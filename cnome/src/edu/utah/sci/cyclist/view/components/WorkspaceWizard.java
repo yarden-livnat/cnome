@@ -59,7 +59,7 @@ public class WorkspaceWizard extends VBox {
 	    dialog.setScene( createScene(dialog) );
 	    
 	    // allow the dialog to be dragged around.
-	    final Node root = dialog.getScene().getRoot();
+	   /* final Node root = dialog.getScene().getRoot();
 	    final Delta dragDelta = new Delta();
 	    root.setOnMousePressed(new EventHandler<MouseEvent>() {
 	      @Override public void handle(MouseEvent mouseEvent) {
@@ -73,8 +73,9 @@ public class WorkspaceWizard extends VBox {
 	        dialog.setX(mouseEvent.getScreenX() + dragDelta.x);
 	        dialog.setY(mouseEvent.getScreenY() + dragDelta.y);
 	      }
-	    });
+	    });*/
 	}
+	
 	
 	private Scene createScene(final Stage dialog) {
 		Text header = TextBuilder.create()
@@ -84,6 +85,7 @@ public class WorkspaceWizard extends VBox {
 		
 		HBox pane = HBoxBuilder.create()
 //				.prefWidth(250)
+				
 				.alignment(Pos.CENTER_RIGHT)
 				.padding(new Insets(5))
 				.spacing(10)
@@ -104,8 +106,8 @@ public class WorkspaceWizard extends VBox {
 									
 									if (cb.getValue() != null && cb.getValue() != "") {
 										File dir = new File(cb.getValue());
-//										System.out.println("init dir:"+dir.getAbsolutePath()+"  "+dir.getPath()+"   "+dir.exists()+"    "+dir.isDirectory());
-										chooser.setInitialDirectory(dir);
+										if(dir.isDirectory())
+											chooser.setInitialDirectory(dir);									
 									}
 									File dir = chooser.showDialog(null);
 									if (dir != null) { 
@@ -154,6 +156,8 @@ public class WorkspaceWizard extends VBox {
 		
 		Scene scene = new Scene(
 				VBoxBuilder.create()
+					.spacing(5)
+					.padding(new Insets(5))
 					.id("workspace-wizard")
 					.children(header, pane, buttons)
 					.build()
@@ -164,5 +168,5 @@ public class WorkspaceWizard extends VBox {
 	}
 	
 	// records relative x and y co-ordinates.
-	 class Delta { double x, y; }
+	// class Delta { double x, y; }
 }
