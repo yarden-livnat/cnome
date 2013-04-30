@@ -26,6 +26,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 
@@ -53,11 +54,17 @@ public class WorkspaceWizard extends VBox {
 	}
 	
 	public WorkspaceWizard() {
-		dialog = new Stage(); 
+	
+		dialog = StageBuilder.create()
+				.title("Select Workspace Directory")
+				.maxWidth(250).minWidth(250)
+				.maxHeight(100).minHeight(95)
+				.build();
+		
 		dialog.initModality(Modality.WINDOW_MODAL);
-	   
-	    dialog.setScene( createScene(dialog) );
+		dialog.setScene( createScene(dialog) );
 	    
+		
 	    // allow the dialog to be dragged around.
 	   /* final Node root = dialog.getScene().getRoot();
 	    final Delta dragDelta = new Delta();
@@ -78,48 +85,45 @@ public class WorkspaceWizard extends VBox {
 	
 	
 	private Scene createScene(final Stage dialog) {
-		Text header = TextBuilder.create()
-				.id("workspace-wizard-header")
-				.text("Select workspace directory")
-				.build();
+		//Text header = TextBuilder.create()
+		//		.id("workspace-wizard-header")
+		//		.text("Select workspace directory")
+		//		.build();
 		
-		HBox pane = HBoxBuilder.create()
-//				.prefWidth(250)
-				
-				.alignment(Pos.CENTER_RIGHT)
+		HBox pane = HBoxBuilder.create()		
+				.alignment(Pos.CENTER)
 				.padding(new Insets(5))
 				.spacing(10)
 				.children(
 						cb = ComboBoxBuilder.<String>create()
-							.prefWidth(150)
-							.editable(true)
-							.value(current)
-							.build(),
+						.prefWidth(200)
+						.editable(true)
+						.value(current)
+						.build(),
 						ButtonBuilder.create()
-							.text("...")
-							.onAction(new EventHandler<ActionEvent>() {
-								@Override
-								public void handle(ActionEvent event) {
-									DirectoryChooser chooser = DirectoryChooserBuilder.create()
-											.title("Select directory")
-											.build();
-									
-									if (cb.getValue() != null && cb.getValue() != "") {
-										File dir = new File(cb.getValue());
-										if(dir.isDirectory())
-											chooser.setInitialDirectory(dir);									
-									}
-									File dir = chooser.showDialog(null);
-									if (dir != null) { 
-										cb.getItems().add(0, dir.getAbsolutePath());
-										cb.setValue(cb.getItems().get(0));
-									}
-										
+						.text("...")
+						.onAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent event) {
+								DirectoryChooser chooser = DirectoryChooserBuilder.create()
+										.title("Select directory")
+										.build();
+
+								if (cb.getValue() != null && cb.getValue() != "") {
+									File dir = new File(cb.getValue());
+									if(dir.isDirectory())
+										chooser.setInitialDirectory(dir);									
 								}
-							})
-							.build()
-					)
-				.build();
+								File dir = chooser.showDialog(null);
+								if (dir != null) { 
+									cb.getItems().add(0, dir.getAbsolutePath());
+									cb.setValue(cb.getItems().get(0));
+								}
+							}
+						})
+						.build()
+						)
+						.build();
 		HBox.setHgrow(cb, Priority.ALWAYS);
 		
 		HBox buttons = HBoxBuilder.create()
@@ -159,7 +163,8 @@ public class WorkspaceWizard extends VBox {
 					.spacing(5)
 					.padding(new Insets(5))
 					.id("workspace-wizard")
-					.children(header, pane, buttons)
+					//.children(header, pane, buttons)
+					.children(pane, buttons)
 					.build()
 				);
 		
