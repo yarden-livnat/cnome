@@ -1,8 +1,5 @@
 package edu.utah.sci.cyclist.view.components;
 
-import java.io.File;
-
-import edu.utah.sci.cyclist.Cyclist;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -16,7 +13,6 @@ import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ComboBoxBuilder;
 import javafx.scene.control.ListViewBuilder;
-import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
@@ -24,29 +20,32 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.text.TextBuilder;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
+import edu.utah.sci.cyclist.Cyclist;
 
+/*
+ * Class to allow the user to create or edit a data table.
+ * Also controls the creation/editing of data sources.
+ */
 public class DatatableWizard extends VBox {
 
-	private Stage dialog;
-	private ComboBox<String> cb;
-	private TextField _name;
-	private ImageView _status;
-	private String current = null;
+	// GUI elements
+	private Stage            _dialog;
+	private ComboBox<String> _sourceBox;
+	private TextField        _nameField;
+	private ImageView        _statusDisplay;
+	private Button           _addButton;
 	
-	// This will need to be changed to a data table
-	private ObjectProperty<String> selection = new SimpleObjectProperty<>();
 
-		
-	
+	// Data elements
+	private ObjectProperty<String> selection = new SimpleObjectProperty<>(); // This will need to be changed to a data table	
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -57,20 +56,19 @@ public class DatatableWizard extends VBox {
 		createDialog(tableProperty);		
 	}
 	
+	// * * * Return the add button for the controller * * * //
+	public Button getAddSourceButton(){ return _addButton; }
+		
 	// * * * Create the dialog * * * //
 	private void createDialog(String tableProperty){
 		
-		dialog = StageBuilder.create()
+		_dialog = StageBuilder.create()
 				.title("Create or Edit Data Table")
-				.maxWidth(250).minWidth(250)
-			//	.maxHeight(100).minHeight(95)
 				.build();
 		
-		dialog.initModality(Modality.WINDOW_MODAL);
-		dialog.setScene( createScene(dialog, tableProperty) );
-			
+		_dialog.initModality(Modality.WINDOW_MODAL);
+		_dialog.setScene( createScene(_dialog, tableProperty) );	
 	}
-	
 	
 	// * * * Create scene creates the GUI * * * //
 	private Scene createScene(final Stage dialog, String tableProperty) {
@@ -78,8 +76,6 @@ public class DatatableWizard extends VBox {
 		// Get the name of the table, if we have one
 		String tableName = tableProperty;
 		if (tableName == null) tableName = "";
-
-		// The name field
 		
 		// The user-specified name of the table
 		HBox nameBox = HBoxBuilder.create()
@@ -87,7 +83,7 @@ public class DatatableWizard extends VBox {
 				.alignment(Pos.CENTER)
 				.children(
 						TextBuilder.create().text("Name:").build(),
-						_name = TextFieldBuilder.create()
+						_nameField = TextFieldBuilder.create()
 						.prefWidth(150)
 						.text(tableName)
 						.build())
@@ -99,11 +95,13 @@ public class DatatableWizard extends VBox {
 				.alignment(Pos.CENTER)
 				.children(
 						TextBuilder.create().text("Data Connection:").build(),
-						cb = ComboBoxBuilder.<String>create()
+						_sourceBox = ComboBoxBuilder.<String>create()
+						.prefWidth(200)
 						.build(),
 						new Spring(),
-						ButtonBuilder.create()
+						_addButton = ButtonBuilder.create()
 						.text("Add")
+						.minWidth(75)
 						.onAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent event) {
@@ -112,6 +110,8 @@ public class DatatableWizard extends VBox {
 						})
 						.build()
 						).build();
+		HBox.setHgrow(_sourceBox, Priority.ALWAYS);
+
 		
 		// Select the connection settings box
 		HBox selectConnectionBox = HBoxBuilder.create()
@@ -128,7 +128,7 @@ public class DatatableWizard extends VBox {
 							};
 						})
 						.build(),
-					_status = ImageViewBuilder.create().build()
+					_statusDisplay = ImageViewBuilder.create().build()
 					).build();
 		
 		// The connection schema
@@ -137,7 +137,7 @@ public class DatatableWizard extends VBox {
 				//.alignment(Pos.CENTER)
 				.padding(new Insets(5))
 				.children(	
-						TextBuilder.create().text("Schema Tables:").build(),
+						TextBuilder.create().text("Select Schema Table:").build(),
 						ListViewBuilder.create()
 						.maxHeight(100)
 						.build()						
@@ -174,10 +174,10 @@ public class DatatableWizard extends VBox {
 						})
 						.build()	
 				)
-				.build();
+				.build();	
+		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
 		
-		
-		// The name header
+		// The vertical layout of the whole wizard
 		VBox header = VBoxBuilder.create()
 				.spacing(10)
 				.padding(new Insets(5))
@@ -220,8 +220,8 @@ public class DatatableWizard extends VBox {
 	
 	// * * * Show the dialog * * * //
 	public ObjectProperty<String> show(Window window) {
-		 dialog.initOwner(window);
-		 dialog.show();
+		 _dialog.initOwner(window);
+		 _dialog.show();
 		 return selection;
 	}
 	
