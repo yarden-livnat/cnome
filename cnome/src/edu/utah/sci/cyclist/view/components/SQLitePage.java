@@ -1,7 +1,11 @@
 package edu.utah.sci.cyclist.view.components;
 
 import java.io.File;
+import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
+import edu.utah.sci.cyclist.model.CyclistDatasource;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -15,11 +19,11 @@ import javafx.scene.text.TextBuilder;
 import javafx.stage.FileChooser;
 
 public class SQLitePage extends GridPane implements DatasourceWizardPage {
+	static Logger log = Logger.getLogger(SQLitePage.class);
 	private TextField _path;
-	//private CyclistDataSource _ds;
-	private String _ds;
-
-	public SQLitePage(String ds) {
+	private CyclistDatasource _ds;
+	
+	public SQLitePage(CyclistDatasource ds) {
 		_ds = ds;
 		build();
 	}
@@ -32,9 +36,9 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 	}
 
 	@Override
-	public String getDatasource() {
+	public CyclistDatasource getDataSource() {
 
-		/*try {
+		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
 			log.warn("Can not load sqlite driver", e);
@@ -47,9 +51,8 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 		p.setProperty("path", _path.getText());
 		String name = _path.getText();
 		p.setProperty("name", name.substring(name.lastIndexOf("/")+1));
-*/
-		return _ds;
-		
+
+		return _ds;	
 	}
 
 	@Override
@@ -63,7 +66,7 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 			.padding(new Insets(10,3,10,3))
 			.applyTo(this);
 
-		String path = _ds; //_ds.getProperties().getProperty("path");
+		String path = _ds.getProperties().getProperty("path");
 		if (path == null) path = "";
 
 		 _path = TextFieldBuilder.create().text(path).build();
@@ -85,5 +88,4 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 				.build(),
 			2, 0);
 	}
-
 }

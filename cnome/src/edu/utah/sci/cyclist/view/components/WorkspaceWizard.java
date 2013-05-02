@@ -66,7 +66,7 @@ public class WorkspaceWizard extends VBox {
 	    
 		
 	    // allow the dialog to be dragged around.
-	   /* final Node root = dialog.getScene().getRoot();
+	    final Node root = dialog.getScene().getRoot();
 	    final Delta dragDelta = new Delta();
 	    root.setOnMousePressed(new EventHandler<MouseEvent>() {
 	      @Override public void handle(MouseEvent mouseEvent) {
@@ -80,7 +80,7 @@ public class WorkspaceWizard extends VBox {
 	        dialog.setX(mouseEvent.getScreenX() + dragDelta.x);
 	        dialog.setY(mouseEvent.getScreenY() + dragDelta.y);
 	      }
-	    });*/
+	    });
 	}
 	
 	
@@ -173,5 +173,5 @@ public class WorkspaceWizard extends VBox {
 	}
 	
 	// records relative x and y co-ordinates.
-	// class Delta { double x, y; }
+	class Delta { double x, y; }
 }

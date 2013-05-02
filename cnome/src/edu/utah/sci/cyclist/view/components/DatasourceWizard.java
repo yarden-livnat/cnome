@@ -1,15 +1,19 @@
 package edu.utah.sci.cyclist.view.components;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -40,64 +44,60 @@ import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 
+/*
+ *  Class to create or edit a data source
+ */
 public class DatasourceWizard extends VBox {
 
 	
 	// GUI elements
-	private Stage            _dialog;
-	private ComboBox<String> _sourceBox;
-	private TextField        _nameField;
-	private ImageView        _statusDisplay;
-
+	private Stage                             _dialog;
+	private ComboBox<String>                  _sourceBox;
+	private TextField                         _nameField;
+	private ImageView                         _statusDisplay;
 	private Map<String, DatasourceWizardPage> _panes;
-	private DatasourceWizardPage _currentPage;	
+	private DatasourceWizardPage              _currentPage;	
 	
 	private String current = null;
 	
 
 	// This will have to be changed to a data source
-	private ObjectProperty<String> selection = new SimpleObjectProperty<>();
-	
+	private ObjectProperty<CyclistDatasource> selection = new SimpleObjectProperty<>();
 	
 
 	// * * * Default constructor creates new data source * * * //
 	public DatasourceWizard() {
-		createDialog(new String(""));
+		createDialog(new CyclistDatasource());
 	}
 
 	// * * * Constructor that edits existing source * * * *//
-	public DatasourceWizard(String sourceProperty){
+	public DatasourceWizard(CyclistDatasource sourceProperty){
 		createDialog(sourceProperty);		
 	}
 	
 	// * * * Create the dialog * * * //
-	private void createDialog(String sourceProperty){
-
+	private void createDialog(CyclistDatasource sourceProperty){
 		_dialog = StageBuilder.create()
 				.title("Create or Edit Data Source")
-				//.maxWidth(250).minWidth(250)
-				//	.maxHeight(100).minHeight(95)
 				.build();
-
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, sourceProperty) );
-
 	}
 		
 	// * * * Show the wizard * * * //
-	public ObjectProperty<String> show(Window window) {
+	public ObjectProperty<CyclistDatasource> show(Window window) {
 		_dialog.initOwner(window);
 		_dialog.show();
 		return selection;
-
 	}
 		
 	// * * * Create scene creates the GUI * * * //
-	private Scene createScene(final Stage dialog, String sourceProperty) {
+	private Scene createScene(final Stage dialog, final CyclistDatasource sourceProperty) {
 		
 		// Get the name of the source, if we have one
-		String sourceName = sourceProperty;
+		String sourceName = sourceProperty.getName();
 		if (sourceName == null) sourceName = "";
+		
 		
 		// The user-specified name of the table
 		HBox nameBox = HBoxBuilder.create()
@@ -134,8 +134,7 @@ public class DatasourceWizard extends VBox {
 		});
 	
 		cb.setItems(FXCollections.observableArrayList(_panes.keySet()));
-	//	String type = ds.getProperties().getProperty("type");
-		String type = null;
+		String type = sourceProperty.getProperties().getProperty("type");
 		if (type == null) type = "MySQL";
 		cb.getSelectionModel().select(type);
 		
@@ -152,8 +151,7 @@ public class DatasourceWizard extends VBox {
 						.onAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent arg0) {
-								//	CyclistDataSource ds = _currentPage.getDataSource();
-								String ds = "connection";
+								CyclistDatasource ds = _currentPage.getDataSource();
 								testConnection(ds);
 							};
 						})
@@ -179,6 +177,12 @@ public class DatasourceWizard extends VBox {
 							@Override
 							public void handle(ActionEvent arg0) {
 								System.out.println("Create & return a new data source");
+								
+								CyclistDatasource ds = _currentPage.getDataSource();
+								ds.getProperties().setProperty("name", _nameField.getText());
+								selection.setValue(ds);
+								
+								//selection.set(sourceProperty);
 								dialog.hide();
 							};
 						})
@@ -186,6 +190,9 @@ public class DatasourceWizard extends VBox {
 						)
 						.build();
 		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
+		
+		// Disable the ok button until we at least have a name field
+		ok.disableProperty().bind(_nameField.textProperty().isNull().or(_nameField.textProperty().isEqualTo("")));
 
 
 		// The vertical layout of the whole wizard
@@ -212,8 +219,7 @@ public class DatasourceWizard extends VBox {
 		return scene;
 	}
 	
-	//private Map<String, DatasourceWizardPage> createPanes(CyclistDataSource ds) {
-	private Map<String, DatasourceWizardPage> createPanes(String ds) {
+	private Map<String, DatasourceWizardPage> createPanes(CyclistDatasource ds) {
 		Map<String, DatasourceWizardPage> panes = new HashMap<>();
 
 		panes.put("MySQL", new MySQLPage(ds));
@@ -221,20 +227,31 @@ public class DatasourceWizard extends VBox {
 		return panes;
 	}
 
-
-	//private void testConnection(CyclistDataSource ds) {
-	private void testConnection(String ds) {
+	private void testConnection(CyclistDatasource ds) {
 		System.out.println("Test Connection");
 
-		//	_indicator.setVisible(true);
-		/*try (Connection conn = ds.getConnection()) {
+		try (Connection conn = ds.getConnection()) {
 			System.out.println("connection ok");
-			_status.setImage(Resources.getIcon("ok"));
+			_statusDisplay.setImage(Resources.getIcon("ok"));
 		} catch (Exception e) {
 			System.out.println("connection failed");
-			_status.setImage(Resources.getIcon("error"));
-		}*/
-		//		_indicator.setVisible(false);
+			_statusDisplay.setImage(Resources.getIcon("error"));
+		}
+
+	}
+
+	// * * * Set the existing data sources in the combo box * * * //
+	public void setItems(ObservableList<CyclistDatasource> sources) {
+		
+		// Set the sources in the combo box
+		for(int i = 0; i < sources.size(); i++)
+			_sourceBox.getItems().add(sources.get(i).getName());
+
+		//if (sources.size() > 0) {
+	//		current = items.get(0);
+	//		cb.setValue(current);
+	//	}	
+
 
 	}
 	

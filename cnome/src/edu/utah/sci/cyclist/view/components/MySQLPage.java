@@ -1,8 +1,10 @@
 package edu.utah.sci.cyclist.view.components;
 
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+
 public class MySQLPage extends DatasourcePage {
 
-	public MySQLPage(String ds) {
+	public MySQLPage(CyclistDatasource ds) {
 		super(ds);
 		// TODO Auto-generated constructor stub
 	}

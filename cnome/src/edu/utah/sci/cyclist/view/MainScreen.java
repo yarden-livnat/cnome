@@ -1,26 +1,23 @@
 package edu.utah.sci.cyclist.view;
 
-import utils.Resources;
-import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.event.shared.EventBus;
-import edu.utah.sci.cyclist.event.shared.SimpleEventBus;
-import edu.utah.sci.cyclist.view.components.DatasourceWizard;
-import edu.utah.sci.cyclist.view.components.DatatableWizard;
-import edu.utah.sci.cyclist.view.components.WorkspaceWizard;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
+import edu.utah.sci.cyclist.controller.CyclistController;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.view.components.DatasourceWizard;
+import edu.utah.sci.cyclist.view.components.DatatableWizard;
+import edu.utah.sci.cyclist.view.components.WorkspaceWizard;
 
 public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
@@ -47,25 +44,24 @@ public class MainScreen extends VBox {
 		return wizard.show(getScene().getWindow());
 	}
 	
-	public ObjectProperty<String> selectDatatable(ObservableList<String> list){
+	public ObjectProperty<Table> selectDatatable(ObservableList<CyclistDatasource> list){
 
 		DatatableWizard wizard = new DatatableWizard();
-		//	wizard.setItems(list);
+		wizard.setItems(list);
 		wizard.getAddSourceButton().setOnAction(new EventHandler<ActionEvent>(){
-
 			@Override
 			public void handle(ActionEvent event) {
-				controller.selectDatasource();
+				controller.selectDatasource();		
 			}	
 		});	
-
+		
 		return wizard.show(getScene().getWindow());
 	}
 	
-	public ObjectProperty<String> selectDatasource(ObservableList<String> list){
+	public ObjectProperty<CyclistDatasource> selectDatasource(ObservableList<CyclistDatasource> sources){
 		
 		DatasourceWizard wizard = new DatasourceWizard();
-//		wizard.setItems(list);
+		wizard.setItems(sources);
 		return wizard.show(getScene().getWindow());		
 	}
 	
