@@ -14,6 +14,9 @@ public class CyclistController {
 	private MainScreen screen;
 	private ObservableList<String> workspaces = FXCollections.observableArrayList();
 	
+	private ObservableList<String> tables = FXCollections.observableArrayList();
+	private ObservableList<String> sources = FXCollections.observableArrayList();
+	
 	public CyclistController(EventBus eventBus) {
 		this.eventBus = eventBus;
 		bind();
@@ -40,6 +43,32 @@ public class CyclistController {
 			}
 		});
 	}
+	
+	public void selectDatatable(){
+		
+		ObjectProperty<String> selection = screen.selectDatatable(tables);
+		selection.addListener(new ChangeListener<String>() {
+
+			@Override
+			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
+				System.out.println("New Table select:"+newVal);
+				
+			}
+		});	
+	}
+	
+	public void selectDatasource(){
+		ObjectProperty<String> selection = screen.selectDatasource(sources);
+		selection.addListener(new ChangeListener<String>(){
+			@Override
+			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
+				System.out.println("New Sourceselect:"+newVal);
+				
+			}
+		});
+		
+	}
+	
 	
 	public void quit() {
 		System.exit(0);

@@ -4,11 +4,14 @@ import utils.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
 import edu.utah.sci.cyclist.event.shared.EventBus;
 import edu.utah.sci.cyclist.event.shared.SimpleEventBus;
+import edu.utah.sci.cyclist.view.components.DatasourceWizard;
+import edu.utah.sci.cyclist.view.components.DatatableWizard;
 import edu.utah.sci.cyclist.view.components.WorkspaceWizard;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -44,6 +47,29 @@ public class MainScreen extends VBox {
 		return wizard.show(getScene().getWindow());
 	}
 	
+	public ObjectProperty<String> selectDatatable(ObservableList<String> list){
+
+		DatatableWizard wizard = new DatatableWizard();
+		//	wizard.setItems(list);
+		wizard.getAddSourceButton().setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent event) {
+				controller.selectDatasource();
+			}	
+		});	
+
+		return wizard.show(getScene().getWindow());
+	}
+	
+	public ObjectProperty<String> selectDatasource(ObservableList<String> list){
+		
+		DatasourceWizard wizard = new DatasourceWizard();
+//		wizard.setItems(list);
+		return wizard.show(getScene().getWindow());		
+	}
+	
+	
 	private void init(Stage stage){
 		// create the screen
 		
@@ -70,6 +96,16 @@ public class MainScreen extends VBox {
 	
 	private Menu createFileMenu() {
 		// -- Workspace
+		MenuItem datatableItem = new MenuItem("Add Datatable");
+		datatableItem.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent event) {
+				controller.selectDatatable();
+			}		
+		});
+
+		
 		MenuItem workspaceItem = new MenuItem("Workspace"); //new ImageView(Resources.getIcon("workspace.png")));
 		workspaceItem.setOnAction(new EventHandler<ActionEvent>() {
 			
@@ -92,7 +128,7 @@ public class MainScreen extends VBox {
 		
 		// -- setup the menu 
 		Menu fileMenu = new Menu("File");
-		fileMenu.getItems().addAll(workspaceItem, new SeparatorMenuItem(), quitItem);
+		fileMenu.getItems().addAll(datatableItem, new SeparatorMenuItem(), workspaceItem, new SeparatorMenuItem(), quitItem);
 		return fileMenu;
 	}
 }
