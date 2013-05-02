@@ -1,18 +1,32 @@
 package edu.utah.sci.cyclist.event.shared;
 
-import javafx.event.Event;
-import javafx.event.EventType;
 
-public class CyclistEvent extends Event {
+public class CyclistEvent {
 
-	public CyclistEvent(EventType<? extends Event> type) {
-		super(type);
-		// TODO Auto-generated constructor stub
+	private String _type;
+	private Object _src;
+	private String _destId;
+	
+	public CyclistEvent(String type, Object src) {
+		this(type, src, null);
+	}
+	public CyclistEvent(String type, Object src, String dest) {
+		_type = type;
+		_src = src;
+		_destId = dest;
 	}
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+	public String getType() {
+		return _type;
+	}
+	
+	public Object getSource() {
+		return _src;
+	}
+	
+	public String getDestID() {
+		return _destId;
+	}
+	
 
 }

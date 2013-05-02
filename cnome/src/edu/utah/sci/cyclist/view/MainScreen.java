@@ -1,10 +1,5 @@
 package edu.utah.sci.cyclist.view;
 
-import utils.Resources;
-import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.event.shared.EventBus;
-import edu.utah.sci.cyclist.event.shared.SimpleEventBus;
-import edu.utah.sci.cyclist.view.components.WorkspaceWizard;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,14 +8,25 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
+import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
+import edu.utah.sci.cyclist.controller.CyclistController;
+import edu.utah.sci.cyclist.view.components.Spring;
+import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.components.WorkspaceWizard;
 
 public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
+	
+	private MenuBar _menubar;
+	private VBox _toolsArea;
+	private HBox _content;
 	
 	private CyclistController controller;
 	/**
@@ -44,18 +50,40 @@ public class MainScreen extends VBox {
 		return wizard.show(getScene().getWindow());
 	}
 	
+	public void setWorkspace(Workspace workspace) {
+		HBox.setHgrow(workspace, Priority.ALWAYS);
+		_content.getChildren().add(workspace);
+	}
+	
 	private void init(Stage stage){
 		// create the screen
 		
 		// -- menubar
-		MenuBar menubar = createMenuBar(stage);
+		_menubar = createMenuBar(stage);
 		
 		// -- tables and schema
+		_toolsArea = VBoxBuilder.create()
+						.children(
+							TextFieldBuilder.create().text("test").build(),
+							// tables
+							// schema
+							new Spring()
+							)
+					.build();
+		
+		VBox.setVgrow(_toolsArea, Priority.SOMETIMES);
 		
 		// -- workspace
+		_content = HBoxBuilder.create()
+						.children(
+								_toolsArea
+								// workspace
+								)
+						.build();
 		
 		// -- setup
-		getChildren().addAll(menubar);
+		VBox.setVgrow(_content, Priority.ALWAYS);
+		getChildren().addAll(_menubar, _content);
 	}
 	
 	private MenuBar createMenuBar(Stage stage) {

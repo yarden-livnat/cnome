@@ -6,31 +6,41 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.event.shared.EventBus;
+import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
+import edu.utah.sci.cyclist.view.components.Workspace;
 
 public class CyclistController {
 
-	private final EventBus eventBus;
-	private MainScreen screen;
-	private ObservableList<String> workspaces = FXCollections.observableArrayList();
+	private final EventBus _eventBus;
+	private MainScreen _screen;
+	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
 	
 	public CyclistController(EventBus eventBus) {
-		this.eventBus = eventBus;
+		this._eventBus = eventBus;
 		bind();
-		workspaces.add("/Users/yarden/software");
-		workspaces.add("/Users/yarden");
+		_workspaces.add("/Users/yarden/software");
+		_workspaces.add("/Users/yarden");
 	}
 
 	public void setScreen(final MainScreen screen) {
-		this.screen = screen;
+		this._screen = screen;
 		screen.setControler(this);
+		
+		// set up the main workspace
+		Workspace workspace = new Workspace();
+		screen.setWorkspace(workspace);
+		
+		WorkspacePresenter presenter = new WorkspacePresenter();
+		presenter.setEventBus(_eventBus);
+		presenter.setView(workspace);
 		
 		// do something?
 		//selectWorkspace();
 	}
 	
 	public void selectWorkspace() {
-		ObjectProperty<String> selection = screen.selectWorkspace(workspaces);
+		ObjectProperty<String> selection = _screen.selectWorkspace(_workspaces);
 		selection.addListener(new ChangeListener<String>() {
 
 			@Override
