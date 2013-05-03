@@ -23,6 +23,31 @@ public class Table {
 		return _name;
 	}
 
+	public void setName(String name) {
+		_name = name;	
+	}
+	
+	@Override
+    public String toString() {
+        return getName();
+    }
+		
+	public void setDataSource(CyclistDatasource datasource){
+		setProperty("DataSource", datasource);
+	}
+	
+	public CyclistDatasource getDataSource(){
+		return (CyclistDatasource) getProperty("DataSource");
+	}
+	
+	public void setTableName(String tablename){
+		setProperty("TableName", tablename);
+	}
+	
+	public String getTableName(){
+		return (String) getProperty("TableName");
+	}
+	
 	public void setProperty(String property, Object value) {
 		_properties.put(property, value);
 	}
@@ -85,4 +110,6 @@ public class Table {
 			value = new Object[size];
 		}
 	}
+
+	
 }

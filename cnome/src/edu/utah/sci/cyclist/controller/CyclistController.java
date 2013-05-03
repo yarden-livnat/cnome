@@ -93,7 +93,7 @@ public class CyclistController {
 		
 		// bind event handlers
 		
-		_sources.addListener(new ListChangeListener<CyclistDatasource>(){
+		/*_sources.addListener(new ListChangeListener<CyclistDatasource>(){
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CyclistDatasource> arg0) {
@@ -101,7 +101,17 @@ public class CyclistController {
 				
 			}
 			
+		});*/
+		
+		_tables.addListener(new ListChangeListener<Table>(){
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Table> arg0) {
+				_screen.setTables(_tables);
+			}
+			
 		});
+		
 	}
 
 	public void removeDatasource(CyclistDatasource current) {

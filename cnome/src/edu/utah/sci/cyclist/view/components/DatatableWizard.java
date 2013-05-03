@@ -47,14 +47,14 @@ import edu.utah.sci.cyclist.model.Table;
 public class DatatableWizard extends VBox {
 
 	// GUI elements
-	private Stage            _dialog;
+	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourceList;
-	private ListView         _tableList;
-	private TextField        _nameField;
-	private ImageView        _statusDisplay;
-	private Button           _addButton;
-	private Button           _editButton;
-	private Button           _removeButton;
+	private ListView<String>            _tableList;
+	private TextField                   _nameField;
+	private ImageView                   _statusDisplay;
+	private Button                      _addButton;
+	private Button                      _editButton;
+	private Button                      _removeButton;
 	
 	// Data elements
 	private CyclistDatasource _current;
@@ -89,10 +89,10 @@ public class DatatableWizard extends VBox {
 	}
 	
 	// * * * Create scene creates the GUI * * * //
-	private Scene createScene(final Stage dialog, Table tableProperty) {
+	private Scene createScene(final Stage dialog, final Table table) {
 			
 		// Get the name of the table, if we have one
-		String tableName = tableProperty.getName();
+		String tableName = table.getName();
 		if (tableName == null) tableName = "";
 		
 		// The user-specified name of the table
@@ -107,6 +107,7 @@ public class DatatableWizard extends VBox {
 						.build())
 						.build();		
 			
+		Button selectionButton;
 		
 		// * * * The connection settings group
 		VBox connectionBox = VBoxBuilder.create()
@@ -158,13 +159,11 @@ public class DatatableWizard extends VBox {
 								.alignment(Pos.CENTER)
 								.children(
 										// Select the connection
-										ButtonBuilder.create()
+										selectionButton = ButtonBuilder.create()
 										.text("Select Connection")
 										.onAction(new EventHandler<ActionEvent>() {
 											@Override
 											public void handle(ActionEvent arg0) {
-												System.out.println("Get the connection");
-												//CyclistDatasource ds = _currentPage.getDataSource();
 												selectConnection(_current);
 											};
 										})
@@ -186,17 +185,15 @@ public class DatatableWizard extends VBox {
 		// Disable edit/remove until we have something selected
 		_editButton.disableProperty().bind( _sourceList.getSelectionModel().selectedItemProperty().isNull());
 		_removeButton.disableProperty().bind( _sourceList.getSelectionModel().selectedItemProperty().isNull());
+		selectionButton.disableProperty().bind( _sourceList.getSelectionModel().selectedItemProperty().isNull());
 
-
-
-		// The connection schema
-		
+		// The connection schema		
 		VBox schemaBox = VBoxBuilder.create()
 				.spacing(1)
 				.padding(new Insets(5))
 				.children(	
 						TextBuilder.create().text("Select Schema Table:").build(),
-						_tableList = ListViewBuilder.create()
+						_tableList = ListViewBuilder.<String>create()
 						.maxHeight(100)
 						.build()						
 						).build();
@@ -226,7 +223,10 @@ public class DatatableWizard extends VBox {
 						.onAction(new EventHandler<ActionEvent>() {	
 							@Override
 							public void handle(ActionEvent arg0) {
-								System.out.println("Create & return a new data table");
+								table.setName(_nameField.getText());
+								table.setDataSource(_current);
+								table.setTableName((String) _tableList.getSelectionModel().getSelectedItem());
+								selection.setValue(table);
 								dialog.hide();
 							};
 						})

@@ -4,11 +4,13 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ListViewBuilder;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
@@ -16,6 +18,7 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.TextBuilder;
 import javafx.stage.Stage;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
@@ -33,6 +36,8 @@ public class MainScreen extends VBox {
 	private MenuBar _menubar;
 	private VBox _toolsArea;
 	private HBox _content;
+	
+	private ListView<Table> tableList;
 	
 	private CyclistController controller;
 	/**
@@ -107,16 +112,21 @@ public class MainScreen extends VBox {
 		// -- menubar
 		_menubar = createMenuBar(stage);
 		
+				
 		// -- tables and schema
 		_toolsArea = VBoxBuilder.create()
-						.children(
-							TextFieldBuilder.create().text("test").build(),
-							// tables
-							// schema
-							new Spring()
-							)
-					.build();
-		
+				.spacing(5)
+				.padding(new Insets(5))
+				.children(
+						// tables
+						TextBuilder.create().text("Tables:").build(),
+						tableList = ListViewBuilder.<Table>create()
+						.maxHeight(150)
+						.build(),
+						new Spring()	
+						// schema
+						)
+						.build();
 		VBox.setVgrow(_toolsArea, Priority.SOMETIMES);
 		
 		// -- workspace
@@ -178,5 +188,15 @@ public class MainScreen extends VBox {
 		Menu fileMenu = new Menu("File");
 		fileMenu.getItems().addAll(datatableItem, new SeparatorMenuItem(), workspaceItem, new SeparatorMenuItem(), quitItem);
 		return fileMenu;
+	}
+
+	public void setTables(ObservableList<Table> tables) {
+
+		tableList.getItems().clear();
+		
+		// Set the tables
+		for(int i = 0; i < tables.size(); i++)
+			tableList.getItems().add(tables.get(i));	
+		
 	}
 }
