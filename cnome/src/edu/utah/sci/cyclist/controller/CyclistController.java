@@ -16,9 +16,9 @@ import edu.utah.sci.cyclist.view.components.Workspace;
 public class CyclistController {
 
 	private final EventBus _eventBus;
-	private MainScreen _screen;
-	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
+	private MainScreen     _screen;
 	
+	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
 	private ObservableList<Table> tables = FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> sources = FXCollections.observableArrayList();
 	
@@ -59,39 +59,28 @@ public class CyclistController {
 		});
 	}
 	
+	// * * * Action to select a data table * * * //
 	public void selectDatatable(){
-		
-		ObjectProperty<Table> selection = screen.selectDatatable(sources);
-		selection.addListener(new ChangeListener<Table>() {
-		ObjectProperty<String> selection = _screen.selectDatatable(tables);
-		selection.addListener(new ChangeListener<String>() {
 
+		ObjectProperty<Table> selection = _screen.selectDatatable(sources);
+		selection.addListener(new ChangeListener<Table>() {
 			@Override
 			public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-				System.out.println("New Table select:"+newVal.getName());
 				tables.add(newVal);
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
-				System.out.println("New Table select:"+newVal);
-				
 			}
 		});	
-	}
+	}	
 	
+	// * * * Action to select a data source * * * //
 	public void selectDatasource(){
-		ObjectProperty<CyclistDatasource> selection = screen.selectDatasource(sources);
+
+		ObjectProperty<CyclistDatasource> selection = _screen.selectDatasource(sources);
 		selection.addListener(new ChangeListener<CyclistDatasource>(){
-		ObjectProperty<String> selection = _screen.selectDatasource(sources);
-		selection.addListener(new ChangeListener<String>(){
 			@Override
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				System.out.println("New Sourceselect:"+newVal.getName());
 				sources.add(newVal);
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
-				System.out.println("New Sourceselect:"+newVal);
-				
 			}
 		});
-		
 	}
 	
 	

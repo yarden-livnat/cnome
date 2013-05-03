@@ -59,13 +59,13 @@ public class MainScreen extends VBox {
 		return wizard.show(getScene().getWindow());
 	}
 	
-	public ObjectProperty<Table> selectDatatable(ObservableList<CyclistDatasource> list){
+	
 	public void setWorkspace(Workspace workspace) {
 		HBox.setHgrow(workspace, Priority.ALWAYS);
 		_content.getChildren().add(workspace);
 	}
 	
-	public ObjectProperty<String> selectDatatable(ObservableList<String> list){
+	public ObjectProperty<Table> selectDatatable(ObservableList<CyclistDatasource> list){
 
 		DatatableWizard wizard = new DatatableWizard();
 		wizard.setItems(list);
