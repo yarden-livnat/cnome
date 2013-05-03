@@ -8,6 +8,9 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import javax.sql.DataSource;
 
 public class CyclistDatasource implements DataSource {
@@ -19,6 +22,11 @@ public class CyclistDatasource implements DataSource {
 	public CyclistDatasource() {
 	}
 
+	@Override
+    public String toString() {
+        return getName();
+    }
+	
 	public String getName() {
 		return _properties.getProperty("name");
 	}
@@ -27,6 +35,10 @@ public class CyclistDatasource implements DataSource {
 		_properties.setProperty("name", name);
 	}
 
+	public StringProperty getNameProperty(){
+		return new SimpleStringProperty(getName());
+	}
+	
 	public void setProperties(Properties p) {
 		_properties = p;
 	}

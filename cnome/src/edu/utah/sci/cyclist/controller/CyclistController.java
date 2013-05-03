@@ -19,10 +19,10 @@ public class CyclistController {
 	private MainScreen     _screen;
 	
 	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
-	private ObservableList<Table> tables = FXCollections.observableArrayList();
-	private ObservableList<CyclistDatasource> sources = FXCollections.observableArrayList();
+	private ObservableList<Table> _tables = FXCollections.observableArrayList();
+	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
-	public ObservableList<CyclistDatasource> getSources() { return sources; }
+	public ObservableList<CyclistDatasource> getSources() { return _sources; }
 	
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
@@ -62,23 +62,23 @@ public class CyclistController {
 	// * * * Action to select a data table * * * //
 	public void selectDatatable(){
 
-		ObjectProperty<Table> selection = _screen.selectDatatable(sources);
+		ObjectProperty<Table> selection = _screen.selectDatatable(_sources);
 		selection.addListener(new ChangeListener<Table>() {
 			@Override
 			public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-				tables.add(newVal);
+				_tables.add(newVal);
 			}
 		});	
 	}	
 	
 	// * * * Action to select a data source * * * //
-	public void selectDatasource(){
+	public void selectDatasource(CyclistDatasource datasource){
 
-		ObjectProperty<CyclistDatasource> selection = _screen.selectDatasource(sources);
+		ObjectProperty<CyclistDatasource> selection = _screen.selectDatasource(datasource);
 		selection.addListener(new ChangeListener<CyclistDatasource>(){
 			@Override
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				sources.add(newVal);
+				_sources.add(newVal);
 			}
 		});
 	}
@@ -93,7 +93,7 @@ public class CyclistController {
 		
 		// bind event handlers
 		
-		sources.addListener(new ListChangeListener<CyclistDatasource>(){
+		_sources.addListener(new ListChangeListener<CyclistDatasource>(){
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CyclistDatasource> arg0) {
@@ -102,5 +102,9 @@ public class CyclistController {
 			}
 			
 		});
+	}
+
+	public void removeDatasource(CyclistDatasource current) {
+		_sources.remove(current);
 	}	
 }

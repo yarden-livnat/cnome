@@ -1,7 +1,13 @@
 package edu.utah.sci.cyclist.view.components;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,9 +18,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ComboBoxBuilder;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.image.ImageView;
@@ -30,8 +35,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
+ 
 
 /*
  * Class to allow the user to create or edit a data table.
@@ -41,13 +48,16 @@ public class DatatableWizard extends VBox {
 
 	// GUI elements
 	private Stage            _dialog;
-	private ComboBox<String> _sourceBox;
+	private ListView<CyclistDatasource> _sourceList;
+	private ListView         _tableList;
 	private TextField        _nameField;
 	private ImageView        _statusDisplay;
 	private Button           _addButton;
+	private Button           _editButton;
+	private Button           _removeButton;
 	
-
 	// Data elements
+	private CyclistDatasource _current;
 	private ObjectProperty<Table> selection = new SimpleObjectProperty<>(); 
 	
 	// * * * Constructor creates a new stage * * * //
@@ -59,10 +69,15 @@ public class DatatableWizard extends VBox {
 		createDialog(tableProperty);		
 	}
 	
-	// * * * Return the add button for the controller * * * //
+	// * * * Return the add/edit/remove buttons for the controller
 	public Button getAddSourceButton(){ return _addButton; }
+	public Button getEditSourceButton(){ return _editButton; }
+	public Button getRemoveSourceButton(){ return _removeButton; }
 		
-	// * * * Create the dialog * * * //
+	// * * * Get the current data source
+	public CyclistDatasource getCurrentDataSource(){return _current; }
+	
+	// * * * Create the dialog
 	private void createDialog(Table tableProperty){
 		
 		_dialog = StageBuilder.create()
@@ -90,62 +105,102 @@ public class DatatableWizard extends VBox {
 						.prefWidth(150)
 						.text(tableName)
 						.build())
-						.build();
+						.build();		
+			
 		
-		// The connection settings
-		HBox connectionBox = HBoxBuilder.create()
+		// * * * The connection settings group
+		VBox connectionBox = VBoxBuilder.create()
 				.spacing(5)
-				.alignment(Pos.CENTER)
+				.alignment(Pos.CENTER_LEFT)
 				.children(
-						TextBuilder.create().text("Data Connection:").build(),
-						_sourceBox = ComboBoxBuilder.<String>create()
-						.prefWidth(200)
-						.build(),
-						new Spring(),
-						_addButton = ButtonBuilder.create()
-						.text("Add")
-						.minWidth(75)
-						.onAction(new EventHandler<ActionEvent>() {
-							@Override
-							public void handle(ActionEvent event) {
-								System.out.println("Data Source Wizard!");
-							}
-						})
-						.build()
-						).build();
-		HBox.setHgrow(_sourceBox, Priority.ALWAYS);
+						
+						// Add, edit, or remove connection box
+						HBoxBuilder.create()
+						.spacing(5)
+						.alignment(Pos.CENTER_LEFT)
+						.children(
 
-		
-		// Select the connection settings box
-		HBox selectConnectionBox = HBoxBuilder.create()
-				.spacing(10)
-				.padding(new Insets(5))
-				.children(
-					// Select the connection
-					ButtonBuilder.create()
-						.text("Select Connection")
-						.onAction(new EventHandler<ActionEvent>() {
-							@Override
-							public void handle(ActionEvent arg0) {
-								System.out.println("Get the connection");
-							};
-						})
-						.build(),
-					_statusDisplay = ImageViewBuilder.create().build()
-					).build();
-		
+								// Sources box
+								VBoxBuilder.create()
+								.spacing(5)
+								.alignment(Pos.CENTER_LEFT)
+								.children(
+										TextBuilder.create().text("Data Connection").build(),
+										_sourceList = ListViewBuilder.<CyclistDatasource>create()
+										.maxHeight(100)
+										.build())  
+										.build(),
+
+										// Add/Edit/Remove Buttons
+										VBoxBuilder.create()
+										.spacing(5)
+										.alignment(Pos.CENTER)
+										.children(
+												_addButton = ButtonBuilder.create()
+												.text("Add")
+												.minWidth(75)
+												.build(),
+												_editButton = ButtonBuilder.create()
+												.text("Edit")
+												.minWidth(75)
+												.build(),
+												_removeButton = ButtonBuilder.create()
+												.text("Remove")
+												.minWidth(75)
+												.build()
+												).build()
+								).build(),
+
+								// Select the connection settings box
+								HBoxBuilder.create()
+								.spacing(10)
+								.padding(new Insets(5))
+								.alignment(Pos.CENTER)
+								.children(
+										// Select the connection
+										ButtonBuilder.create()
+										.text("Select Connection")
+										.onAction(new EventHandler<ActionEvent>() {
+											@Override
+											public void handle(ActionEvent arg0) {
+												System.out.println("Get the connection");
+												//CyclistDatasource ds = _currentPage.getDataSource();
+												selectConnection(_current);
+											};
+										})
+										.build(),
+										_statusDisplay = ImageViewBuilder.create().build()
+										).build()
+
+						).build();
+
+		// Keep track of the currently selected data source
+		_sourceList.getSelectionModel().selectedItemProperty().addListener(
+				new ChangeListener<CyclistDatasource>() {
+					public void changed(ObservableValue<? extends CyclistDatasource> ov, 
+							CyclistDatasource old_val, CyclistDatasource new_val) {
+						_current = _sourceList.getSelectionModel().getSelectedItem();
+					}
+				});
+
+		// Disable edit/remove until we have something selected
+		_editButton.disableProperty().bind( _sourceList.getSelectionModel().selectedItemProperty().isNull());
+		_removeButton.disableProperty().bind( _sourceList.getSelectionModel().selectedItemProperty().isNull());
+
+
+
 		// The connection schema
+		
 		VBox schemaBox = VBoxBuilder.create()
 				.spacing(1)
-				//.alignment(Pos.CENTER)
 				.padding(new Insets(5))
 				.children(	
 						TextBuilder.create().text("Select Schema Table:").build(),
-						ListViewBuilder.create()
+						_tableList = ListViewBuilder.create()
 						.maxHeight(100)
 						.build()						
 						).build();
-		
+		_tableList.disableProperty().bind(_sourceList.getSelectionModel().selectedItemProperty().isNull());
 			
 		// The ok/cancel buttons
 		Button ok;
@@ -179,18 +234,16 @@ public class DatatableWizard extends VBox {
 				)
 				.build();	
 		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
+		ok.disableProperty().bind(_tableList.getSelectionModel().selectedItemProperty().isNull());
+
 		
 		// The vertical layout of the whole wizard
 		VBox header = VBoxBuilder.create()
 				.spacing(10)
 				.padding(new Insets(5))
 				.children(nameBox, 
-						new Separator(), 
 						connectionBox,
-						selectConnectionBox, 
-						new Separator(),
 						schemaBox,
-						new Separator(),
 						buttonsBox)
 						.build();	
 
@@ -204,41 +257,55 @@ public class DatatableWizard extends VBox {
 				.build()
 				);
 
+			
 		scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
 		return scene;
 
 	}
-	
+
 	// * * * Set the existing data sources in the combo box * * * //
-		public void setItems(final ObservableList<CyclistDatasource> sources) {
+	public void setItems(final ObservableList<CyclistDatasource> sources) {
+
+		_sourceList.getItems().clear();
+		// Set the sources in the combo box
+		for(int i = 0; i < sources.size(); i++)
+			_sourceList.getItems().add(sources.get(i));	
+		
+		sources.addListener(new ListChangeListener<CyclistDatasource>(){
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends CyclistDatasource> arg0) {
+				_sourceList.getItems().clear();
+				// Set the sources in the combo box
+				for(int i = 0; i < sources.size(); i++)
+					_sourceList.getItems().add(sources.get(i));	
+			}	
+		});
+	}
 			
-			sources.addListener(new ListChangeListener<CyclistDatasource>(){
-
-				@Override
-				public void onChanged(ListChangeListener.Change<? extends CyclistDatasource> arg0) {
-					// Set the sources in the combo box
-					for(int i = 0; i < sources.size(); i++)
-						_sourceBox.getItems().add(sources.get(i).getName());
-				}
-				
-			});
-			
-			
-
-			//if (sources.size() > 0) {
-		//		current = items.get(0);
-		//		cb.setValue(current);
-		//	}	
-
-
-		}
-	
-	
 	// * * * Show the dialog * * * //
 	public ObjectProperty<Table> show(Window window) {
 		 _dialog.initOwner(window);
 		 _dialog.show();
 		 return selection;
+	}
+	
+	private void selectConnection(CyclistDatasource ds) {
+		System.out.println("Test Connection");
+
+		try (Connection conn = ds.getConnection()) {
+			System.out.println("connection ok");
+			_statusDisplay.setImage(Resources.getIcon("ok"));
+			DatabaseMetaData md = conn.getMetaData();
+			ResultSet rs = md.getTables(null, null, "%", null);
+			while (rs.next()) {
+				_tableList.getItems().add(rs.getString(3));
+			}
+			
+		} catch (Exception e) {
+			//System.out.println("connection failed");
+			_statusDisplay.setImage(Resources.getIcon("error"));
+		}
 	}
 	
 }

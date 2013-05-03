@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.view;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -10,6 +9,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextFieldBuilder;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
@@ -17,13 +17,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
+import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.components.DatasourceWizard;
-import edu.utah.sci.cyclist.view.components.DatatableWizard;
-import edu.utah.sci.cyclist.view.components.WorkspaceWizard;
-import edu.utah.sci.cyclist.controller.CyclistController;
 import edu.utah.sci.cyclist.view.components.DatasourceWizard;
 import edu.utah.sci.cyclist.view.components.DatatableWizard;
 import edu.utah.sci.cyclist.view.components.Spring;
@@ -66,23 +63,40 @@ public class MainScreen extends VBox {
 	}
 	
 	public ObjectProperty<Table> selectDatatable(ObservableList<CyclistDatasource> list){
-
-		DatatableWizard wizard = new DatatableWizard();
+	
+		final DatatableWizard wizard = new DatatableWizard();
 		wizard.setItems(list);
 		wizard.getAddSourceButton().setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent event) {
-				controller.selectDatasource();		
+				controller.selectDatasource(new CyclistDatasource());		
+			}	
+		});	
+		
+		wizard.getEditSourceButton().setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				
+				CyclistDatasource current = ((DatatableWizard)wizard).getCurrentDataSource();
+				controller.selectDatasource(current);		
+			}	
+		});	
+		
+		wizard.getRemoveSourceButton().setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				
+				CyclistDatasource current = ((DatatableWizard)wizard).getCurrentDataSource();
+				controller.removeDatasource(current);		
 			}	
 		});	
 
 		return wizard.show(getScene().getWindow());
 	}
 	
-	public ObjectProperty<CyclistDatasource> selectDatasource(ObservableList<CyclistDatasource> sources){
+	public ObjectProperty<CyclistDatasource> selectDatasource(CyclistDatasource source){
 		
-		DatasourceWizard wizard = new DatasourceWizard();
-		wizard.setItems(sources);
+		DatasourceWizard wizard = new DatasourceWizard(source);
 		return wizard.show(getScene().getWindow());		
 	}
 	
@@ -130,7 +144,7 @@ public class MainScreen extends VBox {
 	
 	private Menu createFileMenu() {
 		// -- Workspace
-		MenuItem datatableItem = new MenuItem("Add Datatable");
+		MenuItem datatableItem = new MenuItem("Add Datatable", new ImageView(Resources.getIcon("open.png")));
 		datatableItem.setOnAction(new EventHandler<ActionEvent>(){
 			
 			@Override

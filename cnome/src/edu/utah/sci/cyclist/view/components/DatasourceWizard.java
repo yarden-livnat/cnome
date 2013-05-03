@@ -1,19 +1,13 @@
 package edu.utah.sci.cyclist.view.components;
 
-import java.io.File;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.model.CyclistDatasource;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -24,7 +18,6 @@ import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ComboBoxBuilder;
 import javafx.scene.control.ProgressIndicatorBuilder;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.image.ImageView;
@@ -35,35 +28,32 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
+import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
 
 /*
  *  Class to create or edit a data source
  */
 public class DatasourceWizard extends VBox {
-
 	
 	// GUI elements
 	private Stage                             _dialog;
-	private ComboBox<String>                  _sourceBox;
+	private ComboBox<String>                  _sourceBox;	
 	private TextField                         _nameField;
 	private ImageView                         _statusDisplay;
 	private Map<String, DatasourceWizardPage> _panes;
 	private DatasourceWizardPage              _currentPage;	
 	
 	private String current = null;
-	
 
 	// This will have to be changed to a data source
 	private ObjectProperty<CyclistDatasource> selection = new SimpleObjectProperty<>();
-	
 
 	// * * * Default constructor creates new data source * * * //
 	public DatasourceWizard() {
@@ -92,10 +82,10 @@ public class DatasourceWizard extends VBox {
 	}
 		
 	// * * * Create scene creates the GUI * * * //
-	private Scene createScene(final Stage dialog, final CyclistDatasource sourceProperty) {
+	private Scene createScene(final Stage dialog, final CyclistDatasource datasource) {
 		
 		// Get the name of the source, if we have one
-		String sourceName = sourceProperty.getName();
+		String sourceName = datasource.getName();
 		if (sourceName == null) sourceName = "";
 		
 		
@@ -114,7 +104,7 @@ public class DatasourceWizard extends VBox {
 		// The selector for type of connection
 		final Pane pane = new Pane();
 		pane.prefHeight(200);
-		_panes = createPanes(sourceProperty);
+		_panes = createPanes(datasource);
 		
 		ComboBox<String> cb = ComboBoxBuilder.<String>create()
 				.prefWidth(200)
@@ -134,7 +124,7 @@ public class DatasourceWizard extends VBox {
 		});
 	
 		cb.setItems(FXCollections.observableArrayList(_panes.keySet()));
-		String type = sourceProperty.getProperties().getProperty("type");
+		String type = datasource.getProperties().getProperty("type");
 		if (type == null) type = "MySQL";
 		cb.getSelectionModel().select(type);
 		
@@ -228,31 +218,14 @@ public class DatasourceWizard extends VBox {
 	}
 
 	private void testConnection(CyclistDatasource ds) {
-		System.out.println("Test Connection");
+		//System.out.println("Test Connection");
 
 		try (Connection conn = ds.getConnection()) {
-			System.out.println("connection ok");
+			//System.out.println("connection ok");
 			_statusDisplay.setImage(Resources.getIcon("ok"));
 		} catch (Exception e) {
-			System.out.println("connection failed");
+			//System.out.println("connection failed");
 			_statusDisplay.setImage(Resources.getIcon("error"));
 		}
-
 	}
-
-	// * * * Set the existing data sources in the combo box * * * //
-	public void setItems(ObservableList<CyclistDatasource> sources) {
-		
-		// Set the sources in the combo box
-		for(int i = 0; i < sources.size(); i++)
-			_sourceBox.getItems().add(sources.get(i).getName());
-
-		//if (sources.size() > 0) {
-	//		current = items.get(0);
-	//		cb.setValue(current);
-	//	}	
-
-
-	}
-	
 }
