@@ -1,5 +1,5 @@
 package edu.utah.sci.cyclist.view;
 
-public class View {
-
+public interface View {
+	void setTitle(String title);
 }

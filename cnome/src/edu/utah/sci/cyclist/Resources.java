@@ -13,8 +13,11 @@ import javafx.scene.image.Image;
  */
 public class Resources {
 
+	public static final String ICONS_DIR = "assets/icons/";
+	public static final String UNKNOWN_ICON	= "unknown.png";
+	
 	private static Map<String, Image> _icons = new HashMap<String, Image>();
-
+	
 	/**
 	 * Find an icon
 	 * @param name
@@ -23,7 +26,7 @@ public class Resources {
 	public static Image getIcon(String name) {
 		return getIcon(name, -1, -1);
 	}
-
+	
 	/**
 	 * Find an icon with a specified size
 	 * @param name 
@@ -35,9 +38,9 @@ public class Resources {
 		String fullname =  name.contains(".") ? name : name+".png";
 		Image image = _icons.get(fullname);
 		if (image == null) {
-			InputStream is = Resources.class.getResourceAsStream("assets/icons/"+fullname);
+			InputStream is = Resources.class.getResourceAsStream(ICONS_DIR+fullname);
 			if (is == null)
-				is = Resources.class.getResourceAsStream("assets/icons/unknown.png");
+				is = Resources.class.getResourceAsStream(ICONS_DIR+UNKNOWN_ICON);
 			if (width > 0)
 				image = new Image(is, width, height, true, true);
 			else
@@ -46,7 +49,7 @@ public class Resources {
 		}
 		return image;
 	}
-
+	
 //	public static void clean() {
 //		_icons = new HashMap<String, Image>();
 //	}
