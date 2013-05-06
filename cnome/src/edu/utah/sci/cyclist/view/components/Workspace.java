@@ -10,29 +10,33 @@ import javafx.geometry.Insets;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
-//import cyclist.model.vo.DnD;
+import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+
 //import cyclist.view.event.CyclistDropEvent;
 
 public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
-		
+	
+	private Pane _pane;
+	
 	// -- Properties
 	
 	// OnToolDrop
-//	private ObjectProperty<EventHandler<CyclistDropEvent>> _propertyOnToolDrop = new SimpleObjectProperty<EventHandler<CyclistDropEvent>>();
-//	
-//	public final ObjectProperty<EventHandler<CyclistDropEvent>> onToolDropPropery() {
-//		return _propertyOnToolDrop;
-//	}
-//	
-//	public final void setOnToolDrop(EventHandler<CyclistDropEvent> eventHandler) {
-//		_propertyOnToolDrop.set(eventHandler);
-//	}
-//	
-//	public final EventHandler<CyclistDropEvent> getOnToolDrop() {
-//		return _propertyOnToolDrop.get();
-//	}
+	private ObjectProperty<EventHandler<CyclistDropEvent>> _propertyOnToolDrop = new SimpleObjectProperty<EventHandler<CyclistDropEvent>>();
+	
+	public final ObjectProperty<EventHandler<CyclistDropEvent>> onToolDropPropery() {
+		return _propertyOnToolDrop;
+	}
+	
+	public final void setOnToolDrop(EventHandler<CyclistDropEvent> eventHandler) {
+		_propertyOnToolDrop.set(eventHandler);
+	}
+	
+	public final EventHandler<CyclistDropEvent> getOnToolDrop() {
+		return _propertyOnToolDrop.get();
+	}
 	
 	
 	/**
@@ -42,54 +46,59 @@ public class Workspace extends ViewBase implements View {
 		getStyleClass().add("workspace");
 		setPadding(new Insets(5, 10, 5, 10));
 
+		_pane = new Pane();
+		_pane.getStyleClass().add("workspace-pane");
+		
+		setContent(_pane);
+		
 		final Workspace workspace = this;
 		
-//		setOnDragOver(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {
-////				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
-////				System.out.println("gesture \n\tsrc:"+event.getGestureSource()+"\n\ttarget: "+event.getGestureTarget());
-//				if (event.getGestureSource() != workspace && 
-//					event.getDragboard().getContent(DnD.TOOL_FORMAT) != null) 
-//				{
-//					event.acceptTransferModes(TransferMode.COPY);
-//				} 
-//				
-//				event.consume();
-//			}
-//		});	
+		setOnDragOver(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+//				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
+//				System.out.println("gesture \n\tsrc:"+event.getGestureSource()+"\n\ttarget: "+event.getGestureTarget());
+				if (event.getGestureSource() != workspace && 
+					event.getDragboard().getContent(DnD.TOOL_FORMAT) != null) 
+				{
+					event.acceptTransferModes(TransferMode.COPY);
+				} 
+				
+				event.consume();
+			}
+		});	
 		
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
-//				System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
+				System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
 				event.consume();
 			}
 		});
 		
 		setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				System.out.println("worspace exit");
+				System.out.println("worspace exit");
 				// do nothing
 				event.consume();
 			}
 		});
 		
-//		setOnDragDropped(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {
-////				System.out.println("dropped on workspace");
-//				if (event.getGestureSource() != this) {
-//					if (event.getDragboard().hasContent(DnD.TOOL_FORMAT)) {
-//						String toolName = (String) event.getDragboard().getContent(DnD.TOOL_FORMAT);
-//						
-//						onToolDropPropery().get().handle(
-//								new CyclistDropEvent(CyclistDropEvent.DROP, toolName, event.getX(), event.getY()));
-//					}
-//				
-//				}
-//				event.setDropCompleted(true);
-//				
-//				event.consume();
-//			}
-//		});
+		setOnDragDropped(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				System.out.println("dropped on workspace");
+				if (event.getGestureSource() != this) {
+					if (event.getDragboard().hasContent(DnD.TOOL_FORMAT)) {
+						String toolName = (String) event.getDragboard().getContent(DnD.TOOL_FORMAT);
+						
+						onToolDropPropery().get().handle(
+								new CyclistDropEvent(CyclistDropEvent.DROP, toolName, event.getX(), event.getY()));
+					}
+				
+				}
+				event.setDropCompleted(true);
+				
+				event.consume();
+			}
+		});
 		
 	}
 	
@@ -99,7 +108,7 @@ public class Workspace extends ViewBase implements View {
 	}
 	
 	public void addView(final ViewBase view) {
-		getChildren().add(view);
+		_pane.getChildren().add(view);
 		
 		view.setOnSelect(new EventHandler<ActionEvent>() {
 			@Override
@@ -134,6 +143,14 @@ public class Workspace extends ViewBase implements View {
 					view.setMaximized(true);
 				}
 					
+			}
+		});
+		
+		view.setOnClose(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				removeView(view);
 			}
 		});
 	}

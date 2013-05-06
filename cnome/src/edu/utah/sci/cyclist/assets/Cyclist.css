@@ -6,6 +6,10 @@
 }
 
 
+.workspace-pane {
+	-fx-background-color: #f04590;
+}
+
 /*
  * Workspace Wizard
  */

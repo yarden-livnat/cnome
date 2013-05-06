@@ -25,10 +25,11 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.components.SchemaPanel;
-import edu.utah.sci.cyclist.view.components.TablesPanel;
 import edu.utah.sci.cyclist.view.components.Spring;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.panels.SchemaPanel;
+import edu.utah.sci.cyclist.view.panels.TablesPanel;
+import edu.utah.sci.cyclist.view.panels.ToolsPanel;
 import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
 import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 import edu.utah.sci.cyclist.view.wizard.WorkspaceWizard;
@@ -41,6 +42,7 @@ public class MainScreen extends VBox {
 	private HBox _content;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _schemaPanel;
+	private ToolsPanel _toolsPanel;
 	
 	private CyclistController _controller;
 	
@@ -83,6 +85,10 @@ public class MainScreen extends VBox {
 		return _schemaPanel;
 	}
 	
+	public ToolsPanel getToolsPanel() {
+		return _toolsPanel;
+	}
+	
 	private void init(Stage stage){
 		// create the screen
 		
@@ -98,6 +104,7 @@ public class MainScreen extends VBox {
 				.children(
 						_datasourcesPanel = new TablesPanel(),					
 						_schemaPanel = new SchemaPanel(),
+						_toolsPanel = new ToolsPanel(),
 						new Spring()	
 						)
 				.build();

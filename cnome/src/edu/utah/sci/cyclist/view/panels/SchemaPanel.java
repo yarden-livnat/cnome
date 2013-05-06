@@ -1,25 +1,21 @@
-package edu.utah.sci.cyclist.view.components;
-
-import java.util.ArrayList;
-import java.util.List;
+package edu.utah.sci.cyclist.view.panels;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.cell.TextFieldListCell;
+import javafx.util.Callback;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Schema;
-import edu.utah.sci.cyclist.view.View;
-import javafx.scene.control.ListView;
-import javafx.scene.control.cell.TextFieldListCell;
-import javafx.util.Callback;
 
-public class SchemaPanel extends TitledPane implements View {
+public class SchemaPanel extends TitledPane {
 	public static final String ID 		= "schema-panel";
 	public static final String TITLE	= "Schema";
 	
@@ -31,7 +27,7 @@ public class SchemaPanel extends TitledPane implements View {
 		build();
 	}
 	
-	@Override
+//	@Override
 	public void setTitle(String title) {
 		setTitle(title);
 	}

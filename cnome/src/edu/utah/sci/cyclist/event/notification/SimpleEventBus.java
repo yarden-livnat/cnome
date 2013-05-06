@@ -7,27 +7,32 @@ import java.util.Map;
 
 public class SimpleEventBus extends EventBus {
 
-	private Map<String, List<CyclistNotificationHandler>> _handlers = new HashMap<>();
+	private Map<String, List<HandlerInfo>> _handlers = new HashMap<>();
 	
 	@Override
-	public void addHandler(String type, CyclistNotificationHandler handler) {
-		List<CyclistNotificationHandler> list = _handlers.get(type);
+	public void addHandler(String type, String target, CyclistNotificationHandler handler) {
+		HandlerInfo info = new HandlerInfo(target, handler);
+		
+		List<HandlerInfo> list = _handlers.get(type);
 		if (list == null) {
-			list = new ArrayList<CyclistNotificationHandler>();
+			list = new ArrayList<HandlerInfo>();
 			_handlers.put(type, list);
 		}
-		if (!list.contains(handler)) {
-			list.add(handler);
-		}
 
+		list.add(info);
 	}
 
 	@Override
-	public void removeHandler(String type, CyclistNotificationHandler handler) {
-		List<CyclistNotificationHandler> list = _handlers.get(type);
+	public void removeHandler(String type, String target, CyclistNotificationHandler handler) {
+		List<HandlerInfo> list = _handlers.get(type);
 		if (list != null) {
 			if (list.size() > 1) {
-				list.remove(handler);
+				for (HandlerInfo info : list) {
+					if (info.targetId.equals(target)) {
+						list.remove(info);
+						break;
+					}
+				}
 			} else {
 				_handlers.remove(type);
 			}
@@ -36,12 +41,23 @@ public class SimpleEventBus extends EventBus {
 	
 	@Override
 	public void notify(CyclistNotification event) {
-		List<CyclistNotificationHandler> list = _handlers.get(event.getType());
+		List<HandlerInfo> list = _handlers.get(event.getType());
 		if (list != null) {
-			for (CyclistNotificationHandler handler : list) {
-				handler.handle(event);
+			for (HandlerInfo info : list) {
+				if (event.getDestID() == null || event.getDestID().equals(info.targetId))
+						info.handler.handle(event);
 			}
 		}
 
+	}
+	
+	class HandlerInfo {
+		public String targetId;
+		public CyclistNotificationHandler handler;
+		
+		public HandlerInfo(String target, CyclistNotificationHandler notificationHanlder) {
+			targetId = target;
+			handler = notificationHanlder;
+		}
 	}
 }

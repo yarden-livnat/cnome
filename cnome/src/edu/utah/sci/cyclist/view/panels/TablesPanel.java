@@ -1,8 +1,6 @@
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.view.panels;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -20,7 +18,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 
-public class TablesPanel extends TitledPane implements View {
+public class TablesPanel extends TitledPane  {
 	public static final String ID 		= "datasources-panel";
 	public static final String TITLE	= "Tables";
 	
@@ -30,7 +28,7 @@ public class TablesPanel extends TitledPane implements View {
 		build();
 	}
 	
-	@Override
+//	@Override
 	public void setTitle(String title) {
 		setTitle(title);
 	}

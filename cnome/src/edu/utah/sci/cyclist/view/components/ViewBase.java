@@ -14,7 +14,6 @@ import edu.utah.sci.cyclist.view.View;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -59,12 +58,14 @@ public class ViewBase extends VBox implements View {
 	private HBox _dataBar;
 	private final Resize resize = new Resize();
 	
+	private int _maxNumTables = 1;
+	
 	private List<Table> _tables = new ArrayList<>();
 	
 	public ViewBase() {	
 		super();
-		prefWidth(100);
-		prefHeight(100);
+//		prefWidth(100);
+//		prefHeight(100);
 		getStyleClass().add("view");
 		
 		// Title
@@ -96,6 +97,14 @@ public class ViewBase extends VBox implements View {
 	
 	public void setTitle(String title) {
 		_title.setText(title);
+	}
+	
+	public void setMaxNumTables(int n) {
+		_maxNumTables = n;
+	}
+	
+	public int getMaxNumTables() {
+		return _maxNumTables;
 	}
 	
 	public void setWaiting(boolean value) {
@@ -176,7 +185,15 @@ public class ViewBase extends VBox implements View {
 	
 	
 	public void addTable(Table table) {
-		_tables.add(table);
+		if (_tables.contains(table)) {
+			System.out.println("view: already has table");
+			return;
+		}
+		if (_tables.size() < _maxNumTables)
+			_tables.add(table);
+		else {
+			_tables.set(_maxNumTables-1, table);
+		}
 		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
 		_dataBar.getChildren().add(b);
 	}
@@ -189,7 +206,6 @@ public class ViewBase extends VBox implements View {
 		
 		getChildren().add(node);
 		VBox.setVgrow(node, Priority.NEVER);
-		setPrefHeight(200);
 	}
 	
 	/*
@@ -227,8 +243,14 @@ public class ViewBase extends VBox implements View {
 				Parent parent = view.getParent();
 				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
 				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
-				setTranslateX(Math.min(Math.max(0, delta.x + event.getSceneX()), maxX)) ;
-				setTranslateY(Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
+//				System.out.println("parent maxY:"+parent.getLayoutBounds().getMaxY()+"  h:"+getHeight());
+//				System.out.println("delta.y: "+delta.y+"  event.sy: "+event.getSceneY()+"  maxY:"+maxY);
+//				System.out.println("x: "+Math.min(Math.max(0, delta.x + event.getSceneX()), maxX)+"  y:"+Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
+//				setTranslateX(Math.min(Math.max(0, delta.x+event.getSceneX()), maxX)) ;
+//				setTranslateY(Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
+				
+				setTranslateX(delta.x+event.getSceneX()) ;
+				setTranslateY(delta.y+event.getSceneY());
 			}
 			
 		});	
@@ -352,7 +374,7 @@ public class ViewBase extends VBox implements View {
 	
 	private EventHandler<MouseEvent> _onMouseDragged = new EventHandler<MouseEvent>() {
         public void handle(MouseEvent event) {
-        	
+//			System.out.println("OnMouseDrag: "+this);
         	if (resize.edge == Edge.NONE) {
         		return;
         	}
@@ -379,6 +401,8 @@ public class ViewBase extends VBox implements View {
         		//setTranslateY(resize.y+dy);
         		setPrefWidth(resize.width-dx);
         	}
+        	
+        	event.consume();
         }
 	};
 	

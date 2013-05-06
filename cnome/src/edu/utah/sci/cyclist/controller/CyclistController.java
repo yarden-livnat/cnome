@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.controller;
 
+import java.util.Arrays;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -11,6 +13,7 @@ import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.presenter.TablesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
+import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
@@ -18,6 +21,7 @@ import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.components.DnDIcon;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.tool.Tools;
 import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
 import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
@@ -51,14 +55,24 @@ public class CyclistController {
 		
 		DnDIcon.getInstance().setRoot(screen);
 		
-		// wire panels
+		/*
+		 *  wire panels
+		 */
+		
+		// Tables panel
 		TablesPresenter ds = new TablesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
-		ds.setView(screen.getDatasourcesPanel());
+		ds.setPanel(screen.getDatasourcesPanel());
 		
+		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
-		sp.setView(screen.getSchemaPanel());
+		sp.setPanel(screen.getSchemaPanel());
+		
+		// Tools panel
+		ToolsPresenter tp = new ToolsPresenter(_eventBus);
+		tp.setPanel(screen.getToolsPanel());
+		tp.setTools(Arrays.asList(Tools.list));
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();
