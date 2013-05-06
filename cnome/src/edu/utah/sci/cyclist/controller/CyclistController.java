@@ -6,47 +6,71 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import edu.utah.sci.cyclist.event.shared.EventBus;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.view.components.DnDIcon;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
+import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
 public class CyclistController {
 
 	private final EventBus _eventBus;
-	private MainScreen     _screen;
+	private MainScreen _screen;
+	private Model _model = new Model();
 	
 	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
-	private ObservableList<Table> _tables = FXCollections.observableArrayList();
-	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
-	public ObservableList<CyclistDatasource> getSources() { return _sources; }
-	
+	/**
+	 * Constructor
+	 * 
+	 * @param eventBus
+	 */
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
-		bind();
 		_workspaces.add("/Users/yarden/software");
 		_workspaces.add("/Users/yarden");
 	}
 
+	/**
+	 * initialize the main screen
+	 * @param screen
+	 */
 	public void setScreen(final MainScreen screen) {
 		this._screen = screen;
 		screen.setControler(this);
+		addActions();
+		
+		DnDIcon.getInstance().setRoot(screen);
+		
+		// wire panels
+		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
+		ds.setSources(_model.getSources());
+		ds.setTables(_model.getTables());
+		ds.setView(screen.getDatasourcesPanel());
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();
 		screen.setWorkspace(workspace);
 		
-		WorkspacePresenter presenter = new WorkspacePresenter();
-		presenter.setEventBus(_eventBus);
+		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus, _model);
 		presenter.setView(workspace);
 		
 		// do something?
 		//selectWorkspace();
 	}
 	
+	/**
+	 * selectWorkspace
+	 * 
+	 */
 	public void selectWorkspace() {
 		ObjectProperty<String> selection = _screen.selectWorkspace(_workspaces);
 		selection.addListener(new ChangeListener<String>() {
@@ -57,64 +81,31 @@ public class CyclistController {
 				
 			}
 		});
-	}
-	
-	// * * * Action to select a data table * * * //
-	public void selectDatatable(){
-
-		ObjectProperty<Table> selection = _screen.selectDatatable(_sources);
-		selection.addListener(new ChangeListener<Table>() {
-			@Override
-			public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-				_tables.add(newVal);
-			}
-		});	
 	}	
-	
-	// * * * Action to select a data source * * * //
-	public void selectDatasource(CyclistDatasource datasource){
-
-		ObjectProperty<CyclistDatasource> selection = _screen.selectDatasource(datasource);
-		selection.addListener(new ChangeListener<CyclistDatasource>(){
-			@Override
-			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				_sources.add(newVal);
-			}
-		});
-	}
-	
 	
 	public void quit() {
 		System.exit(0);
 	}
 
-	private void bind() {
-		// set the history mechanism
-		
-		// bind event handlers
-		
-		/*_sources.addListener(new ListChangeListener<CyclistDatasource>(){
-
+	
+	private void addActions() {
+		_screen.onAddDatasource().set(new EventHandler<ActionEvent>() {
+			
 			@Override
-			public void onChanged(ListChangeListener.Change<? extends CyclistDatasource> arg0) {
-				System.out.println("throw the sources into the datatable");
+			public void handle(ActionEvent event) {
+				final DatatableWizard wizard = new DatatableWizard();
+				wizard.setItems(_model.getSources());
+				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
+				
+				selection.addListener(new ChangeListener<Table>() {
+					@Override
+					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
+						System.out.println("add table: "+newVal.getName());
+						_model.getTables().add(newVal);
+					}
+				});	
 				
 			}
-			
-		});*/
-		
-		_tables.addListener(new ListChangeListener<Table>(){
-
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends Table> arg0) {
-				_screen.setTables(_tables);
-			}
-			
 		});
-		
 	}
-
-	public void removeDatasource(CyclistDatasource current) {
-		_sources.remove(current);
-	}	
 }

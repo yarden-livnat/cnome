@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.view.wizard;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -36,6 +36,9 @@ import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.view.components.MySQLPage;
+import edu.utah.sci.cyclist.view.components.SQLitePage;
+import edu.utah.sci.cyclist.view.components.Spring;
 
 /*
  *  Class to create or edit a data source

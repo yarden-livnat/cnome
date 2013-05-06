@@ -1,6 +1,10 @@
 package edu.utah.sci.cyclist.presenter;
 
-import edu.utah.sci.cyclist.event.shared.EventBus;
+import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.model.Model;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 import edu.utah.sci.cyclist.view.components.Workspace;
 
@@ -8,14 +12,26 @@ public class WorkspacePresenter implements Presenter {
 
 	private Workspace _workspace;
 	private EventBus _eventBus;
+	private Model _model;
 	
-	public void setView(View workspace) {
-		if (workspace instanceof Workspace)
-		_workspace = (Workspace) workspace;
-	}
-	
-	public void setEventBus(EventBus bus) {
+	public WorkspacePresenter(EventBus bus, Model model) {
 		_eventBus = bus;
+		_model = model;
+	}
+	public void setView(View workspace) {
+		if (workspace instanceof Workspace) {
+			_workspace = (Workspace) workspace;
+			
+			_workspace.setOnDatasourceAction(new EventHandler<CyclistDropEvent>() {
+				
+				@Override
+				public void handle(CyclistDropEvent event) {
+					Table table = _model.getTable(event.getName());
+					_workspace.addTable(table);
+					
+				}
+			});
+		}
 	}
 	
 	public void run() {

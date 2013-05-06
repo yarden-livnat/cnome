@@ -3,13 +3,13 @@ package edu.utah.sci.cyclist.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FieldDesc {
+public class Field {
 
 	private String _name;
 	private Map<String, String> _properties = new HashMap<>();
 
 
-	public FieldDesc(String name) {
+	public Field(String name) {
 		this._name = name;
 	}
 
@@ -19,7 +19,7 @@ public class FieldDesc {
 
 
 	public String getDataType() {
-		return _properties.get(FieldDescProperties.DATA_TYPE);
+		return _properties.get(FieldProperties.DATA_TYPE);
 	}
 
 	public void set(String property, String value) {

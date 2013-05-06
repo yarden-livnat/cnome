@@ -1,8 +1,12 @@
 package edu.utah.sci.cyclist.view.components;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 
 
@@ -10,6 +14,7 @@ import edu.utah.sci.cyclist.view.View;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,7 +28,9 @@ import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
@@ -44,10 +51,15 @@ public class ViewBase extends VBox implements View {
 	
 	private Label _title;
 	private ProgressIndicator _indicator;
-	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<EventHandler<ActionEvent>>();		
+	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
+	private ObjectProperty<EventHandler<CyclistDropEvent>> datasourceActionProperty = new SimpleObjectProperty<>();
+
 	private boolean _maximized = false;
 	private HBox _actionsArea;
+	private HBox _dataBar;
 	private final Resize resize = new Resize();
+	
+	private List<Table> _tables = new ArrayList<>();
 	
 	public ViewBase() {	
 		super();
@@ -64,6 +76,10 @@ public class ViewBase extends VBox implements View {
 				.children(
 					_title = LabelBuilder.create().build(),
 					_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
+					_dataBar = HBoxBuilder.create()
+						.id("databar")
+						.minWidth(30)
+						.build(),
 					new Spring(),
 					_actionsArea = new HBox(),
 					_minmaxButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("maximize"))).build(),
@@ -71,6 +87,7 @@ public class ViewBase extends VBox implements View {
 				)
 				.build();
 		setHeaderListeners(header);
+		setDatasourcesListeners();
 		
 		getChildren().add(header);
 		
@@ -142,6 +159,28 @@ public class ViewBase extends VBox implements View {
 	}	
 	
 	/*
+	 * Datasource
+	 */
+	
+	public ObjectProperty<EventHandler<CyclistDropEvent>> onDatasourceActionProperty() {
+		return datasourceActionProperty;
+	}
+	
+	public EventHandler<CyclistDropEvent> getOnDatasourceAction() {
+		return datasourceActionProperty.get();
+	}
+	
+	public void setOnDatasourceAction(EventHandler<CyclistDropEvent> handler) {
+		datasourceActionProperty.set(handler);
+	}	
+	
+	
+	public void addTable(Table table) {
+		_tables.add(table);
+		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
+		_dataBar.getChildren().add(b);
+	}
+	/*
 	 * Content
 	 */
 	
@@ -206,7 +245,53 @@ public class ViewBase extends VBox implements View {
 		setOnMouseClicked(eh);
 	}
 	
+	private void setDatasourcesListeners() {
+		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 
+			@Override
+			public void handle(DragEvent event) {
+				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
+					event.acceptTransferModes(TransferMode.COPY);
+				}
+				event.consume();
+			}
+		});
+		
+		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
+					event.acceptTransferModes(TransferMode.COPY);
+				}
+				event.consume();
+			}
+		});
+		
+		_dataBar.setOnDragExited(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				event.consume();
+			}
+		});
+		
+		_dataBar.setOnDragDropped(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
+					String name = (String) event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT);
+					if (getOnDatasourceAction() != null) {
+						getOnDatasourceAction().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, name, event.getX(), event.getY()));
+					}
+				}
+				event.setDropCompleted(true);
+				event.consume();
+			}
+		});
+	}
+	
 	private void setListeners() {
 		
 		

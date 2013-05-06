@@ -1,11 +1,13 @@
 package edu.utah.sci.cyclist.model;
 
-public class FieldDescProperties {
+public class FieldProperties {
 	public static final String ROLE = "role";
 
 	public static final String ROLE_DIMENSION = "dimension";
 	public static final String ROLE_MEASURE = "measure";
 
+	public static final String DATA_TYPE_NAME = "data_type_name";
+	
 	public static final String DATA_TYPE = "data_type";
 	public static final String DATA_TYPE_INT = "int";
 	public static final String DATA_TYPE_REAL = "real";

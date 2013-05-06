@@ -13,7 +13,7 @@ import javafx.scene.layout.Pane;
 //import cyclist.model.vo.DnD;
 //import cyclist.view.event.CyclistDropEvent;
 
-public class Workspace extends Pane implements View {
+public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
 		

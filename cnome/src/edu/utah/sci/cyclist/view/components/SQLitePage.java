@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.view.wizard.DatasourceWizardPage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

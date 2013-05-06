@@ -3,6 +3,7 @@ package edu.utah.sci.cyclist.view.components;
 import java.util.Properties;
 
 import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.view.wizard.DatasourceWizardPage;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.PasswordFieldBuilder;

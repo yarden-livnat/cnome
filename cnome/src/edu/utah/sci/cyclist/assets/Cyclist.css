@@ -29,6 +29,14 @@
 	-fx-padding:  5;
 }
 
+.datasources-list {
+	-fx-background-color:  #ffff00;
+}
+
+.databar {
+	-fx-background-color:  #ffff00;
+}
+
 /* ---- previous ---  */
 /* 
  * View

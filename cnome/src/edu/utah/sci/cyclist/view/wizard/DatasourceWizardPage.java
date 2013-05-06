@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.view.wizard;
 
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import javafx.scene.Node;

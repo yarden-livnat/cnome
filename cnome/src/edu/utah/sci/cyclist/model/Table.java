@@ -9,7 +9,7 @@ public class Table {
 
 	private String _name;
 	private Map<String, Object> _properties = new HashMap<>();
-	private List<FieldDesc> _fields;
+	private List<Field> _fields;
 	private List<TableRow> _rows = new ArrayList<>();
 
 	public Table() {
@@ -74,15 +74,15 @@ public class Table {
 			return value.toString();
 	}
 
-	public void setFields(List<FieldDesc> fields) {
+	public void setFields(List<Field> fields) {
 		_fields = fields;
 	}
 
-	public List<FieldDesc> getFields() {
+	public List<Field> getFields() {
 		return _fields;
 	}
 
-	public FieldDesc getField(int index) {
+	public Field getField(int index) {
 		return _fields.get(index);
 	}
 

@@ -3,8 +3,8 @@ package edu.utah.sci.cyclist;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.event.shared.EventBus;
-import edu.utah.sci.cyclist.event.shared.SimpleEventBus;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.view.MainScreen;
 
 import javafx.application.Application;
