@@ -6,7 +6,7 @@ import java.util.Map;
 public class Field {
 
 	private String _name;
-	private Map<String, String> _properties = new HashMap<>();
+	private Map<String, Object> _properties = new HashMap<>();
 
 
 	public Field(String name) {
@@ -19,14 +19,22 @@ public class Field {
 
 
 	public String getDataType() {
-		return _properties.get(FieldProperties.DATA_TYPE);
+		return (String) _properties.get(FieldProperties.DATA_TYPE);
 	}
 
-	public void set(String property, String value) {
+	public void set(String property, Object value) {
 		_properties.put(property, value);
 	}
 
-	public String get(String property) {
+	public Object get(String property) {
 		return _properties.get(property);
+	}
+	
+	public String getString(String property) {
+		return (String) get(property);
+	}
+	
+	public int getInt(String property) {
+		return (int) get(property);
 	}
 }

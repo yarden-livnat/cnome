@@ -35,22 +35,9 @@ public class Table {
     public String toString() {
         return getName();
     }
-		
-	public void setDataSource(CyclistDatasource datasource){
-		setProperty(DATA_SOURCE, datasource);
-	}
+
 	
-	public CyclistDatasource getDataSource(){
-		return (CyclistDatasource) getProperty(DATA_SOURCE);
-	}
-	
-	public void setTableName(String tablename){
-		setProperty(REMOTE_TABLE_NAME, tablename);
-	}
-	
-	public String getTableName(){
-		return (String) getProperty(REMOTE_TABLE_NAME);
-	}
+
 	
 	public void setProperty(String property, Object value) {
 		_properties.put(property, value);
@@ -77,11 +64,28 @@ public class Table {
 		else
 			return value.toString();
 	}
-
-	public void setFields(List<Field> fields) {
-		_schema.set(fields);
+	
+	/**
+	 * Convenient method
+	 * @param datasource
+	 */
+	public void setDataSource(CyclistDatasource datasource){
+		setProperty(DATA_SOURCE, datasource);
 	}
-
+	
+	/**
+	 * Convenient method
+	 * @return
+	 */
+	public CyclistDatasource getDataSource(){
+		return (CyclistDatasource) getProperty(DATA_SOURCE);
+	}
+	
+	public void setSchema(Schema schema) {
+		_schema = schema;
+		clear();
+	}
+	
 	public List<Field> getFields() {
 		List<Field> list = new ArrayList<Field>();
 		int n = _schema.size();
@@ -112,6 +116,10 @@ public class Table {
 		return _rows.get(index);
 	}
 
+	public void clear() {
+		_rows.clear();
+	}
+	
 	public class TableRow  {
 		public Object[] value;
 

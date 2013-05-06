@@ -77,44 +77,6 @@ public class MainScreen extends VBox {
 		return _datasourcesPanel;
 	}
 	
-//	public ObjectProperty<Table> selectDatatable(ObservableList<CyclistDatasource> list){
-//	
-//		final DatatableWizard wizard = new DatatableWizard();
-//		wizard.setItems(list);
-//		wizard.getAddSourceButton().setOnAction(new EventHandler<ActionEvent>(){
-//			@Override
-//			public void handle(ActionEvent event) {
-//				_controller.selectDatasource(new CyclistDatasource());		
-//			}	
-//		});	
-//		
-//		wizard.getEditSourceButton().setOnAction(new EventHandler<ActionEvent>(){
-//			@Override
-//			public void handle(ActionEvent event) {
-//				
-//				CyclistDatasource current = ((DatatableWizard)wizard).getCurrentDataSource();
-//				_controller.selectDatasource(current);		
-//			}	
-//		});	
-//		
-//		wizard.getRemoveSourceButton().setOnAction(new EventHandler<ActionEvent>(){
-//			@Override
-//			public void handle(ActionEvent event) {
-//				
-//				CyclistDatasource current = ((DatatableWizard)wizard).getCurrentDataSource();
-//				_controller.removeDatasource(current);		
-//			}	
-//		});	
-//
-//		return wizard.show(getScene().getWindow());
-//	}
-	
-//	public ObjectProperty<CyclistDatasource> selectDatasource(CyclistDatasource source){
-//		
-//		DatasourceWizard wizard = new DatasourceWizard(source);
-//		return wizard.show(getScene().getWindow());		
-//	}
-	
 	
 	private void init(Stage stage){
 		// create the screen
@@ -129,11 +91,6 @@ public class MainScreen extends VBox {
 				.prefWidth(150)
 				.padding(new Insets(5))
 				.children(
-						// tables
-//						TextBuilder.create().text("Tables:").build(),
-//						_tableList = ListViewBuilder.<Table>create()
-//						.maxHeight(150)
-//						.build(),
 						_datasourcesPanel = new TablesPanel(),					
 						// schema
 						new Spring()	
@@ -161,6 +118,8 @@ public class MainScreen extends VBox {
 	private MenuItem _datasourceMenuItem;
 	private MenuItem _workspaceMenuItem;
 	private MenuItem _quitMenuItem;
+	private MenuItem _saveMenuItem;
+	
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
@@ -168,6 +127,10 @@ public class MainScreen extends VBox {
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onSelectWorkspace() {
 		return _workspaceMenuItem.onActionProperty();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onSave() {
+		return _saveMenuItem.onActionProperty();
 	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onQuit() {
@@ -185,35 +148,15 @@ public class MainScreen extends VBox {
 	}
 	
 	private Menu createFileMenu() {
-		// -- Workspace
 		_datasourceMenuItem = new MenuItem("Add Datatable", new ImageView(Resources.getIcon("open.png")));
-//		datatableItem.setOnAction(new EventHandler<ActionEvent>(){			
-//			@Override
-//			public void handle(ActionEvent event) {
-//				_controller.selectDatatable();
-//			}		
-//		});
-
 		
 		_workspaceMenuItem = new MenuItem("Workspace"); //new ImageView(Resources.getIcon("workspace.png")));
-//		workspaceItem.setOnAction(new EventHandler<ActionEvent>() {
-//			
-//			@Override
-//			public void handle(ActionEvent event) {
-//				_controller.selectWorkspace();
-//			}
-//		});
+		
+		_saveMenuItem = new MenuItem("Save");
 		
 		// -- Quit
 		_quitMenuItem = new MenuItem("Quit");
 		_quitMenuItem.setAccelerator(KeyCombination.keyCombination("Alt+Q"));
-//		quitItem.setOnAction(new EventHandler<ActionEvent>() {
-//			@Override
-//			public void handle(ActionEvent event) {
-//				// save state
-//				_controller.quit();
-//			}
-//		});
 		
 		// -- setup the menu 
 		Menu fileMenu = new Menu("File");
@@ -221,13 +164,4 @@ public class MainScreen extends VBox {
 		return fileMenu;
 	}
 
-//	public void setTables(ObservableList<Table> tables) {
-//
-//		_tableList.getItems().clear();
-//		
-//		// Set the tables
-//		for(int i = 0; i < tables.size(); i++)
-//			_tableList.getItems().add(tables.get(i));	
-//		
-//	}
 }

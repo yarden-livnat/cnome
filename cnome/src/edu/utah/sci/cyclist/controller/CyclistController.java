@@ -83,9 +83,7 @@ public class CyclistController {
 		});
 	}	
 	
-	public void quit() {
-		System.exit(0);
-	}
+
 
 	
 	private void addActions() {
@@ -100,12 +98,40 @@ public class CyclistController {
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-						System.out.println("add table: "+newVal.getName());
 						_model.getTables().add(newVal);
 					}
 				});	
 				
 			}
 		});
+		
+		_screen.onSave().set(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				save();
+			}
+		});
+		
+		_screen.onQuit().set(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				quit();
+			}
+		});
+	}
+	
+	private void quit() {
+		// TODO: check is we need to save  
+		System.exit(0);
+	}
+	
+	private void save() {
+		// save state to an xml file
+	}
+	
+	private void load() {
+		// load state from xml file
 	}
 }

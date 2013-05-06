@@ -12,7 +12,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -21,11 +20,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.layout.HBox;
@@ -43,6 +39,7 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
+import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
  
 
@@ -326,12 +323,13 @@ public class DatatableWizard extends VBox {
 	}
 	
 	private void updateTable(Table table) {
+		// for now table name is the same as the remote name
 		String name = (String) _tablesView.getSelectionModel().getSelectedItem();
+		
 		table.setName(name); // _nameField.getText());
 		table.setDataSource(_current);
-		table.setTableName(name);
-//		Schema schema = new Schema();
-		List<Field> schema = new ArrayList<>();
+		table.setProperty(Table.REMOTE_TABLE_NAME, name);
+		Schema schema = new Schema();
 		
 		try (Connection conn = _current.getConnection()) {
 			DatabaseMetaData md = conn.getMetaData();
@@ -342,15 +340,20 @@ public class DatatableWizard extends VBox {
 					System.out.print(": "+rs.getString(i));
 				}
 				System.out.println();
-				Field field = new Field(rs.getString("COLUMN_NAME"));
-//				field.set(FieldProperties.DATA_TYPE, rs.getInt("DATA_TYPE"));
-				field.set(FieldProperties.DATA_TYPE_NAME, rs.getString("TYPE_NAME"));
-				schema.add(field);
+				String colName = rs.getString("COLUMN_NAME");
+				Field field = new Field(colName);
+				field.set(FieldProperties.REMOTE_NAME, colName);
+				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
+				field.set(FieldProperties.REMOTE_DATA_TYPE_NAME, rs.getString("TYPE_NAME"));
+				
+				schema.addField(field);
 			}
 		} catch (Exception e) {
+			System.out.println("Error while parsing schema: "+e.getMessage());
 		}
 		
-		table.setFields(schema);
+		schema.update();
+		table.setSchema(schema);
 	}
 	
 }
