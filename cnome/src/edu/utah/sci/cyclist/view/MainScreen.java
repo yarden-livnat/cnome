@@ -153,14 +153,21 @@ public class MainScreen extends VBox {
 		_workspaceMenuItem = new MenuItem("Workspace"); //new ImageView(Resources.getIcon("workspace.png")));
 		
 		_saveMenuItem = new MenuItem("Save");
+		_saveMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+S"));
 		
 		// -- Quit
 		_quitMenuItem = new MenuItem("Quit");
-		_quitMenuItem.setAccelerator(KeyCombination.keyCombination("Alt+Q"));
+		_quitMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+Q"));
 		
 		// -- setup the menu 
 		Menu fileMenu = new Menu("File");
-		fileMenu.getItems().addAll(_datasourceMenuItem, new SeparatorMenuItem(), _workspaceMenuItem, new SeparatorMenuItem(), _quitMenuItem);
+		fileMenu.getItems().addAll(
+					_datasourceMenuItem, 
+					new SeparatorMenuItem(), 
+					_workspaceMenuItem, 
+					_saveMenuItem,
+					new SeparatorMenuItem(), 
+					_quitMenuItem);
 		return fileMenu;
 	}
 
