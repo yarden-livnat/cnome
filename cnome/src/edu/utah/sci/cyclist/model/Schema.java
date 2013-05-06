@@ -49,7 +49,7 @@ public class Schema {
 		
 		// for now assume local type is the same as remote type
 		field.set(FieldProperties.DATA_TYPE, remote_type);
-		field.set(FieldProperties.DATA_TYPE_NAME, field.getString("TYPE_NAME"));
+		field.set(FieldProperties.DATA_TYPE_NAME, field.getString(FieldProperties.REMOTE_DATA_TYPE_NAME));
 				
 		switch (remote_type) {
 		case java.sql.Types.INTEGER:

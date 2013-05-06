@@ -25,6 +25,7 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.view.components.SchemaPanel;
 import edu.utah.sci.cyclist.view.components.TablesPanel;
 import edu.utah.sci.cyclist.view.components.Spring;
 import edu.utah.sci.cyclist.view.components.Workspace;
@@ -39,6 +40,7 @@ public class MainScreen extends VBox {
 	private VBox _toolsArea;
 	private HBox _content;
 	private TablesPanel _datasourcesPanel;
+	private SchemaPanel _schemaPanel;
 	
 	private CyclistController _controller;
 	
@@ -77,6 +79,9 @@ public class MainScreen extends VBox {
 		return _datasourcesPanel;
 	}
 	
+	public SchemaPanel getSchemaPanel() {
+		return _schemaPanel;
+	}
 	
 	private void init(Stage stage){
 		// create the screen
@@ -88,11 +93,11 @@ public class MainScreen extends VBox {
 		// -- tables and schema
 		_toolsArea = VBoxBuilder.create()
 				.spacing(5)
-				.prefWidth(150)
+				.prefWidth(100)
 				.padding(new Insets(5))
 				.children(
 						_datasourcesPanel = new TablesPanel(),					
-						// schema
+						_schemaPanel = new SchemaPanel(),
 						new Spring()	
 						)
 				.build();

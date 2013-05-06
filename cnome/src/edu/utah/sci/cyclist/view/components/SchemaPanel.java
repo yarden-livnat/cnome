@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListViewBuilder;
 import javafx.scene.control.SplitPane;
@@ -65,6 +66,8 @@ public class SchemaPanel extends TitledPane implements View {
 		setText(TITLE);
 		
 		SplitPane pane = SplitPaneBuilder.create()
+				.maxHeight(150)
+				.orientation(Orientation.VERTICAL)
 				.items(
 						_dimensionsView = ListViewBuilder.<Field>create()
 								.prefWidth(100)
@@ -84,6 +87,14 @@ public class SchemaPanel extends TitledPane implements View {
 			}
 		});
 		
+		_measuresView.setCellFactory(new Callback<ListView<Field>, ListCell<Field>>() {
+			
+			@Override
+			public ListCell<Field> call(ListView<Field> param) {
+				return new FieldCell();
+			}
+		});
+		
 		setContent(pane);
 	}
 	
@@ -93,7 +104,7 @@ public class SchemaPanel extends TitledPane implements View {
 				super.updateItem(field, empty);	
 				
 				if (field != null) {
-					setText(field.getDataType()+":"+field.getDataType());
+					setText(field.getName()+":"+field.getDataTypeName());
 				} else {
 					setText("");
 				}

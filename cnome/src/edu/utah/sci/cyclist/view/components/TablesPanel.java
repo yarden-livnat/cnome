@@ -1,6 +1,8 @@
 package edu.utah.sci.cyclist.view.components;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -39,8 +41,8 @@ public class TablesPanel extends TitledPane implements View {
 	}
 	
 	
-	public ReadOnlyObjectProperty<Table> focusedItemProperty() {
-		return _tables.getFocusModel().focusedItemProperty();
+	public ReadOnlyObjectProperty<Table> selectedItemProperty() {
+		return _tables.getSelectionModel().selectedItemProperty();
 	}
 	
 	private void build() {
@@ -59,7 +61,7 @@ public class TablesPanel extends TitledPane implements View {
 				return new TableCell();
 			}
 		});
-				
+			
 		setContent(_tables);
 	}
 	
@@ -83,7 +85,6 @@ public class TablesPanel extends TitledPane implements View {
 						
 						db.setContent(content);
 						
-						System.out.println("dnd: "+TableCell.this.getItem().getName());
 						event.consume();
 					}
 				});

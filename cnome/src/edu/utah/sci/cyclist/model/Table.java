@@ -37,8 +37,6 @@ public class Table {
     }
 
 	
-
-	
 	public void setProperty(String property, Object value) {
 		_properties.put(property, value);
 	}
@@ -84,6 +82,10 @@ public class Table {
 	public void setSchema(Schema schema) {
 		_schema = schema;
 		clear();
+	}
+	
+	public Schema getSchema() {
+		return _schema;
 	}
 	
 	public List<Field> getFields() {

@@ -18,8 +18,8 @@ public class Field {
 	}
 
 
-	public String getDataType() {
-		return (String) _properties.get(FieldProperties.DATA_TYPE);
+	public String getDataTypeName() {
+		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
 	}
 
 	public void set(String property, Object value) {

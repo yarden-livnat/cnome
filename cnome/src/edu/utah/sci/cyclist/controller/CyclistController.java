@@ -9,7 +9,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
+import edu.utah.sci.cyclist.presenter.TablesPresenter;
+import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
@@ -51,10 +52,13 @@ public class CyclistController {
 		DnDIcon.getInstance().setRoot(screen);
 		
 		// wire panels
-		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
+		TablesPresenter ds = new TablesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
 		ds.setView(screen.getDatasourcesPanel());
+		
+		SchemaPresenter sp = new SchemaPresenter(_eventBus);
+		sp.setView(screen.getSchemaPanel());
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();

@@ -8,14 +8,13 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 import edu.utah.sci.cyclist.view.components.Workspace;
 
-public class WorkspacePresenter implements Presenter {
+public class WorkspacePresenter extends PresenterBase {
 
 	private Workspace _workspace;
-	private EventBus _eventBus;
 	private Model _model;
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
-		_eventBus = bus;
+		super(bus);
 		_model = model;
 	}
 	public void setView(View workspace) {
