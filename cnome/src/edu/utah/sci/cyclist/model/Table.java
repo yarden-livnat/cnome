@@ -7,9 +7,13 @@ import java.util.Map;
 
 public class Table {
 
+	public static final String DATA_SOURCE = "datasource";
+	public static final String REMOTE_TABLE_NAME = "remote-table-name";
+	
 	private String _name;
+	private Schema _schema = new Schema();
 	private Map<String, Object> _properties = new HashMap<>();
-	private List<Field> _fields;
+
 	private List<TableRow> _rows = new ArrayList<>();
 
 	public Table() {
@@ -33,19 +37,19 @@ public class Table {
     }
 		
 	public void setDataSource(CyclistDatasource datasource){
-		setProperty("DataSource", datasource);
+		setProperty(DATA_SOURCE, datasource);
 	}
 	
 	public CyclistDatasource getDataSource(){
-		return (CyclistDatasource) getProperty("DataSource");
+		return (CyclistDatasource) getProperty(DATA_SOURCE);
 	}
 	
 	public void setTableName(String tablename){
-		setProperty("TableName", tablename);
+		setProperty(REMOTE_TABLE_NAME, tablename);
 	}
 	
 	public String getTableName(){
-		return (String) getProperty("TableName");
+		return (String) getProperty(REMOTE_TABLE_NAME);
 	}
 	
 	public void setProperty(String property, Object value) {
@@ -75,19 +79,24 @@ public class Table {
 	}
 
 	public void setFields(List<Field> fields) {
-		_fields = fields;
+		_schema.set(fields);
 	}
 
 	public List<Field> getFields() {
-		return _fields;
+		List<Field> list = new ArrayList<Field>();
+		int n = _schema.size();
+		for (int i=0; i<n; i++) {
+			list.add(_schema.getField(i));
+		}
+		return list;
 	}
 
 	public Field getField(int index) {
-		return _fields.get(index);
+		return _schema.getField(index);
 	}
 
 	public int getNumColumns() {
-		return _fields.size();
+		return _schema.size();
 	}
 
 
