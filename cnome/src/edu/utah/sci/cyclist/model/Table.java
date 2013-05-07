@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Table {
 
@@ -21,6 +22,8 @@ public class Table {
 	}
 	public Table(String name) {
 		_name = name;
+		setProperty("class", "CyclistDatasource");
+		setProperty("uid", UUID.randomUUID().toString());
 	}
 
 	public String getName() {
@@ -35,9 +38,6 @@ public class Table {
     public String toString() {
         return getName();
     }
-
-	
-
 	
 	public void setProperty(String property, Object value) {
 		_properties.put(property, value);

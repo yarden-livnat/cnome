@@ -1,27 +1,33 @@
 package edu.utah.sci.cyclist.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Properties;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
-import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
-import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
+import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
+import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.view.components.DnDIcon;
 import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
 import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
-public class CyclistController {
 
+public class CyclistController {
+	
 	private final EventBus _eventBus;
 	private MainScreen _screen;
 	private Model _model = new Model();
@@ -37,6 +43,8 @@ public class CyclistController {
 		this._eventBus = eventBus;
 		_workspaces.add("/Users/yarden/software");
 		_workspaces.add("/Users/yarden");
+		
+		load();
 	}
 
 	/**
@@ -82,10 +90,7 @@ public class CyclistController {
 			}
 		});
 	}	
-	
-
-
-	
+		
 	private void addActions() {
 		_screen.onAddDatasource().set(new EventHandler<ActionEvent>() {
 			
@@ -128,10 +133,37 @@ public class CyclistController {
 	}
 	
 	private void save() {
-		// save state to an xml file
+		
+		System.out.println("Save!");
+		
+		// The file we are saving into
+		String propertyFile = System.getProperty("user.dir") + "/.cnome/save.xml";
+		
+		XMLMemento memento = XMLMemento.createWriteRoot("root");
+		for(CyclistDatasource source: _model.getSources()){
+			memento.copyChild(source.getMemento());
+		}
+		try {
+			memento.save(new PrintWriter(System.out));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		
+		
 	}
 	
+	// Load saved properties
 	private void load() {
-		// load state from xml file
+	
+		//
+		final String saveDir = System.getProperty("user.dir");	
+		String propFile = saveDir + "/.cnome.xml";
+		File f = new File(propFile);
+		if(f.exists()){
+			
+
+		}
 	}
 }

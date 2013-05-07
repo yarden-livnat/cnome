@@ -5,8 +5,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListViewBuilder;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -18,18 +16,13 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.scene.text.TextBuilder;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.components.TablesPanel;
 import edu.utah.sci.cyclist.view.components.Spring;
+import edu.utah.sci.cyclist.view.components.TablesPanel;
 import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
-import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 import edu.utah.sci.cyclist.view.wizard.WorkspaceWizard;
 
 public class MainScreen extends VBox {
