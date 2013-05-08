@@ -27,7 +27,5 @@ public class Model {
 	
 	public ObservableList<CyclistDatasource> getSources() {
 		return _sources;
-	}
-	
-	
+	}	
 }

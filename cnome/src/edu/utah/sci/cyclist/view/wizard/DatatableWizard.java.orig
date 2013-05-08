@@ -336,6 +336,13 @@ public class DatatableWizard extends VBox {
 			ResultSet rs = md.getColumns(null, null, name, null);
 //			ResultSetMetaData rmd = rs.getMetaData();
 			while (rs.next()) {
+<<<<<<< HEAD
+				//for (int i=1; i<=rmd.getColumnCount(); i++) {
+			//		System.out.print(": "+rs.getString(i));
+		//		}
+				System.out.println();
+=======
+>>>>>>> f43c4488eb2487be0ba4927fc08e4b05faf2d281
 				String colName = rs.getString("COLUMN_NAME");
 				Field field = new Field(colName);
 				field.set(FieldProperties.REMOTE_NAME, colName);

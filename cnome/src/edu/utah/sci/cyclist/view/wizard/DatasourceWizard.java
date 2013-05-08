@@ -187,7 +187,6 @@ public class DatasourceWizard extends VBox {
 		// Disable the ok button until we at least have a name field
 		ok.disableProperty().bind(_nameField.textProperty().isNull().or(_nameField.textProperty().isEqualTo("")));
 
-
 		// The vertical layout of the whole wizard
 		VBox header = VBoxBuilder.create()
 				.spacing(10)

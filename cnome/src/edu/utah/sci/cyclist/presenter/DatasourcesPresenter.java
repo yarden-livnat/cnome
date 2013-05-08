@@ -45,7 +45,6 @@ public class DatasourcesPresenter extends PresenterBase {
 
 			@Override
 			public void changed(ObservableValue<? extends Table> observable, Table oldValue, Table newValue) {
-				System.out.println("table selected: "+newValue.getName());
 				broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, newValue));
 			}
 		});

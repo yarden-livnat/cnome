@@ -99,6 +99,10 @@ public class Table {
     public String toString() {
         return getName();
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> f43c4488eb2487be0ba4927fc08e4b05faf2d281
 	
 	public void setProperty(String property, Object value) {
 		_properties.put(property, value);
@@ -235,5 +239,8 @@ public class Table {
 		}
 	}
 
+<<<<<<< HEAD
+=======
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
+>>>>>>> f43c4488eb2487be0ba4927fc08e4b05faf2d281
 }

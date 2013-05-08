@@ -1,36 +1,38 @@
 package edu.utah.sci.cyclist.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import edu.utah.sci.cyclist.event.dnd.DnDIcon;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Model;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
-import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.model.Model;
-import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.components.Workspace;
 import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
-import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
 import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
-public class CyclistController {
 
+public class CyclistController {
+	
 	private final EventBus _eventBus;
 	private MainScreen _screen;
 	private Model _model = new Model();
-	
+	private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	private String SAVE_FILE = SAVE_DIR+"save.xml";
 	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
 	
 	/**
@@ -42,6 +44,8 @@ public class CyclistController {
 		this._eventBus = eventBus;
 		_workspaces.add("/Users/yarden/software");
 		_workspaces.add("/Users/yarden");
+		
+		load();
 	}
 
 	/**
@@ -98,10 +102,7 @@ public class CyclistController {
 			}
 		});
 	}	
-	
-
-
-	
+		
 	private void addActions() {
 		_screen.onAddDatasource().set(new EventHandler<ActionEvent>() {
 			
@@ -144,10 +145,76 @@ public class CyclistController {
 	}
 	
 	private void save() {
-		// save state to an xml file
+		
+		// If the save directory does not exist, create it
+		File saveDir = new File(SAVE_DIR);
+		if (!saveDir.exists())	
+			saveDir.mkdir();  
+	
+		// The save file
+		File saveFile = new File(SAVE_FILE);
+
+		// Create the root memento
+		XMLMemento memento = XMLMemento.createWriteRoot("root");
+			
+		// Save the data sources
+		for(CyclistDatasource source: _model.getSources()){			
+			source.save(memento.createChild("sources"));
+		}
+		
+		// Save the data tables
+		for(Table table: _model.getTables()){
+			table.save(memento.createChild("tables"));
+		}
+		
+		try {
+			memento.save(new PrintWriter(saveFile));
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 	
+		
 	}
 	
+	// Load saved properties
 	private void load() {
-		// load state from xml file
+	
+		System.out.println("Load!");
+	/*	
+		// Check if the save file exists
+		File saveFile = new File(SAVE_FILE);
+			
+		// If we have a save file, read it in
+		if(saveFile.exists()){
+			
+			
+			Reader reader;
+			try {
+				reader = new FileReader(saveFile);
+				try {
+					// Create the root memento
+					XMLMemento memento = XMLMemento.createReadRoot(reader);
+					
+					// Read in the data sources
+					IMemento sources_list = memento.getChild("sources-list");
+					IMemento[] sources = sources_list.getChildren("CyclistDatasource");
+					System.out.println("sourcs " + sources.length);
+					for(IMemento source: sources){
+						
+						CyclistDatasource datasource = new CyclistDatasource();
+						datasource.restore(source);
+						_model.getSources().add(datasource);
+					}
+					
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 		
+		}*/
 	}
 }

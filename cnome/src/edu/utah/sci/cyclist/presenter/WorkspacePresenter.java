@@ -20,18 +20,14 @@ import edu.utah.sci.cyclist.view.components.ViewBase;
 import edu.utah.sci.cyclist.view.components.Workspace;
 import edu.utah.sci.cyclist.view.tool.GenericTool;
 import edu.utah.sci.cyclist.view.tool.Tool;
-import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
 
 public class WorkspacePresenter extends PresenterBase {
 
 	private Workspace _workspace;
-	private Model _model;
 	private List<Presenter> _presenters = new ArrayList<>();
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
-		super(bus);
-		_model = model;
-		
+		super(bus);		
 		addListeners();
 	}
 	
@@ -51,7 +47,7 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Table table) {
-					_workspace.addTable(table);
+					_workspace.addTable(table, true);
 					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));				
 				}
 				

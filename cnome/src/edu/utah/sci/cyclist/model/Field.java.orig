@@ -86,8 +86,13 @@ public class Field {
 	public int getInt(String property) {
 		return (int) get(property);
 	}
+<<<<<<< HEAD
+
+
+=======
 	
 	public String toString() {
 		return _name;
 	}
+>>>>>>> f43c4488eb2487be0ba4927fc08e4b05faf2d281
 }

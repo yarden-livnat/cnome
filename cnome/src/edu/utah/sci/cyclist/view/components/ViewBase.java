@@ -195,25 +195,25 @@ public class ViewBase extends BorderPane implements View {
 		return DnD.getInstance().getLocalClipboard();
 	}
 	
-	/**
-	 * addTable
-	 */
-	public void addTable(Table table) {
-		if (_tables.contains(table)) {
-			System.out.println("view: already has table");
-			return;
-		}
-//		if (_tables.size() < _maxNumTables)
-//			_tables.add(table);
-//		else {
-//			_tables.set(_maxNumTables-1, table);
+//	/**
+//	 * addTable
+//	 */
+//	public void addTable(Table table) {
+//		if (_tables.contains(table)) {
+//			System.out.println("view: already has table");
+//			return;
 //		}
-		_tables.clear();
-		_tables.add(table);
-		_dataBar.getChildren().clear();
-		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
-		_dataBar.getChildren().add(b);
-	}
+////		if (_tables.size() < _maxNumTables)
+////			_tables.add(table);
+////		else {
+////			_tables.set(_maxNumTables-1, table);
+////		}
+//		_tables.clear();
+//		_tables.add(table);
+//		_dataBar.getChildren().clear();
+//		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
+//		_dataBar.getChildren().add(b);
+//	}
 	
 	public void addTable(Table table, boolean local) {
 		final DatasourceInfo info = new DatasourceInfo(table);

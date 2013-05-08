@@ -47,7 +47,7 @@ public class SimpleTableView extends ViewBase {
 	@Override
 	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
 		if (active) {
-		
+			setTitle(info.table.getName());
 			Schema schema = info.table.getSchema();
 			
 			_tableView.itemsProperty().unbind();
@@ -65,6 +65,8 @@ public class SimpleTableView extends ViewBase {
 			
 			_tableView.getColumns().addAll(cols);
 			_tableView.itemsProperty().bind(info.table.getRows(100));
+		} else {
+			setTitle("");
 		}
 	}
 	

@@ -3,6 +3,8 @@ package edu.utah.sci.cyclist.model;
 import java.util.List;
 import java.util.Vector;
 
+import edu.utah.sci.cyclist.controller.IMemento;
+
 
 
 public class Schema {
@@ -12,6 +14,22 @@ public class Schema {
 	public Schema() {
 		
 	}
+	
+	// Save the schema
+	public void save(IMemento memento) {
+
+		// Create the child memento
+		for(Field field: _fields){
+			field.save(memento.createChild("field"));
+		}
+	}
+
+	// Restore the schema
+	public void restore(IMemento memento) {
+
+		
+	}
+
 	
 	public int size() {
 		return _fields.size();
@@ -93,4 +111,6 @@ public class Schema {
 			field.set(FieldProperties.ROLE, FieldProperties.VALUE_UNKNOWN);
 		}
 	}
+	
+	
 }
