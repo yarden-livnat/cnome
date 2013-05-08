@@ -1,6 +1,6 @@
 package edu.utah.sci.cyclist.view.tool;
 
-public class Tools {
+public class ToolsLibrary {
 
 	public static Tool[] list = {
 		new GenericTool()

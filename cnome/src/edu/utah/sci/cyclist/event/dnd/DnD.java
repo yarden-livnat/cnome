@@ -11,27 +11,40 @@ public class DnD {
 	public static final DataFormat TOOL_FORMAT			= new DataFormat("cyclist.dnd.tool");
 	public static final DataFormat FIELD_FORMAT 		= new DataFormat("cyclist.dnd.field");
 	
-	public static class LocalDragboard {
-		private final static LocalDragboard _instance = new LocalDragboard();
-		
+	private static LocalClipboard _clipboard;
+	
+	private static DnD _instance = new DnD();
+	
+	public static DnD getInstance() {
+		return _instance;
+	}
+	
+	public LocalClipboard createLocalClipboard() {
+		_clipboard = new LocalClipboard();
+		return _clipboard;
+	}
+	
+	public static LocalClipboard getLocalClipboard() {
+		return _clipboard;
+	}
+	
+	public class LocalClipboard {
+
 		private final Map<DataFormat, Entry<?>> _items = new HashMap<DataFormat, Entry<?>>();
 		
-		private LocalDragboard() {
+		public LocalClipboard() {
+			
 		}
 		
-		public static LocalDragboard getInstance() {
-			return _instance ;
-		}
-		
-		public <T> void putValue(DataFormat key, Class<T> type, T value) {
+		public <T> void put(DataFormat key, Class<T> type, T value) {
 			_items.put(key, new Entry<T>(type, value));
 		}
 		
-		public <T> T getValue(DataFormat key, Class<T> type) {
-			return type.cast(_items.get(type).value);
+		public <T> T get(DataFormat key, Class<T> type) {
+			return type.cast(_items.get(key).value);
 		}
 		
-		public boolean hasKey(DataFormat key) {
+		public boolean hasContent(DataFormat key) {
 			return _items.containsKey(key);
 		}
 		

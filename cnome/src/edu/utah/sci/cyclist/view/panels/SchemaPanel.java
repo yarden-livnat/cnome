@@ -128,7 +128,8 @@ public class SchemaPanel extends TitledPane {
 					@Override
 					public void handle(Event event) {
 						System.out.println("field drag");
-						DnD.LocalDragboard.getInstance().putValue(DnD.FIELD_FORMAT, Field.class, getItem());
+						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+						clipboard.put(DnD.FIELD_FORMAT, Field.class, getItem());
 						
 						Dragboard db = _label.startDragAndDrop(TransferMode.COPY);
 						ClipboardContent content = new ClipboardContent();

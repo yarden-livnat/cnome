@@ -49,6 +49,8 @@ public class GenericTableView extends ViewBase {
 		
 		Schema schema = table.getSchema();
 		
+		_tableView.itemsProperty().unbind();
+		_tableView.getItems().clear();
 		_tableView.getColumns().clear();
 		
 		List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();

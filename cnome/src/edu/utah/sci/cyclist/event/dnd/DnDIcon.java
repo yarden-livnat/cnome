@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.event.dnd;
 
 
 import javafx.event.EventHandler;

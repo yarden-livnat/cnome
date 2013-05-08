@@ -3,13 +3,12 @@ package edu.utah.sci.cyclist.view.components;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
-
-
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -36,7 +35,7 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class ViewBase extends /*VBox*/ BorderPane implements View {
+public class ViewBase extends BorderPane implements View {
 	
 	public static final double EDGE_SIZE = 4;
 	
@@ -52,8 +51,7 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 	private Label _title;
 	private ProgressIndicator _indicator;
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
-	private ObjectProperty<EventHandler<CyclistDropEvent>> datasourceActionProperty = new SimpleObjectProperty<>();
-
+	
 	private boolean _maximized = false;
 	private HBox _actionsArea;
 	private HBox _dataBar;
@@ -62,6 +60,9 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 	private int _maxNumTables = 1;
 	
 	private List<Table> _tables = new ArrayList<>();
+	
+	
+	private Closure.V1<Table> _onTableDrop = null;
 	
 	public ViewBase() {	
 		super();
@@ -92,7 +93,6 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 		setHeaderListeners(header);
 		setDatasourcesListeners();
 		
-		//getChildren().add(header);
 		setTop(header);
 		setListeners();
 	}
@@ -170,22 +170,21 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 	}	
 	
 	/*
-	 * Datasource
+	 * Actions 
 	 */
 	
-	public ObjectProperty<EventHandler<CyclistDropEvent>> onDatasourceActionProperty() {
-		return datasourceActionProperty;
+	public void setOnTableDrop(Closure.V1<Table> action) {
+		_onTableDrop = action;
 	}
 	
-	public EventHandler<CyclistDropEvent> getOnDatasourceAction() {
-		return datasourceActionProperty.get();
+	
+	public DnD.LocalClipboard getLocalClipboard() {
+		return DnD.getInstance().getLocalClipboard();
 	}
 	
-	public void setOnDatasourceAction(EventHandler<CyclistDropEvent> handler) {
-		datasourceActionProperty.set(handler);
-	}	
-	
-	
+	/**
+	 * addTable
+	 */
 	public void addTable(Table table) {
 		if (_tables.contains(table)) {
 			System.out.println("view: already has table");
@@ -202,6 +201,8 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
 		_dataBar.getChildren().add(b);
 	}
+	
+	
 	/*
 	 * Content
 	 */
@@ -209,7 +210,6 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 	protected void setContent(Parent node) {
 		node.setOnMouseMoved(_onMouseMove);
 		
-		//getChildren().add(node);
 		setCenter(node);
 		VBox.setVgrow(node, Priority.NEVER);
 	}
@@ -275,7 +275,6 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 	
 	private void setDatasourcesListeners() {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
-
 			@Override
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
@@ -286,7 +285,6 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 		});
 		
 		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
-
 			@Override
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
@@ -297,7 +295,6 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 		});
 		
 		_dataBar.setOnDragExited(new EventHandler<DragEvent>() {
-
 			@Override
 			public void handle(DragEvent event) {
 				event.consume();
@@ -305,13 +302,12 @@ public class ViewBase extends /*VBox*/ BorderPane implements View {
 		});
 		
 		_dataBar.setOnDragDropped(new EventHandler<DragEvent>() {
-
 			@Override
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
-					String name = (String) event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT);
-					if (getOnDatasourceAction() != null) {
-						getOnDatasourceAction().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, name, event.getX(), event.getY()));
+					Table table = getLocalClipboard().get(DnD.DATA_SOURCE_FORMAT, Table.class);
+					if (_onTableDrop != null) {
+						_onTableDrop.call(table);
 					}
 				}
 				event.setDropCompleted(true);

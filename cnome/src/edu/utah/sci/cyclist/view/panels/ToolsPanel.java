@@ -1,14 +1,10 @@
 package edu.utah.sci.cyclist.view.panels;
 
 import java.util.Collections;
-import javafx.scene.layout.Pane;
 import java.util.Comparator;
 import java.util.List;
 
 import javafx.event.EventHandler;
-import javafx.geometry.Point2D;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
@@ -17,12 +13,11 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import edu.utah.sci.cyclist.view.View;
-import edu.utah.sci.cyclist.view.components.DnDIcon;
-import edu.utah.sci.cyclist.view.tool.Tool;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class ToolsPanel extends TitledPane  {
 	public static final String ID 		= "tools-panel";
@@ -56,14 +51,16 @@ public class ToolsPanel extends TitledPane  {
 			
 			title.setOnDragDetected(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent event) {					
+					
+					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+					clipboard.put(DnD.TOOL_FORMAT, Tool.class, tool);
+					
 					Dragboard db = title.startDragAndDrop(TransferMode.COPY);
-					ClipboardContent content = new ClipboardContent();
-//					
+					ClipboardContent content = new ClipboardContent();				
 					content.put( DnD.TOOL_FORMAT, tool.getName());
 					db.setContent(content);
 					
-					DnDIcon.getInstance().show(icon, title);
-					
+//					DnDIcon.getInstance().show(icon, title);
 					event.consume();
 				}
 			});

@@ -10,6 +10,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.dnd.DnDIcon;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.presenter.TablesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
@@ -19,9 +20,8 @@ import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.components.DnDIcon;
 import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.tool.Tools;
+import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
 import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
 import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
@@ -67,10 +67,10 @@ public class CyclistController {
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
 		sp.setPanel(screen.getSchemaPanel());
 		
-		// Tools panel
+		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
 		tp.setPanel(screen.getToolsPanel());
-		tp.setTools(Arrays.asList(Tools.list));
+		tp.setTools(Arrays.asList(ToolsLibrary.list));
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();

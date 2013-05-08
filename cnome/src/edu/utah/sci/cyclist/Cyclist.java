@@ -3,10 +3,10 @@ package edu.utah.sci.cyclist;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.controller.CyclistController;
+import edu.utah.sci.cyclist.event.dnd.DnDIcon;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.view.MainScreen;
-import edu.utah.sci.cyclist.view.components.DnDIcon;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

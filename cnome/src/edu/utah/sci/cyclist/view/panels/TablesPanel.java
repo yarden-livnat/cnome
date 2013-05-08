@@ -16,7 +16,6 @@ import javafx.util.Callback;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.View;
 
 public class TablesPanel extends TitledPane  {
 	public static final String ID 		= "datasources-panel";
@@ -74,6 +73,10 @@ public class TablesPanel extends TitledPane  {
 
 					@Override
 					public void handle(Event event) {
+						
+						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+						clipboard.put(DnD.DATA_SOURCE_FORMAT, Table.class, TableCell.this.getItem());
+						
 						Dragboard db = TableCell.this.startDragAndDrop(TransferMode.COPY);
 						
 						ClipboardContent content = new ClipboardContent();

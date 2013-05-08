@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.view.components;
 
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.view.View;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,6 +14,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.view.tool.Tool;
 
 //import cyclist.view.event.CyclistDropEvent;
 
@@ -20,6 +23,11 @@ public class Workspace extends ViewBase implements View {
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
+	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
+	
+	public void setOnToolDrop(Closure.V3<Tool, Double, Double> v3) {
+		_onToolDrop = v3;
+	}
 	
 	// -- Properties
 	
@@ -84,15 +92,12 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				System.out.println("dropped on workspace");
 				if (event.getGestureSource() != this) {
-					if (event.getDragboard().hasContent(DnD.TOOL_FORMAT)) {
-						String toolName = (String) event.getDragboard().getContent(DnD.TOOL_FORMAT);
-						
-						onToolDropPropery().get().handle(
-								new CyclistDropEvent(CyclistDropEvent.DROP, toolName, event.getX(), event.getY()));
+					if ( getLocalClipboard().hasContent(DnD.TOOL_FORMAT)) {
+						Tool tool =  getLocalClipboard().get(DnD.TOOL_FORMAT, Tool.class);
+						if (_onToolDrop != null)
+							_onToolDrop.call(tool, event.getX(), event.getY());
 					}
-				
 				}
 				event.setDropCompleted(true);
 				
