@@ -18,7 +18,9 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 import edu.utah.sci.cyclist.view.components.ViewBase;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.tool.GenericTool;
 import edu.utah.sci.cyclist.view.tool.Tool;
+import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
 
 public class WorkspacePresenter extends PresenterBase {
 
@@ -41,16 +43,7 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Tool tool, Double x, Double y) {
-					ViewBase view = (ViewBase) tool.getView();
-					view.setTranslateX(x);
-					view.setTranslateY(y);
-					_workspace.addView(view);
-					
-					Presenter presenter = tool.getPresenter(getEventBus());
-					if (presenter != null) {	
-						_presenters.add(presenter);
-						presenter.setView(view);	
-					}
+					addTool(tool, x, y);
 				}
 			});
 			
@@ -64,47 +57,37 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			});
 			
-//			_workspace.setOnDatasourceAction(new EventHandler<CyclistDropEvent>() {
-//				
-//				@Override
-//				public void handle(CyclistDropEvent event) {
-//					Table table = _model.getTable(event.getName());
-//					_workspace.addTable(table);
-//					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
-//				}
-//			});
-			
-//			_workspace.setOnToolDrop(new EventHandler<CyclistDropEvent>() {
-//				
-//				@Override
-//				public void handle(CyclistDropEvent event) {
-//					try {
-//						String name = event.getName();
-//						Tool tool = ToolsLibrary.getTool(name);
-//						ViewBase view = (ViewBase) tool.getView();
-//						view.setTranslateX(event.getX());
-//						view.setTranslateY(event.getY());
-//						_workspace.addView(view);
-//						
-//						Presenter presenter = tool.getPresenter(getEventBus());
-//						if (presenter != null) {	
-//							_presenters.add(presenter);
-//							presenter.setView(view);
-//						 
-////							mediator.handleNotification(new Notification(ApplicationConstants.MEDIATOR_INIT));
-//						}
-//					} catch (Exception e) {
-////						log.error("Error while creating Tool and Mediator", e);
-//					}
-//				}
-//			});
+			_workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
+
+				@Override
+				public void call(Table table, Double x, Double y) {
+					GenericPresenter presenter = (GenericPresenter) addTool(new GenericTool(), x, y);
+					presenter.addTable(table);
+				}
+			});
 		}
 	}
 	
+		
 	public void run() {
 		// setup event listeners on the bus
 	}
 
+	private Presenter addTool(Tool tool, double x, double y) {
+		ViewBase view = (ViewBase) tool.getView();
+		view.setTranslateX(x);
+		view.setTranslateY(y);
+		_workspace.addView(view);
+		
+		Presenter presenter = tool.getPresenter(getEventBus());
+		if (presenter != null) {	
+			_presenters.add(presenter);
+			presenter.setView(view);	
+		}
+		
+		return presenter;
+	}
+	
 	private void addListeners() {
 		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {
 			

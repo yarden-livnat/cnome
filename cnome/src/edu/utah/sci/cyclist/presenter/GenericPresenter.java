@@ -25,7 +25,7 @@ public class GenericPresenter extends PresenterBase {
 			
 			@Override
 			public void call(Table table) {
-				getView().addTable(table);
+				addTable(table);
 			}
 		});
 	}
@@ -36,8 +36,12 @@ public class GenericPresenter extends PresenterBase {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getView().addTable(notification.getTable());			
+				addTable(notification.getTable());			
 			}
 		});
+	}
+	
+	public void addTable(Table table) {
+		getView().addTable(table);
 	}
 }

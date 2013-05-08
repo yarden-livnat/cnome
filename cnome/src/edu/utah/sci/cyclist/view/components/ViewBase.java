@@ -57,8 +57,7 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private final Resize resize = new Resize();
 	
-	private int _maxNumTables = 1;
-	
+	private int _maxNumTables = 1;	
 	private List<Table> _tables = new ArrayList<>();
 	
 	
