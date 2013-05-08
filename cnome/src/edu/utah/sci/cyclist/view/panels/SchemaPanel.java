@@ -13,7 +13,6 @@ import javafx.scene.control.ListViewBuilder;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.TitledPane;
-import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -35,7 +34,6 @@ public class SchemaPanel extends TitledPane {
 		build();
 	}
 	
-//	@Override
 	public void setTitle(String title) {
 		setTitle(title);
 	}
@@ -118,20 +116,19 @@ public class SchemaPanel extends TitledPane {
 				super.updateItem(field, empty);	
 				
 				if (field != null) {
-					_label.setText(field.getName()+":"+field.getDataTypeName());
+					_label.setText(field.getName());
 				} else {
 					_label.setText("");
 				}
 			}
 			
 			private void addListeners() {
-				System.out.println("field add listener");
 				_label.setOnDragDetected(new EventHandler<Event>() {
 
 					@Override
 					public void handle(Event event) {
 						System.out.println("field drag");
-						DnD.LocalDragboard.getInstance().putValue(Field.class, getItem());
+						DnD.LocalDragboard.getInstance().putValue(DnD.FIELD_FORMAT, Field.class, getItem());
 						
 						Dragboard db = _label.startDragAndDrop(TransferMode.COPY);
 						ClipboardContent content = new ClipboardContent();

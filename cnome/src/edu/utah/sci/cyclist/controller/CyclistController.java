@@ -52,9 +52,7 @@ public class CyclistController {
 		this._screen = screen;
 		screen.setControler(this);
 		addActions();
-		
-		DnDIcon.getInstance().setRoot(screen);
-		
+			
 		/*
 		 *  wire panels
 		 */

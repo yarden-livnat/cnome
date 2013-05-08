@@ -1,10 +1,14 @@
 package edu.utah.sci.cyclist.view.panels;
 
 import java.util.Collections;
+import javafx.scene.layout.Pane;
 import java.util.Comparator;
 import java.util.List;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
@@ -16,6 +20,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import edu.utah.sci.cyclist.view.View;
+import edu.utah.sci.cyclist.view.components.DnDIcon;
 import edu.utah.sci.cyclist.view.tool.Tool;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 
@@ -24,6 +29,9 @@ public class ToolsPanel extends TitledPane  {
 	public static final String TITLE	= "Views";
 	
 	private VBox _vbox;
+	
+	public ImageView dragView = new ImageView();
+	public Pane root;
 	
 	public ToolsPanel() {
 		build();
@@ -34,7 +42,7 @@ public class ToolsPanel extends TitledPane  {
 		setText(title);
 	}
 
-	public void setTools(List<Tool> tools) {
+	public void setTools(List<Tool> tools) {		
 		Collections.sort(tools, new Comparator<Tool>() {
 			public int compare(Tool a, Tool b) {
 				return a.getName().compareTo(b.getName());
@@ -47,14 +55,14 @@ public class ToolsPanel extends TitledPane  {
 			title.getStyleClass().add("tools-entry");
 			
 			title.setOnDragDetected(new EventHandler<MouseEvent>() {
-				public void handle(MouseEvent event) {
+				public void handle(MouseEvent event) {					
 					Dragboard db = title.startDragAndDrop(TransferMode.COPY);
-					
 					ClipboardContent content = new ClipboardContent();
-					
+//					
 					content.put( DnD.TOOL_FORMAT, tool.getName());
-					content.putImage(icon);
 					db.setContent(content);
+					
+					DnDIcon.getInstance().show(icon, title);
 					
 					event.consume();
 				}

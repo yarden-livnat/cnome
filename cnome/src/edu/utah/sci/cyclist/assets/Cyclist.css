@@ -6,6 +6,10 @@
 }
 
 
+.glass {
+	-fx-background-color: rgb(50, 50, 50, 0.5);
+}
+
 .workspace-pane {
 	/*-fx-background-color: #f04590;*/
 }

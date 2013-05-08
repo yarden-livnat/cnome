@@ -89,6 +89,7 @@ public class WorkspacePresenter extends PresenterBase {
 					if (presenter.getId().equals(id)) {
 						_presenters.remove(presenter);
 						_workspace.removeView((ViewBase)presenter.getView());
+						break;
 					}
 				}
 				
