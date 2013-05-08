@@ -20,9 +20,16 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.components.Spring;
 import edu.utah.sci.cyclist.view.components.TablesPanel;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.panels.SchemaPanel;
+import edu.utah.sci.cyclist.view.panels.TablesPanel;
+import edu.utah.sci.cyclist.view.panels.ToolsPanel;
+import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
+import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 import edu.utah.sci.cyclist.view.wizard.WorkspaceWizard;
 
 public class MainScreen extends VBox {
@@ -32,6 +39,8 @@ public class MainScreen extends VBox {
 	private VBox _toolsArea;
 	private HBox _content;
 	private TablesPanel _datasourcesPanel;
+	private SchemaPanel _schemaPanel;
+	private ToolsPanel _toolsPanel;
 	
 	private CyclistController _controller;
 	
@@ -70,6 +79,13 @@ public class MainScreen extends VBox {
 		return _datasourcesPanel;
 	}
 	
+	public SchemaPanel getSchemaPanel() {
+		return _schemaPanel;
+	}
+	
+	public ToolsPanel getToolsPanel() {
+		return _toolsPanel;
+	}
 	
 	private void init(Stage stage){
 		// create the screen
@@ -81,11 +97,12 @@ public class MainScreen extends VBox {
 		// -- tables and schema
 		_toolsArea = VBoxBuilder.create()
 				.spacing(5)
-				.prefWidth(150)
+				.prefWidth(100)
 				.padding(new Insets(5))
 				.children(
 						_datasourcesPanel = new TablesPanel(),					
-						// schema
+						_schemaPanel = new SchemaPanel(),
+						_toolsPanel = new ToolsPanel(),
 						new Spring()	
 						)
 				.build();

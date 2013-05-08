@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.view.panels;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.ObservableList;
@@ -16,9 +16,8 @@ import javafx.util.Callback;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.View;
 
-public class TablesPanel extends TitledPane implements View {
+public class TablesPanel extends TitledPane  {
 	public static final String ID 		= "datasources-panel";
 	public static final String TITLE	= "Tables";
 	
@@ -28,7 +27,7 @@ public class TablesPanel extends TitledPane implements View {
 		build();
 	}
 	
-	@Override
+//	@Override
 	public void setTitle(String title) {
 		setTitle(title);
 	}
@@ -39,8 +38,8 @@ public class TablesPanel extends TitledPane implements View {
 	}
 	
 	
-	public ReadOnlyObjectProperty<Table> focusedItemProperty() {
-		return _tables.getFocusModel().focusedItemProperty();
+	public ReadOnlyObjectProperty<Table> selectedItemProperty() {
+		return _tables.getSelectionModel().selectedItemProperty();
 	}
 	
 	private void build() {
@@ -59,7 +58,7 @@ public class TablesPanel extends TitledPane implements View {
 				return new TableCell();
 			}
 		});
-				
+			
 		setContent(_tables);
 	}
 	
@@ -74,6 +73,10 @@ public class TablesPanel extends TitledPane implements View {
 
 					@Override
 					public void handle(Event event) {
+						
+						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+						clipboard.put(DnD.DATA_SOURCE_FORMAT, Table.class, TableCell.this.getItem());
+						
 						Dragboard db = TableCell.this.startDragAndDrop(TransferMode.COPY);
 						
 						ClipboardContent content = new ClipboardContent();
@@ -83,7 +86,6 @@ public class TablesPanel extends TitledPane implements View {
 						
 						db.setContent(content);
 						
-						System.out.println("dnd: "+TableCell.this.getItem().getName());
 						event.consume();
 					}
 				});

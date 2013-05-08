@@ -1,24 +1,28 @@
-package edu.utah.sci.cyclist.view.components;
-
-import java.util.ArrayList;
-import java.util.List;
+package edu.utah.sci.cyclist.view.panels;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.util.Callback;
+import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Schema;
-import edu.utah.sci.cyclist.view.View;
-import javafx.scene.control.ListView;
-import javafx.scene.control.cell.TextFieldListCell;
-import javafx.util.Callback;
 
-public class SchemaPanel extends TitledPane implements View {
+public class SchemaPanel extends TitledPane {
 	public static final String ID 		= "schema-panel";
 	public static final String TITLE	= "Schema";
 	
@@ -30,7 +34,6 @@ public class SchemaPanel extends TitledPane implements View {
 		build();
 	}
 	
-	@Override
 	public void setTitle(String title) {
 		setTitle(title);
 	}
@@ -65,6 +68,8 @@ public class SchemaPanel extends TitledPane implements View {
 		setText(TITLE);
 		
 		SplitPane pane = SplitPaneBuilder.create()
+				.maxHeight(150)
+				.orientation(Orientation.VERTICAL)
 				.items(
 						_dimensionsView = ListViewBuilder.<Field>create()
 								.prefWidth(100)
@@ -84,19 +89,57 @@ public class SchemaPanel extends TitledPane implements View {
 			}
 		});
 		
+		_measuresView.setCellFactory(new Callback<ListView<Field>, ListCell<Field>>() {
+			
+			@Override
+			public ListCell<Field> call(ListView<Field> param) {
+				return new FieldCell();
+			}
+		});
+		
 		setContent(pane);
 	}
 	
-	class FieldCell extends TextFieldListCell<Field> {		
+	class FieldCell extends ListCell<Field> {
+			private Label _label;
+			
+			public FieldCell() {
+				_label = new Label("");
+				_label.setAlignment(Pos.CENTER_LEFT);
+				setGraphic(_label);
+				
+				addListeners();
+			}
+			
 			@Override
 			public void updateItem(Field field, boolean empty) {
 				super.updateItem(field, empty);	
 				
 				if (field != null) {
-					setText(field.getDataType()+":"+field.getDataType());
+					_label.setText(field.getName());
 				} else {
-					setText("");
+					_label.setText("");
 				}
+			}
+			
+			private void addListeners() {
+				_label.setOnDragDetected(new EventHandler<Event>() {
+
+					@Override
+					public void handle(Event event) {
+						System.out.println("field drag");
+						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+						clipboard.put(DnD.FIELD_FORMAT, Field.class, getItem());
+						
+						Dragboard db = _label.startDragAndDrop(TransferMode.COPY);
+						ClipboardContent content = new ClipboardContent();
+						content.putString("Test");
+						content.put(DnD.FIELD_FORMAT, getItem().getName());
+						db.setContent(content);
+						
+						event.consume();
+					}
+				});
 			}
 	}
 }

@@ -1,6 +1,8 @@
 package edu.utah.sci.cyclist;
 
+import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,8 +45,9 @@ public class Resources {
 				is = Resources.class.getResourceAsStream(ICONS_DIR+UNKNOWN_ICON);
 			if (width > 0)
 				image = new Image(is, width, height, true, true);
-			else
+			else 
 				image = new Image(is);
+			
 			_icons.put(fullname, image);
 		}
 		return image;

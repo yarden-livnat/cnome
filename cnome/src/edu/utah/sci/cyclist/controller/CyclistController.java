@@ -17,15 +17,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.dnd.DnDIcon;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
+import edu.utah.sci.cyclist.presenter.TablesPresenter;
+import edu.utah.sci.cyclist.presenter.SchemaPresenter;
+import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.view.components.DnDIcon;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Model;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
+import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
 import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
 
@@ -59,14 +68,25 @@ public class CyclistController {
 		this._screen = screen;
 		screen.setControler(this);
 		addActions();
+			
+		/*
+		 *  wire panels
+		 */
 		
-		DnDIcon.getInstance().setRoot(screen);
-		
-		// wire panels
-		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
+		// Tables panel
+		TablesPresenter ds = new TablesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
-		ds.setView(screen.getDatasourcesPanel());
+		ds.setPanel(screen.getDatasourcesPanel());
+		
+		// Schema panel
+		SchemaPresenter sp = new SchemaPresenter(_eventBus);
+		sp.setPanel(screen.getSchemaPanel());
+		
+		// ToolsLibrary panel
+		ToolsPresenter tp = new ToolsPresenter(_eventBus);
+		tp.setPanel(screen.getToolsPanel());
+		tp.setTools(Arrays.asList(ToolsLibrary.list));
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();

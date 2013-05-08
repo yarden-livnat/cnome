@@ -1,36 +1,103 @@
 package edu.utah.sci.cyclist.presenter;
 
-import javafx.event.EventHandler;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mo.closure.v1.Closure;
+
+import edu.utah.sci.cyclist.event.notification.CyclistNotification;
+import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
+import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
+import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
+import edu.utah.sci.cyclist.view.components.ViewBase;
 import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.tool.Tool;
 
-public class WorkspacePresenter implements Presenter {
+public class WorkspacePresenter extends PresenterBase {
 
 	private Workspace _workspace;
-	private EventBus _eventBus;
 	private Model _model;
+	private List<Presenter> _presenters = new ArrayList<>();
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
-		_eventBus = bus;
+		super(bus);
 		_model = model;
+		
+		addListeners();
 	}
+	
 	public void setView(View workspace) {
 		if (workspace instanceof Workspace) {
 			_workspace = (Workspace) workspace;
 			
-			_workspace.setOnDatasourceAction(new EventHandler<CyclistDropEvent>() {
-				
+			_workspace.setOnToolDrop(new Closure.V3<Tool, Double, Double>() {
+
 				@Override
-				public void handle(CyclistDropEvent event) {
-					Table table = _model.getTable(event.getName());
-					_workspace.addTable(table);
+				public void call(Tool tool, Double x, Double y) {
+					ViewBase view = (ViewBase) tool.getView();
+					view.setTranslateX(x);
+					view.setTranslateY(y);
+					_workspace.addView(view);
 					
+					Presenter presenter = tool.getPresenter(getEventBus());
+					if (presenter != null) {	
+						_presenters.add(presenter);
+						presenter.setView(view);	
+					}
 				}
 			});
+			
+			_workspace.setOnTableDrop(new Closure.V1<Table>() {
+
+				@Override
+				public void call(Table table) {
+					_workspace.addTable(table);
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));				
+				}
+				
+			});
+			
+//			_workspace.setOnDatasourceAction(new EventHandler<CyclistDropEvent>() {
+//				
+//				@Override
+//				public void handle(CyclistDropEvent event) {
+//					Table table = _model.getTable(event.getName());
+//					_workspace.addTable(table);
+//					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
+//				}
+//			});
+			
+//			_workspace.setOnToolDrop(new EventHandler<CyclistDropEvent>() {
+//				
+//				@Override
+//				public void handle(CyclistDropEvent event) {
+//					try {
+//						String name = event.getName();
+//						Tool tool = ToolsLibrary.getTool(name);
+//						ViewBase view = (ViewBase) tool.getView();
+//						view.setTranslateX(event.getX());
+//						view.setTranslateY(event.getY());
+//						_workspace.addView(view);
+//						
+//						Presenter presenter = tool.getPresenter(getEventBus());
+//						if (presenter != null) {	
+//							_presenters.add(presenter);
+//							presenter.setView(view);
+//						 
+////							mediator.handleNotification(new Notification(ApplicationConstants.MEDIATOR_INIT));
+//						}
+//					} catch (Exception e) {
+////						log.error("Error while creating Tool and Mediator", e);
+//					}
+//				}
+//			});
 		}
 	}
 	
@@ -38,5 +105,22 @@ public class WorkspacePresenter implements Presenter {
 		// setup event listeners on the bus
 	}
 
+	private void addListeners() {
+		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				String id = ((SimpleNotification)event).getMsg();
+				for (Presenter presenter : _presenters) {
+					if (presenter.getId().equals(id)) {
+						_presenters.remove(presenter);
+						_workspace.removeView((ViewBase)presenter.getView());
+						break;
+					}
+				}
+				
+			}
+		});
+	}
 	
 }

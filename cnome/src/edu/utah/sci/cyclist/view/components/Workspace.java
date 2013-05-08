@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.view.components;
 
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.view.View;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -10,53 +12,68 @@ import javafx.geometry.Insets;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
-//import cyclist.model.vo.DnD;
+import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.view.tool.Tool;
+
 //import cyclist.view.event.CyclistDropEvent;
 
 public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
-		
+	
+	private Pane _pane;
+	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
+	
+	public void setOnToolDrop(Closure.V3<Tool, Double, Double> v3) {
+		_onToolDrop = v3;
+	}
+	
 	// -- Properties
 	
 	// OnToolDrop
-//	private ObjectProperty<EventHandler<CyclistDropEvent>> _propertyOnToolDrop = new SimpleObjectProperty<EventHandler<CyclistDropEvent>>();
-//	
-//	public final ObjectProperty<EventHandler<CyclistDropEvent>> onToolDropPropery() {
-//		return _propertyOnToolDrop;
-//	}
-//	
-//	public final void setOnToolDrop(EventHandler<CyclistDropEvent> eventHandler) {
-//		_propertyOnToolDrop.set(eventHandler);
-//	}
-//	
-//	public final EventHandler<CyclistDropEvent> getOnToolDrop() {
-//		return _propertyOnToolDrop.get();
-//	}
+	private ObjectProperty<EventHandler<CyclistDropEvent>> _propertyOnToolDrop = new SimpleObjectProperty<EventHandler<CyclistDropEvent>>();
+	
+	public final ObjectProperty<EventHandler<CyclistDropEvent>> onToolDropPropery() {
+		return _propertyOnToolDrop;
+	}
+	
+	public final void setOnToolDrop(EventHandler<CyclistDropEvent> eventHandler) {
+		_propertyOnToolDrop.set(eventHandler);
+	}
+	
+	public final EventHandler<CyclistDropEvent> getOnToolDrop() {
+		return _propertyOnToolDrop.get();
+	}
 	
 	
 	/**
 	 * Constructor
 	 */
 	public Workspace() {
+		super();
 		getStyleClass().add("workspace");
+		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
 
+		_pane = new Pane();
+		_pane.getStyleClass().add("workspace-pane");
+		
+		setContent(_pane);
+		
 		final Workspace workspace = this;
 		
-//		setOnDragOver(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {
-////				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
-////				System.out.println("gesture \n\tsrc:"+event.getGestureSource()+"\n\ttarget: "+event.getGestureTarget());
-//				if (event.getGestureSource() != workspace && 
-//					event.getDragboard().getContent(DnD.TOOL_FORMAT) != null) 
-//				{
-//					event.acceptTransferModes(TransferMode.COPY);
-//				} 
-//				
-//				event.consume();
-//			}
-//		});	
+		setOnDragOver(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				if (event.getGestureSource() != workspace && 
+					event.getDragboard().getContent(DnD.TOOL_FORMAT) != null) 
+				{
+					event.acceptTransferModes(TransferMode.COPY);
+				} 
+				
+				event.consume();
+			}
+		});	
 		
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
@@ -73,23 +90,20 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
-//		setOnDragDropped(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {
-////				System.out.println("dropped on workspace");
-//				if (event.getGestureSource() != this) {
-//					if (event.getDragboard().hasContent(DnD.TOOL_FORMAT)) {
-//						String toolName = (String) event.getDragboard().getContent(DnD.TOOL_FORMAT);
-//						
-//						onToolDropPropery().get().handle(
-//								new CyclistDropEvent(CyclistDropEvent.DROP, toolName, event.getX(), event.getY()));
-//					}
-//				
-//				}
-//				event.setDropCompleted(true);
-//				
-//				event.consume();
-//			}
-//		});
+		setOnDragDropped(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				if (event.getGestureSource() != this) {
+					if ( getLocalClipboard().hasContent(DnD.TOOL_FORMAT)) {
+						Tool tool =  getLocalClipboard().get(DnD.TOOL_FORMAT, Tool.class);
+						if (_onToolDrop != null)
+							_onToolDrop.call(tool, event.getX(), event.getY());
+					}
+				}
+				event.setDropCompleted(true);
+				
+				event.consume();
+			}
+		});
 		
 	}
 	
@@ -99,7 +113,7 @@ public class Workspace extends ViewBase implements View {
 	}
 	
 	public void addView(final ViewBase view) {
-		getChildren().add(view);
+		_pane.getChildren().add(view);
 		
 		view.setOnSelect(new EventHandler<ActionEvent>() {
 			@Override
@@ -136,11 +150,16 @@ public class Workspace extends ViewBase implements View {
 					
 			}
 		});
+		
 	}
 	
+	/**
+	 * will be called by the workspace presenter
+	 * @param view
+	 */
 	public void removeView(ViewBase view) {
 		view.setOnSelect(null);
-		getChildren().remove(view);
+		_pane.getChildren().remove(view);
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

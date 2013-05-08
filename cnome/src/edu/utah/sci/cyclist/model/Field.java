@@ -67,8 +67,8 @@ public class Field {
 	}
 
 
-	public String getDataType() {
-		return (String) _properties.get(FieldProperties.DATA_TYPE);
+	public String getDataTypeName() {
+		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
 	}
 
 	public void set(String property, Object value) {
@@ -86,6 +86,8 @@ public class Field {
 	public int getInt(String property) {
 		return (int) get(property);
 	}
-
-
+	
+	public String toString() {
+		return _name;
+	}
 }
