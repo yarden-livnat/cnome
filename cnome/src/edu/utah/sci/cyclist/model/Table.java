@@ -1,9 +1,19 @@
 package edu.utah.sci.cyclist.model;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 
 public class Table {
 
@@ -14,7 +24,7 @@ public class Table {
 	private Schema _schema = new Schema();
 	private Map<String, Object> _properties = new HashMap<>();
 
-	private List<TableRow> _rows = new ArrayList<>();
+	private List<Row> _rows = new ArrayList<>();
 
 	public Table() {
 		this("");
@@ -106,15 +116,57 @@ public class Table {
 	}
 
 
-	public void addRow(TableRow row) {
+	public void addRow(Row row) {
 		_rows.add(row);
 	}
 
-	public List<TableRow> getRows() {
+	public List<Row> getRows() {
 		return _rows;
 	}
 
-	public TableRow getRow(int index) {
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+
+			@Override
+			protected ObservableList<Row> call() throws Exception {
+				List<Row> rows = new ArrayList<>();
+				try {
+					Connection conn = ds.getConnection();
+					String query = GET_ROWS_QUERY.replace("$table", getName());
+					PreparedStatement stmt = conn.prepareStatement(query);
+					stmt.setInt(1, n);
+					
+					ResultSet rs = stmt.executeQuery();
+					ResultSetMetaData rmd = rs.getMetaData();
+					
+					int cols = rmd.getColumnCount();
+					while (rs.next()) {
+						Row row = new Row(cols);
+						for (int i=0; i<cols; i++) {
+							row.value[i] = rs.getObject(i+1);
+						}
+						rows.add(row);
+					}
+				}catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				return FXCollections.observableList(rows);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task.valueProperty();
+	}
+	
+	public Row getRow(int index) {
 		return _rows.get(index);
 	}
 
@@ -122,13 +174,13 @@ public class Table {
 		_rows.clear();
 	}
 	
-	public class TableRow  {
+	public class Row  {
 		public Object[] value;
 
-		public TableRow(int size) {
+		public Row(int size) {
 			value = new Object[size];
 		}
 	}
 
-	
+	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
 }

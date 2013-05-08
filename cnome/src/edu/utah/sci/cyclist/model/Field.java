@@ -37,4 +37,8 @@ public class Field {
 	public int getInt(String property) {
 		return (int) get(property);
 	}
+	
+	public String toString() {
+		return _name;
+	}
 }

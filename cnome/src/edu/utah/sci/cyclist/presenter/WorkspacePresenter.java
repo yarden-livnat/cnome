@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.notification.CyclistNotification;
+import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
@@ -27,6 +30,8 @@ public class WorkspacePresenter extends PresenterBase {
 	public WorkspacePresenter(EventBus bus, Model model) {
 		super(bus);
 		_model = model;
+		
+		addListeners();
 	}
 	
 	public void setView(View workspace) {
@@ -74,5 +79,21 @@ public class WorkspacePresenter extends PresenterBase {
 		// setup event listeners on the bus
 	}
 
+	private void addListeners() {
+		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				String id = ((SimpleNotification)event).getMsg();
+				for (Presenter presenter : _presenters) {
+					if (presenter.getId().equals(id)) {
+						_presenters.remove(presenter);
+						_workspace.removeView((ViewBase)presenter.getView());
+					}
+				}
+				
+			}
+		});
+	}
 	
 }

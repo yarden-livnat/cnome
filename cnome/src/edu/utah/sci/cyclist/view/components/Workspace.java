@@ -43,7 +43,9 @@ public class Workspace extends ViewBase implements View {
 	 * Constructor
 	 */
 	public Workspace() {
+		super();
 		getStyleClass().add("workspace");
+		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
 
 		_pane = new Pane();
@@ -55,8 +57,6 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
-//				System.out.println("gesture \n\tsrc:"+event.getGestureSource()+"\n\ttarget: "+event.getGestureTarget());
 				if (event.getGestureSource() != workspace && 
 					event.getDragboard().getContent(DnD.TOOL_FORMAT) != null) 
 				{
@@ -69,14 +69,14 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
-				System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
+//				System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
 				event.consume();
 			}
 		});
 		
 		setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				System.out.println("worspace exit");
+//				System.out.println("worspace exit");
 				// do nothing
 				event.consume();
 			}
@@ -84,7 +84,7 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				System.out.println("dropped on workspace");
+//				System.out.println("dropped on workspace");
 				if (event.getGestureSource() != this) {
 					if (event.getDragboard().hasContent(DnD.TOOL_FORMAT)) {
 						String toolName = (String) event.getDragboard().getContent(DnD.TOOL_FORMAT);
@@ -146,18 +146,15 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
-		view.setOnClose(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent event) {
-				removeView(view);
-			}
-		});
 	}
 	
+	/**
+	 * will be called by the workspace presenter
+	 * @param view
+	 */
 	public void removeView(ViewBase view) {
 		view.setOnSelect(null);
-		getChildren().remove(view);
+		_pane.getChildren().remove(view);
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

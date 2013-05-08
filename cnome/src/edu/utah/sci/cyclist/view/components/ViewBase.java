@@ -30,12 +30,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class ViewBase extends VBox implements View {
+public class ViewBase extends /*VBox*/ BorderPane implements View {
 	
 	public static final double EDGE_SIZE = 4;
 	
@@ -79,7 +80,8 @@ public class ViewBase extends VBox implements View {
 					_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
 					_dataBar = HBoxBuilder.create()
 						.id("databar")
-						.minWidth(30)
+						.styleClass("data-bar")
+						.minWidth(20)
 						.build(),
 					new Spring(),
 					_actionsArea = new HBox(),
@@ -90,8 +92,8 @@ public class ViewBase extends VBox implements View {
 		setHeaderListeners(header);
 		setDatasourcesListeners();
 		
-		getChildren().add(header);
-		
+		//getChildren().add(header);
+		setTop(header);
 		setListeners();
 	}
 	
@@ -189,11 +191,14 @@ public class ViewBase extends VBox implements View {
 			System.out.println("view: already has table");
 			return;
 		}
-		if (_tables.size() < _maxNumTables)
-			_tables.add(table);
-		else {
-			_tables.set(_maxNumTables-1, table);
-		}
+//		if (_tables.size() < _maxNumTables)
+//			_tables.add(table);
+//		else {
+//			_tables.set(_maxNumTables-1, table);
+//		}
+		_tables.clear();
+		_tables.add(table);
+		_dataBar.getChildren().clear();
 		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
 		_dataBar.getChildren().add(b);
 	}
@@ -204,7 +209,8 @@ public class ViewBase extends VBox implements View {
 	protected void setContent(Parent node) {
 		node.setOnMouseMoved(_onMouseMove);
 		
-		getChildren().add(node);
+		//getChildren().add(node);
+		setCenter(node);
 		VBox.setVgrow(node, Priority.NEVER);
 	}
 	

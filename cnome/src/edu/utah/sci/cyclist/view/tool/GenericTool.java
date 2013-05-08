@@ -12,12 +12,12 @@ public class GenericTool implements Tool {
 
 	@Override
 	public Image getIcon() {
-		return Resources.getIcon("table");	
+		return Resources.getIcon("table", 16, 16);	
 	}
 
 	@Override
 	public String getName() {
-		return "view";
+		return "Table";
 	}
 
 	@Override

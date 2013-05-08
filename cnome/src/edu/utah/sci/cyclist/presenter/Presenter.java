@@ -7,6 +7,7 @@ import edu.utah.sci.cyclist.view.View;
 public abstract interface Presenter {
 	String getId();
 	EventBus getEventBus();
-	abstract void setView(final View view);
-	abstract void broadcast(CyclistNotification notification);
+	void setView(final View view);
+	View getView();
+	void broadcast(CyclistNotification notification);
 }

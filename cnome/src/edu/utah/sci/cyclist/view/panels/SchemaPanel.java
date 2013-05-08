@@ -2,7 +2,11 @@ package edu.utah.sci.cyclist.view.panels;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
@@ -10,7 +14,11 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
+import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Schema;
@@ -94,16 +102,46 @@ public class SchemaPanel extends TitledPane {
 		setContent(pane);
 	}
 	
-	class FieldCell extends TextFieldListCell<Field> {		
+	class FieldCell extends ListCell<Field> {
+			private Label _label;
+			
+			public FieldCell() {
+				_label = new Label("");
+				_label.setAlignment(Pos.CENTER_LEFT);
+				setGraphic(_label);
+				
+				addListeners();
+			}
+			
 			@Override
 			public void updateItem(Field field, boolean empty) {
 				super.updateItem(field, empty);	
 				
 				if (field != null) {
-					setText(field.getName()+":"+field.getDataTypeName());
+					_label.setText(field.getName()+":"+field.getDataTypeName());
 				} else {
-					setText("");
+					_label.setText("");
 				}
+			}
+			
+			private void addListeners() {
+				System.out.println("field add listener");
+				_label.setOnDragDetected(new EventHandler<Event>() {
+
+					@Override
+					public void handle(Event event) {
+						System.out.println("field drag");
+						DnD.LocalDragboard.getInstance().putValue(Field.class, getItem());
+						
+						Dragboard db = _label.startDragAndDrop(TransferMode.COPY);
+						ClipboardContent content = new ClipboardContent();
+						content.putString("Test");
+						content.put(DnD.FIELD_FORMAT, getItem().getName());
+						db.setContent(content);
+						
+						event.consume();
+					}
+				});
 			}
 	}
 }
