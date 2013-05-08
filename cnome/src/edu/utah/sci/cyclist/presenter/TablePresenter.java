@@ -10,9 +10,9 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 
-public class GenericPresenter extends PresenterBase {
+public class TablePresenter extends PresenterBase {
 	
-	public GenericPresenter(EventBus bus) {
+	public TablePresenter(EventBus bus) {
 		super(bus);
 		
 		addNotificationHandlers();
@@ -25,7 +25,7 @@ public class GenericPresenter extends PresenterBase {
 			
 			@Override
 			public void call(Table table) {
-				addTable(table);
+				addTable(table, true);
 			}
 		});
 	}
@@ -36,12 +36,12 @@ public class GenericPresenter extends PresenterBase {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				addTable(notification.getTable());			
+				addTable(notification.getTable(), false);			
 			}
 		});
 	}
 	
-	public void addTable(Table table) {
-		getView().addTable(table);
+	public void addTable(Table table, boolean local) {
+		getView().addTable(table, local);
 	}
 }

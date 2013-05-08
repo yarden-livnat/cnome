@@ -12,7 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.dnd.DnDIcon;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.TablesPresenter;
+import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
@@ -58,7 +58,7 @@ public class CyclistController {
 		 */
 		
 		// Tables panel
-		TablesPresenter ds = new TablesPresenter(_eventBus);
+		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
 		ds.setPanel(screen.getDatasourcesPanel());

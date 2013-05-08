@@ -12,9 +12,12 @@ import edu.utah.sci.cyclist.view.View;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
@@ -25,6 +28,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
+import javafx.scene.control.SeparatorBuilder;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
@@ -59,7 +65,8 @@ public class ViewBase extends BorderPane implements View {
 	
 	private int _maxNumTables = 1;	
 	private List<Table> _tables = new ArrayList<>();
-	
+	private List<DatasourceInfo> _workspaceDatasources = new ArrayList<>();
+	private List<DatasourceInfo> _localDatasources = new ArrayList<>();
 	
 	private Closure.V1<Table> _onTableDrop = null;
 	
@@ -82,6 +89,13 @@ public class ViewBase extends BorderPane implements View {
 						.id("databar")
 						.styleClass("data-bar")
 						.minWidth(20)
+						.children(
+								SeparatorBuilder.create()
+									.prefWidth(1)
+									.style("-fx-background-color:  #a0a0a0")
+									.orientation(Orientation.VERTICAL)
+									.build()
+								)
 						.build(),
 					new Spring(),
 					_actionsArea = new HBox(),
@@ -201,6 +215,30 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.getChildren().add(b);
 	}
 	
+	public void addTable(Table table, boolean local) {
+		final DatasourceInfo info = new DatasourceInfo(table);
+		if (local) {
+			info.button = ToggleButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
+			_localDatasources.add(info);
+			_dataBar.getChildren().add(info.button);
+		} else {
+			info.button = ToggleButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
+			_workspaceDatasources.add(info);
+			_dataBar.getChildren().add(_workspaceDatasources.size(), info.button);
+		}
+		info.button.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				datasourceStatusChanged(info, newValue);
+				
+			}
+		});
+	}
+	
+	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
+		System.out.println("status: "+active);
+	}
 	
 	/*
 	 * Content
@@ -427,6 +465,18 @@ public class ViewBase extends BorderPane implements View {
 		public double height;
 		public double sceneX;
 		public double sceneY;
+	}
+	
+	public class DatasourceInfo {
+		public Table table;
+		public boolean active;
+		public ToggleButton button;
+		
+		public DatasourceInfo(Table table) {
+			this.table = table;
+			active = false;
+			button = null;
+		}
 	}
 }
 

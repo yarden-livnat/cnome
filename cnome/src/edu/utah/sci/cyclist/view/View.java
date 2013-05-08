@@ -14,4 +14,5 @@ public interface View {
 	void setOnTableDrop(Closure.V1<Table> action);
 	
 	void addTable(Table table);
+	void addTable(Table table, boolean local);
 }

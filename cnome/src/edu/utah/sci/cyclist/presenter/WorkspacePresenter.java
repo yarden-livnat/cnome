@@ -61,8 +61,8 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Table table, Double x, Double y) {
-					GenericPresenter presenter = (GenericPresenter) addTool(new GenericTool(), x, y);
-					presenter.addTable(table);
+					TablePresenter presenter = (TablePresenter) addTool(new GenericTool(), x, y);
+					presenter.addTable(table, true);
 				}
 			});
 		}
