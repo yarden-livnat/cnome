@@ -310,10 +310,10 @@ public class DatatableWizard extends VBox {
 			System.out.println(rmd.getColumnCount());
 			while (rs.next()) {
 				_tablesView.getItems().add(rs.getString(3));
-				for (int i=1; i<=rmd.getColumnCount(); i++) {
-					System.out.print(": "+rs.getString(i));
-				}
-				System.out.println();
+				//for (int i=1; i<=rmd.getColumnCount(); i++) {
+				//	System.out.print(": "+rs.getString(i));
+			//	}
+			//	System.out.println();
 			}
 			
 		} catch (Exception e) {
@@ -336,9 +336,9 @@ public class DatatableWizard extends VBox {
 			ResultSet rs = md.getColumns(null, null, name, null);
 			ResultSetMetaData rmd = rs.getMetaData();
 			while (rs.next()) {
-				for (int i=1; i<=rmd.getColumnCount(); i++) {
-					System.out.print(": "+rs.getString(i));
-				}
+				//for (int i=1; i<=rmd.getColumnCount(); i++) {
+			//		System.out.print(": "+rs.getString(i));
+		//		}
 				System.out.println();
 				String colName = rs.getString("COLUMN_NAME");
 				Field field = new Field(colName);

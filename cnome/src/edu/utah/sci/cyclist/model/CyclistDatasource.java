@@ -14,11 +14,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import javax.sql.DataSource;
-import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.controller.XMLMemento;
 
 public class CyclistDatasource implements DataSource {
@@ -26,18 +23,46 @@ public class CyclistDatasource implements DataSource {
 	private transient PrintWriter _logger;
 	private String _url;
 	private boolean _ready = false;
-	private XMLMemento _memento;
 	
 	
 	public CyclistDatasource() {
-					 
-		_memento = XMLMemento.createWriteRoot("CyclistDatasource");
-		_memento.putString("class", "CyclistDatasource");
-		_memento.putString("uid", UUID.randomUUID().toString());
+		_properties.setProperty("uid", UUID.randomUUID().toString());
 	}		
 
-	public CyclistDatasource(Properties prop) {
-		setProperties(prop);
+	// Save this data source
+	public void save(IMemento sourcesListMemento) {
+				
+		// Create the child memento
+		IMemento memento = sourcesListMemento.createChild("CyclistDatasource");
+			
+		// Set the url
+		memento.putString("url", getURL());
+				
+		Enumeration e = _properties.keys();
+		while (e.hasMoreElements()){
+			String key = (String) e.nextElement();
+			String value = _properties.getProperty(key);
+			memento.putString(key, value);
+		}
+	}
+	
+	// Restore this data source
+	public void restore(IMemento memento){
+		
+		// Get all of the keys	
+		String[] keys = memento.getAttributeKeys();
+		System.out.println("Restore keys: " + keys.length);
+		for(String key: keys){
+
+			// Get the value associated with the key
+			String value = memento.getString(key);
+
+			// If we have a url, set it
+			if(key == "url")
+				setURL(value);
+			else	
+				_properties.setProperty(key, value);
+		}	
 	}
 
 	@Override
@@ -65,15 +90,6 @@ public class CyclistDatasource implements DataSource {
 		return _properties;
 	}
 
-	public XMLMemento getMemento(){
-		Enumeration e = _properties.keys();
-		while (e.hasMoreElements()){
-			String key = (String) e.nextElement();
-			String value = _properties.getProperty(key);
-			_memento.putString(key, value);
-		}
-		return _memento;
-	}
 	
 	public void setURL(String url) {
 		if (_url != url) {
@@ -86,7 +102,10 @@ public class CyclistDatasource implements DataSource {
 		return _url;
 	}
 
-
+	public String getUID(){
+		return (String) _properties.get("uid");
+	}
+	
 	public boolean isReady() {
 		return _ready;
 	}
@@ -143,5 +162,7 @@ public class CyclistDatasource implements DataSource {
             _properties.put("pass", password);
         return DriverManager.getConnection(_url, _properties);
 	}
+
+	
 
 }

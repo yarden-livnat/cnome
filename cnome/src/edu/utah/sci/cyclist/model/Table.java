@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import edu.utah.sci.cyclist.controller.IMemento;
 
 public class Table {
 
@@ -13,6 +16,7 @@ public class Table {
 	
 	private String _name;
 	private Schema _schema = new Schema();
+	private CyclistDatasource _datasource;
 	private Map<String, Object> _properties = new HashMap<>();
 
 	private List<TableRow> _rows = new ArrayList<>();
@@ -22,9 +26,56 @@ public class Table {
 	}
 	public Table(String name) {
 		_name = name;
-		setProperty("class", "CyclistDatasource");
 		setProperty("uid", UUID.randomUUID().toString());
 	}
+	
+    // Save the table
+	public void save(IMemento memento) {
+
+		// Create the child memento
+		//XMLMemento memento = (XMLMemento) tablesListMemento.createChild("Table");
+
+		// Set the name
+		memento.putString("name", getName());
+		
+		// Save the schema
+		_schema.save(memento.createChild("Schema"));
+		
+		// Save the uid of the data source
+		memento.putString("datasource-uid", _datasource.getUID());
+		
+		// Save the map
+		IMemento mapMemento = memento.createChild("property-map");
+
+		// Set things saved in the properties map
+		Set<String> keys = _properties.keySet();
+		for(String key: keys){
+			
+			Object value = _properties.get(key);
+
+			IMemento entryMemento = mapMemento.createChild("entry");
+			entryMemento.putString("key", key);
+			entryMemento.putString("class", value.getClass().toString());
+
+			// Save integers or strings as strings
+			if(value.getClass().toString().equals(String.class.toString()) || 
+  			   value.getClass().toString().equals(Integer.class.toString()))
+				entryMemento.putTextData((String)value);
+			else{
+
+				System.out.println("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
+				IMemento valueMemento = entryMemento.createChild("value");
+				valueMemento.putString("value-ID", value.toString());		
+			}
+		}
+	}
+	
+	// Restore the table
+	public void restore(IMemento memento){
+		
+	}
+
+	
 
 	public String getName() {
 		return _name;
@@ -70,7 +121,7 @@ public class Table {
 	 * @param datasource
 	 */
 	public void setDataSource(CyclistDatasource datasource){
-		setProperty(DATA_SOURCE, datasource);
+		_datasource = datasource;
 	}
 	
 	/**
@@ -78,7 +129,7 @@ public class Table {
 	 * @return
 	 */
 	public CyclistDatasource getDataSource(){
-		return (CyclistDatasource) getProperty(DATA_SOURCE);
+		return _datasource;
 	}
 	
 	public void setSchema(Schema schema) {
@@ -128,5 +179,4 @@ public class Table {
 		}
 	}
 
-	
 }

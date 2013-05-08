@@ -2,9 +2,12 @@ package edu.utah.sci.cyclist.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.FileReader;
 import java.util.Properties;
 
 import javafx.beans.property.ObjectProperty;
@@ -31,7 +34,8 @@ public class CyclistController {
 	private final EventBus _eventBus;
 	private MainScreen _screen;
 	private Model _model = new Model();
-	
+	private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	private String SAVE_FILE = SAVE_DIR+"save.xml";
 	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
 	
 	/**
@@ -134,36 +138,75 @@ public class CyclistController {
 	
 	private void save() {
 		
-		System.out.println("Save!");
-		
-		// The file we are saving into
-		String propertyFile = System.getProperty("user.dir") + "/.cnome/save.xml";
-		
+		// If the save directory does not exist, create it
+		File saveDir = new File(SAVE_DIR);
+		if (!saveDir.exists())	
+			saveDir.mkdir();  
+	
+		// The save file
+		File saveFile = new File(SAVE_FILE);
+
+		// Create the root memento
 		XMLMemento memento = XMLMemento.createWriteRoot("root");
-		for(CyclistDatasource source: _model.getSources()){
-			memento.copyChild(source.getMemento());
+			
+		// Save the data sources
+		for(CyclistDatasource source: _model.getSources()){			
+			source.save(memento.createChild("sources"));
 		}
+		
+		// Save the data tables
+		for(Table table: _model.getTables()){
+			table.save(memento.createChild("tables"));
+		}
+		
 		try {
-			memento.save(new PrintWriter(System.out));
+			memento.save(new PrintWriter(saveFile));
+
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		
-		
+		} 	
 		
 	}
 	
 	// Load saved properties
 	private void load() {
 	
-		//
-		final String saveDir = System.getProperty("user.dir");	
-		String propFile = saveDir + "/.cnome.xml";
-		File f = new File(propFile);
-		if(f.exists()){
+		System.out.println("Load!");
+	/*	
+		// Check if the save file exists
+		File saveFile = new File(SAVE_FILE);
 			
-
-		}
+		// If we have a save file, read it in
+		if(saveFile.exists()){
+			
+			
+			Reader reader;
+			try {
+				reader = new FileReader(saveFile);
+				try {
+					// Create the root memento
+					XMLMemento memento = XMLMemento.createReadRoot(reader);
+					
+					// Read in the data sources
+					IMemento sources_list = memento.getChild("sources-list");
+					IMemento[] sources = sources_list.getChildren("CyclistDatasource");
+					System.out.println("sourcs " + sources.length);
+					for(IMemento source: sources){
+						
+						CyclistDatasource datasource = new CyclistDatasource();
+						datasource.restore(source);
+						_model.getSources().add(datasource);
+					}
+					
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 		
+		}*/
 	}
 }

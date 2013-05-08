@@ -238,6 +238,9 @@ public final class XMLMemento implements IMemento {
         return null;
     }
 
+    
+    
+    
     /* (non-Javadoc)
      * Method declared in IMemento.
      */
