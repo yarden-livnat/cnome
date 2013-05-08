@@ -14,6 +14,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -26,6 +28,7 @@ import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.SeparatorBuilder;
@@ -40,6 +43,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.LineBuilder;
 
 public class ViewBase extends BorderPane implements View {
 	
@@ -63,10 +67,8 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private final Resize resize = new Resize();
 	
-	private int _maxNumTables = 1;	
-	private List<Table> _tables = new ArrayList<>();
-	private List<DatasourceInfo> _workspaceDatasources = new ArrayList<>();
-	private List<DatasourceInfo> _localDatasources = new ArrayList<>();
+	private List<DatasourceInfo> _datasources = new ArrayList<>();
+	private boolean _multipleSelection = false;
 	
 	private Closure.V1<Table> _onTableDrop = null;
 	
@@ -83,19 +85,15 @@ public class ViewBase extends BorderPane implements View {
 				.styleClass("header")
 				.alignment(Pos.CENTER_LEFT)
 				.children(
-					_title = LabelBuilder.create().build(),
+					_title = LabelBuilder.create().prefWidth(60).build(),
 					_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
 					_dataBar = HBoxBuilder.create()
 						.id("databar")
 						.styleClass("data-bar")
 						.minWidth(20)
 						.children(
-								SeparatorBuilder.create()
-									.prefWidth(1)
-									.style("-fx-background-color:  #a0a0a0")
-									.orientation(Orientation.VERTICAL)
-									.build()
-								)
+								LineBuilder.create().startY(0).endY(16).build()
+							)
 						.build(),
 					new Spring(),
 					_actionsArea = new HBox(),
@@ -112,14 +110,6 @@ public class ViewBase extends BorderPane implements View {
 	
 	public void setTitle(String title) {
 		_title.setText(title);
-	}
-	
-	public void setMaxNumTables(int n) {
-		_maxNumTables = n;
-	}
-	
-	public int getMaxNumTables() {
-		return _maxNumTables;
 	}
 	
 	public void setWaiting(boolean value) {
@@ -195,49 +185,50 @@ public class ViewBase extends BorderPane implements View {
 		return DnD.getInstance().getLocalClipboard();
 	}
 	
-//	/**
-//	 * addTable
-//	 */
-//	public void addTable(Table table) {
-//		if (_tables.contains(table)) {
-//			System.out.println("view: already has table");
-//			return;
-//		}
-////		if (_tables.size() < _maxNumTables)
-////			_tables.add(table);
-////		else {
-////			_tables.set(_maxNumTables-1, table);
-////		}
-//		_tables.clear();
-//		_tables.add(table);
-//		_dataBar.getChildren().clear();
-//		Button b = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
-//		_dataBar.getChildren().add(b);
-//	}
+
 	
 	public void addTable(Table table, boolean local) {
-		final DatasourceInfo info = new DatasourceInfo(table);
+		final DatasourceInfo info = new DatasourceInfo(table, local);
+		_datasources.add(info);
 		if (local) {
 			info.button = ToggleButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
-			_localDatasources.add(info);
 			_dataBar.getChildren().add(info.button);
 		} else {
 			info.button = ToggleButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
-			_workspaceDatasources.add(info);
-			_dataBar.getChildren().add(_workspaceDatasources.size(), info.button);
+			int index = -1;
+			for (DatasourceInfo di : _datasources) {
+				if (!di.local) index++;
+			}
+			_dataBar.getChildren().add(index, info.button);
 		}
+		
 		info.button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				datasourceStatusChanged(info, newValue);
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean prev, Boolean active) {
+				System.out.println("info: "+active);
+				info.active = active;
 				
+				if (active) {
+					if (_multipleSelection) {
+						
+					} else {
+						System.out.println("deactivate >>");
+						for (DatasourceInfo di : _datasources) {
+							if (di != info) {
+								di.setSelected(false);
+							}
+						}
+						System.out.println("deactivate <<");
+					}
+				}
+				if (prev != active)
+					datasourceStatusChanged(info, active);		
 			}
 		});
 	}
 	
-	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
-		System.out.println("status: "+active);
+	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {	
 	}
 	
 	/*
@@ -452,6 +443,7 @@ public class ViewBase extends BorderPane implements View {
 		}
 	};
 	
+	
 	class Delta {
 		public double x;
 		public double y;
@@ -470,12 +462,18 @@ public class ViewBase extends BorderPane implements View {
 	public class DatasourceInfo {
 		public Table table;
 		public boolean active;
+		public boolean local;
 		public ToggleButton button;
 		
-		public DatasourceInfo(Table table) {
+		public DatasourceInfo(Table table, boolean local) {
 			this.table = table;
 			active = false;
+			this.local = local;
 			button = null;
+		}
+		
+		public void setSelected(boolean value) {
+			button.setSelected(value);
 		}
 	}
 }

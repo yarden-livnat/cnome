@@ -46,20 +46,18 @@ public class SimpleTableView extends ViewBase {
 	
 	@Override
 	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
+		super.datasourceStatusChanged(info, active);
+		_tableView.itemsProperty().unbind();
+		_tableView.getItems().clear();
+		_tableView.getColumns().clear();	
+		
 		if (active) {
 			setTitle(info.table.getName());
-			Schema schema = info.table.getSchema();
-			
-			_tableView.itemsProperty().unbind();
-			_tableView.getItems().clear();
-			_tableView.getColumns().clear();
+			Schema schema = info.table.getSchema();	
 			
 			List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();
-			
 			for (int f=0; f<schema.size(); f++) {
-				Field field = schema.getField(f);
-				System.out.println("Field: "+field.getName());
-				
+				Field field = schema.getField(f);				
 				cols.add(createColumn(field, f));
 			}
 			
