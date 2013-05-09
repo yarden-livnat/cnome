@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -20,10 +19,9 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
-import edu.utah.sci.cyclist.presenter.TablesPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
+import edu.utah.sci.cyclist.presenter.TablePresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.view.components.Workspace;
@@ -67,7 +65,7 @@ public class CyclistController {
 		 */
 		
 		// Tables panel
-		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
+		TablesPresenter ds = new TablesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
 		ds.setPanel(screen.getDatasourcesPanel());
@@ -184,7 +182,6 @@ public class CyclistController {
 	// Load saved properties
 	private void load() {
 	
-		System.out.println("Load!");
 	
 		// Check if the save file exists
 		File saveFile = new File(SAVE_FILE);
@@ -202,7 +199,6 @@ public class CyclistController {
 					
 					// Read in the data sources
 					IMemento[] sources = memento.getChildren("CyclistDatasource");
-					System.out.println("sourcs " + sources.length);
 					for(IMemento source: sources){
 						CyclistDatasource datasource = new CyclistDatasource();
 						datasource.restore(source);
