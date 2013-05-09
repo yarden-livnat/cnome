@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 SCI Institute, University of Utah.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Yarden Livnat  
+ *******************************************************************************/
 package edu.utah.sci.cyclist.view;
 
 import java.util.ArrayList;
@@ -25,6 +35,7 @@ public class SimpleTableView extends ViewBase {
 	public static final String TITLE = "Table";
 	
 	private TableView<Table.Row> _tableView;
+	private Table _currentTable = null;
 	
 	public SimpleTableView() {
 		super();
@@ -35,7 +46,7 @@ public class SimpleTableView extends ViewBase {
 		setTitle(TITLE);
 		
 		_tableView = TableViewBuilder.<Table.Row>create()
-				.prefWidth(200)
+				.prefWidth(300)
 				.prefHeight(200)
 				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
 				.build();
@@ -46,6 +57,11 @@ public class SimpleTableView extends ViewBase {
 	
 	@Override
 	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
+		
+		if (!active && info.table != _currentTable) {
+			// ignore
+			return;
+		}
 		super.datasourceStatusChanged(info, active);
 		
 		_tableView.itemsProperty().unbind();
@@ -67,6 +83,8 @@ public class SimpleTableView extends ViewBase {
 		} else {
 			setTitle("");
 		}
+		
+		_currentTable = info.table;
 	}
 	
 	

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 SCI Institute, University of Utah.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Yarden Livnat  
+ *******************************************************************************/
 package edu.utah.sci.cyclist.view.components;
 
 import java.util.ArrayList;
@@ -206,13 +216,42 @@ public class ViewBase extends BorderPane implements View {
 		return null;
 	}
 
+	public void selectTable(Table table) {
+		selectTable(table, false);
+	}
+	
+	public void selectTable(Table table, boolean force) {
+		DatasourceInfo info = findDatasource(table);
+		if (info != null) {
+			if (force)
+				_defaultDatasource = info;
+			info.setSelected(true);
+		}
+	}
+	
 	public void setTables(List<Table> list, Table current) {
 		for (Table table : list) {
 			addTable(table, false, false);
 		}
 		
-		if (current != null) {
-			findDatasource(current).setSelected(true);
+		tableSelected(current);
+//		if (current != null) {
+//			findDatasource(current).setSelected(true);
+//		}
+	}
+	
+	@Override
+	public void tableSelected(Table table) {
+		boolean activate = false;
+		if (_defaultDatasource != null && _defaultDatasource.active) {
+			_defaultDatasource.setSelected(false);
+			activate = true;
+		} else {
+			activate = true;
+		}
+		_defaultDatasource = findDatasource(table);
+		if (activate) {
+			_defaultDatasource.setSelected(true);
 		}
 	}
 	
@@ -242,20 +281,18 @@ public class ViewBase extends BorderPane implements View {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				System.out.println("info: "+activate);
+				System.out.println("info activate:"+activate);
 				info.active = activate;
 				
 				if (activate) {
 					if (_multipleSelection) {
 						// TODO
 					} else {
-						System.out.println("deactivate >>");
 						for (DatasourceInfo di : _datasources) {
 							if (di != info && di.active) {
 									di.setSelected(false);
 							}
 						}
-						System.out.println("deactivate <<");
 					}
 				} else /* deactivate */ {
 					boolean found = false; 
@@ -270,8 +307,12 @@ public class ViewBase extends BorderPane implements View {
 					}
 				}
 					
-				if (prevState != activate)
-					datasourceStatusChanged(info, activate);		
+				if (prevState != activate) {
+					datasourceStatusChanged(info, activate);
+					if (_defaultDatasource != null && !activate) {
+						_defaultDatasource.setSelected(true);
+					}
+				}
 			}
 		});
 		
@@ -284,20 +325,6 @@ public class ViewBase extends BorderPane implements View {
 				tableSelected(info.table);
 		}
 		
-	}
-	
-	
-	@Override
-	public void tableSelected(Table table) {
-		boolean activate = false;
-		if (_defaultDatasource != null && _defaultDatasource.active) {
-			_defaultDatasource.setSelected(false);
-			activate = true;
-		}
-		_defaultDatasource = findDatasource(table);
-		if (activate) {
-			_defaultDatasource.setSelected(true);
-		}
 	}
 	
 	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {	
