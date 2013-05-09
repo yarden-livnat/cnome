@@ -37,6 +37,7 @@ import javafx.scene.layout.Pane;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.view.components.ViewBase.DatasourceInfo;
 import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class Workspace extends ViewBase implements View {
@@ -182,6 +183,17 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
+	}
+	
+	@Override
+	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
+		super.datasourceStatusChanged(info, active);
+		
+		if (active) {
+			setTitle(info.table.getName());
+		} else {
+			setTitle("");
+		}
 	}
 	
 	/**

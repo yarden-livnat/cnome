@@ -262,7 +262,7 @@ public class ViewBase extends BorderPane implements View {
 			activate = true;
 		}
 		_defaultDatasource = findDatasource(table);
-		if (activate) {
+		if (activate && _defaultDatasource != null) {
 			_defaultDatasource.setSelected(true);
 		}
 	}
@@ -293,7 +293,7 @@ public class ViewBase extends BorderPane implements View {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				System.out.println("info activate:"+activate);
+				System.out.println(info.table.getName()+"  activate:"+activate);
 				info.active = activate;
 				
 				if (activate) {
