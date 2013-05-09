@@ -1,6 +1,7 @@
 package edu.utah.sci.cyclist.model;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -121,9 +122,30 @@ public class Table {
 		Schema schema = new Schema();
 		schema.restore(memento);
 		setSchema(schema);
+		extractSchema();
+		
 	}
 
-	
+	// Extract the table schema from the database
+	public void extractSchema(){
+		
+		try (Connection conn = _datasource.getConnection()) {
+			DatabaseMetaData md = conn.getMetaData();
+			ResultSet rs = md.getColumns(null, null, getName(), null);
+			while (rs.next()) {
+				String colName = rs.getString("COLUMN_NAME");
+				Field field = new Field(colName);
+				field.set(FieldProperties.REMOTE_NAME, colName);
+				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
+				field.set(FieldProperties.REMOTE_DATA_TYPE_NAME, rs.getString("TYPE_NAME"));
+				
+				_schema.addField(field);
+			}
+		} catch (Exception e) {
+			System.out.println("Error while parsing schema: "+e.getMessage());
+		}
+		_schema.update();
+	}
 
 	public String getName() {
 		return _name;

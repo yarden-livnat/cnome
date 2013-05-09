@@ -21,7 +21,7 @@ import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
-import edu.utah.sci.cyclist.presenter.TablePresenter;
+import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
 import edu.utah.sci.cyclist.view.components.Workspace;
@@ -65,7 +65,7 @@ public class CyclistController {
 		 */
 		
 		// Tables panel
-		TablesPresenter ds = new TablesPresenter(_eventBus);
+		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
 		ds.setPanel(screen.getDatasourcesPanel());
