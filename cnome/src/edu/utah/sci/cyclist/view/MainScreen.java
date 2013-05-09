@@ -20,16 +20,11 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.components.Spring;
-import edu.utah.sci.cyclist.view.components.TablesPanel;
 import edu.utah.sci.cyclist.view.components.Workspace;
 import edu.utah.sci.cyclist.view.panels.SchemaPanel;
 import edu.utah.sci.cyclist.view.panels.TablesPanel;
 import edu.utah.sci.cyclist.view.panels.ToolsPanel;
-import edu.utah.sci.cyclist.view.wizard.DatasourceWizard;
-import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 import edu.utah.sci.cyclist.view.wizard.WorkspaceWizard;
 
 public class MainScreen extends VBox {

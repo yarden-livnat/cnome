@@ -27,9 +27,14 @@ public class Schema {
 	// Restore the schema
 	public void restore(IMemento memento) {
 
-		
+		// Restore each field
+		IMemento[] fields = memento.getChildren("field");
+		for(IMemento field: fields){
+			Field newField = new Field();
+			newField.restore(field);
+			addField(newField);
+		}
 	}
-
 	
 	public int size() {
 		return _fields.size();

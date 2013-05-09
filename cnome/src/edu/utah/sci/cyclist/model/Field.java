@@ -12,6 +12,9 @@ public class Field {
 	private String _name;
 	private Map<String, Object> _properties = new HashMap<>();
 
+	public Field(){
+		this("");
+	}
 
 	public Field(String name) {
 		this._name = name;
@@ -58,8 +61,34 @@ public class Field {
 	
 	// Restore this field
 	public void restore(IMemento memento) {
-
-
+		
+		// Get the name of the field
+		_name = memento.getString("name");
+		
+		// Get the entries in the field
+		IMemento[] entries = memento.getChildren("entry");
+		for(IMemento entry:entries){
+			
+			// Get the key of the object
+			String key = entry.getString("key");
+						
+			// Get the class of the object
+			String classType = entry.getString("class");
+							
+			// If we have a string
+			if(classType.equals(String.class.toString())){
+				String value = entry.getTextData();
+				set(key, value);
+			}
+			// If we have an Integer
+			else if(classType.equals(Integer.class.toString())){
+				Integer value = Integer.parseInt(entry.getTextData());
+				set(key, value);
+			}	
+			else{
+				System.out.println("Field:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
+			}	
+		}		
 	}
 
 	public String getName() {
