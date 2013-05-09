@@ -90,12 +90,13 @@ public class DatatableWizard extends VBox {
 	}
 
 	public DatatableWizard(Table tableProperty){
-		createDialog(tableProperty);		
+		createDialog(tableProperty);
 	}
 	
 	// * * * Set the existing data sources in the combo box * * * //
 	public void setItems(final ObservableList<CyclistDatasource> sources) {
 		_sourcesView.setItems(sources);
+		_sourcesView.getSelectionModel().selectFirst();
 	}
 			
 	// * * * Show the dialog * * * //
@@ -196,6 +197,8 @@ public class DatatableWizard extends VBox {
 
 					)
 				.build();
+		
+		
 
 		// Keep track of the currently selected data source
 		_sourcesView.getSelectionModel().selectedItemProperty().addListener(
@@ -205,7 +208,8 @@ public class DatatableWizard extends VBox {
 						_current = _sourcesView.getSelectionModel().getSelectedItem();
 					}
 				});
-
+		
+	
 		// Disable edit/remove until we have something selected
 		editButton.disableProperty().bind( _sourcesView.getSelectionModel().selectedItemProperty().isNull());
 		removeButton.disableProperty().bind( _sourcesView.getSelectionModel().selectedItemProperty().isNull());
@@ -329,17 +333,11 @@ public class DatatableWizard extends VBox {
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, "%", null);
 			ResultSetMetaData rmd = rs.getMetaData();
-			System.out.println(rmd.getColumnCount());
 			while (rs.next()) {
 				_tablesView.getItems().add(rs.getString(3));
-				//for (int i=1; i<=rmd.getColumnCount(); i++) {
-				//	System.out.print(": "+rs.getString(i));
-			//	}
-			//	System.out.println();
 			}
 			
 		} catch (Exception e) {
-			//System.out.println("connection failed");
 			_statusDisplay.setImage(Resources.getIcon("error"));
 		}
 	}
@@ -351,27 +349,7 @@ public class DatatableWizard extends VBox {
 		table.setName(name); // _nameField.getText());
 		table.setDataSource(_current);
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
-		Schema schema = new Schema();
-		
-		try (Connection conn = _current.getConnection()) {
-			DatabaseMetaData md = conn.getMetaData();
-			ResultSet rs = md.getColumns(null, null, name, null);
-//			ResultSetMetaData rmd = rs.getMetaData();
-			while (rs.next()) {
-				String colName = rs.getString("COLUMN_NAME");
-				Field field = new Field(colName);
-				field.set(FieldProperties.REMOTE_NAME, colName);
-				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
-				field.set(FieldProperties.REMOTE_DATA_TYPE_NAME, rs.getString("TYPE_NAME"));
-				
-				schema.addField(field);
-			}
-		} catch (Exception e) {
-			System.out.println("Error while parsing schema: "+e.getMessage());
-		}
-		
-		schema.update();
-		table.setSchema(schema);
+		table.extractSchema();
 	}
 	
 }
