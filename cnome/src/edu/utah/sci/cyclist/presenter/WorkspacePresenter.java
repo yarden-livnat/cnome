@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.presenter;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +45,18 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Table table) {
-					_workspace.addTable(table, true);
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));				
+					_workspace.addTable(table, true, false);
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
+					_workspace.tableSelected(table);
+				}
+				
+			});
+			
+			_workspace.setOnTableSelected(new Closure.V1<Table>() {
+
+				@Override
+				public void call(Table table) {
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_SELECTED, table));				
 				}
 				
 			});
@@ -63,11 +71,6 @@ public class WorkspacePresenter extends PresenterBase {
 			});
 		}
 	}
-	
-		
-	public void run() {
-		// setup event listeners on the bus
-	}
 
 	private Presenter addTool(Tool tool, double x, double y) {
 		ViewBase view = (ViewBase) tool.getView();
@@ -79,6 +82,7 @@ public class WorkspacePresenter extends PresenterBase {
 		if (presenter != null) {	
 			_presenters.add(presenter);
 			presenter.setView(view);	
+			presenter.setTables(_workspace.getLocalTables(), _workspace.getSelectedTable());
 		}
 		
 		return presenter;

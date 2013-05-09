@@ -254,7 +254,7 @@ public final class XMLMemento implements IMemento {
 		}
 
         // Extract each node with given type.
-        ArrayList list = new ArrayList(size);
+        ArrayList<Element> list = new ArrayList<>(size);
         for (int nX = 0; nX < size; nX++) {
             Node node = nodes.item(nX);
             if (node instanceof Element) {

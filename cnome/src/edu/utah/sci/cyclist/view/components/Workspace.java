@@ -17,8 +17,6 @@ import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.tool.Tool;
 
-//import cyclist.view.event.CyclistDropEvent;
-
 public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
@@ -27,13 +25,12 @@ public class Workspace extends ViewBase implements View {
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
 	private Closure.V3<Table, Double, Double> _onShowTable = null;
 	
-	public void setOnToolDrop(Closure.V3<Tool, Double, Double> v3) {
-		_onToolDrop = v3;
+	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
+		_onToolDrop = action;
 	}
 	
-	
-	public void setOnShowTable(Closure.V3<Table, Double, Double> v3) {
-		_onShowTable = v3;
+	public void setOnShowTable(Closure.V3<Table, Double, Double> action) {
+		_onShowTable = action;
 	}
 	
 	// -- Properties
@@ -67,14 +64,11 @@ public class Workspace extends ViewBase implements View {
 		_pane.getStyleClass().add("workspace-pane");
 		
 		setContent(_pane);
-		
-		final Workspace workspace = this;
-		
+				
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
-				if (/*event.getGestureSource() != workspace && */
-					clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) 
+				if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) 
 				{
 					event.acceptTransferModes(TransferMode.COPY);
 				} 
@@ -122,8 +116,9 @@ public class Workspace extends ViewBase implements View {
 	}
 	
 	
+	@Override
 	public void setTitle(String title) {
-		// ignore for now
+		super.setTitle(title);
 	}
 	
 	public void addView(final ViewBase view) {
