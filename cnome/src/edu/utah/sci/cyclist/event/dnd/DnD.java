@@ -11,7 +11,7 @@ public class DnD {
 	public static final DataFormat TOOL_FORMAT			= new DataFormat("cyclist.dnd.tool");
 	public static final DataFormat FIELD_FORMAT 		= new DataFormat("cyclist.dnd.field");
 	
-	private static LocalClipboard _clipboard;
+	
 	
 	private static DnD _instance = new DnD();
 	
@@ -19,12 +19,15 @@ public class DnD {
 		return _instance;
 	}
 	
+	
+	private  LocalClipboard _clipboard;
+	
 	public LocalClipboard createLocalClipboard() {
 		_clipboard = new LocalClipboard();
 		return _clipboard;
 	}
 	
-	public static LocalClipboard getLocalClipboard() {
+	public LocalClipboard getLocalClipboard() {
 		return _clipboard;
 	}
 	

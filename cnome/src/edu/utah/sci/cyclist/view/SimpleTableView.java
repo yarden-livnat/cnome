@@ -19,14 +19,15 @@ import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.view.components.ViewBase;
+import edu.utah.sci.cyclist.view.components.ViewBase.DatasourceInfo;
 
-public class GenericTableView extends ViewBase {
+public class SimpleTableView extends ViewBase {
 	public static final String ID = "table-view";
 	public static final String TITLE = "Table";
 	
 	private TableView<Table.Row> _tableView;
 	
-	public GenericTableView() {
+	public SimpleTableView() {
 		super();
 		build();
 	}
@@ -44,26 +45,29 @@ public class GenericTableView extends ViewBase {
 	}
 	
 	@Override
-	public void addTable(Table table) {
-		super.addTable(table);
-		
-		Schema schema = table.getSchema();
-		
-		_tableView.itemsProperty().unbind();
-		_tableView.getItems().clear();
-		_tableView.getColumns().clear();
-		
-		List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();
-		
-		for (int f=0; f<schema.size(); f++) {
-			Field field = schema.getField(f);
-			System.out.println("Field: "+field.getName());
+	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
+		if (active) {
+			setTitle(info.table.getName());
+			Schema schema = info.table.getSchema();
 			
-			cols.add(createColumn(field, f));
+			_tableView.itemsProperty().unbind();
+			_tableView.getItems().clear();
+			_tableView.getColumns().clear();
+			
+			List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();
+			
+			for (int f=0; f<schema.size(); f++) {
+				Field field = schema.getField(f);
+				System.out.println("Field: "+field.getName());
+				
+				cols.add(createColumn(field, f));
+			}
+			
+			_tableView.getColumns().addAll(cols);
+			_tableView.itemsProperty().bind(info.table.getRows(100));
+		} else {
+			setTitle("");
 		}
-		
-		_tableView.getColumns().addAll(cols);
-		_tableView.itemsProperty().bind(table.getRows(100));
 	}
 	
 	

@@ -3,9 +3,9 @@ package edu.utah.sci.cyclist.view.tool;
 import javafx.scene.image.Image;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.GenericPresenter;
+import edu.utah.sci.cyclist.presenter.TablePresenter;
 import edu.utah.sci.cyclist.presenter.Presenter;
-import edu.utah.sci.cyclist.view.GenericTableView;
+import edu.utah.sci.cyclist.view.SimpleTableView;
 import edu.utah.sci.cyclist.view.View;
 
 public class GenericTool implements Tool {
@@ -22,12 +22,12 @@ public class GenericTool implements Tool {
 
 	@Override
 	public View getView() {
-		return new GenericTableView();
+		return new SimpleTableView();
 	}
 
 	@Override
 	public Presenter getPresenter(EventBus bus) {
-		return new GenericPresenter(bus);
+		return new TablePresenter(bus);
 	}
 
 }

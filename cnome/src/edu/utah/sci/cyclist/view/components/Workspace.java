@@ -14,6 +14,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.tool.Tool;
 
 //import cyclist.view.event.CyclistDropEvent;
@@ -24,9 +25,15 @@ public class Workspace extends ViewBase implements View {
 	
 	private Pane _pane;
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
+	private Closure.V3<Table, Double, Double> _onShowTable = null;
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> v3) {
 		_onToolDrop = v3;
+	}
+	
+	
+	public void setOnShowTable(Closure.V3<Table, Double, Double> v3) {
+		_onShowTable = v3;
 	}
 	
 	// -- Properties
@@ -65,8 +72,9 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				if (event.getGestureSource() != workspace && 
-					event.getDragboard().getContent(DnD.TOOL_FORMAT) != null) 
+				DnD.LocalClipboard clipboard = getLocalClipboard();
+				if (/*event.getGestureSource() != workspace && */
+					clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) 
 				{
 					event.acceptTransferModes(TransferMode.COPY);
 				} 
@@ -92,11 +100,17 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
+				DnD.LocalClipboard clipboard = getLocalClipboard();
 				if (event.getGestureSource() != this) {
-					if ( getLocalClipboard().hasContent(DnD.TOOL_FORMAT)) {
-						Tool tool =  getLocalClipboard().get(DnD.TOOL_FORMAT, Tool.class);
+					if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
+						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
 						if (_onToolDrop != null)
 							_onToolDrop.call(tool, event.getX(), event.getY());
+					} else if (clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) {
+						Table table = clipboard.get(DnD.DATA_SOURCE_FORMAT, Table.class);
+						if (_onShowTable != null) {
+							_onShowTable.call(table, event.getX(), event.getY());
+						}
 					}
 				}
 				event.setDropCompleted(true);

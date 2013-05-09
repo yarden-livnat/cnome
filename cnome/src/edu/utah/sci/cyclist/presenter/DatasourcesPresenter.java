@@ -11,12 +11,12 @@ import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.panels.TablesPanel;
 
-public class TablesPresenter extends PresenterBase {
+public class DatasourcesPresenter extends PresenterBase {
 	private TablesPanel _panel;
 	private ObservableList<Table> _tables;
 	private ObservableList<CyclistDatasource> _sources;
 	
-	public TablesPresenter(EventBus bus) {
+	public DatasourcesPresenter(EventBus bus) {
 		super(bus);
 	}
 	
@@ -45,7 +45,6 @@ public class TablesPresenter extends PresenterBase {
 
 			@Override
 			public void changed(ObservableValue<? extends Table> observable, Table oldValue, Table newValue) {
-				System.out.println("table selected: "+newValue.getName());
 				broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, newValue));
 			}
 		});

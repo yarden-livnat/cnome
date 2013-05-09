@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -19,6 +20,7 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.TablesPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
@@ -65,7 +67,7 @@ public class CyclistController {
 		 */
 		
 		// Tables panel
-		TablesPresenter ds = new TablesPresenter(_eventBus);
+		DatasourcesPresenter ds = new DatasourcesPresenter(_eventBus);
 		ds.setSources(_model.getSources());
 		ds.setTables(_model.getTables());
 		ds.setPanel(screen.getDatasourcesPanel());
