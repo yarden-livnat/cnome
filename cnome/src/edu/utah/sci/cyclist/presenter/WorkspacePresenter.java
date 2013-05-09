@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.presenter;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +45,9 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Table table) {
-					_workspace.addTable(table, true);
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));				
+					_workspace.addTable(table, true, false);
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
+					_workspace.tableSelected(table);
 				}
 				
 			});

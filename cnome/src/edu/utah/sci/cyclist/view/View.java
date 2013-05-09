@@ -18,5 +18,6 @@ public interface View {
 	
 	void setTables(List<Table> list, Table table);
 	void addTable(Table table, boolean local);
+	void addTable(Table table, boolean local, boolean activate);
 	void tableSelected(Table table);
 }
