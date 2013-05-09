@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.presenter;
 
+import java.util.List;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
@@ -7,6 +9,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
+import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 
 public class PresenterBase implements Presenter {
@@ -57,5 +60,10 @@ public class PresenterBase implements Presenter {
 	public void broadcast(CyclistNotification notification) {
 		notification.setSource(this);
 		_eventBus.notify(notification);
+	}
+
+	@Override
+	public void setTables(List<Table> list, Table current) {
+		getView().setTables(list, current);
 	}
 }

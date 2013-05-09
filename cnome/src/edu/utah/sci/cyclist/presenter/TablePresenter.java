@@ -39,6 +39,15 @@ public class TablePresenter extends PresenterBase {
 				addTable(notification.getTable(), false);			
 			}
 		});
+		
+		addNotificationHandler(CyclistNotifications.DATASOURCE_SELECTED, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				CyclistTableNotification notification = (CyclistTableNotification) event;
+				getView().tableSelected(notification.getTable());			
+			}
+		});
 	}
 	
 	public void addTable(Table table, boolean local) {

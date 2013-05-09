@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.view;
 
+import java.util.List;
+
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.model.Table;
@@ -12,6 +14,9 @@ public interface View {
 	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
 	
 	void setOnTableDrop(Closure.V1<Table> action);
+	void setOnTableSelected(Closure.V1<Table> action);
 	
+	void setTables(List<Table> list, Table table);
 	void addTable(Table table, boolean local);
+	void tableSelected(Table table);
 }

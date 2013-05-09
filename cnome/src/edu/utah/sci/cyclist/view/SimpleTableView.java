@@ -19,7 +19,6 @@ import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.view.components.ViewBase;
-import edu.utah.sci.cyclist.view.components.ViewBase.DatasourceInfo;
 
 public class SimpleTableView extends ViewBase {
 	public static final String ID = "table-view";
@@ -37,6 +36,7 @@ public class SimpleTableView extends ViewBase {
 		
 		_tableView = TableViewBuilder.<Table.Row>create()
 				.prefWidth(200)
+				.prefHeight(200)
 				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
 				.build();
 		
@@ -47,8 +47,9 @@ public class SimpleTableView extends ViewBase {
 	@Override
 	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
 		super.datasourceStatusChanged(info, active);
+		
 		_tableView.itemsProperty().unbind();
-		_tableView.getItems().clear();
+		if (_tableView.getItems() != null) _tableView.getItems().clear();
 		_tableView.getColumns().clear();	
 		
 		if (active) {

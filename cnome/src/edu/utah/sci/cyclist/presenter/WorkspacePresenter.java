@@ -53,6 +53,15 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			});
 			
+			_workspace.setOnTableSelected(new Closure.V1<Table>() {
+
+				@Override
+				public void call(Table table) {
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_SELECTED, table));				
+				}
+				
+			});
+			
 			_workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
 
 				@Override
@@ -62,11 +71,6 @@ public class WorkspacePresenter extends PresenterBase {
 				}
 			});
 		}
-	}
-	
-		
-	public void run() {
-		// setup event listeners on the bus
 	}
 
 	private Presenter addTool(Tool tool, double x, double y) {
@@ -79,6 +83,7 @@ public class WorkspacePresenter extends PresenterBase {
 		if (presenter != null) {	
 			_presenters.add(presenter);
 			presenter.setView(view);	
+			presenter.setTables(_workspace.getLocalTables(), _workspace.getSelectedTable());
 		}
 		
 		return presenter;

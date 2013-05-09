@@ -3,23 +3,13 @@ package edu.utah.sci.cyclist.view.components;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mo.closure.v1.Closure;
-
-import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.View;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
@@ -28,10 +18,8 @@ import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
-import javafx.scene.control.SeparatorBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
@@ -45,9 +33,16 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.LineBuilder;
 
+import org.mo.closure.v1.Closure;
+
+import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.view.View;
+
 public class ViewBase extends BorderPane implements View {
 	
-	public static final double EDGE_SIZE = 4;
+	public static final double EDGE_SIZE = 2;
 	
 	public enum Edge { TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, NONE };
 	
@@ -68,9 +63,13 @@ public class ViewBase extends BorderPane implements View {
 	private final Resize resize = new Resize();
 	
 	private List<DatasourceInfo> _datasources = new ArrayList<>();
+	private DatasourceInfo _defaultDatasource = null;
 	private boolean _multipleSelection = false;
 	
+	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
+	private Closure.V1<Table> _onTableSelected = null;
+	
 	
 	public ViewBase() {	
 		super();
@@ -180,21 +179,58 @@ public class ViewBase extends BorderPane implements View {
 		_onTableDrop = action;
 	}
 	
+	public void setOnTableSelected(Closure.V1<Table> action) {
+		_onTableSelected = action;
+	}
 	
 	public DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
 	}
 	
+	public List<Table> getLocalTables() {
+		List<Table> list = new ArrayList<>();
+		
+		for (DatasourceInfo info : _datasources) {
+			if (info.local)
+				list.add(info.table);
+		}
+		
+		return list;
+	}
+	
+	public Table getSelectedTable() {
+		for (DatasourceInfo info : _datasources) {
+			if (info.active)
+				return info.table;
+		}
+		return null;
+	}
 
+	public void setTables(List<Table> list, Table current) {
+		for (Table table : list) {
+			addTable(table, false, false);
+		}
+		
+		if (current != null) {
+			findDatasource(current).setSelected(true);
+		}
+	}
 	
 	public void addTable(Table table, boolean local) {
+		addTable(table, local, true);
+	}
+	
+	/**
+	 * addTable
+	 */
+	public void addTable(Table table, boolean local, boolean activate) {
 		final DatasourceInfo info = new DatasourceInfo(table, local);
 		_datasources.add(info);
 		if (local) {
-			info.button = ToggleButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
+			info.button = ToggleButtonBuilder.create().styleClass("flat-toggle-button").graphic(new ImageView(Resources.getIcon("table"))).build();
 			_dataBar.getChildren().add(info.button);
 		} else {
-			info.button = ToggleButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("table"))).build();
+			info.button = ToggleButtonBuilder.create().styleClass("flat-toggle-button").graphic(new ImageView(Resources.getIcon("table"))).build();
 			int index = -1;
 			for (DatasourceInfo di : _datasources) {
 				if (!di.local) index++;
@@ -205,30 +241,75 @@ public class ViewBase extends BorderPane implements View {
 		info.button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean prev, Boolean active) {
-				System.out.println("info: "+active);
-				info.active = active;
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
+				System.out.println("info: "+activate);
+				info.active = activate;
 				
-				if (active) {
+				if (activate) {
 					if (_multipleSelection) {
-						
+						// TODO
 					} else {
 						System.out.println("deactivate >>");
 						for (DatasourceInfo di : _datasources) {
-							if (di != info) {
-								di.setSelected(false);
+							if (di != info && di.active) {
+									di.setSelected(false);
 							}
 						}
 						System.out.println("deactivate <<");
 					}
+				} else /* deactivate */ {
+					boolean found = false; 
+					for (DatasourceInfo di : _datasources) {
+						if (di.active) {
+							found = true;
+							break;
+						}
+					}
+					if (!found && _defaultDatasource != null ) {
+						_defaultDatasource.setSelected(true);
+					}
 				}
-				if (prev != active)
-					datasourceStatusChanged(info, active);		
+					
+				if (prevState != activate)
+					datasourceStatusChanged(info, activate);		
 			}
 		});
+		
+		if (activate) {
+			if (_datasources.size() == 1) {
+				info.setSelected(true);
+			} else if (local) {
+				info.setSelected(true);
+			} else 
+				tableSelected(info.table);
+		}
+		
+	}
+	
+	
+	@Override
+	public void tableSelected(Table table) {
+		boolean activate = false;
+		if (_defaultDatasource != null && _defaultDatasource.active) {
+			_defaultDatasource.setSelected(false);
+			activate = true;
+		}
+		_defaultDatasource = findDatasource(table);
+		if (activate) {
+			_defaultDatasource.setSelected(true);
+		}
 	}
 	
 	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {	
+		if (_onTableSelected != null)
+			_onTableSelected.call(info.table);
+	}
+	
+	private DatasourceInfo findDatasource(Table table) {
+		for (DatasourceInfo info : _datasources)
+			if (info.table == table)
+				return info;
+		return null;
 	}
 	
 	/*
@@ -275,8 +356,8 @@ public class ViewBase extends BorderPane implements View {
 			@Override
 			public void handle(MouseEvent event) {
 				Parent parent = view.getParent();
-				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
-				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
+//				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
+//				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
 //				System.out.println("parent maxY:"+parent.getLayoutBounds().getMaxY()+"  h:"+getHeight());
 //				System.out.println("delta.y: "+delta.y+"  event.sy: "+event.getSceneY()+"  maxY:"+maxY);
 //				System.out.println("x: "+Math.min(Math.max(0, delta.x + event.getSceneX()), maxX)+"  y:"+Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
@@ -344,9 +425,7 @@ public class ViewBase extends BorderPane implements View {
 		});
 	}
 	
-	private void setListeners() {
-		
-		
+	private void setListeners() {	
 		setOnMouseMoved(_onMouseMove);
 		setOnMousePressed(_onMousePressed);
 		setOnMouseDragged(_onMouseDragged);
@@ -404,7 +483,6 @@ public class ViewBase extends BorderPane implements View {
 	
 	private EventHandler<MouseEvent> _onMouseDragged = new EventHandler<MouseEvent>() {
         public void handle(MouseEvent event) {
-//			System.out.println("OnMouseDrag: "+this);
         	if (resize.edge == Edge.NONE) {
         		return;
         	}
