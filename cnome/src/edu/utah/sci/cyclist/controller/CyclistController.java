@@ -1,8 +1,12 @@
 package edu.utah.sci.cyclist.controller;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.Arrays;
 import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
@@ -18,6 +22,7 @@ import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
+import edu.utah.sci.cyclist.presenter.TablesPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.view.MainScreen;
@@ -159,12 +164,12 @@ public class CyclistController {
 			
 		// Save the data sources
 		for(CyclistDatasource source: _model.getSources()){			
-			source.save(memento.createChild("sources"));
+			source.save(memento.createChild("CyclistDatasource"));
 		}
 		
 		// Save the data tables
 		for(Table table: _model.getTables()){
-			table.save(memento.createChild("tables"));
+			table.save(memento.createChild("Table"));
 		}
 		
 		try {
@@ -180,7 +185,7 @@ public class CyclistController {
 	private void load() {
 	
 		System.out.println("Load!");
-	/*	
+	
 		// Check if the save file exists
 		File saveFile = new File(SAVE_FILE);
 			
@@ -196,16 +201,22 @@ public class CyclistController {
 					XMLMemento memento = XMLMemento.createReadRoot(reader);
 					
 					// Read in the data sources
-					IMemento sources_list = memento.getChild("sources-list");
-					IMemento[] sources = sources_list.getChildren("CyclistDatasource");
+					IMemento[] sources = memento.getChildren("CyclistDatasource");
 					System.out.println("sourcs " + sources.length);
 					for(IMemento source: sources){
-						
 						CyclistDatasource datasource = new CyclistDatasource();
 						datasource.restore(source);
 						_model.getSources().add(datasource);
 					}
 					
+					// Read in the tables
+					IMemento[] tables = memento.getChildren("Table");
+					System.out.println("tables " + tables.length);
+					for(IMemento table: tables){
+						Table tbl = new Table();
+						tbl.restore(table, _model.getSources());
+						_model.getTables().add(tbl);
+					}
 					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -215,6 +226,6 @@ public class CyclistController {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} 		
-		}*/
+		}
 	}
 }

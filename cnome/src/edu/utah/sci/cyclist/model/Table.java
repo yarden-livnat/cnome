@@ -42,9 +42,6 @@ public class Table {
     // Save the table
 	public void save(IMemento memento) {
 
-		// Create the child memento
-		//XMLMemento memento = (XMLMemento) tablesListMemento.createChild("Table");
-
 		// Set the name
 		memento.putString("name", getName());
 		
@@ -66,6 +63,7 @@ public class Table {
 			IMemento entryMemento = mapMemento.createChild("entry");
 			entryMemento.putString("key", key);
 			entryMemento.putString("class", value.getClass().toString());
+			
 
 			// Save integers or strings as strings
 			if(value.getClass().toString().equals(String.class.toString()) || 
@@ -81,8 +79,46 @@ public class Table {
 	}
 	
 	// Restore the table
-	public void restore(IMemento memento){
+	public void restore(IMemento memento, ObservableList<CyclistDatasource> sources){
+	
+		// Get the name
+		setName(memento.getString("name"));
+
+		// Get the datasource
+		String datasourceUID = memento.getString("datasource-uid");
+		for(CyclistDatasource source: sources){
+			if(source.getUID().equals(datasourceUID))
+				setDataSource(source);
+		}
 		
+		// Get values in the property map	
+		IMemento mapMemento = memento.getChild("property-map");
+		IMemento[] entries =  mapMemento.getChildren("entry");
+		for(IMemento entry: entries){
+
+			// Get the key of the object
+			String key = entry.getString("key");
+			
+			// Get the class of the object
+			String classType = entry.getString("class");
+				
+			// If we have a string
+			if(classType.equals(String.class.toString())){
+				 String value = entry.getTextData();
+				 setProperty(key, value);
+			}
+			// If we have an Integer
+			else if(classType.equals(Integer.class.toString())){
+				 Integer value = Integer.parseInt(entry.getTextData());
+				 setProperty(key, value);
+			}
+			else{
+				System.out.println("Table:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
+			}	
+		}
+		
+		// Restore the schema
+		_schema.restore(memento);
 	}
 
 	

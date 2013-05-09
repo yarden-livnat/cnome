@@ -9,16 +9,13 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Logger;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-
 import javax.sql.DataSource;
-
 import edu.utah.sci.cyclist.controller.IMemento;
-import edu.utah.sci.cyclist.controller.XMLMemento;
 
 public class CyclistDatasource implements DataSource {
+	
 	private Properties _properties = new Properties();
 	private transient PrintWriter _logger;
 	private String _url;
@@ -30,15 +27,12 @@ public class CyclistDatasource implements DataSource {
 	}		
 
 	// Save this data source
-	public void save(IMemento sourcesListMemento) {
-				
-		// Create the child memento
-		IMemento memento = sourcesListMemento.createChild("CyclistDatasource");
-			
+	public void save(IMemento memento) {
+						
 		// Set the url
 		memento.putString("url", getURL());
 				
-		Enumeration e = _properties.keys();
+		Enumeration<Object> e = _properties.keys();
 		while (e.hasMoreElements()){
 			String key = (String) e.nextElement();
 			String value = _properties.getProperty(key);
@@ -51,7 +45,6 @@ public class CyclistDatasource implements DataSource {
 		
 		// Get all of the keys	
 		String[] keys = memento.getAttributeKeys();
-		System.out.println("Restore keys: " + keys.length);
 		for(String key: keys){
 
 			// Get the value associated with the key
@@ -129,7 +122,6 @@ public class CyclistDatasource implements DataSource {
 
 	@Override
 	public int getLoginTimeout() throws SQLException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -162,7 +154,4 @@ public class CyclistDatasource implements DataSource {
             _properties.put("pass", password);
         return DriverManager.getConnection(_url, _properties);
 	}
-
-	
-
 }
