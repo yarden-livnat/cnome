@@ -99,7 +99,7 @@ public class CyclistController {
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
 		tp.setPanel(screen.getToolsPanel());
-		tp.setTools(Arrays.asList(ToolsLibrary.list));
+		tp.setFactories(Arrays.asList(ToolsLibrary.factories));
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();

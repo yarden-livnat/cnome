@@ -28,6 +28,8 @@ import edu.utah.sci.cyclist.view.View;
 import javafx.scene.image.Image;
 
 public interface Tool {
+
+	String getId();
 	Image getIcon();
 	String getName();
 	View getView();

@@ -38,7 +38,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 import edu.utah.sci.cyclist.view.components.ViewBase;
 import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.tool.GenericTool;
+import edu.utah.sci.cyclist.view.tool.TableTool;
 import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class WorkspacePresenter extends PresenterBase {
@@ -87,7 +87,7 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Table table, Double x, Double y) {
-					TablePresenter presenter = (TablePresenter) addTool(new GenericTool(), x, y);
+					TablePresenter presenter = (TablePresenter) addTool(new TableTool(), x, y);
 					presenter.addTable(table, true);
 				}
 			});

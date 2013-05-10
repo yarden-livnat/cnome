@@ -27,6 +27,7 @@ import java.util.List;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.view.panels.ToolsPanel;
 import edu.utah.sci.cyclist.view.tool.Tool;
+import edu.utah.sci.cyclist.view.tool.ToolFactory;
 
 public class ToolsPresenter extends PresenterBase {
 
@@ -40,9 +41,9 @@ public class ToolsPresenter extends PresenterBase {
 		_panel = panel;
 	}
 	
-	public void setTools(List<Tool> tools) {
+	public void setFactories(List<ToolFactory> factories) {
 		if (_panel != null) {
-			_panel.setTools(tools);
+			_panel.setToolFactories(factories);
 		}
 	}
 }

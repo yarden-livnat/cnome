@@ -30,26 +30,42 @@ import edu.utah.sci.cyclist.presenter.Presenter;
 import edu.utah.sci.cyclist.view.SimpleTableView;
 import edu.utah.sci.cyclist.view.View;
 
-public class GenericTool implements Tool {
+public class TableTool implements Tool {
 
+	public static final String ID 			= "edu.utah.sci.cyclist.TableTool";
+	public static final String TOOL_NAME 	= "Table";
+	public static final String ICON_NAME 	= "table";
+	
+	private View _view = null;
+	private Presenter _presenter = null;
+	
+	@Override
+	public String getId() {
+		return ID;
+	}
+	
 	@Override
 	public Image getIcon() {
-		return Resources.getIcon("table", 16, 16);	
+		return Resources.getIcon(ICON_NAME, 16, 16);	
 	}
 
 	@Override
 	public String getName() {
-		return "Table";
+		return TOOL_NAME;
 	}
 
 	@Override
 	public View getView() {
-		return new SimpleTableView();
+		if (_view == null) 
+			_view = new SimpleTableView();
+		return _view;
 	}
 
 	@Override
 	public Presenter getPresenter(EventBus bus) {
-		return new TablePresenter(bus);
+		if (_presenter == null)
+			_presenter = new TablePresenter(bus);
+		return _presenter;
 	}
 
 }
