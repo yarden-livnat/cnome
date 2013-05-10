@@ -28,6 +28,7 @@ public class CyclistNotifications {
 	public static final String DATASOURCE_ADD 		= "datasource_add";
 	public static final String DATASOURCE_REMOVE	= "datasource_remove";
 	public static final String DATASOURCE_SELECTED 	= "datasource_selected";
+	public static final String DATASOURCE_UNSELECTED = "datasource_unselected";
 	
 	public static final String REMOVE_VIEW			= "remove_view";
 }

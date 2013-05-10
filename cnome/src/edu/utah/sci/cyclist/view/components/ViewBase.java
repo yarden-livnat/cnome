@@ -23,7 +23,9 @@
 package edu.utah.sci.cyclist.view.components;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -84,13 +86,22 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private final Resize resize = new Resize();
 	
-	private List<DatasourceInfo> _datasources = new ArrayList<>();
-	private DatasourceInfo _defaultDatasource = null;
-	private boolean _multipleSelection = false;
+	class ButtonEntry {
+		public ToggleButton button;
+		public Boolean remote;
+		
+		public ButtonEntry(ToggleButton button, Boolean remote) {
+			this.button = button;
+			this.remote = remote;
+		}	
+	}
+	
+	private Map<Table, ButtonEntry> _buttons = new HashMap<>();
+	private int _numOfRemotes = 0;
 	
 	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
-	private Closure.V1<Table> _onTableSelected = null;
+	private Closure.V2<Table, Boolean> _onTableSelected = null;
 	
 	
 	public ViewBase() {	
@@ -102,7 +113,6 @@ public class ViewBase extends BorderPane implements View {
 		// Title
 		HBox header = HBoxBuilder.create()
 				.spacing(2)
-				.padding(new Insets(0, 5, 0, 5))
 				.styleClass("header")
 				.alignment(Pos.CENTER_LEFT)
 				.children(
@@ -111,6 +121,7 @@ public class ViewBase extends BorderPane implements View {
 					_dataBar = HBoxBuilder.create()
 						.id("databar")
 						.styleClass("data-bar")
+						.spacing(2)
 						.minWidth(20)
 						.children(
 								LineBuilder.create().startY(0).endY(16).build()
@@ -201,7 +212,7 @@ public class ViewBase extends BorderPane implements View {
 		_onTableDrop = action;
 	}
 	
-	public void setOnTableSelected(Closure.V1<Table> action) {
+	public void setOnTableSelected(Closure.V2<Table, Boolean> action) {
 		_onTableSelected = action;
 	}
 	
@@ -209,146 +220,47 @@ public class ViewBase extends BorderPane implements View {
 		return DnD.getInstance().getLocalClipboard();
 	}
 	
-	public List<Table> getLocalTables() {
-		List<Table> list = new ArrayList<>();
-		
-		for (DatasourceInfo info : _datasources) {
-			if (info.local)
-				list.add(info.table);
-		}
-		
-		return list;
-	}
-	
-	public Table getSelectedTable() {
-		for (DatasourceInfo info : _datasources) {
-			if (info.active)
-				return info.table;
-		}
-		return null;
-	}
-
-	public void selectTable(Table table) {
-		selectTable(table, false);
-	}
-	
-	public void selectTable(Table table, boolean force) {
-		DatasourceInfo info = findDatasource(table);
-		if (info != null) {
-			if (force)
-				_defaultDatasource = info;
-			info.setSelected(true);
-		}
-	}
-	
-	public void setTables(List<Table> list, Table current) {
-		for (Table table : list) {
-			addTable(table, false, false);
-		}
-		
-		tableSelected(current);
-//		if (current != null) {
-//			findDatasource(current).setSelected(true);
-//		}
-	}
 	
 	@Override
-	public void tableSelected(Table table) {
-		boolean activate = false;
-		if (_defaultDatasource != null && _defaultDatasource.active) {
-			_defaultDatasource.setSelected(false);
-			activate = true;
-		} else {
-			activate = true;
-		}
-		_defaultDatasource = findDatasource(table);
-		if (activate && _defaultDatasource != null) {
-			_defaultDatasource.setSelected(true);
-		}
-	}
-	
-	public void addTable(Table table, boolean local) {
-		addTable(table, local, true);
-	}
-	
-	/**
-	 * addTable
-	 */
-	public void addTable(Table table, boolean local, boolean activate) {
-		final DatasourceInfo info = new DatasourceInfo(table, local);
-		_datasources.add(info);
-		if (local) {
-			info.button = ToggleButtonBuilder.create().styleClass("flat-toggle-button").graphic(new ImageView(Resources.getIcon("table"))).build();
-			_dataBar.getChildren().add(info.button);
-		} else {
-			info.button = ToggleButtonBuilder.create().styleClass("flat-toggle-button").graphic(new ImageView(Resources.getIcon("table"))).build();
-			int index = -1;
-			for (DatasourceInfo di : _datasources) {
-				if (!di.local) index++;
-			}
-			_dataBar.getChildren().add(index, info.button);
-		}
-		
-		info.button.selectedProperty().addListener(new ChangeListener<Boolean>() {
+	public void addTable(final Table table, boolean remote, boolean active) {
+		ToggleButton button = ToggleButtonBuilder.create()
+				.styleClass("flat-toggle-button")
+				//.graphic(new ImageView(Resources.getIcon("table")))
+				.text(table.getName().substring(0, 1))
+				.selected(active)
+				.build();
+		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				System.out.println(info.table.getName()+"  activate:"+activate);
-				info.active = activate;
-				
-				if (activate) {
-					if (_multipleSelection) {
-						// TODO
-					} else {
-						for (DatasourceInfo di : _datasources) {
-							if (di != info && di.active) {
-									di.setSelected(false);
-							}
-						}
-					}
-				} else /* deactivate */ {
-					boolean found = false; 
-					for (DatasourceInfo di : _datasources) {
-						if (di.active) {
-							found = true;
-							break;
-						}
-					}
-					if (!found && _defaultDatasource != null ) {
-						_defaultDatasource.setSelected(true);
-					}
-				}
-					
-				if (prevState != activate) {
-					datasourceStatusChanged(info, activate);
-					if (_defaultDatasource != null && !activate) {
-						_defaultDatasource.setSelected(true);
-					}
-				}
+				System.out.println(">>> " + table.getName()+"  activate:"+activate);
+				if (_onTableSelected != null)
+					_onTableSelected.call(table, activate);
+				System.out.println("<< " + table.getName()+"  activate");
 			}
 		});
 		
-		if (activate) {
-			if (_datasources.size() == 1) {
-				info.setSelected(true);
-			} else if (local) {
-				info.setSelected(true);
-			} else 
-				tableSelected(info.table);
-		}
+		_buttons.put(table, new ButtonEntry(button, remote));
 		
+		if (remote) {
+			_dataBar.getChildren().add(_numOfRemotes, button);
+			_numOfRemotes++;
+		} else {
+			_dataBar.getChildren().add(button);
+		}
 	}
 	
-	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {	
-		if (_onTableSelected != null)
-			_onTableSelected.call(info.table);
+	@Override
+	public void removeTable(Table table) {
+		ButtonEntry entry = _buttons.remove(table);
+		_dataBar.getChildren().remove(entry.button);
+		if (entry.remote)
+			_numOfRemotes--;
 	}
 	
-	private DatasourceInfo findDatasource(Table table) {
-		for (DatasourceInfo info : _datasources)
-			if (info.table == table)
-				return info;
-		return null;
+	@Override
+	public void selectTable(Table table, boolean value) {
+		_buttons.get(table).button.setSelected(value);
 	}
 	
 	/*
@@ -576,23 +488,74 @@ public class ViewBase extends BorderPane implements View {
 		public double sceneY;
 	}
 	
-	public class DatasourceInfo {
-		public Table table;
-		public boolean active;
-		public boolean local;
-		public ToggleButton button;
+	
+	
+	private Datasources _datasources;
+	
+	public abstract class Datasources {
 		
-		public DatasourceInfo(Table table, boolean local) {
-			this.table = table;
-			active = false;
-			this.local = local;
-			button = null;
+		private List<Entry> _entries = new ArrayList<>();
+		private int _locals = 0;
+		
+		public void setEnteries(List<Entry> list) {
+			_entries = list;
 		}
 		
-		public void setSelected(boolean value) {
-			button.setSelected(value);
+		public void add(Entry entry) {
+			_entries.add(entry);
+			if (entry.local)
+				_locals++;
+		}
+		
+		public void remove(Entry entry) {
+			_entries.remove(entry);
+		}
+		
+		public int getNumLocals() {
+			return _locals;
+		}
+		
+		public int getNumRemote() {
+			return _entries.size() - _locals;
+		}
+		
+		public void select(Entry entry, boolean value) {
+			if (entry.active != value) {
+				entry.active = value;
+				entry.button.setSelected(value);
+			}
+		}
+		
+		public Entry find(Table table) {
+			for (Entry entry : _entries) {
+				if (entry.table == table)
+					return entry;
+			}
+			return null;
+		}
+		
+		
+		
+		public abstract void removeTable(Table table);
+		public abstract void select(Table table);
+		public abstract void unselect(Table table);
+	
+		
+		public class Entry {
+			public Table table;
+			public boolean active;
+			public boolean local;
+			public ToggleButton button;
+			
+			public Entry(Table table, boolean local) {
+				this.table = table;
+				this.local = local;
+				this.active = false;
+				button = null;
+			}
 		}
 	}
+	
 }
 
 

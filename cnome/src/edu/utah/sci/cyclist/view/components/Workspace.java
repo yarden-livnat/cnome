@@ -37,7 +37,6 @@ import javafx.scene.layout.Pane;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.components.ViewBase.DatasourceInfo;
 import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class Workspace extends ViewBase implements View {
@@ -90,20 +89,23 @@ public class Workspace extends ViewBase implements View {
 				
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				DnD.LocalClipboard clipboard = getLocalClipboard();
-				if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) 
-				{
-					event.acceptTransferModes(TransferMode.COPY);
-				} 
-				
-				event.consume();
+//				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
+				if (event.getTarget() == _pane) {
+					DnD.LocalClipboard clipboard = getLocalClipboard();
+					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) 
+					{
+						event.acceptTransferModes(TransferMode.COPY);
+					} 
+					
+					event.consume();
+				}
 			}
 		});	
 		
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
-//				System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
-				event.consume();
+//			System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
+//				event.consume();
 			}
 		});
 		
@@ -111,7 +113,7 @@ public class Workspace extends ViewBase implements View {
 			public void handle(DragEvent event) {
 //				System.out.println("worspace exit");
 				// do nothing
-				event.consume();
+//				event.consume();
 			}
 		});
 		
@@ -183,17 +185,6 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
-	}
-	
-	@Override
-	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
-		super.datasourceStatusChanged(info, active);
-		
-		if (active) {
-			setTitle(info.table.getName());
-		} else {
-			setTitle("");
-		}
 	}
 	
 	/**

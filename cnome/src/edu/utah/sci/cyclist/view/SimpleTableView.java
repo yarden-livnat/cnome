@@ -67,37 +67,37 @@ public class SimpleTableView extends ViewBase {
 		VBox.setVgrow(_tableView, Priority.NEVER);
 	}
 	
-	@Override
-	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
-		
-		if (!active && info.table != _currentTable) {
-			// ignore
-			return;
-		}
-		super.datasourceStatusChanged(info, active);
-		
-		_tableView.itemsProperty().unbind();
-		if (_tableView.getItems() != null) _tableView.getItems().clear();
-		_tableView.getColumns().clear();	
-		
-		if (active) {
-			setTitle(info.table.getName());
-			Schema schema = info.table.getSchema();	
-			
-			List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();
-			for (int f=0; f<schema.size(); f++) {
-				Field field = schema.getField(f);				
-				cols.add(createColumn(field, f));
-			}
-			
-			_tableView.getColumns().addAll(cols);
-			_tableView.itemsProperty().bind(info.table.getRows(100));
-		} else {
-			setTitle("");
-		}
-		
-		_currentTable = info.table;
-	}
+//	@Override
+//	public void datasourceStatusChanged(DatasourceInfo info, boolean active) {
+//		
+//		if (!active && info.table != _currentTable) {
+//			// ignore
+//			return;
+//		}
+//		super.datasourceStatusChanged(info, active);
+//		
+//		_tableView.itemsProperty().unbind();
+//		if (_tableView.getItems() != null) _tableView.getItems().clear();
+//		_tableView.getColumns().clear();	
+//		
+//		if (active) {
+//			setTitle(info.table.getName());
+//			Schema schema = info.table.getSchema();	
+//			
+//			List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();
+//			for (int f=0; f<schema.size(); f++) {
+//				Field field = schema.getField(f);				
+//				cols.add(createColumn(field, f));
+//			}
+//			
+//			_tableView.getColumns().addAll(cols);
+//			_tableView.itemsProperty().bind(info.table.getRows(100));
+//		} else {
+//			setTitle("");
+//		}
+//		
+//		_currentTable = info.table;
+//	}
 	
 	
 	private <T> TableColumn<Table.Row, T> createColumn(final Field field, final int col) {

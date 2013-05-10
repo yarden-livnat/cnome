@@ -67,18 +67,19 @@ public class WorkspacePresenter extends PresenterBase {
 
 				@Override
 				public void call(Table table) {
-					_workspace.addTable(table, true, false);
+					_workspace.addTable(table, false /*remote*/, false /* active */);
 					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
 					_workspace.selectTable(table, true);
 				}
 				
 			});
 			
-			_workspace.setOnTableSelected(new Closure.V1<Table>() {
+			_workspace.setOnTableSelected(new Closure.V2<Table, Boolean>() {
 
 				@Override
-				public void call(Table table) {
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_SELECTED, table));				
+				public void call(Table table, Boolean activate) {
+					String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
+					broadcast(new CyclistTableNotification(msg, table));				
 				}
 				
 			});
@@ -88,7 +89,7 @@ public class WorkspacePresenter extends PresenterBase {
 				@Override
 				public void call(Table table, Double x, Double y) {
 					TablePresenter presenter = (TablePresenter) addTool(new TableTool(), x, y);
-					presenter.addTable(table, true);
+					presenter.addTable(table, false /* remote */, true /* active */);
 				}
 			});
 		}
@@ -104,7 +105,7 @@ public class WorkspacePresenter extends PresenterBase {
 		if (presenter != null) {	
 			_presenters.add(presenter);
 			presenter.setView(view);	
-			presenter.setTables(_workspace.getLocalTables(), _workspace.getSelectedTable());
+			presenter.setRemoteTables(getTableRecords());
 		}
 		
 		return presenter;

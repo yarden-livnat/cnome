@@ -37,6 +37,7 @@ public class TablePresenter extends PresenterBase {
 	public TablePresenter(EventBus bus) {
 		super(bus);
 		
+		setSelectionModel(new SingleSelection());
 		addNotificationHandlers();
 	}
 
@@ -47,7 +48,7 @@ public class TablePresenter extends PresenterBase {
 			
 			@Override
 			public void call(Table table) {
-				addTable(table, true);
+				addTable(table, false /* remote */, true /* active */);
 			}
 		});
 	}
@@ -58,7 +59,16 @@ public class TablePresenter extends PresenterBase {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				addTable(notification.getTable(), false);			
+				getView().addTable(notification.getTable(), true /*remote*/, false /* active */);			
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.DATASOURCE_REMOVE, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				CyclistTableNotification notification = (CyclistTableNotification) event;
+				getView().removeTable(notification.getTable());			
 			}
 		});
 		
@@ -67,12 +77,85 @@ public class TablePresenter extends PresenterBase {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getView().tableSelected(notification.getTable());			
+				getView().selectTable(notification.getTable(), true);			
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.DATASOURCE_UNSELECTED, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				CyclistTableNotification notification = (CyclistTableNotification) event;
+				getView().selectTable(notification.getTable(), false);			
 			}
 		});
 	}
 	
-	public void addTable(Table table, boolean local) {
-		getView().addTable(table, local);
+	
+	public void selectTable(Table table, boolean active) {
+		getView().selectTable(table, active);
+	}
+	
+	public class SingleSelection extends SelectionModel {
+		private Entry _current = null;
+		private boolean _ignore = false;
+		
+		@Override
+		public void addTable(Table table, boolean remote, boolean active) {
+			super.addTable(table, remote, active);
+			
+			if (active) {
+				if (_current == null) {
+					selectTable(table, true);
+				} else if (!remote) {
+					selectTable(table, true);
+				} else {
+					// select a remote only if no local table is active
+				}
+			}
+		}
+		
+		public void selectTable(Table table, boolean active) {
+			Entry entry = getEntry(table);
+			if (entry.active == active) {
+				// ignore
+			} else if (active) {
+				if (_current != null) {
+					_current.active = false;
+					getView().selectTable(_current.table, false);
+				}
+				_current = entry;
+				entry.active = true;
+				getView().selectTable(table, true);
+			} else /* unselect */ {
+				entry.active = false;
+				if (entry == _current) {
+					_current = null;
+				}
+				getView().selectTable(table, false);
+				
+				// TODO: select a default one from the remote?
+			}
+		}
+		
+		@Override
+		public void tableSelected(Table table, boolean active) {
+			Entry entry = getEntry(table);
+			if (entry.active == active) {
+				// ignore
+			} else if (active) {
+				if (_current != entry) {
+					_current.active = false;
+					getView().selectTable(_current.table, false);
+				}
+				_current = entry;
+				_current.active = true;
+			} else /* not active */ {
+				_current.active = false;
+				_current = null;
+				
+				// TODO: select a remore?
+			}
+		}
 	}
 }
