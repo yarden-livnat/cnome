@@ -25,9 +25,7 @@ package edu.utah.sci.cyclist.ui.wizards;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.util.ArrayList;
-import java.util.List;
+//import java.sql.ResultSetMetaData;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -59,9 +57,6 @@ import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.FieldProperties;
-import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
  
 
@@ -332,7 +327,7 @@ public class DatatableWizard extends VBox {
 			_statusDisplay.setImage(Resources.getIcon("ok"));
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, "%", null);
-			ResultSetMetaData rmd = rs.getMetaData();
+			//ResultSetMetaData rmd = rs.getMetaData();
 			while (rs.next()) {
 				_tablesView.getItems().add(rs.getString(3));
 			}

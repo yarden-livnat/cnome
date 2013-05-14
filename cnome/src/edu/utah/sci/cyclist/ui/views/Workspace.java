@@ -112,7 +112,7 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				System.out.println("worspace exit");
+//				System.out.println("workspace exit");
 				// do nothing
 //				event.consume();
 			}

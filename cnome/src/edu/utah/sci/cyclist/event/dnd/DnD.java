@@ -32,6 +32,7 @@ public class DnD {
 	public static final DataFormat TABLE_FORMAT	= new DataFormat("cyclist.dnd.datasource");
 	public static final DataFormat TOOL_FORMAT			= new DataFormat("cyclist.dnd.tool");
 	public static final DataFormat FIELD_FORMAT 		= new DataFormat("cyclist.dnd.field");
+	public static final DataFormat DnD_SOURCE_FORMAT = new DataFormat("cyclist.dnd.dnd_source");
 	
 	
 	

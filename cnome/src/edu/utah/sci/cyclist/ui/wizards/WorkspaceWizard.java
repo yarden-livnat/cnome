@@ -42,8 +42,6 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextBuilder;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Modality;

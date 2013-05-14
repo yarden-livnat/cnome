@@ -22,6 +22,8 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.presenter;
 
+import org.mo.closure.v1.Closure;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
@@ -53,6 +55,27 @@ public class SchemaPresenter  extends PresenterBase {
 		_dimensionsPanel = dimensions;
 		_measuresPanel = measures;
 		
+		_dimensionsPanel.setOnFieldDropAction(new Closure.V1<Field>() {
+
+			@Override
+			public void call(Field field) {
+				_measures.remove(field);
+				_dimensions.add(field);	
+				field.set(FieldProperties.ROLE, FieldProperties.VALUE_DIMENSION);
+			}
+			
+		});
+		
+		_measuresPanel.setOnFieldDropAction(new Closure.V1<Field>() {
+
+			@Override
+			public void call(Field field) {
+				_dimensions.remove(field);	
+				_measures.add(field);
+				field.set(FieldProperties.ROLE, FieldProperties.VALUE_MEASURE);
+			}
+			
+		});
 	}
 	
 	private void addNotificationListeners() {

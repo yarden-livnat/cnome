@@ -1,5 +1,6 @@
 package edu.utah.sci.cyclist.ui.panels;
 
+import org.mo.closure.v1.Closure;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,10 +8,12 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -21,11 +24,19 @@ import edu.utah.sci.cyclist.model.Field;
 
 public class SchemaPanel extends Panel {
 		
+	private String _id;
 	private ObservableList<Field> _fields;
 	private List<Entry> _entries;
+	private Closure.V1<Field> _onFieldDropAction = null;
 	
 	public SchemaPanel(String title) {
 		super(title);
+		_id = title;
+		addListeners();
+	}
+	
+	public void setOnFieldDropAction(Closure.V1<Field> action) {
+		_onFieldDropAction = action;
 	}
 	
 	public void setFields(ObservableList<Field> fields) {
@@ -67,11 +78,12 @@ public class SchemaPanel extends Panel {
 				
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 				clipboard.put(DnD.FIELD_FORMAT, Field.class, entry.field);
+				clipboard.put(DnD.DnD_SOURCE_FORMAT, Node.class, SchemaPanel.this);
 				
 				Dragboard db = entry.label.startDragAndDrop(TransferMode.COPY);
 				
 				ClipboardContent content = new ClipboardContent();
-				content.putString(entry.label.getText());
+				content.putString(_id);
 //				content.putImage(Resources.getIcon("field"));
 				
 				db.setContent(content);
@@ -89,6 +101,44 @@ public class SchemaPanel extends Panel {
 		}
 	};
 	
+	
+	private void addListeners() {
+		getContent().setOnDragEntered(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {		
+				System.out.println("enter");
+				event.consume();
+			}
+		});
+		
+		getContent().setOnDragOver(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				System.out.println("over");
+
+				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
+				
+				Node src = clipboard.get(DnD.DnD_SOURCE_FORMAT, Node.class);
+				if (src != null && src != SchemaPanel.this) {
+					event.acceptTransferModes(TransferMode.COPY);
+				}
+				event.consume();
+			}
+		});
+		
+		getContent().setOnDragExited(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				event.consume();
+			}
+		});
+			
+		getContent().setOnDragDropped(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
+				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
+				if (_onFieldDropAction != null) 
+					_onFieldDropAction.call(field);
+			}
+		});
+	}
 	
 	class Entry {
 		Label label;

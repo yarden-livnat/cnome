@@ -142,9 +142,9 @@ public class Table {
 		
 		// Restore the schema
 		Schema schema = new Schema();
-		schema.restore(memento);
+		schema.restore(memento.getChild("Schema"));
 		setSchema(schema);
-		extractSchema();
+//		extractSchema();
 		
 	}
 

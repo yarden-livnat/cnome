@@ -109,6 +109,7 @@ public class SimpleTableView extends ViewBase {
 					public ObservableValue<T> call(CellDataFeatures<Row, T> cell) {
 						return new SimpleObjectProperty<T>(cell.getValue(), field.getName()) {
 							
+							@SuppressWarnings("unchecked")
 							@Override
 							public T getValue() {
 								Row row = (Row) getBean();
