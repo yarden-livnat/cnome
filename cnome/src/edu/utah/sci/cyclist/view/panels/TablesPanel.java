@@ -22,31 +22,52 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.view.panels;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListViewBuilder;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.control.Label;
+import javafx.scene.control.LabelBuilder;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.util.Callback;
+import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
 
-public class TablesPanel extends TitledPane  {
-	public static final String ID 		= "datasources-panel";
+public class TablesPanel extends Panel  {
+	public static final String ID 		= "cnome-panel";
 	public static final String TITLE	= "Tables";
 	
-	private ListView<Table> _tables;
+	public static final String SELECTED_STYLE = "-fx-background-color: #99ccff";
+	public static final String UNSELECTED_STYLE = "-fx-background-color: #f0f0f0";
+	
+	
+	private List<Entry> _entries;
+	private ObservableList<Table> _items;
+	private ObjectProperty<Table> _tablePropery = new SimpleObjectProperty<>();
+	private Entry _selected = null;
+	private InvalidationListener _listener = new InvalidationListener() {
+		
+		@Override
+		public void invalidated(Observable observable) {
+			resetContent();
+
+		}
+	};
 	
 	public TablesPanel() {
-		build();
+		super(TITLE);
 	}
 	
 //	@Override
@@ -55,66 +76,82 @@ public class TablesPanel extends TitledPane  {
 	}
 
 	
-	public void setItems(ObservableList<Table> items) {
-		_tables.setItems(items);
-	}
-	
-	
-	public ReadOnlyObjectProperty<Table> selectedItemProperty() {
-		return _tables.getSelectionModel().selectedItemProperty();
-	}
-	
-	private void build() {
-		setId(ID);
-		setText(TITLE);
-		
-		_tables = ListViewBuilder.<Table>create()
-					.maxHeight(150)
-					.prefWidth(150)
-					.build();
-		
-		_tables.setCellFactory(new Callback<ListView<Table>, ListCell<Table>>() {
-			
-			@Override
-			public ListCell<Table> call(ListView<Table> param) {
-				return new TableCell();
+	public void setItems(final ObservableList<Table> items) {
+		if (_items != items) {
+			if (_items != null) {
+				_items.removeListener(_listener);
 			}
-		});
 			
-		setContent(_tables);
+			items.addListener(_listener);
+			
+			_items = items;
+		}
+		
+		resetContent();
 	}
 	
-	class TableCell extends TextFieldListCell<Table> {		
-		@Override
-		public void updateItem(Table table, boolean empty) {
-			super.updateItem(table, empty);
-			
-			if (table != null) {
-				setText(table.getName());
-				setOnDragDetected(new EventHandler<Event>() {
-
-					@Override
-					public void handle(Event event) {
-						
-						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-						clipboard.put(DnD.DATA_SOURCE_FORMAT, Table.class, TableCell.this.getItem());
-						
-						Dragboard db = TableCell.this.startDragAndDrop(TransferMode.COPY);
-						
-						ClipboardContent content = new ClipboardContent();
-						content.putString(TableCell.this.getItem().getName());
-						content.put(DnD.DATA_SOURCE_FORMAT, TableCell.this.getItem().getName()) ;
-						content.putImage(Resources.getIcon("table"));
-						
-						db.setContent(content);
-						
-						event.consume();
-					}
-				});
-			} else {
-				setText("");
-			}
+	private void resetContent() {
+		VBox vbox = (VBox) getContent();
+		vbox.getChildren().clear();
+		
+		_entries = new ArrayList<>();
+		for (Table table : _items) {
+			Entry entry = createEntry(table);
+			_entries.add(entry);
+			vbox.getChildren().add(entry.title);
 		}
 	}
 	
+	private void select(Entry entry) {
+		if (_selected != null) 
+			_selected.title.setStyle(UNSELECTED_STYLE);
+		_selected = entry;
+		_selected.title.setStyle(SELECTED_STYLE);
+	}
+	
+	public ReadOnlyObjectProperty<Table> selectedItemProperty() {
+		return _tablePropery;
+	}
+	
+	private Entry createEntry(Table table) {
+		final Entry entry = new Entry();
+		entry.table = table;
+		entry.title = LabelBuilder.create()
+						.text(table.getName())
+						.graphic(new ImageView(Resources.getIcon("table")))
+						.build();
+		
+		entry.title.setOnMouseClicked(new EventHandler<Event>() {
+
+			@Override
+			public void handle(Event event) {
+				_tablePropery.set(entry.table);
+				select(entry);
+				
+			}
+		});
+		
+		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent event) {					
+				
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.TABLE_FORMAT, Table.class, entry.table);
+				
+				Dragboard db = entry.title.startDragAndDrop(TransferMode.COPY);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.put(DnD.TABLE_FORMAT, entry.title.getText());
+				content.putImage(Resources.getIcon("table"));
+				
+				db.setContent(content);
+			}
+		});
+
+		return entry;
+	}
+	
+	class Entry {
+		Label title;
+		Table table;
+	}
 }

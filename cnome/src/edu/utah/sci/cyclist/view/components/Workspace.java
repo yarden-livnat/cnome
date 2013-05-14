@@ -92,7 +92,7 @@ public class Workspace extends ViewBase implements View {
 //				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
 				if (event.getTarget() == _pane) {
 					DnD.LocalClipboard clipboard = getLocalClipboard();
-					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) 
+					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
 					{
 						event.acceptTransferModes(TransferMode.COPY);
 					} 
@@ -125,8 +125,8 @@ public class Workspace extends ViewBase implements View {
 						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
 						if (_onToolDrop != null)
 							_onToolDrop.call(tool, event.getX(), event.getY());
-					} else if (clipboard.hasContent(DnD.DATA_SOURCE_FORMAT)) {
-						Table table = clipboard.get(DnD.DATA_SOURCE_FORMAT, Table.class);
+					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
+						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
 						if (_onShowTable != null) {
 							_onShowTable.call(table, event.getX(), event.getY());
 						}

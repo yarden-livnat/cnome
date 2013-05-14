@@ -36,7 +36,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.PaneBuilder;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class Cyclist extends Application {
 	public static final String TITLE = "Cyclist";

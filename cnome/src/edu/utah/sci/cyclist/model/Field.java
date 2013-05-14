@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.utah.sci.cyclist.controller.IMemento;
-import edu.utah.sci.cyclist.controller.XMLMemento;
 
 public class Field {
 

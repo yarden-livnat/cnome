@@ -22,7 +22,6 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.view.components;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
@@ -101,7 +99,7 @@ public class ViewBase extends BorderPane implements View {
 	
 	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
-	private Closure.V2<Table, Boolean> _onTableSelected = null;
+	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	
 	
 	public ViewBase() {	
@@ -212,8 +210,8 @@ public class ViewBase extends BorderPane implements View {
 		_onTableDrop = action;
 	}
 	
-	public void setOnTableSelected(Closure.V2<Table, Boolean> action) {
-		_onTableSelected = action;
+	public void setOnTableSelectedAction(Closure.V2<Table, Boolean> action) {
+		_onTableSelectedAction = action;
 	}
 	
 	public DnD.LocalClipboard getLocalClipboard() {
@@ -229,14 +227,15 @@ public class ViewBase extends BorderPane implements View {
 				.text(table.getName().substring(0, 1))
 				.selected(active)
 				.build();
+		
 		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				System.out.println(">>> " + table.getName()+"  activate:"+activate);
-				if (_onTableSelected != null)
-					_onTableSelected.call(table, activate);
-				System.out.println("<< " + table.getName()+"  activate");
+				//System.out.println("ViewBase ["+getId()+"]>>> " + table.getName()+"  activate:"+activate);
+				if (_onTableSelectedAction != null)
+					_onTableSelectedAction.call(table, activate);
+				//System.out.println("ViewBase ["+getId()+"]<< " + table.getName()+"  activate");
 			}
 		});
 		
@@ -290,7 +289,6 @@ public class ViewBase extends BorderPane implements View {
 	 * Listeners
 	 */
 	private void setHeaderListeners(HBox header) {
-		final ViewBase view = this;
 		final Delta delta = new Delta();
 		
 		header.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -306,7 +304,7 @@ public class ViewBase extends BorderPane implements View {
 		header.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				Parent parent = view.getParent();
+//				Parent parent = view.getParent();
 //				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
 //				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
 //				System.out.println("parent maxY:"+parent.getLayoutBounds().getMaxY()+"  h:"+getHeight());
@@ -337,7 +335,7 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
+				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
 					event.acceptTransferModes(TransferMode.COPY);
 				}
 				event.consume();
@@ -347,7 +345,7 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
+				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
 					event.acceptTransferModes(TransferMode.COPY);
 				}
 				event.consume();
@@ -364,8 +362,8 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setOnDragDropped(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.DATA_SOURCE_FORMAT) != null) {
-					Table table = getLocalClipboard().get(DnD.DATA_SOURCE_FORMAT, Table.class);
+				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
+					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 					if (_onTableDrop != null) {
 						_onTableDrop.call(table);
 					}
@@ -486,76 +484,7 @@ public class ViewBase extends BorderPane implements View {
 		public double height;
 		public double sceneX;
 		public double sceneY;
-	}
-	
-	
-	
-	private Datasources _datasources;
-	
-	public abstract class Datasources {
-		
-		private List<Entry> _entries = new ArrayList<>();
-		private int _locals = 0;
-		
-		public void setEnteries(List<Entry> list) {
-			_entries = list;
-		}
-		
-		public void add(Entry entry) {
-			_entries.add(entry);
-			if (entry.local)
-				_locals++;
-		}
-		
-		public void remove(Entry entry) {
-			_entries.remove(entry);
-		}
-		
-		public int getNumLocals() {
-			return _locals;
-		}
-		
-		public int getNumRemote() {
-			return _entries.size() - _locals;
-		}
-		
-		public void select(Entry entry, boolean value) {
-			if (entry.active != value) {
-				entry.active = value;
-				entry.button.setSelected(value);
-			}
-		}
-		
-		public Entry find(Table table) {
-			for (Entry entry : _entries) {
-				if (entry.table == table)
-					return entry;
-			}
-			return null;
-		}
-		
-		
-		
-		public abstract void removeTable(Table table);
-		public abstract void select(Table table);
-		public abstract void unselect(Table table);
-	
-		
-		public class Entry {
-			public Table table;
-			public boolean active;
-			public boolean local;
-			public ToggleButton button;
-			
-			public Entry(Table table, boolean local) {
-				this.table = table;
-				this.local = local;
-				this.active = false;
-				button = null;
-			}
-		}
-	}
-	
+	}	
 }
 
 

@@ -1,167 +1,97 @@
-/*******************************************************************************
- * Copyright (c) 2013 SCI Institute, University of Utah.
- * All rights reserved.
- *
- * License for the specific language governing rights and limitations under Permission
- * is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction, 
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions: The above copyright notice 
- * and this permission notice shall be included in all copies  or substantial portions of the Software. 
- *  
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- *  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR 
- *  A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
- *  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
- *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
- *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * Contributors:
- *     Yarden Livnat  
- *******************************************************************************/
 package edu.utah.sci.cyclist.view.panels;
 
-import javafx.collections.FXCollections;
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListViewBuilder;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.SplitPaneBuilder;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.LabelBuilder;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.util.Callback;
+import javafx.scene.layout.VBox;
+import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.FieldProperties;
-import edu.utah.sci.cyclist.model.Schema;
 
-public class SchemaPanel extends TitledPane {
-	public static final String ID 		= "schema-panel";
-	public static final String TITLE	= "Schema";
-	
-	private Schema _schema;
-	private ListView<Field> _dimensionsView;
-	private ListView<Field> _measuresView;
-	
-	public SchemaPanel() {
-		build();
-	}
-	
-	public void setTitle(String title) {
-		setTitle(title);
-	}
-	
-	public void setSchema(Schema schema) {
-		_schema = schema;
-
-		ObservableList<Field> dimensions = FXCollections.observableArrayList();
-		ObservableList<Field> mesures = FXCollections.observableArrayList();
+public class SchemaPanel extends Panel {
 		
-		for (int f=0; f < schema.size(); f++) {
-			Field field = schema.getField(f);
-			switch (field.getString(FieldProperties.ROLE)) {
-			case FieldProperties.VALUE_DIMENSION:
-				dimensions.add(field);
-				break;
-			case FieldProperties.VALUE_MEASURE:
-				mesures.add(field);
-				break;
-			case FieldProperties.VALUE_UNKNOWN:
-				// ignore for now
-				break;
+	private ObservableList<Field> _fields;
+	private List<Entry> _entries;
+	
+	public SchemaPanel(String title) {
+		super(title);
+	}
+	
+	public void setFields(ObservableList<Field> fields) {
+		if (_fields != fields) {
+			if (_fields != null) {
+				_fields.removeListener(_invalidationListener);
 			}
+			
+			_fields = fields;
+			_fields.addListener(_invalidationListener);
 		}
 		
-		_dimensionsView.setItems(dimensions);
-		_measuresView.setItems(mesures);
+		resetContent();
 	}
 	
-	private void build() {
-		setId(ID);
-		setText(TITLE);
+	private void resetContent() {
+		VBox vbox = (VBox) getContent();
+		vbox.getChildren().clear();
 		
-		SplitPane pane = SplitPaneBuilder.create()
-				.maxHeight(150)
-				.orientation(Orientation.VERTICAL)
-				.items(
-						_dimensionsView = ListViewBuilder.<Field>create()
-								.prefWidth(100)
-								.build(),
-						_measuresView = ListViewBuilder.<Field>create()
-								.prefWidth(100)
-								.build()
-					)
-				.build();
-		
-		
-		_dimensionsView.setCellFactory(new Callback<ListView<Field>, ListCell<Field>>() {
-			
-			@Override
-			public ListCell<Field> call(ListView<Field> param) {
-				return new FieldCell();
-			}
-		});
-		
-		_measuresView.setCellFactory(new Callback<ListView<Field>, ListCell<Field>>() {
-			
-			@Override
-			public ListCell<Field> call(ListView<Field> param) {
-				return new FieldCell();
-			}
-		});
-		
-		setContent(pane);
+		_entries = new ArrayList<>();
+		for (Field field : _fields) {
+			Entry entry = createEntry(field);
+			_entries.add(entry);
+			vbox.getChildren().add(entry.label);
+		}
 	}
 	
-	class FieldCell extends ListCell<Field> {
-			private Label _label;
-			
-			public FieldCell() {
-				_label = new Label("");
-				_label.setAlignment(Pos.CENTER_LEFT);
-				setGraphic(_label);
+	private Entry createEntry(Field field) {
+		final Entry entry = new Entry();
+		entry.field = field;
+		
+		entry.label = LabelBuilder.create()
+						.text(field.getName())
+						.graphic(new ImageView(Resources.getIcon(field.getDataTypeName())))
+						.build();
+		
+		entry.label.setOnDragDetected(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent event) {					
 				
-				addListeners();
-			}
-			
-			@Override
-			public void updateItem(Field field, boolean empty) {
-				super.updateItem(field, empty);	
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.FIELD_FORMAT, Field.class, entry.field);
 				
-				if (field != null) {
-					_label.setText(field.getName());
-				} else {
-					_label.setText("");
-				}
+				Dragboard db = entry.label.startDragAndDrop(TransferMode.COPY);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.putString(entry.label.getText());
+//				content.putImage(Resources.getIcon("field"));
+				
+				db.setContent(content);
 			}
-			
-			private void addListeners() {
-				_label.setOnDragDetected(new EventHandler<Event>() {
+		});
+		return entry;
+	}
+	
 
-					@Override
-					public void handle(Event event) {
-						System.out.println("field drag");
-						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-						clipboard.put(DnD.FIELD_FORMAT, Field.class, getItem());
-						
-						Dragboard db = _label.startDragAndDrop(TransferMode.COPY);
-						ClipboardContent content = new ClipboardContent();
-						content.putString("Test");
-						content.put(DnD.FIELD_FORMAT, getItem().getName());
-						db.setContent(content);
-						
-						event.consume();
-					}
-				});
-			}
+	private InvalidationListener _invalidationListener = new InvalidationListener() {
+		
+		@Override
+		public void invalidated(Observable observable) {
+			resetContent();
+		}
+	};
+	
+	
+	class Entry {
+		Label label;
+		Field field;
 	}
 }

@@ -43,7 +43,6 @@ import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class WorkspacePresenter extends PresenterBase {
 
-//	private Workspace _workspace;
 	private List<Presenter> _presenters = new ArrayList<>();
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
@@ -81,16 +80,6 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			});
 			
-			workspace.setOnTableSelected(new Closure.V2<Table, Boolean>() {
-
-				@Override
-				public void call(Table table, Boolean activate) {
-					String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
-					broadcast(new CyclistTableNotification(msg, table));				
-				}
-				
-			});
-			
 			workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
 
 				@Override
@@ -102,6 +91,9 @@ public class WorkspacePresenter extends PresenterBase {
 		}
 	}
 
+	/*
+	 * addTool
+	 */
 	private Presenter addTool(Tool tool, double x, double y) {
 		ViewBase view = (ViewBase) tool.getView();
 		view.setTranslateX(x);
@@ -118,6 +110,10 @@ public class WorkspacePresenter extends PresenterBase {
 		return presenter;
 	}
 	
+	
+	/*
+	 * addListeners
+	 */
 	private void addListeners() {
 		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {
 			
@@ -134,6 +130,21 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			}
 		});
+		
+		SelectionModel selectionModel = new SingleSelection();
+		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+
+			@Override
+			public void call(Table table, Boolean activate) {
+				System.out.println("workspace presenter: selectTable: "+table.getName()+" active:"+activate);
+				getView().selectTable(table, activate);	
+				String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
+				broadcast(new CyclistTableNotification(msg, table));
+			}
+		
+		});
+		
+		setSelectionModel(selectionModel);
 	}
 	
 }

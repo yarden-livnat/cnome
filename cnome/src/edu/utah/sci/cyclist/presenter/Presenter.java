@@ -28,7 +28,6 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.view.View;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.presenter.PresenterBase.TableRecord;
 
 public abstract interface Presenter {
 	String getId();
@@ -37,11 +36,11 @@ public abstract interface Presenter {
 	void setView(final View view);
 	View getView();
 	
-	void setRemoteTables(List<TableRecord> list);
+	void setRemoteTables(List<SelectionModel.Entry> list);
 	void addTable(Table table, boolean remote, boolean active, boolean remoteActive);
 	void removeTable(Table table);
 	
-	List<TableRecord> getTableRecords();
+	List<SelectionModel.Entry> getTableRecords();
 	
 	void broadcast(CyclistNotification notification);
 	

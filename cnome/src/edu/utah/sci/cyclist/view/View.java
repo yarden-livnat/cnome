@@ -34,7 +34,7 @@ public interface View {
 	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
 	
 	void setOnTableDrop(Closure.V1<Table> action);
-	void setOnTableSelected(Closure.V2<Table, Boolean> action);
+	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
 	
 	void addTable(Table table, boolean remote, boolean active);
 	void removeTable(Table table);

@@ -22,9 +22,7 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,7 +73,4 @@ public class Resources {
 		return image;
 	}
 	
-//	public static void clean() {
-//		_icons = new HashMap<String, Image>();
-//	}
 }

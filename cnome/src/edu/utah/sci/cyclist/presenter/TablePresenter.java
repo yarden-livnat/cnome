@@ -32,15 +32,38 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.view.View;
 
+
 public class TablePresenter extends PresenterBase {
+	
+	/**
+	 * TablePresenter
+	 * Constructor
+	 * @param bus
+	 */
 	
 	public TablePresenter(EventBus bus) {
 		super(bus);
 		
-		setSelectionModel(new SingleSelection());
+		SingleSelection selectionModel = new SingleSelection();
+		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+
+			@Override
+			public void call(Table table, Boolean value) {
+				getView().selectTable(table, value);
+				
+			}
+		
+		});
+		
+		setSelectionModel(selectionModel);
 		addNotificationHandlers();
 	}
 
+	/**
+	 * setView
+	 * @param view
+	 */
+	
 	public void setView(View view) {
 		super.setView(view);
 		
@@ -52,6 +75,10 @@ public class TablePresenter extends PresenterBase {
 			}
 		});
 	}
+	
+	/**
+	 * addNotficicationHandlers
+	 */
 	
 	public void addNotificationHandlers() {
 		addNotificationHandler(CyclistNotifications.DATASOURCE_ADD, new CyclistNotificationHandler() {
@@ -93,80 +120,5 @@ public class TablePresenter extends PresenterBase {
 	}
 	
 	
-	public class SingleSelection extends SelectionModel {
-		private Entry _current = null;
-		
-		@Override
-		public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
-			super.addTable(table, remote, false, remoteActive);
-			
-			if (active) {
-				if (_current == null) {
-					selectTable(table, true);
-				} else if (!remote) {
-					selectTable(table, true);
-				} else {
-					// select a remote only if no local table is active
-				}
-			}
-		}
-		
-		public void selectTable(Table table, boolean active) {
-			System.out.println("selectTable: "+table.getName()+"  active:"+active);
-			Entry entry = getEntry(table);
-			if (entry.active == active) {
-				// ignore
-			} else if (active) {
-				if (_current != null) {
-					if (!_current.remote && entry.remote) {
-						// ignore. 
-						// switch from a local to a remote on on user explicit request (tableSelected) 
-						entry.remoteActive = true;
-						return;
-					} else {
-						_current.active = false;
-						getView().selectTable(_current.table, false);
-					}
-				}
-				_current = entry;
-				entry.active = true;
-				getView().selectTable(table, true);
-			} else /* unselect */ {
-				entry.active = false;
-				if (entry == _current) {
-					_current = null;
-				}
-				getView().selectTable(table, false);
-				
-				// TODO: select a default one from the remote?
-			}
-		}
-		
-		@Override
-		public void tableSelected(Table table, boolean active) {
-			System.out.println("tableSelected: "+table.getName()+"  active:"+active);
-			Entry entry = getEntry(table);
-			if (entry.active == active) {
-				// ignore
-			} else if (active) {
-				if (_current != entry && _current != null) {
-					_current.active = false;
-					getView().selectTable(_current.table, false);
-				}
-				_current = entry;
-				_current.active = true;
-			} else /* not active */ {
-				_current.active = false;
-				_current = null;
-				
-				// check if there is a remoteActive
-				for (Entry remoteEntry : getRemotes()) {
-					if (remoteEntry.remoteActive) {
-						selectTable(remoteEntry.table, true);
-						break;
-					}
-				}
-			}
-		}
-	}
+	
 }

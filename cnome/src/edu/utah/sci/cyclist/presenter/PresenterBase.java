@@ -24,7 +24,6 @@ package edu.utah.sci.cyclist.presenter;
 
 import org.mo.closure.v1.Closure;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javafx.event.ActionEvent;
@@ -73,7 +72,7 @@ public class PresenterBase implements Presenter {
 				}
 			});
 			
-			_view.setOnTableSelected(new Closure.V2<Table, Boolean>() {
+			_view.setOnTableSelectedAction(new Closure.V2<Table, Boolean>() {
 				
 				@Override
 				public void call(Table table, Boolean active) {
@@ -106,12 +105,13 @@ public class PresenterBase implements Presenter {
 	}
 
 	@Override
-	public void setRemoteTables(List<TableRecord> list) {
-		for (TableRecord record : list) {
+	public void setRemoteTables(List<SelectionModel.Entry> list) {
+		for (SelectionModel.Entry record : list) {
 			// infom the view but let the selection model determine if it should be active
 			getView().addTable(record.table, true /*remote*/, false /* active */);
-			_selectionModel.addTable(record.table, true, false, record.active);
+//			getSelectionModel().addTable(record.table, true, false, record.active);
 		}
+		getSelectionModel().setRemoteTables(list);
 	}
 	
 	@Override
@@ -128,86 +128,7 @@ public class PresenterBase implements Presenter {
 	}
 	
 	@Override
-	public List<TableRecord> getTableRecords() {
+	public List<SelectionModel.Entry> getTableRecords() {
 		return _selectionModel.getTableRecords();
 	}
-	
-	public class TableRecord {
-		Table table;
-		boolean active;
-		
-		public TableRecord(Table table, boolean active) {
-			this.table = table;
-			this.active = active;
-		}
-	}
-	
-	public class SelectionModel {
-		private List<Entry> _list = new ArrayList<Entry>();
-		private int _remotes = 0;
-		
-//		public int getRemotes() {
-//			return _remotes;
-//		}
-		
-		public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
-			_list.add(new Entry(table, remote, active, remoteActive));
-			if (remote) _remotes++;
-		}
-		
-		public void removeTable(Table table) {
-			Entry entry = getEntry(table);
-			if (entry != null) {
-				_list.remove(entry);
-			}
-		}
-		
-		public Entry getEntry(Table table) {
-			for (Entry entry : _list)
-				if (entry.table == table)
-					return entry;
-			return null;
-		}
-		
-		public List<TableRecord> getTableRecords() {
-			List<TableRecord> records = new ArrayList<>();
-			for (Entry entry : _list) {
-				records.add(new TableRecord(entry.table, entry.active));
-			}
-			return records;
-		}
-		
-		public List<Entry> getRemotes() {
-			List<Entry> records = new ArrayList<>();
-			for (Entry entry : _list)
-				if (entry.remote)
-					records.add(entry);
-			return records;
-		}
-		
-		public void selectTable(Table table, boolean active) {
-			// ignore here.
-		}
-		
-		public void tableSelected(Table table, boolean active) {
-			// ignore here
-		}
-		
-		public class Entry {
-			Table table;
-			boolean remote;
-			boolean active;
-			boolean remoteActive;
-			
-			public Entry(Table table, boolean remote, boolean active, boolean remoteActive) {
-				this.table = table;
-				this.remote = remote;
-				this.active = active;
-				this.remoteActive = remoteActive;
-			}
-		}
-	}
-
-
-	
 }

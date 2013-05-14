@@ -79,7 +79,6 @@ public class CyclistController {
 	 */
 	public void setScreen(final MainScreen screen) {
 		this._screen = screen;
-		screen.setControler(this);
 		addActions();
 			
 		/*
@@ -94,7 +93,7 @@ public class CyclistController {
 		
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
-		sp.setPanel(screen.getSchemaPanel());
+		sp.setPanels(screen.getDimensionPanel(), screen.getMeauresPanel());
 		
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
@@ -203,15 +202,14 @@ public class CyclistController {
 	
 	// Load saved properties
 	private void load() {
-	
-	
+		
 		// Check if the save file exists
 		File saveFile = new File(SAVE_FILE);
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
 			
-			
+	
 			Reader reader;
 			try {
 				reader = new FileReader(saveFile);
@@ -229,7 +227,7 @@ public class CyclistController {
 					
 					// Read in the tables
 					IMemento[] tables = memento.getChildren("Table");
-					System.out.println("tables " + tables.length);
+					//System.out.println("tables " + tables.length);
 					for(IMemento table: tables){
 						Table tbl = new Table();
 						tbl.restore(table, _model.getSources());

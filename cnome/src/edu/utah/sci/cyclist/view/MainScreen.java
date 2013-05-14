@@ -26,23 +26,22 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.view.components.Spring;
 import edu.utah.sci.cyclist.view.components.Workspace;
 import edu.utah.sci.cyclist.view.panels.SchemaPanel;
 import edu.utah.sci.cyclist.view.panels.TablesPanel;
@@ -53,14 +52,13 @@ public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
 	
 	private MenuBar _menubar;
-	private VBox _toolsArea;
+	private SplitPane _toolsArea;
 	private HBox _content;
 	private TablesPanel _datasourcesPanel;
-	private SchemaPanel _schemaPanel;
+	private SchemaPanel _dimensionsPanel;
+	private SchemaPanel _measuresPanel;
 	private ToolsPanel _toolsPanel;
-	
-	private CyclistController _controller;
-	
+		
 	/**
 	 * Constructor
 	 */
@@ -73,10 +71,6 @@ public class MainScreen extends VBox {
 	
 	public Window getWindow() {
 		return getScene().getWindow();
-	}
-	
-	public void setControler(CyclistController controler) {
-		this._controller = controler;
 	}
 	
 	public ObjectProperty<String> selectWorkspace(ObservableList<String> list) {
@@ -96,8 +90,12 @@ public class MainScreen extends VBox {
 		return _datasourcesPanel;
 	}
 	
-	public SchemaPanel getSchemaPanel() {
-		return _schemaPanel;
+	public SchemaPanel getDimensionPanel() {
+		return _dimensionsPanel;
+	}
+	
+	public SchemaPanel getMeauresPanel() {
+		return _measuresPanel;
 	}
 	
 	public ToolsPanel getToolsPanel() {
@@ -112,16 +110,15 @@ public class MainScreen extends VBox {
 		
 				
 		// -- tables and schema
-		_toolsArea = VBoxBuilder.create()
-				.spacing(5)
-				.prefWidth(100)
-				.padding(new Insets(5))
-				.children(
-						_datasourcesPanel = new TablesPanel(),					
-						_schemaPanel = new SchemaPanel(),
-						_toolsPanel = new ToolsPanel(),
-						new Spring()	
-						)
+		_toolsArea = SplitPaneBuilder.create()
+				.prefWidth(130)
+				.orientation(Orientation.VERTICAL)
+				.items(
+						_datasourcesPanel = new TablesPanel(),	
+						_dimensionsPanel = new SchemaPanel("Dimensions"),
+						_measuresPanel = new SchemaPanel("Measures"),
+						_toolsPanel = new ToolsPanel()
+					)
 				.build();
 		VBox.setVgrow(_toolsArea, Priority.SOMETIMES);
 		
