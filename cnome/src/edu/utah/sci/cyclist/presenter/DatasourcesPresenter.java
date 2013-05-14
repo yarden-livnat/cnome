@@ -31,7 +31,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.panels.TablesPanel;
+import edu.utah.sci.cyclist.ui.panels.TablesPanel;
 
 public class DatasourcesPresenter extends PresenterBase {
 	private TablesPanel _panel;

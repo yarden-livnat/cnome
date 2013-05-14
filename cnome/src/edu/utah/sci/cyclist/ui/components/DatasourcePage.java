@@ -20,12 +20,12 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.ui.components;
 
 import java.util.Properties;
 
 import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.view.wizard.DatasourceWizardPage;
+import edu.utah.sci.cyclist.ui.wizards.DatasourceWizardPage;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.PasswordFieldBuilder;

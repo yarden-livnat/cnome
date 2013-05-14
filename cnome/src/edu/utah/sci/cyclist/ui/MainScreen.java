@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view;
+package edu.utah.sci.cyclist.ui;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
@@ -42,11 +42,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.panels.SchemaPanel;
-import edu.utah.sci.cyclist.view.panels.TablesPanel;
-import edu.utah.sci.cyclist.view.panels.ToolsPanel;
-import edu.utah.sci.cyclist.view.wizard.WorkspaceWizard;
+import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
+import edu.utah.sci.cyclist.ui.panels.TablesPanel;
+import edu.utah.sci.cyclist.ui.panels.ToolsPanel;
+import edu.utah.sci.cyclist.ui.views.Workspace;
+import edu.utah.sci.cyclist.ui.wizards.WorkspaceWizard;
 
 public class MainScreen extends VBox {
 	public static final String ID = "main-screen";

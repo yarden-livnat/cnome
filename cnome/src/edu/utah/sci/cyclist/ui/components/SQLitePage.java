@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.ui.components;
 
 import java.io.File;
 import java.util.Properties;
@@ -28,7 +28,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.view.wizard.DatasourceWizardPage;
+import edu.utah.sci.cyclist.ui.wizards.DatasourceWizardPage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

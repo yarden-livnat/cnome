@@ -34,7 +34,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.View;
+import edu.utah.sci.cyclist.ui.View;
 
 public class PresenterBase implements Presenter {
 	private static int _idCounter = 0;

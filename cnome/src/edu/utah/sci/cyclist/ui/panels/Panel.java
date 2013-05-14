@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.view.panels;
+package edu.utah.sci.cyclist.ui.panels;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;

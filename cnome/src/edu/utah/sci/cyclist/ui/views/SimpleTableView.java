@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view;
+package edu.utah.sci.cyclist.ui.views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
-import edu.utah.sci.cyclist.view.components.ViewBase;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
 
 public class SimpleTableView extends ViewBase {
 	public static final String ID = "table-view";

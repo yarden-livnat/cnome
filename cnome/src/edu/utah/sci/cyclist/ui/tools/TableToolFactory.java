@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.view.tool;
+package edu.utah.sci.cyclist.ui.tools;
 
 public class TableToolFactory implements ToolFactory {
 

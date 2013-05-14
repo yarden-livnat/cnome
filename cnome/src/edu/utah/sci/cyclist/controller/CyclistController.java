@@ -45,10 +45,10 @@ import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
-import edu.utah.sci.cyclist.view.MainScreen;
-import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
-import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
+import edu.utah.sci.cyclist.ui.MainScreen;
+import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
+import edu.utah.sci.cyclist.ui.views.Workspace;
+import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
 
 
 public class CyclistController {

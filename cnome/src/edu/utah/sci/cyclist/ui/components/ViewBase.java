@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.ui.components;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +60,7 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.View;
+import edu.utah.sci.cyclist.ui.View;
 
 public class ViewBase extends BorderPane implements View {
 	

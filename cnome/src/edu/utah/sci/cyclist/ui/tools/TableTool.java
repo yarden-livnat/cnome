@@ -20,11 +20,52 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.tool;
+package edu.utah.sci.cyclist.ui.tools;
 
-public class ToolsLibrary {
+import javafx.scene.image.Image;
+import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.presenter.TablePresenter;
+import edu.utah.sci.cyclist.presenter.Presenter;
+import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.views.SimpleTableView;
 
-	public static final ToolFactory[] factories = {
-		new TableToolFactory()
-	};
+public class TableTool implements Tool {
+
+	public static final String ID 			= "edu.utah.sci.cyclist.TableTool";
+	public static final String TOOL_NAME 	= "Table";
+	public static final String ICON_NAME 	= "table";
+	
+	private View _view = null;
+	private Presenter _presenter = null;
+	
+	@Override
+	public String getId() {
+		return ID;
+	}
+	
+	@Override
+	public Image getIcon() {
+		return Resources.getIcon(ICON_NAME, 16, 16);	
+	}
+
+	@Override
+	public String getName() {
+		return TOOL_NAME;
+	}
+
+	@Override
+	public View getView() {
+		if (_view == null) 
+			_view = new SimpleTableView();
+		return _view;
+	}
+
+	@Override
+	public Presenter getPresenter(EventBus bus) {
+		if (_presenter == null)
+			_presenter = new TablePresenter(bus);
+		return _presenter;
+	}
+
 }

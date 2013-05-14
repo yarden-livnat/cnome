@@ -25,8 +25,8 @@ package edu.utah.sci.cyclist.presenter;
 import java.util.List;
 
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.view.panels.ToolsPanel;
-import edu.utah.sci.cyclist.view.tool.ToolFactory;
+import edu.utah.sci.cyclist.ui.panels.ToolsPanel;
+import edu.utah.sci.cyclist.ui.tools.ToolFactory;
 
 public class ToolsPresenter extends PresenterBase {
 

@@ -35,11 +35,11 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.View;
-import edu.utah.sci.cyclist.view.components.ViewBase;
-import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.tool.TableTool;
-import edu.utah.sci.cyclist.view.tool.Tool;
+import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.tools.TableTool;
+import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.ui.views.Workspace;
 
 public class WorkspacePresenter extends PresenterBase {
 

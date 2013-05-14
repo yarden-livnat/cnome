@@ -20,11 +20,13 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.ui.views;
 
 import org.mo.closure.v1.Closure;
 
-import edu.utah.sci.cyclist.view.View;
+import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.tools.Tool;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -37,7 +39,6 @@ import javafx.scene.layout.Pane;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class Workspace extends ViewBase implements View {
 

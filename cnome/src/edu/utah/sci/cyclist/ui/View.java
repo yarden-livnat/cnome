@@ -20,18 +20,23 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.tool;
+package edu.utah.sci.cyclist.ui;
 
-import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.Presenter;
-import edu.utah.sci.cyclist.view.View;
-import javafx.scene.image.Image;
+import org.mo.closure.v1.Closure;
 
-public interface Tool {
+import edu.utah.sci.cyclist.model.Table;
+import javafx.beans.property.ObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
-	String getId();
-	Image getIcon();
-	String getName();
-	View getView();
-	Presenter getPresenter(EventBus bus);
+public interface View {
+	ObjectProperty<EventHandler<ActionEvent>> onMinmaxProperty();
+	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
+	
+	void setOnTableDrop(Closure.V1<Table> action);
+	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
+	
+	void addTable(Table table, boolean remote, boolean active);
+	void removeTable(Table table);
+	void selectTable(Table table, boolean value);
 }

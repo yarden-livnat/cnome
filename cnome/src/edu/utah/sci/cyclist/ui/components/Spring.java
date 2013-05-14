@@ -20,23 +20,19 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.ui.components;
 
-import edu.utah.sci.cyclist.model.CyclistDatasource;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
-public class MySQLPage extends DatasourcePage {
+public class Spring extends Region {
 
-	public MySQLPage(CyclistDatasource ds) {
-		super(ds);
-		// TODO Auto-generated constructor stub
-	}
-	
-	@Override
-	protected void init() {
-		super.init();
-		_driver = "mysql";
-		_type = "MySQL";
-		if (_port.getText() == null || _port.getText().equals(""))
-			_port.setText("3306");
+	public Spring() {
+		super();
+		
+		setPrefWidth(10);
+		setMinWidth(1);
+		HBox.setHgrow(this, Priority.ALWAYS);
 	}
 }

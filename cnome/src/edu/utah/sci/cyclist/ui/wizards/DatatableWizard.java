@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.wizard;
+package edu.utah.sci.cyclist.ui.wizards;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

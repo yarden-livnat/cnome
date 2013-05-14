@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.panels;
+package edu.utah.sci.cyclist.ui.panels;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,8 +38,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.view.tool.Tool;
-import edu.utah.sci.cyclist.view.tool.ToolFactory;
+import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.ui.tools.ToolFactory;
 
 public class ToolsPanel extends Panel {
 	public static final String ID 		= "tools-panel";

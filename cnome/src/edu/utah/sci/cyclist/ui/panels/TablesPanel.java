@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.panels;
+package edu.utah.sci.cyclist.ui.panels;
 
 import java.util.ArrayList;
 import java.util.List;

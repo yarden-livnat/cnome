@@ -20,14 +20,18 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.wizard;
+package edu.utah.sci.cyclist.ui.tools;
 
-import edu.utah.sci.cyclist.model.CyclistDatasource;
-import javafx.scene.Node;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.presenter.Presenter;
+import edu.utah.sci.cyclist.ui.View;
+import javafx.scene.image.Image;
 
-public interface DatasourceWizardPage {
+public interface Tool {
 
-	String getURL();
-	CyclistDatasource getDataSource();
-	Node getNode();
+	String getId();
+	Image getIcon();
+	String getName();
+	View getView();
+	Presenter getPresenter(EventBus bus);
 }

@@ -28,7 +28,7 @@ import edu.utah.sci.cyclist.controller.CyclistController;
 import edu.utah.sci.cyclist.event.dnd.DnDIcon;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
-import edu.utah.sci.cyclist.view.MainScreen;
+import edu.utah.sci.cyclist.ui.MainScreen;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

@@ -33,7 +33,7 @@ import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.view.panels.SchemaPanel;
+import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
 
 
 public class SchemaPresenter  extends PresenterBase {

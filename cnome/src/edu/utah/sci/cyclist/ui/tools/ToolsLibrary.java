@@ -20,19 +20,11 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.components;
+package edu.utah.sci.cyclist.ui.tools;
 
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
+public class ToolsLibrary {
 
-public class Spring extends Region {
-
-	public Spring() {
-		super();
-		
-		setPrefWidth(10);
-		setMinWidth(1);
-		HBox.setHgrow(this, Priority.ALWAYS);
-	}
+	public static final ToolFactory[] factories = {
+		new TableToolFactory()
+	};
 }

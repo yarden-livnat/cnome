@@ -20,7 +20,7 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.wizard;
+package edu.utah.sci.cyclist.ui.wizards;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -58,9 +58,9 @@ import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.view.components.MySQLPage;
-import edu.utah.sci.cyclist.view.components.SQLitePage;
-import edu.utah.sci.cyclist.view.components.Spring;
+import edu.utah.sci.cyclist.ui.components.MySQLPage;
+import edu.utah.sci.cyclist.ui.components.SQLitePage;
+import edu.utah.sci.cyclist.ui.components.Spring;
 
 /*
  *  Class to create or edit a data source

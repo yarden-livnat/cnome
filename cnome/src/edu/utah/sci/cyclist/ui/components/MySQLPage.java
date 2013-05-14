@@ -20,52 +20,23 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.view.tool;
+package edu.utah.sci.cyclist.ui.components;
 
-import javafx.scene.image.Image;
-import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.TablePresenter;
-import edu.utah.sci.cyclist.presenter.Presenter;
-import edu.utah.sci.cyclist.view.SimpleTableView;
-import edu.utah.sci.cyclist.view.View;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
 
-public class TableTool implements Tool {
+public class MySQLPage extends DatasourcePage {
 
-	public static final String ID 			= "edu.utah.sci.cyclist.TableTool";
-	public static final String TOOL_NAME 	= "Table";
-	public static final String ICON_NAME 	= "table";
-	
-	private View _view = null;
-	private Presenter _presenter = null;
-	
-	@Override
-	public String getId() {
-		return ID;
+	public MySQLPage(CyclistDatasource ds) {
+		super(ds);
+		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
-	public Image getIcon() {
-		return Resources.getIcon(ICON_NAME, 16, 16);	
+	protected void init() {
+		super.init();
+		_driver = "mysql";
+		_type = "MySQL";
+		if (_port.getText() == null || _port.getText().equals(""))
+			_port.setText("3306");
 	}
-
-	@Override
-	public String getName() {
-		return TOOL_NAME;
-	}
-
-	@Override
-	public View getView() {
-		if (_view == null) 
-			_view = new SimpleTableView();
-		return _view;
-	}
-
-	@Override
-	public Presenter getPresenter(EventBus bus) {
-		if (_presenter == null)
-			_presenter = new TablePresenter(bus);
-		return _presenter;
-	}
-
 }
