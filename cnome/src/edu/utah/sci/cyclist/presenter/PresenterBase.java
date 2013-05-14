@@ -109,17 +109,23 @@ public class PresenterBase implements Presenter {
 	public void setRemoteTables(List<TableRecord> list) {
 		for (TableRecord record : list) {
 			// infom the view but let the selection model determine if it should be active
-			getView().addTable(record.table, true /*remote*/, false);
-			_selectionModel.addTable(record.table, true, record.active);
+			getView().addTable(record.table, true /*remote*/, false /* active */);
+			_selectionModel.addTable(record.table, true, false, record.active);
 		}
 	}
 	
 	@Override
-	public void addTable(Table table, boolean remote, boolean active) {
-		getView().addTable(table, remote, active);
-		getSelectionModel().addTable(table, remote, active);
+	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
+		getView().addTable(table, remote, false);
+		getSelectionModel().addTable(table, remote, active, remoteActive);
 	}
 	
+	
+	@Override
+	public void removeTable(Table table) {
+		getView().removeTable(table);
+		getSelectionModel().removeTable(table);
+	}
 	
 	@Override
 	public List<TableRecord> getTableRecords() {
@@ -140,11 +146,12 @@ public class PresenterBase implements Presenter {
 		private List<Entry> _list = new ArrayList<Entry>();
 		private int _remotes = 0;
 		
-		public int getRemotes() {
-			return _remotes;
-		}
-		public void addTable(Table table, boolean remote, boolean active) {
-			_list.add(new Entry(table, remote, active));
+//		public int getRemotes() {
+//			return _remotes;
+//		}
+		
+		public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
+			_list.add(new Entry(table, remote, active, remoteActive));
 			if (remote) _remotes++;
 		}
 		
@@ -170,6 +177,14 @@ public class PresenterBase implements Presenter {
 			return records;
 		}
 		
+		public List<Entry> getRemotes() {
+			List<Entry> records = new ArrayList<>();
+			for (Entry entry : _list)
+				if (entry.remote)
+					records.add(entry);
+			return records;
+		}
+		
 		public void selectTable(Table table, boolean active) {
 			// ignore here.
 		}
@@ -182,11 +197,13 @@ public class PresenterBase implements Presenter {
 			Table table;
 			boolean remote;
 			boolean active;
+			boolean remoteActive;
 			
-			public Entry(Table table, boolean remote, boolean active) {
+			public Entry(Table table, boolean remote, boolean active, boolean remoteActive) {
 				this.table = table;
 				this.remote = remote;
 				this.active = active;
+				this.remoteActive = remoteActive;
 			}
 		}
 	}

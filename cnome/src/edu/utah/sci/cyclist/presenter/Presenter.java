@@ -38,8 +38,11 @@ public abstract interface Presenter {
 	View getView();
 	
 	void setRemoteTables(List<TableRecord> list);
-	void addTable(Table table, boolean remote, boolean active);
+	void addTable(Table table, boolean remote, boolean active, boolean remoteActive);
+	void removeTable(Table table);
+	
 	List<TableRecord> getTableRecords();
 	
 	void broadcast(CyclistNotification notification);
+	
 }

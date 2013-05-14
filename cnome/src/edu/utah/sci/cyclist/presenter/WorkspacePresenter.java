@@ -43,7 +43,7 @@ import edu.utah.sci.cyclist.view.tool.Tool;
 
 public class WorkspacePresenter extends PresenterBase {
 
-	private Workspace _workspace;
+//	private Workspace _workspace;
 	private List<Presenter> _presenters = new ArrayList<>();
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
@@ -51,11 +51,18 @@ public class WorkspacePresenter extends PresenterBase {
 		addListeners();
 	}
 	
-	public void setView(View workspace) {
-		if (workspace instanceof Workspace) {
-			_workspace = (Workspace) workspace;
+	public Workspace getWorkspace() {
+		return (Workspace) getView();
+	}
+	
+	public void setView(View view) {
+		super.setView(view);
+		
+		if (view instanceof Workspace) {
+			Workspace workspace = getWorkspace();
+			workspace = (Workspace) workspace;
 			
-			_workspace.setOnToolDrop(new Closure.V3<Tool, Double, Double>() {
+			workspace.setOnToolDrop(new Closure.V3<Tool, Double, Double>() {
 
 				@Override
 				public void call(Tool tool, Double x, Double y) {
@@ -63,18 +70,18 @@ public class WorkspacePresenter extends PresenterBase {
 				}
 			});
 			
-			_workspace.setOnTableDrop(new Closure.V1<Table>() {
+			workspace.setOnTableDrop(new Closure.V1<Table>() {
 
 				@Override
 				public void call(Table table) {
-					_workspace.addTable(table, false /*remote*/, false /* active */);
+					addTable(table, false /*remote*/, false /* active */, false /* remoteActive */);
 					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
-					_workspace.selectTable(table, true);
+					getSelectionModel().selectTable(table, true);
 				}
 				
 			});
 			
-			_workspace.setOnTableSelected(new Closure.V2<Table, Boolean>() {
+			workspace.setOnTableSelected(new Closure.V2<Table, Boolean>() {
 
 				@Override
 				public void call(Table table, Boolean activate) {
@@ -84,12 +91,12 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			});
 			
-			_workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
+			workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
 
 				@Override
 				public void call(Table table, Double x, Double y) {
 					TablePresenter presenter = (TablePresenter) addTool(new TableTool(), x, y);
-					presenter.addTable(table, false /* remote */, true /* active */);
+					presenter.addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 				}
 			});
 		}
@@ -99,7 +106,7 @@ public class WorkspacePresenter extends PresenterBase {
 		ViewBase view = (ViewBase) tool.getView();
 		view.setTranslateX(x);
 		view.setTranslateY(y);
-		_workspace.addView(view);
+		getWorkspace().addView(view);
 		
 		Presenter presenter = tool.getPresenter(getEventBus());
 		if (presenter != null) {	
@@ -120,7 +127,7 @@ public class WorkspacePresenter extends PresenterBase {
 				for (Presenter presenter : _presenters) {
 					if (presenter.getId().equals(id)) {
 						_presenters.remove(presenter);
-						_workspace.removeView((ViewBase)presenter.getView());
+						getWorkspace().removeView((ViewBase)presenter.getView());
 						break;
 					}
 				}
