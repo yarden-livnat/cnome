@@ -136,7 +136,7 @@ public class DropArea extends HBox {
 										System.out.println("cursor sizes: "+ImageCursor.getBestSize(100, 100)+" colors: "+ImageCursor.getMaximumColors());
 										System.out.println("field drag detected");
 //										glyph.setCursor(new ImageCursor(Resources.getIcon("curssr"), 8, 8));
-										Dragboard db = glyph.startDragAndDrop(TransferMode.ANY);
+										Dragboard db = glyph.startDragAndDrop(TransferMode.COPY_OR_MOVE);
 										
 										DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 										clipboard.put(DnD.FIELD_FORMAT, Field.class, field);
@@ -155,11 +155,12 @@ public class DropArea extends HBox {
 									public void handle(DragEvent event) {
 //										glyph.setCursor(Cursor.DEFAULT);
 										System.out.println("field drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
-										if (event.isDropCompleted()) {
-											getChildren().remove(glyph);
-										} else {
+										if (/*event.isDropCompleted()*/ event.getAcceptedTransferMode() == TransferMode.COPY) {
 											glyph.setVisible(true);
 											glyph.setManaged(true);
+										} else {
+											getChildren().remove(glyph);
+											getFields().remove(field);
 										}
 									}
 								});
