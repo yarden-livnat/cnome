@@ -25,6 +25,7 @@ package edu.utah.sci.cyclist.ui.tools;
 public class ToolsLibrary {
 
 	public static final ToolFactory[] factories = {
-		new TableToolFactory()
+		new TableToolFactory(),
+		new ChartToolFactory()
 	};
 }
