@@ -115,7 +115,7 @@ public class WorkspaceWizard extends VBox {
 				.padding(new Insets(5))
 				.spacing(10)
 				.children(
-						cb = ComboBoxBuilder.<String>create()
+						cb = ComboBoxBuilder.create(String.class)
 						.prefWidth(200)
 						.editable(true)
 						.value(current)

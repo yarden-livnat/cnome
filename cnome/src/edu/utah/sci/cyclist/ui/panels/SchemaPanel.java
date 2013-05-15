@@ -84,7 +84,7 @@ public class SchemaPanel extends Panel {
 				
 				ClipboardContent content = new ClipboardContent();
 				content.putString(_id);
-//				content.putImage(Resources.getIcon("field"));
+				content.putImage(Resources.getIcon("field"));
 				
 				db.setContent(content);
 			}
@@ -105,15 +105,12 @@ public class SchemaPanel extends Panel {
 	private void addListeners() {
 		getContent().setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
-				System.out.println("enter");
 				event.consume();
 			}
 		});
 		
 		getContent().setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				System.out.println("over");
-
 				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
 				
 				Node src = clipboard.get(DnD.DnD_SOURCE_FORMAT, Node.class);
@@ -138,6 +135,11 @@ public class SchemaPanel extends Panel {
 					_onFieldDropAction.call(field);
 			}
 		});
+	}
+	
+	
+	private DnD.LocalClipboard getLocalClipboard() {
+		return DnD.getInstance().getLocalClipboard();
 	}
 	
 	class Entry {

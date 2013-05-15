@@ -14,7 +14,9 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
+import edu.utah.sci.cyclist.ui.components.DropArea;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 
 public class ChartView extends ViewBase {
@@ -32,6 +34,7 @@ public class ChartView extends ViewBase {
 		setTitle(TITLE);
 		
 		createChart();
+		getStyleClass().add("chart-view");
 		VBox vbox = VBoxBuilder.create()
 						.children(
 								_chart,
@@ -56,7 +59,7 @@ public class ChartView extends ViewBase {
 					.vgap(5)
 					.padding(new Insets(0, 0, 0, 0))
 					.build();
-		grid.getColumnConstraints().add(new ColumnConstraints(50));
+		grid.getColumnConstraints().add(new ColumnConstraints(10));
 		ColumnConstraints cc = new ColumnConstraints();
 		cc.setHgrow(Priority.ALWAYS);
 		grid.getColumnConstraints().add(cc);
@@ -67,17 +70,11 @@ public class ChartView extends ViewBase {
 		return grid;
 	}
 	
-	private Node createControlArea(GridPane grid, String title, int  row) {
-		grid.add(TextBuilder.create().text(title).build(), 0, row);
-		HBox xArea = HBoxBuilder.create()
-						.spacing(0)
-						.padding(new Insets(2))
-						.minWidth(30)
-						.prefHeight(20)
-						.build();
+	private void createControlArea(GridPane grid, String title, int  row) {
 		
-		grid.add(xArea, 2, row);
+		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
 		
-		return xArea;
+		grid.add(text, 0, row);
+		grid.add(new DropArea(DropArea.Policy.SINGLE), 1, row);
 	}
 }

@@ -12,7 +12,7 @@ public class ChartTool implements Tool {
 
 	public static final String ID 			= "edu.utah.sci.cyclist.ChartTool";
 	public static final String TOOL_NAME 	= "Chart";
-	public static final String ICON_NAME 	= "chart";
+	public static final String ICON_NAME 	= "chart_bar";
 	
 	private View _view = null;
 	private Presenter _presenter = null;

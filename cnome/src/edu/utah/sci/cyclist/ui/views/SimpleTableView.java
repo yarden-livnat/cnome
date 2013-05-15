@@ -57,7 +57,7 @@ public class SimpleTableView extends ViewBase {
 	private void build() {
 		setTitle(TITLE);
 		
-		_tableView = TableViewBuilder.<Table.Row>create()
+		_tableView = TableViewBuilder.create(Table.Row.class)
 				.prefWidth(300)
 				.prefHeight(200)
 				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
@@ -84,7 +84,7 @@ public class SimpleTableView extends ViewBase {
 			setTitle(table.getName());
 			Schema schema = table.getSchema();	
 			
-			List<TableColumn<Table.Row, ?>> cols = new ArrayList<>();
+			List<TableColumn<Table.Row, Object>> cols = new ArrayList<>();
 			for (int f=0; f<schema.size(); f++) {
 				Field field = schema.getField(f);				
 				cols.add(createColumn(field, f));
@@ -100,20 +100,19 @@ public class SimpleTableView extends ViewBase {
 	}
 	
 	
-	private <T> TableColumn<Table.Row, T> createColumn(final Field field, final int col) {
-		return TableColumnBuilder.<Table.Row, T>create()
+	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
+		return TableColumnBuilder.create(Table.Row.class, Object.class)
 				.text(field.getName())
-				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,T>, ObservableValue<T>>() {
+				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
 
 					@Override
-					public ObservableValue<T> call(CellDataFeatures<Row, T> cell) {
-						return new SimpleObjectProperty<T>(cell.getValue(), field.getName()) {
+					public ObservableValue<Object> call(CellDataFeatures<Row, Object> cell) {
+						return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
 							
-							@SuppressWarnings("unchecked")
 							@Override
-							public T getValue() {
+							public Object getValue() {
 								Row row = (Row) getBean();
-								return (T)row.value[col];
+								return row.value[col];
 							}
 						};
 					}

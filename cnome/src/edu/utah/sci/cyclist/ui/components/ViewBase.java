@@ -69,7 +69,7 @@ public class ViewBase extends BorderPane implements View {
 	public enum Edge { TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, NONE };
 	
 	private static final Cursor[] _cursor = {
-		Cursor.N_RESIZE, Cursor.S_RESIZE, Cursor.E_RESIZE, Cursor.W_RESIZE, Cursor.NE_RESIZE, Cursor.NW_RESIZE, Cursor.SE_RESIZE, Cursor.SW_RESIZE, Cursor.DEFAULT
+		Cursor.N_RESIZE, Cursor.S_RESIZE, Cursor.E_RESIZE, Cursor.W_RESIZE, Cursor.NW_RESIZE, Cursor.NE_RESIZE, Cursor.SW_RESIZE, Cursor.SE_RESIZE, Cursor.DEFAULT
 	};
 	
 	private Button _closeButton;

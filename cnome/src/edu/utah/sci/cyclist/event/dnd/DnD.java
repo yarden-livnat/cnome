@@ -29,10 +29,11 @@ import javafx.scene.input.DataFormat;
 
 public class DnD {
 	
-	public static final DataFormat TABLE_FORMAT	= new DataFormat("cyclist.dnd.datasource");
+	public static final DataFormat TYPE_FORMAT			= new DataFormat("cyclist.dnd.type");
+	public static final DataFormat TABLE_FORMAT			= new DataFormat("cyclist.dnd.datasource");
 	public static final DataFormat TOOL_FORMAT			= new DataFormat("cyclist.dnd.tool");
 	public static final DataFormat FIELD_FORMAT 		= new DataFormat("cyclist.dnd.field");
-	public static final DataFormat DnD_SOURCE_FORMAT = new DataFormat("cyclist.dnd.dnd_source");
+	public static final DataFormat DnD_SOURCE_FORMAT 	= new DataFormat("cyclist.dnd.dnd_source");
 	
 	
 	
@@ -67,7 +68,8 @@ public class DnD {
 		}
 		
 		public <T> T get(DataFormat key, Class<T> type) {
-			return type.cast(_items.get(key).value);
+			Entry<?> entry = _items.get(key);
+			return entry == null ? null : type.cast(entry.value);
 		}
 		
 		public boolean hasContent(DataFormat key) {

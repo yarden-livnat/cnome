@@ -143,7 +143,7 @@ public class DatatableWizard extends VBox {
 										TextBuilder.create()
 											.text("Data sources")
 											.build(),
-										_sourcesView = ListViewBuilder.<CyclistDatasource>create()
+										_sourcesView = ListViewBuilder.create(CyclistDatasource.class)
 											.id("datasources-list")
 											.maxHeight(100)
 											.build())  
@@ -238,7 +238,7 @@ public class DatatableWizard extends VBox {
 				.padding(new Insets(5))
 				.children(	
 						TextBuilder.create().text("Select Schema Table:").build(),
-						_tablesView = ListViewBuilder.<String>create()
+						_tablesView = ListViewBuilder.create(String.class)
 						.maxHeight(100)
 						.build()						
 						).build();
