@@ -96,9 +96,10 @@ public class Workspace extends ViewBase implements View {
 					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
 					{
 						event.acceptTransferModes(TransferMode.COPY);
+						event.consume();
 					} 
 					
-					event.consume();
+					
 				}
 			}
 		});	
@@ -120,22 +121,28 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
+				
+				boolean status = false;
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				if (event.getGestureSource() != this) {
 					if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
 						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
 						if (_onToolDrop != null)
-							_onToolDrop.call(tool, event.getX(), event.getY());
+							_onToolDrop.call(tool, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
+						status = true;
 					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
 						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
 						if (_onShowTable != null) {
-							_onShowTable.call(table, event.getX(), event.getY());
+							_onShowTable.call(table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
 						}
+						status = true;
 					}
 				}
-				event.setDropCompleted(true);
-				
-				event.consume();
+				if (status) {
+					event.setDropCompleted(status);
+					System.out.println("workspace drop: "+status);
+					event.consume();
+				}
 			}
 		});
 		

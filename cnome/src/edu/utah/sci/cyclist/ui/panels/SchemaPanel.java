@@ -142,6 +142,7 @@ public class SchemaPanel extends Panel {
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
 				if (_onFieldDropAction != null) 
 					_onFieldDropAction.call(field);
+				event.setDropCompleted(true);
 			}
 		});
 	}
