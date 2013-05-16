@@ -131,7 +131,8 @@ public class DatasourceWizard extends VBox {
 		pane.prefHeight(200);
 		_panes = createPanes(datasource);
 		
-		ComboBox<String> cb = ComboBoxBuilder.create(String.class)
+//		ComboBox<String> cb = ComboBoxBuilder.create(String.class)  // J8.0
+		ComboBox<String> cb = ComboBoxBuilder.<String>create()
 				.prefWidth(200)
 				.build();
 		HBox.setHgrow(cb,  Priority.ALWAYS);

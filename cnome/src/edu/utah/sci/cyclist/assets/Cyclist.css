@@ -83,7 +83,7 @@
 
 .drop-area {
 	-fx-background-color: #e0e0e0;
-	-fx-spacing: 4;
+	-fx-spacing: 2;
 }
 
 /*
@@ -141,7 +141,7 @@
 	-fx-border-radius: 5;
 	-fx-background-radius: 5;
 	-fx-spacing: 4;
- 	-fx-padding: 2; 
+ 	-fx-padding: 2 3 3 3; 
  	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
 }
 

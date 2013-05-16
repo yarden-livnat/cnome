@@ -35,6 +35,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
@@ -48,7 +49,7 @@ import edu.utah.sci.cyclist.ui.panels.ToolsPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.WorkspaceWizard;
 
-public class MainScreen extends VBox {
+public class MainScreen extends BorderPane {
 	public static final String ID = "main-screen";
 	
 	private MenuBar _menubar;
@@ -82,8 +83,9 @@ public class MainScreen extends VBox {
 	
 	
 	public void setWorkspace(Workspace workspace) {
-		HBox.setHgrow(workspace, Priority.ALWAYS);
-		_content.getChildren().add(workspace);
+//		HBox.setHgrow(workspace, Priority.ALWAYS);
+//		_content.getChildren().add(workspace);
+		setCenter(workspace);
 	}
 	
 	public TablesPanel getDatasourcesPanel() {
@@ -103,11 +105,12 @@ public class MainScreen extends VBox {
 	}
 	
 	private void init(Stage stage){
+		prefHeight(200);
+		prefWidth(200);
 		// create the screen
 		
 		// -- menubar
 		_menubar = createMenuBar(stage);
-		
 				
 		// -- tables and schema
 		_toolsArea = SplitPaneBuilder.create()
@@ -132,7 +135,10 @@ public class MainScreen extends VBox {
 		
 		// -- setup
 		VBox.setVgrow(_content, Priority.ALWAYS);
-		getChildren().addAll(_menubar, _content);
+//		getChildren().addAll(_menubar, _content);
+		setTop(_menubar);
+		setLeft(_toolsArea);
+//		setCenter(value)
 	}
 	
 	/*
