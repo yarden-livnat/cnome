@@ -69,25 +69,24 @@ public class DropArea extends HBox {
 		 */
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {	
-				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
+//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
 					if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT))
 						setStyle("-fx-border-color: #c0c0c0");
 					event.consume();
-				}
+//				}
 				
 			}
 		});
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
+//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
 					if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT)) {
 						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-						System.out.println("mode: "+event.getAcceptedTransferMode());
+//						System.out.println("mode: "+event.getAcceptedTransferMode());
 					}
 					event.consume();
-				}
-				
+//				}
 			}
 		});
 		
@@ -105,14 +104,19 @@ public class DropArea extends HBox {
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				boolean status = false;
-				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
+//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
 					Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
-					getFields().add(field);
+					if (getFields().size() == 0) {
+						getFields().add(field);
+					} else {
+						getFields().set(0, field);
+					}
+					
 					status = true;					
 //					System.out.println("set drag completed to "+status+". string:"+event.getDragboard().getString());
-//					event.setDropCompleted(status);
-//					event.consume();				
-				}
+					event.setDropCompleted(status);
+					event.consume();				
+//				}
 
 			}
 		});
@@ -163,7 +167,7 @@ public class DropArea extends HBox {
 									@Override
 									public void handle(DragEvent event) {
 //										glyph.setCursor(Cursor.DEFAULT);
-										System.out.println("field drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
+//										System.out.println("field drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
 //										if (/*event.isDropCompleted()*/ event.getAcceptedTransferMode() == TransferMode.COPY) {
 //											glyph.setVisible(true);
 //											glyph.setManaged(true);

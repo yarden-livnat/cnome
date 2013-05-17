@@ -121,7 +121,7 @@ public class CyclistController {
 
 			@Override
 			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
-				System.out.println("select:"+newVal);
+//				System.out.println("select:"+newVal);
 				
 			}
 		});

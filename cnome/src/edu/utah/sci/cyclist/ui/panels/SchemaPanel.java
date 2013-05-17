@@ -93,9 +93,9 @@ public class SchemaPanel extends Panel {
 		entry.label.setOnDragDone(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				System.out.println("SchemaPanel: drag done. accepted:"+event.isAccepted()
-						+"  completed:"+event.isDropCompleted()
-						+"  mode:"+event.getTransferMode());				
+//				System.out.println("SchemaPanel: drag done. accepted:"+event.isAccepted()
+//						+"  completed:"+event.isDropCompleted()
+//						+"  mode:"+event.getTransferMode());				
 			}
 		});
 		return entry;

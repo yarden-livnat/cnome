@@ -136,7 +136,6 @@ public class WorkspacePresenter extends PresenterBase {
 
 			@Override
 			public void call(Table table, Boolean activate) {
-				System.out.println("workspace presenter: selectTable: "+table.getName()+" active:"+activate);
 				getView().selectTable(table, activate);	
 				String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
 				broadcast(new CyclistTableNotification(msg, table));

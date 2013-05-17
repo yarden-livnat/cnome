@@ -140,7 +140,6 @@ public class Workspace extends ViewBase implements View {
 				}
 				if (status) {
 					event.setDropCompleted(status);
-					System.out.println("workspace drop: "+status);
 					event.consume();
 				}
 			}

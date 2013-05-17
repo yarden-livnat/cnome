@@ -11,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -24,6 +25,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -39,6 +41,9 @@ public class ChartView extends ViewBase {
 	private DropArea _xArea;
 	private DropArea _yArea;
 	
+	private String _xAxisType = "";
+	private String _yAxisType = "";
+	
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
@@ -51,80 +56,93 @@ public class ChartView extends ViewBase {
 	public void selectTable(Table table, boolean active) {
 		super.selectTable(table, active);
 
-		if (!active && table != _currentTable) {
-			// ignore
+		if (!active) {
+			if (table == _currentTable) 
+				invalidateChart();
 			return;
 		}
 		
-		_currentTable = table;
+		if (table != _currentTable) {
+			invalidateChart();
+			_currentTable = table;
+		}
+		
 		fetchData();
 	}
 	
+	private void invalidateChart() {
+		_pane.setCenter(null);
+		_chart = null;
+	}
 	
 	private void fetchData() {
 		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() == 1) {
+			if (_chart == null) 
+				createChart();
 			Field[] fields = {_xArea.getFields().get(0), _yArea.getFields().get(0)};
 			_items.bind(_currentTable.getRows(fields, 100));
 		}
 	}
 	
-	private void build() {
-		setTitle(TITLE);
-		
-		createChart();
-		getStyleClass().add("chart-view");
-		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
-		_pane.setBottom(createControl());
-		
-		setContent(_pane);
-		
-		_items.addListener(new ChangeListener<ObservableList<Row>>() {
-
-			@Override
-			public void changed(
-					ObservableValue<? extends ObservableList<Row>> observable,
-					ObservableList<Row> oldValue, ObservableList<Row> newValue) {
-				if (newValue == null) return;
-				
-				assignData(newValue);
-			}
-		});
-	}
 	
 	private void assignData(ObservableList<Row> list) {
 		ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
 		for (Row row : list) {
 			data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[1]));
 		}
+
+		_series = new XYChart.Series<Object, Object>();
 		_series.dataProperty().set(data);
-//		_chart.getData().get(0).dataProperty().set(data);
+		
+		// clear chart data
+		((XYChart)_chart).setData(FXCollections.observableArrayList());
+		_chart.getData().add(_series);
+		
+//		if (_chart.getData().size() == 0) 
+//			_chart.getData().add(_series);
+//		else
+//			_chart.getData().set(0, _series);
 	}
 	
 	private void createChart() {
-//		Field xField = _xArea.getFields().get(0);
-//		Field yField = _yArea.getFields().get(0);
+		Field xField = _xArea.getFields().get(0);
+		Field yField = _yArea.getFields().get(0);
 		
-//		if (xField.get(FieldProperties.ROLE).equals(FieldProperties.VALUE_MEASURE)) {
-		Axis xAxis = new NumberAxis();
-		Axis yAxis = new NumberAxis();
+		Axis xAxis;
+		_xAxisType = xField.getString(FieldProperties.ROLE);
+		if (_xAxisType.equals(FieldProperties.VALUE_MEASURE)) {
+			NumberAxis axis = new NumberAxis();
+			axis.forceZeroInRangeProperty().set(false);
+			xAxis = axis;
+			// TODO: deal with time
+		}
+		else 
+			xAxis = new CategoryAxis();
+		xAxis.setLabel(xField.getName());
 		
-		_series = new XYChart.Series<Object, Object>();
+		Axis yAxis;
+		_yAxisType = yField.getString(FieldProperties.ROLE);
+		if (_yAxisType.equals(FieldProperties.VALUE_MEASURE)) {
+			NumberAxis axis = new NumberAxis();
+			axis.forceZeroInRangeProperty().set(false);
+			yAxis = axis;
+		}
+		else 
+			yAxis = new CategoryAxis();
+		yAxis.setLabel(yField.getName());
 	
-		_chart = new LineChart<Object, Object>(xAxis, yAxis);
-		_chart.getData().add(_series);
+		LineChart<Object,Object> chart = new LineChart<Object, Object>(xAxis, yAxis);
+		chart.setCreateSymbols(false);
+		chart.setLegendVisible(false);
+		
+//		_series = new XYChart.Series<Object, Object>();
+//		chart.getData().add(_series);
+		
+		_chart = chart;
+		
+		_pane.setCenter(_chart);
 	}
-	
-//	private Axis<?> createAxis(Field field) {
-//		Axis<?> axis;
-//		
-//		if (field.get(FieldProperties.ROLE).equals(FieldProperties.VALUE_MEASURE)) {
-//			axis = new NumberAxis();
-//		} else {
-//			axis = new CategoryAxis();
-//		}
-//		
-//		return axis;
-//	}
+
 		
 	private Node createControl() {
 		GridPane grid = GridPaneBuilder.create()
@@ -146,13 +164,14 @@ public class ChartView extends ViewBase {
 	private InvalidationListener _areaLister = new InvalidationListener() {
 		
 		@Override
-		public void invalidated(Observable arg0) {
-			System.out.println("changed");
-			if (_xArea.getFields().size() > 0 && _yArea.getFields().size() > 0) {
-				createChart();
-				_pane.setCenter(_chart);
-				fetchData();
-			}
+		public void invalidated(Observable arg0) {			
+			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getString(FieldProperties.ROLE).equals(_xAxisType))
+				invalidateChart();
+			
+			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getString(FieldProperties.ROLE).equals(_yAxisType))
+				invalidateChart();	
+				
+			fetchData();
 		}
 	};
 	
@@ -165,5 +184,27 @@ public class ChartView extends ViewBase {
 		grid.add(area, 1, row);
 		
 		return area;
+	}
+	
+	private void build() {
+		setTitle(TITLE);
+		
+		getStyleClass().add("chart-view");
+		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
+		_pane.setBottom(createControl());
+		
+		setContent(_pane);
+		
+		_items.addListener(new ChangeListener<ObservableList<Row>>() {
+
+			@Override
+			public void changed(
+					ObservableValue<? extends ObservableList<Row>> observable,
+					ObservableList<Row> oldValue, ObservableList<Row> newValue) {
+				if (newValue == null) return;
+				
+				assignData(newValue);
+			}
+		});
 	}
 }

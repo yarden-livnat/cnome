@@ -192,7 +192,7 @@ public class DatasourceWizard extends VBox {
 						.onAction(new EventHandler<ActionEvent>() {	
 							@Override
 							public void handle(ActionEvent arg0) {
-								System.out.println("Create & return a new data source");
+//								System.out.println("Create & return a new data source");
 								
 								CyclistDatasource ds = _currentPage.getDataSource();
 								ds.getProperties().setProperty("name", _nameField.getText());
