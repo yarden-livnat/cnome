@@ -90,6 +90,15 @@ public class TablesPanel extends Panel  {
 		resetContent();
 	}
 	
+	public void focus(Table table) {
+		for (Entry entry : _entries) {
+			if (entry.table == table) {
+				select(entry);
+				break;
+			}
+		}
+	}
+	
 	private void resetContent() {
 		VBox vbox = (VBox) getContent();
 		vbox.getChildren().clear();

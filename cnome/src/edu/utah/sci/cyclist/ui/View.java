@@ -35,6 +35,7 @@ public interface View {
 	
 	void setOnTableDrop(Closure.V1<Table> action);
 	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
+	void setOnSelectAction(Closure.V0 action);
 	
 	void addTable(Table table, boolean remote, boolean active);
 	void removeTable(Table table);

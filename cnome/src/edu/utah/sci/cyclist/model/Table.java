@@ -301,6 +301,51 @@ public class Table {
 		return task.valueProperty();
 	}
 	
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final Field[] fields, final int n) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+
+			@Override
+			protected ObservableList<Row> call() throws Exception {
+				List<Row> rows = new ArrayList<>();
+				try {
+					Connection conn = ds.getConnection();
+					StringBuilder builder = new StringBuilder("select ");
+					for (int i=0; i<fields.length; i++) {
+						builder.append(fields[i].getName());
+						if (i < fields.length-1) builder.append(", ");
+					}
+					builder.append(" from ").append(getName()).append(" limit ").append(n);
+					System.out.println("query: ["+builder.toString()+"]");
+					PreparedStatement stmt = conn.prepareStatement(builder.toString());
+					
+					ResultSet rs = stmt.executeQuery();
+					int cols = fields.length;
+					
+					while (rs.next()) {
+						Row row = new Row(cols);
+						for (int i=0; i<cols; i++) {
+							row.value[i] = rs.getObject(i+1);
+						}
+						rows.add(row);
+					}
+				}catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				return FXCollections.observableList(rows);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task.valueProperty();
+	}
 	public Row getRow(int index) {
 		return _rows.get(index);
 	}
@@ -318,4 +363,5 @@ public class Table {
 	}
 
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
+
 }

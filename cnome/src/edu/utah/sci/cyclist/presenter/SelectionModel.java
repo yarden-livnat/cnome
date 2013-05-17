@@ -56,6 +56,10 @@ public class SelectionModel {
 		return records;
 	}
 	
+	public Table getSelected() {
+		return null;
+	}
+	
 	/**
 	 * Select at table 
 	 */

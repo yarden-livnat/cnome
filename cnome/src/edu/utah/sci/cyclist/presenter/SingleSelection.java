@@ -7,6 +7,10 @@ import edu.utah.sci.cyclist.model.Table;
 public class SingleSelection extends SelectionModel {
 	private Entry _current = null;
 	
+	@Override
+	public Table getSelected() {
+		return _current == null ? null : _current.table;
+	}
 	
 	@Override
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {

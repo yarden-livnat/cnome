@@ -114,7 +114,7 @@ public class MainScreen extends BorderPane {
 				
 		// -- tables and schema
 		_toolsArea = SplitPaneBuilder.create()
-				.prefWidth(130)
+				.prefWidth(150)
 				.orientation(Orientation.VERTICAL)
 				.items(
 						_datasourcesPanel = new TablesPanel(),	

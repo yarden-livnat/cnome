@@ -98,6 +98,7 @@ public class ViewBase extends BorderPane implements View {
 	private int _numOfRemotes = 0;
 	
 	// Actions
+	private Closure.V0 _onSelectAction = null;
 	private Closure.V1<Table> _onTableDrop = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	
@@ -214,6 +215,10 @@ public class ViewBase extends BorderPane implements View {
 		_onTableSelectedAction = action;
 	}
 	
+	public void setOnSelectAction(Closure.V0 action) {
+		_onSelectAction = action;
+	}
+	
 	public DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
 	}
@@ -296,8 +301,11 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				delta.x = getTranslateX() - event.getSceneX();
 				delta.y = getTranslateY() - event.getSceneY();
-				if (selectPropery.get() != null)
-					selectPropery.get().handle(new ActionEvent());
+				if (_onSelectAction != null)
+					_onSelectAction.call();
+				
+//				if (selectPropery.get() != null)
+//					selectPropery.get().handle(new ActionEvent());
 			}
 		});
 		
@@ -322,8 +330,10 @@ public class ViewBase extends BorderPane implements View {
 		EventHandler<MouseEvent> eh = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (selectPropery.get() != null)
-					selectPropery.get().handle(new ActionEvent());
+				if (_onSelectAction != null)
+					_onSelectAction.call();
+//				if (selectPropery.get() != null)
+//					selectPropery.get().handle(new ActionEvent());
 			}
 		};
 		

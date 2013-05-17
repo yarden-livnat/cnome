@@ -26,6 +26,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import edu.utah.sci.cyclist.event.notification.CyclistNotification;
+import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
@@ -40,6 +42,8 @@ public class DatasourcesPresenter extends PresenterBase {
 	
 	public DatasourcesPresenter(EventBus bus) {
 		super(bus);
+		
+		addListeners();
 	}
 	
 	public void setTables(ObservableList<Table> tables) {
@@ -72,5 +76,17 @@ public class DatasourcesPresenter extends PresenterBase {
 		});
 	}
 	
+	private void addListeners() {
+		addNotificationHandler(CyclistNotifications.DATASOURCE_FOCUS, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification notification) {
+				CyclistTableNotification tableNotification = (CyclistTableNotification) notification;
+				Table table = tableNotification.getTable();
+				_panel.focus(table);
+			
+			}
+		});
+	}
 
 }

@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPaneBuilder;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 
@@ -39,6 +40,10 @@ public class Panel extends VBox {
 		
 		vbox.getStyleClass().add("panel-vbox");
 		_pane.setContent(vbox);
+		
+		VBox.setVgrow(vbox, Priority.ALWAYS);
+		VBox.setVgrow(this, Priority.ALWAYS);
+		VBox.setVgrow(_pane, Priority.ALWAYS);
 		
 //		title.relocate(0, 0);
 //		
