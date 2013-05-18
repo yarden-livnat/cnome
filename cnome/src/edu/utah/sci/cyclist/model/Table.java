@@ -301,7 +301,7 @@ public class Table {
 		return task.valueProperty();
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final Field[] fields, final int n) {
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int n) {
 		final CyclistDatasource ds = getDataSource();
 		
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
@@ -312,16 +312,16 @@ public class Table {
 				try {
 					Connection conn = ds.getConnection();
 					StringBuilder builder = new StringBuilder("select ");
-					for (int i=0; i<fields.length; i++) {
-						builder.append(fields[i].getName());
-						if (i < fields.length-1) builder.append(", ");
+					for (int i=0; i<fields.size(); i++) {
+						builder.append(fields.get(i).getName());
+						if (i < fields.size()-1) builder.append(", ");
 					}
 					builder.append(" from ").append(getName()).append(" limit ").append(n);
 					System.out.println("query: ["+builder.toString()+"]");
 					PreparedStatement stmt = conn.prepareStatement(builder.toString());
 					
 					ResultSet rs = stmt.executeQuery();
-					int cols = fields.length;
+					int cols = fields.size();
 					
 					while (rs.next()) {
 						Row row = new Row(cols);

@@ -61,7 +61,7 @@ public class SchemaPresenter  extends PresenterBase {
 			public void call(Field field) {
 				_measures.remove(field);
 				_dimensions.add(field);	
-				field.set(FieldProperties.ROLE, FieldProperties.VALUE_DIMENSION);
+				field.set(FieldProperties.ROLE, Field.Role.CATEGORICAL);
 			}
 			
 		});
@@ -72,7 +72,7 @@ public class SchemaPresenter  extends PresenterBase {
 			public void call(Field field) {
 				_dimensions.remove(field);	
 				_measures.add(field);
-				field.set(FieldProperties.ROLE, FieldProperties.VALUE_MEASURE);
+				field.set(FieldProperties.ROLE, Field.Role.NUMERIC);
 			}
 			
 		});
@@ -92,14 +92,14 @@ public class SchemaPresenter  extends PresenterBase {
 				
 				for (int f=0; f < _schema.size(); f++) {
 					Field field = _schema.getField(f);
-					switch (field.getString(FieldProperties.ROLE)) {
-					case FieldProperties.VALUE_DIMENSION:
+					switch (field.getRole()) {
+					case CATEGORICAL:
 						_dimensions.add(field);
 						break;
-					case FieldProperties.VALUE_MEASURE:
+					case NUMERIC:
 						_measures.add(field);
 						break;
-					case FieldProperties.VALUE_UNKNOWN:
+					case NA:
 						// ignore for now
 						break;
 					}

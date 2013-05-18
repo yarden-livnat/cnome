@@ -29,8 +29,23 @@ import java.util.Set;
 import edu.utah.sci.cyclist.controller.IMemento;
 
 public class Field {
-
+	
+	public static enum Role {
+		NUMERIC, CATEGORICAL, NA;
+	}
+	
+	public enum Type {
+		INTEGER,
+		NUMERIC,
+		STRING,
+		TIME,
+		BOOLEAN,
+		NA
+	}
+	
 	private String _name;
+	private Role _role;
+	private Type _type;
 	private Map<String, Object> _properties = new HashMap<>();
 
 	public Field(){
@@ -45,7 +60,8 @@ public class Field {
 	public void save(IMemento memento) {
 	
 		memento.putString("name", _name);
-		
+		memento.putString("role", _role.toString());
+		memento.putString("type", _type.toString());
 		// Set things saved in the properties map
 		Set<String> keys = _properties.keySet();
 		for(String key: keys){
@@ -85,6 +101,8 @@ public class Field {
 		
 		// Get the name of the field
 		_name = memento.getString("name");
+		_role = Field.Role.valueOf(memento.getString("role"));
+		_type = Field.Type.valueOf(memento.getString("type"));
 		
 		// Get the entries in the field
 		IMemento[] entries = memento.getChildren("entry");
@@ -137,7 +155,25 @@ public class Field {
 		return (int) get(property);
 	}
 	
+	
+	public void setRole(Role role) {
+		_role = role;
+	}
+	
+	public Role getRole() {
+		return _role;
+	}
+	
+	public void setType(Type type) {
+		_type = type;
+	}
+	
+	public Type getType() {
+		return _type;
+	}
+	
 	public String toString() {
 		return _name;
 	}
+	
 }

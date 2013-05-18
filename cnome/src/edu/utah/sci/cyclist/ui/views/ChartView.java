@@ -1,5 +1,10 @@
 package edu.utah.sci.cyclist.ui.views;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
@@ -24,8 +29,8 @@ import javafx.scene.layout.GridPaneBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
+import javafx.util.converter.TimeStringConverter;
 import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -41,8 +46,8 @@ public class ChartView extends ViewBase {
 	private DropArea _xArea;
 	private DropArea _yArea;
 	
-	private String _xAxisType = "";
-	private String _yAxisType = "";
+	private Field.Role _xAxisType = Field.Role.NA;
+	private Field.Role _yAxisType = Field.Role.NA;
 	
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
@@ -76,73 +81,104 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void fetchData() {
-		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() == 1) {
+		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (_chart == null) 
 				createChart();
-			Field[] fields = {_xArea.getFields().get(0), _yArea.getFields().get(0)};
+			List<Field> fields = new ArrayList<>();
+			fields.add(_xArea.getFields().get(0));
+			fields.addAll(_yArea.getFields());
+//			Field[] fields = {_xArea.getFields().get(0), _yArea.getFields().get(0)};
 			_items.bind(_currentTable.getRows(fields, 100));
 		}
 	}
 	
 	
 	private void assignData(ObservableList<Row> list) {
-		ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
-		for (Row row : list) {
-			data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[1]));
+		((XYChart)_chart).setData(FXCollections.observableArrayList());
+		
+		int cols = _yArea.getFields().size();
+		for (int col=0; col<cols; col++) {
+			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
+		
+			for (Row row : list) {
+				data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[col+1]));
+			}
+			
+			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
+			series.setName(_yArea.getFields().get(col).getName());
+			series.dataProperty().set(data);
+			_chart.getData().add(series);
 		}
+//		if (_xArea.getFields().get(0).getType() == Field.Type.TIME) {
+//			for (Row row : list) {
+//				Timestamp time = (Timestamp) row.value[0];
+//				data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[1]));
+//			}
+//		} else {
+//			for (Row row : list) {
+//				data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[1]));
+//			}
+//		}
+		
 
-		_series = new XYChart.Series<Object, Object>();
-		_series.dataProperty().set(data);
+//		_series = new XYChart.Series<Object, Object>();
+//		_series.dataProperty().set(data);
 		
 		// clear chart data
-		((XYChart)_chart).setData(FXCollections.observableArrayList());
-		_chart.getData().add(_series);
 		
-//		if (_chart.getData().size() == 0) 
-//			_chart.getData().add(_series);
-//		else
-//			_chart.getData().set(0, _series);
+//		_chart.getData().add(_series);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
-		Field xField = _xArea.getFields().get(0);
-		Field yField = _yArea.getFields().get(0);
-		
-		Axis xAxis;
-		_xAxisType = xField.getString(FieldProperties.ROLE);
-		if (_xAxisType.equals(FieldProperties.VALUE_MEASURE)) {
-			NumberAxis axis = new NumberAxis();
-			axis.forceZeroInRangeProperty().set(false);
-			xAxis = axis;
-			// TODO: deal with time
-		}
-		else 
-			xAxis = new CategoryAxis();
-		xAxis.setLabel(xField.getName());
-		
-		Axis yAxis;
-		_yAxisType = yField.getString(FieldProperties.ROLE);
-		if (_yAxisType.equals(FieldProperties.VALUE_MEASURE)) {
-			NumberAxis axis = new NumberAxis();
-			axis.forceZeroInRangeProperty().set(false);
-			yAxis = axis;
-		}
-		else 
-			yAxis = new CategoryAxis();
-		yAxis.setLabel(yField.getName());
+		Axis xAxis = createAxis(_xArea.getFields().get(0));
+		Axis yAxis = createAxis(_yArea.getFields().get(0));
 	
 		LineChart<Object,Object> chart = new LineChart<Object, Object>(xAxis, yAxis);
 		chart.setCreateSymbols(false);
 		chart.setLegendVisible(false);
-		
-//		_series = new XYChart.Series<Object, Object>();
-//		chart.getData().add(_series);
 		
 		_chart = chart;
 		
 		_pane.setCenter(_chart);
 	}
 
+	@SuppressWarnings("rawtypes")
+	private Axis createAxis(Field field) {
+		Axis axis =  null;
+		switch (field.getType()) {
+		case INTEGER:
+		case NUMERIC:
+			NumberAxis a = new NumberAxis();
+			a.forceZeroInRangeProperty().set(false);
+			axis = a;
+			break;
+		case STRING:
+			CategoryAxis c = new CategoryAxis();
+			axis = c;
+			break;
+		case TIME:
+			NumberAxis t = new NumberAxis();
+			t.forceZeroInRangeProperty().set(false);
+			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(t) {
+				TimeStringConverter converter = new TimeStringConverter("YYYY");
+				@Override
+				public String toString(Number n) {
+					return converter.toString(new Date(n.longValue()));
+				}
+			};
+			t.setTickLabelFormatter(f);
+			axis = t;
+			break;
+		case BOOLEAN:
+		case NA:
+			axis = new NumberAxis();
+		}
+		
+		axis.setLabel(field.getName());
+		
+		return axis;
+	}
 		
 	private Node createControl() {
 		GridPane grid = GridPaneBuilder.create()
@@ -165,10 +201,10 @@ public class ChartView extends ViewBase {
 		
 		@Override
 		public void invalidated(Observable arg0) {			
-			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getString(FieldProperties.ROLE).equals(_xAxisType))
+			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
 				invalidateChart();
 			
-			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getString(FieldProperties.ROLE).equals(_yAxisType))
+			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
 				invalidateChart();	
 				
 			fetchData();

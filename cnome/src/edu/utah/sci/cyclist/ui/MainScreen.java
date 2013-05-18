@@ -118,8 +118,8 @@ public class MainScreen extends BorderPane {
 				.orientation(Orientation.VERTICAL)
 				.items(
 						_datasourcesPanel = new TablesPanel(),	
-						_dimensionsPanel = new SchemaPanel("Dimensions"),
-						_measuresPanel = new SchemaPanel("Measures"),
+						_dimensionsPanel = new SchemaPanel("Category"),
+						_measuresPanel = new SchemaPanel("Numeric"),
 						_toolsPanel = new ToolsPanel()
 					)
 				.build();
