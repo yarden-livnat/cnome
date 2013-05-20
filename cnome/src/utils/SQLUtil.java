@@ -13,11 +13,13 @@ public class SQLUtil {
 		
 	
 	public static Field.Type fromSQL(int type) {
-		return _sql2Field.get(type);
+		Field.Type result = _sql2Field.get(type);
+		return result != null ? result : Field.Type.NA;
 	}
 	
 	public static Field.Type fromSQL(String name) {
-		return _name2Field.get(name);
+		Field.Type result = _name2Field.get(name);
+		return result != null ? result : Field.Type.NA;
 	}
 	
 	static {
@@ -68,8 +70,10 @@ public class SQLUtil {
 		_name2Field.put("REAL",				Field.Type.NUMERIC);
 		_name2Field.put("DOUBLE", 			Field.Type.NUMERIC);
 		_name2Field.put("FLOAT", 			Field.Type.NUMERIC);
+		_name2Field.put("NUMERIC",			Field.Type.NUMERIC);    // sqlite return field type name as 'NUMERIC'
 		
 		_name2Field.put("BOOLEAN", 			Field.Type.BOOLEAN);
+		_name2Field.put("BOOL", 			Field.Type.BOOLEAN);   	// sqlite return field type name as 'BOOL'. 
 
 		_name2Field.put("TEXT",				Field.Type.STRING);     // sqlite return field type name as 'text'. it's not part of java.sql.Types
 		_name2Field.put("CHAR",				Field.Type.STRING);
@@ -82,6 +86,7 @@ public class SQLUtil {
 		_name2Field.put("DATE", 			Field.Type.TIME);
 		_name2Field.put("TIME", 			Field.Type.TIME);
 		_name2Field.put("TIMESTAMP", 		Field.Type.TIME);
+		_name2Field.put("DATETIME", 		Field.Type.TIME);      // sqlite return field type name as 'DATETIME'. 
 		
 		_name2Field.put("BIT",	 			Field.Type.NA);
 		_name2Field.put("BLOB", 			Field.Type.NA);

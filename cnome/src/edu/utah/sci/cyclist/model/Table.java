@@ -152,15 +152,10 @@ public class Table {
 	public void extractSchema(){
 		
 		try (Connection conn = _datasource.getConnection()) {
+			//printTypeInfo(conn);
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getColumns(null, null, getName(), null);
-			ResultSetMetaData cmd = rs.getMetaData();
-			while (rs.next()) {
-//				for (int i=1; i<=cmd.getColumnCount(); i++) {
-//					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
-//				}
-//				System.out.println();
-				
+			while (rs.next()) {				
 				String colName = rs.getString("COLUMN_NAME");
 			
 //				System.out.println("field "+colName+"  type name:"+rs.getString("TYPE_NAME")+"  type:"+rs.getInt("DATA_TYPE"));
@@ -177,6 +172,27 @@ public class Table {
 		_schema.update();
 	}
 
+	private void printTypeInfo(Connection conn) {
+		DatabaseMetaData d;
+		try {
+			d = conn.getMetaData();
+			ResultSet rs = d.getTypeInfo();
+			ResultSetMetaData cmd = rs.getMetaData();
+			System.out.println("database types:");
+			while (rs.next()) {
+				for (int i=1; i<=cmd.getColumnCount(); i++) {
+					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
+				}
+				System.out.println();
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
 	public String getName() {
 		return _name;
 	}
