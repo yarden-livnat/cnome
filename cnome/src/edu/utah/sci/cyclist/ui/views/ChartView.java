@@ -40,7 +40,6 @@ public class ChartView extends ViewBase {
 	public static final String TITLE = "Chart";
 
 	private XYChart<Object,Object> _chart;
-	private Series<Object, Object> _series;
 	
 	private BorderPane _pane;
 	private DropArea _xArea;
@@ -87,7 +86,6 @@ public class ChartView extends ViewBase {
 			List<Field> fields = new ArrayList<>();
 			fields.add(_xArea.getFields().get(0));
 			fields.addAll(_yArea.getFields());
-//			Field[] fields = {_xArea.getFields().get(0), _yArea.getFields().get(0)};
 			_items.bind(_currentTable.getRows(fields, 100));
 		}
 	}
@@ -100,8 +98,15 @@ public class ChartView extends ViewBase {
 		for (int col=0; col<cols; col++) {
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
 		
-			for (Row row : list) {
-				data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[col+1]));
+			if (_xArea.getFields().get(0).getType() == Field.Type.TIME) {
+				for (Row row : list) {
+					Timestamp time = (Timestamp) row.value[0];
+					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
+				}
+			} else {
+				for (Row row : list) {
+					data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[col+1]));
+				}
 			}
 			
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
@@ -109,24 +114,6 @@ public class ChartView extends ViewBase {
 			series.dataProperty().set(data);
 			_chart.getData().add(series);
 		}
-//		if (_xArea.getFields().get(0).getType() == Field.Type.TIME) {
-//			for (Row row : list) {
-//				Timestamp time = (Timestamp) row.value[0];
-//				data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[1]));
-//			}
-//		} else {
-//			for (Row row : list) {
-//				data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[1]));
-//			}
-//		}
-		
-
-//		_series = new XYChart.Series<Object, Object>();
-//		_series.dataProperty().set(data);
-		
-		// clear chart data
-		
-//		_chart.getData().add(_series);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -161,7 +148,7 @@ public class ChartView extends ViewBase {
 			NumberAxis t = new NumberAxis();
 			t.forceZeroInRangeProperty().set(false);
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(t) {
-				TimeStringConverter converter = new TimeStringConverter("YYYY");
+				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
 				@Override
 				public String toString(Number n) {
 					return converter.toString(new Date(n.longValue()));
@@ -191,8 +178,8 @@ public class ChartView extends ViewBase {
 		cc.setHgrow(Priority.ALWAYS);
 		grid.getColumnConstraints().add(cc);
 		
-		_xArea = createControlArea(grid, "X", 0);
-		_yArea = createControlArea(grid, "Y", 1);
+		_xArea = createControlArea(grid, "X", 0, DropArea.Policy.SINGLE);
+		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MUTLIPLE);
 				
 		return grid;
 	}
@@ -211,10 +198,10 @@ public class ChartView extends ViewBase {
 		}
 	};
 	
-	private DropArea createControlArea(GridPane grid, String title, int  row) {
+	private DropArea createControlArea(GridPane grid, String title, int  row, DropArea.Policy policy) {
 		
 		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
-		DropArea area = new DropArea(DropArea.Policy.SINGLE);
+		DropArea area = new DropArea(policy);
 		area.getFields().addListener(_areaLister);
 		grid.add(text, 0, row);
 		grid.add(area, 1, row);
