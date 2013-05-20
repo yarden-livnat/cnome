@@ -154,8 +154,16 @@ public class Table {
 		try (Connection conn = _datasource.getConnection()) {
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getColumns(null, null, getName(), null);
+			ResultSetMetaData cmd = rs.getMetaData();
 			while (rs.next()) {
+//				for (int i=1; i<=cmd.getColumnCount(); i++) {
+//					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
+//				}
+//				System.out.println();
+				
 				String colName = rs.getString("COLUMN_NAME");
+			
+//				System.out.println("field "+colName+"  type name:"+rs.getString("TYPE_NAME")+"  type:"+rs.getInt("DATA_TYPE"));
 				Field field = new Field(colName);
 				field.set(FieldProperties.REMOTE_NAME, colName);
 				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));

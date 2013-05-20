@@ -94,13 +94,15 @@ public class Schema {
 	public void updateField(Field field) {
 		// set field type
 		int remote_type = (int) field.get(FieldProperties.REMOTE_DATA_TYPE);
+		String remote_type_name = field.getString(FieldProperties.REMOTE_DATA_TYPE_NAME);
 		
-		Field.Type type = SQLUtil.fromSQL(remote_type);
+//		Field.Type type = SQLUtil.fromSQL(remote_type);
+		Field.Type type = SQLUtil.fromSQL(remote_type_name);
 		field.setType(type);
+		field.set(FieldProperties.DATA_TYPE_NAME, remote_type_name);
 		
-		
-		field.set(FieldProperties.DATA_TYPE_NAME, field.getString(FieldProperties.REMOTE_DATA_TYPE_NAME));
-				
+		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
+	
 		Field.Role role = Field.Role.NA;
 		switch (type) {
 		case INTEGER:
