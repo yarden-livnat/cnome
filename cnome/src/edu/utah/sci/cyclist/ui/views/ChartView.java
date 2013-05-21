@@ -14,23 +14,26 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.GridPaneBuilder;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.Field.Type;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -39,8 +42,10 @@ import edu.utah.sci.cyclist.ui.components.ViewBase;
 public class ChartView extends ViewBase {
 	public static final String TITLE = "Chart";
 
-	private XYChart<Object,Object> _chart;
-	
+	private StackPane _chartStack;
+	private XYChart<Object,Object> _chartBottom;
+	private XYChart<Object,Object> _chartTop;
+		
 	private BorderPane _pane;
 	private DropArea _xArea;
 	private DropArea _yArea;
@@ -76,13 +81,16 @@ public class ChartView extends ViewBase {
 	
 	private void invalidateChart() {
 		_pane.setCenter(null);
-		_chart = null;
+		_chartBottom = null;
+		_chartTop = null;
 	}
 	
 	private void fetchData() {
 		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
-			if (_chart == null) 
-				createChart();
+			if (_chartBottom == null) 
+				createBottomChart();
+			if(_yArea.getFields().size() == 2 && _chartTop == null)
+				createTopChart();
 			List<Field> fields = new ArrayList<>();
 			fields.add(_xArea.getFields().get(0));
 			fields.addAll(_yArea.getFields());
@@ -92,12 +100,15 @@ public class ChartView extends ViewBase {
 	
 	
 	private void assignData(ObservableList<Row> list) {
-		((XYChart)_chart).setData(FXCollections.observableArrayList());
-		
+		((XYChart)_chartBottom).setData(FXCollections.observableArrayList());
+		if(_chartTop != null)
+			((XYChart)_chartTop).setData(FXCollections.observableArrayList());
+
 		int cols = _yArea.getFields().size();
+		System.out.println("YAREA: " + _yArea.getFields().size());
 		for (int col=0; col<cols; col++) {
+			
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
-		
 			if (_xArea.getFields().get(0).getType() == Field.Type.TIME) {
 				for (Row row : list) {
 					Timestamp time = (Timestamp) row.value[0];
@@ -109,25 +120,73 @@ public class ChartView extends ViewBase {
 				}
 			}
 			
+		
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
 			series.setName(_yArea.getFields().get(col).getName());
 			series.dataProperty().set(data);
-			_chart.getData().add(series);
+		
+			// !!!! DEAL WITH MORE THAN 2 DATAS ON TEH Y AXIS!!
+			if(col == 0)
+				_chartBottom.getData().add(series);
+			else
+				_chartTop.getData().add(series);
+		
 		}
+		
+		// Translate the top chart
+		if(_chartTop != null){
+			_chartBottom.getXAxis().setMinWidth(250);
+			_chartTop.getXAxis().setMinWidth(250);
+			_chartBottom.getXAxis().setMaxWidth(250);
+			_chartTop.getXAxis().setMaxWidth(250);
+			
+			_chartTop.setTranslateX(_chartBottom.getYAxis().getBoundsInLocal().getWidth() + _chartBottom.getYAxis().getTickLength() );
+		}
+		
 	}
 	
+	// Create the bottom chart (always present)
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void createChart() {
+	private void createBottomChart() {
+		
+		// Create the stack to hold the charts, set as center
+		_chartStack = new StackPane();
+		_pane.setCenter(_chartStack);		
+				
+		// Create the x and y axes
 		Axis xAxis = createAxis(_xArea.getFields().get(0));
-		Axis yAxis = createAxis(_yArea.getFields().get(0));
+		Axis yAxis = createAxis(_yArea.getFields().get(0));	
+		
+		// Create the bottom chart
+		LineChart<Object,Object> chartBottom = new LineChart<Object, Object>(xAxis, yAxis);
+		chartBottom.setCreateSymbols(false);
+		chartBottom.setLegendVisible(false);
+		_chartBottom = chartBottom;
+						
+		// Add the bottom chart to the stack
+		_chartStack.getChildren().add(_chartBottom);	
+	}	
 	
-		LineChart<Object,Object> chart = new LineChart<Object, Object>(xAxis, yAxis);
-		chart.setCreateSymbols(false);
-		chart.setLegendVisible(false);
+	// Create the top chart (only present when we have 2 fields in the y area)
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void createTopChart() {
 		
-		_chart = chart;
+		// Create the x and y axes (x axis is the same as the bottom chart)
+		Axis xAxis = createAxis(_xArea.getFields().get(0));
+		Axis yAxis = createAxis(_yArea.getFields().get(1));	
+		yAxis.setSide(Side.RIGHT);
 		
-		_pane.setCenter(_chart);
+		// Create the top chart	    
+		LineChart<Object,Object> chartTop = new LineChart<Object,Object>(xAxis,yAxis);
+		chartTop.getStyleClass().add("top-line-chart");
+		chartTop.setCreateSymbols(false);
+		chartTop.setLegendVisible(false);		
+		_chartTop = chartTop;
+
+		System.out.println("Scale? " + _chartBottom.getScaleX());
+		
+		// Add the top chart to the stack
+		_chartStack.getChildren().add(_chartTop);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -179,7 +238,7 @@ public class ChartView extends ViewBase {
 		grid.getColumnConstraints().add(cc);
 		
 		_xArea = createControlArea(grid, "X", 0, DropArea.Policy.SINGLE);
-		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MUTLIPLE);
+		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MULTIPLE);
 				
 		return grid;
 	}
@@ -214,8 +273,7 @@ public class ChartView extends ViewBase {
 		
 		getStyleClass().add("chart-view");
 		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
-		_pane.setBottom(createControl());
-		
+		_pane.setBottom(createControl());	
 		setContent(_pane);
 		
 		_items.addListener(new ChangeListener<ObservableList<Row>>() {
@@ -225,9 +283,9 @@ public class ChartView extends ViewBase {
 					ObservableValue<? extends ObservableList<Row>> observable,
 					ObservableList<Row> oldValue, ObservableList<Row> newValue) {
 				if (newValue == null) return;
-				
+
 				assignData(newValue);
 			}
-		});
-	}
+		});				
+	}	
 }

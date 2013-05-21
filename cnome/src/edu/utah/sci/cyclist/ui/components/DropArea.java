@@ -8,8 +8,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
-import javafx.scene.ImageCursor;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -17,14 +15,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.layout.Priority;
-import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 
 public class DropArea extends HBox {
 	
-	public enum Policy {SINGLE, MUTLIPLE};
+	public enum Policy {SINGLE, MULTIPLE};
 	
 	private ObjectProperty<ObservableList<Field>> _fieldsProperty = new SimpleObjectProperty<>();
 	private Policy _policy;
@@ -104,20 +100,21 @@ public class DropArea extends HBox {
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				boolean status = false;
-//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
 					Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+					
+					// If we have no fields, add one, else set the field for single or add it for multiple
 					if (getFields().size() == 0) {
 						getFields().add(field);
-					} else {
+					} else if(_policy == Policy.SINGLE){
 						getFields().set(0, field);
+					} else {
+						getFields().add(field);
 					}
-					
+										
 					status = true;					
 //					System.out.println("set drag completed to "+status+". string:"+event.getDragboard().getString());
 					event.setDropCompleted(status);
 					event.consume();				
-//				}
-
 			}
 		});
 		
