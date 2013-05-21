@@ -97,7 +97,10 @@ public class Workspace extends ViewBase implements View {
 					{
 						event.acceptTransferModes(TransferMode.COPY);
 						event.consume();
-					} 
+					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
+						event.acceptTransferModes(TransferMode.MOVE);
+						event.consume();
+					}
 					
 					
 				}
@@ -106,14 +109,12 @@ public class Workspace extends ViewBase implements View {
 		
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
-//			System.out.println("workspace enter: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
 //				event.consume();
 			}
 		});
 		
 		setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				System.out.println("workspace exit");
 				// do nothing
 //				event.consume();
 			}
@@ -135,6 +136,10 @@ public class Workspace extends ViewBase implements View {
 						if (_onShowTable != null) {
 							_onShowTable.call(table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
 						}
+						status = true;
+					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
+						// accept but don't do anything. 
+						// This allows fields to be remove from other places without causing the DnD to fail
 						status = true;
 					}
 				}

@@ -16,11 +16,11 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.ColumnConstraints;
@@ -31,6 +31,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -50,6 +51,8 @@ public class ChartView extends ViewBase {
 	
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
+	
+	private int _limit = 1000;
 	
 	public ChartView() {
 		super();
@@ -80,13 +83,13 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void fetchData() {
-		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
+		if (_currentTable != null && _xArea.getFilters().size() == 1 && _yArea.getFilters().size() > 0) {
 			if (_chart == null) 
 				createChart();
-			List<Field> fields = new ArrayList<>();
-			fields.add(_xArea.getFields().get(0));
-			fields.addAll(_yArea.getFields());
-			_items.bind(_currentTable.getRows(fields, 100));
+			List<Filter> filters = new ArrayList<>();
+			filters.add(_xArea.getFilters().get(0));
+			filters.addAll(_yArea.getFilters());
+			_items.bind(_currentTable.getRows(filters, _limit));
 		}
 	}
 	
@@ -94,11 +97,11 @@ public class ChartView extends ViewBase {
 	private void assignData(ObservableList<Row> list) {
 		((XYChart)_chart).setData(FXCollections.observableArrayList());
 		
-		int cols = _yArea.getFields().size();
+		int cols = _yArea.getFilters().size();
 		for (int col=0; col<cols; col++) {
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
 		
-			if (_xArea.getFields().get(0).getType() == Field.Type.TIME) {
+			if (_xArea.getFilters().get(0).getField().getType() == Field.Type.TIME) {
 				for (Row row : list) {
 					Timestamp time = (Timestamp) row.value[0];
 					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
@@ -110,7 +113,7 @@ public class ChartView extends ViewBase {
 			}
 			
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
-			series.setName(_yArea.getFields().get(col).getName());
+			series.setName(_yArea.getFilters().get(col).getName());
 			series.dataProperty().set(data);
 			_chart.getData().add(series);
 		}
@@ -118,22 +121,38 @@ public class ChartView extends ViewBase {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
-		Axis xAxis = createAxis(_xArea.getFields().get(0));
-		Axis yAxis = createAxis(_yArea.getFields().get(0));
+		Filter xFilter = _xArea.getFilters().get(0);
+		Axis xAxis = createAxis(xFilter);
+		Axis yAxis = createAxis(_yArea.getFilters().get(0));
 	
-		LineChart<Object,Object> chart = new LineChart<Object, Object>(xAxis, yAxis);
-		chart.setCreateSymbols(false);
-		chart.setLegendVisible(false);
+		XYChart chart = null;
+		switch (xFilter.getRole()) {
+		case CATEGORICAL:
+			chart = new BarChart<Object,Object>(xAxis, yAxis);
+			break;
+		case NUMERIC:
+			LineChart numericChart = new LineChart<Object, Object>(xAxis, yAxis);
+			numericChart.setCreateSymbols(false);
+			chart = numericChart;
+			break;
+		case NA:
+			chart = new LineChart<Object, Object>(xAxis, yAxis);
+			break;
+		default:
+			break;
 		
+		}
+		
+		chart.setLegendVisible(false);
 		_chart = chart;
 		
 		_pane.setCenter(_chart);
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Axis createAxis(Field field) {
+	private Axis createAxis(Filter filter) {
 		Axis axis =  null;
-		switch (field.getType()) {
+		switch (filter.getType()) {
 		case INTEGER:
 		case NUMERIC:
 			NumberAxis a = new NumberAxis();
@@ -162,7 +181,7 @@ public class ChartView extends ViewBase {
 			axis = new NumberAxis();
 		}
 		
-		axis.setLabel(field.getName());
+		axis.setLabel(filter.getName());
 		
 		return axis;
 	}
@@ -188,10 +207,10 @@ public class ChartView extends ViewBase {
 		
 		@Override
 		public void invalidated(Observable arg0) {			
-			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
+			if (_xArea.getFilters().size() == 0 || !_xArea.getFilters().get(0).getRole().equals(_xAxisType))
 				invalidateChart();
 			
-			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
+			if (_yArea.getFilters().size() == 0 || !_yArea.getFilters().get(0).getRole().equals(_yAxisType))
 				invalidateChart();	
 				
 			fetchData();
@@ -202,7 +221,7 @@ public class ChartView extends ViewBase {
 		
 		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
 		DropArea area = new DropArea(policy);
-		area.getFields().addListener(_areaLister);
+		area.getFilters().addListener(_areaLister);
 		grid.add(text, 0, row);
 		grid.add(area, 1, row);
 		

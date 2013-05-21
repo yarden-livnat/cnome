@@ -158,7 +158,6 @@ public class Table {
 			while (rs.next()) {				
 				String colName = rs.getString("COLUMN_NAME");
 			
-//				System.out.println("field "+colName+"  type name:"+rs.getString("TYPE_NAME")+"  type:"+rs.getInt("DATA_TYPE"));
 				Field field = new Field(colName);
 				field.set(FieldProperties.REMOTE_NAME, colName);
 				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
@@ -325,7 +324,7 @@ public class Table {
 		return task.valueProperty();
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int n) {
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Filter> filters, final int limit) {
 		final CyclistDatasource ds = getDataSource();
 		
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
@@ -336,16 +335,17 @@ public class Table {
 				try {
 					Connection conn = ds.getConnection();
 					StringBuilder builder = new StringBuilder("select ");
-					for (int i=0; i<fields.size(); i++) {
-						builder.append(fields.get(i).getName());
-						if (i < fields.size()-1) builder.append(", ");
+					int n = filters.size();
+					for (int i=0; i<n; i++) {
+						builder.append(filters.get(i).getName());
+						if (i < n-1) builder.append(", ");
 					}
-					builder.append(" from ").append(getName()).append(" limit ").append(n);
+					builder.append(" from ").append(getName()).append(" limit ").append(limit);
 					System.out.println("query: ["+builder.toString()+"]");
 					PreparedStatement stmt = conn.prepareStatement(builder.toString());
 					
 					ResultSet rs = stmt.executeQuery();
-					int cols = fields.size();
+					int cols = filters.size();
 					
 					while (rs.next()) {
 						Row row = new Row(cols);

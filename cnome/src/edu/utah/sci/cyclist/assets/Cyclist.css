@@ -84,7 +84,11 @@
 .drop-area {
 	-fx-background-color: #e0e0e0;
 	-fx-spacing: 2;
+	-fx-padding: 1;
+	-fx-pref-height: 27;
+	-fx-min-height: 20;
 }
+
 
 /*
  * --- Style ---
@@ -145,9 +149,20 @@
  	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
 }
 
-field-glyph .text {
+.field-glyph .text {
 	
 }
+
+.filter-glyph {
+	-fx-background-color: #ccff33;
+	-fx-border-color: #303030;
+	-fx-border-radius: 5;
+	-fx-background-radius: 5;
+	-fx-spacing: 4;
+ 	-fx-padding: 2 3 3 3; 
+ 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+}
+
 /*
  * --- Wizards
  */

@@ -46,6 +46,8 @@ public class Field {
 	private String _name;
 	private Role _role;
 	private Type _type;
+	private String _action;
+	
 	private Map<String, Object> _properties = new HashMap<>();
 
 	public Field(){
@@ -55,6 +57,7 @@ public class Field {
 	public Field(String name) {
 		this._name = name;
 	}
+
 
 	// Save this field
 	public void save(IMemento memento) {
@@ -134,7 +137,6 @@ public class Field {
 		return _name;
 	}
 
-
 	public String getDataTypeName() {
 		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
 	}
@@ -176,4 +178,15 @@ public class Field {
 		return _name;
 	}
 	
+	public Field clone() {
+		Field f = new Field(_name);
+		
+		f.setRole(getRole());
+		f.setType(getType());
+		for (Map.Entry<String, Object> entry : _properties.entrySet()) {
+			f.set(entry.getKey(),entry.getValue());
+		}
+		
+		return f;
+	}
 }

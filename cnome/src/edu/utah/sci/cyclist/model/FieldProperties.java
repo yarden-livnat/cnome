@@ -31,4 +31,9 @@ public class FieldProperties {
 	public static final String REMOTE_NAME 				= "remote_name";
 	public static final String REMOTE_DATA_TYPE 		= "remote_data_type";
 	public static final String REMOTE_DATA_TYPE_NAME	= "remote_-data_type_name";
+	
+	public static final String FIELD_ACTION				= "field_action";
+	
+	public static final String FIELD_ACTION_SUM			= "field_action_sum";
+	public static final String FIELD_ACTION_AVG			= "field_action_avg";
 }

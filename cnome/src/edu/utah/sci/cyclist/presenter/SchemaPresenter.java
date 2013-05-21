@@ -32,7 +32,6 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
@@ -61,7 +60,7 @@ public class SchemaPresenter  extends PresenterBase {
 			public void call(Field field) {
 				_measures.remove(field);
 				_dimensions.add(field);	
-				field.set(FieldProperties.ROLE, Field.Role.CATEGORICAL);
+				field.setRole(Field.Role.CATEGORICAL);
 			}
 			
 		});
@@ -72,7 +71,7 @@ public class SchemaPresenter  extends PresenterBase {
 			public void call(Field field) {
 				_dimensions.remove(field);	
 				_measures.add(field);
-				field.set(FieldProperties.ROLE, Field.Role.NUMERIC);
+				field.setRole(Field.Role.NUMERIC);
 			}
 			
 		});

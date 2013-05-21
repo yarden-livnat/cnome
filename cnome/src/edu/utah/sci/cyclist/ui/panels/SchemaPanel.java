@@ -21,6 +21,7 @@ import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.Filter;
 
 public class SchemaPanel extends Panel {
 		
@@ -77,7 +78,7 @@ public class SchemaPanel extends Panel {
 			public void handle(MouseEvent event) {					
 				
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-				clipboard.put(DnD.FIELD_FORMAT, Field.class, entry.field);
+				clipboard.put(DnD.FILTER_FORMAT, Filter.class, new Filter(entry.field));
 				clipboard.put(DnD.DnD_SOURCE_FORMAT, Node.class, SchemaPanel.this);
 				
 				Dragboard db = entry.label.startDragAndDrop(TransferMode.COPY);
@@ -92,10 +93,7 @@ public class SchemaPanel extends Panel {
 		
 		entry.label.setOnDragDone(new EventHandler<DragEvent>() {
 			@Override
-			public void handle(DragEvent event) {
-//				System.out.println("SchemaPanel: drag done. accepted:"+event.isAccepted()
-//						+"  completed:"+event.isDropCompleted()
-//						+"  mode:"+event.getTransferMode());				
+			public void handle(DragEvent event) {			
 			}
 		});
 		return entry;
@@ -120,7 +118,7 @@ public class SchemaPanel extends Panel {
 		
 		getContent().setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
+				DnD.LocalClipboard clipboard = getLocalClipboard();
 				
 				Node src = clipboard.get(DnD.DnD_SOURCE_FORMAT, Node.class);
 				if (src != null && src != SchemaPanel.this) {
@@ -138,10 +136,10 @@ public class SchemaPanel extends Panel {
 			
 		getContent().setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
-				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
+				DnD.LocalClipboard clipboard = getLocalClipboard();
+				Filter filter = clipboard.get(DnD.FILTER_FORMAT, Filter.class);
 				if (_onFieldDropAction != null) 
-					_onFieldDropAction.call(field);
+					_onFieldDropAction.call(filter.getField());
 				event.setDropCompleted(true);
 			}
 		});
