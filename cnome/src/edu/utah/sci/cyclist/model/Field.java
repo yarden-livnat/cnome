@@ -30,22 +30,9 @@ import edu.utah.sci.cyclist.controller.IMemento;
 
 public class Field {
 	
-	public static enum Role {
-		NUMERIC, CATEGORICAL, NA;
-	}
-	
-	public enum Type {
-		INTEGER,
-		NUMERIC,
-		STRING,
-		TIME,
-		BOOLEAN,
-		NA
-	}
-	
 	private String _name;
-	private Role _role;
-	private Type _type;
+	private DataType _dataType;
+	
 	private Map<String, Object> _properties = new HashMap<>();
 
 	public Field(){
@@ -56,12 +43,72 @@ public class Field {
 		this._name = name;
 	}
 
+
+	public String getName() {
+		return _name;
+	}
+
+
+	public String getDataTypeName() {
+		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
+	}
+
+	public void set(String property, Object value) {
+		_properties.put(property, value);
+	}
+
+	public Object get(String property) {
+		return _properties.get(property);
+	}
+	
+	public String getString(String property) {
+		return (String) get(property);
+	}
+	
+	public int getInt(String property) {
+		return (int) get(property);
+	}
+	
+	public DataType getDataType() {
+		return _dataType;
+	}
+	
+	public void setDataType(DataType dataType) {
+		_dataType = dataType;
+	}
+	
+
+	public DataType.Role getRole() {
+		return _dataType.getRole();
+	}
+	
+	public void setRole(DataType.Role role) {
+		_dataType.setRole(role);
+	}
+	
+	public DataType.Type getType() {
+		return _dataType.getType();
+	}
+	
+	public DataType.Classification getClassification() {
+		return _dataType.getClassification();
+	}
+	
+	public String toString() {
+		return _name;
+	}
+	
 	// Save this field
 	public void save(IMemento memento) {
 	
 		memento.putString("name", _name);
-		memento.putString("role", _role.toString());
-		memento.putString("type", _type.toString());
+		
+		IMemento dataMemento = memento.createChild("datatype");
+		dataMemento.putString("role", getRole().toString());
+		dataMemento.putString("type", getType().toString());
+		dataMemento.putString("interp", _dataType.getInterpretation().toString());		
+		dataMemento.putString("classification", getClassification().toString());
+		
 		// Set things saved in the properties map
 		Set<String> keys = _properties.keySet();
 		for(String key: keys){
@@ -101,8 +148,14 @@ public class Field {
 		
 		// Get the name of the field
 		_name = memento.getString("name");
-		_role = Field.Role.valueOf(memento.getString("role"));
-		_type = Field.Type.valueOf(memento.getString("type"));
+		
+		IMemento dataMemento = memento.getChild("datatype");
+		DataType.Role role = DataType.Role.valueOf(dataMemento.getString("role"));
+		DataType.Type type = DataType.Type.valueOf(dataMemento.getString("type"));
+		DataType.Interpretation interp = DataType.Interpretation.valueOf(dataMemento.getString("interp"));
+		DataType.Classification classification = DataType.Classification.valueOf(dataMemento.getString("classification"));
+
+		_dataType = new DataType(role, type, interp, classification);
 		
 		// Get the entries in the field
 		IMemento[] entries = memento.getChildren("entry");
@@ -130,50 +183,4 @@ public class Field {
 		}		
 	}
 
-	public String getName() {
-		return _name;
-	}
-
-
-	public String getDataTypeName() {
-		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
-	}
-
-	public void set(String property, Object value) {
-		_properties.put(property, value);
-	}
-
-	public Object get(String property) {
-		return _properties.get(property);
-	}
-	
-	public String getString(String property) {
-		return (String) get(property);
-	}
-	
-	public int getInt(String property) {
-		return (int) get(property);
-	}
-	
-	
-	public void setRole(Role role) {
-		_role = role;
-	}
-	
-	public Role getRole() {
-		return _role;
-	}
-	
-	public void setType(Type type) {
-		_type = type;
-	}
-	
-	public Type getType() {
-		return _type;
-	}
-	
-	public String toString() {
-		return _name;
-	}
-	
 }

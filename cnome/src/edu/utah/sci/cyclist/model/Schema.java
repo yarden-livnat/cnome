@@ -28,7 +28,6 @@ import java.util.Vector;
 import utils.SQLUtil;
 
 import edu.utah.sci.cyclist.controller.IMemento;
-import edu.utah.sci.cyclist.model.Field.Type;
 
 
 
@@ -93,32 +92,17 @@ public class Schema {
 	
 	public void updateField(Field field) {
 		// set field type
-		int remote_type = (int) field.get(FieldProperties.REMOTE_DATA_TYPE);
+
 		String remote_type_name = field.getString(FieldProperties.REMOTE_DATA_TYPE_NAME);
-		
-//		Field.Type type = SQLUtil.fromSQL(remote_type);
-		Field.Type type = SQLUtil.fromSQL(remote_type_name);
-		field.setType(type);
 		field.set(FieldProperties.DATA_TYPE_NAME, remote_type_name);
 		
-		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
-	
-		Field.Role role = Field.Role.NA;
-		switch (type) {
-		case INTEGER:
-		case NUMERIC:
-			role = Field.Role.NUMERIC;
-			break;
-		case STRING:
-		case TIME:
-		case BOOLEAN:
-			role = Field.Role.CATEGORICAL;
-			break;
-		default:
-			role = Field.Role.NA;
-		}
+		int remote_type = (int) field.get(FieldProperties.REMOTE_DATA_TYPE);
+		DataType.Type type = SQLUtil.fromSQL(remote_type_name);
 		
-		field.setRole(role);
+		DataType dataType = new DataType(type);
+		field.setDataType(dataType);
+		
+		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
 	}
 	
 	

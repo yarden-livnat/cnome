@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import edu.utah.sci.cyclist.controller.IMemento;
+import edu.utah.sci.cyclist.model.DataType.Type;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
@@ -337,6 +338,8 @@ public class Table {
 					Connection conn = ds.getConnection();
 					StringBuilder builder = new StringBuilder("select ");
 					for (int i=0; i<fields.size(); i++) {
+						Field field = fields.get(i);
+						
 						builder.append(fields.get(i).getName());
 						if (i < fields.size()-1) builder.append(", ");
 					}

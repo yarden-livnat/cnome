@@ -93,7 +93,7 @@ public class DatasourceWizard extends VBox {
 	// * * * Create the dialog * * * //
 	private void createDialog(CyclistDatasource sourceProperty){
 		_dialog = StageBuilder.create()
-				.title("Create or Edit Data Source")
+				.title("Create or Edit DataType Source")
 				.build();
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, sourceProperty) );

@@ -23,8 +23,6 @@
 package edu.utah.sci.cyclist.model;
 
 public class FieldProperties {
-	public static final String ROLE 					= "role";
-
 	public static final String DATA_TYPE_NAME 			= "data_type_name";
 	public static final String DATA_TYPE 				= "data_type";
 

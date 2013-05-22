@@ -1,9 +1,7 @@
 package edu.utah.sci.cyclist.ui.views;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -16,11 +14,12 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.ColumnConstraints;
@@ -30,6 +29,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
+import edu.utah.sci.cyclist.model.DataType;
+import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
@@ -39,14 +40,22 @@ import edu.utah.sci.cyclist.ui.components.ViewBase;
 public class ChartView extends ViewBase {
 	public static final String TITLE = "Chart";
 
+	enum ViewType { CROSS_TAB, BAR, LINE, SCATTER_PLOT, GANTT, NA }
+	
+	enum MarkType { TEXT, BAR, LINE, SHAPE, GANTT, NA }
+	
+	
+	private ViewType _viewType;
+	private MarkType _markType;
+	
 	private XYChart<Object,Object> _chart;
 	
 	private BorderPane _pane;
 	private DropArea _xArea;
 	private DropArea _yArea;
 	
-	private Field.Role _xAxisType = Field.Role.NA;
-	private Field.Role _yAxisType = Field.Role.NA;
+	private DataType.Role _xAxisType = DataType.Role.MEASURE;
+	private DataType.Role _yAxisType = DataType.Role.MEASURE;
 	
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
@@ -83,13 +92,20 @@ public class ChartView extends ViewBase {
 		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (_chart == null) 
 				createChart();
-			List<Field> fields = new ArrayList<>();
-			fields.add(_xArea.getFields().get(0));
-			fields.addAll(_yArea.getFields());
-			_items.bind(_currentTable.getRows(fields, 100));
+			if (_chart != null) {
+				ObservableList<Field> fields = FXCollections.observableArrayList();
+				fields.add(_xArea.getFields().get(0));
+				fields.addAll(_yArea.getFields());
+				_items.bind(_currentTable.getRows(fields, 100));
+			}
 		}
 	}
 	
+	private Object convert(Object value) {
+		if (value instanceof Timestamp) 
+			return ((Timestamp)value).getTime();
+		return value;
+	}
 	
 	private void assignData(ObservableList<Row> list) {
 		((XYChart)_chart).setData(FXCollections.observableArrayList());
@@ -98,16 +114,21 @@ public class ChartView extends ViewBase {
 		for (int col=0; col<cols; col++) {
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
 		
-			if (_xArea.getFields().get(0).getType() == Field.Type.TIME) {
+//			if (getXField().getType() == DataType.Type.DATETIME) {
+//				for (Row row : list) {
+//					Timestamp time = (Timestamp) row.value[0];
+//					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
+//				}
+//			} if (getYField().getType() == DataType.Type.DATETIME) {
+//				for (Row row : list) {
+//					Timestamp time = (Timestamp) row.value[0];
+//					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
+//				}
+//			} else {
 				for (Row row : list) {
-					Timestamp time = (Timestamp) row.value[0];
-					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
+					data.add(new XYChart.Data<Object, Object>(convert(row.value[0]), convert(row.value[col+1])));
 				}
-			} else {
-				for (Row row : list) {
-					data.add(new XYChart.Data<Object, Object>(row.value[0], row.value[col+1]));
-				}
-			}
+//			}
 			
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
 			series.setName(_yArea.getFields().get(col).getName());
@@ -116,17 +137,77 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
+	private Field getXField() {
+		return _xArea.getFields().get(0);
+	}
+	
+	private Field getYField() {
+		return _yArea.getFields().get(0);
+	}
+	
+	private boolean isPaneType(Classification x, Classification y, Classification c1, Classification c2) {
+		return (x == c1 && y == c2) || (x==c2 && y==c1); 
+	}
+	
+	private void determineViewType(Classification x, Classification y) {
+		ViewType viewType;
+		if (isPaneType(x, y, Classification.C, Classification.C)) {
+			_viewType = ViewType.CROSS_TAB;
+			_markType = MarkType.TEXT;
+		} else if (isPaneType(x, y, Classification.Qd, Classification.C)) {
+			_viewType = ViewType.BAR;
+			_markType = MarkType.BAR;
+		} else if (isPaneType(x, y, Classification.Qd, Classification.Cdate)) {
+			_viewType = ViewType.LINE;
+			_markType = MarkType.LINE;
+		} else if (isPaneType(x, y, Classification.Qd, Classification.Qd)) {
+			_viewType = ViewType.SCATTER_PLOT;
+			_markType = MarkType.SHAPE;
+		} else if (isPaneType(x, y, Classification.Qi, Classification.C)) {
+			_viewType = ViewType.BAR;
+			_markType = MarkType.BAR;
+		} else if (isPaneType(x, y, Classification.Qi, Classification.Qd)) {
+			_viewType = ViewType.BAR;
+			_markType = MarkType.BAR;
+		}else if (isPaneType(x, y, Classification.Qi, Classification.Qi)) {
+			_viewType = ViewType.BAR;
+			_markType = MarkType.BAR;
+		} else {
+			_viewType = ViewType.NA;
+			_markType = MarkType.NA;
+		}
+	}
+	
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
-		Axis xAxis = createAxis(_xArea.getFields().get(0));
-		Axis yAxis = createAxis(_yArea.getFields().get(0));
+		Axis xAxis = createAxis(getXField());
+		Axis yAxis = createAxis(getYField());
 	
-		LineChart<Object,Object> chart = new LineChart<Object, Object>(xAxis, yAxis);
-		chart.setCreateSymbols(false);
-		chart.setLegendVisible(false);
-		
-		_chart = chart;
-		
+		determineViewType(getXField().getClassification(), getYField().getClassification()); 
+		switch (_viewType) {
+		case CROSS_TAB:
+			_chart = null;
+			break;
+		case BAR:
+			_chart = new BarChart<>(xAxis,  yAxis);
+			break;
+		case LINE:
+			_chart = new LineChart<Object, Object>(xAxis, yAxis);
+			break;
+		case SCATTER_PLOT:
+			_chart = new ScatterChart<>(xAxis, yAxis);
+			break;
+		case GANTT:
+			_chart = null;
+			break;
+		case NA:
+			_chart = null;
+		}
+		 
+//		chart.setCreateSymbols(false);
+//		chart.setLegendVisible(false);
+//				
 		_pane.setCenter(_chart);
 	}
 
@@ -134,17 +215,17 @@ public class ChartView extends ViewBase {
 	private Axis createAxis(Field field) {
 		Axis axis =  null;
 		switch (field.getType()) {
-		case INTEGER:
 		case NUMERIC:
 			NumberAxis a = new NumberAxis();
 			a.forceZeroInRangeProperty().set(false);
 			axis = a;
 			break;
-		case STRING:
+		case TEXT:
 			CategoryAxis c = new CategoryAxis();
 			axis = c;
 			break;
-		case TIME:
+		case DATE:
+		case DATETIME:
 			NumberAxis t = new NumberAxis();
 			t.forceZeroInRangeProperty().set(false);
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(t) {

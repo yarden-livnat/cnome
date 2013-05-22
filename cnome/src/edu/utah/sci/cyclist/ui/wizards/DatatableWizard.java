@@ -75,7 +75,7 @@ public class DatatableWizard extends VBox {
 	private ObservableList<Table> _tables;
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
-	// Data elements
+	// DataType elements
 	private CyclistDatasource _current;
 	private ObjectProperty<Table> selection = new SimpleObjectProperty<>(); 
 	
@@ -105,7 +105,7 @@ public class DatatableWizard extends VBox {
 	private void createDialog(Table tableProperty){
 		
 		_dialog = StageBuilder.create()
-				.title("Create or Edit Data Table")
+				.title("Create or Edit DataType Table")
 				.build();
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
@@ -141,7 +141,7 @@ public class DatatableWizard extends VBox {
 								.alignment(Pos.CENTER_LEFT)
 								.children(
 										TextBuilder.create()
-											.text("Data sources")
+											.text("DataType sources")
 											.build(),
 //										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
 										_sourcesView = ListViewBuilder.<CyclistDatasource>create()

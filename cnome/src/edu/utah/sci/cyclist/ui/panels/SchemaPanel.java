@@ -2,7 +2,9 @@ package edu.utah.sci.cyclist.ui.panels;
 
 import org.mo.closure.v1.Closure;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -20,6 +22,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.Field;
 
 public class SchemaPanel extends Panel {
@@ -70,7 +73,7 @@ public class SchemaPanel extends Panel {
 		
 		entry.label = LabelBuilder.create()
 						.text(field.getName())
-						.graphic(new ImageView(Resources.getIcon(field.getDataTypeName())))
+						.graphic(new ImageView(Resources.getIcon(_type2Icon.get(field.getType()))))
 						.build();
 		
 		entry.label.setOnDragDetected(new EventHandler<MouseEvent>() {
@@ -120,7 +123,7 @@ public class SchemaPanel extends Panel {
 		
 		getContent().setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
+				DnD.LocalClipboard clipboard = getLocalClipboard();
 				
 				Node src = clipboard.get(DnD.DnD_SOURCE_FORMAT, Node.class);
 				if (src != null && src != SchemaPanel.this) {
@@ -138,7 +141,7 @@ public class SchemaPanel extends Panel {
 			
 		getContent().setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				DnD.LocalClipboard clipboard = DnD.getInstance().getLocalClipboard();
+				DnD.LocalClipboard clipboard = getLocalClipboard();
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
 				if (_onFieldDropAction != null) 
 					_onFieldDropAction.call(field);
@@ -155,5 +158,14 @@ public class SchemaPanel extends Panel {
 	class Entry {
 		Label label;
 		Field field;
+	}
+	
+	private static Map<DataType.Type, String> _type2Icon = new HashMap<>();
+	
+	static {
+		_type2Icon.put(DataType.Type.NUMERIC, "field/number");
+		_type2Icon.put(DataType.Type.TEXT, "field/Ab");
+		_type2Icon.put(DataType.Type.DATE, "field/date");
+		_type2Icon.put(DataType.Type.DATETIME, "field/date");		
 	}
 }
