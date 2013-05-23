@@ -54,7 +54,7 @@ public class DropArea extends HBox {
 			.spacing(0)
 			.padding(new Insets(2))
 			.minWidth(30)
-			.prefHeight(27)
+			.prefHeight(23)
 			.styleClass("drop-area")
 			.applyTo(this);
 				

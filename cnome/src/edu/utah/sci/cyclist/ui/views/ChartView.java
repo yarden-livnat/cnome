@@ -139,7 +139,6 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void determineViewType(Classification x, Classification y) {
-		ViewType viewType;
 		if (isPaneType(x, y, Classification.C, Classification.C)) {
 			_viewType = ViewType.CROSS_TAB;
 			_markType = MarkType.TEXT;
@@ -197,6 +196,7 @@ public class ChartView extends ViewBase {
 //		chart.setCreateSymbols(false);
 //		chart.setLegendVisible(false);
 //				
+		_chart.setAnimated(false);
 		_pane.setCenter(_chart);
 	}
 

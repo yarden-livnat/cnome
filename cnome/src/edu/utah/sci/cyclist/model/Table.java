@@ -339,7 +339,7 @@ public class Table {
 					for (int i=0; i<fields.size(); i++) {
 						Field field = fields.get(i);
 						
-						builder.append(fields.get(i).getName());
+						builder.append(field.getName());
 						if (i < fields.size()-1) builder.append(", ");
 					}
 					builder.append(" from ").append(getName()).append(" limit ").append(limit);
