@@ -122,7 +122,7 @@ public class Table {
 		setAlias(memento.getString("alias"));
 		
 		// Get the number of rows
-		_numRows = memento.getInteger("NumRows");
+//		_numRows = memento.getInteger("NumRows");
 
 		// Get the datasource
 		String datasourceUID = memento.getString("datasource-uid");

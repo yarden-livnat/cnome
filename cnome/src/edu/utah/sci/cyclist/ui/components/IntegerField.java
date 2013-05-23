@@ -1,5 +1,6 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.beans.property.IntegerProperty;
@@ -30,7 +31,9 @@ public class IntegerField extends TextField {
 	public IntegerField() {
 		this(Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE);
 	}
+	
 	public IntegerField(int min, int max, Integer value)  {
+		super();
 		_min = min;
 		_max = max;
 		
@@ -50,31 +53,59 @@ public class IntegerField extends TextField {
 			}
 		});
 		
-		textProperty().addListener(new ChangeListener<String>() {
-
+		setOnAction(new EventHandler<ActionEvent>() {
+			
 			@Override
-			public void changed(ObservableValue<? extends String> observable,
-					String oldValue, String newValue) {
-				if (newValue == null || "".equals(newValue)) {
-					_value.setValue(Integer.MIN_VALUE);
-				}
-				
+			public void handle(ActionEvent event) {
+				int i = Integer.parseInt(getText());
+				_value.set(i);
 			}
 		});
 		
-		_value.addListener(new ChangeListener<Number>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Number> observable,
-					Number oldValue, Number newValue) {
-				if (newValue == null) {
-					setText(null);
-				} else {
-					
-				}
-				
-				
-			}
-		});
+//		textProperty().addListener(new ChangeListener<String>() {
+//
+//			@Override
+//			public void changed(ObservableValue<? extends String> observable,
+//					String oldValue, String newValue) {
+//				if (newValue == null || "".equals(newValue)) {
+//					_value.setValue(Integer.MIN_VALUE);
+//					return;
+//				}
+//				
+//				int i = Integer.parseInt(newValue);
+//				if (_min > i || i > _max)
+//					textProperty().set(oldValue);
+//				
+//				if (textProperty().get() == null)
+//					_value.set(Integer.MIN_VALUE);
+//				else
+//					_value.set(Integer.parseInt(textProperty().get()));
+//			}
+//		});
+		
+//		_value.addListener(new ChangeListener<Number>() {
+//
+//			@Override
+//			public void changed(ObservableValue<? extends Number> observable,
+//					Number oldValue, Number newValue) {
+//				if (newValue == null || (Integer)newValue == Integer.MIN_VALUE) {
+//					setText(null);
+//				} else {
+//					int i = (Integer) newValue;
+//					if (i < _min) {
+//						_value.set(_min);
+//					} else if (i> _max) {
+//						_value.set(_max);
+//					} else if (i == Integer.MIN_VALUE && (getText() == null || getText().equals(""))) {
+//						// ignore
+//					} else {
+//						setText(newValue.toString());
+//					}
+//					
+//				}
+//				
+//				
+//			}
+//		});
 	}
 }

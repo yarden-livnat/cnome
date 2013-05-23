@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
@@ -39,6 +40,7 @@ import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
+import edu.utah.sci.cyclist.ui.components.IntegerField;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 
 public class ChartView extends ViewBase {
@@ -64,7 +66,7 @@ public class ChartView extends ViewBase {
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
-	private TextField _limitBox;
+	private IntegerField _limitEntry;
 	private int _limit = 1000;
 	
 	public ChartView() {
@@ -103,7 +105,7 @@ public class ChartView extends ViewBase {
 				ObservableList<Field> fields = FXCollections.observableArrayList();
 				fields.add(_xArea.getFields().get(0));
 				fields.addAll(_yArea.getFields());
-				_items.bind(_currentTable.getRows(fields, 100));
+				_items.bind(_currentTable.getRows(fields, _limit));
 			}
 		}
 	}
@@ -289,22 +291,23 @@ public class ChartView extends ViewBase {
 		getStyleClass().add("chart-view");
 		
 		// Limit box
-		_limitBox = TextFieldBuilder.create()
-						.editable(true)
-						.promptText("unlimited")
-						.prefColumnCount(6)
-					.build();
+		_limitEntry = new IntegerField(1, Integer.MAX_VALUE, 1000);
+		_limitEntry.setEditable(true);
+		_limitEntry.setPromptText("unlimited");
+		_limitEntry.setPrefColumnCount(8);
 		
-		_limitBox.setOnAction(new EventHandler<ActionEvent>() {
-			
+		_limitEntry.valueProperty().addListener(new ChangeListener<Number>() {
+
 			@Override
-			public void handle(ActionEvent event) {
-				// TODO Auto-generated method stub
-				
+			public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue) {
+				_limit = newValue.intValue();
+				System.out.println("limit changed: "+_limit);
+				fetchData();	
 			}
 		});
 		
-		addBar(_limitBox);
+		addBar(_limitEntry, HPos.RIGHT);
 		// main view
 		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
 		_pane.setBottom(createControl());
