@@ -30,20 +30,29 @@ import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.ui.wizards.DatasourceWizard;
+import edu.utah.sci.cyclist.ui.wizards.TableEditorWizard;
 
 public class TablesPanel extends Panel  {
 	public static final String ID 		= "cnome-panel";
@@ -55,7 +64,7 @@ public class TablesPanel extends Panel  {
 	
 	private List<Entry> _entries;
 	private ObservableList<Table> _items;
-	private ObjectProperty<Table> _tablePropery = new SimpleObjectProperty<>();
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	private Entry _selected = null;
 	private InvalidationListener _listener = new InvalidationListener() {
 		
@@ -119,14 +128,14 @@ public class TablesPanel extends Panel  {
 	}
 	
 	public ReadOnlyObjectProperty<Table> selectedItemProperty() {
-		return _tablePropery;
+		return _tableProperty;
 	}
 	
 	private Entry createEntry(Table table) {
 		final Entry entry = new Entry();
 		entry.table = table;
 		entry.title = LabelBuilder.create()
-						.text(table.getName())
+						.text(table.getAlias())
 						.graphic(new ImageView(Resources.getIcon("table")))
 						.build();
 		
@@ -134,11 +143,12 @@ public class TablesPanel extends Panel  {
 
 			@Override
 			public void handle(Event event) {
-				_tablePropery.set(entry.table);
+				_tableProperty.set(entry.table);
 				select(entry);
 				
 			}
 		});
+		
 		
 		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {					
@@ -156,8 +166,51 @@ public class TablesPanel extends Panel  {
 			}
 		});
 
+		
+		entry.title.setContextMenu(createContextMenu(entry));
+		
 		return entry;
 	}
+	
+	private ContextMenu createContextMenu(final Entry entry) {
+		final ContextMenu menu = new ContextMenu();
+
+		MenuItem edit = new MenuItem("Edit");
+		edit.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				MenuItem mi = (MenuItem) event.getSource();
+				editTable(entry, mi.getParentPopup().getOwnerWindow());
+			}
+		});
+		menu.getItems().add(edit);
+
+		MenuItem delete = new MenuItem("Delete");
+		delete.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				removeTable(entry);
+			}
+		});
+		menu.getItems().add(delete);
+		return menu;
+	}
+	
+	public void removeTable(Entry entry) {
+		_items.remove(entry.table);
+	}
+
+		
+	private void editTable(final Entry entry, Window window) {
+		TableEditorWizard wizard = new TableEditorWizard(entry.table);
+		ObjectProperty<Table> selection = wizard.show(window);
+		selection.addListener(new ChangeListener<Table>(){
+			@Override
+			public void changed(ObservableValue<? extends Table> arg0, Table oldVal,Table newVal) {
+				entry.table = newVal;
+			}
+		});
+	}	
 	
 	class Entry {
 		Label title;

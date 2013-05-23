@@ -75,7 +75,6 @@ public class MainScreen extends BorderPane {
 	}
 	
 	public ObjectProperty<String> selectWorkspace(ObservableList<String> list) {
-		
 		WorkspaceWizard wizard = new WorkspaceWizard();
 		wizard.setItems(list);
 		return wizard.show(getScene().getWindow());

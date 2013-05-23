@@ -11,6 +11,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
@@ -20,6 +22,8 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.ColumnConstraints;
@@ -60,6 +64,7 @@ public class ChartView extends ViewBase {
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
+	private TextField _limitBox;
 	private int _limit = 1000;
 	
 	public ChartView() {
@@ -249,7 +254,7 @@ public class ChartView extends ViewBase {
 		grid.getColumnConstraints().add(cc);
 		
 		_xArea = createControlArea(grid, "X", 0, DropArea.Policy.SINGLE);
-		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MUTLIPLE);
+		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MULTIPLE);
 				
 		return grid;
 	}
@@ -281,8 +286,26 @@ public class ChartView extends ViewBase {
 	
 	private void build() {
 		setTitle(TITLE);
-		
 		getStyleClass().add("chart-view");
+		
+		// Limit box
+		_limitBox = TextFieldBuilder.create()
+						.editable(true)
+						.promptText("unlimited")
+						.prefColumnCount(6)
+					.build();
+		
+		_limitBox.setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		addBar(_limitBox);
+		// main view
 		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
 		_pane.setBottom(createControl());
 		

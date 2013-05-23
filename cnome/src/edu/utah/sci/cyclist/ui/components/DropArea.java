@@ -20,7 +20,7 @@ import edu.utah.sci.cyclist.model.Field;
 
 public class DropArea extends HBox {
 	
-	public enum Policy {SINGLE, MUTLIPLE};
+	public enum Policy {SINGLE, MULTIPLE};
 	
 	private ObjectProperty<ObservableList<Field>> _fieldsProperty = new SimpleObjectProperty<>();
 	private Policy _policy;
@@ -97,16 +97,21 @@ public class DropArea extends HBox {
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				boolean status = false;
+
 				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
 				if (field != null) {
-					if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
+					if (getFields().size() == 0) {
 						getFields().add(field);
-					} else {
+					} else if(_policy == Policy.SINGLE){
 						getFields().set(0, field);
+					} else {
+						getFields().add(field);
 					}
 					
 					status = true;			
 				}
+				
+//					System.out.println("set drag completed to "+status+". string:"+event.getDragboard().getString());
 				event.setDropCompleted(status);
 				event.consume();				
 			}

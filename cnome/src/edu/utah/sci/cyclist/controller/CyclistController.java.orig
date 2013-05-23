@@ -1,33 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2013 SCI Institute, University of Utah.
- * All rights reserved.
- *
- * License for the specific language governing rights and limitations under Permission
- * is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction, 
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the 
- * Software is furnished to do so, subject to the following conditions: The above copyright notice 
- * and this permission notice shall be included in all copies  or substantial portions of the Software. 
- *  
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- *  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR 
- *  A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
- *  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
- *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
- *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * Contributors:
- *     Yarden Livnat  
- *******************************************************************************/
 package edu.utah.sci.cyclist.controller;
 
 import java.io.File;
+<<<<<<< HEAD
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+=======
+import java.io.IOException;
+import java.io.PrintWriter;
+>>>>>>> 9082b395f2002b5edcda8dfa5a09957794469ec0
 import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
@@ -41,14 +24,18 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.presenter.SchemaPresenter;
-import edu.utah.sci.cyclist.presenter.ToolsPresenter;
+<<<<<<< HEAD
+=======
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
+>>>>>>> 9082b395f2002b5edcda8dfa5a09957794469ec0
+import edu.utah.sci.cyclist.presenter.SchemaPresenter;
+import edu.utah.sci.cyclist.presenter.TablesPresenter;
+import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
-import edu.utah.sci.cyclist.ui.MainScreen;
-import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
-import edu.utah.sci.cyclist.ui.views.Workspace;
-import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.view.MainScreen;
+import edu.utah.sci.cyclist.view.components.Workspace;
+import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
+import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
 
 
 public class CyclistController {
@@ -79,6 +66,7 @@ public class CyclistController {
 	 */
 	public void setScreen(final MainScreen screen) {
 		this._screen = screen;
+		screen.setControler(this);
 		addActions();
 			
 		/*
@@ -93,12 +81,12 @@ public class CyclistController {
 		
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
-		sp.setPanels(screen.getDimensionPanel(), screen.getMeauresPanel());
+		sp.setPanel(screen.getSchemaPanel());
 		
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
 		tp.setPanel(screen.getToolsPanel());
-		tp.setFactories(Arrays.asList(ToolsLibrary.factories));
+		tp.setTools(Arrays.asList(ToolsLibrary.list));
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();
@@ -120,13 +108,14 @@ public class CyclistController {
 		selection.addListener(new ChangeListener<String>() {
 
 			@Override
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {			
+			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
+				System.out.println("select:"+newVal);
+				
 			}
 		});
 	}	
 		
 	private void addActions() {
-		
 		_screen.onAddDatasource().set(new EventHandler<ActionEvent>() {
 			
 			@Override
@@ -143,16 +132,6 @@ public class CyclistController {
 				});	
 				
 			}
-		});
-		
-		_screen.onSelectWorkspace().set(new EventHandler<ActionEvent>(){
-
-			@Override
-			public void handle(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				selectWorkspace();
-			}
-			
 		});
 		
 		_screen.onSave().set(new EventHandler<ActionEvent>() {
@@ -211,14 +190,16 @@ public class CyclistController {
 	
 	// Load saved properties
 	private void load() {
-		
+	
+		System.out.println("Load!");
+	
 		// Check if the save file exists
 		File saveFile = new File(SAVE_FILE);
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
 			
-	
+			
 			Reader reader;
 			try {
 				reader = new FileReader(saveFile);
@@ -228,6 +209,7 @@ public class CyclistController {
 					
 					// Read in the data sources
 					IMemento[] sources = memento.getChildren("CyclistDatasource");
+					System.out.println("sourcs " + sources.length);
 					for(IMemento source: sources){
 						CyclistDatasource datasource = new CyclistDatasource();
 						datasource.restore(source);
@@ -236,7 +218,7 @@ public class CyclistController {
 					
 					// Read in the tables
 					IMemento[] tables = memento.getChildren("Table");
-					//System.out.println("tables " + tables.length);
+					System.out.println("tables " + tables.length);
 					for(IMemento table: tables){
 						Table tbl = new Table();
 						tbl.restore(table, _model.getSources());

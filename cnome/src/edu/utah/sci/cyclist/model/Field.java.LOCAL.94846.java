@@ -26,28 +26,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-
 import edu.utah.sci.cyclist.controller.IMemento;
 
 public class Field {
 	
 	private String _name;
 	private DataType _dataType;
-	private BooleanProperty _selected;
+
 	
 	private Map<String, Object> _properties = new HashMap<>();
 
-	
 	public Field(){
 		this("");
 	}
 
 	public Field(String name) {
 		this._name = name;
-		_selected = new SimpleBooleanProperty();
-		_selected.set(true);
 	}
 
 
@@ -115,8 +109,6 @@ public class Field {
 		dataMemento.putString("type", getType().toString());
 		dataMemento.putString("interp", _dataType.getInterpretation().toString());		
 		dataMemento.putString("classification", getClassification().toString());
-
-		memento.putBoolean("selected", _selected.get());
 		
 		// Set things saved in the properties map
 		Set<String> keys = _properties.keySet();
@@ -154,7 +146,7 @@ public class Field {
 	
 	// Restore this field
 	public void restore(IMemento memento) {
-		try{
+		
 		// Get the name of the field
 		_name = memento.getString("name");
 		
@@ -165,9 +157,7 @@ public class Field {
 		DataType.Classification classification = DataType.Classification.valueOf(dataMemento.getString("classification"));
 
 		_dataType = new DataType(role, type, interp, classification);
-
-		_selected.set(memento.getBoolean("selected"));
-				
+		
 		// Get the entries in the field
 		IMemento[] entries = memento.getChildren("entry");
 		for(IMemento entry:entries){
@@ -191,18 +181,7 @@ public class Field {
 			else{
 				System.out.println("Field:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
 			}	
-		}	
-		}catch(NullPointerException e){
-			
-		}
+		}		
 	}
 
-	public BooleanProperty getSelectedProperty() {
-		return _selected;
-	}
-	
-	public void setSelectedProperty(boolean selected){
-		_selected.set(selected);
-	}
-	
 }
