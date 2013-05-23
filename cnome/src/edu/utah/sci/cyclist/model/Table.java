@@ -47,10 +47,12 @@ public class Table {
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
 	
+	private String _alias;
 	private String _name;
 	private Schema _schema = new Schema();
 	private CyclistDatasource _datasource;
 	private Map<String, Object> _properties = new HashMap<>();
+	private int _numRows;
 
 	private List<Row> _rows = new ArrayList<>();
 
@@ -59,6 +61,8 @@ public class Table {
 	}
 	public Table(String name) {
 		_name = name;
+		_alias = name;
+		_numRows = -1;
 		setProperty("uid", UUID.randomUUID().toString());
 	}
 	
@@ -67,6 +71,12 @@ public class Table {
 
 		// Set the name
 		memento.putString("name", getName());
+		
+		// Set the alias
+		memento.putString("alias", getAlias());
+		
+		// Set the number of rows (puts -1 if we haven't queried)
+		memento.putInteger("NumRows", _numRows);
 		
 		// Save the schema
 		_schema.save(memento.createChild("Schema"));
@@ -106,6 +116,12 @@ public class Table {
 	
 		// Get the name
 		setName(memento.getString("name"));
+		
+		 // Get the alias
+		setAlias(memento.getString("alias"));
+		
+		// Get the number of rows
+		_numRows = memento.getInteger("NumRows");
 
 		// Get the datasource
 		String datasourceUID = memento.getString("datasource-uid");
@@ -201,6 +217,18 @@ public class Table {
 		_name = name;	
 	}
 	
+	public String getAlias(){
+		
+		if(_alias == "")
+			return getName();
+		else
+			return _alias;
+	}
+	
+	public void setAlias(String alias){
+		_alias = alias;
+	}
+	
 	@Override
     public String toString() {
         return getName();
@@ -270,6 +298,10 @@ public class Table {
 		return _schema.getField(index);
 	}
 
+	public void setFieldSelected(int index, boolean selected){
+		_schema.getField(index).setSelectedProperty(selected);
+	}
+	
 	public int getNumColumns() {
 		return _schema.size();
 	}
@@ -281,6 +313,26 @@ public class Table {
 
 	public List<Row> getRows() {
 		return _rows;
+	}
+	
+	public int getNumRows(){
+		if(_numRows == -1){
+			final CyclistDatasource ds = getDataSource();
+			int count = 0;	
+			try {
+				Connection conn = ds.getConnection();
+				String query = GET_NUM_ROWS_QUERY.replace("$table", getName());
+				PreparedStatement stmt = conn.prepareStatement(query);
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next())	
+					count = rs.getInt(1);			
+			}catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			_numRows = count;
+		}
+		return _numRows;
 	}
 
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
@@ -387,5 +439,6 @@ public class Table {
 	}
 
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
+	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
 
 }

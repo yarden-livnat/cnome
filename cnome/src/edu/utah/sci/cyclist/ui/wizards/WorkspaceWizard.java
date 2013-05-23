@@ -19,6 +19,7 @@
  *
  * Contributors:
  *     Yarden Livnat  
+ *     Kristin Potter
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.wizards;
 
@@ -55,13 +56,14 @@ public class WorkspaceWizard extends VBox {
 	private Stage dialog;
 	private ComboBox<String> cb;
 	private String current = null;
-	
 
 	private ObjectProperty<String> selection = new SimpleObjectProperty<>();
 	
 	public ObjectProperty<String> show(Window window) {
 		 dialog.initOwner(window);
 		 dialog.show();
+		 dialog.setX(window.getX() + (window.getWidth() - dialog.getWidth())*0.5);
+		 dialog.setY(window.getY() + (window.getHeight() - dialog.getHeight())*0.5);
 		 return selection;
 	}
 	
@@ -83,7 +85,7 @@ public class WorkspaceWizard extends VBox {
 		
 		dialog.initModality(Modality.WINDOW_MODAL);
 		dialog.setScene( createScene(dialog) );
-	    
+	    dialog.centerOnScreen();
 		
 	    // allow the dialog to be dragged around.
 	    final Node root = dialog.getScene().getRoot();
@@ -103,7 +105,8 @@ public class WorkspaceWizard extends VBox {
 	    });
 	}
 	
-	
+
+
 	private Scene createScene(final Stage dialog) {
 		//Text header = TextBuilder.create()
 		//		.id("workspace-wizard-header")

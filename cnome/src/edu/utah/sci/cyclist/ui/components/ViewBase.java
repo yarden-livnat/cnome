@@ -19,6 +19,7 @@
  *
  * Contributors:
  *     Yarden Livnat  
+ *     Kristi Potter
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.components;
 

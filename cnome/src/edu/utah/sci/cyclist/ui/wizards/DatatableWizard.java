@@ -98,6 +98,10 @@ public class DatatableWizard extends VBox {
 	public ObjectProperty<Table> show(Window window) {
 		 _dialog.initOwner(window);
 		 _dialog.show();
+		
+		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
+		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
+
 		 return selection;
 	}
 	
@@ -105,7 +109,7 @@ public class DatatableWizard extends VBox {
 	private void createDialog(Table tableProperty){
 		
 		_dialog = StageBuilder.create()
-				.title("Create or Edit Data Table")
+				.title("Create Data Table")
 				.build();
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);

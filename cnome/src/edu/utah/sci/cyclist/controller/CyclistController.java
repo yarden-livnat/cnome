@@ -120,14 +120,13 @@ public class CyclistController {
 		selection.addListener(new ChangeListener<String>() {
 
 			@Override
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
-//				System.out.println("select:"+newVal);
-				
+			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {			
 			}
 		});
 	}	
 		
 	private void addActions() {
+		
 		_screen.onAddDatasource().set(new EventHandler<ActionEvent>() {
 			
 			@Override
@@ -144,6 +143,16 @@ public class CyclistController {
 				});	
 				
 			}
+		});
+		
+		_screen.onSelectWorkspace().set(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				selectWorkspace();
+			}
+			
 		});
 		
 		_screen.onSave().set(new EventHandler<ActionEvent>() {

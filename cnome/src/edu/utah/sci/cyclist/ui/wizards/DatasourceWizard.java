@@ -97,12 +97,15 @@ public class DatasourceWizard extends VBox {
 				.build();
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, sourceProperty) );
+		_dialog.centerOnScreen();
 	}
 		
 	// * * * Show the wizard * * * //
 	public ObjectProperty<CyclistDatasource> show(Window window) {
 		_dialog.initOwner(window);
 		_dialog.show();
+		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
+		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
 		return selection;
 	}
 		
