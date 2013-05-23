@@ -33,7 +33,6 @@ import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;

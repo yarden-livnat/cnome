@@ -8,8 +8,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
-import javafx.scene.ImageCursor;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -17,8 +15,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.layout.Priority;
-import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 
@@ -45,7 +41,7 @@ public class DropArea extends HBox {
 	}
 	
 	public void setPolicy(Policy policy) {
-		// TODO: deal with the case where policy == MULTIPLE and there are already more than one field
+		// TODO: deal with the case where policy == MULTIPLE and there are already more than one Filter
 		_policy = policy;
 	}
 	
@@ -61,15 +57,13 @@ public class DropArea extends HBox {
 			.prefHeight(27)
 			.styleClass("drop-area")
 			.applyTo(this);
-		
-//		HBox.setHgrow(this, Priority.ALWAYS);
-		
+				
 		/*
 		 * DnD handlers
 		 */
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {	
-//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
+//				if (_policy == Policy.MUTLIPLE || getFilters().size() == 0) {
 					if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT))
 						setStyle("-fx-border-color: #c0c0c0");
 					event.consume();
@@ -80,10 +74,9 @@ public class DropArea extends HBox {
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
+//				if (_policy == Policy.MUTLIPLE || getFilters().size() == 0) {
 					if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT)) {
 						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-//						System.out.println("mode: "+event.getAcceptedTransferMode());
 					}
 					event.consume();
 //				}
@@ -104,25 +97,23 @@ public class DropArea extends HBox {
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				boolean status = false;
-//				if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
-					Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
-					if (getFields().size() == 0) {
+				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+				if (field != null) {
+					if (_policy == Policy.MUTLIPLE || getFields().size() == 0) {
 						getFields().add(field);
 					} else {
 						getFields().set(0, field);
 					}
 					
-					status = true;					
-//					System.out.println("set drag completed to "+status+". string:"+event.getDragboard().getString());
-					event.setDropCompleted(status);
-					event.consume();				
-//				}
-
+					status = true;			
+				}
+				event.setDropCompleted(status);
+				event.consume();				
 			}
 		});
 		
 		/*
-		 * Handle changes in the list of fields
+		 * Handle changes in the list of Filters
 		 */
 		
 		fieldsProperty().addListener(new InvalidationListener() {
@@ -143,9 +134,6 @@ public class DropArea extends HBox {
 
 									@Override
 									public void handle(MouseEvent event) {
-//										System.out.println("cursor sizes: "+ImageCursor.getBestSize(100, 100)+" colors: "+ImageCursor.getMaximumColors());
-//										System.out.println("field drag detected");
-//										glyph.setCursor(new ImageCursor(Resources.getIcon("cursor"), 8, 8));
 										Dragboard db = glyph.startDragAndDrop(TransferMode.MOVE);
 										
 										DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
@@ -167,13 +155,13 @@ public class DropArea extends HBox {
 									@Override
 									public void handle(DragEvent event) {
 //										glyph.setCursor(Cursor.DEFAULT);
-//										System.out.println("field drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
+//										System.out.println("Filter drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
 //										if (/*event.isDropCompleted()*/ event.getAcceptedTransferMode() == TransferMode.COPY) {
 //											glyph.setVisible(true);
 //											glyph.setManaged(true);
 //										} else {
 //											getChildren().remove(glyph);
-//											getFields().remove(field);
+//											getFilters().remove(Filter);
 //										}
 									}
 								});

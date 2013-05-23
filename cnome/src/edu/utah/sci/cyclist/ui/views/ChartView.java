@@ -60,6 +60,8 @@ public class ChartView extends ViewBase {
 	private Table _currentTable = null;
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
+	private int _limit = 1000;
+	
 	public ChartView() {
 		super();
 		build();
@@ -113,22 +115,9 @@ public class ChartView extends ViewBase {
 		int cols = _yArea.getFields().size();
 		for (int col=0; col<cols; col++) {
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
-		
-//			if (getXField().getType() == DataType.Type.DATETIME) {
-//				for (Row row : list) {
-//					Timestamp time = (Timestamp) row.value[0];
-//					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
-//				}
-//			} if (getYField().getType() == DataType.Type.DATETIME) {
-//				for (Row row : list) {
-//					Timestamp time = (Timestamp) row.value[0];
-//					data.add(new XYChart.Data<Object, Object>(time.getTime(), row.value[col+1]));
-//				}
-//			} else {
-				for (Row row : list) {
-					data.add(new XYChart.Data<Object, Object>(convert(row.value[0]), convert(row.value[col+1])));
-				}
-//			}
+			for (Row row : list) {
+				data.add(new XYChart.Data<Object, Object>(convert(row.value[0]), convert(row.value[col+1])));
+			}
 			
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
 			series.setName(_yArea.getFields().get(col).getName());

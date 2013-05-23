@@ -32,6 +32,7 @@ public class Field {
 	
 	private String _name;
 	private DataType _dataType;
+
 	
 	private Map<String, Object> _properties = new HashMap<>();
 

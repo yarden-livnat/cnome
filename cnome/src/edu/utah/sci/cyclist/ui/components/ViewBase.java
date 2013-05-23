@@ -77,11 +77,12 @@ public class ViewBase extends BorderPane implements View {
 	
 	private Label _title;
 	private ProgressIndicator _indicator;
+	private HBox _actionsArea;
+	private HBox _dataBar;
+	private FilterArea _filtersArea;
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
 	private boolean _maximized = false;
-	private HBox _actionsArea;
-	private HBox _dataBar;
 	private final Resize resize = new Resize();
 	
 	class ButtonEntry {
@@ -105,11 +106,9 @@ public class ViewBase extends BorderPane implements View {
 	
 	public ViewBase() {	
 		super();
-//		prefWidth(100);
-//		prefHeight(100);
 		getStyleClass().add("view");
 		
-		// Title
+		// Header
 		HBox header = HBoxBuilder.create()
 				.spacing(2)
 				.styleClass("header")
@@ -126,6 +125,7 @@ public class ViewBase extends BorderPane implements View {
 								LineBuilder.create().startY(0).endY(16).build()
 							)
 						.build(),
+					_filtersArea = new FilterArea(),
 					new Spring(),
 					_actionsArea = new HBox(),
 					_minmaxButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("maximize"))).build(),
@@ -228,7 +228,6 @@ public class ViewBase extends BorderPane implements View {
 	public void addTable(final Table table, boolean remote, boolean active) {
 		ToggleButton button = ToggleButtonBuilder.create()
 				.styleClass("flat-toggle-button")
-				//.graphic(new ImageView(Resources.getIcon("table")))
 				.text(table.getName().substring(0, 1))
 				.selected(active)
 				.build();
@@ -237,10 +236,8 @@ public class ViewBase extends BorderPane implements View {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				//System.out.println("ViewBase ["+getId()+"]>>> " + table.getName()+"  activate:"+activate);
 				if (_onTableSelectedAction != null)
 					_onTableSelectedAction.call(table, activate);
-				//System.out.println("ViewBase ["+getId()+"]<< " + table.getName()+"  activate");
 			}
 		});
 		
@@ -303,9 +300,6 @@ public class ViewBase extends BorderPane implements View {
 				delta.y = getTranslateY() - event.getSceneY();
 				if (_onSelectAction != null)
 					_onSelectAction.call();
-				
-//				if (selectPropery.get() != null)
-//					selectPropery.get().handle(new ActionEvent());
 			}
 		});
 		
@@ -332,8 +326,6 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				if (_onSelectAction != null)
 					_onSelectAction.call();
-//				if (selectPropery.get() != null)
-//					selectPropery.get().handle(new ActionEvent());
 			}
 		};
 		
@@ -347,8 +339,9 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
 					event.acceptTransferModes(TransferMode.COPY);
+					event.consume();
 				}
-				event.consume();
+				
 			}
 		});
 		
@@ -357,15 +350,16 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
 					event.acceptTransferModes(TransferMode.COPY);
+					event.consume();
 				}
-				event.consume();
+				
 			}
 		});
 		
 		_dataBar.setOnDragExited(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				event.consume();
+//				event.consume();
 			}
 		});
 		
@@ -376,10 +370,11 @@ public class ViewBase extends BorderPane implements View {
 					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 					if (_onTableDrop != null) {
 						_onTableDrop.call(table);
+						event.setDropCompleted(true);
+						event.consume();
 					}
 				}
-				event.setDropCompleted(true);
-				event.consume();
+				
 			}
 		});
 	}
