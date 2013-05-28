@@ -3,6 +3,8 @@ package edu.utah.sci.cyclist.ui.views;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import utils.QueryBuilder;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
@@ -102,10 +104,18 @@ public class ChartView extends ViewBase {
 			if (_chart == null) 
 				createChart();
 			if (_chart != null) {
-				ObservableList<Field> fields = FXCollections.observableArrayList();
-				fields.add(_xArea.getFields().get(0));
-				fields.addAll(_yArea.getFields());
-				_items.bind(_currentTable.getRows(fields, _limit));
+				QueryBuilder builder = 
+							_currentTable.queryBuilder()
+							.field(_xArea.getFields().get(0))
+							.fields(_yArea.getFields())
+							.limit(_limit);
+				System.out.println("Query: "+builder.toString());
+				_items.bind(_currentTable.getRows(builder.toString()));
+				
+//				ObservableList<Field> fields = FXCollections.observableArrayList();
+//				fields.add(_xArea.getFields().get(0));
+//				fields.addAll(_yArea.getFields());
+//				_items.bind(_currentTable.getRows(fields, _limit));
 			}
 		}
 	}

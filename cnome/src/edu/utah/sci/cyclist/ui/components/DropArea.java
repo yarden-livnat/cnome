@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.FieldProperties;
 
 public class DropArea extends HBox {
 	
@@ -99,6 +100,12 @@ public class DropArea extends HBox {
 				boolean status = false;
 
 				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+				if (event.getAcceptedTransferMode() == TransferMode.COPY) {
+					field = field.clone();
+					if (field.getString(FieldProperties.AGGREGATION_FUNC) == null) {
+						field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
+					}
+				}
 				if (field != null) {
 					if (getFields().size() == 0) {
 						getFields().add(field);

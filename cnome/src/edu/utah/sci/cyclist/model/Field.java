@@ -68,6 +68,11 @@ public class Field {
 		return _properties.get(property);
 	}
 	
+	public <T> T get(String key, Class<T> type) {
+		Object value = _properties.get(key);
+		return value == null ? null : type.cast(value);
+	}
+	
 	public String getString(String property) {
 		return (String) get(property);
 	}
@@ -192,7 +197,7 @@ public class Field {
 				System.out.println("Field:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
 			}	
 		}	
-		}catch(NullPointerException e){
+		} catch(NullPointerException e){
 			
 		}
 	}
@@ -203,6 +208,18 @@ public class Field {
 	
 	public void setSelectedProperty(boolean selected){
 		_selected.set(selected);
+	}
+	
+	public Field clone() {
+		Field copy = new Field(getName());
+		
+		copy._dataType = new DataType(_dataType);
+		copy._selected = _selected;
+		for (Map.Entry<String, Object> entry : _properties.entrySet()) {
+			copy._properties.put(entry.getKey(), entry.getValue());
+		}
+		
+		return copy;
 	}
 	
 }

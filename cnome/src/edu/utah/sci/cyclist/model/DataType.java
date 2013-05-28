@@ -57,6 +57,13 @@ public class DataType {
 		_classification = classification;
 	}
 	
+	public DataType(DataType copy) {
+		_role = copy._role;
+		_type = copy._type;
+		_interp = copy._interp;
+		_classification = copy._classification;
+	}
+	
 	/**
 	 * read-only
 	 * @return

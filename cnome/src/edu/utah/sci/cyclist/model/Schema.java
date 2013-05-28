@@ -25,9 +25,11 @@ package edu.utah.sci.cyclist.model;
 import java.util.List;
 import java.util.Vector;
 
+import utils.SQL;
 import utils.SQLUtil;
 
 import edu.utah.sci.cyclist.controller.IMemento;
+import edu.utah.sci.cyclist.model.DataType.Role;
 
 
 
@@ -102,6 +104,8 @@ public class Schema {
 		DataType dataType = new DataType(type);
 		field.setDataType(dataType);
 		
+		if (dataType.getRole() == Role.MEASURE)
+			field.set(FieldProperties.AGGREGATION_DEFAULT_FUNC, SQL.SUM);
 		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
 	}
 	

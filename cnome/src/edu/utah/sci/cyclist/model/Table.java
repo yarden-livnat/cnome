@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import utils.QueryBuilder;
+
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.model.DataType.Type;
 
@@ -335,6 +337,11 @@ public class Table {
 		return _numRows;
 	}
 
+	
+	public QueryBuilder queryBuilder() {
+		return new QueryBuilder(this);
+	}
+	
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
 		final CyclistDatasource ds = getDataSource();
 		
@@ -377,6 +384,45 @@ public class Table {
 		return task.valueProperty();
 	}
 	
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final String query) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+
+			@Override
+			protected ObservableList<Row> call() throws Exception {
+				List<Row> rows = new ArrayList<>();
+				try {
+					Connection conn = ds.getConnection();
+					PreparedStatement stmt = conn.prepareStatement(query);
+					
+					ResultSet rs = stmt.executeQuery();
+					ResultSetMetaData rmd = rs.getMetaData();
+					
+					int cols = rmd.getColumnCount();
+					while (rs.next()) {
+						Row row = new Row(cols);
+						for (int i=0; i<cols; i++) {
+							row.value[i] = rs.getObject(i+1);
+						}
+						rows.add(row);
+					}
+				}catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				return FXCollections.observableList(rows);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task.valueProperty();
+	}
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int limit) {
 		final CyclistDatasource ds = getDataSource();
 		
