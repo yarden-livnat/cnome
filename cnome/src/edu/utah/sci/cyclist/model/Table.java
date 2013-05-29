@@ -19,6 +19,7 @@
  *
  * Contributors:
  *     Yarden Livnat  
+ *     Kristi Potter
  *******************************************************************************/
 package edu.utah.sci.cyclist.model;
 
@@ -46,23 +47,35 @@ public class Table {
 
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
+	private static final String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	
+	public enum SourceLocation {
+		REMOTE,
+		LOCAL_ALL,
+		LOCAL_SUBSET
+	}
+	
 	
 	private String _alias;
 	private String _name;
 	private Schema _schema = new Schema();
 	private CyclistDatasource _datasource;
 	private Map<String, Object> _properties = new HashMap<>();
-	private int _numRows;
 
 	private List<Row> _rows = new ArrayList<>();
+	private String _localDataFile;
 
+	private SourceLocation _sourceLocation;
+	private int _dataSubset;
+	
 	public Table() {
 		this("");
 	}
 	public Table(String name) {
 		_name = name;
 		_alias = name;
-		_numRows = -1;
+		_sourceLocation = SourceLocation.REMOTE;
+		_dataSubset = 0;
 		setProperty("uid", UUID.randomUUID().toString());
 	}
 	
@@ -74,15 +87,18 @@ public class Table {
 		
 		// Set the alias
 		memento.putString("alias", getAlias());
-		
-		// Set the number of rows (puts -1 if we haven't queried)
-		memento.putInteger("NumRows", _numRows);
-		
+			
 		// Save the schema
 		_schema.save(memento.createChild("Schema"));
 		
 		// Save the uid of the data source
 		memento.putString("datasource-uid", _datasource.getUID());
+		
+		// Save the location of the data source
+		memento.putString("source-location", _sourceLocation.toString());
+		
+		// Save the subset
+		memento.putInteger("subset", _dataSubset);
 		
 		// Save the map
 		IMemento mapMemento = memento.createChild("property-map");
@@ -120,15 +136,21 @@ public class Table {
 		 // Get the alias
 		setAlias(memento.getString("alias"));
 		
-		// Get the number of rows
-		_numRows = memento.getInteger("NumRows");
-
 		// Get the datasource
 		String datasourceUID = memento.getString("datasource-uid");
 		for(CyclistDatasource source: sources){
 			if(source.getUID().equals(datasourceUID))
 				setDataSource(source);
 		}
+		
+		// Get the location of the data source
+		setSourceLocation(memento.getString("source-location"));
+		
+		// Get the data subset
+		setDataSubset(memento.getInteger("subset"));
+		
+		// Save the subset
+		memento.putInteger("subset", _dataSubset);
 		
 		// Get values in the property map	
 		IMemento mapMemento = memento.getChild("property-map");
@@ -173,8 +195,6 @@ public class Table {
 			ResultSet rs = md.getColumns(null, null, getName(), null);
 			while (rs.next()) {				
 				String colName = rs.getString("COLUMN_NAME");
-			
-//				System.out.println("field "+colName+"  type name:"+rs.getString("TYPE_NAME")+"  type:"+rs.getInt("DATA_TYPE"));
 				Field field = new Field(colName);
 				field.set(FieldProperties.REMOTE_NAME, colName);
 				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
@@ -205,10 +225,8 @@ public class Table {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
 	}
+	
 	public String getName() {
 		return _name;
 	}
@@ -218,8 +236,7 @@ public class Table {
 	}
 	
 	public String getAlias(){
-		
-		if(_alias == "")
+		if(_alias.equals(""))
 			return getName();
 		else
 			return _alias;
@@ -227,6 +244,31 @@ public class Table {
 	
 	public void setAlias(String alias){
 		_alias = alias;
+	}
+	
+	public void setSourceLocation(SourceLocation source){
+		_sourceLocation = source;
+	}
+	
+	public void setSourceLocation(String source){
+		if(source.equals("REMOTE"))
+			_sourceLocation = SourceLocation.REMOTE;
+		else if(source.equals("LOCAL_ALL"))
+			_sourceLocation = SourceLocation.LOCAL_ALL;
+		else if(source.equals("LOCAL_SUBSET"))
+			_sourceLocation = SourceLocation.LOCAL_SUBSET;
+	}
+	
+	public SourceLocation getSourceLocation(){
+		return _sourceLocation;
+	}
+	
+	public void setDataSubset(int subset){
+		_dataSubset = subset;
+	}
+	
+	public int getDataSubset(){
+		return _dataSubset;
 	}
 	
 	@Override
@@ -313,26 +355,6 @@ public class Table {
 
 	public List<Row> getRows() {
 		return _rows;
-	}
-	
-	public int getNumRows(){
-		if(_numRows == -1){
-			final CyclistDatasource ds = getDataSource();
-			int count = 0;	
-			try {
-				Connection conn = ds.getConnection();
-				String query = GET_NUM_ROWS_QUERY.replace("$table", getName());
-				PreparedStatement stmt = conn.prepareStatement(query);
-				ResultSet rs = stmt.executeQuery();
-				while (rs.next())	
-					count = rs.getInt(1);			
-			}catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			_numRows = count;
-		}
-		return _numRows;
 	}
 
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
@@ -430,6 +452,13 @@ public class Table {
 		_rows.clear();
 	}
 	
+	public String getLocalDatafile() {
+		return _localDataFile;
+	}
+	public void setLocalDatafile() {
+		_localDataFile = SAVE_DIR + getDataSource() + getName() + ".sqlite";
+	}
+	
 	public class Row  {
 		public Object[] value;
 
@@ -438,7 +467,7 @@ public class Table {
 		}
 	}
 
+	
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
 	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
-
 }

@@ -12,13 +12,95 @@
 }
 
 /*
+ * --- New Defaults ---
+ */
+
+.list-view{
+ 	-fx-background-color: gainsboro;
+ }
+ 
+ .list-view:focused{
+ 	-fx-border-color: lightgray,-fx-box-border,-fx-control-inner-background;
+ }
+ 
+ .list-view:hover{
+	-fx-border-color: dimgray;
+ }
+ 
+ .list-cell:selected{
+ 	-fx-background-color: gainsboro;
+	-fx-border-color: silver;
+	-fx-text-fill: black;
+}
+
+.list-cell:hover{
+	-fx-background-color: aliceblue;		
+}
+ 
+.text-field:focused{
+	-fx-background-color: gray,-fx-box-border,-fx-control-inner-background;	
+	-fx-border-color: gray;
+}
+/* 	-fx-background-color: gray,-fx-box-border,-fx-control-inner-background;
+}*/
+
+.button {
+	-fx-background-color: 
+        #c3c4c4,
+        linear-gradient(#d6d6d6 50%, white 100%),
+        radial-gradient(center 50% -40%, radius 200%, #e6e6e6 45%, rgba(230,230,230,0) 50%);    
+    -fx-text-fill: black;   
+}
+
+.button:hover {
+    -fx-effect: dropshadow( one-pass-box , rgba(0,0,0,0.6) , 2, 0.0 , 0 , 1 );
+}
+
+.button:focused{
+	-fx-text-fill: black;
+    -fx-effect:dropshadow( one-pass-box , rgba(0,0,0,0.6) , 2, 0.0 , 0 , 1 );
+}
+
+.combo-box{
+	-fx-border-color: transparent ;
+	-fx-background-color: transparent ;
+}
+
+.combo-box .text-input{
+	-fx-highlight-fill: gainsboro ;
+	-fx-highlight-text-fill: black;
+	-fx-background-color: whitesmoke;
+	-fx-border-color: silver;
+	-fx-border-radius: 3;
+}
+
+.combo-box .list-cell{
+	-fx-border-color: silver;
+	-fx-border-radius: 3;
+}
+
+.menu:hover{
+	-fx-background-color: dimgray ;
+}
+
+.menu:focused{
+	-fx-background-color: dimgray ;
+}
+
+.menu{
+	-fx-background-color: transparent ;
+}
+.menu-item:hover{
+	-fx-background-color: silver;
+}
+
+
+/*
  * --- Workspace
  */
 .workspace-pane {
 	/*-fx-background-color: #f04590;*/
 }
-
-
 
 .datasources-list {
 	-fx-background-color:  #ffff00;
@@ -87,8 +169,10 @@
 }
 
 /*
- * --- Style ---
+ * --- Custom Styles ---
  */
+ 
+ 
 /* 
  * Flat Button
  */
@@ -105,8 +189,7 @@
 
 /*
  * Flat Toggle Button
- */
- 
+ */ 
 .flat-toggle-button {
      /* -fx-skin: "com.sun.javafx.scene.control.skin.ToggleButtonSkin";*/
     -fx-background-color: #a0a0a0, #505050, #f0f0f0;
@@ -145,11 +228,32 @@
  	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
 }
 
-field-glyph .text {
-	
+field-glyph .text {	
 }
+
+
 /*
- * --- Wizards
+ * Line Charts
+ */
+.top-line-chart{
+	-fx-background-color:  transparent;
+   	-fx-alternative-row-fill-visible: false;
+	-fx-vertical-grid-lines-visible: false;   	   	
+	-fx-horizontal-grid-lines-visible: false;  
+	-fx-vertical-zero-line-visible: false;
+	-fx-horizontal-zero-line-visible: false; 	
+}
+.top-line-chart .chart-plot-background{
+	 -fx-background-color:  transparent;
+}
+.top-line-chart .default-color0.chart-series-line { -fx-stroke: darkorange; }
+
+
+.default-color0.chart-series-line { -fx-stroke: darkseagreen; }
+
+
+/*
+ * --- Wizards ---
  */
  
 /*
@@ -174,24 +278,6 @@ field-glyph .text {
 	-fx-padding:  5;
 }
 
-/*
- * Line Charts
- */
-.top-line-chart{
-	-fx-background-color:  transparent;
-   	-fx-alternative-row-fill-visible: false;
-	-fx-vertical-grid-lines-visible: false;   	   	
-	-fx-horizontal-grid-lines-visible: false;  
-	-fx-vertical-zero-line-visible: false;
-	-fx-horizontal-zero-line-visible: false; 	
-}
-.top-line-chart .chart-plot-background{
-	 -fx-background-color:  transparent;
-}
-.top-line-chart .default-color0.chart-series-line { -fx-stroke: darkorange; }
-
-
-.default-color0.chart-series-line { -fx-stroke: darkseagreen; }
 
 
 /* ---- previous ---  */

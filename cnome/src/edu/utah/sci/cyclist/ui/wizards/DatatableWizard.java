@@ -19,14 +19,13 @@
  *
  * Contributors:
  *     Yarden Livnat  
+ *     Kristi Potter
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.wizards;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-//import java.sql.ResultSetMetaData;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -58,7 +57,7 @@ import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
- 
+import edu.utah.sci.cyclist.ui.components.DatasourceSelector;
 
 /*
  * Class to allow the user to create or edit a data table.
@@ -72,12 +71,12 @@ public class DatatableWizard extends VBox {
 	private ListView<String>            _tablesView;
 	private ImageView                   _statusDisplay;
 	
-	private ObservableList<Table> _tables;
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
 	// Data elements
-	private CyclistDatasource _current;
-	private ObjectProperty<Table> selection = new SimpleObjectProperty<>(); 
+	private CyclistDatasource     _current;
+	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
+	private DatasourceSelector    _selector; 
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -96,13 +95,16 @@ public class DatatableWizard extends VBox {
 			
 	// * * * Show the dialog * * * //
 	public ObjectProperty<Table> show(Window window) {
+
 		 _dialog.initOwner(window);
-		 _dialog.show();
-		
+		 _dialog.show();	
+		 
+		// TODO: hopefully in JAVA 8 moving this to be BEFORE the show() will make it not flash, but at the moment it doesn't work
+		// Moves window to be in the middle of the main window 
 		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
 		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
-
-		 return selection;
+		 	
+		return _selection;
 	}
 	
 	// * * * Create the dialog
@@ -126,7 +128,8 @@ public class DatatableWizard extends VBox {
 		// Get the name of the table, if we have one
 		String tableName = table.getName();
 		if (tableName == null) tableName = "";
-			
+		
+		
 		// * * * The connection settings group
 		VBox connectionBox = VBoxBuilder.create()
 				.spacing(5)
@@ -194,7 +197,6 @@ public class DatatableWizard extends VBox {
 									_statusDisplay = ImageViewBuilder.create().build()
 									)
 							.build()
-
 					)
 				.build();
 		
@@ -242,7 +244,7 @@ public class DatatableWizard extends VBox {
 				.spacing(1)
 				.padding(new Insets(5))
 				.children(	
-						TextBuilder.create().text("Select Schema Table:").build(),
+						TextBuilder.create().text("Select Table:").build(),
 //						_tablesView = ListViewBuilder.create(String.class) // Java 8
 						_tablesView = ListViewBuilder.<String>create()
 						.maxHeight(100)
@@ -275,7 +277,7 @@ public class DatatableWizard extends VBox {
 							@Override
 							public void handle(ActionEvent arg0) {
 								updateTable(table);
-								selection.setValue(table);
+								_selection.setValue(table);
 								dialog.hide();
 							};
 						})
@@ -293,6 +295,7 @@ public class DatatableWizard extends VBox {
 				.children(
 						connectionBox,
 						schemaBox,
+						_selector = new DatasourceSelector(table),
 						buttonsBox)
 				.build();	
 
@@ -347,8 +350,10 @@ public class DatatableWizard extends VBox {
 		// for now table name is the same as the remote name
 		String name = (String) _tablesView.getSelectionModel().getSelectedItem();
 		
-		table.setName(name); // _nameField.getText());
+		table.setName(name); 
+		table.setAlias(_selector.getAlias());
 		table.setDataSource(_current);
+		table.setLocalDatafile();
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
 		table.extractSchema();
 	}
