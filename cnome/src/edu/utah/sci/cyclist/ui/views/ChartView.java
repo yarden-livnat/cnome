@@ -111,11 +111,6 @@ public class ChartView extends ViewBase {
 							.limit(_limit);
 				System.out.println("Query: "+builder.toString());
 				_items.bind(_currentTable.getRows(builder.toString()));
-				
-//				ObservableList<Field> fields = FXCollections.observableArrayList();
-//				fields.add(_xArea.getFields().get(0));
-//				fields.addAll(_yArea.getFields());
-//				_items.bind(_currentTable.getRows(fields, _limit));
 			}
 		}
 	}
@@ -126,6 +121,7 @@ public class ChartView extends ViewBase {
 		return value;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void assignData(ObservableList<Row> list) {
 		((XYChart)_chart).setData(FXCollections.observableArrayList());
 		

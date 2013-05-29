@@ -51,7 +51,8 @@ public class QueryBuilder {
 	public String toString() {
 		boolean first = true;
 		StringBuilder builder = new StringBuilder("Select ");
-		// add dims
+		
+		// dims
 		for (Field field : _fields) {
 			if (first) {
 				builder.append(" ");
@@ -61,7 +62,8 @@ public class QueryBuilder {
 			}
 			builder.append(field.getName());
 		}
-		// add aggregates
+		
+		// aggregates
 		for (Field field : _aggregates) {
 			if (first) {
 				builder.append(" ");

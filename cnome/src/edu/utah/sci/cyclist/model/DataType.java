@@ -23,10 +23,16 @@ public class DataType {
 		C, Cdate, Qd, Qi
 	}
 	
+	public enum StructureType {
+		SIMPLE, COMPLEX, HIERARCHICAL
+	}
+	
 	private Role _role;
 	private Type _type;
 	private Interpretation _interp;
 	private Classification _classification;
+	private StructureType  _structureType;
+	private FieldStructure _structure;
 	
 	public DataType(Type type) {
 		_type = type;
@@ -81,32 +87,71 @@ public class DataType {
 		return _classification;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public Role getRole() {
 		return _role;
 	}
 	
+	/**
+	 * 
+	 * @param role
+	 */
 	public void setRole(Role role) {
 		_role = role;
 		update();
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public Interpretation getInterpretation() {
 		return _interp;
 	}
 	
+	/**
+	 * 
+	 * @param i
+	 */
 	public void setInterpetation(Interpretation i) {
 		_interp = i;
 		update();
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean isContinuous() {
 		return _interp == Interpretation.CONTINUOUS;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean isDate() {
 		return _type == Type.DATE || _type == Type.DATETIME;
 	}
 	
+	public StructureType getStructurTypee() {
+		return _structureType;
+	}
+	
+	public void setStructureType(StructureType value) {
+		_structureType = value;
+	}
+	
+	public void setStructure(FieldStructure value) {
+		_structure = value;
+	}
+	
+	public FieldStructure getStructure() {
+		return _structure;
+	}
 	
 	private void update() {
 		if (_interp == Interpretation.DISCRETE) {
@@ -119,6 +164,15 @@ public class DataType {
 				_classification = Classification.Qi;
 			else
 				_classification = Classification.Qd;
+		}
+		
+		// determine default structure
+		if (isDate()) {
+			_structureType = StructureType.HIERARCHICAL;
+			_structure = new DateTimeStructure();
+		} else {
+			_structureType = StructureType.SIMPLE;
+			_structure = null;
 		}
 	}
 }
