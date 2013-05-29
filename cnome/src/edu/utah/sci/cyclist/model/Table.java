@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import edu.utah.sci.cyclist.controller.IMemento;
+import edu.utah.sci.cyclist.model.DataType.Type;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
@@ -136,6 +137,9 @@ public class Table {
 		 // Get the alias
 		setAlias(memento.getString("alias"));
 		
+		// Get the number of rows
+//		_numRows = memento.getInteger("NumRows");
+
 		// Get the datasource
 		String datasourceUID = memento.getString("datasource-uid");
 		for(CyclistDatasource source: sources){
@@ -195,6 +199,7 @@ public class Table {
 			ResultSet rs = md.getColumns(null, null, getName(), null);
 			while (rs.next()) {				
 				String colName = rs.getString("COLUMN_NAME");
+			
 				Field field = new Field(colName);
 				field.set(FieldProperties.REMOTE_NAME, colName);
 				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
@@ -399,7 +404,7 @@ public class Table {
 		return task.valueProperty();
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int n) {
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int limit) {
 		final CyclistDatasource ds = getDataSource();
 		
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
@@ -411,10 +416,12 @@ public class Table {
 					Connection conn = ds.getConnection();
 					StringBuilder builder = new StringBuilder("select ");
 					for (int i=0; i<fields.size(); i++) {
-						builder.append(fields.get(i).getName());
+						Field field = fields.get(i);
+						
+						builder.append(field.getName());
 						if (i < fields.size()-1) builder.append(", ");
 					}
-					builder.append(" from ").append(getName()).append(" limit ").append(n);
+					builder.append(" from ").append(getName()).append(" limit ").append(limit);
 					System.out.println("query: ["+builder.toString()+"]");
 					PreparedStatement stmt = conn.prepareStatement(builder.toString());
 					

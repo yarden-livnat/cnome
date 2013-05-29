@@ -73,10 +73,9 @@ public class DatatableWizard extends VBox {
 	
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
-	// Data elements
-	private CyclistDatasource     _current;
-	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
-	private DatasourceSelector    _selector; 
+	// DataType elements
+	private CyclistDatasource _current;
+	private ObjectProperty<Table> selection = new SimpleObjectProperty<>(); 
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -148,7 +147,7 @@ public class DatatableWizard extends VBox {
 								.alignment(Pos.CENTER_LEFT)
 								.children(
 										TextBuilder.create()
-											.text("Data sources")
+											.text("DataType sources")
 											.build(),
 //										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
 										_sourcesView = ListViewBuilder.<CyclistDatasource>create()

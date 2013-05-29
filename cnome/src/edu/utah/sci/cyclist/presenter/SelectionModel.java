@@ -60,6 +60,10 @@ public class SelectionModel {
 		return null;
 	}
 	
+	public boolean isExplicit() {
+		return _explicitSelection != null;
+	}
+	
 	/**
 	 * Select at table 
 	 */

@@ -33,8 +33,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -78,11 +80,14 @@ public class ViewBase extends BorderPane implements View {
 	
 	private Label _title;
 	private ProgressIndicator _indicator;
+	private HBox _header;
+	private HBox _actionsArea;
+	private HBox _dataBar;
+	private Spring _spring;
+	private FilterArea _filtersArea;
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
 	private boolean _maximized = false;
-	private HBox _actionsArea;
-	private HBox _dataBar;
 	private final Resize resize = new Resize();
 	
 	class ButtonEntry {
@@ -106,12 +111,10 @@ public class ViewBase extends BorderPane implements View {
 	
 	public ViewBase() {	
 		super();
-//		prefWidth(100);
-//		prefHeight(100);
 		getStyleClass().add("view");
 		
-		// Title
-		HBox header = HBoxBuilder.create()
+		// Header
+		_header = HBoxBuilder.create()
 				.spacing(2)
 				.styleClass("header")
 				.alignment(Pos.CENTER_LEFT)
@@ -127,16 +130,17 @@ public class ViewBase extends BorderPane implements View {
 								LineBuilder.create().startY(0).endY(16).build()
 							)
 						.build(),
-					new Spring(),
+					_filtersArea = new FilterArea(),
+					_spring = new Spring(),
 					_actionsArea = new HBox(),
 					_minmaxButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("maximize"))).build(),
 					_closeButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("close_view"))).build()
 				)
 				.build();
-		setHeaderListeners(header);
+		setHeaderListeners();
 		setDatasourcesListeners();
 		
-		setTop(header);
+		setTop(_header);
 		setListeners();
 	}
 	
@@ -229,7 +233,6 @@ public class ViewBase extends BorderPane implements View {
 	public void addTable(final Table table, boolean remote, boolean active) {
 		ToggleButton button = ToggleButtonBuilder.create()
 				.styleClass("flat-toggle-button")
-				//.graphic(new ImageView(Resources.getIcon("table")))
 				.text(table.getName().substring(0, 1))
 				.selected(active)
 				.build();
@@ -238,10 +241,8 @@ public class ViewBase extends BorderPane implements View {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				//System.out.println("ViewBase ["+getId()+"]>>> " + table.getName()+"  activate:"+activate);
 				if (_onTableSelectedAction != null)
 					_onTableSelectedAction.call(table, activate);
-				//System.out.println("ViewBase ["+getId()+"]<< " + table.getName()+"  activate");
 			}
 		});
 		
@@ -268,6 +269,14 @@ public class ViewBase extends BorderPane implements View {
 		_buttons.get(table).button.setSelected(value);
 	}
 	
+	
+	public void addBar(Node bar) {
+		addBar(bar, HPos.LEFT);
+	}
+	
+	public void addBar(Node bar, HPos pos) {
+		_header.getChildren().add(_header.getChildren().indexOf(_spring)+(pos == HPos.RIGHT ? 1 : 0), bar);
+	}
 	/*
 	 * Content
 	 */
@@ -294,23 +303,20 @@ public class ViewBase extends BorderPane implements View {
 	/*
 	 * Listeners
 	 */
-	private void setHeaderListeners(HBox header) {
+	private void setHeaderListeners() {
 		final Delta delta = new Delta();
 		
-		header.setOnMousePressed(new EventHandler<MouseEvent>() {
+		_header.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 				delta.x = getTranslateX() - event.getSceneX();
 				delta.y = getTranslateY() - event.getSceneY();
 				if (_onSelectAction != null)
 					_onSelectAction.call();
-				
-//				if (selectPropery.get() != null)
-//					selectPropery.get().handle(new ActionEvent());
 			}
 		});
 		
-		header.setOnMouseDragged(new EventHandler<MouseEvent>() {
+		_header.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 //				Parent parent = view.getParent();
@@ -333,12 +339,10 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				if (_onSelectAction != null)
 					_onSelectAction.call();
-//				if (selectPropery.get() != null)
-//					selectPropery.get().handle(new ActionEvent());
 			}
 		};
 		
-		header.setOnMouseClicked(eh);
+		_header.setOnMouseClicked(eh);
 		setOnMouseClicked(eh);
 	}
 	
@@ -348,8 +352,9 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
 					event.acceptTransferModes(TransferMode.COPY);
+					event.consume();
 				}
-				event.consume();
+				
 			}
 		});
 		
@@ -358,15 +363,16 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(DragEvent event) {
 				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
 					event.acceptTransferModes(TransferMode.COPY);
+					event.consume();
 				}
-				event.consume();
+				
 			}
 		});
 		
 		_dataBar.setOnDragExited(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				event.consume();
+//				event.consume();
 			}
 		});
 		
@@ -377,10 +383,11 @@ public class ViewBase extends BorderPane implements View {
 					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 					if (_onTableDrop != null) {
 						_onTableDrop.call(table);
+						event.setDropCompleted(true);
+						event.consume();
 					}
 				}
-				event.setDropCompleted(true);
-				event.consume();
+				
 			}
 		});
 	}
