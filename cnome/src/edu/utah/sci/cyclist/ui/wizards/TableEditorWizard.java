@@ -84,7 +84,7 @@ public class TableEditorWizard extends VBox {
 					.alignment(Pos.CENTER_LEFT)
 					.maxHeight(Double.MAX_VALUE)
 					.children(
-							TextBuilder.create().text("Select Schema Fields:").build(),
+							TextBuilder.create().text("Select Fields:").build(),
 							_schemaView = ListViewBuilder.<Field>create()
 							.items(FXCollections.observableList(table.getFields()))
 							.maxHeight(Double.MAX_VALUE)

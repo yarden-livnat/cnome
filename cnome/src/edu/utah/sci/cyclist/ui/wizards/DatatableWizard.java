@@ -35,6 +35,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -43,11 +44,16 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.TilePane;
+import javafx.scene.layout.TilePaneBuilder;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -63,7 +69,7 @@ import edu.utah.sci.cyclist.ui.components.DatasourceSelector;
  * Class to allow the user to create or edit a data table.
  * Also controls the creation/editing of data sources.
  */
-public class DatatableWizard extends VBox {
+public class DatatableWizard extends TilePane {
 
 	// GUI elements
 	private Stage                       _dialog;
@@ -74,8 +80,10 @@ public class DatatableWizard extends VBox {
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
 	// DataType elements
-	private CyclistDatasource _current;
-	private ObjectProperty<Table> selection = new SimpleObjectProperty<>(); 
+	private CyclistDatasource     _current;
+	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
+	private DatasourceSelector    _selector; 
+
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -88,6 +96,7 @@ public class DatatableWizard extends VBox {
 	
 	// * * * Set the existing data sources in the combo box * * * //
 	public void setItems(final ObservableList<CyclistDatasource> sources) {
+		System.out.println("Set sources");
 		_sourcesView.setItems(sources);
 		_sourcesView.getSelectionModel().selectFirst();
 	}
@@ -127,14 +136,13 @@ public class DatatableWizard extends VBox {
 		// Get the name of the table, if we have one
 		String tableName = table.getName();
 		if (tableName == null) tableName = "";
-		
-		
+			
 		// * * * The connection settings group
 		VBox connectionBox = VBoxBuilder.create()
 				.spacing(5)
 				.alignment(Pos.CENTER_LEFT)
 				.children(
-						
+
 						// Add, edit, or remove connection box
 						HBoxBuilder.create()
 						.spacing(5)
@@ -147,60 +155,56 @@ public class DatatableWizard extends VBox {
 								.alignment(Pos.CENTER_LEFT)
 								.children(
 										TextBuilder.create()
-											.text("DataType sources")
-											.build(),
-//										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
+										.text("DataType sources")
+										.build(),
+										//_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
 										_sourcesView = ListViewBuilder.<CyclistDatasource>create()
-											.id("datasources-list")
-											.maxHeight(100)
-											.build())  
-								.build(),
+										.id("datasources-list")
+										.maxHeight(100)
+										.minHeight(100)
+										.build())  
+										.build(),
 
-								// Add/Edit/Remove Buttons
-								VBoxBuilder.create()
-								.spacing(5)
-								.alignment(Pos.CENTER)
+										// Add/Edit/Remove Buttons
+										VBoxBuilder.create()
+										.spacing(5)
+										.alignment(Pos.CENTER)
+										.children(
+												addButton = ButtonBuilder.create()
+												.text("Add")
+												.minWidth(75)
+												.build(),
+												editButton = ButtonBuilder.create()
+												.text("Edit")
+												.minWidth(75)
+												.build(),
+												removeButton = ButtonBuilder.create()
+												.text("Remove")
+												.minWidth(75)
+												.build()
+												)
+												.build()
+								).build(),
+
+								// Select the connection settings box
+								HBoxBuilder.create()
+								.spacing(10)
+								.padding(new Insets(5))
+								.alignment(Pos.CENTER_LEFT)
 								.children(
-										addButton = ButtonBuilder.create()
-										.text("Add")
-										.minWidth(75)
-										.build(),
-										editButton = ButtonBuilder.create()
-										.text("Edit")
-										.minWidth(75)
-										.build(),
-										removeButton = ButtonBuilder.create()
-										.text("Remove")
-										.minWidth(75)
-										.build()
-										)
-								.build()
-							).build(),
-
-							// Select the connection settings box
-							HBoxBuilder.create()
-							.spacing(10)
-							.padding(new Insets(5))
-							.alignment(Pos.CENTER_LEFT)
-							.children(
-									// Select the connection
-									selectionButton = ButtonBuilder.create()
-									.text("Connect")
-									.onAction(new EventHandler<ActionEvent>() {
-										@Override
-										public void handle(ActionEvent arg0) {
-											selectConnection(_current);
-										};
-									})
-									.build(),
-									_statusDisplay = ImageViewBuilder.create().build()
-									)
-							.build()
-					)
-				.build();
+										// Select the connection
+										selectionButton = ButtonBuilder.create()
+										.text("Connect")
+										.onAction(new EventHandler<ActionEvent>() {
+											@Override
+											public void handle(ActionEvent arg0) {
+												selectConnection(_current);
+											};
+										}).build(),
+										_statusDisplay = ImageViewBuilder.create().build()
+										).build()
+						).build();
 		
-		
-
 		// Keep track of the currently selected data source
 		_sourcesView.getSelectionModel().selectedItemProperty().addListener(
 				new ChangeListener<CyclistDatasource>() {
@@ -238,19 +242,22 @@ public class DatatableWizard extends VBox {
 			}	
 		});	
 		
-		// The connection schema		
+		// The connection schema	
 		VBox schemaBox = VBoxBuilder.create()
 				.spacing(1)
 				.padding(new Insets(5))
+				.maxHeight(Double.MAX_VALUE)
 				.children(	
 						TextBuilder.create().text("Select Table:").build(),
-//						_tablesView = ListViewBuilder.create(String.class) // Java 8
+						//_tablesView = ListViewBuilder.create(String.class) // Java 8
 						_tablesView = ListViewBuilder.<String>create()
-						.maxHeight(100)
+						.maxHeight(Double.MAX_VALUE)
 						.build()						
 						).build();
-		_tablesView.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
-			
+		VBox.setVgrow(_tablesView, Priority.ALWAYS);
+		VBox.setVgrow(schemaBox, Priority.ALWAYS);
+		schemaBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
+	
 		// The ok/cancel buttons
 		Button ok;
 		HBox buttonsBox = HBoxBuilder.create()
@@ -285,31 +292,22 @@ public class DatatableWizard extends VBox {
 				.build();	
 		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
 		ok.disableProperty().bind(_tablesView.getSelectionModel().selectedItemProperty().isNull());
-
+	
 		
-		// The vertical layout of the whole wizard
-		VBox header = VBoxBuilder.create()
-				.spacing(10)
-				.padding(new Insets(5))
-				.children(
-						connectionBox,
-						schemaBox,
-						_selector = new DatasourceSelector(table),
-						buttonsBox)
-				.build();	
-
 		// Create the scene
 		Scene scene = new Scene(
 				VBoxBuilder.create()
 				.spacing(5)
 				.padding(new Insets(5))
+				.prefHeight(500)
 				.id("datatable-wizard")
-				.children(header)
+				.children(connectionBox, schemaBox, _selector = new DatasourceSelector(table), buttonsBox)
 				.build()
-				);
-
-			
+				);			
 		scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
+		_selector.disableProperty().bind(_tablesView.getSelectionModel().selectedItemProperty().isNull());
+		
+		// Return the scene
 		return scene;
 	}
 	
@@ -328,14 +326,12 @@ public class DatatableWizard extends VBox {
 		});
 	}
 	
-	
 
 	private void selectConnection(CyclistDatasource ds) {
 		try (Connection conn = ds.getConnection()) {
 			_statusDisplay.setImage(Resources.getIcon("ok"));
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, "%", null);
-			//ResultSetMetaData rmd = rs.getMetaData();
 			while (rs.next()) {
 				_tablesView.getItems().add(rs.getString(3));
 			}
