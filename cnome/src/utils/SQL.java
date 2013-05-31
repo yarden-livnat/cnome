@@ -28,7 +28,7 @@ public class SQL {
 	}
 	
 	public static final List<Function> FUNCTIONS = new ArrayList<>();
-	public static final Function DEFAULT_FUNCTION = getFunction("Sum");
+	public static final String DEFAULT_FUNCTION = "Sum";
 	
 	public static Function getFunction(String name) {
 		for (Function f : FUNCTIONS) {
