@@ -29,7 +29,7 @@ public class Model {
 
 	private ObservableList<Table> _tables = FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
-	
+	private CyclistDatasource _currentSource;
 	
 	/**
 	 * getTables
@@ -50,4 +50,12 @@ public class Model {
 	public ObservableList<CyclistDatasource> getSources() {
 		return _sources;
 	}	
+	
+	public CyclistDatasource getSelectedDatasource(){
+		return _currentSource;
+	}
+	
+	public void setSelectedDatasource(CyclistDatasource source){
+		_currentSource = source;
+	}
 }

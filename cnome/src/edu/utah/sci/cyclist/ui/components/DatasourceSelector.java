@@ -92,7 +92,7 @@ public class DatasourceSelector extends VBox{
 		}	
 		
 		// --- Layout
-		this.getChildren().addAll(aliasBox, remoteBox, localBox, subsetBox);	
+		this.getChildren().addAll(aliasBox, TextBuilder.create().text("Data Location:").build(), remoteBox, localBox, subsetBox);	
 	}
 
 	// Get the alias text
