@@ -153,24 +153,17 @@
 	
 }
 
-.field-glyph arrow {
+.field-glyph .arrow {
     -fx-background-insets: 1 0 -1 0, 0;
-    -fx-background-color: -fx-mark-color, #FFFFFF;
-    -fx-padding: 0.25em; /* 3 */
-    -fx-shape: "M 0 -3.5 v 7 l 4 -3.5 z";
-}
-
-.field-glyph:hover .arrow {
-    -fx-background-insets: 1 0 -1 0, 0;
-    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
-    -fx-padding: 0.25em; /* 3 */
-    -fx-shape: "M 0 -3.5 v 7 l 4 -3.5 z";
-}
-
-.field-glyph:openvertically .arrow {
+    -fx-background-color: trasparent;
     -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
+
+.field-glyph:hover .arrow {
+    -fx-background-color: -fx-mark-color, #FFFFFF;
+}
+
 
 .filter-glyph {
 	-fx-background-color: #ccff33;
