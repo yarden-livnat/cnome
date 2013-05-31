@@ -1,11 +1,15 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.input.ClipboardContent;
@@ -19,12 +23,13 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 
-public class DropArea extends HBox {
+public class DropArea extends HBox implements Observable {
 	
 	public enum Policy {SINGLE, MULTIPLE};
 	
 	private ObjectProperty<ObservableList<Field>> _fieldsProperty = new SimpleObjectProperty<>();
 	private Policy _policy;
+	private List<InvalidationListener> _listeners = new ArrayList<>();
 	
 	public DropArea(Policy policy) {
 		_policy = policy;
@@ -118,7 +123,6 @@ public class DropArea extends HBox {
 					status = true;			
 				}
 				
-//					System.out.println("set drag completed to "+status+". string:"+event.getDragboard().getString());
 				event.setDropCompleted(status);
 				event.consume();				
 			}
@@ -177,11 +181,27 @@ public class DropArea extends HBox {
 //										}
 									}
 								});
+								
+								glyph.setOnAction(new EventHandler<ActionEvent>() {
+
+									@Override
+									public void handle(ActionEvent event) {
+										fireInvalidationEvent();
+									}
+								});
 							}
+							
+							fireInvalidationEvent();
 						}
 				});
 			}
 		});
+	}
+	
+	private void fireInvalidationEvent() {
+		for (InvalidationListener listener : _listeners) {
+			listener.invalidated(DropArea.this);
+		}
 	}
 	
 	private void init() {
@@ -190,5 +210,17 @@ public class DropArea extends HBox {
 
 	private DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
+	}
+
+	@Override
+	public void addListener(InvalidationListener listener) {
+		if (!_listeners.contains(listener))
+			_listeners.add(listener);
+		
+	}
+
+	@Override
+	public void removeListener(InvalidationListener listener) {
+		_listeners.remove(listener);
 	}
 }

@@ -71,7 +71,7 @@ public class QueryBuilder {
 			} else {
 				builder.append(", ");
 			}
-			builder.append(field.getString(FieldProperties.AGGREGATION_FUNC)).append("(").append(field.getName()).append(")");
+			builder.append(SQL.getFunction(field.getString(FieldProperties.AGGREGATION_FUNC)).format(field.getName()));
 		}
 		
 		// table

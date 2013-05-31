@@ -267,47 +267,6 @@ public class ChartView extends ViewBase {
 		return axis;
 	}
 		
-	private Node createControl() {
-		GridPane grid = GridPaneBuilder.create()
-					.hgap(5)
-					.vgap(5)
-					.padding(new Insets(0, 0, 0, 0))
-					.build();
-		grid.getColumnConstraints().add(new ColumnConstraints(10));
-		ColumnConstraints cc = new ColumnConstraints();
-		cc.setHgrow(Priority.ALWAYS);
-		grid.getColumnConstraints().add(cc);
-		
-		_xArea = createControlArea(grid, "X", 0, DropArea.Policy.SINGLE);
-		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MULTIPLE);
-				
-		return grid;
-	}
-	
-	private InvalidationListener _areaLister = new InvalidationListener() {
-		
-		@Override
-		public void invalidated(Observable arg0) {			
-			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
-				invalidateChart();
-			
-			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
-				invalidateChart();	
-				
-			fetchData();
-		}
-	};
-	
-	private DropArea createControlArea(GridPane grid, String title, int  row, DropArea.Policy policy) {
-		
-		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
-		DropArea area = new DropArea(policy);
-		area.getFields().addListener(_areaLister);
-		grid.add(text, 0, row);
-		grid.add(area, 1, row);
-		
-		return area;
-	}
 	
 	private void build() {
 		setTitle(TITLE);
@@ -331,6 +290,7 @@ public class ChartView extends ViewBase {
 		});
 		
 		addBar(_limitEntry, HPos.RIGHT);
+		
 		// main view
 		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
 		_pane.setBottom(createControl());
@@ -349,4 +309,47 @@ public class ChartView extends ViewBase {
 			}
 		});
 	}
+	
+	private Node createControl() {
+		GridPane grid = GridPaneBuilder.create()
+					.hgap(5)
+					.vgap(5)
+					.padding(new Insets(0, 0, 0, 0))
+					.build();
+		grid.getColumnConstraints().add(new ColumnConstraints(10));
+		ColumnConstraints cc = new ColumnConstraints();
+		cc.setHgrow(Priority.ALWAYS);
+		grid.getColumnConstraints().add(cc);
+		
+		_xArea = createControlArea(grid, "X", 0, DropArea.Policy.SINGLE);
+		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MULTIPLE);
+				
+		return grid;
+	}
+	
+	private InvalidationListener _areaLister = new InvalidationListener() {
+	
+		@Override
+		public void invalidated(Observable arg0) {			
+			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
+				invalidateChart();
+			
+			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
+				invalidateChart();	
+				
+			fetchData();
+		}
+	};
+	
+	private DropArea createControlArea(GridPane grid, String title, int  row, DropArea.Policy policy) {
+		
+		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
+		DropArea area = new DropArea(policy);
+		area.addListener(_areaLister);
+		grid.add(text, 0, row);
+		grid.add(area, 1, row);
+		
+		return area;
+	}
+	
 }

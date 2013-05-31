@@ -139,6 +139,7 @@
 /*
  * Glyphs
  */
+ 
 .field-glyph {
 	-fx-background-color: #FEE391; /*C7E9C0;*/
 	-fx-border-color: #bbbbbb;
@@ -155,7 +156,7 @@
 
 .field-glyph .arrow {
     -fx-background-insets: 1 0 -1 0, 0;
-    -fx-background-color: trasparent;
+    -fx-background-color: transparent;
     -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
