@@ -7,6 +7,7 @@ import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.DataType.Role;
 
 public class QueryBuilder {
 	
@@ -34,7 +35,7 @@ public class QueryBuilder {
 	
 	public QueryBuilder field(Field field) {
 		if (!_fields.contains(field)) {
-			if (field.getString(FieldProperties.AGGREGATION_FUNC) != null) {
+			if (field.getRole() == Role.MEASURE && field.getString(FieldProperties.AGGREGATION_FUNC) != null) {
 				_aggregates.add(field);
 			} else {
 				_fields.add(field);

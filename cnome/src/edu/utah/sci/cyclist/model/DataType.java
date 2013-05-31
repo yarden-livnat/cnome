@@ -101,6 +101,12 @@ public class DataType {
 	 */
 	public void setRole(Role role) {
 		_role = role;
+		if (_type == Type.NUMERIC) {
+			if (role == Role.DIMENSION)
+				_interp = Interpretation.DISCRETE;
+			else
+				_interp = Interpretation.CONTINUOUS;
+		}
 		update();
 	}
 	

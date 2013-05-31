@@ -1,9 +1,11 @@
 package edu.utah.sci.cyclist.ui.views;
 
+import java.lang.reflect.Array;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
-
-import utils.QueryBuilder;
+import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -13,8 +15,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -25,8 +25,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.ColumnConstraints;
@@ -36,8 +34,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
+
+import org.mo.closure.v0.Closure;
+
+import utils.QueryBuilder;
 import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.DataType.Classification;
+import edu.utah.sci.cyclist.model.DataType.Role;
+import edu.utah.sci.cyclist.model.DataType.Type;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
@@ -70,6 +74,8 @@ public class ChartView extends ViewBase {
 	
 	private IntegerField _limitEntry;
 	private int _limit = 1000;
+	
+	private List<Closure.R1<Object, Object>> _convert;
 	
 	public ChartView() {
 		super();
@@ -115,21 +121,83 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
+	
 	private Object convert(Object value) {
 		if (value instanceof Timestamp) 
 			return ((Timestamp)value).getTime();
 		return value;
 	}
 	
+	private Closure.R1<Object, Object> defaultConvert = new Closure.R1<Object, Object>() {
+		@Override
+		public Object call(Object value) {
+			return value;
+		}
+	};
+	
+	private Closure.R1<Object, Object> num2String = new Closure.R1<Object, Object>() {
+		private NumberFormat format = NumberFormat.getInstance();
+		
+		@Override
+		public String call(Object num) {
+			return format.format(num);
+		}
+	};
+	
+	private Closure.R1<Object, Object> date2int = new Closure.R1<Object, Object>() {		
+		@Override
+		public Object call(Object date) {
+			return ((Date)date).getTime();
+		}
+	};
+	
+	private Closure.R1<Object, Object> determineConversionFunction(Role role, Type type) {
+		if (role == Role.DIMENSION) {
+			switch (type) {
+			case NUMERIC: 
+				return num2String;
+			case DATE:
+			case DATETIME:
+				return date2int;
+			default:
+				return defaultConvert;
+			}
+		} else {
+			switch (type) {
+			case DATE:
+			case DATETIME:
+				return date2int;
+			default:
+				return defaultConvert;
+			}
+		}
+	}
+		
+	private void determineConvertions() {
+		_convert = new ArrayList<>();
+		
+		Field x = _xArea.getFields().get(0);
+		_convert.add(determineConversionFunction(_xAxisType, x.getType()));
+		
+		for (Field y : _yArea.getFields()) {
+			_convert.add(determineConversionFunction(_yAxisType, y.getType()));
+		}
+	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void assignData(ObservableList<Row> list) {
 		((XYChart)_chart).setData(FXCollections.observableArrayList());
 		
+		determineConvertions();
+		
+		Closure.R1<Object, Object> xFunc = _convert.get(0);
+		
 		int cols = _yArea.getFields().size();
 		for (int col=0; col<cols; col++) {
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
+			Closure.R1<Object, Object> yFunc = _convert.get(col+1);
 			for (Row row : list) {
-				data.add(new XYChart.Data<Object, Object>(convert(row.value[0]), convert(row.value[col+1])));
+				data.add(new XYChart.Data<Object, Object>(xFunc.call(row.value[0]), yFunc.call(row.value[col+1])));
 			}
 			
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
@@ -152,14 +220,10 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void determineViewType(Classification x, Classification y) {
-		Axis xAxis;
-		Axis yAxis;
 		
 		if (isPaneType(x, y, Classification.C, Classification.C)) {
 			_viewType = ViewType.CROSS_TAB;
 			_markType = MarkType.TEXT;
-			xAxis = new CategoryAxis();
-			yAxis = new CategoryAxis();
 		} else if (isPaneType(x, y, Classification.Qd, Classification.C)) {
 			_viewType = ViewType.BAR;
 			_markType = MarkType.BAR;
@@ -188,7 +252,11 @@ public class ChartView extends ViewBase {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
 		Axis xAxis = createAxis(getXField());
+		_xAxisType = xAxis instanceof CategoryAxis ? Role.DIMENSION : Role.MEASURE;
+		
 		Axis yAxis = createAxis(getYField());
+		_yAxisType = yAxis instanceof CategoryAxis ? Role.DIMENSION : Role.MEASURE;
+
 	
 		determineViewType(getXField().getClassification(), getYField().getClassification()); 
 		switch (_viewType) {
@@ -229,7 +297,6 @@ public class ChartView extends ViewBase {
 			axis = c;
 			break;
 		case Cdate:
-			// TODO
 			NumberAxis cd = new NumberAxis();
 			cd.forceZeroInRangeProperty().set(false);
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
@@ -242,15 +309,6 @@ public class ChartView extends ViewBase {
 			cd.setTickLabelFormatter(f);
 			axis = cd;
 			break;
-//			CategoryAxis cd = new CategoryAxis();
-//			CategoryAxis.DefaultFormatter f1 = new CategoryAxis.DefaultFormatter(cd) {
-//				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
-//				@Override
-//				public String toString(Number n) {
-//					return converter.toString(new Date(n.longValue()));
-//				}
-//			};
-//			axis = cd;
 		case Qd:
 			NumberAxis t = new NumberAxis();
 			t.forceZeroInRangeProperty().set(false);
