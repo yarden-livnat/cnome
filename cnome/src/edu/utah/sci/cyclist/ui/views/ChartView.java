@@ -152,9 +152,14 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void determineViewType(Classification x, Classification y) {
+		Axis xAxis;
+		Axis yAxis;
+		
 		if (isPaneType(x, y, Classification.C, Classification.C)) {
 			_viewType = ViewType.CROSS_TAB;
 			_markType = MarkType.TEXT;
+			xAxis = new CategoryAxis();
+			yAxis = new CategoryAxis();
 		} else if (isPaneType(x, y, Classification.Qd, Classification.C)) {
 			_viewType = ViewType.BAR;
 			_markType = MarkType.BAR;
@@ -208,41 +213,53 @@ public class ChartView extends ViewBase {
 		 
 //		chart.setCreateSymbols(false);
 //		chart.setLegendVisible(false);
-//				
-		_chart.setAnimated(false);
+//		
+		if (_chart != null)
+			_chart.setAnimated(false);
 		_pane.setCenter(_chart);
 	}
 
 	@SuppressWarnings("rawtypes")
 	private Axis createAxis(Field field) {
 		Axis axis =  null;
-		switch (field.getType()) {
-		case NUMERIC:
-			NumberAxis a = new NumberAxis();
-			a.forceZeroInRangeProperty().set(false);
-			axis = a;
-			break;
-		case TEXT:
+		switch (field.getClassification()) {
+
+		case C:
 			CategoryAxis c = new CategoryAxis();
 			axis = c;
 			break;
-		case DATE:
-		case DATETIME:
-			NumberAxis t = new NumberAxis();
-			t.forceZeroInRangeProperty().set(false);
-			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(t) {
+		case Cdate:
+			// TODO
+			NumberAxis cd = new NumberAxis();
+			cd.forceZeroInRangeProperty().set(false);
+			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
 				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
 				@Override
 				public String toString(Number n) {
 					return converter.toString(new Date(n.longValue()));
 				}
 			};
-			t.setTickLabelFormatter(f);
+			cd.setTickLabelFormatter(f);
+			axis = cd;
+			break;
+//			CategoryAxis cd = new CategoryAxis();
+//			CategoryAxis.DefaultFormatter f1 = new CategoryAxis.DefaultFormatter(cd) {
+//				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
+//				@Override
+//				public String toString(Number n) {
+//					return converter.toString(new Date(n.longValue()));
+//				}
+//			};
+//			axis = cd;
+		case Qd:
+			NumberAxis t = new NumberAxis();
+			t.forceZeroInRangeProperty().set(false);
 			axis = t;
 			break;
-		case BOOLEAN:
-		case NA:
-			axis = new NumberAxis();
+		default:
+			NumberAxis a = new NumberAxis();
+			a.forceZeroInRangeProperty().set(false);
+			axis = a;
 		}
 		
 		axis.setLabel(field.getName());

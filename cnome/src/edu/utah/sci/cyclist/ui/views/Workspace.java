@@ -186,7 +186,7 @@ public class Workspace extends ViewBase implements View {
 		
 					view.setTranslateX(0);
 					view.setTranslateY(0);
-					Bounds b = getLayoutBounds();
+					Bounds b = _pane.getLayoutBounds();
 					view.setPrefSize(b.getWidth(), b.getHeight());
 					
 					view.toFront();
