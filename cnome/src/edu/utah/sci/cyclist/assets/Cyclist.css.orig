@@ -222,7 +222,6 @@
 /*
  * Glyphs
  */
- 
 .field-glyph {
 	-fx-background-color: #FEE391; /*C7E9C0;*/
 	-fx-border-color: #bbbbbb;
@@ -237,18 +236,6 @@
 	
 }
 
-.field-glyph .arrow {
-    -fx-background-insets: 1 0 -1 0, 0;
-    -fx-background-color: transparent;
-    -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
-    -fx-shape: "M 0 0 h 7 l -3.5 4 z";
-}
-
-.field-glyph:hover .arrow {
-    -fx-background-color: -fx-mark-color, #FFFFFF;
-}
-
-
 .filter-glyph {
 	-fx-background-color: #ccff33;
 	-fx-border-color: #303030;
@@ -258,6 +245,11 @@
  	-fx-padding: 2 3 3 3; 
  	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
 }
+
+<<<<<<< HEAD
+field-glyph .text {	
+}
+
 
 /*
  * Line Charts
@@ -279,6 +271,8 @@
 .default-color0.chart-series-line { -fx-stroke: darkseagreen; }
 
 
+=======
+>>>>>>> 2419cb05d896e5bcee08475c1dc106d548c920dc
 /*
  * --- Wizards ---
  */

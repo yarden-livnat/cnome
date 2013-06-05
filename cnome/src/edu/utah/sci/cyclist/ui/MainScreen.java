@@ -54,7 +54,7 @@ public class MainScreen extends BorderPane {
 	
 	private MenuBar _menubar;
 	private SplitPane _toolsArea;
-	private HBox _content;
+//	private HBox _content;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _dimensionsPanel;
 	private SchemaPanel _measuresPanel;
@@ -127,15 +127,15 @@ public class MainScreen extends BorderPane {
 		VBox.setVgrow(_toolsArea, Priority.SOMETIMES);
 		
 		// -- workspace
-		_content = HBoxBuilder.create()
-						.children(
-								_toolsArea
-								// workspace
-								)
-						.build();
-		
-		// -- setup
-		VBox.setVgrow(_content, Priority.ALWAYS);
+//		_content = HBoxBuilder.create()
+//						.children(
+//								_toolsArea
+//								// workspace
+//								)
+//						.build();
+//		
+//		// -- setup
+//		VBox.setVgrow(_content, Priority.ALWAYS);
 //		getChildren().addAll(_menubar, _content);
 		setTop(_menubar);
 		setLeft(_toolsArea);

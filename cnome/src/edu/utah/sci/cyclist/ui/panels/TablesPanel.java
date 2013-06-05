@@ -19,6 +19,7 @@
  *
  * Contributors:
  *     Yarden Livnat  
+ *     Kristi Potter
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.panels;
 
@@ -91,8 +92,7 @@ public class TablesPanel extends Panel  {
 				_items.removeListener(_listener);
 			}
 			
-			items.addListener(_listener);
-			
+			items.addListener(_listener);	
 			_items = items;
 		}
 		
@@ -143,8 +143,13 @@ public class TablesPanel extends Panel  {
 
 			@Override
 			public void handle(Event event) {
-				_tableProperty.set(entry.table);
-				select(entry);
+			    if(((MouseEvent) event).getClickCount() == 1){
+			    	_tableProperty.set(entry.table);
+			    	select(entry);
+			    }
+			    else if(((MouseEvent) event).getClickCount() == 2){
+			    	editTable(entry);
+			    }
 				
 			}
 		});
@@ -164,51 +169,31 @@ public class TablesPanel extends Panel  {
 				
 				db.setContent(content);
 			}
-		});
-
-		
-		entry.title.setContextMenu(createContextMenu(entry));
-		
+		});		
 		return entry;
 	}
 	
-	private ContextMenu createContextMenu(final Entry entry) {
-		final ContextMenu menu = new ContextMenu();
-
-		MenuItem edit = new MenuItem("Edit");
-		edit.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				MenuItem mi = (MenuItem) event.getSource();
-				editTable(entry, mi.getParentPopup().getOwnerWindow());
-			}
-		});
-		menu.getItems().add(edit);
-
-		MenuItem delete = new MenuItem("Delete");
-		delete.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				removeTable(entry);
-			}
-		});
-		menu.getItems().add(delete);
-		return menu;
-	}
-	
+		
 	public void removeTable(Entry entry) {
 		_items.remove(entry.table);
 	}
 
 		
-	private void editTable(final Entry entry, Window window) {
+	private void editTable(final Entry entry) {
 		TableEditorWizard wizard = new TableEditorWizard(entry.table);
-		ObjectProperty<Table> selection = wizard.show(window);
+		
+		ObjectProperty<Table> selection = wizard.show(this.getParent().getScene().getWindow());
+		
 		selection.addListener(new ChangeListener<Table>(){
 			@Override
 			public void changed(ObservableValue<? extends Table> arg0, Table oldVal,Table newVal) {
-				entry.table = newVal;
-			}
+				if(newVal.getName().equals("DELETE_ME"))
+					removeTable(entry);
+				else{
+					entry.table = newVal;
+					entry.title.setText(entry.table.getAlias());
+				}		
+			}	
 		});
 	}	
 	

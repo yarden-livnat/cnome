@@ -1,19 +1,21 @@
 package edu.utah.sci.cyclist.ui.components;
 
 import utils.SQL;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.StackPaneBuilder;
-import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Interpretation;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
@@ -23,11 +25,25 @@ public class FieldGlyph extends HBox {
 
 	private Field _field;
 	private StackPane _button;
+	private Label _label;
 	
+	private ObjectProperty<EventHandler<ActionEvent>> _action = new SimpleObjectProperty<>();
 	
 	public FieldGlyph(Field field) {
 		_field = field;
 		build();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onAction() {
+		return _action;
+	}
+	
+	public void setOnAction( EventHandler<ActionEvent> handler) {
+		_action.set(handler);
+	}
+	
+	public EventHandler<ActionEvent> getOnAction() {
+		return _action.get();
 	}
 	
 	private String getTitle() {
@@ -35,10 +51,11 @@ public class FieldGlyph extends HBox {
 		if (_field.getRole() == Role.DIMENSION) {
 			title = _field.getName();
 		} else {
-			String func = _field.get(FieldProperties.AGGREGATION_FUNC, String.class);
-			if (func == null)
-				func = _field.get(FieldProperties.AGGREGATION_DEFAULT_FUNC, String.class);
-			title = func+"("+_field.getName()+")";
+			String funcName = _field.get(FieldProperties.AGGREGATION_FUNC, String.class);
+			if (funcName == null)
+				funcName = _field.get(FieldProperties.AGGREGATION_DEFAULT_FUNC, String.class);
+			SQL.Function func = SQL.getFunction(funcName);
+			title = func.getLabel(_field.getName());
 		}
 		
 		return title;
@@ -49,7 +66,7 @@ public class FieldGlyph extends HBox {
 			.styleClass("field-glyph")
 			.spacing(5)
 			.children(
-					LabelBuilder.create()
+					_label = LabelBuilder.create()
 						.styleClass("text")
 						.text(getTitle())
 						.build()
@@ -73,6 +90,12 @@ public class FieldGlyph extends HBox {
 
 	}
 	
+	private void fireActionEvent() {
+		if (getOnAction() != null) {
+			getOnAction().handle(new ActionEvent(this, null));
+		}
+	}
+	
 	private void createMenu() {
 		
 		final ContextMenu contextMenu = new ContextMenu();
@@ -88,11 +111,13 @@ public class FieldGlyph extends HBox {
 //		    }
 //		});
 
-		for (final String op : SQL.OPERATIONS) {
-			MenuItem item = new MenuItem(op);
+		for (final SQL.Function func : SQL.FUNCTIONS) {
+			MenuItem item = new MenuItem(func.getName());
 			item.setOnAction(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
-					_field.set(FieldProperties.AGGREGATION_FUNC, op);
+					_field.set(FieldProperties.AGGREGATION_FUNC, func.getName());
+					_label.setText(getTitle());
+					fireActionEvent();
 				}
 			});
 			contextMenu.getItems().add(item);

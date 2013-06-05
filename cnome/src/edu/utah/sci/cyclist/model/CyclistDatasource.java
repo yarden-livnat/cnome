@@ -50,7 +50,7 @@ public class CyclistDatasource implements DataSource {
 
 	// Save this data source
 	public void save(IMemento memento) {
-						
+				
 		// Set the url
 		memento.putString("url", getURL());
 				
