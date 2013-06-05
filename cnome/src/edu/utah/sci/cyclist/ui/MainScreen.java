@@ -110,7 +110,8 @@ public class MainScreen extends BorderPane {
 		
 		// -- menubar
 		_menubar = createMenuBar(stage);
-				
+			
+		double[] div = {0.1, 0.3, 0.5};
 		// -- tables and schema
 		_toolsArea = SplitPaneBuilder.create()
 				.prefWidth(150)
@@ -121,6 +122,7 @@ public class MainScreen extends BorderPane {
 						_measuresPanel = new SchemaPanel("Numeric"),
 						_toolsPanel = new ToolsPanel()
 					)
+				.dividerPositions(div)
 				.build();
 		VBox.setVgrow(_toolsArea, Priority.SOMETIMES);
 		

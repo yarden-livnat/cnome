@@ -106,7 +106,6 @@ public class Schema {
 		
 		if (dataType.getRole() == Role.MEASURE)
 			field.set(FieldProperties.AGGREGATION_DEFAULT_FUNC, SQL.SUM);
-		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
 	}
 	
 	
