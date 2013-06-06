@@ -33,9 +33,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
@@ -84,6 +86,10 @@ public class Workspace extends ViewBase implements View {
 		setPadding(new Insets(5, 10, 5, 10));
 
 		_pane = new Pane();
+		Rectangle clip = new Rectangle(0, 0, 100, 100);
+		clip.widthProperty().bind(_pane.widthProperty());
+		clip.heightProperty().bind(_pane.heightProperty());
+		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
 		
 		setContent(_pane);

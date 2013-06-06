@@ -133,8 +133,8 @@ public class PresenterBase implements Presenter {
 	
 	@Override
 	public void removeTable(Table table) {
-		getView().removeTable(table);
 		getSelectionModel().removeTable(table);
+		getView().removeTable(table);
 	}
 	
 	@Override

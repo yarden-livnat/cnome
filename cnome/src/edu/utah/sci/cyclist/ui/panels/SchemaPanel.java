@@ -112,13 +112,13 @@ public class SchemaPanel extends Panel {
 	
 	
 	private void addListeners() {
-		getContent().setOnDragEntered(new EventHandler<DragEvent>() {
+		getPane().setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
 				event.consume();
 			}
 		});
 		
-		getContent().setOnDragOver(new EventHandler<DragEvent>() {
+		getPane().setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				
@@ -130,13 +130,13 @@ public class SchemaPanel extends Panel {
 			}
 		});
 		
-		getContent().setOnDragExited(new EventHandler<DragEvent>() {
+		getPane().setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				event.consume();
 			}
 		});
 			
-		getContent().setOnDragDropped(new EventHandler<DragEvent>() {
+		getPane().setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);

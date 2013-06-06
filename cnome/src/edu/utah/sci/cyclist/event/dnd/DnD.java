@@ -38,6 +38,8 @@ public class DnD {
 	
 	private static DnD _instance = new DnD();
 	
+	public enum Status {MOVED, COPIED, ACCEPTED, IGNORED, NA};
+	
 	public static DnD getInstance() {
 		return _instance;
 	}
@@ -55,13 +57,20 @@ public class DnD {
 	}
 	
 	public class LocalClipboard {
-
+	
 		private final Map<DataFormat, Entry<?>> _items = new HashMap<DataFormat, Entry<?>>();
+		private Status _status = Status.NA;
 		
 		public LocalClipboard() {
 			
 		}
+		public void setStatus(Status status) {
+			_status = status;
+		}
 		
+		public Status getStatus() {
+			return _status;
+		}
 		public <T> void put(DataFormat key, Class<T> type, T value) {
 			_items.put(key, new Entry<T>(type, value));
 		}

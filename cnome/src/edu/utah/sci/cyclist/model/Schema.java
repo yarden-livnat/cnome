@@ -35,10 +35,15 @@ import edu.utah.sci.cyclist.model.DataType.Role;
 
 public class Schema {
 
+	private Table _table;
 	private Vector<Field> _fields = new Vector<Field>();
 	
-	public Schema() {
-		
+	public Schema(Table table) {
+		_table = table;
+	}
+	
+	public Table getTable() {
+		return _table;
 	}
 	
 	// Save the schema
@@ -78,6 +83,7 @@ public class Schema {
 	}
 	
 	public void addField(Field field) {
+		field.set(FieldProperties.FIELD_TABLE, _table);
 		_fields.add(field);
 	}
 	

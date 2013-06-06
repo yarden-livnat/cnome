@@ -32,9 +32,6 @@ public class Panel extends VBox {
 		
 		VBox vbox =  VBoxBuilder.create()
 							.children(
-//								LabelBuilder.create().text("item 1").build(),
-//								LabelBuilder.create().text("item 2").build(),
-//								LabelBuilder.create().text("item 3").build()
 								)
 							.build();
 		
@@ -44,12 +41,7 @@ public class Panel extends VBox {
 		VBox.setVgrow(vbox, Priority.ALWAYS);
 		VBox.setVgrow(this, Priority.ALWAYS);
 		VBox.setVgrow(_pane, Priority.ALWAYS);
-		
-//		title.relocate(0, 0);
-//		
-//		pane.relocate(0, 30);
-//		pane.layoutYProperty().bind(title.heightProperty());
-//		pane.heightProperty()
+
 		getChildren().addAll(title, _pane);
 	}
 	
@@ -59,6 +51,10 @@ public class Panel extends VBox {
 	
 	public Node getContent() {
 		return _pane.getContent();
+	}
+	
+	public Node getPane() {
+		return _pane;
 	}
 	
 }

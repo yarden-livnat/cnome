@@ -34,25 +34,19 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
-import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.ui.wizards.DatasourceWizard;
 import edu.utah.sci.cyclist.ui.wizards.TableEditorWizard;
 
 public class TablesPanel extends Panel  {
@@ -157,7 +151,9 @@ public class TablesPanel extends Panel  {
 		
 		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {					
-				
+				_tableProperty.set(entry.table);
+		    	select(entry);
+		    	
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 				clipboard.put(DnD.TABLE_FORMAT, Table.class, entry.table);
 				

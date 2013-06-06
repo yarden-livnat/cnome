@@ -41,6 +41,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ProgressIndicator;
@@ -48,7 +49,9 @@ import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -57,17 +60,19 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.LineBuilder;
+import javafx.scene.shape.Rectangle;
 
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.dnd.DnD.Status;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
 public class ViewBase extends BorderPane implements View {
 	
-	public static final double EDGE_SIZE = 2;
+	public static final double EDGE_SIZE = 3;
 	
 	public enum Edge { TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, NONE };
 	
@@ -106,6 +111,7 @@ public class ViewBase extends BorderPane implements View {
 	// Actions
 	private Closure.V0 _onSelectAction = null;
 	private Closure.V1<Table> _onTableDrop = null;
+	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	
 	
@@ -216,6 +222,14 @@ public class ViewBase extends BorderPane implements View {
 		_onTableDrop = action;
 	}
 	
+	public Closure.V1<Table> getOnTableDrop() {
+		return _onTableDrop;
+	}
+	
+	public void setOnTableRemoved(Closure.V1<Table> action) {
+		_onTableRemoved = action;
+		
+	}
 	public void setOnTableSelectedAction(Closure.V2<Table, Boolean> action) {
 		_onTableSelectedAction = action;
 	}
@@ -231,7 +245,7 @@ public class ViewBase extends BorderPane implements View {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		ToggleButton button = ToggleButtonBuilder.create()
+		final ToggleButton button = ToggleButtonBuilder.create()
 				.styleClass("flat-toggle-button")
 				.text(table.getName().substring(0, 1))
 				.selected(active)
@@ -243,6 +257,35 @@ public class ViewBase extends BorderPane implements View {
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
 				if (_onTableSelectedAction != null)
 					_onTableSelectedAction.call(table, activate);
+			}
+		});
+		
+		button.setOnDragDetected(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				Dragboard db = button.startDragAndDrop(TransferMode.MOVE);
+				
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.TABLE_FORMAT, Table.class, table);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.putString(table.getName());
+				db.setContent(content);
+			}
+		});
+		
+		button.setOnDragDone(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				// ignore if the button was dragged onto self 
+				if (getLocalClipboard().getStatus() != Status.IGNORED) {
+					if (_onTableRemoved != null) {
+						_onTableRemoved.call(table);
+					}
+				}
+				
 			}
 		});
 		
@@ -350,22 +393,30 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
-					event.acceptTransferModes(TransferMode.COPY);
-					event.consume();
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				if ( table != null ) {
+					if (_buttons.containsKey(table)) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+						event.consume();
+					}
 				}
-				
 			}
 		});
 		
 		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
-					event.acceptTransferModes(TransferMode.COPY);
-					event.consume();
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				if ( table != null ) {
+					if (_buttons.containsKey(table)) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+						event.consume();
+					}
 				}
-				
 			}
 		});
 		
@@ -379,9 +430,12 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setOnDragDropped(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
-					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
-					if (_onTableDrop != null) {
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
+				if (table != null) {
+					if (_buttons.containsKey(table)) {
+						getLocalClipboard().setStatus(Status.IGNORED);
+					} else 	if (_onTableDrop != null) {
+						getLocalClipboard().setStatus(Status.ACCEPTED);
 						_onTableDrop.call(table);
 						event.setDropCompleted(true);
 						event.consume();

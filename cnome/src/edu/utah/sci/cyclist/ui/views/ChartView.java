@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.ui.views;
 
-import java.lang.reflect.Array;
-import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +29,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.GridPaneBuilder;
 import javafx.scene.layout.Priority;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
@@ -43,6 +42,7 @@ import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.DataType.Type;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -121,12 +121,6 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
-	
-	private Object convert(Object value) {
-		if (value instanceof Timestamp) 
-			return ((Timestamp)value).getTime();
-		return value;
-	}
 	
 	private Closure.R1<Object, Object> defaultConvert = new Closure.R1<Object, Object>() {
 		@Override
@@ -282,8 +276,10 @@ public class ChartView extends ViewBase {
 //		chart.setCreateSymbols(false);
 //		chart.setLegendVisible(false);
 //		
-		if (_chart != null)
+		if (_chart != null) {
 			_chart.setAnimated(false);
+			_chart.setCache(true);
+		}
 		_pane.setCenter(_chart);
 	}
 
@@ -311,12 +307,12 @@ public class ChartView extends ViewBase {
 			break;
 		case Qd:
 			NumberAxis t = new NumberAxis();
-			t.forceZeroInRangeProperty().set(false);
+//			t.forceZeroInRangeProperty().set(false);
 			axis = t;
 			break;
 		default:
 			NumberAxis a = new NumberAxis();
-			a.forceZeroInRangeProperty().set(false);
+//			a.forceZeroInRangeProperty().set(false);
 			axis = a;
 		}
 		
@@ -351,6 +347,10 @@ public class ChartView extends ViewBase {
 		
 		// main view
 		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
+		Rectangle clip = new Rectangle(0, 0, 100, 100);
+		clip.widthProperty().bind(_pane.widthProperty());
+		clip.heightProperty().bind(_pane.heightProperty());
+		_pane.setClip(clip);
 		_pane.setBottom(createControl());
 		
 		setContent(_pane);
@@ -361,9 +361,10 @@ public class ChartView extends ViewBase {
 			public void changed(
 					ObservableValue<? extends ObservableList<Row>> observable,
 					ObservableList<Row> oldValue, ObservableList<Row> newValue) {
-				if (newValue == null) return;
 				
-				assignData(newValue);
+				if (newValue != null) {
+					assignData(newValue);
+				}
 			}
 		});
 	}
@@ -388,13 +389,21 @@ public class ChartView extends ViewBase {
 	private InvalidationListener _areaLister = new InvalidationListener() {
 	
 		@Override
-		public void invalidated(Observable arg0) {			
+		public void invalidated(Observable observable) {			
 			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
 				invalidateChart();
 			
 			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
 				invalidateChart();	
 				
+			if (_currentTable == null) {
+				DropArea area = (DropArea) observable;
+				if (area.getFields().size() == 1) {
+					Table table = area.getFields().get(0).get(FieldProperties.FIELD_TABLE, Table.class);
+					if (getOnTableDrop() != null)
+						getOnTableDrop().call(table);
+				}
+			}
 			fetchData();
 		}
 	};

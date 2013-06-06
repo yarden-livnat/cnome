@@ -80,6 +80,15 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			});
 			
+			workspace.setOnTableRemoved(new Closure.V1<Table>() {
+				@Override
+				public void call(Table table) {
+					removeTable(table);
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
+					getSelectionModel().removeTable(table);
+				}
+			});
+			
 			workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
 
 				@Override

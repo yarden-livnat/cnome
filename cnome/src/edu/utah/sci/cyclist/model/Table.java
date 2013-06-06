@@ -61,7 +61,7 @@ public class Table {
 	
 	private String _alias;
 	private String _name;
-	private Schema _schema = new Schema();
+	private Schema _schema = new Schema(this);
 	private CyclistDatasource _datasource;
 	private Map<String, Object> _properties = new HashMap<>();
 
@@ -185,7 +185,7 @@ public class Table {
 		}
 		
 		// Restore the schema
-		Schema schema = new Schema();
+		Schema schema = new Schema(this);
 		schema.restore(memento.getChild("Schema"));
 		setSchema(schema);
 //		extractSchema();
