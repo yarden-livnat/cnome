@@ -203,6 +203,7 @@ public class Table {
 				String colName = rs.getString("COLUMN_NAME");
 			
 				Field field = new Field(colName);
+				field.setTable(this);
 				field.set(FieldProperties.REMOTE_NAME, colName);
 				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
 				field.set(FieldProperties.REMOTE_DATA_TYPE_NAME, rs.getString("TYPE_NAME"));
@@ -411,7 +412,7 @@ public class Table {
 		return task.valueProperty();
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final String query) {
+	public Task<ObservableList<Row>> getRows(final String query) {
 		final CyclistDatasource ds = getDataSource();
 		
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
@@ -448,7 +449,7 @@ public class Table {
 		th.setDaemon(true);
 		th.start();
 		
-		return task.valueProperty();
+		return task;
 	}
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int limit) {
 		final CyclistDatasource ds = getDataSource();

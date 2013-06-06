@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 
@@ -36,7 +38,7 @@ public class Field {
 	private String _name;
 	private DataType _dataType;
 	private BooleanProperty _selected;
-	private Table _table;
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
 	
 	private Map<String, Object> _properties = new HashMap<>();
 
@@ -56,12 +58,16 @@ public class Field {
 		return _name;
 	}
 
+	public ObjectProperty<Table> tableProperty() {
+		return _tableProperty;
+	}
+	
 	public void setTable(Table table) {
-		_table = table;
+		_tableProperty.set(table);
 	}
 	
 	public Table getTable() {
-		return _table;
+		return _tableProperty.get();
 	}
 	
 	public String getDataTypeName() {
@@ -223,6 +229,7 @@ public class Field {
 		
 		copy._dataType = new DataType(_dataType);
 		copy._selected = _selected;
+		copy.setTable(getTable()); 
 		for (Map.Entry<String, Object> entry : _properties.entrySet()) {
 			copy._properties.put(entry.getKey(), entry.getValue());
 		}

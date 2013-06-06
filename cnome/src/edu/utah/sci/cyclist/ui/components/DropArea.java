@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -12,6 +13,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -22,6 +24,7 @@ import javafx.scene.layout.HBoxBuilder;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
+import edu.utah.sci.cyclist.model.Table;
 
 public class DropArea extends HBox implements Observable {
 	
@@ -29,6 +32,7 @@ public class DropArea extends HBox implements Observable {
 	
 	private ObjectProperty<ObservableList<Field>> _fieldsProperty = new SimpleObjectProperty<>();
 	private Policy _policy;
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	private List<InvalidationListener> _listeners = new ArrayList<>();
 	
 	public DropArea(Policy policy) {
@@ -51,8 +55,22 @@ public class DropArea extends HBox implements Observable {
 		_policy = policy;
 	}
 	
+	public ObjectProperty<Table> tableProperty() {
+		return _tableProperty;
+	}
+	
 	public ObservableList<Field> getFields() {
 		return _fieldsProperty.get();
+	}
+	
+	public boolean isValid() {
+		for (Node node : getChildren()) {
+			FieldGlyph glyph = (FieldGlyph) node;
+			if (glyph.isDisabled())
+				return false;
+		}
+		
+		return true;
 	}
 	
 	private void build() {		
@@ -189,6 +207,8 @@ public class DropArea extends HBox implements Observable {
 										fireInvalidationEvent();
 									}
 								});
+								
+								glyph.validProperty().bind(tableProperty().isEqualTo(field.tableProperty()));
 							}
 							
 							fireInvalidationEvent();

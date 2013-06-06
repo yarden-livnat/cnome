@@ -1,7 +1,11 @@
 package edu.utah.sci.cyclist.ui.components;
 
 import utils.SQL;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -26,12 +30,17 @@ public class FieldGlyph extends HBox {
 	private Field _field;
 	private StackPane _button;
 	private Label _label;
+	private BooleanProperty _validProperty = new SimpleBooleanProperty();
 	
 	private ObjectProperty<EventHandler<ActionEvent>> _action = new SimpleObjectProperty<>();
 	
 	public FieldGlyph(Field field) {
 		_field = field;
 		build();
+	}
+	
+	public Field getField() {
+		return _field;
 	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAction() {
@@ -44,6 +53,14 @@ public class FieldGlyph extends HBox {
 	
 	public EventHandler<ActionEvent> getOnAction() {
 		return _action.get();
+	}
+	
+	public BooleanProperty validProperty() {
+		return _validProperty;
+	}
+	
+	public boolean isValid() {
+		return _validProperty.get();
 	}
 	
 	private String getTitle() {
@@ -88,6 +105,18 @@ public class FieldGlyph extends HBox {
 			createMenu();
 		}
 
+		validProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				if (validProperty().get()) {
+					setStyle("-fx-background-color: -active-bg");
+				} else {
+					setStyle("-fx-background-color: -inactive-bg");
+				}
+				
+			}
+		});
 	}
 	
 	private void fireActionEvent() {

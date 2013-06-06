@@ -8,11 +8,14 @@ import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -69,7 +72,7 @@ public class ChartView extends ViewBase {
 	private DataType.Role _xAxisType = DataType.Role.MEASURE;
 	private DataType.Role _yAxisType = DataType.Role.MEASURE;
 	
-	private Table _currentTable = null;
+	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
 	private IntegerField _limitEntry;
@@ -82,19 +85,23 @@ public class ChartView extends ViewBase {
 		build();
 	}
 	
+	public Table getCurrentTable() {
+		return _currentTableProperty.get();
+	}
+	
 	@Override
 	public void selectTable(Table table, boolean active) {
 		super.selectTable(table, active);
 
 		if (!active) {
-			if (table == _currentTable) 
+			if (table == getCurrentTable()) 
 				invalidateChart();
 			return;
 		}
 		
-		if (table != _currentTable) {
+		if (table != getCurrentTable()) {
 			invalidateChart();
-			_currentTable = table;
+			_currentTableProperty.set(table);
 		}
 		
 		fetchData();
@@ -106,17 +113,22 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void fetchData() {
-		if (_currentTable != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
+		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
+			if (!_xArea.isValid() || !_yArea.isValid())
+				return;
+			
 			if (_chart == null) 
 				createChart();
 			if (_chart != null) {
 				QueryBuilder builder = 
-							_currentTable.queryBuilder()
+							getCurrentTable().queryBuilder()
 							.field(_xArea.getFields().get(0))
 							.fields(_yArea.getFields())
 							.limit(_limit);
 				System.out.println("Query: "+builder.toString());
-				_items.bind(_currentTable.getRows(builder.toString()));
+				Task<ObservableList<Row>> task = getCurrentTable().getRows(builder.toString());
+				setCurrentTask(task);
+				_items.bind(task.valueProperty());
 			}
 		}
 	}
@@ -396,7 +408,7 @@ public class ChartView extends ViewBase {
 			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
 				invalidateChart();	
 				
-			if (_currentTable == null) {
+			if (getCurrentTable() == null) {
 				DropArea area = (DropArea) observable;
 				if (area.getFields().size() == 1) {
 					if (getOnTableDrop() != null)
@@ -411,6 +423,7 @@ public class ChartView extends ViewBase {
 		
 		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
 		DropArea area = new DropArea(policy);
+		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaLister);
 		grid.add(text, 0, row);
 		grid.add(area, 1, row);

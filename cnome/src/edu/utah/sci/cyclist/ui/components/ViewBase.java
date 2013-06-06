@@ -31,6 +31,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -90,6 +91,7 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
+	private Task<?> _task;	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
 	private boolean _maximized = false;
@@ -169,6 +171,14 @@ public class ViewBase extends BorderPane implements View {
 		}
 	}
 	
+	public void setCurrentTask(Task<?> task) {
+		if (_task != null && _task.isRunning()) {
+			_task.cancel();
+		}
+		
+		_task = task;
+		_indicator.visibleProperty().bind(_task.runningProperty());
+	}
 	/*
 	 * Max/min button
 	 */
