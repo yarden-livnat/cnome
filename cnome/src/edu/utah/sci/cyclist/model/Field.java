@@ -36,6 +36,7 @@ public class Field {
 	private String _name;
 	private DataType _dataType;
 	private BooleanProperty _selected;
+	private Table _table;
 	
 	private Map<String, Object> _properties = new HashMap<>();
 
@@ -55,7 +56,14 @@ public class Field {
 		return _name;
 	}
 
-
+	public void setTable(Table table) {
+		_table = table;
+	}
+	
+	public Table getTable() {
+		return _table;
+	}
+	
 	public String getDataTypeName() {
 		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
 	}

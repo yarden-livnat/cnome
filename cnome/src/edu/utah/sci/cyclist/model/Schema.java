@@ -59,11 +59,12 @@ public class Schema {
 	public void restore(IMemento memento) {
 
 		// Restore each field
-		IMemento[] fields = memento.getChildren("field");
-		for(IMemento field: fields){
-			Field newField = new Field();
-			newField.restore(field);
-			addField(newField);
+		IMemento[] list = memento.getChildren("field");
+		for(IMemento fieldMemento: list){
+			Field field = new Field();
+			field.setTable(_table);
+			field.restore(fieldMemento);
+			addField(field);
 		}
 	}
 	
@@ -83,7 +84,7 @@ public class Schema {
 	}
 	
 	public void addField(Field field) {
-		field.set(FieldProperties.FIELD_TABLE, _table);
+		field.setTable(_table);
 		_fields.add(field);
 	}
 	

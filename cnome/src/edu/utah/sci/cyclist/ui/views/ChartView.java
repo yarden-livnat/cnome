@@ -399,9 +399,8 @@ public class ChartView extends ViewBase {
 			if (_currentTable == null) {
 				DropArea area = (DropArea) observable;
 				if (area.getFields().size() == 1) {
-					Table table = area.getFields().get(0).get(FieldProperties.FIELD_TABLE, Table.class);
 					if (getOnTableDrop() != null)
-						getOnTableDrop().call(table);
+						getOnTableDrop().call(area.getFields().get(0).getTable());
 				}
 			}
 			fetchData();
