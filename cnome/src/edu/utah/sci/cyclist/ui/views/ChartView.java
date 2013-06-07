@@ -146,7 +146,12 @@ public class ChartView extends ViewBase {
 		
 		@Override
 		public String call(Object num) {
-			return format.format(num);
+			if (num instanceof Number)
+				return format.format((Number)num);
+			else if (num instanceof String)
+				return (String)num;
+			else
+				return "error";
 		}
 	};
 	

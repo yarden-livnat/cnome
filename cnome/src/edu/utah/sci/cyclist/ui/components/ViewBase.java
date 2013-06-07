@@ -86,6 +86,7 @@ public class ViewBase extends BorderPane implements View {
 	
 	private Label _title;
 	private ProgressIndicator _indicator;
+	private TaskControl _taskControl;
 	private HBox _header;
 	private HBox _actionsArea;
 	private HBox _dataBar;
@@ -128,7 +129,8 @@ public class ViewBase extends BorderPane implements View {
 				.alignment(Pos.CENTER_LEFT)
 				.children(
 					_title = LabelBuilder.create().prefWidth(60).build(),
-					_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
+					//_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
+					_taskControl = new TaskControl(),
 					_dataBar = HBoxBuilder.create()
 						.id("databar")
 						.styleClass("data-bar")
@@ -156,9 +158,9 @@ public class ViewBase extends BorderPane implements View {
 		_title.setText(title);
 	}
 	
-	public void setWaiting(boolean value) {
-		_indicator.setVisible(value);
-	}
+//	public void setWaiting(boolean value) {
+//		_indicator.setVisible(value);
+//	}
 	
 	public boolean isMaximized() {
 		return _maximized;
@@ -172,12 +174,14 @@ public class ViewBase extends BorderPane implements View {
 	}
 	
 	public void setCurrentTask(Task<?> task) {
-		if (_task != null && _task.isRunning()) {
-			_task.cancel();
-		}
+//		if (_task != null && _task.isRunning()) {
+//			_task.cancel();
+//		}
+//		
+//		_task = task;
+//		_indicator.visibleProperty().bind(_task.runningProperty());
+		_taskControl.setTask(task);
 		
-		_task = task;
-		_indicator.visibleProperty().bind(_task.runningProperty());
 	}
 	/*
 	 * Max/min button

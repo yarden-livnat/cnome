@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -421,25 +422,50 @@ public class Table {
 			protected ObservableList<Row> call() throws Exception {
 				List<Row> rows = new ArrayList<>();
 				try {
+					updateMessage("connecting");
 					Connection conn = ds.getConnection();
-					PreparedStatement stmt = conn.prepareStatement(query);
 					
-					ResultSet rs = stmt.executeQuery();
+					updateMessage("querying");
+					
+//					PreparedStatement stmt = conn.prepareStatement(query);
+//					ResultSet rs = stmt.executeQuery()
+					
+					System.out.println("querying");
+					long t1 = System.currentTimeMillis();
+					Statement stmt = conn.createStatement();
+					ResultSet rs = stmt.executeQuery(query);
+					long t2 = System.currentTimeMillis();
+					System.out.println("time: "+(t2-t1)/1000);
 					ResultSetMetaData rmd = rs.getMetaData();
 					
 					int cols = rmd.getColumnCount();
+					updateProgress(0, Long.MAX_VALUE);
+					int n=0;
 					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
 						Row row = new Row(cols);
 						for (int i=0; i<cols; i++) {
 							row.value[i] = rs.getObject(i+1);
 						}
 						rows.add(row);
+						n++;
+						if (n % 1000 == 0) {
+							updateMessage(n+" rows");
+						}
 					}
+					long t3 = System.currentTimeMillis();
+					System.out.println("gathering time: "+(t3-t2)/1000);
 				}catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println("task sql exception");
+					updateMessage(e.getLocalizedMessage());
+					throw new Exception(e.getMessage(), e);
 				}
 				
+//				System.out.println("task state:"+ getState());
 				return FXCollections.observableList(rows);
 			}
 			
