@@ -36,7 +36,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
@@ -80,7 +82,7 @@ public class Workspace extends ViewBase implements View {
 	 * Constructor
 	 */
 	public Workspace() {
-		super();
+		super(true);
 		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
@@ -92,8 +94,10 @@ public class Workspace extends ViewBase implements View {
 		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
 		
-		setContent(_pane);
-				
+		setContent(_pane, true /* allowMove */);
+			
+		enableDragging(false);
+		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 //				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
@@ -162,6 +166,11 @@ public class Workspace extends ViewBase implements View {
 	@Override
 	public void setTitle(String title) {
 		super.setTitle(title);
+	}
+	
+	public void selectView(View view) {
+		ViewBase node = (ViewBase) view;
+		node.toFront();
 	}
 	
 	public void addView(final ViewBase view) {

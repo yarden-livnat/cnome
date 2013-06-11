@@ -31,6 +31,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
+import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Model;
@@ -124,8 +125,7 @@ public class WorkspacePresenter extends PresenterBase {
 	 * addListeners
 	 */
 	private void addListeners() {
-		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {
-			
+		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {	
 			@Override
 			public void handle(CyclistNotification event) {
 				String id = ((SimpleNotification)event).getMsg();
@@ -140,6 +140,13 @@ public class WorkspacePresenter extends PresenterBase {
 			}
 		});
 		
+		addNotificationHandler(CyclistNotifications.VIEW_SELECTED, new CyclistNotificationHandler() {
+			@Override
+			public void handle(CyclistNotification event) {
+				View view = ((CyclistViewNotification)event).getView();
+				getWorkspace().selectView(view);
+			}
+		});
 		SelectionModel selectionModel = new SingleSelection();
 		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
 

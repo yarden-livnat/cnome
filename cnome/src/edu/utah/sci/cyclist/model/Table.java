@@ -435,7 +435,7 @@ public class Table {
 					Statement stmt = conn.createStatement();
 					ResultSet rs = stmt.executeQuery(query);
 					long t2 = System.currentTimeMillis();
-					System.out.println("time: "+(t2-t1)/1000);
+					System.out.println("time: "+(t2-t1)/1000.0);
 					ResultSetMetaData rmd = rs.getMetaData();
 					
 					int cols = rmd.getColumnCount();
@@ -458,7 +458,7 @@ public class Table {
 						}
 					}
 					long t3 = System.currentTimeMillis();
-					System.out.println("gathering time: "+(t3-t2)/1000);
+					System.out.println("gathering time: "+(t3-t2)/1000.0);
 				}catch (SQLException e) {
 					System.out.println("task sql exception");
 					updateMessage(e.getLocalizedMessage());

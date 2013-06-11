@@ -24,11 +24,12 @@ package edu.utah.sci.cyclist.event.notification;
 
 public class CyclistNotifications {
 
-	public static final String DATASOURCE_FOCUS 	= "datasource_focus";
-	public static final String DATASOURCE_ADD 		= "datasource_add";
-	public static final String DATASOURCE_REMOVE	= "datasource_remove";
-	public static final String DATASOURCE_SELECTED 	= "datasource_selected";
-	public static final String DATASOURCE_UNSELECTED = "datasource_unselected";
+	public static final String DATASOURCE_FOCUS 		= "datasource_focus";
+	public static final String DATASOURCE_ADD 			= "datasource_add";
+	public static final String DATASOURCE_REMOVE		= "datasource_remove";
+	public static final String DATASOURCE_SELECTED 		= "datasource_selected";
+	public static final String DATASOURCE_UNSELECTED 	= "datasource_unselected";
 	
-	public static final String REMOVE_VIEW			= "remove_view";
+	public static final String REMOVE_VIEW				= "remove_view";
+	public static final String VIEW_SELECTED			= "view_selected";
 }

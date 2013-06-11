@@ -32,6 +32,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
+import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Table;
@@ -84,6 +85,8 @@ public class PresenterBase implements Presenter {
 			_view.setOnSelectAction(new Closure.V0() {
 				@Override
 				public void call() {
+					broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, _view));
+					
 					Table table = getSelectionModel().getSelected();
 					if (table != null)
 						broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));

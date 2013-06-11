@@ -42,11 +42,8 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
@@ -61,7 +58,6 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.LineBuilder;
-import javafx.scene.shape.Rectangle;
 
 import org.mo.closure.v1.Closure;
 
@@ -85,18 +81,18 @@ public class ViewBase extends BorderPane implements View {
 	private Button _minmaxButton;
 	
 	private Label _title;
-	private ProgressIndicator _indicator;
 	private TaskControl _taskControl;
 	private HBox _header;
 	private HBox _actionsArea;
 	private HBox _dataBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
-	private Task<?> _task;	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
 	private boolean _maximized = false;
 	private final Resize resize = new Resize();
+	
+	private boolean _enableDragging = true;
 	
 	class ButtonEntry {
 		public ToggleButton button;
@@ -119,6 +115,10 @@ public class ViewBase extends BorderPane implements View {
 	
 	
 	public ViewBase() {	
+		this(false);
+	}
+	
+	public ViewBase(boolean toplevel) {
 		super();
 		getStyleClass().add("view");
 		
@@ -128,8 +128,7 @@ public class ViewBase extends BorderPane implements View {
 				.styleClass("header")
 				.alignment(Pos.CENTER_LEFT)
 				.children(
-					_title = LabelBuilder.create().prefWidth(60).build(),
-					//_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
+					_title = LabelBuilder.create().prefWidth(70).build(),
 					_taskControl = new TaskControl(),
 					_dataBar = HBoxBuilder.create()
 						.id("databar")
@@ -147,6 +146,13 @@ public class ViewBase extends BorderPane implements View {
 					_closeButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("close_view"))).build()
 				)
 				.build();
+		
+		if (toplevel) {
+			_minmaxButton.setVisible(false);
+			_minmaxButton.setManaged(false);
+			_closeButton.setVisible(false);
+			_closeButton.setManaged(false);
+		}
 		setHeaderListeners();
 		setDatasourcesListeners();
 		
@@ -158,9 +164,6 @@ public class ViewBase extends BorderPane implements View {
 		_title.setText(title);
 	}
 	
-//	public void setWaiting(boolean value) {
-//		_indicator.setVisible(value);
-//	}
 	
 	public boolean isMaximized() {
 		return _maximized;
@@ -174,12 +177,6 @@ public class ViewBase extends BorderPane implements View {
 	}
 	
 	public void setCurrentTask(Task<?> task) {
-//		if (_task != null && _task.isRunning()) {
-//			_task.cancel();
-//		}
-//		
-//		_task = task;
-//		_indicator.visibleProperty().bind(_task.runningProperty());
 		_taskControl.setTask(task);
 		
 	}
@@ -339,12 +336,18 @@ public class ViewBase extends BorderPane implements View {
 	 */
 	
 	protected void setContent(Parent node) {
-		node.setOnMouseMoved(_onMouseMove);
+		setContent(node, true);
+	}
+	
+	protected void setContent(Parent node, boolean canMove) {
+		if (canMove)
+			node.setOnMouseMoved(_onMouseMove);
 		
 		setCenter(node);
 		VBox.setVgrow(node, Priority.NEVER);
 	}
 	
+
 	/*
 	 * 
 	 */
@@ -355,6 +358,15 @@ public class ViewBase extends BorderPane implements View {
 	protected void setActions(List<ButtonBase> actions) {
 		_actionsArea.getChildren().clear();
 		addActions(actions);
+	}
+	
+	private void fireSelectEvent() {
+		if (_onSelectAction != null) 
+			_onSelectAction.call();
+	}
+	
+	protected void enableDragging(Boolean value) {
+		_enableDragging = value;
 	}
 	
 	/*
@@ -368,14 +380,16 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				delta.x = getTranslateX() - event.getSceneX();
 				delta.y = getTranslateY() - event.getSceneY();
-				if (_onSelectAction != null)
-					_onSelectAction.call();
+				fireSelectEvent();
+				event.consume();
 			}
 		});
 		
 		_header.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
+				if (!_enableDragging) return;
+				
 //				Parent parent = view.getParent();
 //				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
 //				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
@@ -387,6 +401,7 @@ public class ViewBase extends BorderPane implements View {
 				
 				setTranslateX(delta.x+event.getSceneX()) ;
 				setTranslateY(delta.y+event.getSceneY());
+				event.consume();
 			}
 			
 		});	
@@ -394,8 +409,8 @@ public class ViewBase extends BorderPane implements View {
 		EventHandler<MouseEvent> eh = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (_onSelectAction != null)
-					_onSelectAction.call();
+				fireSelectEvent();
+				event.consume();
 			}
 		};
 		
@@ -413,9 +428,9 @@ public class ViewBase extends BorderPane implements View {
 						event.acceptTransferModes(TransferMode.NONE);
 					} else {
 						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-						event.consume();
 					}
 				}
+				event.consume();
 			}
 		});
 		
@@ -428,9 +443,9 @@ public class ViewBase extends BorderPane implements View {
 						event.acceptTransferModes(TransferMode.NONE);
 					} else {
 						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-						event.consume();
 					}
 				}
+				event.consume();
 			}
 		});
 		
@@ -541,7 +556,6 @@ public class ViewBase extends BorderPane implements View {
         		setTranslateX(resize.x-dx);
         		setPrefWidth(resize.width+dx);
         	} else if (resize.edge == Edge.TOP_RIGHT || resize.edge == Edge.RIGHT || resize.edge == Edge.BOTTOM_RIGHT){
-        		//setTranslateY(resize.y+dy);
         		setPrefWidth(resize.width-dx);
         	}
         	

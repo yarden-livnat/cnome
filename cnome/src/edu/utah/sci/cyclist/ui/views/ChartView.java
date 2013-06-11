@@ -278,7 +278,9 @@ public class ChartView extends ViewBase {
 			_chart = new BarChart<>(xAxis,  yAxis);
 			break;
 		case LINE:
-			_chart = new LineChart<Object, Object>(xAxis, yAxis);
+			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
+			lineChart.setCreateSymbols(false);
+			_chart = lineChart;
 			break;
 		case SCATTER_PLOT:
 			_chart = new ScatterChart<>(xAxis, yAxis);
