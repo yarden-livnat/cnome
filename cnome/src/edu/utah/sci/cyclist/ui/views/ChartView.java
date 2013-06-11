@@ -248,11 +248,11 @@ public class ChartView extends ViewBase {
 			_viewType = ViewType.BAR;
 			_markType = MarkType.BAR;
 		} else if (isPaneType(x, y, Classification.Qi, Classification.Qd)) {
-			_viewType = ViewType.BAR;
-			_markType = MarkType.BAR;
+			_viewType = ViewType.LINE;
+			_markType = MarkType.LINE;
 		}else if (isPaneType(x, y, Classification.Qi, Classification.Qi)) {
-			_viewType = ViewType.BAR;
-			_markType = MarkType.BAR;
+			_viewType = ViewType.SCATTER_PLOT;
+			_markType = MarkType.SHAPE;
 		} else {
 			_viewType = ViewType.NA;
 			_markType = MarkType.NA;

@@ -163,8 +163,10 @@ public class DataType {
 		if (_interp == Interpretation.DISCRETE) {
 			if (_type == Type.DATE || _type == Type.DATETIME) 
 				_classification = Classification.Cdate;
-			else
+			else if (_type == Type.TEXT)
 				_classification = Classification.C;
+			else
+				_classification = Classification.Qi;
 		} else { /* Interpretation.CONINUOUS */
 			if (_type == Type.DATE || _type == Type.DATETIME || _role == Role.DIMENSION) 
 				_classification = Classification.Qi;

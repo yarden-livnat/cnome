@@ -22,33 +22,35 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.views;
 
-import org.mo.closure.v1.Closure;
-
-import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
-import edu.utah.sci.cyclist.ui.tools.Tool;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.tools.Tool;
 
 public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
+	private ViewBase _maximizedView = null;
+	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
 	private Closure.V3<Table, Double, Double> _onShowTable = null;
 	
@@ -83,6 +85,10 @@ public class Workspace extends ViewBase implements View {
 	 */
 	public Workspace() {
 		super(true);
+		build();
+	}
+	
+	private void build() {
 		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
@@ -160,8 +166,22 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
+		heightProperty().addListener(_resizedHandler);
+		widthProperty().addListener(_resizedHandler);
 	}
 	
+	
+	private InvalidationListener _resizedHandler = new InvalidationListener() {
+		
+		@Override
+		public void invalidated(Observable observable) {
+			if (_maximizedView != null) {
+				Bounds b = _pane.getLayoutBounds();
+				_maximizedView.setPrefSize(b.getWidth(), b.getHeight());
+			}
+			
+		}
+	};
 	
 	@Override
 	public void setTitle(String title) {
@@ -192,6 +212,7 @@ public class Workspace extends ViewBase implements View {
 					view.setPrefSize(_viewPos.width, _viewPos.height);
 					
 					view.setMaximized(false);
+					_maximizedView = null;
 					
 				} else {
 					_viewPos.x = view.getTranslateX();
@@ -207,6 +228,7 @@ public class Workspace extends ViewBase implements View {
 					view.toFront();
 					
 					view.setMaximized(true);
+					_maximizedView = view;
 				}
 					
 			}
