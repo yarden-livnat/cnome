@@ -124,6 +124,10 @@ public class Field {
 		return _name;
 	}
 	
+	public boolean similar(Field field) {
+		return getName().equals(field.getName()) && getType() == field.getType();
+	}
+	
 	// Save this field
 	public void save(IMemento memento) {
 	

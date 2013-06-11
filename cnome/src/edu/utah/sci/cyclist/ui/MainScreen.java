@@ -104,8 +104,8 @@ public class MainScreen extends BorderPane {
 	}
 	
 	private void init(Stage stage){
-		prefHeight(200);
-		prefWidth(200);
+		prefHeight(600);
+		prefWidth(400);
 		// create the screen
 		
 		// -- menubar

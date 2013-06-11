@@ -46,27 +46,6 @@ public class Schema {
 		return _table;
 	}
 	
-	// Save the schema
-	public void save(IMemento memento) {
-
-		// Create the child memento
-		for(Field field: _fields){
-			field.save(memento.createChild("field"));
-		}
-	}
-
-	// Restore the schema
-	public void restore(IMemento memento) {
-
-		// Restore each field
-		IMemento[] list = memento.getChildren("field");
-		for(IMemento fieldMemento: list){
-			Field field = new Field();
-			field.setTable(_table);
-			field.restore(fieldMemento);
-			addField(field);
-		}
-	}
 	
 	public int size() {
 		return _fields.size();
@@ -93,6 +72,14 @@ public class Schema {
 		_fields.addAll(list);
 	}
 
+	public boolean contain(Field field) {
+		for (Field f : _fields) {
+			if (f.similar(field))
+				return true;
+		}
+		return false;
+	}
+	
 	public void update() {
 		for (Field field : _fields) {
 			updateField(field);
@@ -116,5 +103,26 @@ public class Schema {
 		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
 	}
 	
-	
+
+	// Save the schema
+	public void save(IMemento memento) {
+
+		// Create the child memento
+		for(Field field: _fields){
+			field.save(memento.createChild("field"));
+		}
+	}
+
+	// Restore the schema
+	public void restore(IMemento memento) {
+
+		// Restore each field
+		IMemento[] list = memento.getChildren("field");
+		for(IMemento fieldMemento: list){
+			Field field = new Field();
+			field.setTable(_table);
+			field.restore(fieldMemento);
+			addField(field);
+		}
+	}
 }
