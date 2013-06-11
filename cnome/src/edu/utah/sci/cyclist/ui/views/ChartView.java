@@ -45,7 +45,6 @@ import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.DataType.Type;
 import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -76,7 +75,7 @@ public class ChartView extends ViewBase {
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
 	private IntegerField _limitEntry;
-	private int _limit = 1000;
+//	private int _limit = 1000;
 	
 	private List<Closure.R1<Object, Object>> _convert;
 	
@@ -110,6 +109,7 @@ public class ChartView extends ViewBase {
 	private void invalidateChart() {
 		_pane.setCenter(null);
 		_chart = null;
+		setCurrentTask(null);
 	}
 	
 	private void fetchData() {
@@ -124,7 +124,7 @@ public class ChartView extends ViewBase {
 							getCurrentTable().queryBuilder()
 							.field(_xArea.getFields().get(0))
 							.fields(_yArea.getFields())
-							.limit(_limit);
+							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
 				Task<ObservableList<Row>> task = getCurrentTable().getRows(builder.toString());
 				setCurrentTask(task);
@@ -197,6 +197,8 @@ public class ChartView extends ViewBase {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void assignData(ObservableList<Row> list) {
+		System.out.println("fetched "+list.size()+" data points");
+		long t0 = System.currentTimeMillis();
 		((XYChart)_chart).setData(FXCollections.observableArrayList());
 		
 		determineConvertions();
@@ -204,6 +206,8 @@ public class ChartView extends ViewBase {
 		Closure.R1<Object, Object> xFunc = _convert.get(0);
 		
 		int cols = _yArea.getFields().size();
+		List<XYChart.Series<Object, Object>> s = new ArrayList<>(); 
+		
 		for (int col=0; col<cols; col++) {
 			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
 			Closure.R1<Object, Object> yFunc = _convert.get(col+1);
@@ -214,8 +218,12 @@ public class ChartView extends ViewBase {
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
 			series.setName(_yArea.getFields().get(col).getName());
 			series.dataProperty().set(data);
-			_chart.getData().add(series);
+			s.add(series);			
 		}
+		long t1 = System.currentTimeMillis();
+		_chart.getData().addAll(s);
+		long t2 = System.currentTimeMillis();
+		System.out.println("conversion: "+(t1-t0)/1000.0+"  assignment: "+(t2-t1)/1000.0);
 	}
 	
 	private Field getXField() {
@@ -298,8 +306,11 @@ public class ChartView extends ViewBase {
 		if (_chart != null) {
 			_chart.setAnimated(false);
 			_chart.setCache(true);
+			_pane.setCenter(_chart);
+		} else {
+			Text text = new Text("Unsupported fields combination");
+			_pane.setCenter(text);
 		}
-		_pane.setCenter(_chart);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -356,8 +367,8 @@ public class ChartView extends ViewBase {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable,
 					Number oldValue, Number newValue) {
-				_limit = newValue.intValue();
-				System.out.println("limit changed: "+_limit);
+//				_limit = newValue.intValue();
+				System.out.println("limit changed: "+ newValue.intValue());
 				fetchData();	
 			}
 		});
@@ -409,12 +420,12 @@ public class ChartView extends ViewBase {
 	
 		@Override
 		public void invalidated(Observable observable) {			
-			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
-				invalidateChart();
-			
-			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
-				invalidateChart();	
-				
+//			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
+//				invalidateChart();
+//			
+//			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
+//				invalidateChart();	
+			invalidateChart();		
 			if (getCurrentTable() == null) {
 				DropArea area = (DropArea) observable;
 				if (area.getFields().size() == 1) {

@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
@@ -12,8 +14,16 @@ public class IntegerField extends TextField {
 	private IntegerProperty _value;
 	private int _min;
 	private int _max;
+	private boolean _valid = true;
 	
 	public int getValue() { 
+		if (!_valid) {
+			_valid = true;
+			int i = -1;
+			if (!"".equals(getText())) 
+				i = Integer.parseInt(getText());
+			_value.set(i);
+		}
 		return _value.getValue(); 
 	}
 	
@@ -60,6 +70,14 @@ public class IntegerField extends TextField {
 				if (!"".equals(getText())) 
 					i = Integer.parseInt(getText());
 				_value.set(i);
+			}
+		});
+		
+		textProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				_valid = false;
 			}
 		});
 		

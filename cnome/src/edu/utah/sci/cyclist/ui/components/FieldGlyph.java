@@ -20,7 +20,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.StackPaneBuilder;
-import edu.utah.sci.cyclist.model.DataType.Interpretation;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
@@ -86,24 +85,21 @@ public class FieldGlyph extends HBox {
 					_label = LabelBuilder.create()
 						.styleClass("text")
 						.text(getTitle())
-						.build()
+						.build(),
+					StackPaneBuilder.create()
+					.children(
+							_button = StackPaneBuilder.create()
+								.styleClass("arrow")
+								.maxHeight(8)
+								.maxWidth(6)
+								.build()
+						)
+					.alignment(Pos.CENTER)
+					.build()
 				)
 			.applyTo(this);
-		
-		if (_field.getDataType().getInterpretation() == Interpretation.CONTINUOUS) {
-			getChildren().add(
-				StackPaneBuilder.create()
-				.children(
-						_button = StackPaneBuilder.create()
-							.styleClass("arrow")
-							.maxHeight(8)
-							.maxWidth(6)
-							.build()
-					)
-				.alignment(Pos.CENTER)
-				.build());
-			createMenu();
-		}
+
+		createMenu();
 
 		validProperty().addListener(new InvalidationListener() {
 			
@@ -128,22 +124,22 @@ public class FieldGlyph extends HBox {
 	private void createMenu() {
 		
 		final ContextMenu contextMenu = new ContextMenu();
-		
-//		contextMenu.setOnShowing(new EventHandler<WindowEvent>() {
-//		    public void handle(WindowEvent e) {
-//		        System.out.println("showing");
-//		    }
-//		});
-//		contextMenu.setOnShown(new EventHandler<WindowEvent>() {
-//		    public void handle(WindowEvent e) {
-//		        System.out.println("shown");
-//		    }
-//		});
 
+		MenuItem item = new MenuItem("Dimension");
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				_field.setRole(Role.DIMENSION);
+				_label.setText(getTitle());
+				fireActionEvent();
+			}
+		});
+		contextMenu.getItems().add(item);
+		
 		for (final SQL.Function func : SQL.FUNCTIONS) {
-			MenuItem item = new MenuItem(func.getName());
+			item = new MenuItem(func.getName());
 			item.setOnAction(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
+					_field.setRole(Role.MEASURE);
 					_field.set(FieldProperties.AGGREGATION_FUNC, func.getName());
 					_label.setText(getTitle());
 					fireActionEvent();

@@ -37,29 +37,39 @@ public class TaskControl extends HBox {
 		}
 		
 		_task = task;
-		_indicator.visibleProperty().bind(_task.runningProperty());
 		_imageView.setVisible(false);
-		_task.setOnFailed(new EventHandler<WorkerStateEvent>() {
+		
+		if (_task == null) {
+			_indicator.visibleProperty().set(false);
+			_msg.textProperty().set("");
+		} else {
+			_indicator.visibleProperty().bind(_task.runningProperty());		
+			_task.setOnFailed(new EventHandler<WorkerStateEvent>() {
+				
+				@Override
+				public void handle(WorkerStateEvent event) {
+					_imageView.setVisible(true);
+				}
+			});
 			
-			@Override
-			public void handle(WorkerStateEvent event) {
-				_imageView.setVisible(true);
-			}
-		});
+			
+			_indicator.setOnMouseClicked(new EventHandler<Event>() {
+	
+				@Override
+				public void handle(Event event) {
+					System.out.println("Canceling task: "+_task.cancel());				
+				}
+			});
 		
 		
-		_indicator.setOnMouseClicked(new EventHandler<Event>() {
-
-			@Override
-			public void handle(Event event) {
-				System.out.println("Canceling task: "+_task.cancel());				
-			}
-		});
+//			_progress.textProperty().bind(_task.progressProperty().asString());
+			_msg.textProperty().bind(_task.messageProperty());
+		}
 		
-		
-//		_progress.textProperty().bind(_task.progressProperty().asString());
-		_msg.textProperty().bind(_task.messageProperty());
-		
+	}
+	
+	public void clear() {
+		_imageView.setVisible(false);
 	}
 	
 	private void build() {
