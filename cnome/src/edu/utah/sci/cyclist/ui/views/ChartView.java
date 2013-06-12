@@ -195,6 +195,21 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
+//	private void convertData(ObservableList<Row> list) {
+//		Object[][] data;
+//		
+//		if (list == null || list.size() == 0) {
+//			// ignore
+//		} else {
+//			int n = list.size();
+//			int cols = list.get(0).value.length;
+//			data =  new Object[n][cols];
+//			
+//			convertDataCol(list, 0, _xAxisType, _xArea.getFields().get(0).getType());
+//			
+//		}
+//	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void assignData(ObservableList<Row> list) {
 		System.out.println("fetched "+list.size()+" data points");
@@ -216,7 +231,7 @@ public class ChartView extends ViewBase {
 			}
 			
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
-			series.setName(_yArea.getFields().get(col).getName());
+			series.setName(_yArea.getFieldTitle(col));
 			series.dataProperty().set(data);
 			s.add(series);			
 		}
@@ -270,13 +285,13 @@ public class ChartView extends ViewBase {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
-		Axis xAxis = createAxis(getXField());
+		Axis xAxis = createAxis(getXField(), _xArea.getFieldTitle(0));
 		_xAxisType = xAxis instanceof CategoryAxis ? Role.DIMENSION : Role.MEASURE;
 		
-		Axis yAxis = createAxis(getYField());
+		Axis yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "");
 		_yAxisType = yAxis instanceof CategoryAxis ? Role.DIMENSION : Role.MEASURE;
 
-	
+
 		determineViewType(getXField().getClassification(), getYField().getClassification()); 
 		switch (_viewType) {
 		case CROSS_TAB:
@@ -314,8 +329,9 @@ public class ChartView extends ViewBase {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Axis createAxis(Field field) {
+	private Axis createAxis(Field field, String title) {
 		Axis axis =  null;
+		System.out.println("field clasification: "+field.getClassification());
 		switch (field.getClassification()) {
 
 		case C:
@@ -337,16 +353,16 @@ public class ChartView extends ViewBase {
 			break;
 		case Qd:
 			NumberAxis t = new NumberAxis();
-//			t.forceZeroInRangeProperty().set(false);
+			t.forceZeroInRangeProperty().set(false);
 			axis = t;
 			break;
-		default:
+		case Qi:
 			NumberAxis a = new NumberAxis();
-//			a.forceZeroInRangeProperty().set(false);
+			a.forceZeroInRangeProperty().set(false);
 			axis = a;
 		}
 		
-		axis.setLabel(field.getName());
+		axis.setLabel(title);
 		
 		return axis;
 	}

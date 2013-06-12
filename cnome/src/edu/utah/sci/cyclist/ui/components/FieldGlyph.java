@@ -62,7 +62,7 @@ public class FieldGlyph extends HBox {
 		return _validProperty.get();
 	}
 	
-	private String getTitle() {
+	public String getTitle() {
 		String title = null;
 		if (_field.getRole() == Role.DIMENSION) {
 			title = _field.getName();

@@ -73,6 +73,11 @@ public class DropArea extends HBox implements Observable {
 		return true;
 	}
 	
+	public String getFieldTitle(int index) {
+		FieldGlyph glyph = (FieldGlyph) getChildren().get(index);
+		return glyph.getTitle();
+	}
+	
 	private void build() {		
 		HBoxBuilder.create()
 			.spacing(0)

@@ -111,7 +111,7 @@ public class MainScreen extends BorderPane {
 		// -- menubar
 		_menubar = createMenuBar(stage);
 			
-		double[] div = {0.1, 0.3, 0.5};
+		double[] div = {0.3, 0.6, 0.9};
 		// -- tables and schema
 		_toolsArea = SplitPaneBuilder.create()
 				.prefWidth(150)

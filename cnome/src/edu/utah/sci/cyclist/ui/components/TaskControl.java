@@ -40,8 +40,10 @@ public class TaskControl extends HBox {
 		_imageView.setVisible(false);
 		
 		if (_task == null) {
-			_indicator.visibleProperty().set(false);
-			_msg.textProperty().set("");
+			_indicator.visibleProperty().unbind();
+			_indicator.setVisible(false);
+			_msg.textProperty().unbind();
+			_msg.setText("");
 		} else {
 			_indicator.visibleProperty().bind(_task.runningProperty());		
 			_task.setOnFailed(new EventHandler<WorkerStateEvent>() {

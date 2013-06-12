@@ -102,8 +102,9 @@ public class SimpleTableView extends ViewBase {
 	
 	
 	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
+		
 //		return TableColumnBuilder.create(Table.Row.class, Object.class) // Java 8
-		return TableColumnBuilder.<Table.Row, Object>create()
+		return TableColumnBuilder.<Table.Row, Object>create() // Java 7
 
 				.text(field.getName())
 				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
@@ -121,14 +122,14 @@ public class SimpleTableView extends ViewBase {
 					}
 				
 				})
-//					new PropertyValueFactory<Table.Row, T>(field.getName()))
-//				.cellFactory(new Callback<TableColumn<Row,T>, TableCell<Row,T>>() {
-//
-//					@Override
-//					public TableCell<Row, T> call(TableColumn<Row, T> col) {
-//						return new GenericCell<T>(field);
-//					}
-//				})
+////					new PropertyValueFactory<Table.Row, T>(field.getName()))
+////				.cellFactory(new Callback<TableColumn<Row,T>, TableCell<Row,T>>() {
+////
+////					@Override
+////					public TableCell<Row, T> call(TableColumn<Row, T> col) {
+////						return new GenericCell<T>(field);
+////					}
+////				})
 				.build();
 	}
 	

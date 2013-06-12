@@ -38,7 +38,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class Cyclist extends Application {
-	public static final String TITLE = "Cyclist";
+	public static final String TITLE = "Climate";
     static Logger log = Logger.getLogger(Cyclist.class);
 
     /**

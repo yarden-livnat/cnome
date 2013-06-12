@@ -122,7 +122,7 @@ public class DatasourceWizard extends VBox {
 				.spacing(5)
 				.alignment(Pos.CENTER)
 				.children(
-						TextBuilder.create().text("Name:").build(),
+						TextBuilder.create().text("Name:").build(), 
 						_nameField = TextFieldBuilder.create()
 						.prefWidth(150)
 						.text(sourceName)
