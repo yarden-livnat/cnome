@@ -133,15 +133,16 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				final DatatableWizard wizard = new DatatableWizard();
 				wizard.setItems(_model.getSources());
+				wizard.setSelectedSource(_model.getSelectedDatasource());
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
 						_model.getTables().add(newVal);
+						_model.setSelectedDatasource(wizard.getSelectedSource());
 					}
-				});	
-				
+				});		
 			}
 		});
 		

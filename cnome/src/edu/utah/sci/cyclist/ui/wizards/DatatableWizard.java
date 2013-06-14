@@ -26,6 +26,7 @@ package edu.utah.sci.cyclist.ui.wizards;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -35,7 +36,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -44,16 +44,12 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ListViewBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
-import javafx.scene.layout.TilePaneBuilder;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -96,7 +92,6 @@ public class DatatableWizard extends TilePane {
 	
 	// * * * Set the existing data sources in the combo box * * * //
 	public void setItems(final ObservableList<CyclistDatasource> sources) {
-		System.out.println("Set sources");
 		_sourcesView.setItems(sources);
 		_sourcesView.getSelectionModel().selectFirst();
 	}
@@ -124,6 +119,8 @@ public class DatatableWizard extends TilePane {
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, tableProperty) );	
+	
+		System.out.println("changed" + _sourcesView.getSelectionModel().selectedItemProperty()) ;
 	}
 	
 	// * * * Create scene creates the GUI * * * //
@@ -155,7 +152,7 @@ public class DatatableWizard extends TilePane {
 								.alignment(Pos.CENTER_LEFT)
 								.children(
 										TextBuilder.create()
-										.text("DataType sources")
+										.text("Data Sources")
 										.build(),
 										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
 //										_sourcesView = ListViewBuilder.<CyclistDatasource>create()
@@ -210,7 +207,11 @@ public class DatatableWizard extends TilePane {
 				new ChangeListener<CyclistDatasource>() {
 					public void changed(ObservableValue<? extends CyclistDatasource> ov, 
 							CyclistDatasource old_val, CyclistDatasource new_val) {
+						
 						_current = _sourcesView.getSelectionModel().getSelectedItem();
+						_tablesView.getItems().clear();
+						_statusDisplay.setImage(null);
+						
 					}
 				});
 		
@@ -307,6 +308,15 @@ public class DatatableWizard extends TilePane {
 		scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
 		_selector.disableProperty().bind(_tablesView.getSelectionModel().selectedItemProperty().isNull());
 		
+	/*if(_current != null)
+			_sourcesView.getSelectionModel().select(_current);
+		else if(_sourcesView.getItems().size() == 1)
+			_sourcesView.getSelectionModel().select(0);
+		*/	
+		_sourcesView.getSelectionModel().selectFirst();
+		//_sourcesView.getSelectionModel().clearAndSelect(0);
+	
+		
 		// Return the scene
 		return scene;
 	}
@@ -322,12 +332,15 @@ public class DatatableWizard extends TilePane {
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
 				if (!_sourcesView.getItems().contains(newVal))
 					_sourcesView.getItems().add(newVal);
+				_sourcesView.getSelectionModel().select(newVal);
 			}
 		});
 	}
 	
-
 	private void selectConnection(CyclistDatasource ds) {
+		
+		_tablesView.getItems().clear();
+		
 		try (Connection conn = ds.getConnection()) {
 			_statusDisplay.setImage(Resources.getIcon("ok"));
 			DatabaseMetaData md = conn.getMetaData();
@@ -352,5 +365,16 @@ public class DatatableWizard extends TilePane {
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
 		table.extractSchema();
 	}
+
+	public CyclistDatasource getSelectedSource() {
+		return _current;
+	}
+
+	public void setSelectedSource(CyclistDatasource source) {
+		_current = source;	
+		_sourcesView.getSelectionModel().select(_current);
+	}
+	
+	
 	
 }
