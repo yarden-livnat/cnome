@@ -1,0 +1,80 @@
+/*
+ * --- New Defaults ---
+ */
+
+.list-view{
+ 	-fx-background-color: gainsboro;
+ }
+ 
+ .list-view:focused{
+ 	-fx-border-color: lightgray,-fx-box-border,-fx-control-inner-background;
+ }
+ 
+ .list-view:hover{
+	-fx-border-color: dimgray;
+ }
+ 
+ .list-cell:selected{
+ 	-fx-background-color: gainsboro;
+	-fx-border-color: silver;
+	-fx-text-fill: black;
+}
+
+.list-cell:hover{
+	-fx-background-color: aliceblue;		
+}
+ 
+.text-field:focused{
+	-fx-background-color: gray,-fx-box-border,-fx-control-inner-background;	
+	-fx-border-color: gray;
+}
+
+.button {
+	-fx-background-color:  #c3c4c4,
+        linear-gradient(#d6d6d6 50%, white 100%),
+        radial-gradient(center 50% -40%, radius 200%, #e6e6e6 45%, rgba(230,230,230,0) 50%);    
+    -fx-text-fill: black;   
+}
+
+.button:hover {
+    -fx-effect: dropshadow( one-pass-box , rgba(0,0,0,0.6) , 2, 0.0 , 0 , 1 );
+}
+
+.button:focused{
+	-fx-text-fill: black;
+    -fx-effect:dropshadow( one-pass-box , rgba(0,0,0,0.6) , 2, 0.0 , 0 , 1 );
+}
+
+.combo-box{
+	-fx-border-color: transparent ;
+	-fx-background-color: transparent ;
+}
+
+.combo-box .text-input{
+	-fx-highlight-fill: gainsboro ;
+	-fx-highlight-text-fill: black;
+	-fx-background-color: whitesmoke;
+	-fx-border-color: silver;
+	-fx-border-radius: 3;
+}
+
+.combo-box .list-cell{
+	-fx-border-color: silver;
+	-fx-border-radius: 3;
+}
+
+.menu:hover{
+	-fx-background-color: dimgray ;
+}
+
+.menu:focused{
+	-fx-background-color: dimgray ;
+}
+
+.menu{
+	-fx-background-color: transparent ;
+}
+.menu-item:hover{
+	-fx-background-color: silver;
+}
+

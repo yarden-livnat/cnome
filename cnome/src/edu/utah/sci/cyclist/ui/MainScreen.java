@@ -26,7 +26,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -35,11 +37,11 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
@@ -49,16 +51,16 @@ import edu.utah.sci.cyclist.ui.panels.ToolsPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.WorkspaceWizard;
 
-public class MainScreen extends BorderPane {
+public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
 	
 	private MenuBar _menubar;
 	private SplitPane _toolsArea;
-//	private HBox _content;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _dimensionsPanel;
 	private SchemaPanel _measuresPanel;
 	private ToolsPanel _toolsPanel;
+	private StackPane _workspacePane;
 		
 	/**
 	 * Constructor
@@ -67,7 +69,7 @@ public class MainScreen extends BorderPane {
 		super();
 		setId(ID);
 		
-		init(stage);
+		build(stage);
 	}
 	
 	public Window getWindow() {
@@ -82,9 +84,7 @@ public class MainScreen extends BorderPane {
 	
 	
 	public void setWorkspace(Workspace workspace) {
-//		HBox.setHgrow(workspace, Priority.ALWAYS);
-//		_content.getChildren().add(workspace);
-		setCenter(workspace);
+		_workspacePane.getChildren().add(workspace);
 	}
 	
 	public TablesPanel getDatasourcesPanel() {
@@ -103,43 +103,44 @@ public class MainScreen extends BorderPane {
 		return _toolsPanel;
 	}
 	
-	private void init(Stage stage){
-		prefHeight(600);
-		prefWidth(400);
-		// create the screen
-		
-		// -- menubar
-		_menubar = createMenuBar(stage);
-			
+	private void build(Stage stage){
 		double[] div = {0.3, 0.6, 0.9};
-		// -- tables and schema
-		_toolsArea = SplitPaneBuilder.create()
-				.prefWidth(150)
-				.orientation(Orientation.VERTICAL)
-				.items(
-						_datasourcesPanel = new TablesPanel(),	
-						_dimensionsPanel = new SchemaPanel("Category"),
-						_measuresPanel = new SchemaPanel("Numeric"),
-						_toolsPanel = new ToolsPanel()
-					)
-				.dividerPositions(div)
-				.build();
-		VBox.setVgrow(_toolsArea, Priority.SOMETIMES);
 		
-		// -- workspace
-//		_content = HBoxBuilder.create()
-//						.children(
-//								_toolsArea
-//								// workspace
-//								)
-//						.build();
-//		
-//		// -- setup
-//		VBox.setVgrow(_content, Priority.ALWAYS);
-//		getChildren().addAll(_menubar, _content);
-		setTop(_menubar);
-		setLeft(_toolsArea);
-//		setCenter(value)
+		double [] mainDividers = {150/600.0};
+		
+		Node main;
+		VBoxBuilder.create()
+			.prefWidth(600)
+			.prefHeight(400)
+			.padding(new Insets(0))
+			.spacing(0)
+			.children(
+				_menubar = createMenuBar(stage),
+				main = SplitPaneBuilder.create()
+					.id("hiddenSplitter")
+					.orientation(Orientation.HORIZONTAL)
+					.dividerPositions(mainDividers)
+					.items(
+							_toolsArea = SplitPaneBuilder.create()
+								.id("hiddenSplitter")
+								.prefWidth(150)
+								.orientation(Orientation.VERTICAL)
+								.items(
+										_datasourcesPanel = new TablesPanel(),	
+										_dimensionsPanel = new SchemaPanel("Category"),
+										_measuresPanel = new SchemaPanel("Numeric"),
+										_toolsPanel = new ToolsPanel()
+									)
+								.dividerPositions(div)
+								.build(),
+							_workspacePane = StackPaneBuilder.create()
+								.build()
+						)
+					.build()
+				)
+			.applyTo(this);
+			
+		VBox.setVgrow(main, Priority.ALWAYS);
 	}
 	
 	/*

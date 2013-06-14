@@ -1,181 +1,30 @@
 
 .root {
-	-fx-background-color: #f0f0f0;
+	-fx-background-color: #ffffff;
 	-fx-font-size: 11;
 	-fx-font-smoothing-type: lcd;
 }
-
-
-/** not used: part of a dnd hack */
-.glass {
-	-fx-background-color: rgb(50, 50, 50, 0.5);
-}
-
-/*
- * --- New Defaults ---
- */
-
-.list-view{
- 	-fx-background-color: gainsboro;
- }
- 
- .list-view:focused{
- 	-fx-border-color: lightgray,-fx-box-border,-fx-control-inner-background;
- }
- 
- .list-view:hover{
-	-fx-border-color: dimgray;
- }
- 
- .list-cell:selected{
- 	-fx-background-color: gainsboro;
-	-fx-border-color: silver;
-	-fx-text-fill: black;
-}
-
-.list-cell:hover{
-	-fx-background-color: aliceblue;		
-}
- 
-.text-field:focused{
-	-fx-background-color: gray,-fx-box-border,-fx-control-inner-background;	
-	-fx-border-color: gray;
-}
-/* 	-fx-background-color: gray,-fx-box-border,-fx-control-inner-background;
-}*/
-
-.button {
-	-fx-background-color: 
-        #c3c4c4,
-        linear-gradient(#d6d6d6 50%, white 100%),
-        radial-gradient(center 50% -40%, radius 200%, #e6e6e6 45%, rgba(230,230,230,0) 50%);    
-    -fx-text-fill: black;   
-}
-
-.button:hover {
-    -fx-effect: dropshadow( one-pass-box , rgba(0,0,0,0.6) , 2, 0.0 , 0 , 1 );
-}
-
-.button:focused{
-	-fx-text-fill: black;
-    -fx-effect:dropshadow( one-pass-box , rgba(0,0,0,0.6) , 2, 0.0 , 0 , 1 );
-}
-
-.combo-box{
-	-fx-border-color: transparent ;
-	-fx-background-color: transparent ;
-}
-
-.combo-box .text-input{
-	-fx-highlight-fill: gainsboro ;
-	-fx-highlight-text-fill: black;
-	-fx-background-color: whitesmoke;
-	-fx-border-color: silver;
-	-fx-border-radius: 3;
-}
-
-.combo-box .list-cell{
-	-fx-border-color: silver;
-	-fx-border-radius: 3;
-}
-
-.menu:hover{
-	-fx-background-color: dimgray ;
-}
-
-.menu:focused{
-	-fx-background-color: dimgray ;
-}
-
-.menu{
-	-fx-background-color: transparent ;
-}
-.menu-item:hover{
-	-fx-background-color: silver;
-}
-
-
-/*
- * --- Workspace
- */
-.workspace-pane {
-	/*-fx-background-color: #f04590;*/
-}
-
-.datasources-list {
-	-fx-background-color:  #ffff00;
-}
-
-/*
- *  Panel
- */
-.cnome-panel {
-	/*-fx-background-color:  #f000ff;*/
-	-fx-fill-width: true;
-}
-
-.cnome-panel .header {
-	-fx-background-color:  #e0e0e0;
-	/*-fx-border-color: #000000;*/
-	-fx-font-weight: bold;
-	-fx-font-size:11;
-	-fx-padding: 2;
-}
-
-.cnome-panel .pane {
-	-fx-background-color:  #f0f0f0;
-	-fx-fit-to-height: true;
-}
-
-.cnome-panel .panel-vbox {
-	/*-fx-background-color:  #ff0000;*/
-	-fx-spacing: 2;
-	-fx-fill-width: true;
-	-fx-border-width: 0;
-	-fx-background-insets: 0;
-}
-
-/* 
- * View
- */
-.view {
-	-fx-padding: 4;
-	-fx-spacing: 5;
-	-fx-background-color: #ffffff;
-	-fx-background-radius: 5;
-	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );
-	-fx-border-color: #d0d0d0;
-}
-
-.view .header {
-	-fx-background-color: #f0f0f0;
-	-fx-font-weight: bold;
-
-}
-
-.view .data-bar {
-	-fx-background-color: #e0e0e0;
-	/*-fx-border-color: #d0d0d0;*/
-}
-
-
-.view .chart-view {
-	-fx-background-color: #ffffff;
-}
-
-.drop-area {
-	-fx-background-color: #f0f0f0;
-	-fx-spacing: 2;
-	-fx-padding: 1;
-	/*-fx-pref-height: 27;*/
-	-fx-min-height: 20;
-}
-
 
 /*
  * --- Custom Styles ---
  */
  
+/*
+ * HiddenSpliter
+ */
+ 
+ #hiddenSplitter {
+	-fx-background-color: null;
+    -fx-padding: 2px;
+}
+
+#hiddenSplitter *.split-pane-divider,
+#hiddenSplitter *.vertical-grabber, 
+#hiddenSplitter *.horizontal-grabber {
+    -fx-background-color: null;
+    -fx-border-color: null;
+    -fx-padding: 3px;
+}
  
 /* 
  * Flat Button
