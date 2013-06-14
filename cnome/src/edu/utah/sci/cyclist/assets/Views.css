@@ -24,11 +24,14 @@
 	-fx-font-weight: bold;
 	-fx-font-size:11;
 	-fx-padding: 2;
+	-fx-border-radius: 10 3 0 0;
 }
 
 .cnome-panel .pane {
-	-fx-background-color:  #f0f0f0;
+	-fx-background-color:  #ffffff;
 	-fx-fit-to-height: true;
+	-fx-border-color: #a0a0a0;
+	-fx-border-radius: 0 0 3 3;
 }
 
 .cnome-panel .panel-vbox {
