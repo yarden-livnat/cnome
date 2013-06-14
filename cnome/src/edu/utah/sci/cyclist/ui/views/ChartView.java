@@ -270,9 +270,9 @@ public class ChartView extends ViewBase {
 				seriesData.add(new XYChart.Data<Object, Object>(data[0][row], data[col][row]));
 			}
 			
-			for (int i=0; i<rows; i++) {
-				System.out.println(seriesData.get(i));
-			}
+//			for (int i=0; i<rows; i++) {
+//				System.out.println(seriesData.get(i));
+//			}
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
 			series.setName(_yArea.getFieldTitle(col-1));
 			series.dataProperty().set(seriesData);

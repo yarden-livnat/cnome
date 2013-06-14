@@ -22,6 +22,8 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -29,6 +31,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.control.Control;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -55,7 +58,8 @@ public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
 	
 	private MenuBar _menubar;
-	private SplitPane _toolsArea;
+	private SplitPane _sp;
+	private SplitPane _toolsPane;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _dimensionsPanel;
 	private SchemaPanel _measuresPanel;
@@ -103,12 +107,12 @@ public class MainScreen extends VBox {
 		return _toolsPanel;
 	}
 	
+	private double toolsWidth = 120; 
 	private void build(Stage stage){
 		double[] div = {0.3, 0.6, 0.9};
 		
-		double [] mainDividers = {150/600.0};
+		double [] mainDividers = {toolsWidth/600.0};
 		
-		Node main;
 		VBoxBuilder.create()
 			.prefWidth(600)
 			.prefHeight(400)
@@ -116,14 +120,14 @@ public class MainScreen extends VBox {
 			.spacing(0)
 			.children(
 				_menubar = createMenuBar(stage),
-				main = SplitPaneBuilder.create()
+				_sp = SplitPaneBuilder.create()
 					.id("hiddenSplitter")
 					.orientation(Orientation.HORIZONTAL)
 					.dividerPositions(mainDividers)
 					.items(
-							_toolsArea = SplitPaneBuilder.create()
+							_toolsPane = SplitPaneBuilder.create()
 								.id("hiddenSplitter")
-								.prefWidth(150)
+								.prefWidth(toolsWidth)
 								.orientation(Orientation.VERTICAL)
 								.items(
 										_datasourcesPanel = new TablesPanel(),	
@@ -140,7 +144,9 @@ public class MainScreen extends VBox {
 				)
 			.applyTo(this);
 			
-		VBox.setVgrow(main, Priority.ALWAYS);
+		VBox.setVgrow(_sp, Priority.ALWAYS);
+		
+		SplitPane.setResizableWithParent(_toolsPane, false);
 	}
 	
 	/*
