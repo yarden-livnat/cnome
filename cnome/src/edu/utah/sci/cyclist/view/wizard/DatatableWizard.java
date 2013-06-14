@@ -178,14 +178,7 @@ public class DatatableWizard extends VBox {
 		
 		
 
-		// Keep track of the currently selected data source
-		_sourcesView.getSelectionModel().selectedItemProperty().addListener(
-				new ChangeListener<CyclistDatasource>() {
-					public void changed(ObservableValue<? extends CyclistDatasource> ov, 
-							CyclistDatasource old_val, CyclistDatasource new_val) {
-						_current = _sourcesView.getSelectionModel().getSelectedItem();
-					}
-				});
+		
 		
 	
 		// Disable edit/remove until we have something selected
@@ -227,6 +220,18 @@ public class DatatableWizard extends VBox {
 						).build();
 		_tablesView.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
 			
+		
+		// Keep track of the currently selected data source
+				_sourcesView.getSelectionModel().selectedItemProperty().addListener(
+						new ChangeListener<CyclistDatasource>() {
+							public void changed(ObservableValue<? extends CyclistDatasource> ov, 
+									CyclistDatasource old_val, CyclistDatasource new_val) {
+								_current = _sourcesView.getSelectionModel().getSelectedItem();
+								System.out.println("Changed!");
+								_tablesView.getSelectionModel().getSelectedItems().clear();
+							}
+						});
+		
 		// The ok/cancel buttons
 		Button ok;
 		HBox buttonsBox = HBoxBuilder.create()
