@@ -195,46 +195,130 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
-//	private void convertData(ObservableList<Row> list) {
-//		Object[][] data;
-//		
-//		if (list == null || list.size() == 0) {
-//			// ignore
-//		} else {
-//			int n = list.size();
-//			int cols = list.get(0).value.length;
-//			data =  new Object[n][cols];
-//			
-//			convertDataCol(list, 0, _xAxisType, _xArea.getFields().get(0).getType());
-//			
-//		}
-//	}
+	private Object[][] convertData(ObservableList<Row> list) {
+		Object[][] data; 
+		
+		if (list == null || list.size() == 0) {
+			// ignore
+			data = new Object[0][];
+		} else {
+			int cols = list.get(0).value.length;
+			data = new Object[cols][];
+			data[0] = convertDataCol(list, 0, _xArea.getFields().get(0).getClassification());
+			for (int col=1; col<cols; col++) {
+				data[col] = convertDataCol(list, col, _yArea.getFields().get(col-1).getClassification());
+			}
+		}
+		
+		return data;
+	}
+	
+	private Object[] convertDataCol(ObservableList<Row> list, int col, Classification classification) {
+		NumberFormat format = NumberFormat.getInstance();
+		
+		int n = list.size();
+		Object[] data = new Object[n];
+		
+		if (n > 0) {
+			Object item = list.get(0).value[col];
+			
+			System.out.println(col+": "+classification+"   type:"+item.getClass());
+			
+			switch (classification) {
+			case C:
+				// axis is classification.
+				if (item instanceof String) {
+					// no conversion is required
+					for (int r=0; r<n; r++)
+						data[r] = list.get(r).value[col];
+				} else if (item instanceof Number) {
+					for (int r=0; r<n; r++)
+						data[r] = format.format(list.get(r).value[col]);
+				} else {
+					System.out.println("item type:"+item.getClass());
+				}
+				break;
+			case Cdate:
+				for (int r=0; r<n; r++)
+					data[r] = ((Date)list.get(r).value[col]).getTime();
+				break;
+			case Qi:
+			case Qd:
+				for (int r=0; r<n; r++)
+					data[r] = list.get(r).value[col];
+				break;
+			}
+		}
+		return data;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T> void setMinMax( Axis<?> axis, Object[] data, T Klass) {
+		if (axis instanceof NumberAxis) {
+			NumberAxis numAxis = (NumberAxis) axis;
+			
+			Comparable<T> from = (Comparable<T>) data[0];
+			Comparable<T> to = from;
+			
+			for (Object o : data) {
+				T num = (T) o;
+				if (from.compareTo(num) == 1) from = (Comparable<T>) num;
+				else if (to.compareTo(num) == -1) to = (Comparable<T>) num;
+			}
+			
+			double v0 = ((Number)from).doubleValue();
+			double v1 = ((Number)to).doubleValue();
+			int scale = (int)Math.floor(Math.log10(Math.min(Math.abs(v0), Math.abs(v1))));
+			scale = scale - (scale %3);
+			double factor = Math.pow(10, scale);
+			if (scale > 3) {
+				for (int i=0; i<data.length; i++) 
+					data[i] = (Double)data[i]/factor;
+				v0 /= factor;
+				v1 /= factor;
+				
+				numAxis.setLabel(numAxis.getLabel()+" * 1e"+scale);
+			}
+			
+			
+			numAxis.setLowerBound(v0);
+			numAxis.setUpperBound(v1);
+		}
+	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void assignData(ObservableList<Row> list) {
 		System.out.println("fetched "+list.size()+" data points");
+		
 		long t0 = System.currentTimeMillis();
 		((XYChart)_chart).setData(FXCollections.observableArrayList());
 		
-		determineConvertions();
+		Object[][] data = convertData(list);
 		
-		Closure.R1<Object, Object> xFunc = _convert.get(0);
+		int cols = _yArea.getFields().size()+1;
+		int rows = Math.min(20, list.size());
 		
-		int cols = _yArea.getFields().size();
 		List<XYChart.Series<Object, Object>> s = new ArrayList<>(); 
 		
-		for (int col=0; col<cols; col++) {
-			ObservableList<XYChart.Data<Object, Object>> data = FXCollections.observableArrayList();
-			Closure.R1<Object, Object> yFunc = _convert.get(col+1);
-			for (Row row : list) {
-				data.add(new XYChart.Data<Object, Object>(xFunc.call(row.value[0]), yFunc.call(row.value[col+1])));
+		// compute min/max
+//		setMinMax(_chart.getXAxis(), data[0], data[0].getClass());
+//		setMinMax(_chart.getYAxis(), data[1], data[0].getClass());
+				
+		for (int col=1; col<cols; col++) {
+			ObservableList<XYChart.Data<Object, Object>> seriesData = FXCollections.observableArrayList();
+			for (int row=0; row<rows; row++) {
+				seriesData.add(new XYChart.Data<Object, Object>(data[0][row], data[col][row]));
 			}
 			
+			for (int i=0; i<rows; i++) {
+				System.out.println(seriesData.get(i));
+			}
 			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
-			series.setName(_yArea.getFieldTitle(col));
-			series.dataProperty().set(data);
+			series.setName(_yArea.getFieldTitle(col-1));
+			series.dataProperty().set(seriesData);
 			s.add(series);			
 		}
+		
 		long t1 = System.currentTimeMillis();
 		_chart.getData().addAll(s);
 		long t2 = System.currentTimeMillis();
@@ -302,7 +386,7 @@ public class ChartView extends ViewBase {
 			break;
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
-			lineChart.setCreateSymbols(false);
+//			lineChart.setCreateSymbols(false);
 			_chart = lineChart;
 			break;
 		case SCATTER_PLOT:
@@ -320,7 +404,7 @@ public class ChartView extends ViewBase {
 //		
 		if (_chart != null) {
 			_chart.setAnimated(false);
-			_chart.setCache(true);
+//			_chart.setCache(true);
 			_pane.setCenter(_chart);
 		} else {
 			Text text = new Text("Unsupported fields combination");
