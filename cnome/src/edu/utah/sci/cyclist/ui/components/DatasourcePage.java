@@ -106,12 +106,13 @@ public class DatasourcePage extends GridPane implements DatasourceWizardPage {
 
 		add(TextBuilder.create().text("Host:").build(), 0, 2);
 		add(_host = TextFieldBuilder.create().build(), 1, 2);
-
-		add(TextBuilder.create().text("Port:").build(), 2, 2);
-		add(_port = TextFieldBuilder.create().build(), 3, 2);
-
+		
 		add(TextBuilder.create().text("Schema:").build(), 0, 3);
 		add(_schema = TextFieldBuilder.create().build(), 1, 3);
+	
+		add(TextBuilder.create().text("Port:").focusTraversable(true).build(), 2, 2);
+		add(_port = TextFieldBuilder.create().build(), 3, 2);
+
 	}
 
 	// * * * Initialize the fields, if we have them * * * //

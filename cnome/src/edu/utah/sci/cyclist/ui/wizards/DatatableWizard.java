@@ -1,3 +1,4 @@
+package edu.utah.sci.cyclist.view.wizard;
 /*******************************************************************************
  * Copyright (c) 2013 SCI Institute, University of Utah.
  * All rights reserved.
@@ -214,6 +215,7 @@ public class DatatableWizard extends TilePane {
 						
 					}
 				});
+		
 		
 	
 		// Disable edit/remove until we have something selected

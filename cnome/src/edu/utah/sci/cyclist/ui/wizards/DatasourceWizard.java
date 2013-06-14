@@ -39,11 +39,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ComboBoxBuilder;
+import javafx.scene.control.Control;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.GridPaneBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
@@ -119,15 +122,17 @@ public class DatasourceWizard extends VBox {
 		
 		// The user-specified name of the table
 		HBox nameBox = HBoxBuilder.create()
-				.spacing(5)
-				.alignment(Pos.CENTER)
+				.spacing(25)
+				.padding(new Insets(0, 0, -10, 0))
+				.alignment(Pos.CENTER_LEFT)
 				.children(
 						TextBuilder.create().text("Name:").build(), 
 						_nameField = TextFieldBuilder.create()
-						.prefWidth(150)
+						.prefWidth(125)
 						.text(sourceName)
 						.build())
 						.build();
+						
 			
 		// The selector for type of connection
 		final Pane pane = new Pane();
@@ -167,6 +172,8 @@ public class DatasourceWizard extends VBox {
 						// Test Connection
 						ButtonBuilder.create()
 						.text("Test Connection")
+						.minWidth(115)
+						.prefWidth(115)
 						.onAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent arg0) {
@@ -181,6 +188,8 @@ public class DatasourceWizard extends VBox {
 						// Cancel
 						ButtonBuilder.create()
 						.text("Cancel")
+						.minWidth(60)
+						.prefWidth(60)
 						.onAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent arg0) {
@@ -192,6 +201,8 @@ public class DatasourceWizard extends VBox {
 						// OK
 						ok = ButtonBuilder.create()
 						.text("Ok")
+						.minWidth(40)
+						.prefWidth(40)
 						.onAction(new EventHandler<ActionEvent>() {	
 							@Override
 							public void handle(ActionEvent arg0) {
@@ -216,9 +227,9 @@ public class DatasourceWizard extends VBox {
 		// The vertical layout of the whole wizard
 		VBox header = VBoxBuilder.create()
 				.spacing(10)
-				.padding(new Insets(5))
-				.children(nameBox, 
-						cb,
+				.padding(new Insets(0))
+				.children(cb,
+						nameBox, 
 						pane, 
 						buttonsBox)
 						.build();	
