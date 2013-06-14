@@ -1,3 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2013 SCI Institute, University of Utah.
+ * All rights reserved.
+ *
+ * License for the specific language governing rights and limitations under Permission
+ * is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions: The above copyright notice 
+ * and this permission notice shall be included in all copies  or substantial portions of the Software. 
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ *  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR 
+ *  A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+ *  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+ *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+ *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Contributors:
+ *     Yarden Livnat  
+ *******************************************************************************/
 package edu.utah.sci.cyclist.event.dnd;
 
 import java.util.HashMap;
@@ -7,11 +29,12 @@ import javafx.scene.input.DataFormat;
 
 public class DnD {
 	
-	public static final DataFormat DATA_SOURCE_FORMAT	= new DataFormat("cyclist.dnd.datasource");
+	public static final DataFormat TYPE_FORMAT			= new DataFormat("cyclist.dnd.type");
+	public static final DataFormat TABLE_FORMAT			= new DataFormat("cyclist.dnd.datasource");
 	public static final DataFormat TOOL_FORMAT			= new DataFormat("cyclist.dnd.tool");
 	public static final DataFormat FIELD_FORMAT 		= new DataFormat("cyclist.dnd.field");
-	
-	
+	public static final DataFormat DnD_SOURCE_FORMAT 	= new DataFormat("cyclist.dnd.dnd_source");
+	public static final DataFormat FILTER_FORMAT 		= new DataFormat("cyclist.dnd.filter");
 	
 	private static DnD _instance = new DnD();
 	
@@ -44,7 +67,8 @@ public class DnD {
 		}
 		
 		public <T> T get(DataFormat key, Class<T> type) {
-			return type.cast(_items.get(key).value);
+			Entry<?> entry = _items.get(key);
+			return entry == null ? null : type.cast(entry.value);
 		}
 		
 		public boolean hasContent(DataFormat key) {

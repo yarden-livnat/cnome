@@ -1,3 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2013 SCI Institute, University of Utah.
+ * All rights reserved.
+ *
+ * License for the specific language governing rights and limitations under Permission
+ * is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction, 
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions: The above copyright notice 
+ * and this permission notice shall be included in all copies  or substantial portions of the Software. 
+ *  
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ *  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR 
+ *  A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+ *  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+ *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+ *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Contributors:
+ *     Yarden Livnat  
+ *******************************************************************************/
 package edu.utah.sci.cyclist.controller;
 
 import java.io.File;
@@ -23,10 +45,10 @@ import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
-import edu.utah.sci.cyclist.view.MainScreen;
-import edu.utah.sci.cyclist.view.components.Workspace;
-import edu.utah.sci.cyclist.view.tool.ToolsLibrary;
-import edu.utah.sci.cyclist.view.wizard.DatatableWizard;
+import edu.utah.sci.cyclist.ui.MainScreen;
+import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
+import edu.utah.sci.cyclist.ui.views.Workspace;
+import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
 
 
 public class CyclistController {
@@ -57,7 +79,6 @@ public class CyclistController {
 	 */
 	public void setScreen(final MainScreen screen) {
 		this._screen = screen;
-		screen.setControler(this);
 		addActions();
 			
 		/*
@@ -72,12 +93,12 @@ public class CyclistController {
 		
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
-		sp.setPanel(screen.getSchemaPanel());
+		sp.setPanels(screen.getDimensionPanel(), screen.getMeauresPanel());
 		
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
 		tp.setPanel(screen.getToolsPanel());
-		tp.setTools(Arrays.asList(ToolsLibrary.list));
+		tp.setFactories(Arrays.asList(ToolsLibrary.factories));
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();
@@ -99,30 +120,40 @@ public class CyclistController {
 		selection.addListener(new ChangeListener<String>() {
 
 			@Override
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
-				System.out.println("select:"+newVal);
-				
+			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {			
 			}
 		});
 	}	
 		
 	private void addActions() {
+		
 		_screen.onAddDatasource().set(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent event) {
 				final DatatableWizard wizard = new DatatableWizard();
 				wizard.setItems(_model.getSources());
+				wizard.setSelectedSource(_model.getSelectedDatasource());
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
 						_model.getTables().add(newVal);
+						_model.setSelectedDatasource(wizard.getSelectedSource());
 					}
-				});	
-				
+				});		
 			}
+		});
+		
+		_screen.onSelectWorkspace().set(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				selectWorkspace();
+			}
+			
 		});
 		
 		_screen.onSave().set(new EventHandler<ActionEvent>() {
@@ -181,15 +212,14 @@ public class CyclistController {
 	
 	// Load saved properties
 	private void load() {
-	
-	
+		
 		// Check if the save file exists
 		File saveFile = new File(SAVE_FILE);
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
 			
-			
+	
 			Reader reader;
 			try {
 				reader = new FileReader(saveFile);
@@ -207,7 +237,7 @@ public class CyclistController {
 					
 					// Read in the tables
 					IMemento[] tables = memento.getChildren("Table");
-					System.out.println("tables " + tables.length);
+					//System.out.println("tables " + tables.length);
 					for(IMemento table: tables){
 						Table tbl = new Table();
 						tbl.restore(table, _model.getSources());
