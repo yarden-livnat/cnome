@@ -25,11 +25,11 @@ package edu.utah.sci.cyclist.model;
 import java.util.List;
 import java.util.Vector;
 
-import utils.SQL;
-import utils.SQLUtil;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.model.DataType.Role;
+import edu.utah.sci.cyclist.util.SQL;
+import edu.utah.sci.cyclist.util.SQLUtil;
 
 
 

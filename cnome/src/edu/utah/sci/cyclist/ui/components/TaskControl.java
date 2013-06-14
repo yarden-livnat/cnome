@@ -20,7 +20,6 @@ public class TaskControl extends HBox {
 	private Task<?> _task;
 	private ProgressIndicator _indicator;
 	private ImageView _imageView; 
-//	private Tooltip _progress = new Tooltip();
 	private Tooltip _msg = new Tooltip();
 	
 	public TaskControl() {
@@ -63,8 +62,6 @@ public class TaskControl extends HBox {
 				}
 			});
 		
-		
-//			_progress.textProperty().bind(_task.progressProperty().asString());
 			_msg.textProperty().bind(_task.messageProperty());
 		}
 		
@@ -78,19 +75,17 @@ public class TaskControl extends HBox {
 		HBoxBuilder.create()
 			.children(
 				_indicator = ProgressIndicatorBuilder.create()
-				.progress(-1)
-				.maxWidth(8)
-				.maxHeight(8)
-				.visible(false)
-				.build(),
+					.progress(-1)
+					.maxWidth(20)
+					.maxHeight(20)
+					.visible(false)
+					.build(),
 				_imageView = new ImageView(Resources.getIcon("error"))
 				)
 			.applyTo(this);
 		
 		Tooltip.install(this, _msg);
-//		_indicator.setTooltip(_msg);
 		
 		_imageView.setVisible(false);
-//		Tooltip.install(_imageView, _msg);
 	}
 }

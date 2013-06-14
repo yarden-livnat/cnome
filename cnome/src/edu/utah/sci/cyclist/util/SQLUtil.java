@@ -1,9 +1,10 @@
-package utils;
+package edu.utah.sci.cyclist.util;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.utah.sci.cyclist.model.DataType;
+import edu.utah.sci.cyclist.model.DataType.Type;
 
 
 public class SQLUtil {
@@ -18,7 +19,12 @@ public class SQLUtil {
 	}
 	
 	public static DataType.Type fromSQL(String name) {
-		DataType.Type result = _name2Field.get(name);
+		String s = name;
+		if (s.contains("("))
+			s = s.substring(0, s.indexOf("("));
+		DataType.Type result = _name2Field.get(s);
+		if (result == null || result == Type.NA)
+			System.out.println("**Unknown datatype:"+name);
 		return result != null ? result : DataType.Type.NA;
 	}
 	

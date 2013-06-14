@@ -1,4 +1,4 @@
-package utils;
+package edu.utah.sci.cyclist.util;
 
 import javafx.scene.paint.Color;
 

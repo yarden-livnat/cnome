@@ -37,10 +37,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import utils.QueryBuilder;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.model.DataType.Type;
+import edu.utah.sci.cyclist.util.QueryBuilder;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;

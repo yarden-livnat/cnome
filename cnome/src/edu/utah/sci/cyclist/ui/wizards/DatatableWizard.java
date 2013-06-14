@@ -157,8 +157,8 @@ public class DatatableWizard extends TilePane {
 										TextBuilder.create()
 										.text("DataType sources")
 										.build(),
-//										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
-										_sourcesView = ListViewBuilder.<CyclistDatasource>create()
+										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
+//										_sourcesView = ListViewBuilder.<CyclistDatasource>create()
 										.id("datasources-list")
 										.maxHeight(100)
 										.minHeight(100)
@@ -249,8 +249,8 @@ public class DatatableWizard extends TilePane {
 				.maxHeight(Double.MAX_VALUE)
 				.children(	
 						TextBuilder.create().text("Select Table:").build(),
-//						_tablesView = ListViewBuilder.create(String.class) // Java 8
-						_tablesView = ListViewBuilder.<String>create()
+						_tablesView = ListViewBuilder.create(String.class) // Java 8
+//						_tablesView = ListViewBuilder.<String>create()
 						.maxHeight(Double.MAX_VALUE)
 						.build()						
 						).build();

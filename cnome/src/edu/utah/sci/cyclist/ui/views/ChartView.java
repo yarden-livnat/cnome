@@ -3,7 +3,9 @@ package edu.utah.sci.cyclist.ui.views;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -39,7 +41,6 @@ import javafx.util.converter.TimeStringConverter;
 
 import org.mo.closure.v0.Closure;
 
-import utils.QueryBuilder;
 import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
@@ -50,6 +51,7 @@ import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
 import edu.utah.sci.cyclist.ui.components.IntegerField;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.util.QueryBuilder;
 
 public class ChartView extends ViewBase {
 	public static final String TITLE = "Chart";
@@ -133,67 +135,9 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
-	
-	private Closure.R1<Object, Object> defaultConvert = new Closure.R1<Object, Object>() {
-		@Override
-		public Object call(Object value) {
-			return value;
-		}
-	};
-	
-	private Closure.R1<Object, Object> num2String = new Closure.R1<Object, Object>() {
-		private NumberFormat format = NumberFormat.getInstance();
-		
-		@Override
-		public String call(Object num) {
-			if (num instanceof Number)
-				return format.format((Number)num);
-			else if (num instanceof String)
-				return (String)num;
-			else
-				return "error";
-		}
-	};
-	
-	private Closure.R1<Object, Object> date2int = new Closure.R1<Object, Object>() {		
-		@Override
-		public Object call(Object date) {
-			return ((Date)date).getTime();
-		}
-	};
-	
-	private Closure.R1<Object, Object> determineConversionFunction(Role role, Type type) {
-		if (role == Role.DIMENSION) {
-			switch (type) {
-			case NUMERIC: 
-				return num2String;
-			case DATE:
-			case DATETIME:
-				return date2int;
-			default:
-				return defaultConvert;
-			}
-		} else {
-			switch (type) {
-			case DATE:
-			case DATETIME:
-				return date2int;
-			default:
-				return defaultConvert;
-			}
-		}
-	}
-		
-	private void determineConvertions() {
-		_convert = new ArrayList<>();
-		
-		Field x = _xArea.getFields().get(0);
-		_convert.add(determineConversionFunction(_xAxisType, x.getType()));
-		
-		for (Field y : _yArea.getFields()) {
-			_convert.add(determineConversionFunction(_yAxisType, y.getType()));
-		}
-	}
+	/*
+	 * Convert data to fit the axis
+	 */
 	
 	private Object[][] convertData(ObservableList<Row> list) {
 		Object[][] data; 
@@ -214,7 +158,7 @@ public class ChartView extends ViewBase {
 	}
 	
 	private Object[] convertDataCol(ObservableList<Row> list, int col, Classification classification) {
-		NumberFormat format = NumberFormat.getInstance();
+		NumberFormat numFormater = NumberFormat.getInstance();
 		
 		int n = list.size();
 		Object[] data = new Object[n];
@@ -233,12 +177,13 @@ public class ChartView extends ViewBase {
 						data[r] = list.get(r).value[col];
 				} else if (item instanceof Number) {
 					for (int r=0; r<n; r++)
-						data[r] = format.format(list.get(r).value[col]);
+						data[r] = numFormater.format(list.get(r).value[col]);
 				} else {
 					System.out.println("item type:"+item.getClass());
 				}
 				break;
 			case Cdate:
+				// convert time to long
 				for (int r=0; r<n; r++)
 					data[r] = ((Date)list.get(r).value[col]).getTime();
 				break;
@@ -252,8 +197,10 @@ public class ChartView extends ViewBase {
 		return data;
 	}
 	
+	public final double MIN_BAR_WIDTH = 2;
+	
 	@SuppressWarnings("unchecked")
-	private <T> void setMinMax( Axis<?> axis, Object[] data, T Klass) {
+	private <T> void updateAxis( Axis<?> axis, Object[] data, T Klass) {
 		if (axis instanceof NumberAxis) {
 			NumberAxis numAxis = (NumberAxis) axis;
 			
@@ -283,6 +230,19 @@ public class ChartView extends ViewBase {
 			
 			numAxis.setLowerBound(v0);
 			numAxis.setUpperBound(v1);
+		} else { // CategoryAxis
+//			CategoryAxis ca = (CategoryAxis) axis;
+//			// ensure there is enough space for the bars
+//			Set<Object> names = new HashSet<>();
+//			for (Object obj : data) {
+//				names.add(obj);
+//			}
+//			int n = names.size();
+//			double w = (axis.getWidth() - ca.getCategorySpacing()*(n-1))/n;
+//			if (w < MIN_BAR_WIDTH) {
+//				ca.setCa
+//			}
+			
 		}
 	}
 	
@@ -296,12 +256,12 @@ public class ChartView extends ViewBase {
 		Object[][] data = convertData(list);
 		
 		int cols = _yArea.getFields().size()+1;
-		int rows = Math.min(20, list.size());
+		int rows = list.size();
 		
 		List<XYChart.Series<Object, Object>> s = new ArrayList<>(); 
 		
 		// compute min/max
-//		setMinMax(_chart.getXAxis(), data[0], data[0].getClass());
+//		updateAxis(_chart.getXAxis(), data[0], data[0].getClass());
 //		setMinMax(_chart.getYAxis(), data[1], data[0].getClass());
 				
 		for (int col=1; col<cols; col++) {
@@ -382,7 +342,11 @@ public class ChartView extends ViewBase {
 			_chart = null;
 			break;
 		case BAR:
-			_chart = new BarChart<>(xAxis,  yAxis);
+			BarChart bar = new BarChart<>(xAxis,  yAxis);
+			System.out.println("gaps: "+bar.getBarGap()+"  "+bar.getCategoryGap());
+			bar.setBarGap(1);
+			bar.setCategoryGap(4);
+			_chart = bar;
 			break;
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);

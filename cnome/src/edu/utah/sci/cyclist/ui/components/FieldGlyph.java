@@ -1,6 +1,5 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import utils.SQL;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -23,6 +22,7 @@ import javafx.scene.layout.StackPaneBuilder;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
+import edu.utah.sci.cyclist.util.SQL;
 
 public class FieldGlyph extends HBox {
 
