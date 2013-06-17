@@ -2,10 +2,13 @@ package edu.utah.sci.cyclist.ui.views;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -39,12 +42,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
 
-import org.mo.closure.v0.Closure;
+import org.apache.commons.collections.keyvalue.MultiKey;
 
-import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
-import edu.utah.sci.cyclist.model.DataType.Type;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
@@ -69,17 +70,15 @@ public class ChartView extends ViewBase {
 	private BorderPane _pane;
 	private DropArea _xArea;
 	private DropArea _yArea;
-	
-	private DataType.Role _xAxisType = DataType.Role.MEASURE;
-	private DataType.Role _yAxisType = DataType.Role.MEASURE;
+	private DropArea _lodArea;
+	private DropArea _colorArea;
+	private DropArea _shapeArea;
+	private DropArea _sizeArea;
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
 	
 	private IntegerField _limitEntry;
-//	private int _limit = 1000;
-	
-	private List<Closure.R1<Object, Object>> _convert;
 	
 	public ChartView() {
 		super();
@@ -114,6 +113,17 @@ public class ChartView extends ViewBase {
 		setCurrentTask(null);
 	}
 	
+	private MapSpec _spec;
+	private class FieldInfo {
+		Field field;
+		int index;
+		
+		public FieldInfo(Field field, int index) {
+			this.field = field;
+			this.index = index;
+		}
+	}
+	
 	private void fetchData() {
 		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (!_xArea.isValid() || !_yArea.isValid())
@@ -121,81 +131,131 @@ public class ChartView extends ViewBase {
 			
 			if (_chart == null) 
 				createChart();
+			
 			if (_chart != null) {
+				//
+				List<Field> fields = new ArrayList<>();
+				List<Field> aggregators = new ArrayList<>();
+				List<Field> grouping = new ArrayList<>();
+				
+				for (Field field : _xArea.getFields()) {
+					if (field.getRole() == Role.DIMENSION)
+						fields.add(field);
+					else
+						aggregators.add(field);
+				}
+				
+				for (Field field : _yArea.getFields()) {
+					if (field.getRole() == Role.DIMENSION)
+						fields.add(field);
+					else
+						aggregators.add(field);
+				}
+				
+				for (Field field : _lodArea.getFields()) {
+					grouping.add(field);
+				}
+				
+				// build the query
 				QueryBuilder builder = 
 							getCurrentTable().queryBuilder()
-							.field(_xArea.getFields().get(0))
-							.fields(_yArea.getFields())
+							.fields(fields)
+							.aggregates(aggregators)
+							.grouping(grouping)
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
+				
+				List<Field> order = builder.getOrder();
+				
+				_spec = new MapSpec();
+				for (Field field : _xArea.getFields()) {
+					_spec.xFields.add(new FieldInfo(field, order.indexOf(field)));
+				}
+				for (Field field : _yArea.getFields()) {
+					_spec.yFields.add(new FieldInfo(field, order.indexOf(field)));
+				}
+				
+				for (Field field : _lodArea.getFields()) {
+					_spec.lod.add(new FieldInfo(field, order.indexOf(field)));
+				}
 				Task<ObservableList<Row>> task = getCurrentTable().getRows(builder.toString());
 				setCurrentTask(task);
 				_items.bind(task.valueProperty());
 			}
 		}
 	}
-	
-	/*
-	 * Convert data to fit the axis
-	 */
-	
-	private Object[][] convertData(ObservableList<Row> list) {
-		Object[][] data; 
-		
-		if (list == null || list.size() == 0) {
-			// ignore
-			data = new Object[0][];
-		} else {
-			int cols = list.get(0).value.length;
-			data = new Object[cols][];
-			data[0] = convertDataCol(list, 0, _xArea.getFields().get(0).getClassification());
-			for (int col=1; col<cols; col++) {
-				data[col] = convertDataCol(list, col, _yArea.getFields().get(col-1).getClassification());
-			}
-		}
-		
-		return data;
-	}
-	
-	private Object[] convertDataCol(ObservableList<Row> list, int col, Classification classification) {
-		NumberFormat numFormater = NumberFormat.getInstance();
-		
-		int n = list.size();
-		Object[] data = new Object[n];
-		
-		if (n > 0) {
-			Object item = list.get(0).value[col];
-			
-			System.out.println(col+": "+classification+"   type:"+item.getClass());
-			
-			switch (classification) {
-			case C:
-				// axis is classification.
-				if (item instanceof String) {
-					// no conversion is required
-					for (int r=0; r<n; r++)
-						data[r] = list.get(r).value[col];
-				} else if (item instanceof Number) {
-					for (int r=0; r<n; r++)
-						data[r] = numFormater.format(list.get(r).value[col]);
-				} else {
-					System.out.println("item type:"+item.getClass());
-				}
-				break;
-			case Cdate:
-				// convert time to long
-				for (int r=0; r<n; r++)
-					data[r] = ((Date)list.get(r).value[col]).getTime();
-				break;
-			case Qi:
-			case Qd:
-				for (int r=0; r<n; r++)
-					data[r] = list.get(r).value[col];
-				break;
-			}
-		}
-		return data;
-	}
+
+//	/*
+//	 * Convert data to fit the axis
+//	 */
+//	
+//	private Object[][] convertData(ObservableList<Row> list) {
+//		Object[][] data; 
+//		
+//		if (list == null || list.size() == 0) {
+//			// ignore
+//			data = new Object[0][];
+//		} else {
+//			int cols = list.get(0).value.length;
+//			data = new Object[cols][];
+//			data[0] = convertDataCol(list, 0, _xArea.getFields().get(0).getClassification());
+//			int yCols = _yArea.getFields().size();
+//			for (int col=0; col<yCols; col++) {
+//				data[col+1] = convertDataCol(list, col+1, _yArea.getFields().get(col).getClassification());
+//			}
+//			
+//			int n = list.size();
+//			for (int col=1+yCols; col<cols; col++) {
+//				Object[] colData = new Object[n];
+//				for (int r=0; r<n; r++) {
+//					colData[r] = list.get(r).value[col];
+//				}
+//				data[col] = colData;
+//			}
+//		}
+//		
+//		return data;
+//	}
+//	
+//	private Object[] convertDataCol(ObservableList<Row> list, int col, Classification classification) {
+//		NumberFormat numFormater = NumberFormat.getInstance();
+//		
+//		int n = list.size();
+//		Object[] data = new Object[n];
+//		
+//		if (n > 0) {
+//			Object item = list.get(0).value[col];
+//			
+//			System.out.println(col+": "+classification+"   type:"+item.getClass());
+//			
+//			switch (classification) {
+//			case C:
+//				// axis is classification.
+//				if (item instanceof String) {
+//					// no conversion is required
+//					for (int r=0; r<n; r++)
+//						data[r] = list.get(r).value[col];
+//				} else if (item instanceof Number) {
+//					for (int r=0; r<n; r++)
+//						data[r] = numFormater.format(list.get(r).value[col]);
+//				} else {
+//					System.out.println("item type:"+item.getClass());
+//				}
+//				break;
+//			case Cdate:
+//				// convert time to long
+//				for (int r=0; r<n; r++)
+//					data[r] = ((Date)list.get(r).value[col]).getTime();
+//				break;
+//			case Qi:
+//			case Qd:
+//				for (int r=0; r<n; r++)
+//					data[r] = list.get(r).value[col];
+//				break;
+//			}
+//		}
+//		return data;
+//	}
 	
 	public final double MIN_BAR_WIDTH = 2;
 	
@@ -246,43 +306,172 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void assignData(ObservableList<Row> list) {
-		System.out.println("fetched "+list.size()+" data points");
+	
+	class MapSpec {
+		List<FieldInfo> xFields = new ArrayList<>();
+		List<FieldInfo> yFields = new ArrayList<>();
+		List<FieldInfo> color = new ArrayList<>();
+		List<FieldInfo> lod = new ArrayList<>();
+		int cols;
 		
-		long t0 = System.currentTimeMillis();
-		((XYChart)_chart).setData(FXCollections.observableArrayList());
+		public int numX() { return xFields.size(); }
+		public int numY() { return yFields.size(); }
+		public int cols() { return numX() + numY() + color.size()+lod.size(); }
+	}
+	
+	class SeriesDataPoint {
+		Object x;
+		Object y;
+		Object [] attribues;
+	}
+	
+	class SeriesData {
+		Field x;
+		Field y;
+		List<SeriesDataPoint> points = new ArrayList<>();
+	}
+	
+	private void assignData2(MapSpec spec, ObservableList<Row> list) {
+		// separate to (x,y,attributes) lists
+		List<SeriesData> lists = splitToSeriesData(spec, list);
 		
-		Object[][] data = convertData(list);
-		
-		int cols = _yArea.getFields().size()+1;
-		int rows = list.size();
-		
-		List<XYChart.Series<Object, Object>> s = new ArrayList<>(); 
-		
-		// compute min/max
-//		updateAxis(_chart.getXAxis(), data[0], data[0].getClass());
-//		setMinMax(_chart.getYAxis(), data[1], data[0].getClass());
-				
-		for (int col=1; col<cols; col++) {
-			ObservableList<XYChart.Data<Object, Object>> seriesData = FXCollections.observableArrayList();
-			for (int row=0; row<rows; row++) {
-				seriesData.add(new XYChart.Data<Object, Object>(data[0][row], data[col][row]));
-			}
-			
-//			for (int i=0; i<rows; i++) {
-//				System.out.println(seriesData.get(i));
-//			}
-			XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
-			series.setName(_yArea.getFieldTitle(col-1));
-			series.dataProperty().set(seriesData);
-			s.add(series);			
+		// separate to sublists based on attributes
+		List<Collection<SeriesData>> sublists = new ArrayList<>();
+		for (SeriesData sd : lists) {
+			sublists.add(createSubList(sd));
 		}
 		
-		long t1 = System.currentTimeMillis();
-		_chart.getData().addAll(s);
-		long t2 = System.currentTimeMillis();
-		System.out.println("conversion: "+(t1-t0)/1000.0+"  assignment: "+(t2-t1)/1000.0);
+		// create visual representation
+		List<XYChart.Series<Object, Object>> graphs = new ArrayList<>();
+		for (Collection<SeriesData> collection : sublists) {
+			for (SeriesData sd : collection) {
+				convertData(sd, spec);
+				
+				graphs.add(createChartSeries(sd, spec));
+			}
+		}
+		_chart.getData().addAll(graphs);
+	}
+	
+	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<Row> list) {
+		List<SeriesData> all = new ArrayList<>();
+		
+		int nx = spec.numX();
+		int ny = spec.numY();
+		int cols = spec.cols();
+		
+		boolean hasAttributes = cols > nx+ny;
+		
+		for (FieldInfo xInfo : spec.xFields) {
+			int ix = xInfo.index;
+		
+			for (FieldInfo yInfo : spec.yFields) {
+				int iy = yInfo.index;
+			
+				SeriesData series = new SeriesData();
+				series.x = xInfo.field;
+				series.y = yInfo.field;
+				for (Row row : list) {
+					SeriesDataPoint p = new SeriesDataPoint();
+					p.x = row.value[ix];
+					p.y = row.value[iy];
+					p.attribues = hasAttributes ? Arrays.copyOfRange(row.value, nx+ny, cols) : null;
+					
+					series.points.add(p);
+				}
+				
+				all.add(series);
+			}
+		}
+		return all;
+	}
+	
+	
+	private Collection<SeriesData> createSubList(SeriesData data) {	
+		if (data.points.get(0).attribues == null) {
+			List<SeriesData> result = new ArrayList<>();
+			result.add(data);
+			return result;
+		}
+		
+		Map<MultiKey, SeriesData> map = new HashMap<>();
+		
+		for (SeriesDataPoint point : data.points) {
+			MultiKey key = new MultiKey(point.attribues, false);
+			SeriesData sd = map.get(key);
+			if (sd == null) {
+				sd = new SeriesData();
+				sd.x = data.x;
+				sd.y = data.y;
+				
+				map.put(key, sd);
+			}
+			sd.points.add(point);
+		}
+		
+		System.out.println("attributes:"+map.keySet());
+		return map.values();
+	}
+	
+
+	private void convertData(SeriesData data, MapSpec spec) {
+		NumberFormat numFormater = NumberFormat.getInstance();
+		
+		Object firstItem = data.points.get(0);
+		// convert x
+		switch (data.x.getClassification()) {
+			case C:
+				if (firstItem instanceof String) {
+					// ignore
+				} else if (firstItem instanceof Number) {
+					for (SeriesDataPoint p : data.points) {
+						p.x = numFormater.format(p.x);
+					}
+				}
+				break;
+			case Cdate:
+				for (SeriesDataPoint p : data.points) {
+					p.x = ((Date)p.x).getTime();
+				}
+				break;
+			case Qi:
+			case Qd:
+				// ignore
+		}
+		
+		// convert x
+		switch (data.y.getClassification()) {
+			case C:
+				if (firstItem instanceof String) {
+					// ignore
+				} else if (firstItem instanceof Number) {
+					for (SeriesDataPoint p : data.points) {
+						p.y = numFormater.format(p.y);
+					}
+				}
+				break;
+			case Cdate:
+				for (SeriesDataPoint p : data.points) {
+					p.y = ((Date)p.y).getTime();
+				}
+				break;
+			case Qi:
+			case Qd:
+				// ignore
+		}				
+	}
+	
+	private XYChart.Series<Object, Object> createChartSeries(SeriesData sd, MapSpec spec) {
+		ObservableList<XYChart.Data<Object, Object>> xyData = FXCollections.observableArrayList();
+		for (SeriesDataPoint p : sd.points) {
+			xyData.add(new XYChart.Data<Object, Object>(p.x, p.y, p.attribues));
+		}
+		
+		XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
+		//series.setName(arg0)
+		series.dataProperty().set(xyData);
+		return series;
+		
 	}
 	
 	private Field getXField() {
@@ -330,10 +519,8 @@ public class ChartView extends ViewBase {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
 		Axis xAxis = createAxis(getXField(), _xArea.getFieldTitle(0));
-		_xAxisType = xAxis instanceof CategoryAxis ? Role.DIMENSION : Role.MEASURE;
 		
 		Axis yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "");
-		_yAxisType = yAxis instanceof CategoryAxis ? Role.DIMENSION : Role.MEASURE;
 
 
 		determineViewType(getXField().getClassification(), getYField().getClassification()); 
@@ -431,7 +618,6 @@ public class ChartView extends ViewBase {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable,
 					Number oldValue, Number newValue) {
-//				_limit = newValue.intValue();
 				System.out.println("limit changed: "+ newValue.intValue());
 				fetchData();	
 			}
@@ -457,7 +643,8 @@ public class ChartView extends ViewBase {
 					ObservableList<Row> oldValue, ObservableList<Row> newValue) {
 				
 				if (newValue != null) {
-					assignData(newValue);
+					//assignData(newValue);
+					assignData2(_spec, newValue);
 				}
 			}
 		});
@@ -474,8 +661,9 @@ public class ChartView extends ViewBase {
 		cc.setHgrow(Priority.ALWAYS);
 		grid.getColumnConstraints().add(cc);
 		
-		_xArea = createControlArea(grid, "X", 0, DropArea.Policy.SINGLE);
-		_yArea = createControlArea(grid, "Y", 1, DropArea.Policy.MULTIPLE);
+		_xArea = createControlArea(grid, "X", 0, 0, DropArea.Policy.SINGLE);
+		_yArea = createControlArea(grid, "Y", 1, 0, DropArea.Policy.MULTIPLE);
+		_lodArea = createControlArea(grid, "LOD", 0, 2, DropArea.Policy.MULTIPLE);
 				
 		return grid;
 	}
@@ -501,14 +689,14 @@ public class ChartView extends ViewBase {
 		}
 	};
 	
-	private DropArea createControlArea(GridPane grid, String title, int  row, DropArea.Policy policy) {
+	private DropArea createControlArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy) {
 		
 		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
 		DropArea area = new DropArea(policy);
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaLister);
-		grid.add(text, 0, row);
-		grid.add(area, 1, row);
+		grid.add(text, col, row);
+		grid.add(area, col+1, row);
 		
 		return area;
 	}
