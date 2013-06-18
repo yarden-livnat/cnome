@@ -39,6 +39,12 @@ public class SQL {
 	}
 	
 	static {
+//		FUNCTIONS.add(new Function("", "NA") {
+//			@Override
+//			public String format(String col) {
+//				return col;
+//			}
+//		});
 		FUNCTIONS.add(new Function("Avg", "AVG"));
 		FUNCTIONS.add(new Function("Sum", "SUM"));
 //		FUNCTIONS.add(new Function("Median", "MEDIAN"));

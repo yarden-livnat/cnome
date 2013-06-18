@@ -185,79 +185,56 @@ public class ChartView extends ViewBase {
 		}
 	}
 
-//	/*
-//	 * Convert data to fit the axis
-//	 */
-//	
-//	private Object[][] convertData(ObservableList<Row> list) {
-//		Object[][] data; 
-//		
-//		if (list == null || list.size() == 0) {
-//			// ignore
-//			data = new Object[0][];
-//		} else {
-//			int cols = list.get(0).value.length;
-//			data = new Object[cols][];
-//			data[0] = convertDataCol(list, 0, _xArea.getFields().get(0).getClassification());
-//			int yCols = _yArea.getFields().size();
-//			for (int col=0; col<yCols; col++) {
-//				data[col+1] = convertDataCol(list, col+1, _yArea.getFields().get(col).getClassification());
-//			}
-//			
-//			int n = list.size();
-//			for (int col=1+yCols; col<cols; col++) {
-//				Object[] colData = new Object[n];
-//				for (int r=0; r<n; r++) {
-//					colData[r] = list.get(r).value[col];
-//				}
-//				data[col] = colData;
-//			}
-//		}
-//		
-//		return data;
-//	}
-//	
-//	private Object[] convertDataCol(ObservableList<Row> list, int col, Classification classification) {
-//		NumberFormat numFormater = NumberFormat.getInstance();
-//		
-//		int n = list.size();
-//		Object[] data = new Object[n];
-//		
-//		if (n > 0) {
-//			Object item = list.get(0).value[col];
-//			
-//			System.out.println(col+": "+classification+"   type:"+item.getClass());
-//			
-//			switch (classification) {
-//			case C:
-//				// axis is classification.
-//				if (item instanceof String) {
-//					// no conversion is required
-//					for (int r=0; r<n; r++)
-//						data[r] = list.get(r).value[col];
-//				} else if (item instanceof Number) {
-//					for (int r=0; r<n; r++)
-//						data[r] = numFormater.format(list.get(r).value[col]);
-//				} else {
-//					System.out.println("item type:"+item.getClass());
-//				}
-//				break;
-//			case Cdate:
-//				// convert time to long
-//				for (int r=0; r<n; r++)
-//					data[r] = ((Date)list.get(r).value[col]).getTime();
-//				break;
-//			case Qi:
-//			case Qd:
-//				for (int r=0; r<n; r++)
-//					data[r] = list.get(r).value[col];
-//				break;
-//			}
-//		}
-//		return data;
-//	}
+	
 	
 	public final double MIN_BAR_WIDTH = 2;
+	
+	
+	private void updateAxes(List<XYChart.Series<Object, Object>> graphs) {
+		Axis<? extends Object> axis =  _chart.getXAxis();
+		if (axis instanceof NumberAxis) {
+
+			XYChart.Series<Object, Object> series = graphs.get(0);
+			XYChart.Data<Object, Object> entry = series.getData().get(0);
+			if (entry.getXValue() instanceof Number) {
+				Double min = (Double) entry.getXValue();
+				Double max = min;
+				for (XYChart.Data<Object, Object> item : series.getData()) {				
+					Double value = (Double) item.getXValue();
+//					item.setXValue(-(Double) item.getXValue());
+					if (value < min) min = value;
+					else if (max < value) max = value;
+				}
+				
+				if (max < 0) {
+					NumberAxis numAxis = (NumberAxis) axis;
+					numAxis.setUpperBound(max);
+					numAxis.setLowerBound(min);
+				}
+			}
+		}
+		
+		axis =  _chart.getYAxis();
+		if (axis instanceof NumberAxis) {
+			XYChart.Series<Object, Object> series = graphs.get(0);
+			XYChart.Data<Object, Object> entry = series.getData().get(0);
+			if (entry.getYValue() instanceof Number) {
+				Double min = (Double) entry.getYValue();
+				Double max = min;
+				for (XYChart.Data<Object, Object> item : series.getData()) {				
+					Double value = (Double) item.getYValue();
+					if (value < min) min = value;
+					else if (max < value) max = value;
+				}
+				
+				if (max < 0) {
+					NumberAxis numAxis = (NumberAxis) axis;
+					numAxis.setUpperBound(max);
+				}
+			}
+		}	
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	private <T> void updateAxis( Axis<?> axis, Object[] data, T Klass) {
@@ -350,7 +327,10 @@ public class ChartView extends ViewBase {
 				graphs.add(createChartSeries(sd, spec));
 			}
 		}
+		
+		
 		_chart.getData().addAll(graphs);
+//		updateAxes(graphs);
 	}
 	
 	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<Row> list) {
@@ -439,7 +419,7 @@ public class ChartView extends ViewBase {
 				// ignore
 		}
 		
-		// convert x
+		// convert y
 		switch (data.y.getClassification()) {
 			case C:
 				if (firstItem instanceof String) {
@@ -468,10 +448,28 @@ public class ChartView extends ViewBase {
 		}
 		
 		XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
-		//series.setName(arg0)
+		SeriesDataPoint p = sd.points.get(0);
+		String label = "";
+		if (p.attribues != null && p.attribues.length > 0) {
+			label = createAttributesLabel(p);
+		}
+		series.setName(label);
 		series.dataProperty().set(xyData);
 		return series;
 		
+	}
+	
+	private String createAttributesLabel(SeriesDataPoint p) {
+		
+		int n = p.attribues.length;
+		if (n==1)
+			return p.attribues[0].toString();
+		
+		StringBuilder builder = new StringBuilder("[").append(p.attribues[0]);
+		for (int i=1; i<n; i++)
+			builder.append(",").append(p.attribues[i]);
+		builder.append("]");
+		return builder.toString();
 	}
 	
 	private Field getXField() {
@@ -522,7 +520,6 @@ public class ChartView extends ViewBase {
 		
 		Axis yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "");
 
-
 		determineViewType(getXField().getClassification(), getYField().getClassification()); 
 		switch (_viewType) {
 		case CROSS_TAB:
@@ -555,6 +552,9 @@ public class ChartView extends ViewBase {
 //		
 		if (_chart != null) {
 			_chart.setAnimated(false);
+			_chart.setHorizontalZeroLineVisible(false);
+			_chart.setVerticalZeroLineVisible(false);
+			System.out.println("zero line: "+_chart.horizontalZeroLineVisibleProperty().get()+"  "+_chart.verticalZeroLineVisibleProperty().get());
 //			_chart.setCache(true);
 			_pane.setCenter(_chart);
 		} else {
@@ -619,6 +619,7 @@ public class ChartView extends ViewBase {
 			public void changed(ObservableValue<? extends Number> observable,
 					Number oldValue, Number newValue) {
 				System.out.println("limit changed: "+ newValue.intValue());
+				_chart = null;
 				fetchData();	
 			}
 		});

@@ -11,6 +11,7 @@ import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
@@ -20,6 +21,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType;
@@ -87,9 +89,15 @@ public class SchemaPanel extends Panel {
 				
 				ClipboardContent content = new ClipboardContent();
 				content.putString(_id);
-				content.putImage(Resources.getIcon("field"));
+				
+				SnapshotParameters snapParams = new SnapshotParameters();
+	            snapParams.setFill(Color.TRANSPARENT);
+	            
+	            content.putImage(entry.label.snapshot(snapParams, null));	            
+//				content.putImage(Resources.getIcon("field"));
 				
 				db.setContent(content);
+				event.consume();
 			}
 		});
 		

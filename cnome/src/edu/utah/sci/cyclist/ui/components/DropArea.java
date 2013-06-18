@@ -14,6 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -21,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
@@ -180,6 +182,11 @@ public class DropArea extends HBox implements Observable {
 										
 										ClipboardContent content = new ClipboardContent();
 										content.putString(field.getName());
+										
+										SnapshotParameters snapParams = new SnapshotParameters();
+							            snapParams.setFill(Color.TRANSPARENT);
+							            
+							            content.putImage(glyph.snapshot(snapParams, null));	
 										db.setContent(content);
 										
 //										glyph.setManaged(false);
