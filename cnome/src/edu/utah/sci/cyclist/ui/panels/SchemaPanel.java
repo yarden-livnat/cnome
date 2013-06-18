@@ -91,10 +91,10 @@ public class SchemaPanel extends Panel {
 				content.putString(_id);
 				
 				SnapshotParameters snapParams = new SnapshotParameters();
-	            snapParams.setFill(Color.TRANSPARENT);
+//	            snapParams.setFill(Color.TRANSPARENT);
+	            snapParams.setFill(Color.AQUA);
 	            
 	            content.putImage(entry.label.snapshot(snapParams, null));	            
-//				content.putImage(Resources.getIcon("field"));
 				
 				db.setContent(content);
 				event.consume();
