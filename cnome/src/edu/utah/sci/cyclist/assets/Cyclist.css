@@ -101,13 +101,27 @@
 
 
 .filter-glyph {
-	-fx-background-color: #ccff33;
-	-fx-border-color: #303030;
+	-active-bg: #ccff33;
+	-inactive-bg: #FF9900;
+	-fx-background-color: -active-bg;
+	-fx-border-color: #bbbbbb;
 	-fx-border-radius: 5;
 	-fx-background-radius: 5;
 	-fx-spacing: 4;
- 	-fx-padding: 2 3 3 3; 
+ 	-fx-padding: 1 2 2 2; 
+ 
  	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+}
+
+.filter-glyph .arrow {
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-background-color: transparent;
+    -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
+    -fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.filter-glyph:hover .arrow {
+    -fx-background-color: -fx-mark-color, #FFFFFF;
 }
 
 /*

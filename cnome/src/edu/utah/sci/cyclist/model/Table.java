@@ -460,12 +460,11 @@ public class Table {
 					long t3 = System.currentTimeMillis();
 					System.out.println("gathering time: "+(t3-t2)/1000.0);
 				}catch (SQLException e) {
-					System.out.println("task sql exception");
+					System.out.println("task sql exception: "+e.getLocalizedMessage());
 					updateMessage(e.getLocalizedMessage());
 					throw new Exception(e.getMessage(), e);
 				}
 				
-//				System.out.println("task state:"+ getState());
 				return FXCollections.observableList(rows);
 			}
 			

@@ -94,7 +94,7 @@ public class FieldGlyph extends HBox {
 								.maxWidth(6)
 								.build()
 						)
-					.alignment(Pos.CENTER)
+						.alignment(Pos.CENTER)
 					.build()
 				)
 			.applyTo(this);

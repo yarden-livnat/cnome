@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
@@ -34,6 +35,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
@@ -147,6 +149,18 @@ public class WorkspacePresenter extends PresenterBase {
 				getWorkspace().selectView(view);
 			}
 		});
+		
+		addNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				Filter filter = ((CyclistFilterNotification)event).getFilter();
+				
+				System.out.println("show filter:"+filter.getName());
+				
+			}
+		});
+		
 		SelectionModel selectionModel = new SingleSelection();
 		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
 

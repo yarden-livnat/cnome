@@ -64,6 +64,8 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.dnd.DnD.Status;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -87,6 +89,7 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
+	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
 	private boolean _maximized = false;
@@ -112,7 +115,7 @@ public class ViewBase extends BorderPane implements View {
 	private Closure.V1<Table> _onTableDrop = null;
 	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
-	
+	private Closure.V1<Filter> _onShowFilter = null;
 	
 	public ViewBase() {	
 		this(false);
@@ -155,6 +158,7 @@ public class ViewBase extends BorderPane implements View {
 		}
 		setHeaderListeners();
 		setDatasourcesListeners();
+		setFiltersListeners();
 		
 		setTop(_header);
 		setListeners();
@@ -247,6 +251,11 @@ public class ViewBase extends BorderPane implements View {
 	
 	public void setOnSelectAction(Closure.V0 action) {
 		_onSelectAction = action;
+	}
+	
+	
+	public void setOnShowFilter(Closure.V1<Filter> action) {
+		_onShowFilter = action;
 	}
 	
 	public DnD.LocalClipboard getLocalClipboard() {
@@ -416,6 +425,21 @@ public class ViewBase extends BorderPane implements View {
 		
 		_header.setOnMouseClicked(eh);
 		setOnMouseClicked(eh);
+	}
+	
+	private void setFiltersListeners() {
+		_filtersArea.setOnAction(new EventHandler<FilterEvent>() {
+			
+			@Override
+			public void handle(FilterEvent event) {
+				if (event.getEventType() == FilterEvent.SHOW) {
+					if (_onShowFilter != null) {
+						_onShowFilter.call(event.getFilter());
+					}
+				}
+				
+			}
+		});
 	}
 	
 	private void setDatasourcesListeners() {

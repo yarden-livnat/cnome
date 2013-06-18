@@ -28,6 +28,7 @@ import java.util.List;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
@@ -35,6 +36,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -90,6 +92,13 @@ public class PresenterBase implements Presenter {
 					Table table = getSelectionModel().getSelected();
 					if (table != null)
 						broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
+				}
+			});
+			
+			_view.setOnShowFilter(new Closure.V1<Filter>() {
+				@Override
+				public void call(Filter filter) {
+					broadcast(new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
 			});
 		}
