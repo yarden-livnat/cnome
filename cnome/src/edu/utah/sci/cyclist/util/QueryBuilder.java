@@ -8,6 +8,7 @@ import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.DataType.Role;
 
 public class QueryBuilder {
 	
@@ -16,6 +17,8 @@ public class QueryBuilder {
 	private List<Filter> _filters = new ArrayList<>();
 	private List<Field> _aggregates = new ArrayList<>();
 	private List<Field> _grouping = new ArrayList<>();
+	private List<Filter> _having = new ArrayList<>();
+	
 	private int _limit = -1;
 	
 	public QueryBuilder(Table table) {
@@ -54,6 +57,16 @@ public class QueryBuilder {
 		return this;
 	}
 	
+	public QueryBuilder filters(List<Filter> list) {
+		for (Filter filter : list) {
+			if (filter.getRole() == Role.DIMENSION) 
+				_filters.add(filter);
+			else
+				_having.add(filter);
+		}
+		return this;
+	}
+	
 	private boolean append(StringBuilder builder, boolean first, List<Field> list) {
 		for (Field field : list) {
 			if (first) {
@@ -63,6 +76,20 @@ public class QueryBuilder {
 				builder.append(", ");
 			}
 			builder.append(field.getName());
+		}
+		
+		return first;
+	}
+	
+	private boolean appendFilters(StringBuilder builder, boolean first, List<Filter> list) {
+		for (Filter filter : list) {
+			if (first) {
+				builder.append(" ");
+				first = false;
+			} else {
+				builder.append(" and ");
+			}
+			builder.append(filter.toString());
 		}
 		
 		return first;
@@ -100,20 +127,26 @@ public class QueryBuilder {
 		// table
 		builder.append(" from ").append(_table.getName());
 		
-		// group by
+		// where
+		first = true;
+		if (_filters.size() > 0) {
+			builder.append(" where ");
+			first = appendFilters(builder, first, _filters);
+		}
 		
+		// group by
 		first = true;
 		if (_aggregates.size() > 0 &&  (_fields.size() > 0 || _grouping.size() > 0)) {
-			builder.append(" group by");
+			builder.append(" group by ");
 			first = append(builder, first, _fields);
 			append(builder, first, _grouping);
 		}
 		
 		// filters
 		first = true;
-		if (_filters.size() > 0) {
-			builder.append(" having");
-			for (Filter filter : _filters) {
+		if (_having.size() > 0) {
+			builder.append(" having ");
+			for (Filter filter : _having) {
 				if (first) {
 					builder.append(" ");
 					first = false;

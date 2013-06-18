@@ -413,6 +413,56 @@ public class Table {
 		return task.valueProperty();
 	}
 	
+	public Task<ObservableList<Object>> getFieldValues(final Field field) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableList<Object>> task = new Task<ObservableList<Object>>() {
+			@Override
+			protected ObservableList<Object> call() throws Exception {
+				List<Object> values = new ArrayList<>();
+				try {
+					updateMessage("connecting");
+					Connection conn = ds.getConnection();
+					
+					updateMessage("querying");
+					System.out.println("querying");
+					long t1 = System.currentTimeMillis();
+					Statement stmt = conn.createStatement();
+					
+					// TODO: Fix this hack
+					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName());
+					long t2 = System.currentTimeMillis();
+					System.out.println("time: "+(t2-t1)/1000.0);
+					
+					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
+						
+						values.add(rs.getObject(1));
+					}
+					
+					long t3 = System.currentTimeMillis();
+					System.out.println("gathering time: "+(t3-t2)/1000.0);
+				} catch (SQLException e) {
+					System.out.println("task sql exception: "+e.getLocalizedMessage());
+					updateMessage(e.getLocalizedMessage());
+					throw new Exception(e.getMessage(), e);
+				}
+				
+				return FXCollections.observableList(values);
+			}
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task;
+	}
+	
 	public Task<ObservableList<Row>> getRows(final String query) {
 		final CyclistDatasource ds = getDataSource();
 		

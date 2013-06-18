@@ -32,6 +32,8 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 
@@ -41,7 +43,9 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.components.PanelArea;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.panels.Panel;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 
 public class Workspace extends ViewBase implements View {
@@ -49,6 +53,9 @@ public class Workspace extends ViewBase implements View {
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
+	private PanelArea _filtersPane;
+	private Pane _statusPane;
+	
 	private ViewBase _maximizedView = null;
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
@@ -93,20 +100,26 @@ public class Workspace extends ViewBase implements View {
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
 
+		BorderPane borderPane = new BorderPane();
 		_pane = new Pane();
+		_filtersPane = new PanelArea();
+		_statusPane = new HBox();
+		
+		borderPane.setRight(_filtersPane);
+		borderPane.setBottom(_statusPane);
+		borderPane.setCenter(_pane);
 		Rectangle clip = new Rectangle(0, 0, 100, 100);
 		clip.widthProperty().bind(_pane.widthProperty());
 		clip.heightProperty().bind(_pane.heightProperty());
 		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
 		
-		setContent(_pane, true /* allowMove */);
+		setContent(borderPane, true /* allowMove */);
 			
 		enableDragging(false);
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-//				System.out.println("workspace over: \n\tsrc:"+event.getSource()+"\n\ttarget: "+event.getTarget());
 				if (event.getTarget() == _pane) {
 					DnD.LocalClipboard clipboard = getLocalClipboard();
 					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
@@ -123,18 +136,18 @@ public class Workspace extends ViewBase implements View {
 			}
 		});	
 		
-		setOnDragEntered(new EventHandler<DragEvent>() {
-			public void handle(DragEvent event) {		
-//				event.consume();
-			}
-		});
-		
-		setOnDragExited(new EventHandler<DragEvent>() {
-			public void handle(DragEvent event) {
-				// do nothing
-//				event.consume();
-			}
-		});
+//		setOnDragEntered(new EventHandler<DragEvent>() {
+//			public void handle(DragEvent event) {		
+////				event.consume();
+//			}
+//		});
+//		
+//		setOnDragExited(new EventHandler<DragEvent>() {
+//			public void handle(DragEvent event) {
+//				// do nothing
+////				event.consume();
+//			}
+//		});
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
@@ -243,6 +256,11 @@ public class Workspace extends ViewBase implements View {
 	public void removeView(ViewBase view) {
 		view.setOnSelect(null);
 		_pane.getChildren().remove(view);
+	}
+	
+	
+	public void addPanel(Panel panel) {
+		_filtersPane.add(panel);
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

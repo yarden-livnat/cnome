@@ -72,6 +72,7 @@ public class FilterArea extends ToolBar implements Observable {
 	
 	private void build() {
 		setPrefHeight(25);
+		setMinWidth(50);
 		getStyleClass().add("drop-area");
 		setOrientation(Orientation.HORIZONTAL);
 		
@@ -112,7 +113,7 @@ public class FilterArea extends ToolBar implements Observable {
 				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
 				
 				if (field != null) {
-					getFilters().add(createFilter(field.clone()));
+					getFilters().add(createFilter(field));
 					status = true;
 				}
 				status = true;					
@@ -160,7 +161,13 @@ public class FilterArea extends ToolBar implements Observable {
 	
 	private Filter createFilter(Field field) {
 		Filter filter = new Filter(field);
-		
+		filter.addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				fireInvalidationEvent();
+			}
+		});
 		return filter;
 	}
 	

@@ -107,6 +107,14 @@ public class ChartView extends ViewBase {
 		fetchData();
 	}
 	
+	@Override
+	public void filtersInvalidated() {
+		super.filtersInvalidated();
+		
+		invalidate();
+		fetchData();
+	}
+	
 	private void invalidateChart() {
 		_pane.setCenter(null);
 		_chart = null;
@@ -122,6 +130,10 @@ public class ChartView extends ViewBase {
 			this.field = field;
 			this.index = index;
 		}
+	}
+	
+	private void invalidate() {
+		_chart = null;
 	}
 	
 	private void fetchData() {
@@ -162,6 +174,7 @@ public class ChartView extends ViewBase {
 							.fields(fields)
 							.aggregates(aggregators)
 							.grouping(grouping)
+							.filters(getFilters())
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
 				
@@ -190,98 +203,98 @@ public class ChartView extends ViewBase {
 	public final double MIN_BAR_WIDTH = 2;
 	
 	
-	private void updateAxes(List<XYChart.Series<Object, Object>> graphs) {
-		Axis<? extends Object> axis =  _chart.getXAxis();
-		if (axis instanceof NumberAxis) {
-
-			XYChart.Series<Object, Object> series = graphs.get(0);
-			XYChart.Data<Object, Object> entry = series.getData().get(0);
-			if (entry.getXValue() instanceof Number) {
-				Double min = (Double) entry.getXValue();
-				Double max = min;
-				for (XYChart.Data<Object, Object> item : series.getData()) {				
-					Double value = (Double) item.getXValue();
-//					item.setXValue(-(Double) item.getXValue());
-					if (value < min) min = value;
-					else if (max < value) max = value;
-				}
-				
-				if (max < 0) {
-					NumberAxis numAxis = (NumberAxis) axis;
-					numAxis.setUpperBound(max);
-					numAxis.setLowerBound(min);
-				}
-			}
-		}
-		
-		axis =  _chart.getYAxis();
-		if (axis instanceof NumberAxis) {
-			XYChart.Series<Object, Object> series = graphs.get(0);
-			XYChart.Data<Object, Object> entry = series.getData().get(0);
-			if (entry.getYValue() instanceof Number) {
-				Double min = (Double) entry.getYValue();
-				Double max = min;
-				for (XYChart.Data<Object, Object> item : series.getData()) {				
-					Double value = (Double) item.getYValue();
-					if (value < min) min = value;
-					else if (max < value) max = value;
-				}
-				
-				if (max < 0) {
-					NumberAxis numAxis = (NumberAxis) axis;
-					numAxis.setUpperBound(max);
-				}
-			}
-		}	
-	}
+//	private void updateAxes(List<XYChart.Series<Object, Object>> graphs) {
+//		Axis<? extends Object> axis =  _chart.getXAxis();
+//		if (axis instanceof NumberAxis) {
+//
+//			XYChart.Series<Object, Object> series = graphs.get(0);
+//			XYChart.Data<Object, Object> entry = series.getData().get(0);
+//			if (entry.getXValue() instanceof Number) {
+//				Double min = (Double) entry.getXValue();
+//				Double max = min;
+//				for (XYChart.Data<Object, Object> item : series.getData()) {				
+//					Double value = (Double) item.getXValue();
+////					item.setXValue(-(Double) item.getXValue());
+//					if (value < min) min = value;
+//					else if (max < value) max = value;
+//				}
+//				
+//				if (max < 0) {
+//					NumberAxis numAxis = (NumberAxis) axis;
+//					numAxis.setUpperBound(max);
+//					numAxis.setLowerBound(min);
+//				}
+//			}
+//		}
+//		
+//		axis =  _chart.getYAxis();
+//		if (axis instanceof NumberAxis) {
+//			XYChart.Series<Object, Object> series = graphs.get(0);
+//			XYChart.Data<Object, Object> entry = series.getData().get(0);
+//			if (entry.getYValue() instanceof Number) {
+//				Double min = (Double) entry.getYValue();
+//				Double max = min;
+//				for (XYChart.Data<Object, Object> item : series.getData()) {				
+//					Double value = (Double) item.getYValue();
+//					if (value < min) min = value;
+//					else if (max < value) max = value;
+//				}
+//				
+//				if (max < 0) {
+//					NumberAxis numAxis = (NumberAxis) axis;
+//					numAxis.setUpperBound(max);
+//				}
+//			}
+//		}	
+//	}
 	
 	
-	@SuppressWarnings("unchecked")
-	private <T> void updateAxis( Axis<?> axis, Object[] data, T Klass) {
-		if (axis instanceof NumberAxis) {
-			NumberAxis numAxis = (NumberAxis) axis;
-			
-			Comparable<T> from = (Comparable<T>) data[0];
-			Comparable<T> to = from;
-			
-			for (Object o : data) {
-				T num = (T) o;
-				if (from.compareTo(num) == 1) from = (Comparable<T>) num;
-				else if (to.compareTo(num) == -1) to = (Comparable<T>) num;
-			}
-			
-			double v0 = ((Number)from).doubleValue();
-			double v1 = ((Number)to).doubleValue();
-			int scale = (int)Math.floor(Math.log10(Math.min(Math.abs(v0), Math.abs(v1))));
-			scale = scale - (scale %3);
-			double factor = Math.pow(10, scale);
-			if (scale > 3) {
-				for (int i=0; i<data.length; i++) 
-					data[i] = (Double)data[i]/factor;
-				v0 /= factor;
-				v1 /= factor;
-				
-				numAxis.setLabel(numAxis.getLabel()+" * 1e"+scale);
-			}
-			
-			
-			numAxis.setLowerBound(v0);
-			numAxis.setUpperBound(v1);
-		} else { // CategoryAxis
-//			CategoryAxis ca = (CategoryAxis) axis;
-//			// ensure there is enough space for the bars
-//			Set<Object> names = new HashSet<>();
-//			for (Object obj : data) {
-//				names.add(obj);
+//	@SuppressWarnings("unchecked")
+//	private <T> void updateAxis( Axis<?> axis, Object[] data, T Klass) {
+//		if (axis instanceof NumberAxis) {
+//			NumberAxis numAxis = (NumberAxis) axis;
+//			
+//			Comparable<T> from = (Comparable<T>) data[0];
+//			Comparable<T> to = from;
+//			
+//			for (Object o : data) {
+//				T num = (T) o;
+//				if (from.compareTo(num) == 1) from = (Comparable<T>) num;
+//				else if (to.compareTo(num) == -1) to = (Comparable<T>) num;
 //			}
-//			int n = names.size();
-//			double w = (axis.getWidth() - ca.getCategorySpacing()*(n-1))/n;
-//			if (w < MIN_BAR_WIDTH) {
-//				ca.setCa
+//			
+//			double v0 = ((Number)from).doubleValue();
+//			double v1 = ((Number)to).doubleValue();
+//			int scale = (int)Math.floor(Math.log10(Math.min(Math.abs(v0), Math.abs(v1))));
+//			scale = scale - (scale %3);
+//			double factor = Math.pow(10, scale);
+//			if (scale > 3) {
+//				for (int i=0; i<data.length; i++) 
+//					data[i] = (Double)data[i]/factor;
+//				v0 /= factor;
+//				v1 /= factor;
+//				
+//				numAxis.setLabel(numAxis.getLabel()+" * 1e"+scale);
 //			}
-			
-		}
-	}
+//			
+//			
+//			numAxis.setLowerBound(v0);
+//			numAxis.setUpperBound(v1);
+//		} else { // CategoryAxis
+////			CategoryAxis ca = (CategoryAxis) axis;
+////			// ensure there is enough space for the bars
+////			Set<Object> names = new HashSet<>();
+////			for (Object obj : data) {
+////				names.add(obj);
+////			}
+////			int n = names.size();
+////			double w = (axis.getWidth() - ca.getCategorySpacing()*(n-1))/n;
+////			if (w < MIN_BAR_WIDTH) {
+////				ca.setCa
+////			}
+//			
+//		}
+//	}
 	
 	
 	class MapSpec {
@@ -368,7 +381,7 @@ public class ChartView extends ViewBase {
 	
 	
 	private Collection<SeriesData> createSubList(SeriesData data) {	
-		if (data.points.get(0).attribues == null) {
+		if (data.points == null || data.points.size() == 0 ||data.points.get(0).attribues == null) {
 			List<SeriesData> result = new ArrayList<>();
 			result.add(data);
 			return result;

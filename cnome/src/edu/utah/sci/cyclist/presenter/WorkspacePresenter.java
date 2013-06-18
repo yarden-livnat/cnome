@@ -42,6 +42,7 @@ import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.ui.views.FilterPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 
 public class WorkspacePresenter extends PresenterBase {
@@ -157,7 +158,8 @@ public class WorkspacePresenter extends PresenterBase {
 				Filter filter = ((CyclistFilterNotification)event).getFilter();
 				
 				System.out.println("show filter:"+filter.getName());
-				
+				FilterPanel panel = new FilterPanel(filter);
+				getWorkspace().addPanel(panel);
 			}
 		});
 		

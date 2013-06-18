@@ -23,10 +23,13 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -440,6 +443,22 @@ public class ViewBase extends BorderPane implements View {
 				
 			}
 		});
+		
+		_filtersArea.addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				filtersInvalidated();
+			}
+		});
+	}
+	
+	public void filtersInvalidated() {
+		// to be overriden 
+	}
+	
+	public List<Filter> getFilters() {
+		return  new ArrayList<Filter>(_filtersArea.getFilters());
 	}
 	
 	private void setDatasourcesListeners() {

@@ -29,6 +29,7 @@
 /* 
  * Flat Button
  */
+
 .flat-button {
 	-fx-body-color:  transparent;
 	-fx-background-color:   -fx-body-color;
