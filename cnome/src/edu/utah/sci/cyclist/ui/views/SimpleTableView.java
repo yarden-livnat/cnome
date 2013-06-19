@@ -57,8 +57,8 @@ public class SimpleTableView extends ViewBase {
 	private void build() {
 		setTitle(TITLE);
 		
-	//	_tableView = TableViewBuilder.create(Table.Row.class) // Java 8
-		_tableView = TableViewBuilder.<Table.Row>create()
+		_tableView = TableViewBuilder.create(Table.Row.class) // Java 8
+//		_tableView = TableViewBuilder.<Table.Row>create()
 				.prefWidth(300)
 				.prefHeight(200)
 				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
@@ -103,8 +103,8 @@ public class SimpleTableView extends ViewBase {
 	
 	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
 		
-		//return TableColumnBuilder.create(Table.Row.class, Object.class) // Java 8
-		return TableColumnBuilder.<Table.Row, Object>create() // Java 7
+		return TableColumnBuilder.create(Table.Row.class, Object.class) // Java 8
+//		return TableColumnBuilder.<Table.Row, Object>create() // Java 7
 
 				.text(field.getName())
 				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
