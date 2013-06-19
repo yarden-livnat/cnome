@@ -136,6 +136,10 @@ public class CyclistController {
 				wizard.setSelectedSource(_model.getSelectedDatasource());
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
+				
+			//	wizard.getDataSources()
+					
+				
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {

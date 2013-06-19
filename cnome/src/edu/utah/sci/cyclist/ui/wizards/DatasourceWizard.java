@@ -153,7 +153,7 @@ public class DatasourceWizard extends VBox {
 					pane.getChildren().clear();
 					pane.getChildren().add(page.getNode());
 					_currentPage = page;
-				}
+									}
 			}
 		});
 	
