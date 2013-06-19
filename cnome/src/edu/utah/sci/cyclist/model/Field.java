@@ -27,9 +27,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 
@@ -39,9 +42,8 @@ public class Field {
 	private DataType _dataType;
 	private BooleanProperty _selected;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
-	
+	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
 	private Map<String, Object> _properties = new HashMap<>();
-
 	
 	public Field(){
 		this("");
@@ -53,7 +55,18 @@ public class Field {
 		_selected.set(true);
 	}
 
-
+	public ListProperty<Object> valuesProperty() {
+		return _valuesProperty;
+	}
+	
+	public void setValues(ObservableList<Object> values) {
+		_valuesProperty.set(values);
+	}
+	
+	public ObservableList<Object> getValues() {
+		return _valuesProperty.get();
+	}
+	
 	public String getName() {
 		return _name;
 	}

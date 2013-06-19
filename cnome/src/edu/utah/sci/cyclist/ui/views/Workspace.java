@@ -263,6 +263,14 @@ public class Workspace extends ViewBase implements View {
 		_filtersPane.add(panel);
 	}
 	
+	public void showPanel(Panel panel, boolean show) {
+		_filtersPane.show(panel, show);
+	}
+	
+	public void removePanel(Panel panel) {
+		_filtersPane.remove(panel);
+	}
+	
 	private ViewPos _viewPos = new ViewPos();
 }
 

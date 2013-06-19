@@ -48,6 +48,7 @@ import edu.utah.sci.cyclist.ui.views.Workspace;
 public class WorkspacePresenter extends PresenterBase {
 
 	private List<Presenter> _presenters = new ArrayList<>();
+	private List<FilterPresenter> _filterPresenters = new ArrayList<>();
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
 		super(bus);		
@@ -157,12 +158,44 @@ public class WorkspacePresenter extends PresenterBase {
 			public void handle(CyclistNotification event) {
 				Filter filter = ((CyclistFilterNotification)event).getFilter();
 				
-				System.out.println("show filter:"+filter.getName());
-				FilterPanel panel = new FilterPanel(filter);
-				getWorkspace().addPanel(panel);
+				FilterPresenter presenter = getFilterPresenter(filter);
+				if (presenter == null) {
+					FilterPanel panel = new FilterPanel(filter);
+					 presenter = new FilterPresenter(getEventBus());
+					 presenter.setPanel(panel);
+					 getWorkspace().addPanel(panel);
+					 _filterPresenters.add(presenter);
+				} else {
+					getWorkspace().showPanel(presenter.getPanel(), true);
+				}
 			}
 		});
 		
+		addNotificationHandler(CyclistNotifications.HIDE_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				Filter filter = ((CyclistFilterNotification)event).getFilter();
+				FilterPresenter presenter = getFilterPresenter(filter);
+				if (presenter != null) {
+					getWorkspace().showPanel(presenter.getPanel(), false);
+				}
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.REMOVE_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				Filter filter = ((CyclistFilterNotification)event).getFilter();
+				FilterPresenter presenter = getFilterPresenter(filter);
+				if (presenter != null) {
+					_filterPresenters.remove(presenter);
+					getWorkspace().removePanel(presenter.getPanel());
+				}
+			}
+		});
+				
 		SelectionModel selectionModel = new SingleSelection();
 		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
 
@@ -178,4 +211,11 @@ public class WorkspacePresenter extends PresenterBase {
 		setSelectionModel(selectionModel);
 	}
 	
+	private FilterPresenter getFilterPresenter(Filter filter) {
+		for (FilterPresenter p : _filterPresenters) {
+			if (p.getFilter() == filter) 
+				return p;
+		}
+		return null;
+	}
 }

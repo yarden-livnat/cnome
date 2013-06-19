@@ -59,6 +59,7 @@ public class SimpleTableView extends ViewBase {
 		
 		_tableView = TableViewBuilder.create(Table.Row.class) // Java 8
 //		_tableView = TableViewBuilder.<Table.Row>create()
+				.styleClass("simple-table-view")
 				.prefWidth(300)
 				.prefHeight(200)
 				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)

@@ -322,6 +322,11 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void assignData2(MapSpec spec, ObservableList<Row> list) {
+		if (list.size() == 0) {
+			System.out.println("no data");
+			return;
+		}
+		
 		// separate to (x,y,attributes) lists
 		List<SeriesData> lists = splitToSeriesData(spec, list);
 		
@@ -409,6 +414,8 @@ public class ChartView extends ViewBase {
 
 	private void convertData(SeriesData data, MapSpec spec) {
 		NumberFormat numFormater = NumberFormat.getInstance();
+		
+		if (data.points == null || data.points.size() == 0) return;
 		
 		Object firstItem = data.points.get(0);
 		// convert x

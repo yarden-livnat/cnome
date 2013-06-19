@@ -251,27 +251,28 @@
 /* 
  * Table View
  */
-.table-view {
+.simple-table-view {
 	-fx-background-color: -fx-control-inner-background;
 	-fx-table-header-border-color: #959595;
     -fx-table-cell-border-color: #bbbbbb;
 }
 
-.table-view:focused {
+.simple-table-view:focused {
     -fx-background-color: -fx-control-inner-background;
 }
 
 
-.table-view .column-header {
-	-fx-font-size: 12pt;	
+.simple-table-view .column-header {
+	-fx-font-size: 9pt;	
+	-fx-size: 2em;
 }
 
 
-.table-row-cell, .table-cell {
+.simple-table-view, .table-cell {
 	-fx-cell-size: 16;
 }
 
-.table-view .column-header-background {
+.simple-table-view .column-header-background {
     -fx-background-color:  -fx-body-color;
     -fx-padding: 0;
 }

@@ -7,8 +7,6 @@ import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 public class PanelArea extends VBox {
 
@@ -20,6 +18,15 @@ public class PanelArea extends VBox {
 	
 	public void add(Panel panel) {
 		_sp.getItems().add(panel);
+	}
+	
+	public void remove(Panel panel) {
+		_sp.getItems().remove(panel);
+	}
+	
+	public void show(Panel panel, boolean visible) {
+		panel.setManaged(visible);
+		panel.setVisible(visible);
 	}
 	
 	private void build() {

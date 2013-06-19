@@ -458,7 +458,7 @@ public class ViewBase extends BorderPane implements View {
 	}
 	
 	public List<Filter> getFilters() {
-		return  new ArrayList<Filter>(_filtersArea.getFilters());
+		return new ArrayList<Filter>(_filtersArea.getFilters());
 	}
 	
 	private void setDatasourcesListeners() {

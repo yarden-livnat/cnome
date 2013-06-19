@@ -33,4 +33,6 @@ public class CyclistNotifications {
 	public static final String REMOVE_VIEW				= "remove_view";
 	public static final String VIEW_SELECTED			= "view_selected";
 	public static final String SHOW_FILTER 				= "show_filter";
+	public static final String REMOVE_FILTER 			= "remove_filter";
+	public static final String HIDE_FILTER 				= "hide_filter";
 }

@@ -1,15 +1,21 @@
 package edu.utah.sci.cyclist.ui.panels;
 
+import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.ui.components.Spring;
+import javafx.beans.property.ObjectProperty;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPaneBuilder;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -18,16 +24,14 @@ import javafx.scene.layout.VBoxBuilder;
 public class Panel extends VBox {
 
 	private ProgressIndicator _indicator;
+	private Button _closeButton;
 	private Task<?> _task;
 	
 	private ScrollPane _pane;
 	
 	public Panel(String header) {
-		build2(header);
+		build(header);
 	}
-	
-	
-	
 	
 	public void setTask(Task<?> task) {
 		if (_task != null && _task.isRunning()) {
@@ -51,7 +55,22 @@ public class Panel extends VBox {
 		}
 	}
 	
-	private void build2(String header) {
+	/*
+	 * Close 
+	 */
+	public ObjectProperty<EventHandler<ActionEvent>> onCloseProperty() {
+		return _closeButton.onActionProperty();
+	}
+	
+	public EventHandler<ActionEvent> getOnClose() {
+		return _closeButton.getOnAction();
+	}
+	
+	public void setOnClose(EventHandler<ActionEvent> handler) {
+		_closeButton.setOnAction(handler);
+	}
+	
+	private void build(String header) {
 		VBox vbox;
 		
 		VBoxBuilder.create()
@@ -69,7 +88,12 @@ public class Panel extends VBox {
 									.maxWidth(20)
 									.maxHeight(20)
 									.visible(false)
-									.build()
+									.build(),
+								new Spring(),
+								_closeButton = ButtonBuilder.create()
+									.styleClass("flat-button")
+									.graphic(new ImageView(Resources.getIcon("close_view")))
+									.build() 
 								)
 						.build(),
 					_pane = ScrollPaneBuilder.create()
@@ -88,35 +112,6 @@ public class Panel extends VBox {
 		VBox.setVgrow(this, Priority.ALWAYS);
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 			
-	}
-	private void build(String header) {
-		getStyleClass().add("cnome-panel");
-		
-		
-		Label title = LabelBuilder.create()
-					.text(header)
-					.build();
-		
-		title.getStyleClass().add("header");
-		title.prefWidthProperty().bind(widthProperty());
-		
-		_pane = ScrollPaneBuilder.create()
-							.build();
-		_pane.getStyleClass().add("pane");
-		
-		VBox vbox =  VBoxBuilder.create()
-							.children(
-								)
-							.build();
-		
-		vbox.getStyleClass().add("panel-vbox");
-		_pane.setContent(vbox);
-		
-		VBox.setVgrow(vbox, Priority.ALWAYS);
-		VBox.setVgrow(this, Priority.ALWAYS);
-		VBox.setVgrow(_pane, Priority.ALWAYS);
-
-		getChildren().addAll(title, _pane);
 	}
 	
 	public void setContent(Node node) {

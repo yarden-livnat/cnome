@@ -5,8 +5,12 @@ import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.DataType.Type;
@@ -14,12 +18,28 @@ import edu.utah.sci.cyclist.model.DataType.Type;
 public class Filter implements Observable {
 	private Field _field;
 	private DataType _dataType;
-	private ObservableList<Object> _selectedItems = FXCollections.observableArrayList();
+	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
+	private ListProperty<Object> _values = new SimpleListProperty<>();
 	private List<InvalidationListener> _listeners = new ArrayList<>();
 	
 	public Filter(Field field){
 		_field = field;
 		_dataType = new DataType(field.getDataType());
+		if (_field.getValues() != null) {
+			_selectedItems.addAll(_field.getValues());
+		}
+		
+		_field.valuesProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				if (_field.getValues() != null)
+					_selectedItems.addAll(_field.getValues());
+				else
+					_selectedItems.clear();
+				_values.set(_field.getValues());
+			}
+		});
 	}
 	
 	public Field getField() {
@@ -46,8 +66,24 @@ public class Filter implements Observable {
 		return _dataType.getType();
 	}
 	
+	public boolean isValid() {
+		return _field.getValues() != null;
+	}
+	
 	public ObservableList<Object> getValues() {
+		return _field.getValues();
+	}
+	
+	public ListProperty<Object> valuesProperty() {
+		return _values;
+	}
+	
+	public ObservableSet<Object> getSelectedValues() {
 		return _selectedItems;
+	}
+	
+	public boolean isSelected(Object value) {
+		return _selectedItems.contains(value);
 	}
 	
 	public void selectValue(Object value, boolean select) {
@@ -65,6 +101,12 @@ public class Filter implements Observable {
 			fireInvalidationEvent();
 	}
 
+	public void selectAll(boolean value) {
+		if (value) {
+			_selectedItems.addAll(_values);
+		}
+	}
+	
 	@Override
 	public void addListener(InvalidationListener listener) {
 		if (!_listeners.contains(listener))
