@@ -23,14 +23,18 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -43,12 +47,12 @@ import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -62,12 +66,15 @@ import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.dnd.DnD.Status;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
 public class ViewBase extends BorderPane implements View {
 	
-	public static final double EDGE_SIZE = 2;
+	public static final double EDGE_SIZE = 3;
 	
 	public enum Edge { TOP, BOTTOM, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, NONE };
 	
@@ -79,16 +86,19 @@ public class ViewBase extends BorderPane implements View {
 	private Button _minmaxButton;
 	
 	private Label _title;
-	private ProgressIndicator _indicator;
+	private TaskControl _taskControl;
 	private HBox _header;
 	private HBox _actionsArea;
 	private HBox _dataBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
+	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
 	private boolean _maximized = false;
 	private final Resize resize = new Resize();
+	
+	private boolean _enableDragging = true;
 	
 	class ButtonEntry {
 		public ToggleButton button;
@@ -106,10 +116,15 @@ public class ViewBase extends BorderPane implements View {
 	// Actions
 	private Closure.V0 _onSelectAction = null;
 	private Closure.V1<Table> _onTableDrop = null;
+	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
-	
+	private Closure.V1<Filter> _onShowFilter = null;
 	
 	public ViewBase() {	
+		this(false);
+	}
+	
+	public ViewBase(boolean toplevel) {
 		super();
 		getStyleClass().add("view");
 		
@@ -119,8 +134,8 @@ public class ViewBase extends BorderPane implements View {
 				.styleClass("header")
 				.alignment(Pos.CENTER_LEFT)
 				.children(
-					_title = LabelBuilder.create().prefWidth(60).build(),
-					_indicator = ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),
+					_title = LabelBuilder.create().prefWidth(70).build(),
+					_taskControl = new TaskControl(),
 					_dataBar = HBoxBuilder.create()
 						.id("databar")
 						.styleClass("data-bar")
@@ -137,8 +152,16 @@ public class ViewBase extends BorderPane implements View {
 					_closeButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("close_view"))).build()
 				)
 				.build();
+		
+		if (toplevel) {
+			_minmaxButton.setVisible(false);
+			_minmaxButton.setManaged(false);
+			_closeButton.setVisible(false);
+			_closeButton.setManaged(false);
+		}
 		setHeaderListeners();
 		setDatasourcesListeners();
+		setFiltersListeners();
 		
 		setTop(_header);
 		setListeners();
@@ -148,9 +171,6 @@ public class ViewBase extends BorderPane implements View {
 		_title.setText(title);
 	}
 	
-	public void setWaiting(boolean value) {
-		_indicator.setVisible(value);
-	}
 	
 	public boolean isMaximized() {
 		return _maximized;
@@ -163,6 +183,10 @@ public class ViewBase extends BorderPane implements View {
 		}
 	}
 	
+	public void setCurrentTask(Task<?> task) {
+		_taskControl.setTask(task);
+		
+	}
 	/*
 	 * Max/min button
 	 */
@@ -216,12 +240,25 @@ public class ViewBase extends BorderPane implements View {
 		_onTableDrop = action;
 	}
 	
+	public Closure.V1<Table> getOnTableDrop() {
+		return _onTableDrop;
+	}
+	
+	public void setOnTableRemoved(Closure.V1<Table> action) {
+		_onTableRemoved = action;
+		
+	}
 	public void setOnTableSelectedAction(Closure.V2<Table, Boolean> action) {
 		_onTableSelectedAction = action;
 	}
 	
 	public void setOnSelectAction(Closure.V0 action) {
 		_onSelectAction = action;
+	}
+	
+	
+	public void setOnShowFilter(Closure.V1<Filter> action) {
+		_onShowFilter = action;
 	}
 	
 	public DnD.LocalClipboard getLocalClipboard() {
@@ -231,7 +268,7 @@ public class ViewBase extends BorderPane implements View {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		ToggleButton button = ToggleButtonBuilder.create()
+		final ToggleButton button = ToggleButtonBuilder.create()
 				.styleClass("flat-toggle-button")
 				.text(table.getName().substring(0, 1))
 				.selected(active)
@@ -243,6 +280,35 @@ public class ViewBase extends BorderPane implements View {
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
 				if (_onTableSelectedAction != null)
 					_onTableSelectedAction.call(table, activate);
+			}
+		});
+		
+		button.setOnDragDetected(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				Dragboard db = button.startDragAndDrop(TransferMode.MOVE);
+				
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.TABLE_FORMAT, Table.class, table);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.putString(table.getName());
+				db.setContent(content);
+			}
+		});
+		
+		button.setOnDragDone(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				// ignore if the button was dragged onto self 
+				if (getLocalClipboard().getStatus() != Status.IGNORED) {
+					if (_onTableRemoved != null) {
+						_onTableRemoved.call(table);
+					}
+				}
+				
 			}
 		});
 		
@@ -282,12 +348,18 @@ public class ViewBase extends BorderPane implements View {
 	 */
 	
 	protected void setContent(Parent node) {
-		node.setOnMouseMoved(_onMouseMove);
+		setContent(node, true);
+	}
+	
+	protected void setContent(Parent node, boolean canMove) {
+		if (canMove)
+			node.setOnMouseMoved(_onMouseMove);
 		
 		setCenter(node);
 		VBox.setVgrow(node, Priority.NEVER);
 	}
 	
+
 	/*
 	 * 
 	 */
@@ -298,6 +370,15 @@ public class ViewBase extends BorderPane implements View {
 	protected void setActions(List<ButtonBase> actions) {
 		_actionsArea.getChildren().clear();
 		addActions(actions);
+	}
+	
+	private void fireSelectEvent() {
+		if (_onSelectAction != null) 
+			_onSelectAction.call();
+	}
+	
+	protected void enableDragging(Boolean value) {
+		_enableDragging = value;
 	}
 	
 	/*
@@ -311,14 +392,16 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				delta.x = getTranslateX() - event.getSceneX();
 				delta.y = getTranslateY() - event.getSceneY();
-				if (_onSelectAction != null)
-					_onSelectAction.call();
+				fireSelectEvent();
+				event.consume();
 			}
 		});
 		
 		_header.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
+				if (!_enableDragging) return;
+				
 //				Parent parent = view.getParent();
 //				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
 //				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
@@ -330,6 +413,7 @@ public class ViewBase extends BorderPane implements View {
 				
 				setTranslateX(delta.x+event.getSceneX()) ;
 				setTranslateY(delta.y+event.getSceneY());
+				event.consume();
 			}
 			
 		});	
@@ -337,8 +421,8 @@ public class ViewBase extends BorderPane implements View {
 		EventHandler<MouseEvent> eh = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (_onSelectAction != null)
-					_onSelectAction.call();
+				fireSelectEvent();
+				event.consume();
 			}
 		};
 		
@@ -346,26 +430,65 @@ public class ViewBase extends BorderPane implements View {
 		setOnMouseClicked(eh);
 	}
 	
+	private void setFiltersListeners() {
+		_filtersArea.setOnAction(new EventHandler<FilterEvent>() {
+			
+			@Override
+			public void handle(FilterEvent event) {
+				if (event.getEventType() == FilterEvent.SHOW) {
+					if (_onShowFilter != null) {
+						_onShowFilter.call(event.getFilter());
+					}
+				}
+				
+			}
+		});
+		
+		_filtersArea.addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				filtersInvalidated();
+			}
+		});
+	}
+	
+	public void filtersInvalidated() {
+		// to be overriden 
+	}
+	
+	public List<Filter> getFilters() {
+		return  new ArrayList<Filter>(_filtersArea.getFilters());
+	}
+	
 	private void setDatasourcesListeners() {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
-					event.acceptTransferModes(TransferMode.COPY);
-					event.consume();
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				if ( table != null ) {
+					if (_buttons.containsKey(table)) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					}
 				}
-				
+				event.consume();
 			}
 		});
 		
 		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
-					event.acceptTransferModes(TransferMode.COPY);
-					event.consume();
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				if ( table != null ) {
+					if (_buttons.containsKey(table)) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					}
 				}
-				
+				event.consume();
 			}
 		});
 		
@@ -379,9 +502,12 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setOnDragDropped(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (event.getDragboard().getContent(DnD.TABLE_FORMAT) != null) {
-					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
-					if (_onTableDrop != null) {
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
+				if (table != null) {
+					if (_buttons.containsKey(table)) {
+						getLocalClipboard().setStatus(Status.IGNORED);
+					} else 	if (_onTableDrop != null) {
+						getLocalClipboard().setStatus(Status.ACCEPTED);
 						_onTableDrop.call(table);
 						event.setDropCompleted(true);
 						event.consume();
@@ -473,7 +599,6 @@ public class ViewBase extends BorderPane implements View {
         		setTranslateX(resize.x-dx);
         		setPrefWidth(resize.width+dx);
         	} else if (resize.edge == Edge.TOP_RIGHT || resize.edge == Edge.RIGHT || resize.edge == Edge.BOTTOM_RIGHT){
-        		//setTranslateY(resize.y+dy);
         		setPrefWidth(resize.width-dx);
         	}
         	

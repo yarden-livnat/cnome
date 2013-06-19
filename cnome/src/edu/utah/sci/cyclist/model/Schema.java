@@ -25,40 +25,27 @@ package edu.utah.sci.cyclist.model;
 import java.util.List;
 import java.util.Vector;
 
-import utils.SQLUtil;
 
 import edu.utah.sci.cyclist.controller.IMemento;
+import edu.utah.sci.cyclist.model.DataType.Role;
+import edu.utah.sci.cyclist.util.SQL;
+import edu.utah.sci.cyclist.util.SQLUtil;
 
 
 
 public class Schema {
 
+	private Table _table;
 	private Vector<Field> _fields = new Vector<Field>();
 	
-	public Schema() {
-		
+	public Schema(Table table) {
+		_table = table;
 	}
 	
-	// Save the schema
-	public void save(IMemento memento) {
-
-		// Create the child memento
-		for(Field field: _fields){
-			field.save(memento.createChild("field"));
-		}
+	public Table getTable() {
+		return _table;
 	}
-
-	// Restore the schema
-	public void restore(IMemento memento) {
-
-		// Restore each field
-		IMemento[] fields = memento.getChildren("field");
-		for(IMemento field: fields){
-			Field newField = new Field();
-			newField.restore(field);
-			addField(newField);
-		}
-	}
+	
 	
 	public int size() {
 		return _fields.size();
@@ -76,6 +63,7 @@ public class Schema {
 	}
 	
 	public void addField(Field field) {
+		field.setTable(_table);
 		_fields.add(field);
 	}
 	
@@ -84,6 +72,14 @@ public class Schema {
 		_fields.addAll(list);
 	}
 
+	public boolean contain(Field field) {
+		for (Field f : _fields) {
+			if (f.similar(field))
+				return true;
+		}
+		return false;
+	}
+	
 	public void update() {
 		for (Field field : _fields) {
 			updateField(field);
@@ -102,8 +98,31 @@ public class Schema {
 		DataType dataType = new DataType(type);
 		field.setDataType(dataType);
 		
-		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
+		if (dataType.getRole() == Role.MEASURE)
+			field.set(FieldProperties.AGGREGATION_DEFAULT_FUNC, SQL.DEFAULT_FUNCTION);
+//		System.out.println("Field "+field.getName()+"  remote type:"+ remote_type_name+" ["+remote_type+"] type:"+type);
 	}
 	
-	
+
+	// Save the schema
+	public void save(IMemento memento) {
+
+		// Create the child memento
+		for(Field field: _fields){
+			field.save(memento.createChild("field"));
+		}
+	}
+
+	// Restore the schema
+	public void restore(IMemento memento) {
+
+		// Restore each field
+		IMemento[] list = memento.getChildren("field");
+		for(IMemento fieldMemento: list){
+			Field field = new Field();
+			field.setTable(_table);
+			field.restore(fieldMemento);
+			addField(field);
+		}
+	}
 }

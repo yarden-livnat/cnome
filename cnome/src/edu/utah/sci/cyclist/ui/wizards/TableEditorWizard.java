@@ -85,7 +85,8 @@ public class TableEditorWizard extends VBox {
 					.maxHeight(Double.MAX_VALUE)
 					.children(
 							TextBuilder.create().text("Select Fields:").build(),
-							_schemaView = ListViewBuilder.<Field>create()
+							_schemaView = ListViewBuilder.create(Field.class) // Java 8
+//							_schemaView = ListViewBuilder.<Field>create() // Java 7
 							.items(FXCollections.observableList(table.getFields()))
 							.maxHeight(Double.MAX_VALUE)
 						//	.prefHeight(100)	

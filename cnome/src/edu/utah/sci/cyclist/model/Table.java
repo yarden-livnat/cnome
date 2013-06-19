@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +37,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.model.DataType.Type;
+import edu.utah.sci.cyclist.util.QueryBuilder;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
@@ -59,7 +62,7 @@ public class Table {
 	
 	private String _alias;
 	private String _name;
-	private Schema _schema = new Schema();
+	private Schema _schema = new Schema(this);
 	private CyclistDatasource _datasource;
 	private Map<String, Object> _properties = new HashMap<>();
 
@@ -183,7 +186,7 @@ public class Table {
 		}
 		
 		// Restore the schema
-		Schema schema = new Schema();
+		Schema schema = new Schema(this);
 		schema.restore(memento.getChild("Schema"));
 		setSchema(schema);
 //		extractSchema();
@@ -201,6 +204,7 @@ public class Table {
 				String colName = rs.getString("COLUMN_NAME");
 			
 				Field field = new Field(colName);
+				field.setTable(this);
 				field.set(FieldProperties.REMOTE_NAME, colName);
 				field.set(FieldProperties.REMOTE_DATA_TYPE, rs.getInt("DATA_TYPE"));
 				field.set(FieldProperties.REMOTE_DATA_TYPE_NAME, rs.getString("TYPE_NAME"));
@@ -362,6 +366,11 @@ public class Table {
 		return _rows;
 	}
 
+	
+	public QueryBuilder queryBuilder() {
+		return new QueryBuilder(this);
+	}
+	
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
 		final CyclistDatasource ds = getDataSource();
 		
@@ -404,6 +413,119 @@ public class Table {
 		return task.valueProperty();
 	}
 	
+	public Task<ObservableList<Object>> getFieldValues(final Field field) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableList<Object>> task = new Task<ObservableList<Object>>() {
+			@Override
+			protected ObservableList<Object> call() throws Exception {
+				List<Object> values = new ArrayList<>();
+				try {
+					updateMessage("connecting");
+					Connection conn = ds.getConnection();
+					
+					updateMessage("querying");
+					System.out.println("querying");
+					long t1 = System.currentTimeMillis();
+					Statement stmt = conn.createStatement();
+					
+					// TODO: Fix this hack
+					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName());
+					long t2 = System.currentTimeMillis();
+					System.out.println("time: "+(t2-t1)/1000.0);
+					
+					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
+						
+						values.add(rs.getObject(1));
+					}
+					
+					long t3 = System.currentTimeMillis();
+					System.out.println("gathering time: "+(t3-t2)/1000.0);
+				} catch (SQLException e) {
+					System.out.println("task sql exception: "+e.getLocalizedMessage());
+					updateMessage(e.getLocalizedMessage());
+					throw new Exception(e.getMessage(), e);
+				}
+				
+				return FXCollections.observableList(values);
+			}
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task;
+	}
+	
+	public Task<ObservableList<Row>> getRows(final String query) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+
+			@Override
+			protected ObservableList<Row> call() throws Exception {
+				List<Row> rows = new ArrayList<>();
+				try {
+					updateMessage("connecting");
+					Connection conn = ds.getConnection();
+					
+					updateMessage("querying");
+					
+//					PreparedStatement stmt = conn.prepareStatement(query);
+//					ResultSet rs = stmt.executeQuery()
+					
+					System.out.println("querying");
+					long t1 = System.currentTimeMillis();
+					Statement stmt = conn.createStatement();
+					ResultSet rs = stmt.executeQuery(query);
+					long t2 = System.currentTimeMillis();
+					System.out.println("time: "+(t2-t1)/1000.0);
+					ResultSetMetaData rmd = rs.getMetaData();
+					
+					int cols = rmd.getColumnCount();
+					updateProgress(0, Long.MAX_VALUE);
+					int n=0;
+					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
+						Row row = new Row(cols);
+						for (int i=0; i<cols; i++) {
+							row.value[i] = rs.getObject(i+1);
+						}
+						rows.add(row);
+						n++;
+						if (n % 1000 == 0) {
+							updateMessage(n+" rows");
+						}
+					}
+					long t3 = System.currentTimeMillis();
+					System.out.println("gathering time: "+(t3-t2)/1000.0);
+				}catch (SQLException e) {
+					System.out.println("task sql exception: "+e.getLocalizedMessage());
+					updateMessage(e.getLocalizedMessage());
+					throw new Exception(e.getMessage(), e);
+				}
+				
+				return FXCollections.observableList(rows);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task;
+	}
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int limit) {
 		final CyclistDatasource ds = getDataSource();
 		

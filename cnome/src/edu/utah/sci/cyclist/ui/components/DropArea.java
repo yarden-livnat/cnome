@@ -1,13 +1,20 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -15,15 +22,20 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.FieldProperties;
+import edu.utah.sci.cyclist.model.Table;
 
-public class DropArea extends HBox {
+public class DropArea extends HBox implements Observable {
 	
 	public enum Policy {SINGLE, MULTIPLE};
 	
 	private ObjectProperty<ObservableList<Field>> _fieldsProperty = new SimpleObjectProperty<>();
 	private Policy _policy;
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
+	private List<InvalidationListener> _listeners = new ArrayList<>();
 	
 	public DropArea(Policy policy) {
 		_policy = policy;
@@ -45,8 +57,27 @@ public class DropArea extends HBox {
 		_policy = policy;
 	}
 	
+	public ObjectProperty<Table> tableProperty() {
+		return _tableProperty;
+	}
+	
 	public ObservableList<Field> getFields() {
 		return _fieldsProperty.get();
+	}
+	
+	public boolean isValid() {
+		for (Node node : getChildren()) {
+			FieldGlyph glyph = (FieldGlyph) node;
+			if (glyph.isDisabled())
+				return false;
+		}
+		
+		return true;
+	}
+	
+	public String getFieldTitle(int index) {
+		FieldGlyph glyph = (FieldGlyph) getChildren().get(index);
+		return glyph.getTitle();
 	}
 	
 	private void build() {		
@@ -99,6 +130,12 @@ public class DropArea extends HBox {
 				boolean status = false;
 
 				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+				if (event.getAcceptedTransferMode() == TransferMode.COPY) {
+					field = field.clone();
+					if (field.getString(FieldProperties.AGGREGATION_FUNC) == null) {
+						field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
+					}
+				}
 				if (field != null) {
 					if (getFields().size() == 0) {
 						getFields().add(field);
@@ -111,7 +148,6 @@ public class DropArea extends HBox {
 					status = true;			
 				}
 				
-//					System.out.println("set drag completed to "+status+". string:"+event.getDragboard().getString());
 				event.setDropCompleted(status);
 				event.consume();				
 			}
@@ -146,6 +182,11 @@ public class DropArea extends HBox {
 										
 										ClipboardContent content = new ClipboardContent();
 										content.putString(field.getName());
+										
+										SnapshotParameters snapParams = new SnapshotParameters();
+							            snapParams.setFill(Color.TRANSPARENT);
+							            
+							            content.putImage(glyph.snapshot(snapParams, null));	
 										db.setContent(content);
 										
 //										glyph.setManaged(false);
@@ -170,11 +211,29 @@ public class DropArea extends HBox {
 //										}
 									}
 								});
+								
+								glyph.setOnAction(new EventHandler<ActionEvent>() {
+
+									@Override
+									public void handle(ActionEvent event) {
+										fireInvalidationEvent();
+									}
+								});
+								
+								glyph.validProperty().bind(tableProperty().isEqualTo(field.tableProperty()));
 							}
+							
+							fireInvalidationEvent();
 						}
 				});
 			}
 		});
+	}
+	
+	private void fireInvalidationEvent() {
+		for (InvalidationListener listener : _listeners) {
+			listener.invalidated(DropArea.this);
+		}
 	}
 	
 	private void init() {
@@ -183,5 +242,17 @@ public class DropArea extends HBox {
 
 	private DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
+	}
+
+	@Override
+	public void addListener(InvalidationListener listener) {
+		if (!_listeners.contains(listener))
+			_listeners.add(listener);
+		
+	}
+
+	@Override
+	public void removeListener(InvalidationListener listener) {
+		_listeners.remove(listener);
 	}
 }

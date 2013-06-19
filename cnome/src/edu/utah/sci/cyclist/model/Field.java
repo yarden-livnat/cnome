@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 
@@ -36,6 +38,7 @@ public class Field {
 	private String _name;
 	private DataType _dataType;
 	private BooleanProperty _selected;
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
 	
 	private Map<String, Object> _properties = new HashMap<>();
 
@@ -55,7 +58,18 @@ public class Field {
 		return _name;
 	}
 
-
+	public ObjectProperty<Table> tableProperty() {
+		return _tableProperty;
+	}
+	
+	public void setTable(Table table) {
+		_tableProperty.set(table);
+	}
+	
+	public Table getTable() {
+		return _tableProperty.get();
+	}
+	
 	public String getDataTypeName() {
 		return (String) _properties.get(FieldProperties.DATA_TYPE_NAME);
 	}
@@ -66,6 +80,11 @@ public class Field {
 
 	public Object get(String property) {
 		return _properties.get(property);
+	}
+	
+	public <T> T get(String key, Class<T> type) {
+		Object value = _properties.get(key);
+		return value == null ? null : type.cast(value);
 	}
 	
 	public String getString(String property) {
@@ -103,6 +122,10 @@ public class Field {
 	
 	public String toString() {
 		return _name;
+	}
+	
+	public boolean similar(Field field) {
+		return getName().equals(field.getName()) && getType() == field.getType();
 	}
 	
 	// Save this field
@@ -192,7 +215,7 @@ public class Field {
 				System.out.println("Field:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
 			}	
 		}	
-		}catch(NullPointerException e){
+		} catch(NullPointerException e){
 			
 		}
 	}
@@ -203,6 +226,19 @@ public class Field {
 	
 	public void setSelectedProperty(boolean selected){
 		_selected.set(selected);
+	}
+	
+	public Field clone() {
+		Field copy = new Field(getName());
+		
+		copy._dataType = new DataType(_dataType);
+		copy._selected = _selected;
+		copy.setTable(getTable()); 
+		for (Map.Entry<String, Object> entry : _properties.entrySet()) {
+			copy._properties.put(entry.getKey(), entry.getValue());
+		}
+		
+		return copy;
 	}
 	
 }

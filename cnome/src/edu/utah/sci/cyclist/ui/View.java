@@ -24,6 +24,7 @@ package edu.utah.sci.cyclist.ui;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
@@ -34,8 +35,10 @@ public interface View {
 	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
 	
 	void setOnTableDrop(Closure.V1<Table> action);
+	void setOnTableRemoved(Closure.V1<Table> action);
 	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
 	void setOnSelectAction(Closure.V0 action);
+	void setOnShowFilter(Closure.V1<Filter> action);
 	
 	void addTable(Table table, boolean remote, boolean active);
 	void removeTable(Table table);

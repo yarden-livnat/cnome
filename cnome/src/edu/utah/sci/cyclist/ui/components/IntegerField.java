@@ -1,12 +1,11 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 
@@ -15,8 +14,16 @@ public class IntegerField extends TextField {
 	private IntegerProperty _value;
 	private int _min;
 	private int _max;
+	private boolean _valid = true;
 	
 	public int getValue() { 
+		if (!_valid) {
+			_valid = true;
+			int i = -1;
+			if (!"".equals(getText())) 
+				i = Integer.parseInt(getText());
+			_value.set(i);
+		}
 		return _value.getValue(); 
 	}
 	
@@ -34,6 +41,8 @@ public class IntegerField extends TextField {
 	
 	public IntegerField(int min, int max, Integer value)  {
 		super();
+		
+		setPromptText("no limit");
 		_min = min;
 		_max = max;
 		
@@ -57,8 +66,18 @@ public class IntegerField extends TextField {
 			
 			@Override
 			public void handle(ActionEvent event) {
-				int i = Integer.parseInt(getText());
+				int i = -1;
+				if (!"".equals(getText())) 
+					i = Integer.parseInt(getText());
 				_value.set(i);
+			}
+		});
+		
+		textProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				_valid = false;
 			}
 		});
 		

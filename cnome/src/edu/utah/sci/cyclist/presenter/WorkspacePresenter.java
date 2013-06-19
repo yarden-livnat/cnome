@@ -27,18 +27,22 @@ import java.util.List;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
+import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.ui.views.FilterPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 
 public class WorkspacePresenter extends PresenterBase {
@@ -80,6 +84,15 @@ public class WorkspacePresenter extends PresenterBase {
 				
 			});
 			
+			workspace.setOnTableRemoved(new Closure.V1<Table>() {
+				@Override
+				public void call(Table table) {
+					removeTable(table);
+					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
+					getSelectionModel().removeTable(table);
+				}
+			});
+			
 			workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
 
 				@Override
@@ -115,8 +128,7 @@ public class WorkspacePresenter extends PresenterBase {
 	 * addListeners
 	 */
 	private void addListeners() {
-		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {
-			
+		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {	
 			@Override
 			public void handle(CyclistNotification event) {
 				String id = ((SimpleNotification)event).getMsg();
@@ -128,6 +140,26 @@ public class WorkspacePresenter extends PresenterBase {
 					}
 				}
 				
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.VIEW_SELECTED, new CyclistNotificationHandler() {
+			@Override
+			public void handle(CyclistNotification event) {
+				View view = ((CyclistViewNotification)event).getView();
+				getWorkspace().selectView(view);
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				Filter filter = ((CyclistFilterNotification)event).getFilter();
+				
+				System.out.println("show filter:"+filter.getName());
+				FilterPanel panel = new FilterPanel(filter);
+				getWorkspace().addPanel(panel);
 			}
 		});
 		

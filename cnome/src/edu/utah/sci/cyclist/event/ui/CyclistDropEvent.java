@@ -27,8 +27,8 @@ import javafx.event.Event;
 import javafx.event.EventType;
 
 public class CyclistDropEvent extends CyclistEvent {
-	private static final long serialVersionUID = 1L;
-
+	private static final long serialVersionUID = 119736699487888637L;
+	
 	public static final EventType<CyclistDropEvent> DROP = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DROP");
 	public static final EventType<CyclistDropEvent> DROP_DATASOURCE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DROP_DATASOURCE");
 	

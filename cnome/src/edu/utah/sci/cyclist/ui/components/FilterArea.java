@@ -1,5 +1,8 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
@@ -7,22 +10,28 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Filter;
 
-public class FilterArea extends ToolBar {
+public class FilterArea extends ToolBar implements Observable {
 	
 	private ObjectProperty<ObservableList<Filter>> _filtersProperty = new SimpleObjectProperty<>();
+	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
+	private List<InvalidationListener> _listeners = new ArrayList<>();
 	
 	public FilterArea() {
 		build();
@@ -37,15 +46,33 @@ public class FilterArea extends ToolBar {
 		return _filtersProperty.get();
 	}
 	
+	public ObjectProperty<EventHandler<FilterEvent>> onAction() {
+		return _action;
+	}
+	
+	public void setOnAction( EventHandler<FilterEvent> handler) {
+		_action.set(handler);
+	}
+	
+	public EventHandler<FilterEvent> getOnAction() {
+		return _action.get();
+	}
+	
+	@Override
+	public void addListener(InvalidationListener listener) {
+		if (!_listeners.contains(listener))
+			_listeners.add(listener);
+		
+	}
+
+	@Override
+	public void removeListener(InvalidationListener listener) {
+		_listeners.remove(listener);
+	}
+	
 	private void build() {
-//		HBoxBuilder.create()
-//		.spacing(0)
-//		.padding(new Insets(2))
-//		.minWidth(30)
-//		.prefHeight(27)
-//		.styleClass("drop-area")
-//		.applyTo(this);
 		setPrefHeight(25);
+		setMinWidth(50);
 		getStyleClass().add("drop-area");
 		setOrientation(Orientation.HORIZONTAL);
 		
@@ -122,17 +149,25 @@ public class FilterArea extends ToolBar {
 								}
 							}
 						}
-						
 					}
 					
 				});
+			
+				// inform listeners filter list is invalidated
+				fireInvalidationEvent();
 			}
 		});
 	}
 	
 	private Filter createFilter(Field field) {
 		Filter filter = new Filter(field);
-		
+		filter.addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				fireInvalidationEvent();
+			}
+		});
 		return filter;
 	}
 	
@@ -151,6 +186,12 @@ public class FilterArea extends ToolBar {
 				
 				ClipboardContent content = new ClipboardContent();
 				content.putString(field.getName());
+				
+				SnapshotParameters snapParams = new SnapshotParameters();
+	            snapParams.setFill(Color.TRANSPARENT);
+	            
+	            content.putImage(glyph.snapshot(snapParams, null));	
+				
 				db.setContent(content);
 				
 //				getChildren().remove(glyph);
@@ -164,7 +205,25 @@ public class FilterArea extends ToolBar {
 			public void handle(DragEvent event) {
 			}
 		});
+		
+		
+		glyph.setOnAction(new EventHandler<FilterEvent>() {
+			@Override
+			public void handle(FilterEvent event) {
+				if (event.getEventType() == FilterEvent.SHOW) {
+					if (getOnAction() != null) {
+						getOnAction().handle(event);
+					}
+				}
+			}
+		});
 		return glyph;
+	}
+	
+	private void fireInvalidationEvent() {
+		for (InvalidationListener listener : _listeners) {
+			listener.invalidated(FilterArea.this);
+		}
 	}
 	
 	private void init() {

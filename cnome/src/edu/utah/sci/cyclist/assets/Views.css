@@ -1,0 +1,169 @@
+
+/*
+ * --- Workspace
+ */
+.workspace-pane {
+	/*-fx-background-color: #f04590;*/
+}
+
+.datasources-list {
+	-fx-background-color:  #ffff00;
+}
+
+/*
+ *  Panel
+ */
+.cnome-panel {
+	/*-fx-background-color:  #f000ff;*/
+	-fx-fill-width: true;
+}
+
+.cnome-panel .header {
+	-fx-background-color:  #e0e0e0;
+	/*-fx-border-color: #000000;*/
+	-fx-font-weight: bold;
+	-fx-font-size:11;
+	-fx-padding: 2;
+	-fx-border-radius: 10 3 0 0;
+}
+
+.cnome-panel .pane {
+	-fx-background-color:  #ffffff;
+	-fx-fit-to-height: true;
+	-fx-border-color: #a0a0a0;
+	-fx-border-radius: 0 0 3 3;
+}
+
+.cnome-panel .panel-vbox {
+	/*-fx-background-color:  #ff0000;*/
+	-fx-spacing: 2;
+	-fx-fill-width: true;
+	-fx-border-width: 0;
+	-fx-background-insets: 0;
+}
+
+/* 
+ * View
+ */
+.view {
+	-fx-padding: 4;
+	-fx-spacing: 5;
+	-fx-background-color: #ffffff;
+	-fx-background-radius: 5;
+	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );
+	-fx-border-color: #d0d0d0;
+}
+
+.view .header {
+	-fx-background-color: #f0f0f0;
+	-fx-font-weight: bold;
+
+}
+
+.view .data-bar {
+	-fx-background-color: #e0e0e0;
+	/*-fx-border-color: #d0d0d0;*/
+}
+
+
+.view .chart-view {
+	-fx-background-color: #ffffff;
+}
+
+.drop-area {
+	-fx-background-color: #f0f0f0;
+	-fx-spacing: 2;
+	-fx-padding: 1;
+	/*-fx-pref-height: 27;*/
+	-fx-min-height: 20;
+}
+
+
+
+/*
+ * Glyphs
+ */
+ 
+.field-glyph {
+	-active-bg: #FEE391;
+	-inactive-bg: #FF9900;
+	-fx-background-color: -active-bg;
+	-fx-border-color: #bbbbbb;
+	-fx-border-radius: 5;
+	-fx-background-radius: 5;
+	-fx-spacing: 4;
+ 	-fx-padding: 1 2 2 2; 
+ 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+}
+
+.field-glyph .text {
+	
+}
+
+.field-glyph .arrow {
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-background-color: transparent;
+    -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
+    -fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.field-glyph:hover .arrow {
+    -fx-background-color: -fx-mark-color, #FFFFFF;
+}
+
+
+.filter-glyph {
+	-fx-background-color: #ccff33;
+	-fx-border-color: #303030;
+	-fx-border-radius: 5;
+	-fx-background-radius: 5;
+	-fx-spacing: 4;
+ 	-fx-padding: 2 3 3 3; 
+ 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+}
+
+/*
+ * Line Charts
+ */
+.top-line-chart{
+	-fx-background-color:  transparent;
+   	-fx-alternative-row-fill-visible: false;
+	-fx-vertical-grid-lines-visible: false;   	   	
+	-fx-horizontal-grid-lines-visible: false;  
+	-fx-vertical-zero-line-visible: false;
+	-fx-horizontal-zero-line-visible: false; 	
+}
+.top-line-chart .chart-plot-background{
+	 -fx-background-color:  transparent;
+}
+.top-line-chart .default-color0.chart-series-line { -fx-stroke: darkorange; }
+
+
+.default-color0.chart-series-line { -fx-stroke: darkseagreen; }
+
+
+/*
+ * --- Wizards ---
+ */
+ 
+/*
+ * Workspace Wizard
+ */
+ .workspace-wizard {
+ 	-fx-background-radius: 4;
+	-fx-border-color: #b0b0b0;
+ 	-fx-background-color:  #f0f0f0;
+ 	-fx-vgap: 5;
+ 	-fx-padding: 5;
+ 	-fx-spacing: 5;
+ /* 	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 ); */
+ }
+  
+.workspace-wizard-header {
+	-fx-background-color:  #ffffff;
+}
+
+.worksapce-wizard-buttons {
+	-fx-spacing: 10;
+	-fx-padding:  5;
+}

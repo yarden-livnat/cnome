@@ -45,6 +45,15 @@ public class ChartPresenter extends PresenterBase {
 				addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 			}
 		});
+		
+		getView().setOnTableRemoved(new Closure.V1<Table>() {
+
+			@Override
+			public void call(Table table) {
+				removeTable(table);			
+			}
+			
+		});
 	}
 	
 	/**

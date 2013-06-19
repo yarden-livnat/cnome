@@ -40,6 +40,10 @@ public class Resources {
 	
 	private static Map<String, Image> _icons = new HashMap<String, Image>();
 	
+	public static String getCSS(String name) {
+		return Resources.class.getResource(name).toExternalForm();
+	}
+	
 	/**
 	 * Find an icon
 	 * @param name

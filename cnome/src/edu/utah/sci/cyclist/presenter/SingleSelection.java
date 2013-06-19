@@ -27,6 +27,13 @@ public class SingleSelection extends SelectionModel {
 		}
 	}
 	
+	
+	@Override
+	public void removeTable(Table table) {
+		selectTable(table, false);
+		super.removeTable(table);
+	}
+	
 	/**
 	 * 
 	 */
@@ -68,7 +75,7 @@ public class SingleSelection extends SelectionModel {
 	public void tableSelected(Table table, boolean active) {
 		//System.out.println("tableSelected: "+table.getName()+"  active:"+active);
 		Entry entry = getEntry(table);
-		if (entry.active == active) {
+		if (entry == null || entry.active == active) {
 			// ignore
 		} else if (active) {
 			if (_current != entry && _current != null) {

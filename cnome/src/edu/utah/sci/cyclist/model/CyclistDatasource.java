@@ -37,7 +37,8 @@ import javax.sql.DataSource;
 import edu.utah.sci.cyclist.controller.IMemento;
 
 public class CyclistDatasource implements DataSource {
-	
+	static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CyclistDatasource.class);
+
 	private Properties _properties = new Properties();
 	private transient PrintWriter _logger;
 	private String _url;
@@ -78,6 +79,15 @@ public class CyclistDatasource implements DataSource {
 			else	
 				_properties.setProperty(key, value);
 		}	
+		
+		// sqlite hack
+		if ("SQLite".equals(_properties.getProperty("type"))) {
+			try {
+				Class.forName("org.sqlite.JDBC");
+			} catch (ClassNotFoundException e) {
+				log.warn("Can not load sqlite driver", e);
+			}
+		}
 	}
 
 	@Override

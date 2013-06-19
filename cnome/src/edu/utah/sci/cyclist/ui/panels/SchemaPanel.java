@@ -11,6 +11,7 @@ import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
@@ -20,6 +21,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType;
@@ -87,9 +89,15 @@ public class SchemaPanel extends Panel {
 				
 				ClipboardContent content = new ClipboardContent();
 				content.putString(_id);
-				content.putImage(Resources.getIcon("field"));
+				
+				SnapshotParameters snapParams = new SnapshotParameters();
+//	            snapParams.setFill(Color.TRANSPARENT);
+	            snapParams.setFill(Color.AQUA);
+	            
+	            content.putImage(entry.label.snapshot(snapParams, null));	            
 				
 				db.setContent(content);
+				event.consume();
 			}
 		});
 		
@@ -112,13 +120,13 @@ public class SchemaPanel extends Panel {
 	
 	
 	private void addListeners() {
-		getContent().setOnDragEntered(new EventHandler<DragEvent>() {
+		getPane().setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
 				event.consume();
 			}
 		});
 		
-		getContent().setOnDragOver(new EventHandler<DragEvent>() {
+		getPane().setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				
@@ -130,13 +138,13 @@ public class SchemaPanel extends Panel {
 			}
 		});
 		
-		getContent().setOnDragExited(new EventHandler<DragEvent>() {
+		getPane().setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				event.consume();
 			}
 		});
 			
-		getContent().setOnDragDropped(new EventHandler<DragEvent>() {
+		getPane().setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);

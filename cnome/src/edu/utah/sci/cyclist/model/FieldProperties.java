@@ -34,4 +34,7 @@ public class FieldProperties {
 	
 	public static final String FIELD_ACTION_SUM			= "field_action_sum";
 	public static final String FIELD_ACTION_AVG			= "field_action_avg";
+	
+	public static final String AGGREGATION_FUNC 		= "field_aggregation_function";
+	public static final String AGGREGATION_DEFAULT_FUNC = "field_aggregation_default_function";
 }

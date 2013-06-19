@@ -85,6 +85,8 @@ public class SchemaPresenter  extends PresenterBase {
 			public void handle(CyclistNotification notification) {
 				CyclistTableNotification tableNotification = (CyclistTableNotification) notification;
 				Table table = tableNotification.getTable();
+//				System.out.println("SchemaPresenter: received Datasource focus from:"+tableNotification.getSource()+"  table:"+table);
+
 				_schema = table.getSchema();
 				
 				_dimensions = FXCollections.observableArrayList();
