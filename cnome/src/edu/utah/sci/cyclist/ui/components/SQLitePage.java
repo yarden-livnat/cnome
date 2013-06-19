@@ -38,6 +38,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.GridPaneBuilder;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.FileChooser;
 
@@ -85,30 +87,34 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 	private void build() {
 		GridPaneBuilder.create()
 			.vgap(10)
-			.hgap(5)
+			.hgap(35)
 			.padding(new Insets(10,3,10,3))
 			.applyTo(this);
 
 		String path = _ds.getProperties().getProperty("path");
 		if (path == null) path = "";
 
-		 _path = TextFieldBuilder.create().text(path).build();
-
+		 _path = TextFieldBuilder.create().text(path).prefWidth(125).build();
+		 
+		 HBox textBox = HBoxBuilder.create()
+				 .children(
+				 _path, 
+				 ButtonBuilder.create()
+				 .text("...")
+				 .onAction(new EventHandler<ActionEvent>() {
+					 @Override
+					 public void handle(ActionEvent event) {
+						 FileChooser chooser = new FileChooser();
+						 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
+						 File file = chooser.showOpenDialog(null);
+						 if (file != null)
+							 _path.setText(file.getPath());
+					 }
+				 })
+				 .build()
+				 ).build(); 
+		 
 		add(TextBuilder.create().text("File:").build(), 0, 0);
-		add(_path, 1, 0);
-		add(ButtonBuilder.create()
-				.text("...")
-				.onAction(new EventHandler<ActionEvent>() {
-					@Override
-					public void handle(ActionEvent event) {
-						FileChooser chooser = new FileChooser();
-						chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
-						File file = chooser.showOpenDialog(null);
-						if (file != null)
-							_path.setText(file.getPath());
-					}
-				})
-				.build(),
-			2, 0);
+		add(textBox, 1, 0);
 	}
 }
