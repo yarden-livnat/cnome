@@ -118,8 +118,8 @@ public class WorkspaceWizard extends VBox {
 				.padding(new Insets(5))
 				.spacing(10)
 				.children(
-						cb = ComboBoxBuilder.create(String.class) // Java 8
-//						cb = ComboBoxBuilder.<String>create()     // Java 7
+						//cb = ComboBoxBuilder.create(String.class) // Java 8
+						cb = ComboBoxBuilder.<String>create()     // Java 7
 						.prefWidth(200)
 						.editable(true)
 						.value(current)
