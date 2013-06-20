@@ -57,14 +57,18 @@ public class SimpleTableView extends ViewBase {
 	private void build() {
 		setTitle(TITLE);
 		
-		_tableView = TableViewBuilder.create(Table.Row.class) // Java 8
+//		_tableView = TableViewBuilder.create(Table.Row.class) // Java 8
 //		_tableView = TableViewBuilder.<Table.Row>create()
-				.styleClass("simple-table-view")
-				.prefWidth(300)
-				.prefHeight(200)
-				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
-				.build();
+//				.styleClass("simple-table-view")
+//				.prefWidth(300)
+//				.prefHeight(200)
+//				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
+//				.build();
 		
+		_tableView = new TableView<Table.Row>();
+		_tableView.getStyleClass().add("simple-table-view");
+		_tableView.setPrefSize(300, 200);
+		_tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		setContent(_tableView);
 		VBox.setVgrow(_tableView, Priority.NEVER);
 	}
@@ -104,25 +108,25 @@ public class SimpleTableView extends ViewBase {
 	
 	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
 		
-		return TableColumnBuilder.create(Table.Row.class, Object.class) // Java 8
+//		return TableColumnBuilder.create(Table.Row.class, Object.class) // Java 8
 //		return TableColumnBuilder.<Table.Row, Object>create() // Java 7
+//				.text(field.getName())
+//				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
+//
+//					@Override
+//					public ObservableValue<Object> call(CellDataFeatures<Row, Object> cell) {
+//						return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
+//							
+//							@Override
+//							public Object getValue() {
+//								Row row = (Row) getBean();
+//								return row.value[col];
+//							}
+//						};
+//					}
+//				
+//				})
 
-				.text(field.getName())
-				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
-
-					@Override
-					public ObservableValue<Object> call(CellDataFeatures<Row, Object> cell) {
-						return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
-							
-							@Override
-							public Object getValue() {
-								Row row = (Row) getBean();
-								return row.value[col];
-							}
-						};
-					}
-				
-				})
 ////					new PropertyValueFactory<Table.Row, T>(field.getName()))
 ////				.cellFactory(new Callback<TableColumn<Row,T>, TableCell<Row,T>>() {
 ////
@@ -131,7 +135,26 @@ public class SimpleTableView extends ViewBase {
 ////						return new GenericCell<T>(field);
 ////					}
 ////				})
-				.build();
+//				.build();
+				
+		TableColumn<Table.Row, Object> tc = new TableColumn<>();
+		tc.setText(field.getName());
+		tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
+			@Override
+			public ObservableValue<Object> call(CellDataFeatures<Row, Object> cell) {
+				return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
+					
+					@Override
+					public Object getValue() {
+						Row row = (Row) getBean();
+						return row.value[col];
+					}
+				};
+			}
+		});		
+		
+		return tc;
+					
 	}
 	
 	class GenericCell<T> extends TableCell<Table.Row, T> {

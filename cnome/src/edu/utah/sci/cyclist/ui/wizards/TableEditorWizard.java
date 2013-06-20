@@ -24,6 +24,7 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -84,16 +85,20 @@ public class TableEditorWizard extends VBox {
 					.alignment(Pos.CENTER_LEFT)
 					.maxHeight(Double.MAX_VALUE)
 					.children(
-							TextBuilder.create().text("Select Fields:").build(),
-							_schemaView = ListViewBuilder.create(Field.class) // Java 8
+							new Text("Select Fields:"),
+							_schemaView = new ListView<>()
+//							TextBuilder.create().text("Select Fields:").build(),
+//							_schemaView = ListViewBuilder.create(Field.class) // Java 8
 //							_schemaView = ListViewBuilder.<Field>create() // Java 7
-							.items(FXCollections.observableList(table.getFields()))
-							.maxHeight(Double.MAX_VALUE)
-						//	.prefHeight(100)	
-							.build()							)
+//							.items(FXCollections.observableList(table.getFields()))
+//							.maxHeight(Double.MAX_VALUE)
+//						//	.prefHeight(100)	
+//							.build()							
+					)
 					.build();		
 		
-		
+			_schemaView.setItems(FXCollections.observableList(table.getFields()));
+			_schemaView.setMaxHeight(Double.MAX_VALUE);
 			VBox.setVgrow(_schemaView, Priority.ALWAYS);
 			
 			Callback<Field, ObservableValue<Boolean>> getProperty = new Callback<Field, ObservableValue<Boolean>>() {
