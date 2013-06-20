@@ -34,6 +34,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -430,6 +431,10 @@ public class ViewBase extends BorderPane implements View {
 		setOnMouseClicked(eh);
 	}
 	
+	public ObservableList<Filter> getFilters() {
+		return _filtersArea.getFilters();
+	}
+	
 	private void setFiltersListeners() {
 		_filtersArea.setOnAction(new EventHandler<FilterEvent>() {
 			
@@ -443,22 +448,6 @@ public class ViewBase extends BorderPane implements View {
 				
 			}
 		});
-		
-		_filtersArea.addListener(new InvalidationListener() {
-			
-			@Override
-			public void invalidated(Observable arg0) {
-				filtersInvalidated();
-			}
-		});
-	}
-	
-	public void filtersInvalidated() {
-		// to be overriden 
-	}
-	
-	public List<Filter> getFilters() {
-		return new ArrayList<Filter>(_filtersArea.getFilters());
 	}
 	
 	private void setDatasourcesListeners() {

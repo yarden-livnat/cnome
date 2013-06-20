@@ -41,7 +41,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.tools.ToolFactory;
 
-public class ToolsPanel extends Panel {
+public class ToolsPanel extends TitledPanel {
 	public static final String ID 		= "tools-panel";
 	public static final String TITLE	= "Views";
 	

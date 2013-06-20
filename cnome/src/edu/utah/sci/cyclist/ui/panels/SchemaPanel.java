@@ -27,7 +27,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.Field;
 
-public class SchemaPanel extends Panel {
+public class SchemaPanel extends TitledPanel {
 		
 	private String _id;
 	private ObservableList<Field> _fields;

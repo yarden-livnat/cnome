@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -19,6 +20,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.HPos;
@@ -47,6 +49,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -104,14 +107,6 @@ public class ChartView extends ViewBase {
 			_currentTableProperty.set(table);
 		}
 		
-		fetchData();
-	}
-	
-	@Override
-	public void filtersInvalidated() {
-		super.filtersInvalidated();
-		
-		invalidate();
 		fetchData();
 	}
 	
@@ -321,7 +316,7 @@ public class ChartView extends ViewBase {
 		List<SeriesDataPoint> points = new ArrayList<>();
 	}
 	
-	private void assignData2(MapSpec spec, ObservableList<Row> list) {
+	private void assignData(MapSpec spec, ObservableList<Row> list) {
 		if (list.size() == 0) {
 			System.out.println("no data");
 			return;
@@ -665,8 +660,26 @@ public class ChartView extends ViewBase {
 				
 				if (newValue != null) {
 					//assignData(newValue);
-					assignData2(_spec, newValue);
+					assignData(_spec, newValue);
 				}
+			}
+		});
+		
+		getFilters().addListener(new ListChangeListener<Filter>() {
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+				System.out.println("filters list changed");
+				while (change.next()) {
+					for (Filter f : change.getRemoved()) {
+						f.removeListener(_filterListener);
+					}
+					for (Filter f : change.getAddedSubList()) {
+						f.addListener(_filterListener);
+					}
+				}
+				invalidate();
+				fetchData();
 			}
 		});
 	}
@@ -688,6 +701,17 @@ public class ChartView extends ViewBase {
 				
 		return grid;
 	}
+	
+	private InvalidationListener _filterListener = new InvalidationListener() {
+		
+		@Override
+		public void invalidated(Observable o) {
+			Filter f = (Filter) o;
+			System.out.println("filter cahnged: "+f.getName());
+			invalidate();
+			fetchData();
+		}
+	};
 	
 	private InvalidationListener _areaLister = new InvalidationListener() {
 	

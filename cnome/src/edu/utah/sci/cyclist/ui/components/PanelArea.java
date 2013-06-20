@@ -1,6 +1,6 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import edu.utah.sci.cyclist.ui.panels.Panel;
+import edu.utah.sci.cyclist.ui.panels.TitledPanel;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
@@ -16,15 +16,15 @@ public class PanelArea extends VBox {
 		build();
 	}
 	
-	public void add(Panel panel) {
+	public void add(TitledPanel panel) {
 		_sp.getItems().add(panel);
 	}
 	
-	public void remove(Panel panel) {
+	public void remove(TitledPanel panel) {
 		_sp.getItems().remove(panel);
 	}
 	
-	public void show(Panel panel, boolean visible) {
+	public void show(TitledPanel panel, boolean visible) {
 		panel.setManaged(visible);
 		panel.setVisible(visible);
 	}

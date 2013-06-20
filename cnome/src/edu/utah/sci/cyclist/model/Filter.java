@@ -6,7 +6,6 @@ import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,6 +15,9 @@ import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.DataType.Type;
 
 public class Filter implements Observable {
+	
+	private boolean _valid = true;
+	private String _value = "true";
 	private Field _field;
 	private DataType _dataType;
 	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
@@ -38,6 +40,7 @@ public class Filter implements Observable {
 				else
 					_selectedItems.clear();
 				_values.set(_field.getValues());
+				invalidate();
 			}
 		});
 	}
@@ -87,24 +90,21 @@ public class Filter implements Observable {
 	}
 	
 	public void selectValue(Object value, boolean select) {
-		boolean changed = false;
 		if (select) {
-			if (!_selectedItems.contains(value)) {
-				_selectedItems.add(value);
-				changed = true;
-			}
+			_selectedItems.add(value);
 		} else {
-			changed = _selectedItems.remove(value);
+			_selectedItems.remove(value);
 		}
-		
-		if (changed)
-			fireInvalidationEvent();
+		invalidate();
 	}
 
 	public void selectAll(boolean value) {
 		if (value) {
 			_selectedItems.addAll(_values);
+		} else {
+			_selectedItems.clear();
 		}
+		invalidate();
 	}
 	
 	@Override
@@ -119,31 +119,44 @@ public class Filter implements Observable {
 		_listeners.remove(listener);
 	}
 	
-	private void fireInvalidationEvent() {
-		for (InvalidationListener listener : _listeners) {
-			listener.invalidated(Filter.this);
+	private void invalidate() {
+		if (_valid) {
+			_valid = false;
+			for (InvalidationListener listener : _listeners) {
+				System.out.println("send invalidation");
+				listener.invalidated(this);
+			}
 		}
 	}
 	
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		if (_selectedItems.size() > 0) {
-			builder.append(getName()).append(" in (");
-			boolean first = true;
-			for (Object item : _selectedItems) {
-				if (first) first = false;
-				else builder.append(", ");
-	
-				if (item instanceof String) {
-					builder.append("'").append(item.toString()).append("'");
-				} else
-					builder.append(item.toString());
+		if (!_valid) {
+			if (_field.getValues() == null) {
+				_value = "true";
+			} else {
+				StringBuilder builder = new StringBuilder();
+				if (_selectedItems.size() > 0) {
+					builder.append(getName()).append(" in (");
+					boolean first = true;
+					for (Object item : _selectedItems) {
+						if (first) first = false;
+						else builder.append(", ");
+			
+						if (item instanceof String) {
+							builder.append("'").append(item.toString()).append("'");
+						} else
+							builder.append(item.toString());
+					}
+					builder.append(")");
+				} else {
+					builder.append("false");
+				}
+			
+				_value = builder.toString();
 			}
-			builder.append(")");
-		} else {
-			builder.append("false");
+			_valid = true;
 		}
 		
-		return builder.toString();
+		return _value;
 	}
 }

@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -27,23 +26,18 @@ import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Filter;
 
-public class FilterArea extends ToolBar implements Observable {
+public class FilterArea extends ToolBar {
 	
-	private ObjectProperty<ObservableList<Filter>> _filtersProperty = new SimpleObjectProperty<>();
+	private ObservableList<Filter> _filters = FXCollections.observableArrayList();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
-	private List<InvalidationListener> _listeners = new ArrayList<>();
 	
 	public FilterArea() {
 		build();
-		init();
 	}
 	
-	public ObjectProperty<ObservableList<Filter>> filtersProperty() {
-		return _filtersProperty;
-	}
 	
 	public ObservableList<Filter> getFilters() {
-		return _filtersProperty.get();
+		return _filters;
 	}
 	
 	public ObjectProperty<EventHandler<FilterEvent>> onAction() {
@@ -58,18 +52,6 @@ public class FilterArea extends ToolBar implements Observable {
 		return _action.get();
 	}
 	
-	@Override
-	public void addListener(InvalidationListener listener) {
-		if (!_listeners.contains(listener))
-			_listeners.add(listener);
-		
-	}
-
-	@Override
-	public void removeListener(InvalidationListener listener) {
-		_listeners.remove(listener);
-	}
-	
 	private void build() {
 		setPrefHeight(25);
 		setMinWidth(50);
@@ -82,7 +64,7 @@ public class FilterArea extends ToolBar implements Observable {
 		
 		setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT))
+				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT) )
 					setStyle("-fx-border-color: #c0c0c0");
 				event.consume();			
 			}
@@ -90,7 +72,7 @@ public class FilterArea extends ToolBar implements Observable {
 
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT)) {
+				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
 					event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
 				}
 				event.consume();
@@ -99,7 +81,7 @@ public class FilterArea extends ToolBar implements Observable {
 			
 		setOnDragExited(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT)) {
+				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
 					setEffect(null);
 					setStyle("-fx-border-color: -fx-body-color");
 					event.consume();
@@ -110,65 +92,49 @@ public class FilterArea extends ToolBar implements Observable {
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
 				boolean status = false;
-				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
-				
-				if (field != null) {
-					getFilters().add(createFilter(field));
+				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) ) {
+					Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+					if (field != null) {
+						getFilters().add(new Filter(field));
+						status = true;
+					}
+				}
+				else if (getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
+					Filter filter = getLocalClipboard().get(DnD.FILTER_FORMAT, Filter.class);
+					getFilters().add(filter);
 					status = true;
 				}
-				status = true;					
 				event.setDropCompleted(status);
 				event.consume();				
 			}
 		});
 		
 		
-		filtersProperty().addListener(new InvalidationListener() {
-			
-			@Override
-			public void invalidated(Observable observable) {
-				getFilters().addListener(new ListChangeListener<Filter>() {
+		_filters.addListener(new ListChangeListener<Filter>() {
 
-					@Override
-					public void onChanged(ListChangeListener.Change<? extends Filter> c) {
-						while (c.next()) {
-							if (c.wasAdded()) {
-								for (Filter filter : c.getAddedSubList()) {
-									FilterGlyph glyph = createFilterGlyph(filter);
-									getItems().add(glyph);
-								}
-							} else if (c.wasRemoved()) {
-								for (Filter filter : c.getRemoved()) {
-									for (Node node : getItems()) {
-										FilterGlyph glyph = (FilterGlyph) node;
-										if (glyph.getFilter() == filter) {
-											getItems().remove(glyph);
-											break;
-										}
-									}
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> c) {
+				while (c.next()) {
+					if (c.wasAdded()) {
+						for (Filter filter : c.getAddedSubList()) {
+							FilterGlyph glyph = createFilterGlyph(filter);
+							getItems().add(glyph);
+						}
+					} else if (c.wasRemoved()) {
+						for (Filter filter : c.getRemoved()) {
+							for (Node node : getItems()) {
+								FilterGlyph glyph = (FilterGlyph) node;
+								if (glyph.getFilter() == filter) {
+									getItems().remove(glyph);
+									break;
 								}
 							}
 						}
 					}
-					
-				});
-			
-				// inform listeners filter list is invalidated
-				fireInvalidationEvent();
+				}
 			}
-		});
-	}
-	
-	private Filter createFilter(Field field) {
-		Filter filter = new Filter(field);
-		filter.addListener(new InvalidationListener() {
 			
-			@Override
-			public void invalidated(Observable arg0) {
-				fireInvalidationEvent();
-			}
 		});
-		return filter;
 	}
 	
 	private FilterGlyph createFilterGlyph(Filter filter) {
@@ -178,14 +144,15 @@ public class FilterArea extends ToolBar implements Observable {
 
 			@Override
 			public void handle(MouseEvent event) {
-				Field field = glyph.getFilter().getField();
+//				Field field = glyph.getFilter().getField();
+				Filter filter  = glyph.getFilter();
 				Dragboard db = glyph.startDragAndDrop(TransferMode.MOVE);
 				
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-				clipboard.put(DnD.FIELD_FORMAT, Field.class, field);
+				clipboard.put(DnD.FILTER_FORMAT, Filter.class, filter);
 				
 				ClipboardContent content = new ClipboardContent();
-				content.putString(field.getName());
+				content.putString(filter.getName());
 				
 				SnapshotParameters snapParams = new SnapshotParameters();
 	            snapParams.setFill(Color.TRANSPARENT);
@@ -218,16 +185,6 @@ public class FilterArea extends ToolBar implements Observable {
 			}
 		});
 		return glyph;
-	}
-	
-	private void fireInvalidationEvent() {
-		for (InvalidationListener listener : _listeners) {
-			listener.invalidated(FilterArea.this);
-		}
-	}
-	
-	private void init() {
-		filtersProperty().set(FXCollections.<Filter>observableArrayList());
 	}
 	
 	private DnD.LocalClipboard getLocalClipboard() {

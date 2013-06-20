@@ -425,7 +425,7 @@ public class Table {
 					Connection conn = ds.getConnection();
 					
 					updateMessage("querying");
-					System.out.println("querying");
+					System.out.println("querying field values");
 					long t1 = System.currentTimeMillis();
 					Statement stmt = conn.createStatement();
 					
@@ -480,7 +480,7 @@ public class Table {
 //					PreparedStatement stmt = conn.prepareStatement(query);
 //					ResultSet rs = stmt.executeQuery()
 					
-					System.out.println("querying");
+					System.out.println("querying rows");
 					long t1 = System.currentTimeMillis();
 					Statement stmt = conn.createStatement();
 					ResultSet rs = stmt.executeQuery(query);

@@ -49,7 +49,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.wizards.TableEditorWizard;
 
-public class TablesPanel extends Panel  {
+public class TablesPanel extends TitledPanel  {
 	public static final String ID 		= "cnome-panel";
 	public static final String TITLE	= "Tables";
 	

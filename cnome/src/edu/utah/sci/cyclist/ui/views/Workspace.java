@@ -45,7 +45,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.PanelArea;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
-import edu.utah.sci.cyclist.ui.panels.Panel;
+import edu.utah.sci.cyclist.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 
 public class Workspace extends ViewBase implements View {
@@ -259,15 +259,15 @@ public class Workspace extends ViewBase implements View {
 	}
 	
 	
-	public void addPanel(Panel panel) {
+	public void addPanel(TitledPanel panel) {
 		_filtersPane.add(panel);
 	}
 	
-	public void showPanel(Panel panel, boolean show) {
+	public void showPanel(TitledPanel panel, boolean show) {
 		_filtersPane.show(panel, show);
 	}
 	
-	public void removePanel(Panel panel) {
+	public void removePanel(TitledPanel panel) {
 		_filtersPane.remove(panel);
 	}
 	
