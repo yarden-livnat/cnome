@@ -50,6 +50,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -152,17 +153,20 @@ public class DatatableWizard extends TilePane {
 								.spacing(5)
 								.alignment(Pos.CENTER_LEFT)
 								.children(
-										TextBuilder.create()
-										.text("Data Sources")
-										.build(),
-										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
+//										TextBuilder.create()
+//										.text("Data Sources")
+//										.build(),
+//										_sourcesView = ListViewBuilder.create(CyclistDatasource.class) // Java 8
 //										_sourcesView = ListViewBuilder.<CyclistDatasource>create()
-										.id("datasources-list")
-										.maxHeight(100)
-										.minHeight(100)
-										.build())  
+//										.id("datasources-list")
+//										.maxHeight(100)
+//										.minHeight(100)
+//										.build()
+										new Text("Data Sources"),
+										_sourcesView = new ListView<CyclistDatasource>()
+										)  
 										.build(),
-
+										
 										// Add/Edit/Remove Buttons
 										VBoxBuilder.create()
 										.spacing(5)
@@ -203,6 +207,9 @@ public class DatatableWizard extends TilePane {
 										).build()
 						).build();
 		
+		_sourcesView.setId("datasources-list");
+		_sourcesView.setMaxSize(100, 100);
+
 		// Keep track of the currently selected data source
 		_sourcesView.getSelectionModel().selectedItemProperty().addListener(
 				new ChangeListener<CyclistDatasource>() {
@@ -251,12 +258,15 @@ public class DatatableWizard extends TilePane {
 				.padding(new Insets(5))
 				.maxHeight(Double.MAX_VALUE)
 				.children(	
-						TextBuilder.create().text("Select Table:").build(),
-						_tablesView = ListViewBuilder.create(String.class) // Java 8
+//						TextBuilder.create().text("Select Table:").build(),
+						new Text("Select Table:"),
+//						_tablesView = ListViewBuilder.create(String.class) // Java 8
 //						_tablesView = ListViewBuilder.<String>create()
-						.maxHeight(Double.MAX_VALUE)
-						.build()						
+//						.maxHeight(Double.MAX_VALUE)
+//						.build()	
+						_tablesView = new ListView<String>()
 						).build();
+		_tablesView.setMaxHeight(Double.MAX_VALUE);
 		VBox.setVgrow(_tablesView, Priority.ALWAYS);
 		VBox.setVgrow(schemaBox, Priority.ALWAYS);
 		schemaBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
