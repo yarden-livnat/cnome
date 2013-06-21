@@ -68,8 +68,9 @@
 	-fx-background-color: #ffffff;
 }
 
+
 .drop-area {
-	-fx-background-color: #f0f0f0;
+	-fx-background-color: e0e0e0;
 	-fx-spacing: 2;
 	-fx-padding: 1;
 	/*-fx-pref-height: 27;*/

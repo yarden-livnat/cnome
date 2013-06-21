@@ -26,14 +26,16 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 
@@ -43,8 +45,8 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.components.PanelArea;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 
@@ -53,8 +55,9 @@ public class Workspace extends ViewBase implements View {
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
-	private PanelArea _filtersPane;
+	private WorkspacePanelArea _filtersPane;
 	private Pane _statusPane;
+	private double _savedDivider = 0.9;
 	
 	private ViewBase _maximizedView = null;
 	
@@ -100,21 +103,46 @@ public class Workspace extends ViewBase implements View {
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
 
-		BorderPane borderPane = new BorderPane();
 		_pane = new Pane();
-		_filtersPane = new PanelArea();
-		_statusPane = new HBox();
+		_filtersPane = new WorkspacePanelArea();
 		
-		borderPane.setRight(_filtersPane);
-		borderPane.setBottom(_statusPane);
-		borderPane.setCenter(_pane);
+		final SplitPane splitPane = new SplitPane();
+		splitPane.setId("hiddenSplitter");
+		splitPane.setOrientation(Orientation.HORIZONTAL);
+		splitPane.getItems().addAll(_pane, _filtersPane);
+		splitPane.setDividerPosition(0, 1);
+		
+		_filtersPane.visibleProperty().addListener(new ChangeListener<Boolean>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0,
+					Boolean arg1, Boolean visible) {
+				if (visible) {
+					splitPane.setDividerPosition(0, _savedDivider);
+				} else {
+					_savedDivider = splitPane.getDividerPositions()[0];
+					splitPane.setDividerPosition(0, 1);
+				}
+				
+			}
+		});
+		
+//		BorderPane borderPane = new BorderPane();
+
+//		_statusPane = new HBox();
+//		
+//		borderPane.setRight(_filtersPane);
+//		borderPane.setBottom(_statusPane);
+//		borderPane.setCenter(_pane);
+		
 		Rectangle clip = new Rectangle(0, 0, 100, 100);
 		clip.widthProperty().bind(_pane.widthProperty());
 		clip.heightProperty().bind(_pane.heightProperty());
 		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
 		
-		setContent(borderPane, true /* allowMove */);
+		//setContent(borderPane, true /* allowMove */);
+		setContent(splitPane);
 			
 		enableDragging(false);
 		

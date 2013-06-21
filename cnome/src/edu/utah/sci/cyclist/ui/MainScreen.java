@@ -125,7 +125,8 @@ public class MainScreen extends VBox {
 					.items(
 							_toolsPane = SplitPaneBuilder.create()
 								.id("hiddenSplitter")
-								.prefWidth(toolsWidth)
+								.prefWidth(USE_COMPUTED_SIZE/*toolsWidth*/)
+								.prefHeight(USE_COMPUTED_SIZE)
 								.orientation(Orientation.VERTICAL)
 								.items(
 										_datasourcesPanel = new TablesPanel(),	

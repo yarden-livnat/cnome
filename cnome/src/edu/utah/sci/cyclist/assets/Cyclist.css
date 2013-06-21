@@ -31,14 +31,15 @@
  */
 
 .flat-button {
-	-fx-body-color:  transparent;
-	-fx-background-color:   -fx-body-color;
+ 	-fx-body-color:  transparent;
+	-fx-background-color:  -fx-body-color;
 	-fx-padding: 1;
 }
 
 .flat-button:hover {
 	-fx-background-color:   -fx-body-color;
 	-fx-border-color:	#d0d0d0;
+	-fx-padding: 0;
 }
 
 /*

@@ -30,7 +30,6 @@ public class FilterArea extends ToolBar {
 		build();
 	}
 	
-	
 	public ObservableList<Filter> getFilters() {
 		return _filters;
 	}
@@ -90,7 +89,11 @@ public class FilterArea extends ToolBar {
 				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) ) {
 					Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
 					if (field != null) {
-						getFilters().add(new Filter(field));
+						Filter filter = new Filter(field);
+						getFilters().add(filter);
+						if (getOnAction() != null) {
+							getOnAction().handle(new FilterEvent(FilterEvent.SHOW, filter));
+						}
 						status = true;
 					}
 				}

@@ -627,7 +627,7 @@ public class ChartView extends ViewBase {
 		_limitEntry = new IntegerField(1, Integer.MAX_VALUE, 1000);
 		_limitEntry.setEditable(true);
 		_limitEntry.setPromptText("unlimited");
-		_limitEntry.setPrefColumnCount(8);
+		_limitEntry.setPrefColumnCount(4);
 		
 		_limitEntry.valueProperty().addListener(new ChangeListener<Number>() {
 
@@ -711,7 +711,12 @@ public class ChartView extends ViewBase {
 					.build();
 		grid.getColumnConstraints().add(new ColumnConstraints(10));
 		ColumnConstraints cc = new ColumnConstraints();
-		cc.setHgrow(Priority.ALWAYS);
+		cc.setHgrow(Priority.SOMETIMES);
+		grid.getColumnConstraints().add(cc);
+		
+		grid.getColumnConstraints().add(new ColumnConstraints(20));
+		cc = new ColumnConstraints();
+		cc.setHgrow(Priority.SOMETIMES);
 		grid.getColumnConstraints().add(cc);
 		
 		_xArea = createControlArea(grid, "X", 0, 0, DropArea.Policy.SINGLE);

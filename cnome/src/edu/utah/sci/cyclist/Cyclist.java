@@ -70,7 +70,7 @@ public class Cyclist extends Application {
         
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Views.css").toExternalForm());
-        scene.getStylesheets().add(Cyclist.class.getResource("assets/Wizards.css").toExternalForm());
+       // scene.getStylesheets().add(Cyclist.class.getResource("assets/Wizards.css").toExternalForm());
         
         primaryStage.setTitle(TITLE);
         primaryStage.setScene(scene);

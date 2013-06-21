@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.ui.views;
 
-import org.mo.closure.v0.Closure;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -19,20 +17,15 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
@@ -117,20 +110,21 @@ public class FilterPanel extends TitledPanel {
 	
 	
 	private void build() {
+		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		
 		final HBox header = getHeader();
-		header.getChildren().addAll(
-			_indicator = ProgressIndicatorBuilder.create()
-				.progress(-1)
-				.maxWidth(20)
-				.maxHeight(20)
-				.visible(false)
-				.build(),
-			new Spring(),
-			_closeButton = ButtonBuilder.create()
-				.styleClass("flat-button")
-				.graphic(new ImageView(Resources.getIcon("close_view")))
-				.build() 
-		);		
+		
+		_indicator = new ProgressIndicator();
+		_indicator.setProgress(-1);
+		_indicator.setMaxWidth(20);
+		_indicator.setMaxHeight(20);
+		_indicator.setVisible(false);
+				
+		_closeButton = new Button();
+		_closeButton.getStyleClass().add("flat-button");
+		_closeButton.setGraphic(new ImageView(Resources.getIcon("close_view")));
+	
+		header.getChildren().addAll(_indicator, new Spring(), _closeButton);		
 		
 		header.setOnDragDetected(new EventHandler<MouseEvent>() {
 
@@ -147,7 +141,7 @@ public class FilterPanel extends TitledPanel {
 				SnapshotParameters snapParams = new SnapshotParameters();
 	            snapParams.setFill(Color.TRANSPARENT);
 	            
-	            content.putImage(header.snapshot(snapParams, null));	
+	            content.putImage(header.getChildren().get(0).snapshot(snapParams, null));	
 				
 				db.setContent(content);
 			}
@@ -174,6 +168,8 @@ public class FilterPanel extends TitledPanel {
 				
 			}
 		});
+		
+		
 		configure();
 	}
 	
@@ -194,11 +190,12 @@ public class FilterPanel extends TitledPanel {
 	}
 	
 	private void createList() {
-		_cbBox = VBoxBuilder.create()
-				.spacing(4)
-				.build();
+		_cbBox = new VBox();
+		_cbBox.setSpacing(4);
+		_cbBox.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		
 		setContent(_cbBox);
-		VBox.setVgrow(_cbBox, Priority.ALWAYS);
+//		VBox.setVgrow(_cbBox, Priority.ALWAYS);
 		_valuesProperty.addListener(new InvalidationListener() {
 			
 			@Override

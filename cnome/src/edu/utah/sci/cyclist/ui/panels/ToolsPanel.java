@@ -66,6 +66,7 @@ public class ToolsPanel extends TitledPanel {
 			final Image icon = Resources.getIcon(factory.getIconName());
 			
 			final Label title = new Label(factory.getToolName(), new ImageView(icon));
+			title.setPrefWidth(USE_COMPUTED_SIZE);
 			title.getStyleClass().add("tools-entry");
 			
 			title.setOnDragDetected(new EventHandler<MouseEvent>() {

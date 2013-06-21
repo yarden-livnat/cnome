@@ -1,6 +1,7 @@
 package edu.utah.sci.cyclist.ui.panels;
 
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPaneBuilder;
@@ -23,37 +24,37 @@ public class TitledPanel extends VBox {
 	
 	
 	private void build(String title) {
-		VBox vbox;
+		getStyleClass().add("cnome-panel");
+		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
-		VBoxBuilder.create()
-			.styleClass("cnome-panel")
-			.children(
-					 _header = HBoxBuilder.create()
-						.styleClass("header")
-						.children(
-								LabelBuilder.create()
-									.styleClass("header")
-									.text(title)
-									.build()
-								)
-						.build(),
-					_pane = ScrollPaneBuilder.create()
-								.styleClass("pane")
-								.prefHeight(USE_COMPUTED_SIZE)
-								.content(
-									vbox = VBoxBuilder.create()
-										.styleClass("panel-vbox")
-										.prefHeight(USE_COMPUTED_SIZE)
-										.children() // empty 
-										.build()
-									)
-								.build()
-				)
-			.applyTo(this);
+		// header
+		Label label = new Label(title);
+		label.getStyleClass().add("header");
 		
-//		VBox.setVgrow(vbox, Priority.ALWAYS);
+		_header = new HBox();
+		_header.getStyleClass().add("header");
+		_header.getChildren().add(label);
+		
+		// pane
+		_pane = new ScrollPane();
+		_pane.getStyleClass().add("pane");
+		_pane.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		_pane.fitToWidthProperty();
+		
+		VBox vbox = new VBox();
+		vbox.getStyleClass().add("panel-vbox");
+//		vbox.setPrefWidth(200);
+		vbox.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		vbox.setFillWidth(true);
+		_pane.setContent(vbox);
+		
+		// add childeren
+		getChildren().addAll(_header, _pane);
+		
+		VBox.setVgrow(vbox, Priority.ALWAYS);
 //		VBox.setVgrow(this, Priority.ALWAYS);
-//		VBox.setVgrow(_pane, Priority.ALWAYS);
+		VBox.setVgrow(_pane, Priority.ALWAYS);
 			
 	}
 	

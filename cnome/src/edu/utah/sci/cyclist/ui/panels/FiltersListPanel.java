@@ -1,23 +1,19 @@
 package edu.utah.sci.cyclist.ui.panels;
 
-import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.event.ui.FilterEvent;
-import edu.utah.sci.cyclist.model.Field;
-import edu.utah.sci.cyclist.model.Filter;
-import edu.utah.sci.cyclist.ui.components.FilterGlyph;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.ui.components.FilterGlyph;
 
 public class FiltersListPanel extends TitledPanel {
-	public static final String ID 		= "filters-list--panel";
+	public static final String ID 		= "filters-list-panel";
 	public static final String TITLE	= "Filters";
 	
 	public FiltersListPanel() {
@@ -27,6 +23,8 @@ public class FiltersListPanel extends TitledPanel {
 	}
 	
 	private void configure() {
+		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		
 		getPane().setOnDragEntered(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {		
 				event.consume();
