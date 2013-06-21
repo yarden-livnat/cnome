@@ -40,7 +40,7 @@ public class Filter implements Observable {
 				else
 					_selectedItems.clear();
 				_values.set(_field.getValues());
-				invalidate();
+//				invalidate();
 			}
 		});
 	}
@@ -99,9 +99,12 @@ public class Filter implements Observable {
 	}
 
 	public void selectAll(boolean value) {
+		
 		if (value) {
+			if (_selectedItems.size() == _field.getValues().size()) return;
 			_selectedItems.addAll(_values);
 		} else {
+			if (_selectedItems.size() == 0) return;
 			_selectedItems.clear();
 		}
 		invalidate();
@@ -131,7 +134,7 @@ public class Filter implements Observable {
 	
 	public String toString() {
 		if (!_valid) {
-			if (_field.getValues() == null) {
+			if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
 				_value = "true";
 			} else {
 				StringBuilder builder = new StringBuilder();
