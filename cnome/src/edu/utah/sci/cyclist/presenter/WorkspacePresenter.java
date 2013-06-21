@@ -25,6 +25,8 @@ package edu.utah.sci.cyclist.presenter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.ListChangeListener;
+
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.notification.CyclistFilterNotification;
@@ -45,9 +47,9 @@ import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.views.FilterPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 
-public class WorkspacePresenter extends PresenterBase {
+public class WorkspacePresenter extends ViewPresenter {
 
-	private List<Presenter> _presenters = new ArrayList<>();
+	private List<ViewPresenter> _presenters = new ArrayList<>();
 	private List<FilterPresenter> _filterPresenters = new ArrayList<>();
 	
 	public WorkspacePresenter(EventBus bus, Model model) {
@@ -64,7 +66,6 @@ public class WorkspacePresenter extends PresenterBase {
 		
 		if (view instanceof Workspace) {
 			Workspace workspace = getWorkspace();
-			workspace = (Workspace) workspace;
 			
 			workspace.setOnToolDrop(new Closure.V3<Tool, Double, Double>() {
 
@@ -102,6 +103,24 @@ public class WorkspacePresenter extends PresenterBase {
 					presenter.addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 				}
 			});
+			
+			workspace.filters().addListener(new ListChangeListener<Filter>() {
+
+				@Override
+				public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+					System.out.println("workspace filters list changed");
+					while (change.next()) {
+						for (Filter filter : change.getRemoved()) {
+							broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+						}
+						for (Filter filter : change.getAddedSubList()) {
+							broadcast(new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
+						}
+					}
+					
+				}
+				
+			});
 		}
 	}
 
@@ -114,7 +133,7 @@ public class WorkspacePresenter extends PresenterBase {
 		view.setTranslateY(y);
 		getWorkspace().addView(view);
 		
-		Presenter presenter = tool.getPresenter(getEventBus());
+		ViewPresenter presenter = tool.getPresenter(getEventBus());
 		if (presenter != null) {	
 			_presenters.add(presenter);
 			presenter.setView(view);	
@@ -133,7 +152,7 @@ public class WorkspacePresenter extends PresenterBase {
 			@Override
 			public void handle(CyclistNotification event) {
 				String id = ((SimpleNotification)event).getMsg();
-				for (Presenter presenter : _presenters) {
+				for (ViewPresenter presenter : _presenters) {
 					if (presenter.getId().equals(id)) {
 						_presenters.remove(presenter);
 						getWorkspace().removeView((ViewBase)presenter.getView());

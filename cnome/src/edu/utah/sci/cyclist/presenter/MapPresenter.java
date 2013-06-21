@@ -9,7 +9,7 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
-public class MapPresenter extends PresenterBase {
+public class MapPresenter extends ViewPresenter {
 
 	public MapPresenter(EventBus bus) {
 		super(bus);

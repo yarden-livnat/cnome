@@ -35,4 +35,8 @@ public class CyclistNotifications {
 	public static final String SHOW_FILTER 				= "show_filter";
 	public static final String REMOVE_FILTER 			= "remove_filter";
 	public static final String HIDE_FILTER 				= "hide_filter";
+	public static final String HIGHLIGHT_FILTER 		= "highlight_filter";
+	public static final String UNHIGHLIGHT_FILTER 		= "unhighlight_filter";
+	public static final String REMOVE_REMOTE_FILTER 	= "remove_remote_filter";
+	public static final String ADD_REMOTE_FILTER 		= "add_remote_filter";
 }

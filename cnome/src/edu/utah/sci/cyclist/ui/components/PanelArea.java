@@ -3,10 +3,7 @@ package edu.utah.sci.cyclist.ui.components;
 import edu.utah.sci.cyclist.ui.panels.TitledPanel;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.SplitPaneBuilder;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 
 public class PanelArea extends VBox {
 
@@ -30,17 +27,18 @@ public class PanelArea extends VBox {
 	}
 	
 	private void build() {
-		VBoxBuilder.create()
-			.children(
-				_sp = SplitPaneBuilder.create()
-						.id("hiddenSplitter")
-						.orientation(Orientation.VERTICAL)
-						.build(),
-				new Spring()
-			)
-			.applyTo(this);
+		setStyle("-fx-background-color: #ffbb00");
+		setPrefHeight(USE_COMPUTED_SIZE);
 		
-		VBox.setVgrow(_sp, Priority.SOMETIMES);
+		_sp = new SplitPane();
+		_sp.setId("hiddenSplitter");
+		_sp.setStyle("-fx-background-color: #00ffaa");
+		_sp.setPrefHeight(USE_COMPUTED_SIZE);
+		_sp.setOrientation(Orientation.VERTICAL);
+	
+		getChildren().addAll(_sp /*, new Spring()*/);
+
+//		VBox.setVgrow(_sp, Priority.SOMETIMES);
 	}
 	
 }

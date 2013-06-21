@@ -169,7 +169,8 @@ public class ChartView extends ViewBase {
 							.fields(fields)
 							.aggregates(aggregators)
 							.grouping(grouping)
-							.filters(getFilters())
+							.filters(filters())
+							.filters(remoteFilters())
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
 				
@@ -665,7 +666,7 @@ public class ChartView extends ViewBase {
 			}
 		});
 		
-		getFilters().addListener(new ListChangeListener<Filter>() {
+		filters().addListener(new ListChangeListener<Filter>() {
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
@@ -676,6 +677,24 @@ public class ChartView extends ViewBase {
 					}
 					for (Filter f : change.getAddedSubList()) {
 						f.addListener(_filterListener);
+					}
+				}
+				invalidate();
+				fetchData();
+			}
+		});
+		
+		remoteFilters().addListener(new ListChangeListener<Filter>() {
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+				System.out.println("remote filters list changed");
+				while (change.next()) {
+					for (Filter filter : change.getRemoved()) {
+						filter.removeListener(_filterListener);
+					}
+					for (Filter filter : change.getAddedSubList()) {
+						filter.addListener(_filterListener);
 					}
 				}
 				invalidate();

@@ -27,6 +27,7 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -43,4 +44,6 @@ public interface View {
 	void addTable(Table table, boolean remote, boolean active);
 	void removeTable(Table table);
 	void selectTable(Table table, boolean value);
+	
+	ObservableList<Filter> remoteFilters();
 }

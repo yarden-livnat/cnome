@@ -1,9 +1,13 @@
 package edu.utah.sci.cyclist.ui.views;
 
+import org.mo.closure.v0.Closure;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -13,16 +17,25 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
@@ -38,12 +51,26 @@ public class FilterPanel extends TitledPanel {
 	private Button _closeButton;
 	private Task<?> _task;
 	private boolean _reportChange = true;
+	private BooleanProperty _highlight = new SimpleBooleanProperty(false);
+			
+	
+	public BooleanProperty highlight() {
+		return _highlight;
+	}
+	
+	public void setHighlight(boolean value) {
+		_highlight.set(value);
+	}
+	
+	public boolean getHighlight() {
+		return _highlight.get();
+	}
 	
 	public FilterPanel(Filter filter) {
 		super(filter.getName());
 		_filter = filter;
 		
-		configure();
+		build();
 	}
 	
 	public Filter getFilter() {
@@ -87,8 +114,10 @@ public class FilterPanel extends TitledPanel {
 		_closeButton.setOnAction(handler);
 	}
 	
-	private void configure() {
-		HBox header = getHeader();
+	
+	
+	private void build() {
+		final HBox header = getHeader();
 		header.getChildren().addAll(
 			_indicator = ProgressIndicatorBuilder.create()
 				.progress(-1)
@@ -101,7 +130,54 @@ public class FilterPanel extends TitledPanel {
 				.styleClass("flat-button")
 				.graphic(new ImageView(Resources.getIcon("close_view")))
 				.build() 
-		);
+		);		
+		
+		header.setOnDragDetected(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				Dragboard db = header.startDragAndDrop(TransferMode.MOVE);
+				
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.FILTER_FORMAT, Filter.class, _filter);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.putString(_filter.getName());
+				
+				SnapshotParameters snapParams = new SnapshotParameters();
+	            snapParams.setFill(Color.TRANSPARENT);
+	            
+	            content.putImage(header.snapshot(snapParams, null));	
+				
+				db.setContent(content);
+			}
+		});
+		
+		header.setOnMouseClicked(new EventHandler<Event>() {
+
+			@Override
+			public void handle(Event event) {
+				_highlight.set(!_highlight.get());
+			}
+		});
+		
+		_highlight.addListener(new ChangeListener<Boolean>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0,
+					Boolean oldValue, Boolean newValue) {
+				System.out.println("highlight: "+oldValue+"  "+newValue);
+				if (newValue)
+					getHeader().setStyle("-fx-background-color: #808080");
+				else
+					getHeader().setStyle("-fx-background-color: #e0e0ef");
+				
+			}
+		});
+		configure();
+	}
+	
+	private void configure() {
 				
 		switch (_filter.getClassification()) {
 		case C:
@@ -122,7 +198,7 @@ public class FilterPanel extends TitledPanel {
 				.spacing(4)
 				.build();
 		setContent(_cbBox);
-		
+		VBox.setVgrow(_cbBox, Priority.ALWAYS);
 		_valuesProperty.addListener(new InvalidationListener() {
 			
 			@Override

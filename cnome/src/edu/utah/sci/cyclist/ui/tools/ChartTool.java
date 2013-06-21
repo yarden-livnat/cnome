@@ -5,6 +5,7 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.presenter.ChartPresenter;
 import edu.utah.sci.cyclist.presenter.Presenter;
+import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.ChartView;
 
@@ -15,7 +16,7 @@ public class ChartTool implements Tool {
 	public static final String ICON_NAME 	= "chart_bar";
 	
 	private View _view = null;
-	private Presenter _presenter = null;
+	private ViewPresenter _presenter = null;
 	
 	@Override
 	public String getId() {
@@ -40,7 +41,7 @@ public class ChartTool implements Tool {
 	}
 	
 	@Override
-	public Presenter getPresenter(EventBus bus) {
+	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null)
 			_presenter = new ChartPresenter(bus);
 		return _presenter;

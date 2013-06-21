@@ -5,6 +5,7 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.presenter.MapPresenter;
 import edu.utah.sci.cyclist.presenter.Presenter;
+import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.MapView;
 
@@ -15,7 +16,7 @@ public class MapTool implements Tool {
 	public static final String ICON_NAME 	= "map";
 	
 	private View _view = null;
-	private Presenter _presenter = null;
+	private ViewPresenter _presenter = null;
 	
 	@Override
 	public String getId() {
@@ -40,7 +41,7 @@ public class MapTool implements Tool {
 	}
 	
 	@Override
-	public Presenter getPresenter(EventBus bus) {
+	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null)
 			_presenter = new MapPresenter(bus);
 		return _presenter;

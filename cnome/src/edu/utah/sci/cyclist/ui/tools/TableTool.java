@@ -27,6 +27,7 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.presenter.TablePresenter;
 import edu.utah.sci.cyclist.presenter.Presenter;
+import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.SimpleTableView;
 
@@ -37,7 +38,7 @@ public class TableTool implements Tool {
 	public static final String ICON_NAME 	= "table";
 	
 	private View _view = null;
-	private Presenter _presenter = null;
+	private ViewPresenter _presenter = null;
 	
 	@Override
 	public String getId() {
@@ -62,7 +63,7 @@ public class TableTool implements Tool {
 	}
 
 	@Override
-	public Presenter getPresenter(EventBus bus) {
+	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null)
 			_presenter = new TablePresenter(bus);
 		return _presenter;

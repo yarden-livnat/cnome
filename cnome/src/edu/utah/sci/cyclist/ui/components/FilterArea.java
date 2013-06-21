@@ -1,10 +1,5 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;

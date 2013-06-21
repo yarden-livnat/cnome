@@ -22,16 +22,12 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
-import javafx.scene.control.Control;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;

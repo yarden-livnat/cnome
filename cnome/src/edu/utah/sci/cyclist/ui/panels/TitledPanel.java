@@ -39,9 +39,11 @@ public class TitledPanel extends VBox {
 						.build(),
 					_pane = ScrollPaneBuilder.create()
 								.styleClass("pane")
+								.prefHeight(USE_COMPUTED_SIZE)
 								.content(
 									vbox = VBoxBuilder.create()
 										.styleClass("panel-vbox")
+										.prefHeight(USE_COMPUTED_SIZE)
 										.children() // empty 
 										.build()
 									)
@@ -49,9 +51,9 @@ public class TitledPanel extends VBox {
 				)
 			.applyTo(this);
 		
-		VBox.setVgrow(vbox, Priority.ALWAYS);
-		VBox.setVgrow(this, Priority.ALWAYS);
-		VBox.setVgrow(_pane, Priority.ALWAYS);
+//		VBox.setVgrow(vbox, Priority.ALWAYS);
+//		VBox.setVgrow(this, Priority.ALWAYS);
+//		VBox.setVgrow(_pane, Priority.ALWAYS);
 			
 	}
 	

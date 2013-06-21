@@ -10,7 +10,7 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
-public class ChartPresenter extends PresenterBase {
+public class ChartPresenter extends ViewPresenter {
 
 	public ChartPresenter(EventBus bus) {
 		super(bus);

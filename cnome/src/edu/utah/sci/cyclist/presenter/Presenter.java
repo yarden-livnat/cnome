@@ -33,14 +33,14 @@ public abstract interface Presenter {
 	String getId();
 	EventBus getEventBus();
 	
-	void setView(final View view);
-	View getView();
-	
-	void setRemoteTables(List<SelectionModel.Entry> list);
-	void addTable(Table table, boolean remote, boolean active, boolean remoteActive);
-	void removeTable(Table table);
-	
-	List<SelectionModel.Entry> getTableRecords();
+//	void setView(final View view);
+//	View getView();
+//	
+//	void setRemoteTables(List<SelectionModel.Entry> list);
+//	void addTable(Table table, boolean remote, boolean active, boolean remoteActive);
+//	void removeTable(Table table);
+//	
+//	List<SelectionModel.Entry> getTableRecords();
 	
 	void broadcast(CyclistNotification notification);
 	
