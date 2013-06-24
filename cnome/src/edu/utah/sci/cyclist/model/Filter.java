@@ -29,6 +29,7 @@ public class Filter implements Observable {
 		_dataType = new DataType(field.getDataType());
 		if (_field.getValues() != null) {
 			_selectedItems.addAll(_field.getValues());
+			_values.set(_field.getValues());
 		}
 		
 		_field.valuesProperty().addListener(new InvalidationListener() {
@@ -135,7 +136,7 @@ public class Filter implements Observable {
 	public String toString() {
 		if (!_valid) {
 			if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
-				_value = "true";
+				_value = "1=1";
 			} else {
 				StringBuilder builder = new StringBuilder();
 				if (_selectedItems.size() > 0) {
@@ -152,7 +153,7 @@ public class Filter implements Observable {
 					}
 					builder.append(")");
 				} else {
-					builder.append("false");
+					builder.append("1=0");
 				}
 			
 				_value = builder.toString();

@@ -98,12 +98,12 @@
 }
 
 .field-glyph:hover .arrow {
-    -fx-background-color: -fx-mark-color, #FFFFFF;
+    -fx-background-color: -fx-mark-color, #101010;
 }
 
 
 .filter-glyph {
-	-active-bg: #ccff33;
+	-active-bg: #00ff00; /* #ccff33;*/
 	-inactive-bg: #FF9900;
 	-fx-background-color: -active-bg;
 	-fx-border-color: #bbbbbb;
@@ -112,7 +112,7 @@
 	-fx-spacing: 4;
  	-fx-padding: 1 2 2 2; 
  
- 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+ 	/* -fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 ); */
 }
 
 .filter-glyph .arrow {
@@ -123,7 +123,7 @@
 }
 
 .filter-glyph:hover .arrow {
-    -fx-background-color: -fx-mark-color, #FFFFFF;
+    -fx-background-color: -fx-mark-color, #a0a0a0;
 }
 
 /*

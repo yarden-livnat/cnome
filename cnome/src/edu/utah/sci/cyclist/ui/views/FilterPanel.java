@@ -195,18 +195,12 @@ public class FilterPanel extends TitledPanel {
 		_cbBox.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		
 		setContent(_cbBox);
-//		VBox.setVgrow(_cbBox, Priority.ALWAYS);
 		_valuesProperty.addListener(new InvalidationListener() {
 			
 			@Override
 			public void invalidated(Observable arg0) {
-				_cbBox.getChildren().clear();
-				if (_valuesProperty.get() != null) {
-					_cbBox.getChildren().add(createAllEntry());
-					for (Object item: _valuesProperty.get()) {
-						_cbBox.getChildren().add(createEntry(item));
-					}
-				}
+				populateValues();
+				
 			}
 		});
 		
@@ -221,6 +215,18 @@ public class FilterPanel extends TitledPanel {
 			setTask(task);
 
 			field.valuesProperty().bind(task.valueProperty());
+		} else {
+			populateValues();
+		}
+	}
+	
+	private void populateValues() {
+		_cbBox.getChildren().clear();
+		if (_valuesProperty.get() != null) {
+			_cbBox.getChildren().add(createAllEntry());
+			for (Object item: _valuesProperty.get()) {
+				_cbBox.getChildren().add(createEntry(item));
+			}
 		}
 	}
 	

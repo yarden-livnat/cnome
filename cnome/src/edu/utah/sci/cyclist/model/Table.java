@@ -420,17 +420,14 @@ public class Table {
 			@Override
 			protected ObservableList<Object> call() throws Exception {
 				List<Object> values = new ArrayList<>();
-				try {
-					updateMessage("connecting");
-					Connection conn = ds.getConnection();
-					
+				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+//					updateMessage("connecting");
 					updateMessage("querying");
 					System.out.println("querying field values");
 					long t1 = System.currentTimeMillis();
-					Statement stmt = conn.createStatement();
 					
 					// TODO: Fix this hack
-					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName());
+					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName()+" sort by "+field.getName());
 					long t2 = System.currentTimeMillis();
 					System.out.println("time: "+(t2-t1)/1000.0);
 					
@@ -450,8 +447,9 @@ public class Table {
 					System.out.println("task sql exception: "+e.getLocalizedMessage());
 					updateMessage(e.getLocalizedMessage());
 					throw new Exception(e.getMessage(), e);
+				} finally {
+					ds.releaseConnection();
 				}
-				
 				return FXCollections.observableList(values);
 			}
 		};
@@ -471,18 +469,10 @@ public class Table {
 			@Override
 			protected ObservableList<Row> call() throws Exception {
 				List<Row> rows = new ArrayList<>();
-				try {
-					updateMessage("connecting");
-					Connection conn = ds.getConnection();
-					
+				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
 					updateMessage("querying");
-					
-//					PreparedStatement stmt = conn.prepareStatement(query);
-//					ResultSet rs = stmt.executeQuery()
-					
-					System.out.println("querying rows");
 					long t1 = System.currentTimeMillis();
-					Statement stmt = conn.createStatement();
+					
 					ResultSet rs = stmt.executeQuery(query);
 					long t2 = System.currentTimeMillis();
 					System.out.println("time: "+(t2-t1)/1000.0);
@@ -511,10 +501,12 @@ public class Table {
 					}
 					long t3 = System.currentTimeMillis();
 					System.out.println("gathering time: "+(t3-t2)/1000.0);
-				}catch (SQLException e) {
+				} catch (SQLException e) {
 					System.out.println("task sql exception: "+e.getLocalizedMessage());
 					updateMessage(e.getLocalizedMessage());
 					throw new Exception(e.getMessage(), e);
+				} finally {
+					ds.releaseConnection();
 				}
 				
 				return FXCollections.observableList(rows);
@@ -536,8 +528,7 @@ public class Table {
 			@Override
 			protected ObservableList<Row> call() throws Exception {
 				List<Row> rows = new ArrayList<>();
-				try {
-					Connection conn = ds.getConnection();
+				try (Connection conn = ds.getConnection()){				
 					StringBuilder builder = new StringBuilder("select ");
 					for (int i=0; i<fields.size(); i++) {
 						Field field = fields.get(i);
@@ -547,21 +538,24 @@ public class Table {
 					}
 					builder.append(" from ").append(getName()).append(" limit ").append(limit);
 					System.out.println("query: ["+builder.toString()+"]");
-					PreparedStatement stmt = conn.prepareStatement(builder.toString());
+					try (PreparedStatement stmt = conn.prepareStatement(builder.toString())) {
 					
 					ResultSet rs = stmt.executeQuery();
-					int cols = fields.size();
-					
-					while (rs.next()) {
-						Row row = new Row(cols);
-						for (int i=0; i<cols; i++) {
-							row.value[i] = rs.getObject(i+1);
+						int cols = fields.size();
+						
+						while (rs.next()) {
+							Row row = new Row(cols);
+							for (int i=0; i<cols; i++) {
+								row.value[i] = rs.getObject(i+1);
+							}
+							rows.add(row);
 						}
-						rows.add(row);
-					}
+					} 
 				}catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} finally {
+					ds.releaseConnection();
 				}
 				
 				return FXCollections.observableList(rows);

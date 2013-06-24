@@ -112,6 +112,8 @@ public class Workspace extends ViewBase implements View {
 		splitPane.getItems().addAll(_pane, _filtersPane);
 		splitPane.setDividerPosition(0, 1);
 		
+		SplitPane.setResizableWithParent(_filtersPane, false);
+		
 		_filtersPane.visibleProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override

@@ -27,13 +27,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javax.sql.DataSource;
+
 import edu.utah.sci.cyclist.controller.IMemento;
 
 public class CyclistDatasource implements DataSource {
@@ -43,6 +48,11 @@ public class CyclistDatasource implements DataSource {
 	private transient PrintWriter _logger;
 	private String _url;
 	private boolean _ready = false;
+	
+	// SQLite hack
+	private boolean _isSQLite = false;
+	private final Semaphore _SQLiteSemaphore = new Semaphore(1, true);
+	private Connection _SQLiteConnection = null;
 	
 	
 	public CyclistDatasource() {
@@ -81,7 +91,7 @@ public class CyclistDatasource implements DataSource {
 		}	
 		
 		// sqlite hack
-		if ("SQLite".equals(_properties.getProperty("type"))) {
+		if (isSQLite()) {
 			try {
 				Class.forName("org.sqlite.JDBC");
 			} catch (ClassNotFoundException e) {
@@ -90,6 +100,10 @@ public class CyclistDatasource implements DataSource {
 		}
 	}
 
+	public boolean isSQLite() {
+		return "SQLite".equals(_properties.getProperty("type"));
+	}
+	
 	@Override
     public String toString() {
         return getName();
@@ -184,6 +198,46 @@ public class CyclistDatasource implements DataSource {
             _properties.put("user", username);
         if (password != null)
             _properties.put("pass", password);
-        return DriverManager.getConnection(_url, _properties);
+        
+        Connection connection;
+        
+        if (isSQLite()) {
+        	connection = getSQLiteConnection();
+        } else {
+        	connection = DriverManager.getConnection(_url, _properties);
+        }
+        return connection;
 	}
-}
+	
+	public void releaseConnection() {
+		if (isSQLite()) {
+			System.out.println("sqlite: release")
+;			_SQLiteSemaphore.release();
+		}
+	}
+	
+	private Connection getSQLiteConnection() throws SQLException {
+		try {
+			System.out.println("sqlite: try accuire");
+			_SQLiteSemaphore.acquire();
+			System.out.println("sqlite: accuired");
+//			if (_SQLiteConnection == null) 
+				_SQLiteConnection =  DriverManager.getConnection(_url, _properties);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return _SQLiteConnection;
+	}
+	
+	
+	private void initSQLite(Connection connection) {
+		try (Statement stmt = connection.createStatement()) {
+			boolean ok = stmt.execute("PRAGMA journal_mode = WAL");
+			System.out.println("SQLite PRAGMA statement: "+ok);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+ }
