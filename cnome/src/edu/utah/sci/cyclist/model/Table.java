@@ -427,7 +427,7 @@ public class Table {
 					long t1 = System.currentTimeMillis();
 					
 					// TODO: Fix this hack
-					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName()+" sort by "+field.getName());
+					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName()+" order by "+field.getName());
 					long t2 = System.currentTimeMillis();
 					System.out.println("time: "+(t2-t1)/1000.0);
 					
