@@ -62,6 +62,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.LineBuilder;
 
 import org.mo.closure.v1.Closure;
@@ -132,29 +133,54 @@ public class ViewBase extends BorderPane implements View {
 		getStyleClass().add("view");
 		
 		// Header
-		_header = HBoxBuilder.create()
-				.spacing(2)
-				.styleClass("header")
-				.alignment(Pos.CENTER_LEFT)
-				.children(
-					_title = LabelBuilder.create().prefWidth(70).build(),
-					_taskControl = new TaskControl(),
-					_dataBar = HBoxBuilder.create()
-						.id("databar")
-						.styleClass("data-bar")
-						.spacing(2)
-						.minWidth(20)
-						.children(
-								LineBuilder.create().startY(0).endY(16).build()
-							)
-						.build(),
-					_filtersArea = new FilterArea(),
-					_spring = new Spring(),
-					_actionsArea = new HBox(),
-					_minmaxButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("maximize"))).build(),
-					_closeButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("close_view"))).build()
-				)
-				.build();
+		_header = new HBox();
+		_header.setSpacing(2);
+		_header.getStyleClass().add("header");
+		_header.setAlignment(Pos.CENTER_LEFT);
+		
+		_title = new Label();
+		_title.setPrefWidth(70);
+		
+		_taskControl = new TaskControl();
+		
+		_dataBar = new HBox();
+		_dataBar.setId("databar");
+		_dataBar.getStyleClass().add("data-bar");
+		_dataBar.setSpacing(2);
+		_dataBar.setMinWidth(20);
+		
+		Line line = new Line();
+		line.setStartY(0);
+		line.setEndY(16);
+		
+		_dataBar.getChildren().add(line);
+		
+		Label filtersLabel = new Label(" Filters:");
+		
+		_filtersArea = new FilterArea();
+		
+		_spring = new Spring();
+		
+		_actionsArea = new HBox();
+		
+		_minmaxButton = new Button();
+		_minmaxButton.getStyleClass().add("flat-button");
+		_minmaxButton.setGraphic(new ImageView(Resources.getIcon("maximize")));
+		
+		_closeButton = new Button();
+		_closeButton.getStyleClass().add("flat-button");
+		_closeButton.setGraphic(new ImageView(Resources.getIcon("close_view")));
+		
+		_header.getChildren().addAll(
+				_title,
+				_taskControl,
+				_dataBar,
+				filtersLabel,
+				_filtersArea,
+				_spring,
+				_actionsArea,
+				_minmaxButton,
+				_closeButton);
 		
 		if (toplevel) {
 			_minmaxButton.setVisible(false);
@@ -162,6 +188,7 @@ public class ViewBase extends BorderPane implements View {
 			_closeButton.setVisible(false);
 			_closeButton.setManaged(false);
 		}
+		
 		setHeaderListeners();
 		setDatasourcesListeners();
 		setFiltersListeners();

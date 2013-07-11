@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+
 
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.model.DataType.Type;
@@ -52,6 +54,8 @@ public class Table {
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
 	private static final String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+
+	static Logger log = Logger.getLogger(Table.class);
 	
 	public enum SourceLocation {
 		REMOTE,
@@ -426,8 +430,11 @@ public class Table {
 					System.out.println("querying field values");
 					long t1 = System.currentTimeMillis();
 					
-					// TODO: Fix this hack
-					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName()+" order by "+field.getName());
+					// TODO: Fix this query building hack 
+					String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
+					log.debug("query: "+query);
+					System.out.println(query);
+					ResultSet rs = stmt.executeQuery(query);
 					long t2 = System.currentTimeMillis();
 					System.out.println("time: "+(t2-t1)/1000.0);
 					

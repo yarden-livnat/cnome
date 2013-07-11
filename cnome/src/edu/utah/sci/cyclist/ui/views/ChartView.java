@@ -8,11 +8,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -45,6 +43,7 @@ import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
 
 import org.apache.commons.collections.keyvalue.MultiKey;
+import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
@@ -59,7 +58,8 @@ import edu.utah.sci.cyclist.util.QueryBuilder;
 
 public class ChartView extends ViewBase {
 	public static final String TITLE = "Chart";
-
+	static Logger log = Logger.getLogger(ChartView.class);
+	
 	enum ViewType { CROSS_TAB, BAR, LINE, SCATTER_PLOT, GANTT, NA }
 	
 	enum MarkType { TEXT, BAR, LINE, SHAPE, GANTT, NA }
@@ -173,6 +173,7 @@ public class ChartView extends ViewBase {
 							.filters(remoteFilters())
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
+				log.info("Query: "+builder.toString());
 				
 				List<Field> order = builder.getOrder();
 				

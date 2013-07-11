@@ -33,7 +33,6 @@ import edu.utah.sci.cyclist.ui.MainScreen;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.PaneBuilder;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -44,17 +43,17 @@ public class Cyclist extends Application {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        launch(args);
-    }
+//    public static void main(String[] args) {
+//        launch(args);
+//    }
     
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		StackPane stack = new StackPane();
-		Pane glass = PaneBuilder.create()
-				.style("-fx-background-color: rgba(0, 100, 100, 0)")
-				.mouseTransparent(true).
-				build();
+		
+		Pane glass = new Pane();
+		glass.setStyle("-fx-background-color: rgba(0, 100, 100, 0)");
+		glass.setMouseTransparent(true);
 		
 	 	MainScreen root = new MainScreen(primaryStage);
         
