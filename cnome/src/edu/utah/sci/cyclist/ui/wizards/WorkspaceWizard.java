@@ -80,7 +80,7 @@ public class WorkspaceWizard extends VBox {
 		dialog = StageBuilder.create()
 				.title("Select Workspace Directory")
 				.maxWidth(250).minWidth(250)
-				.maxHeight(100).minHeight(95)
+				.maxHeight(150).minHeight(95)
 				.build();
 		
 		dialog.initModality(Modality.WINDOW_MODAL);
