@@ -36,14 +36,15 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.model.Application;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
@@ -61,9 +62,8 @@ public class CyclistController {
 	private Model _model = new Model();
 	private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
 	private String SAVE_FILE = SAVE_DIR+"save.xml";
-	private String SAVE_GENERAL_CONFIG_FILE = SAVE_DIR+"saveGeneralConfig.xml";
-	private String DEFAULT_WORKSPACE = System.getProperty("user.home");
-	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
+	private int _lastChosenWorkspaceIndex = 0;
+	private WorkDirectoryController _workDirectoryController;
 	
 	/**
 	 * Constructor
@@ -80,9 +80,10 @@ public class CyclistController {
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
-		if(initGeneralConfigFile())
+		_workDirectoryController = new WorkDirectoryController();
+		if(_workDirectoryController.initGeneralConfigFile())
 		{
-			restoreGeneralConfigFile();
+			_workDirectoryController.restoreGeneralConfigFile();
 		}
 		
 		load();
@@ -131,39 +132,23 @@ public class CyclistController {
 	 * 
 	 */
 	public void selectWorkspace() {
-		ObjectProperty<String> selection = _screen.selectWorkspace(_workspaces);
-		selection.addListener(new ChangeListener<String>() {
+		
+		if(_workDirectoryController == null){
+			return;
+		}
+		ObservableList<String> selection = _screen.selectWorkspace(_workDirectoryController.getWorkspaces());
+		
+		selection.addListener(new ListChangeListener<String>(){
 
 			@Override
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {	
-				
-				// The user general config  file
-				File saveFile = new File(SAVE_GENERAL_CONFIG_FILE);
-				
-				//First time - create a new file.
-				if (!saveFile.exists()){
-					initGeneralConfigFile();
-				}
-				
-				FileReader reader;
-				try {
-					reader = new FileReader(saveFile);
-					// Create the root memento
-					XMLMemento memento = XMLMemento.createReadRoot(reader);
-					// Read in the data sources
-					IMemento[] rootApplications = memento.getChildren("applications");
-					if(rootApplications != null && rootApplications.length >0){
-						Application application = new Application("",newVal,true);
-						application.save(rootApplications[0].createChild("application"));
-						memento.save(new PrintWriter(saveFile));
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			public void onChanged(Change<? extends String> list ){
+				if(_workDirectoryController != null){
+					_workDirectoryController.handleWorkDirectoriesListChangedEvent(list);
 				}
 				
 			}
 		});
+		
 	}	
 		
 	private void addActions() {
@@ -299,79 +284,4 @@ public class CyclistController {
 			} 		
 		}
 	}
-	
-	/**
-	 * initialize the file which saves the general configuration for the application.
-	 * (For example - all the existing workspaces).
-	 * If file doesn't exist - create one and add the default workspaces.
-	 * If exists - do nothing.
-	 * 
-	 * @return boolean - true if the file exists, false - if it doesn't.
-	 */
-	private Boolean initGeneralConfigFile(){
-		// The user general config  file
-		File saveFile = new File(SAVE_GENERAL_CONFIG_FILE);
-		
-		//First time - create a new file.
-		if (!saveFile.exists())
-		{
-			try {
-					saveFile.createNewFile();
-					// Create the root memento
-					XMLMemento memento = XMLMemento.createWriteRoot("root");
-						
-					//When creating the global config file for the first time - add the default workspaces.
-					IMemento applications = memento.createChild("applications");
-					new Application("default user",DEFAULT_WORKSPACE ).save(applications.createChild("application"));
-					new Application("default software", DEFAULT_WORKSPACE+"/software" ).save(applications.createChild("application"));
-					memento.save(new PrintWriter(saveFile));
-					_workspaces.add(DEFAULT_WORKSPACE);
-					_workspaces.add(DEFAULT_WORKSPACE+"/software");
-					return false;
-				} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-				}
-		}
-		return true;
-	}
-	
-	/**
-	 * Reads the applications information from the general application configuration file .
-	 */
-	private void restoreGeneralConfigFile(){
-		
-		// Check if the save file exists
-		File saveFile = new File(SAVE_GENERAL_CONFIG_FILE);
-					
-		// If we have a save file, read it in
-		if(saveFile.exists()){
-			Reader reader;
-			try {
-				reader = new FileReader(saveFile);
-				// Create the root memento
-				XMLMemento memento = XMLMemento.createReadRoot(reader);
-				// Read in the data sources
-				IMemento[] rootApplications = memento.getChildren("applications");
-				if(rootApplications != null && rootApplications.length >0){
-					IMemento[] applications = rootApplications[0].getChildren("application");	
-					Application app = new Application();
-					for(IMemento application: applications){
-						if (application != null){
-							app.restore(application);
-							_workspaces.add(app.getDirectory());
-						}
-					}
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		//If the file doesn't exist - create one with default values.
-		else{
-			initGeneralConfigFile();
-		}
-	}
-	    
 }

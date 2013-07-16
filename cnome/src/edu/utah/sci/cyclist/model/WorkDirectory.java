@@ -25,74 +25,55 @@ package edu.utah.sci.cyclist.model;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 
-public class Application {
-		
-	private String _name;
-	private String _directory;
-	private Boolean _lastChosen;
+public class WorkDirectory {
 	
-	public Application() {
-		this("","",false);
+	private String _path;
+	private int _id;
+	
+	public WorkDirectory() {
+		this(-1,"",false);
 	}
-	public Application(String name, String directory, Boolean lastChosen) {
-		_name = name;
-		_directory = directory;
-		_lastChosen= lastChosen;
+	public WorkDirectory(int id, String path, Boolean lastChosen) {
+		_id = id;
+		_path = path;
 	}
 	
-	public Application(String name, String directory) {
-		_name = name;
-		_directory = directory;
+	public WorkDirectory(int id, String path) {
+		_id = id;
+		_path = path;
 	}
 	
-    // Save the workspace
+	/** Saves the work directory */
 	public void save(IMemento memento) {
-
-		// Set the name
-		memento.putString("name", getName());
+		// Set the path
+		memento.putString("path", getPath());
 		
-		// Set the value
-		memento.putString("value", getDirectory());
+		memento.putInteger("id", getId());
 	}
 	
-	// Restore the table
+	/** Restores the work directory */
 	public void restore(IMemento memento){
 	
 		// Get the name
-		setName(memento.getString("name"));
+		setId(memento.getInteger("id"));
 		
-		 // Get the alias
-		setDirectory(memento.getString("value"));	
+		 // Get the value of the directory
+		setPath(memento.getString("path"));
 	}
 	
-	/**
-	 * Checks if the application already has the same directory.
-	 */
-	public Boolean applicationExists(IMemento memento, String directory){
-		if (memento.getString("name").equals(directory)) 
-			return true;
-		return false;
+	public int getId() {
+		return _id;
 	}
 
-	
-	public String getName() {
-		return _name;
-	}
-
-	public void setName(String name) {
-		_name = name;	
+	public void setId(int id) {
+		_id = id;	
 	}
 	
-	public String getDirectory(){
-		return _directory;
+	public String getPath(){
+		return _path;
 	}
 	
-	public void setDirectory(String directory){
-		_directory = directory;
+	public void setPath(String path){
+		_path = path;
 	}
-	
-	@Override
-    public String toString() {
-        return getName();
-    }
 }
