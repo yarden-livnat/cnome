@@ -25,11 +25,9 @@ package edu.utah.sci.cyclist.controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
@@ -42,6 +40,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
@@ -60,9 +59,8 @@ public class CyclistController {
 	private final EventBus _eventBus;
 	private MainScreen _screen;
 	private Model _model = new Model();
-	private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
-	private String SAVE_FILE = SAVE_DIR+"save.xml";
-	private int _lastChosenWorkspaceIndex = 0;
+	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	
 	/**
@@ -72,15 +70,15 @@ public class CyclistController {
 	 */
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
-		/*_workspaces.add("/Users/yarden/software");
-		_workspaces.add("/Users/yarden");*/
+		
+		_workDirectoryController = new WorkDirectoryController();
 		
 		// If the save directory does not exist, create it
-		File saveDir = new File(SAVE_DIR);
+		File saveDir = new File(WorkDirectoryController.SAVE_DIR);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
-		_workDirectoryController = new WorkDirectoryController();
+		
 		if(_workDirectoryController.initGeneralConfigFile())
 		{
 			_workDirectoryController.restoreGeneralConfigFile();
@@ -136,14 +134,24 @@ public class CyclistController {
 		if(_workDirectoryController == null){
 			return;
 		}
-		ObservableList<String> selection = _screen.selectWorkspace(_workDirectoryController.getWorkspaces());
+		
+		ObservableList<String> selection = _screen.selectWorkspace(_workDirectoryController.getWorkDirectories(),
+																   _workDirectoryController.getLastChosenIndex());
 		
 		selection.addListener(new ListChangeListener<String>(){
 
 			@Override
 			public void onChanged(Change<? extends String> list ){
 				if(_workDirectoryController != null){
-					_workDirectoryController.handleWorkDirectoriesListChangedEvent(list);
+					if(_workDirectoryController.handleWorkDirectoriesListChangedEvent(list)){
+						load();
+						
+						//Set all the views to match the new tables.
+						ObservableList<Field> emptyList = FXCollections.observableArrayList();
+						_screen.getDimensionPanel().setFields(emptyList);
+						_screen.getMeauresPanel().setFields(emptyList);
+						
+					}
 				}
 				
 			}
@@ -160,6 +168,8 @@ public class CyclistController {
 				final DatatableWizard wizard = new DatatableWizard();
 				wizard.setItems(_model.getSources());
 				wizard.setSelectedSource(_model.getSelectedDatasource());
+				String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+				wizard.setWorkDir(currDirectory);
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
 				
@@ -210,13 +220,15 @@ public class CyclistController {
 	
 	private void save() {
 		
+		String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+		
 		// If the save directory does not exist, create it
-		File saveDir = new File(SAVE_DIR);
+		File saveDir = new File(currDirectory);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
 		// The save file
-		File saveFile = new File(SAVE_FILE);
+		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
 
 		// Create the root memento
 		XMLMemento memento = XMLMemento.createWriteRoot("root");
@@ -243,13 +255,18 @@ public class CyclistController {
 	// Load saved properties
 	private void load() {
 		
+		String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+		
 		// Check if the save file exists
-		File saveFile = new File(SAVE_FILE);
+		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
+		
+		//Clear the previous data
+		_model.getSources().clear();
+		_model.getTables().clear();
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
 			
-	
 			Reader reader;
 			try {
 				reader = new FileReader(saveFile);

@@ -58,6 +58,7 @@ import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.components.DatasourceSelector;
@@ -80,7 +81,8 @@ public class DatatableWizard extends TilePane {
 	// DataType elements
 	private CyclistDatasource     _current;
 	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
-	private DatasourceSelector    _selector; 
+	private DatasourceSelector    _selector;
+	private String               _workDir = WorkDirectoryController.SAVE_DIR;
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -373,7 +375,7 @@ public class DatatableWizard extends TilePane {
 		table.setName(name); 
 		table.setAlias(_selector.getAlias());
 		table.setDataSource(_current);
-		table.setLocalDatafile();
+		table.setLocalDatafile(_workDir);
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
 		table.extractSchema();
 	}
@@ -385,6 +387,10 @@ public class DatatableWizard extends TilePane {
 	public void setSelectedSource(CyclistDatasource source) {
 		_current = source;	
 		_sourcesView.getSelectionModel().select(_current);
+	}
+	
+	public void setWorkDir(String workDir){
+		_workDir = workDir;
 	}
 	
 	

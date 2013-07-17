@@ -31,16 +31,12 @@ public class WorkDirectory {
 	private int _id;
 	
 	public WorkDirectory() {
-		this(-1,"",false);
-	}
-	public WorkDirectory(int id, String path, Boolean lastChosen) {
-		_id = id;
-		_path = path;
+		this(-1,"");
 	}
 	
 	public WorkDirectory(int id, String path) {
 		_id = id;
-		_path = path;
+		_path = path.replace("\\", "/");
 	}
 	
 	/** Saves the work directory */
@@ -74,6 +70,7 @@ public class WorkDirectory {
 	}
 	
 	public void setPath(String path){
-		_path = path;
+		//If in windows environment - change all the backslash to slash.
+		_path = path.replace("\\", "/");
 	}
 }

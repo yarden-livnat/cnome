@@ -78,9 +78,9 @@ public class MainScreen extends VBox {
 		return getScene().getWindow();
 	}
 	
-	public ObservableList<String> selectWorkspace(ObservableList<String> list) {
+	public ObservableList<String> selectWorkspace(ObservableList<String> list, int chosenIndex) {
 		WorkspaceWizard wizard = new WorkspaceWizard();
-		wizard.setItems(list);
+		wizard.setItems(list,chosenIndex);
 		return wizard.show(getScene().getWindow());
 	}
 	

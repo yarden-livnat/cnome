@@ -51,7 +51,7 @@ public class Table {
 
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
-	private static final String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	//private static final String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
 	
 	public enum SourceLocation {
 		REMOTE,
@@ -580,8 +580,8 @@ public class Table {
 	public String getLocalDatafile() {
 		return _localDataFile;
 	}
-	public void setLocalDatafile() {
-		_localDataFile = SAVE_DIR + getDataSource() + getName() + ".sqlite";
+	public void setLocalDatafile(String workDir) {
+		_localDataFile = workDir + "/" + getDataSource()+"/" + getName() + ".sqlite";
 	}
 	
 	public class Row  {
