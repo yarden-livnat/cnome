@@ -6,7 +6,6 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
@@ -72,8 +71,6 @@ public class TaskControl extends HBox {
 	
 	private void build() {
 		_indicator = new ProgressIndicator(-1);
-//		_indicator.setMaxSize(20, 20);
-		
 		_indicator.setPrefSize(14, 14);
 		_indicator.setVisible(false);
 	

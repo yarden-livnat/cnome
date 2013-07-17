@@ -218,9 +218,9 @@ public class CyclistDatasource implements DataSource {
 	
 	private Connection getSQLiteConnection() throws SQLException {
 		try {
-			System.out.println("sqlite: try accuire");
+			System.out.println("sqlite lock: try acquire");
 			_SQLiteSemaphore.acquire();
-			System.out.println("sqlite: accuired");
+			System.out.println("sqlite lock: acquired");
 //			if (_SQLiteConnection == null) 
 				_SQLiteConnection =  DriverManager.getConnection(_url, _properties);
 		} catch (InterruptedException e) {

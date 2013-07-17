@@ -258,12 +258,7 @@ public class DatatableWizard extends TilePane {
 				.padding(new Insets(5))
 				.maxHeight(Double.MAX_VALUE)
 				.children(	
-//						TextBuilder.create().text("Select Table:").build(),
 						new Text("Select Table:"),
-//						_tablesView = ListViewBuilder.create(String.class) // Java 8
-//						_tablesView = ListViewBuilder.<String>create()
-//						.maxHeight(Double.MAX_VALUE)
-//						.build()	
 						_tablesView = new ListView<String>()
 						).build();
 		_tablesView.setMaxHeight(Double.MAX_VALUE);

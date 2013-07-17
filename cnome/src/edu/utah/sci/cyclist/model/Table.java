@@ -41,7 +41,6 @@ import org.apache.log4j.Logger;
 
 
 import edu.utah.sci.cyclist.controller.IMemento;
-import edu.utah.sci.cyclist.model.DataType.Type;
 import edu.utah.sci.cyclist.util.QueryBuilder;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -601,5 +600,5 @@ public class Table {
 
 	
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
-	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
+//	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
 }

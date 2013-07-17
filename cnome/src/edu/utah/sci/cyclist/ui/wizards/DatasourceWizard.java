@@ -131,7 +131,7 @@ public class DatasourceWizard extends VBox {
 						.prefWidth(125)
 						.text(sourceName)
 						.build())
-						.build();
+					.build();
 						
 			
 		// The selector for type of connection
