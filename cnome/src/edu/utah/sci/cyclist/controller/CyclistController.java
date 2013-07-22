@@ -30,7 +30,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
 
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -43,7 +45,6 @@ import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
@@ -179,17 +180,20 @@ public class CyclistController {
 				wizard.setWorkDir(currDirectory);
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
-				
 			//	wizard.getDataSources()
-					
 				
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-						_model.getTables().add(newVal);
-						_model.setSelectedDatasource(wizard.getSelectedSource());
+						if(newVal != null)
+						{
+							Table tbl = new Table(newVal);
+							_model.getTables().add(tbl);
+							_model.setSelectedDatasource(wizard.getSelectedSource());
+						}
 					}
-				});		
+				});
+				
 			}
 		});
 		
@@ -295,6 +299,7 @@ public class CyclistController {
 					for(IMemento table: tables){
 						Table tbl = new Table();
 						tbl.restore(table, _model.getSources());
+						tbl.setLocalDatafile(getLastChosenWorkDirectory());
 						_model.getTables().add(tbl);
 					}
 					

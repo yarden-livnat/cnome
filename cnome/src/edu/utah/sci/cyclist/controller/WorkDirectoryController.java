@@ -13,9 +13,9 @@ import javafx.collections.ListChangeListener.Change;
 import edu.utah.sci.cyclist.model.WorkDirectory;
 
 public class WorkDirectoryController {
-	public static final String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	public static final String SAVE_DIR = System.getProperty("user.dir").replace("\\", "/") + "/.cnome/";
 	private static final String GENERAL_CONFIG_FILE = SAVE_DIR+"generalConfig.xml";
-	private static final String DEFAULT_WORKSPACE = System.getProperty("user.home").replace("\\", "/");
+	public static final String DEFAULT_WORKSPACE = System.getProperty("user.home").replace("\\", "/");
 	private ObservableList<String> _workdirectories = FXCollections.observableArrayList();
 	private int _lastId = 0;
 	private int _lastChosenIndex = 0;
