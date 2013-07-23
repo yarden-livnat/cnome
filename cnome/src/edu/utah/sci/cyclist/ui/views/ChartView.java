@@ -11,8 +11,10 @@ import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -21,8 +23,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
@@ -31,24 +37,34 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.GridPaneBuilder;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextBuilder;
 import javafx.util.converter.TimeStringConverter;
 
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 
+import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Indicator;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DropArea;
@@ -70,6 +86,11 @@ public class ChartView extends ViewBase {
 	
 	private XYChart<Object,Object> _chart;
 	
+	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
+	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
+	
+	private MapSpec _spec;
+	
 	private BorderPane _pane;
 	private DropArea _xArea;
 	private DropArea _yArea;
@@ -77,11 +98,14 @@ public class ChartView extends ViewBase {
 	private DropArea _colorArea;
 	private DropArea _shapeArea;
 	private DropArea _sizeArea;
+	private DropArea _indicatorArea;
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
-	
 	private IntegerField _limitEntry;
+	
+	private StackPane _stackPane;
+	private Pane _glassPane;
 	
 	public ChartView() {
 		super();
@@ -111,21 +135,16 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void invalidateChart() {
-		_pane.setCenter(null);
+		if (_stackPane.getChildren().size() > 1) {
+			_stackPane.getChildren().remove(0);
+		}
+		
 		_chart = null;
 		setCurrentTask(null);
 	}
 	
-	private MapSpec _spec;
-	private class FieldInfo {
-		Field field;
-		int index;
-		
-		public FieldInfo(Field field, int index) {
-			this.field = field;
-			this.index = index;
-		}
-	}
+
+	
 	
 	private void invalidate() {
 		_chart = null;
@@ -140,7 +159,6 @@ public class ChartView extends ViewBase {
 				createChart();
 			
 			if (_chart != null) {
-				//
 				List<Field> fields = new ArrayList<>();
 				List<Field> aggregators = new ArrayList<>();
 				List<Field> grouping = new ArrayList<>();
@@ -573,10 +591,12 @@ public class ChartView extends ViewBase {
 			_chart.setVerticalZeroLineVisible(false);
 			System.out.println("zero line: "+_chart.horizontalZeroLineVisibleProperty().get()+"  "+_chart.verticalZeroLineVisibleProperty().get());
 //			_chart.setCache(true);
-			_pane.setCenter(_chart);
+//			_pane.setCenter(_chart);
+			_stackPane.getChildren().add(0, _chart);
 		} else {
 			Text text = new Text("Unsupported fields combination");
-			_pane.setCenter(text);
+			_stackPane.getChildren().add(0, text);
+			//_pane.setCenter(text);
 		}
 	}
 
@@ -644,11 +664,22 @@ public class ChartView extends ViewBase {
 		addBar(_limitEntry, HPos.RIGHT);
 		
 		// main view
-		_pane = BorderPaneBuilder.create().prefHeight(200).prefWidth(300).build();
+		_pane = new BorderPane();
+		_pane.setPrefSize(200, 300);
+		
 		Rectangle clip = new Rectangle(0, 0, 100, 100);
 		clip.widthProperty().bind(_pane.widthProperty());
 		clip.heightProperty().bind(_pane.heightProperty());
 		_pane.setClip(clip);
+		
+		_stackPane = new StackPane();
+		_glassPane = new Pane();
+		_glassPane.setStyle("-fx-background-color: rgba(200, 200, 200, 0.1)");
+		setupGlassPaneListeners();
+		
+		_stackPane.getChildren().add(_glassPane);
+		
+		_pane.setCenter(_stackPane);
 		_pane.setBottom(createControl());
 		
 		setContent(_pane);
@@ -667,11 +698,28 @@ public class ChartView extends ViewBase {
 			}
 		});
 		
+		_indicators.addListener(new ListChangeListener<Indicator>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Indicator> change) {
+				System.out.println("indictors list changed");
+				while (change.next()) {
+					for (Indicator indicator : change.getRemoved()) {
+						LineIndicator lineIndicator = _lineIndicators.remove(indicator);
+						if (lineIndicator != null) {
+							_glassPane.getChildren().remove(lineIndicator.line);
+						}
+					}
+					for (Indicator indicator : change.getAddedSubList()) {
+						_lineIndicators.put(indicator, new LineIndicator(indicator));
+					}
+				}
+			}
+		});
+		
 		filters().addListener(new ListChangeListener<Filter>() {
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
-				System.out.println("filters list changed");
 				while (change.next()) {
 					for (Filter f : change.getRemoved()) {
 						f.removeListener(_filterListener);
@@ -689,7 +737,6 @@ public class ChartView extends ViewBase {
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
-				System.out.println("remote filters list changed");
 				while (change.next()) {
 					for (Filter filter : change.getRemoved()) {
 						filter.removeListener(_filterListener);
@@ -704,12 +751,27 @@ public class ChartView extends ViewBase {
 		});
 	}
 	
+	private void createIndicator() {
+		Indicator indicator = new Indicator();
+		
+		if (_chart != null) {
+			Axis<?> axis = _chart.getXAxis();
+			if (axis instanceof NumberAxis) {
+				NumberAxis x = (NumberAxis) axis;
+				double value = (x.getUpperBound() - x.getLowerBound())/2;
+				indicator.valueProperty().set(value);
+			}
+	
+		}
+		_indicators.add(indicator);
+	}
+	
 	private Node createControl() {
-		GridPane grid = GridPaneBuilder.create()
-					.hgap(5)
-					.vgap(5)
-					.padding(new Insets(0, 0, 0, 0))
-					.build();
+		GridPane grid = new GridPane();
+		grid.setHgap(5);
+		grid.setVgap(5);
+		grid.setPadding(new Insets(0, 0, 0, 0));
+		
 		grid.getColumnConstraints().add(new ColumnConstraints(10));
 		ColumnConstraints cc = new ColumnConstraints();
 		cc.setHgrow(Priority.SOMETIMES);
@@ -720,12 +782,14 @@ public class ChartView extends ViewBase {
 		cc.setHgrow(Priority.SOMETIMES);
 		grid.getColumnConstraints().add(cc);
 		
-		_xArea = createControlArea(grid, "X", 0, 0, DropArea.Policy.SINGLE);
-		_yArea = createControlArea(grid, "Y", 1, 0, DropArea.Policy.MULTIPLE);
-		_lodArea = createControlArea(grid, "LOD", 0, 2, DropArea.Policy.MULTIPLE);
-				
+		_xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE);
+		_yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE);
+		_lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE);
+		_indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
+		
 		return grid;
 	}
+	
 	
 	private InvalidationListener _filterListener = new InvalidationListener() {
 		
@@ -742,11 +806,6 @@ public class ChartView extends ViewBase {
 	
 		@Override
 		public void invalidated(Observable observable) {			
-//			if (_xArea.getFields().size() == 0 || !_xArea.getFields().get(0).getRole().equals(_xAxisType))
-//				invalidateChart();
-//			
-//			if (_yArea.getFields().size() == 0 || !_yArea.getFields().get(0).getRole().equals(_yAxisType))
-//				invalidateChart();	
 			invalidateChart();		
 			if (getCurrentTable() == null) {
 				DropArea area = (DropArea) observable;
@@ -759,16 +818,194 @@ public class ChartView extends ViewBase {
 		}
 	};
 	
-	private DropArea createControlArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy) {
+	
+	
+	private DropArea createControlArea(GridPane grid, String title, int  row, int col, int colspan, DropArea.Policy policy) {		
+		Text text = new Text(title);
+		text.getStyleClass().add("input-area-header");
 		
-		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
 		DropArea area = new DropArea(policy);
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaLister);
 		grid.add(text, col, row);
-		grid.add(area, col+1, row);
+		grid.add(area, col+1, row, colspan, 1);
 		
 		return area;
 	}
 	
+	private DropArea createIndicatorArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy) {
+		Text text = new Text(title);
+		text.getStyleClass().add("input-area-header");
+		
+		DropArea area = new DropArea(policy);
+		area.tableProperty().bind(_currentTableProperty);
+		area.addListener(_areaLister);
+		
+		Button addButton = new Button("+");
+		addButton.getStyleClass().add("flat-button");
+		addButton.setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent arg0) {
+				createIndicator();
+			}
+		});
+		
+		grid.add(text, col, row);
+		grid.add(area, col+1, row);
+		grid.add(addButton, col+2, row);
+		
+		return area;
+	}
+	
+	private void setupGlassPaneListeners() {
+		_glassPane.setOnDragOver(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				if (getLocalClipboard().hasContent(DnD.INDICATOR_FORMAT)) {
+					event.acceptTransferModes(TransferMode.COPY);
+					event.consume();
+				}
+			}
+		});
+		
+		_glassPane.setOnDragDropped(new EventHandler<DragEvent>() {
+			public void handle(DragEvent event) {
+				Indicator indicator = getLocalClipboard().get(DnD.INDICATOR_FORMAT, Indicator.class);
+				_indicators.add(indicator);
+			}
+		});
+	}
+		
+		
+	private class FieldInfo {
+		Field field;
+		int index;
+		
+		public FieldInfo(Field field, int index) {
+			this.field = field;
+			this.index = index;
+		}
+	}
+	
+	class LineIndicator {
+		Indicator indicator;
+		Line line;
+		private double _dragX;
+		
+		public LineIndicator(final Indicator indicator) {
+			this.indicator = indicator;
+			
+			line = new Line();
+			line.setStrokeWidth(2);
+			line.setStroke(Color.GRAY);
+			
+			setXAxis(indicator.getValue());
+			setYAxis();
+			
+			_glassPane.getChildren().add(line);
+			
+			line.setOnMouseEntered(new EventHandler<MouseEvent>() {
+
+				@Override
+				public void handle(MouseEvent event) {
+					line.setStroke(Color.BLUE);
+					
+				}
+			});
+			
+			line.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+				@Override
+				public void handle(MouseEvent event) {
+					line.setStroke(Color.GRAY);
+					
+				}
+			});
+				
+			line.setOnDragDetected(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+					if (event.isShiftDown()) {
+						Dragboard db = line.startDragAndDrop(TransferMode.COPY);
+						
+						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+						clipboard.put(DnD.INDICATOR_FORMAT, Indicator.class, indicator);
+						ClipboardContent content = new ClipboardContent();
+						content.putString("indicator");
+						content.putImage(Resources.getIcon("indicator"));
+						db.setContent(content);
+					} else { 
+						_dragX = event.getX();
+						line.setOnMouseDragged(_dragLineHandler);
+					}
+				}
+			});
+			
+			indicator.valueProperty().addListener(new ChangeListener<Number>() {
+
+				@Override
+				public void changed(ObservableValue<? extends Number> arg0, Number prevValue, Number newValue) {
+					setXAxis(newValue.doubleValue());	
+				}
+			});
+		}
+		
+		EventHandler<MouseEvent> _dragLineHandler = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (_dragX != event.getX()) {
+					Axis<?> axis = _chart.getXAxis();
+					
+					if (axis instanceof NumberAxis) {
+						NumberAxis x = (NumberAxis) axis;
+						Number v = x.getValueForDisplay(x.sceneToLocal(event.getSceneX(), event.getSceneY()).getX());
+						indicator.setValue(v.doubleValue());
+					}
+					
+					_dragX = event.getX();
+				}
+	//			double dx = event.getX() - _dragX;
+	//			if (dx != 0) {
+	//				double px = line.getStartX()+dx;
+	//				line.setStartX(px);
+	//				line.setEndX(px);
+	//				_dragX = event.getX();
+	//			}
+			}
+		};
+		
+		
+		private void setXAxis(double value) {
+			if (_chart == null) return;
+			
+			Axis<?> axis = _chart.getXAxis();
+			if (axis != null && axis instanceof NumberAxis) {
+				NumberAxis x = (NumberAxis) axis;
+				if (value < x.getLowerBound()) {
+					value = x.getLowerBound();
+				} else if (x.getUpperBound() < value) {
+					value = x.getUpperBound();
+				}
+				double pos = x.getDisplayPosition(value);
+				
+				 Point2D p = _glassPane.sceneToLocal(x.localToScene(pos, 0));
+				
+				line.setStartX(p.getX());
+				line.setEndX(p.getX());
+			}
+		}
+			
+		private void setYAxis() {
+			if (_chart == null) return;
+			Axis<?> y = _chart.getYAxis();
+			if (y == null) return;
+			
+			Bounds b = y.localToScene(y.getBoundsInLocal());
+			Bounds gb = _glassPane.sceneToLocal(b);
+			
+			line.setStartY(gb.getMinY());
+			line.setEndY(gb.getMaxY());
+		}
+	}
+
 }

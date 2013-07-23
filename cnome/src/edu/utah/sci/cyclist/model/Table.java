@@ -439,6 +439,7 @@ public class Table {
 					while (rs.next()) {
 						if (isCancelled()) {
 							System.out.println("task canceled");
+							stmt.cancel();
 							updateMessage("Canceled");
 							break;
 						}
@@ -489,6 +490,7 @@ public class Table {
 					while (rs.next()) {
 						if (isCancelled()) {
 							System.out.println("task canceled");
+							stmt.cancel();
 							updateMessage("Canceled");
 							break;
 						}

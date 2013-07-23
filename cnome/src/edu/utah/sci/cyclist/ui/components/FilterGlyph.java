@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import edu.utah.sci.cyclist.event.ui.FilterEvent;
-import edu.utah.sci.cyclist.model.Filter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -10,12 +8,12 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.LabelBuilder;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.model.Filter;
 
 public class FilterGlyph extends HBox {
 
@@ -45,26 +43,22 @@ public class FilterGlyph extends HBox {
 	}
 	
 	private void build() {
-		HBoxBuilder.create()
-			.styleClass("filter-glyph")
-			.spacing(5)
-			.children(
-					LabelBuilder.create()
-						.styleClass("text")
-						.text(_filter.getName())
-						.build(),
-					StackPaneBuilder.create()
-						.children(
-							_button = StackPaneBuilder.create()
-								.styleClass("arrow")
-								.maxHeight(8)
-								.maxWidth(6)
-								.build()
-							)
-						.alignment(Pos.CENTER)
-					.build()
-				)
-			.applyTo(this);
+		getStyleClass().add("filter-glyph");
+		setSpacing(5);
+		
+		Label label = new Label(_filter.getName());
+		label.getStyleClass().add("text");
+	
+		_button = new StackPane();
+		_button.getStyleClass().add("arrow");
+		_button.setMaxHeight(8);
+		_button.setMaxWidth(6);
+		
+		StackPane sp = new StackPane();
+		sp.getChildren().add(_button);
+		sp.setAlignment(Pos.CENTER);
+			
+		getChildren().addAll(label, sp);
 		
 		createMenu();
 	}
