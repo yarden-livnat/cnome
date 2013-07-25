@@ -54,6 +54,7 @@ import edu.utah.sci.cyclist.util.QueryBuilder;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 
 public class Table {
@@ -69,6 +70,12 @@ public class Table {
 		LOCAL_SUBSET
 	}
 	
+	public enum NumericRangeValues {
+		MIN,
+		MAX,
+		CHOSEN_MIN,
+		CHOSEN_MAX
+	}
 	
 	private String _alias;
 	private String _name;
@@ -730,6 +737,9 @@ public class Table {
 		 FieldNode.putTextData(sb.toString());
 	}
 	
+	/* Reads distinct values from a file 
+	 * For a given field in a given table- 
+	 * if the table xml file exists and it contains the field values - read the values from the file */
 	private List<Object> readFieldValuesFromFile(String fieldName){
 		
 		List<Object> values = new ArrayList<>();
@@ -759,6 +769,50 @@ public class Table {
 			 }
 		}
 	}
+	
+	public Task<ObservableMap<Object, Object>> getFieldRange(final Field field) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableMap<Object, Object>> task = new Task<ObservableMap<Object, Object>>() {
+			
+			@Override
+			protected ObservableMap<Object, Object> call() throws Exception {
+				Map<Object, Object> values = new HashMap<>();
+				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+					updateMessage("querying");
+					System.out.println("querying field range");
+					String query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+getName();
+					log.debug("query: "+query);
+					System.out.println(query);
+					ResultSet rs = stmt.executeQuery(query);
+					
+					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
+					
+						values.put(NumericRangeValues.MIN, rs.getDouble("min"));
+						values.put(NumericRangeValues.MAX, rs.getDouble("max"));
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				return FXCollections.observableMap(values);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task;
+		
+	}
+	
+	
 
 	
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
