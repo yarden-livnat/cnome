@@ -31,9 +31,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
@@ -194,8 +194,10 @@ public class Workspace extends ViewBase implements View {
 				if (event.getGestureSource() != this) {
 					if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
 						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
-						if (_onToolDrop != null)
-							_onToolDrop.call(tool, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
+						if (_onToolDrop != null) {
+							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
+							_onToolDrop.call(tool, p.getX(), p.getY()); 
+						}
 						status = true;
 					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
 						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);

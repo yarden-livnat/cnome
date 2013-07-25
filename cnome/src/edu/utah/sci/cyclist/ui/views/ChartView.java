@@ -11,10 +11,8 @@ import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -24,12 +22,9 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
@@ -39,10 +34,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -50,8 +42,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.converter.TimeStringConverter;
@@ -59,7 +49,6 @@ import javafx.util.converter.TimeStringConverter;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 
-import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
@@ -68,8 +57,10 @@ import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Indicator;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
+import edu.utah.sci.cyclist.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.ui.components.DropArea;
 import edu.utah.sci.cyclist.ui.components.IntegerField;
+import edu.utah.sci.cyclist.ui.components.LineIndicator;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.util.QueryBuilder;
 
@@ -85,11 +76,13 @@ public class ChartView extends ViewBase {
 	private ViewType _viewType;
 	private MarkType _markType;
 	
-	private XYChart<Object,Object> _chart;
+	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
 	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
+	private List<DistanceIndicator> _distanceIndicators;
 	
+
 	private MapSpec _spec;
 	
 	private BorderPane _pane;
@@ -113,6 +106,17 @@ public class ChartView extends ViewBase {
 		build();
 	}
 	
+	public ObjectProperty<XYChart<Object,Object>> chartProperty() {
+		return _chartProperty;
+	}
+	
+	public XYChart<Object,Object> getChart() {
+		return _chartProperty.get();
+	}
+	
+	public void setChart(XYChart<Object,Object> chart) {
+		_chartProperty.set(chart);
+	}
 	public Table getCurrentTable() {
 		return _currentTableProperty.get();
 	}
@@ -140,26 +144,26 @@ public class ChartView extends ViewBase {
 			_stackPane.getChildren().remove(0);
 		}
 		
-		_chart = null;
+		setChart(null);
 		setCurrentTask(null);
 	}
 	
 
 	
 	
-	private void invalidate() {
-		_chart = null;
-	}
+//	private void invalidate() {
+//		setChart(null);
+//	}
 	
 	private void fetchData() {
 		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (!_xArea.isValid() || !_yArea.isValid())
 				return;
 			
-			if (_chart == null) 
+			if (getChart() == null) 
 				createChart();
 			
-			if (_chart != null) {
+			if (getChart() != null) {
 				List<Field> fields = new ArrayList<>();
 				List<Field> aggregators = new ArrayList<>();
 				List<Field> grouping = new ArrayList<>();
@@ -363,7 +367,7 @@ public class ChartView extends ViewBase {
 		}
 		
 		
-		_chart.getData().addAll(graphs);
+		getChart().getData().addAll(graphs);
 //		updateAxes(graphs);
 	}
 	
@@ -559,41 +563,41 @@ public class ChartView extends ViewBase {
 		determineViewType(getXField().getClassification(), getYField().getClassification()); 
 		switch (_viewType) {
 		case CROSS_TAB:
-			_chart = null;
+			setChart(null);
 			break;
 		case BAR:
 			BarChart bar = new BarChart<>(xAxis,  yAxis);
 			System.out.println("gaps: "+bar.getBarGap()+"  "+bar.getCategoryGap());
 			bar.setBarGap(1);
 			bar.setCategoryGap(4);
-			_chart = bar;
+			setChart(bar);
 			break;
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
 //			lineChart.setCreateSymbols(false);
-			_chart = lineChart;
+			setChart(lineChart);
 			break;
 		case SCATTER_PLOT:
-			_chart = new ScatterChart<>(xAxis, yAxis);
+			setChart(new ScatterChart<>(xAxis, yAxis));
 			break;
 		case GANTT:
-			_chart = null;
+			setChart(null);
 			break;
 		case NA:
-			_chart = null;
+			setChart(null);
 		}
 		 
 //		chart.setCreateSymbols(false);
 //		chart.setLegendVisible(false);
 //		
-		if (_chart != null) {
-			_chart.setAnimated(false);
-			_chart.setHorizontalZeroLineVisible(false);
-			_chart.setVerticalZeroLineVisible(false);
-			System.out.println("zero _line: "+_chart.horizontalZeroLineVisibleProperty().get()+"  "+_chart.verticalZeroLineVisibleProperty().get());
-//			_chart.setCache(true);
-//			_pane.setCenter(_chart);
-			_stackPane.getChildren().add(0, _chart);
+		if (getChart() != null) {
+			getChart().setAnimated(false);
+			getChart().setHorizontalZeroLineVisible(false);
+			getChart().setVerticalZeroLineVisible(false);
+			System.out.println("zero _line: "+getChart().horizontalZeroLineVisibleProperty().get()+"  "+getChart().verticalZeroLineVisibleProperty().get());
+//			getChart().setCache(true);
+//			_pane.setCenter(getChart());
+			_stackPane.getChildren().add(0, getChart());
 		} else {
 			Text text = new Text("Unsupported fields combination");
 			_stackPane.getChildren().add(0, text);
@@ -657,7 +661,7 @@ public class ChartView extends ViewBase {
 			public void changed(ObservableValue<? extends Number> observable,
 					Number oldValue, Number newValue) {
 				System.out.println("limit changed: "+ newValue.intValue());
-				_chart = null;
+				setChart(null);
 				fetchData();	
 			}
 		});
@@ -707,11 +711,14 @@ public class ChartView extends ViewBase {
 					for (Indicator indicator : change.getRemoved()) {
 						LineIndicator lineIndicator = _lineIndicators.remove(indicator);
 						if (lineIndicator != null) {
-							_glassPane.getChildren().remove(lineIndicator._line);
+							_glassPane.getChildren().remove(lineIndicator.getNode());
 						}
 					}
 					for (Indicator indicator : change.getAddedSubList()) {
-						_lineIndicators.put(indicator, new LineIndicator(indicator));
+						LineIndicator li = new LineIndicator(indicator, _glassPane);
+						li.chartProperty().bind(chartProperty());
+//						_glassPane.getChildren().add(li.getNode());
+						_lineIndicators.put(indicator, li);
 						indicator.selectedProperty().addListener(_indicatorSelectedHandler);
 					}
 				}
@@ -730,7 +737,7 @@ public class ChartView extends ViewBase {
 						f.addListener(_filterListener);
 					}
 				}
-				invalidate();
+				invalidateChart();
 				fetchData();
 			}
 		});
@@ -747,7 +754,7 @@ public class ChartView extends ViewBase {
 						filter.addListener(_filterListener);
 					}
 				}
-				invalidate();
+				invalidateChart();
 				fetchData();
 			}
 		});
@@ -756,8 +763,8 @@ public class ChartView extends ViewBase {
 	private void createIndicator() {
 		Indicator indicator = new Indicator();
 		
-		if (_chart != null) {
-			Axis<?> axis = _chart.getXAxis();
+		if (getChart() != null) {
+			Axis<?> axis = getChart().getXAxis();
 			if (axis instanceof NumberAxis) {
 				NumberAxis x = (NumberAxis) axis;
 				double value = (x.getUpperBound() - x.getLowerBound())/2;
@@ -792,29 +799,22 @@ public class ChartView extends ViewBase {
 		return grid;
 	}
 	
-	class DistanceIndicator {
-		LineIndicator from;
-		LineIndicator to;
+	private void showDistances(Indicator selected) {
+		LineIndicator current = _lineIndicators.get(selected);
+		for (LineIndicator to : _lineIndicators.values()) {
+			if (to.getIndicator() != selected) {
+				DistanceIndicator di = new DistanceIndicator(current, to);
+				_distanceIndicators.add(di);
+				_glassPane.getChildren().add(di.getNode());
+			}
+		}
 	}
-	
-	private List<DistanceIndicator> _distanceIndicators;
-	
-//	private void showDistances(Indicator selected) {
-//		for (LineIndicator lineIndicator : _lineIndicators.values()) {
-//			if (lineIndicator.getIndicator() != selected) {
-//				DistanceIndicator di = new DistanceIndicator();
-//				di.from = selected;
-//				di.to = lineIndicator;
-//			}
-//		}
-//	}
 	
 	private ChangeListener<Boolean> _indicatorSelectedHandler = new ChangeListener<Boolean>() {
 
 		@Override
 		public void changed(ObservableValue<? extends Boolean> arg0,
 				Boolean prevValue, Boolean newValue) {
-			System.out.println("_indicator changed");
 			
 		}
 	};
@@ -824,8 +824,8 @@ public class ChartView extends ViewBase {
 		@Override
 		public void invalidated(Observable o) {
 			Filter f = (Filter) o;
-			System.out.println("filter cahnged: "+f.getName());
-			invalidate();
+			System.out.println("filter changed: "+f.getName());
+			invalidateChart();
 			fetchData();
 		}
 	};
@@ -915,145 +915,5 @@ public class ChartView extends ViewBase {
 		}
 	}
 	
-	class LineIndicator {
-		private Indicator _indicator;
-		private Line _line;
-		private double _dragX;
-		
-		public Indicator getIndicator() {
-			return _indicator;
-		}
-		
-		public LineIndicator(final Indicator indicator) {
-			this._indicator = indicator;
-			
-			_line = new Line();
-			_line.setStrokeWidth(2);
-			_line.setStroke(Color.GRAY);
-			
-			setXAxis(indicator.getValue());
-			setYAxis();
-			
-			_glassPane.getChildren().add(_line);
-			
-			indicator.hoverProperty().addListener(new ChangeListener<Boolean>() {
-
-				@Override
-				public void changed(ObservableValue<? extends Boolean> arg0,
-						Boolean arg1, Boolean newValue) {
-					_line.setStroke(newValue ? Color.BLUE : Color.GRAY);	
-				}
-			});
-			
-			_line.setOnMouseEntered(new EventHandler<MouseEvent>() {
-
-				@Override
-				public void handle(MouseEvent event) {
-					indicator.setHover(true);
-				}
-			});
-			
-			_line.setOnMouseExited(new EventHandler<MouseEvent>() {
-
-				@Override
-				public void handle(MouseEvent event) {
-					indicator.setHover(false);
-				}
-			});
-				
-			_line.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-				@Override
-				public void handle(MouseEvent arg0) {
-					indicator.setSelected(!indicator.getSelected());
-				}
-			});
-			
-			_line.setOnDragDetected(new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent event) {
-					if (event.isShiftDown()) {
-						Dragboard db = _line.startDragAndDrop(TransferMode.COPY);
-						
-						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-						clipboard.put(DnD.INDICATOR_FORMAT, Indicator.class, indicator);
-						ClipboardContent content = new ClipboardContent();
-						content.putString("_indicator");
-						content.putImage(Resources.getIcon("_indicator"));
-						db.setContent(content);
-					} else { 
-						_dragX = event.getX();
-						_line.setOnMouseDragged(_dragLineHandler);
-						indicator.setSelected(true);
-					}
-				}
-			});
-			
-			indicator.valueProperty().addListener(new ChangeListener<Number>() {
-
-				@Override
-				public void changed(ObservableValue<? extends Number> arg0, Number prevValue, Number newValue) {
-					setXAxis(newValue.doubleValue());	
-				}
-			});
-		}
-		
-		EventHandler<MouseEvent> _dragLineHandler = new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (_dragX != event.getX()) {
-					Axis<?> axis = _chart.getXAxis();
-					
-					if (axis instanceof NumberAxis) {
-						NumberAxis x = (NumberAxis) axis;
-						Number v = x.getValueForDisplay(x.sceneToLocal(event.getSceneX(), event.getSceneY()).getX());
-						_indicator.setValue(v.doubleValue());
-					}
-					
-					_dragX = event.getX();
-				}
-	//			double dx = event.getX() - _dragX;
-	//			if (dx != 0) {
-	//				double px = _line.getStartX()+dx;
-	//				_line.setStartX(px);
-	//				_line.setEndX(px);
-	//				_dragX = event.getX();
-	//			}
-			}
-		};
-		
-		
-		private void setXAxis(double value) {
-			if (_chart == null) return;
-			
-			Axis<?> axis = _chart.getXAxis();
-			if (axis != null && axis instanceof NumberAxis) {
-				NumberAxis x = (NumberAxis) axis;
-				if (value < x.getLowerBound()) {
-					value = x.getLowerBound();
-				} else if (x.getUpperBound() < value) {
-					value = x.getUpperBound();
-				}
-				double pos = x.getDisplayPosition(value);
-				
-				 Point2D p = _glassPane.sceneToLocal(x.localToScene(pos, 0));
-				
-				_line.setStartX(p.getX());
-				_line.setEndX(p.getX());
-			}
-		}
-			
-		private void setYAxis() {
-			if (_chart == null) return;
-			Axis<?> y = _chart.getYAxis();
-			if (y == null) return;
-			
-			Bounds b = y.localToScene(y.getBoundsInLocal());
-			Bounds gb = _glassPane.sceneToLocal(b);
-			
-			_line.setStartY(gb.getMinY());
-			_line.setEndY(gb.getMaxY());
-		}
-	}
-
+	
 }
