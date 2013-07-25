@@ -41,6 +41,7 @@ import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
@@ -137,16 +138,24 @@ public class TablesPanel extends TitledPanel  {
 
 			@Override
 			public void handle(Event event) {
-			    if(((MouseEvent) event).getClickCount() == 1){
-			    	_tableProperty.set(entry.table);
-			    	select(entry);
-			    }
-			    else if(((MouseEvent) event).getClickCount() == 2){
-			    	editTable(entry);
-			    }
+			    
+				MouseEvent mouseEvent = (MouseEvent)event;
+				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
+					editTable(entry);
+				}
+				else{
+					if(mouseEvent.getClickCount() == 1){
+						_tableProperty.set(entry.table);
+						select(entry);
+					}
+					else if(mouseEvent.getClickCount() == 2){
+						editTable(entry);
+					}
 				
+				}
 			}
 		});
+		
 		
 		
 		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {

@@ -1,18 +1,23 @@
 package edu.utah.sci.cyclist.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.DataType.Type;
+import edu.utah.sci.cyclist.model.Table.NumericRangeValues;
 
 public class Filter implements Observable {
 	
@@ -23,6 +28,8 @@ public class Filter implements Observable {
 	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
 	private ListProperty<Object> _values = new SimpleListProperty<>();
 	private List<InvalidationListener> _listeners = new ArrayList<>();
+	private MapProperty<Object, Object> _rangeValues = new SimpleMapProperty<>();
+	private Map<Object,Object> _selectedRangeValues = new HashMap<>();
 	
 	public Filter(Field field){
 		_field = field;
@@ -30,6 +37,11 @@ public class Filter implements Observable {
 		if (_field.getValues() != null) {
 			_selectedItems.addAll(_field.getValues());
 			_values.set(_field.getValues());
+		}
+		if(_field.getRangeValues() != null){
+			_rangeValues.set(_field.getRangeValues());
+			_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
+			_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
 		}
 		
 		_field.valuesProperty().addListener(new InvalidationListener() {
@@ -42,6 +54,21 @@ public class Filter implements Observable {
 					_selectedItems.clear();
 				_values.set(_field.getValues());
 //				invalidate();
+			}
+		});
+		
+		_field.rangeValuesProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				if (_field.getRangeValues() != null){	
+					_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
+					_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
+				}else{
+					_selectedRangeValues.clear();
+				}
+				
+				_rangeValues.set(_field.getRangeValues());
 			}
 		});
 	}
@@ -74,12 +101,20 @@ public class Filter implements Observable {
 		return _field.getValues() != null;
 	}
 	
+	public boolean isRangeValid() {
+		return _field.getRangeValues() != null;
+	}
+	
 	public ObservableList<Object> getValues() {
 		return _field.getValues();
 	}
 	
 	public ListProperty<Object> valuesProperty() {
 		return _values;
+	}
+	
+	public MapProperty<Object,Object> rangeValuesProperty() {
+		return _rangeValues;
 	}
 	
 	public ObservableSet<Object> getSelectedValues() {
@@ -111,6 +146,12 @@ public class Filter implements Observable {
 		invalidate();
 	}
 	
+	public void selectMinMaxValues(Object minValue, Object maxValue){
+		_selectedRangeValues.put(NumericRangeValues.MIN, minValue);
+		_selectedRangeValues.put(NumericRangeValues.MAX, maxValue);
+		invalidate();
+	}
+	
 	@Override
 	public void addListener(InvalidationListener listener) {
 		if (!_listeners.contains(listener))
@@ -136,7 +177,13 @@ public class Filter implements Observable {
 	public String toString() {
 		if (!_valid) {
 			if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
-				_value = "1=1";
+				if(_selectedRangeValues.size() > 0){
+					String str = getName()+" >=" + _selectedRangeValues.get(NumericRangeValues.MIN) + " AND " + getName()+" <=" + _selectedRangeValues.get(NumericRangeValues.MAX);
+					_value = str;
+					
+				}else{
+					_value = "1=1";
+				}
 			} else {
 				StringBuilder builder = new StringBuilder();
 				if (_selectedItems.size() > 0) {

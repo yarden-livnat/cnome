@@ -23,6 +23,10 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.model;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -39,13 +43,18 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
+import sun.security.acl.WorldGroupImpl;
+
 
 import edu.utah.sci.cyclist.controller.IMemento;
+import edu.utah.sci.cyclist.controller.WorkDirectoryController;
+import edu.utah.sci.cyclist.controller.XMLMemento;
 import edu.utah.sci.cyclist.util.QueryBuilder;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 
 public class Table {
@@ -61,6 +70,12 @@ public class Table {
 		LOCAL_SUBSET
 	}
 	
+	public enum NumericRangeValues {
+		MIN,
+		MAX,
+		CHOSEN_MIN,
+		CHOSEN_MAX
+	}
 	
 	private String _alias;
 	private String _name;
@@ -73,6 +88,7 @@ public class Table {
 
 	private SourceLocation _sourceLocation;
 	private int _dataSubset;
+	private String _saveDir = "";
 	
 	public Table() {
 		this("");
@@ -83,6 +99,17 @@ public class Table {
 		_sourceLocation = SourceLocation.REMOTE;
 		_dataSubset = 0;
 		setProperty("uid", UUID.randomUUID().toString());
+	}
+	
+	public Table(Table tbl){
+		_name = tbl.getName();
+		_alias = tbl.getAlias();
+		_sourceLocation = tbl.getSourceLocation();
+		_datasource = tbl.getDataSource();
+		_localDataFile = tbl.getLocalDatafile();
+		_saveDir = tbl.getSaveDir();
+        setProperty(REMOTE_TABLE_NAME, _name);	
+        extractSchema();
 	}
 	
     // Save the table
@@ -422,39 +449,44 @@ public class Table {
 			@Override
 			protected ObservableList<Object> call() throws Exception {
 				List<Object> values = new ArrayList<>();
-				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
-//					updateMessage("connecting");
-					updateMessage("querying");
-					System.out.println("querying field values");
-					long t1 = System.currentTimeMillis();
+				values = readFieldValuesFromFile(field.getName());
+				if(values.size() == 0)
+				{
+					try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+//						updateMessage("connecting");
+						updateMessage("querying");
+						System.out.println("querying field values");
+						long t1 = System.currentTimeMillis();
 					
-					// TODO: Fix this query building hack 
-					String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
-					log.debug("query: "+query);
-					System.out.println(query);
-					ResultSet rs = stmt.executeQuery(query);
-					long t2 = System.currentTimeMillis();
-					System.out.println("time: "+(t2-t1)/1000.0);
+						// TODO: Fix this query building hack 
+						String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
+						log.debug("query: "+query);
+						System.out.println(query);
+						ResultSet rs = stmt.executeQuery(query);
+						long t2 = System.currentTimeMillis();
+						System.out.println("time: "+(t2-t1)/1000.0);
 					
-					while (rs.next()) {
-						if (isCancelled()) {
-							System.out.println("task canceled");
-							stmt.cancel();
-							updateMessage("Canceled");
-							break;
-						}
+						while (rs.next()) {
+							if (isCancelled()) {
+								System.out.println("task canceled");
+								stmt.cancel();
+								updateMessage("Canceled");
+								break;
+							}
 						
-						values.add(rs.getObject(1));
-					}
+							values.add(rs.getObject(1));
+						}
 					
-					long t3 = System.currentTimeMillis();
-					System.out.println("gathering time: "+(t3-t2)/1000.0);
-				} catch (SQLException e) {
-					System.out.println("task sql exception: "+e.getLocalizedMessage());
-					updateMessage(e.getLocalizedMessage());
-					throw new Exception(e.getMessage(), e);
-				} finally {
-					ds.releaseConnection();
+						long t3 = System.currentTimeMillis();
+						System.out.println("gathering time: "+(t3-t2)/1000.0);
+						writeFieldValuesToFile(field.getName(), values);
+					} catch (SQLException e) {
+						System.out.println("task sql exception: "+e.getLocalizedMessage());
+						updateMessage(e.getLocalizedMessage());
+						throw new Exception(e.getMessage(), e);
+					} finally {
+						ds.releaseConnection();
+					}
 				}
 				return FXCollections.observableList(values);
 			}
@@ -588,7 +620,12 @@ public class Table {
 		return _localDataFile;
 	}
 	public void setLocalDatafile(String workDir) {
+		_saveDir = workDir;
 		_localDataFile = workDir + "/" + getDataSource()+"/" + getName() + ".sqlite";
+	}
+	
+	public String getSaveDir(){
+		return _saveDir;
 	}
 	
 	public class Row  {
@@ -598,6 +635,186 @@ public class Table {
 			value = new Object[size];
 		}
 	}
+	
+	/* Saves the values of a chosen filter into a file 
+	 * Creates an xml file with the table name, and writes the filter's field name and its values
+	 * If the field already exist in the file - do nothing. */
+	private void writeFieldValuesToFile(String fieldName, List<Object> values){
+		if(_saveDir == ""){
+			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
+		}
+		
+		// If the save directory does not exist, create it
+		File saveDir = new File(_saveDir+ "/" + getDataSource()+"/");
+		if (!saveDir.exists()){
+			saveDir.mkdir();
+		}
+			
+		// The save file
+		File saveFile = new File(saveDir+"/"+ getName() + ".xml");
+		
+		XMLMemento root;
+		IMemento fieldsNode = null;
+		Boolean writeNewNode= true;
+		
+		 try {
+			 //If file already exists - read the existing nodes, and add the new Field in its place.
+			 if(saveFile.exists()){
+				 Reader reader = new FileReader(saveFile);
+				 
+				 //Checks if the root node exists.
+				 try{
+					 root = XMLMemento.createReadRoot(reader);
+					 fieldsNode = root.getChild("Fields");
+				 }catch(Exception e){
+					 root = XMLMemento.createWriteRoot("root");
+				 }
+				 
+				 // Checks if the "Fields" node exists. 
+				 // If yes - try to find the Field node with the given name. 
+				 // If not - creates a new "Fields" node and mark that a new field node has to be written.
+				 if(fieldsNode != null)
+				 {
+					 //Check if the field node already exists. If yes - no need to write it again to the table xml file.
+					 if (getField(fieldsNode, fieldName) != null)
+					 {
+						 writeNewNode = false;
+					 }
+				 } else{
+					 fieldsNode = root.createChild("Fields");
+				 }
+			 } else{
+		
+				 // If new file - Create the root memento
+				 root = XMLMemento.createWriteRoot("root");
+				// Create Fields node
+				 fieldsNode = root.createChild("Fields");
+			 }
+	    
+			 //If no such field node yet - write the field and its values into the file.
+			 if(writeNewNode){
+				 writeFieldNodeToFile(fieldName, fieldsNode, values);
+			 }
+			 root.save(new PrintWriter(saveFile));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
+	/*Checks if a given field already exists in the table xml file.
+	 * If field exists - return the field else- return null */
+	private IMemento getField(IMemento fields, String fieldName){
+		IMemento fieldResult = null;
+		try
+		{
+			 IMemento[] fieldNodes = fields.getChildren("Field");
+			 for (IMemento field:fieldNodes){
+				 String name = field.getString("name");
+				 if (name.equals(fieldName)){
+					 fieldResult = field;
+					 break;
+				 }
+			 }
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return fieldResult;
+	}
+	
+	/* Creates a new Field node in the table xml file*/
+	private void writeFieldNodeToFile(String fieldName, IMemento fieldsNode, List<Object> values){
+		
+		//Create the Field node
+		 IMemento FieldNode = fieldsNode.createChild("Field");
+		
+		 // Set the field name
+		 FieldNode.putString("name", fieldName);
+		 StringBuilder sb = new StringBuilder(); 
+		 for(Object value:values){
+			 sb.append(value.toString()+";");
+		 }
+		 FieldNode.putTextData(sb.toString());
+	}
+	
+	/* Reads distinct values from a file 
+	 * For a given field in a given table- 
+	 * if the table xml file exists and it contains the field values - read the values from the file */
+	private List<Object> readFieldValuesFromFile(String fieldName){
+		
+		List<Object> values = new ArrayList<>();
+		if(_saveDir == ""){
+			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
+		}
+		
+		// If the save file does not exist - return an empty list.
+		File saveFile = new File(_saveDir+ "/" + getDataSource() +"/"+ getName() + ".xml");
+		if (!saveFile.exists()){
+			return values;
+		} else{
+			try{
+				 Reader reader = new FileReader(saveFile);
+				 XMLMemento root = XMLMemento.createReadRoot(reader);
+				 IMemento fieldsNode = root.getChild("Fields");
+				 IMemento field = getField(fieldsNode, fieldName);
+				 if(field != null){
+					 String[] tmpValues = field.getTextData().split(";");
+					 for(String value: tmpValues){
+						 values.add(value);
+					 }
+				 }
+				 return values;
+			 }catch(Exception e){
+				return values;
+			 }
+		}
+	}
+	
+	public Task<ObservableMap<Object, Object>> getFieldRange(final Field field) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableMap<Object, Object>> task = new Task<ObservableMap<Object, Object>>() {
+			
+			@Override
+			protected ObservableMap<Object, Object> call() throws Exception {
+				Map<Object, Object> values = new HashMap<>();
+				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+					updateMessage("querying");
+					System.out.println("querying field range");
+					String query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+getName();
+					log.debug("query: "+query);
+					System.out.println(query);
+					ResultSet rs = stmt.executeQuery(query);
+					
+					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
+					
+						values.put(NumericRangeValues.MIN, rs.getDouble("min"));
+						values.put(NumericRangeValues.MAX, rs.getDouble("max"));
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				return FXCollections.observableMap(values);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task;
+		
+	}
+	
+	
 
 	
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";

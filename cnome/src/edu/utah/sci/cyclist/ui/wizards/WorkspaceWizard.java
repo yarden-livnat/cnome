@@ -57,7 +57,7 @@ public class WorkspaceWizard extends VBox {
 	private Stage dialog;
 	private ComboBox<String> cb;
 	private String current = null;
-	private ObjectProperty<ObservableList<String>> _selection = new SimpleObjectProperty<ObservableList<String>>(FXCollections.<String>observableArrayList());
+	//private ObjectProperty<ObservableList<String>> _selection = new SimpleObjectProperty<ObservableList<String>>(FXCollections.<String>observableArrayList());
 	private ObservableList<String> _selectionList = FXCollections.observableArrayList();
 	
 	public ObservableList<String> show(Window window) {
@@ -65,7 +65,7 @@ public class WorkspaceWizard extends VBox {
 		dialog.show();
 		dialog.setX(window.getX() + (window.getWidth() - dialog.getWidth())*0.5);
 		dialog.setY(window.getY() + (window.getHeight() - dialog.getHeight())*0.5);
-		_selection.set(_selectionList);
+		//_selection.set(_selectionList);
 		return _selectionList;
 	}
 	

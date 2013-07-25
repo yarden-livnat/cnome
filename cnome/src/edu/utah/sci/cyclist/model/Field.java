@@ -28,11 +28,14 @@ import java.util.Set;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 import edu.utah.sci.cyclist.controller.IMemento;
 
@@ -43,6 +46,7 @@ public class Field {
 	private BooleanProperty _selected;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
+	private MapProperty<Object,Object> _rangeValuesProperty= new SimpleMapProperty<>();
 	private Map<String, Object> _properties = new HashMap<>();
 	
 	public Field(){
@@ -65,6 +69,18 @@ public class Field {
 	
 	public ObservableList<Object> getValues() {
 		return _valuesProperty.get();
+	}
+	
+	public MapProperty<Object, Object> rangeValuesProperty() {
+		return _rangeValuesProperty;
+	}
+	
+	public void setRangeValues(ObservableMap<Object, Object> rangeValues) {
+		_rangeValuesProperty.set(rangeValues);
+	}
+	
+	public ObservableMap<Object, Object> getRangeValues() {
+		return _rangeValuesProperty.get();
 	}
 	
 	public String getName() {

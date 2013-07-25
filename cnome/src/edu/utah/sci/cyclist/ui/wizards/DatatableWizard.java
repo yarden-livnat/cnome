@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -80,7 +81,7 @@ public class DatatableWizard extends TilePane {
 	
 	// DataType elements
 	private CyclistDatasource     _current;
-	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
+	private ObjectProperty<Table> _selection =  new SimpleObjectProperty<>();
 	private DatasourceSelector    _selector;
 	private String               _workDir = WorkDirectoryController.SAVE_DIR;
 	
@@ -101,7 +102,7 @@ public class DatatableWizard extends TilePane {
 	}
 			
 	// * * * Show the dialog * * * //
-	public ObjectProperty<Table> show(Window window) {
+	public  ObjectProperty<Table>  show(Window window) {
 
 		 _dialog.initOwner(window);
 		 _dialog.show();	
@@ -294,6 +295,7 @@ public class DatatableWizard extends TilePane {
 							public void handle(ActionEvent arg0) {
 								updateTable(table);
 								_selection.setValue(table);
+								//(table.getName());
 								dialog.hide();
 							};
 						})
@@ -372,7 +374,7 @@ public class DatatableWizard extends TilePane {
 		table.setDataSource(_current);
 		table.setLocalDatafile(_workDir);
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
-		table.extractSchema();
+		//table.extractSchema();
 	}
 
 	public CyclistDatasource getSelectedSource() {
@@ -387,7 +389,5 @@ public class DatatableWizard extends TilePane {
 	public void setWorkDir(String workDir){
 		_workDir = workDir;
 	}
-	
-	
 	
 }

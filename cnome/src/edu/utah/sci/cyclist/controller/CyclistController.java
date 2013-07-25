@@ -30,7 +30,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
 
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -43,7 +45,6 @@ import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
@@ -116,6 +117,7 @@ public class CyclistController {
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace();
+		workspace.setWorkDirPath(getLastChosenWorkDirectory());
 		screen.setWorkspace(workspace);
 		
 		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus, _model);
@@ -151,6 +153,12 @@ public class CyclistController {
 						_screen.getDimensionPanel().setFields(emptyList);
 						_screen.getMeauresPanel().setFields(emptyList);
 						
+						//Set the workspace to display the new path at the title.
+						Workspace workspace = _screen.getWorkSpace();
+						if(workspace != null){
+							workspace.setWorkDirPath(getLastChosenWorkDirectory());
+						}
+						
 					}
 				}
 				
@@ -168,21 +176,24 @@ public class CyclistController {
 				final DatatableWizard wizard = new DatatableWizard();
 				wizard.setItems(_model.getSources());
 				wizard.setSelectedSource(_model.getSelectedDatasource());
-				String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+				String currDirectory = getLastChosenWorkDirectory();
 				wizard.setWorkDir(currDirectory);
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
-				
 			//	wizard.getDataSources()
-					
 				
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-						_model.getTables().add(newVal);
-						_model.setSelectedDatasource(wizard.getSelectedSource());
+						if(newVal != null)
+						{
+							Table tbl = new Table(newVal);
+							_model.getTables().add(tbl);
+							_model.setSelectedDatasource(wizard.getSelectedSource());
+						}
 					}
-				});		
+				});
+				
 			}
 		});
 		
@@ -220,7 +231,7 @@ public class CyclistController {
 	
 	private void save() {
 		
-		String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+		String currDirectory = getLastChosenWorkDirectory();
 		
 		// If the save directory does not exist, create it
 		File saveDir = new File(currDirectory);
@@ -288,6 +299,7 @@ public class CyclistController {
 					for(IMemento table: tables){
 						Table tbl = new Table();
 						tbl.restore(table, _model.getSources());
+						tbl.setLocalDatafile(getLastChosenWorkDirectory());
 						_model.getTables().add(tbl);
 					}
 					
@@ -300,5 +312,16 @@ public class CyclistController {
 				e1.printStackTrace();
 			} 		
 		}
+	}
+	
+	/*
+	 * Gets the path of the last chosen work directory.
+	 * If not available - return the default work directory
+	 */
+	private String getLastChosenWorkDirectory(){
+		if(_workDirectoryController == null){
+			return WorkDirectoryController.SAVE_DIR;
+		}
+		return _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
 	}
 }

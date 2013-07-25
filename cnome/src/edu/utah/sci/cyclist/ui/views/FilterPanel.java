@@ -1,19 +1,26 @@
 package edu.utah.sci.cyclist.ui.views;
 
+import org.controlsfx.control.RangeSlider;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -32,6 +39,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.Table.NumericRangeValues;
 import edu.utah.sci.cyclist.ui.components.Spring;
 import edu.utah.sci.cyclist.ui.panels.TitledPanel;
 
@@ -45,6 +53,7 @@ public class FilterPanel extends TitledPanel {
 	private Task<?> _task;
 	private boolean _reportChange = true;
 	private BooleanProperty _highlight = new SimpleBooleanProperty(false);
+	MapProperty<Object, Object> _map = new SimpleMapProperty<>();
 			
 	
 	public BooleanProperty highlight() {
@@ -266,7 +275,59 @@ public class FilterPanel extends TitledPanel {
 	}
 	
 	
+	/* For numerical values - get the minimum and maximum values of the filter */
 	private void createRange() {
 		
+		_cbBox = new VBox();
+		_cbBox.setSpacing(4);
+		_cbBox.setPrefSize(USE_COMPUTED_SIZE,USE_COMPUTED_SIZE);
+		setContent(_cbBox);
+		_cbBox.setPadding(new Insets(0,0,0,4));
+		
+		_map.addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable arg0) {
+				populateRangeValues();
+			}
+		});
+		
+		_map.bind(_filter.rangeValuesProperty());
+		
+		if (!_filter.isRangeValid()) {
+			Field field = _filter.getField();
+			Table table = field.getTable();
+			
+			Task<ObservableMap<Object,Object>> task = table.getFieldRange(field);
+			setTask(task);
+			//_map.bind(task.valueProperty());
+			field.rangeValuesProperty().bind(task.valueProperty());
+		}
+		else{
+			populateRangeValues();
+		}
+	}
+	
+	private void populateRangeValues() {
+		_cbBox.getChildren().clear();
+		if (_map.get() != null) {
+			
+			Double min = (Double) (_map.get(NumericRangeValues.MIN) != null ? _map.get(NumericRangeValues.MIN):0.0);
+			Double max = (Double) (_map.get(NumericRangeValues.MAX) != null ? _map.get(NumericRangeValues.MAX):0.0);
+			final RangeSlider rangeSlider = new RangeSlider(min,max,min,max);
+			rangeSlider.setShowTickLabels(true);
+			rangeSlider.setShowTickMarks(true);
+			//rangeSlider.setOrientation(Orientation.VERTICAL);
+			double middelTick = (rangeSlider.getMax()-rangeSlider.getMin())/2;
+			if(middelTick > rangeSlider.getMin() && middelTick < rangeSlider.getMax() ){
+				rangeSlider.setMajorTickUnit(middelTick);
+			}
+			_cbBox.getChildren().add(rangeSlider);
+			rangeSlider.setOnMouseReleased(new EventHandler<MouseEvent>() {
+				public void handle(MouseEvent e) {
+					_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
+				}
+			});  	
+		}
 	}
 }
