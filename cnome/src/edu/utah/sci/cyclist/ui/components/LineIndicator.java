@@ -155,7 +155,6 @@ public class LineIndicator extends Group {
 				if (axis instanceof NumberAxis) {
 					NumberAxis x = (NumberAxis) axis;
 					Number v = x.getValueForDisplay(x.sceneToLocal(event.getSceneX(), event.getSceneY()).getX());
-					System.out.println("drag: "+v);
 					_indicator.setValue(v.doubleValue());
 				}
 				
@@ -179,7 +178,6 @@ public class LineIndicator extends Group {
 			double pos = x.getDisplayPosition(value);
 			
 			 Point2D p = _pane.sceneToLocal(x.localToScene(pos, 0));
-//			System.out.println(" set x:"+value+"  at "+pos+"  p:"+p+"   pane: "+_pane.getWidth()+"x"+_pane.getHeight()+ " @ "+_pane.getLayoutX()+","+_pane.getLayoutY());
 			
 			_line.setStartX(p.getX());
 			_line.setEndX(p.getX());

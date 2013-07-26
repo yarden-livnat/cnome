@@ -734,7 +734,11 @@ public class Table {
 		 FieldNode.putString("name", fieldName);
 		 StringBuilder sb = new StringBuilder(); 
 		 for(Object value:values){
-			 sb.append(value.toString()+";");
+			 if (value == null) {
+				 System.out.println("*** Warning: field '"+fieldName+"' has a null value");
+			 } else  {
+				 sb.append(value.toString()+";");
+			 }
 		 }
 		 FieldNode.putTextData(sb.toString());
 	}
