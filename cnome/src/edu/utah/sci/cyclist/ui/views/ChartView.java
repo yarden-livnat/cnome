@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.mo.closure.v1.Closure;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
@@ -80,7 +82,7 @@ public class ChartView extends ViewBase {
 	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
-	private List<DistanceIndicator> _distanceIndicators;
+	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
 	
 
 	private MapSpec _spec;
@@ -148,13 +150,6 @@ public class ChartView extends ViewBase {
 		setCurrentTask(null);
 	}
 	
-
-	
-	
-//	private void invalidate() {
-//		setChart(null);
-//	}
-	
 	private void fetchData() {
 		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (!_xArea.isValid() || !_yArea.isValid())
@@ -196,7 +191,7 @@ public class ChartView extends ViewBase {
 							.filters(remoteFilters())
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
-				log.info("Query: "+builder.toString());
+//				log.info("Query: "+builder.toString());
 				
 				List<Field> order = builder.getOrder();
 				
@@ -220,9 +215,9 @@ public class ChartView extends ViewBase {
 
 	
 	
-	public final double MIN_BAR_WIDTH = 2;
-	
-	
+//	public final double MIN_BAR_WIDTH = 2;
+//	
+//	
 //	private void updateAxes(List<XYChart.Series<Object, Object>> graphs) {
 //		Axis<? extends Object> axis =  _chart.getXAxis();
 //		if (axis instanceof NumberAxis) {
@@ -556,6 +551,7 @@ public class ChartView extends ViewBase {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
+		System.out.println("create new chart");
 		Axis xAxis = createAxis(getXField(), _xArea.getFieldTitle(0));
 		
 		Axis yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "");
@@ -706,20 +702,40 @@ public class ChartView extends ViewBase {
 		_indicators.addListener(new ListChangeListener<Indicator>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Indicator> change) {
-				System.out.println("indictors list changed");
 				while (change.next()) {
+					// remove
 					for (Indicator indicator : change.getRemoved()) {
 						LineIndicator lineIndicator = _lineIndicators.remove(indicator);
 						if (lineIndicator != null) {
 							_glassPane.getChildren().remove(lineIndicator.getNode());
 						}
 					}
-					for (Indicator indicator : change.getAddedSubList()) {
-						LineIndicator li = new LineIndicator(indicator, _glassPane);
+					
+					// add
+					for (final Indicator indicator : change.getAddedSubList()) {
+						final LineIndicator li = new LineIndicator(indicator, _glassPane);
 						li.chartProperty().bind(chartProperty());
-//						_glassPane.getChildren().add(li.getNode());
+						li.setOnRemoveAction(new Closure.V1<LineIndicator>() {
+
+							@Override
+							public void call(LineIndicator li) {
+								_indicators.remove(li.getIndicator());
+							}
+							
+						});
 						_lineIndicators.put(indicator, li);
-						indicator.selectedProperty().addListener(_indicatorSelectedHandler);
+						indicator.selectedProperty().addListener( new ChangeListener<Boolean>() {
+
+							@Override
+							public void changed(ObservableValue<? extends Boolean> arg0,
+									Boolean prevValue, Boolean select) {
+								if (select) {
+									showDistances(indicator);
+								} else {
+									clearDistances();										
+								}
+							}
+						});
 					}
 				}
 			}
@@ -800,24 +816,28 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void showDistances(Indicator selected) {
+		clearDistances();
+		
+		Axis<?> axis = getChart().getXAxis();
+		NumberAxis.DefaultFormatter formater = new NumberAxis.DefaultFormatter((NumberAxis)axis);
 		LineIndicator current = _lineIndicators.get(selected);
+		double y = 10;
 		for (LineIndicator to : _lineIndicators.values()) {
 			if (to.getIndicator() != selected) {
-				DistanceIndicator di = new DistanceIndicator(current, to);
+				DistanceIndicator di = new DistanceIndicator(current, to, y, formater);
 				_distanceIndicators.add(di);
-				_glassPane.getChildren().add(di.getNode());
+				_glassPane.getChildren().add(di);
+				y += 10;
 			}
 		}
 	}
 	
-	private ChangeListener<Boolean> _indicatorSelectedHandler = new ChangeListener<Boolean>() {
+	private void clearDistances() {
+		for (DistanceIndicator di : _distanceIndicators)
+			_glassPane.getChildren().remove(di);
+		_distanceIndicators.clear();
+	}
 
-		@Override
-		public void changed(ObservableValue<? extends Boolean> arg0,
-				Boolean prevValue, Boolean newValue) {
-			
-		}
-	};
 	
 	private InvalidationListener _filterListener = new InvalidationListener() {
 		

@@ -1,7 +1,10 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import org.mo.closure.v1.Closure;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -31,6 +34,7 @@ public class LineIndicator extends Group {
 	private Pane _pane;
 	private Line _line;
 	private double _dragX;
+	private Closure.V1<LineIndicator> _onRemoveAction = null;
 	
 	public Indicator getIndicator() {
 		return _indicator;
@@ -40,12 +44,20 @@ public class LineIndicator extends Group {
 		return _line;
 	}
 	
+	public DoubleProperty xProperty() {
+		return _line.startXProperty();
+	}
+	
 	public ObjectProperty<XYChart<?,?>> chartProperty() {
 		return _chartProperty;
 	}
 	
 	public XYChart<?,?> getChart() {
 		return _chartProperty.get();
+	}
+	
+	public void setOnRemoveAction(Closure.V1<LineIndicator> action) {
+		_onRemoveAction = action;
 	}
 	
 	public LineIndicator(final Indicator indicator, Pane parent) {
@@ -90,6 +102,17 @@ public class LineIndicator extends Group {
 			}
 		});
 		
+		_line.setOnMousePressed(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				if (event.isSecondaryButtonDown() && _onRemoveAction != null) {
+					_onRemoveAction.call(LineIndicator.this);
+				}
+								
+			}
+		});
+		
 		_line.setOnDragDetected(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -109,6 +132,7 @@ public class LineIndicator extends Group {
 				}
 			}
 		});
+		
 		
 		indicator.valueProperty().addListener(new ChangeListener<Number>() {
 
@@ -130,8 +154,7 @@ public class LineIndicator extends Group {
 			
 			@Override
 			public void invalidated(Observable arg0) {
-				moveLine();
-				
+				moveLine();	
 			}
 		});
 	}

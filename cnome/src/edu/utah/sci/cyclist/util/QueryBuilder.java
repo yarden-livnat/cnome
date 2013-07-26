@@ -58,12 +58,13 @@ public class QueryBuilder {
 	}
 	
 	public QueryBuilder filters(List<Filter> list) {
-		for (Filter filter : list) {
-			if (filter.getRole() == Role.DIMENSION) 
-				_filters.add(filter);
-			else
-				_having.add(filter);
-		}
+		_filters.addAll(list);
+//		for (Filter filter : list) {
+//			if (filter.getRole() == Role.DIMENSION) 
+//				_filters.add(filter);
+//			else
+//				_having.add(filter);
+//		}
 		return this;
 	}
 	
