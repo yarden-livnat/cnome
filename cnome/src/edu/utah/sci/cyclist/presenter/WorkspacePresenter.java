@@ -36,9 +36,9 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Filter;
-import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
@@ -51,9 +51,11 @@ public class WorkspacePresenter extends ViewPresenter {
 
 	private List<ViewPresenter> _presenters = new ArrayList<>();
 	private List<FilterPresenter> _filterPresenters = new ArrayList<>();
+	private EventBus _localBus;
 	
-	public WorkspacePresenter(EventBus bus, Model model) {
-		super(bus);		
+	public WorkspacePresenter(EventBus bus/*, Model model*/) {
+		super(bus);
+		_localBus = new SimpleEventBus();
 		addListeners();
 	}
 	
@@ -80,7 +82,7 @@ public class WorkspacePresenter extends ViewPresenter {
 				@Override
 				public void call(Table table) {
 					addTable(table, false /*remote*/, false /* active */, false /* remoteActive */);
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
+					broadcast(_localBus, new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
 					getSelectionModel().selectTable(table, true);
 				}
 				
@@ -90,7 +92,7 @@ public class WorkspacePresenter extends ViewPresenter {
 				@Override
 				public void call(Table table) {
 					removeTable(table);
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
+					broadcast(_localBus, new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
 					getSelectionModel().removeTable(table);
 				}
 			});
@@ -108,18 +110,22 @@ public class WorkspacePresenter extends ViewPresenter {
 
 				@Override
 				public void onChanged(ListChangeListener.Change<? extends Filter> change) {
-					System.out.println("workspace filters list changed");
 					while (change.next()) {
 						for (Filter filter : change.getRemoved()) {
-							broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+							broadcast(_localBus, new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
 						}
 						for (Filter filter : change.getAddedSubList()) {
-							broadcast(new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
+							broadcast(_localBus, new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
 						}
 					}
-					
+				}				
+			});
+			
+			workspace.setOnShowFilter(new Closure.V1<Filter>() {
+				@Override
+				public void call(Filter filter) {
+					broadcast(_localBus, new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
-				
 			});
 		}
 	}
@@ -133,7 +139,7 @@ public class WorkspacePresenter extends ViewPresenter {
 		view.setTranslateY(y);
 		getWorkspace().addView(view);
 		
-		ViewPresenter presenter = tool.getPresenter(getEventBus());
+		ViewPresenter presenter = tool.getPresenter(_localBus);
 		if (presenter != null) {	
 			_presenters.add(presenter);
 			presenter.setView(view);	
@@ -148,7 +154,7 @@ public class WorkspacePresenter extends ViewPresenter {
 	 * addListeners
 	 */
 	private void addListeners() {
-		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {	
+		addNotificationHandler(_localBus, CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {	
 			@Override
 			public void handle(CyclistNotification event) {
 				String id = ((SimpleNotification)event).getMsg();
@@ -163,7 +169,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.VIEW_SELECTED, new CyclistNotificationHandler() {
+		addNotificationHandler(_localBus, CyclistNotifications.VIEW_SELECTED, new CyclistNotificationHandler() {
 			@Override
 			public void handle(CyclistNotification event) {
 				View view = ((CyclistViewNotification)event).getView();
@@ -171,7 +177,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
+		addNotificationHandler(_localBus, CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {
@@ -190,7 +196,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.HIDE_FILTER, new CyclistNotificationHandler() {
+		addNotificationHandler(_localBus, CyclistNotifications.HIDE_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {
@@ -202,7 +208,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.REMOVE_FILTER, new CyclistNotificationHandler() {
+		addNotificationHandler(_localBus, CyclistNotifications.REMOVE_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {
@@ -215,6 +221,22 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 				
+		addNotificationHandler(CyclistNotifications.REMOVE_REMOTE_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(_localBus, event);
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.ADD_REMOTE_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(_localBus, event);
+			}
+		});
+		
 		SelectionModel selectionModel = new SingleSelection();
 		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
 
@@ -222,7 +244,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			public void call(Table table, Boolean activate) {
 				getView().selectTable(table, activate);	
 				String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
-				broadcast(new CyclistTableNotification(msg, table));
+				broadcast(_localBus, new CyclistTableNotification(msg, table));
 			}
 		
 		});

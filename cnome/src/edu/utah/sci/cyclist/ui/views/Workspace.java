@@ -97,8 +97,8 @@ public class Workspace extends ViewBase implements View {
 	/**
 	 * Constructor
 	 */
-	public Workspace() {
-		super(true);
+	public Workspace(boolean toplevel) {
+		super(toplevel);
 		build();
 	}
 	
@@ -134,7 +134,7 @@ public class Workspace extends ViewBase implements View {
 		});
 		
 		_pathLabel = new Label(PATH_TITLE);
-		addBar(_pathLabel);
+//		addBar(_pathLabel);
 		
 //		BorderPane borderPane = new BorderPane();
 

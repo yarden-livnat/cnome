@@ -675,7 +675,7 @@ public class ChartView extends ViewBase {
 		
 		_stackPane = new StackPane();
 		_glassPane = new Pane();
-		_glassPane.setStyle("-fx-background-color: rgba(200, 200, 200, 0.1)");
+//		_glassPane.setStyle("-fx-background-color: rgba(200, 200, 200, 0.1)");
 		setupGlassPaneListeners();
 		
 		_stackPane.getChildren().add(_glassPane);

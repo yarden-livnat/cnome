@@ -44,7 +44,7 @@
  * View
  */
 .view {
-	-fx-padding: 4;
+	-fx-padding: 2;
 	-fx-spacing: 5;
 	-fx-background-color: #ffffff;
 	-fx-background-radius: 5;
@@ -53,12 +53,14 @@
 }
 
 .view .header {
-	-fx-background-color: #f0f0f0;
+	-fx-padding: 2, 2, 0, 2;
+	-fx-background-color: #e0e0e0;
 	-fx-font-weight: bold;
 
 }
 
 .view .data-bar {
+	-fx-padding: 0;
 	-fx-background-color: #e0e0e0;
 	/*-fx-border-color: #d0d0d0;*/
 }

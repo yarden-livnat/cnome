@@ -116,11 +116,11 @@ public class CyclistController {
 		tp.setFactories(Arrays.asList(ToolsLibrary.factories));
 		
 		// set up the main workspace
-		Workspace workspace = new Workspace();
+		Workspace workspace = new Workspace(true);
 		workspace.setWorkDirPath(getLastChosenWorkDirectory());
 		screen.setWorkspace(workspace);
 		
-		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus, _model);
+		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
 		presenter.setView(workspace);
 		
 		// do something?

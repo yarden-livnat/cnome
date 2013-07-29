@@ -65,8 +65,8 @@ public class FilterGlyph extends HBox {
 	
 	private void createMenu() {
 		final ContextMenu contextMenu = new ContextMenu();
-		MenuItem item = new MenuItem("Show");
-		item.setOnAction(new EventHandler<ActionEvent>() {
+		MenuItem show = new MenuItem("Show");
+		show.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				if (getOnAction() != null) {
 					getOnAction().handle(new FilterEvent(FilterEvent.SHOW, _filter));
@@ -74,7 +74,15 @@ public class FilterGlyph extends HBox {
 			}
 		});
 		
-		contextMenu.getItems().add(item);
+		MenuItem delete = new MenuItem("Delete");
+		delete.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if (getOnAction() != null) {
+					getOnAction().handle(new FilterEvent(FilterEvent.DELETE, _filter));
+				}
+			}
+		});
+		contextMenu.getItems().addAll(show, delete);
 		
 		_button.setOnMousePressed(new EventHandler<Event>() {
 

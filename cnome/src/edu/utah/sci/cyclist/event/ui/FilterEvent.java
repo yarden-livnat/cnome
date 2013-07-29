@@ -10,6 +10,9 @@ public class FilterEvent extends CyclistEvent {
 	private static final long serialVersionUID = -3420350628439528645L;
 
 	public static final EventType<CyclistDropEvent> SHOW = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "SHOW");
+	public static final EventType<CyclistDropEvent> DELETE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DELETE");
+
+
 	
 	private Filter _filter;
 	

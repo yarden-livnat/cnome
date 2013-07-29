@@ -48,7 +48,7 @@ public class FilterArea extends ToolBar {
 	
 	private void build() {
 		setPrefHeight(25);
-		setMinWidth(50);
+		setMinWidth(5);
 		getStyleClass().add("drop-area");
 		setOrientation(Orientation.HORIZONTAL);
 		
@@ -144,7 +144,7 @@ public class FilterArea extends ToolBar {
 			public void handle(MouseEvent event) {
 //				Field field = glyph.getFilter().getField();
 				Filter filter  = glyph.getFilter();
-				Dragboard db = glyph.startDragAndDrop(TransferMode.MOVE);
+				Dragboard db = glyph.startDragAndDrop(TransferMode.COPY);
 				
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 				clipboard.put(DnD.FILTER_FORMAT, Filter.class, filter);
@@ -160,7 +160,7 @@ public class FilterArea extends ToolBar {
 				db.setContent(content);
 				
 //				getChildren().remove(glyph);
-				getFilters().remove(glyph.getFilter());
+//				getFilters().remove(glyph.getFilter());
 			}
 		});
 		
@@ -179,6 +179,10 @@ public class FilterArea extends ToolBar {
 					if (getOnAction() != null) {
 						getOnAction().handle(event);
 					}
+				} else if (event.getEventType() == FilterEvent.DELETE) {
+//					if (getOnAction() != null) {
+//						getOnAction().handle(event);
+					getFilters().remove(glyph.getFilter());
 				}
 			}
 		});

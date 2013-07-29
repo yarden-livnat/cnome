@@ -140,16 +140,16 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setId("databar");
 		_dataBar.getStyleClass().add("data-bar");
 		_dataBar.setSpacing(2);
-		_dataBar.setMinWidth(20);
+		_dataBar.setMinWidth(5);
+		_dataBar.setFillHeight(true);
 		
 		Line line = new Line();
-		line.setStartY(0);
-		line.setEndY(16);
+		line.setLayoutY(8);
+		line.setStartY(8);
+		line.setEndY(20);
 		
-		_dataBar.getChildren().add(line);
-		
-		Label filtersLabel = new Label(" Filters:");
-		
+		_dataBar.getChildren().add(new Label("|"));
+				
 		_filtersArea = new FilterArea();
 		
 		_spring = new Spring();
@@ -167,9 +167,12 @@ public class ViewBase extends BorderPane implements View {
 		_header.getChildren().addAll(
 				_title,
 				_taskControl,
+				new Label("tables: ["),
 				_dataBar,
-				filtersLabel,
+				new Label("] "),
+				new Label(" Filters: ["),
 				_filtersArea,
+				new Label("]"),
 				_spring,
 				_actionsArea,
 				_minmaxButton,
@@ -296,11 +299,9 @@ public class ViewBase extends BorderPane implements View {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		final ToggleButton button = ToggleButtonBuilder.create()
-				.styleClass("flat-toggle-button")
-				.text(table.getName().substring(0, 1))
-				.selected(active)
-				.build();
+		final ToggleButton button = new ToggleButton(table.getName().substring(0, 1));
+		button.getStyleClass().add("flat-toggle-button");
+		button.setSelected(active);
 		
 		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
