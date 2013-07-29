@@ -91,9 +91,9 @@ public class ChartView extends ViewBase {
 	private DropArea _xArea;
 	private DropArea _yArea;
 	private DropArea _lodArea;
-	private DropArea _colorArea;
-	private DropArea _shapeArea;
-	private DropArea _sizeArea;
+//	private DropArea _colorArea;
+//	private DropArea _shapeArea;
+//	private DropArea _sizeArea;
 	private DropArea _indicatorArea;
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
@@ -662,7 +662,7 @@ public class ChartView extends ViewBase {
 			}
 		});
 		
-		addBar(_limitEntry, HPos.RIGHT);
+//		addBar(_limitEntry, HPos.RIGHT);
 		
 		// main view
 		_pane = new BorderPane();
@@ -850,7 +850,7 @@ public class ChartView extends ViewBase {
 		}
 	};
 	
-	private InvalidationListener _areaLister = new InvalidationListener() {
+	private InvalidationListener _areaListener = new InvalidationListener() {
 	
 		@Override
 		public void invalidated(Observable observable) {			
@@ -874,7 +874,7 @@ public class ChartView extends ViewBase {
 		
 		DropArea area = new DropArea(policy);
 		area.tableProperty().bind(_currentTableProperty);
-		area.addListener(_areaLister);
+		area.addListener(_areaListener);
 		grid.add(text, col, row);
 		grid.add(area, col+1, row, colspan, 1);
 		
@@ -887,7 +887,7 @@ public class ChartView extends ViewBase {
 		
 		DropArea area = new DropArea(policy);
 		area.tableProperty().bind(_currentTableProperty);
-		area.addListener(_areaLister);
+		area.addListener(_areaListener);
 		
 		Button addButton = new Button("+");
 		addButton.getStyleClass().add("flat-button");

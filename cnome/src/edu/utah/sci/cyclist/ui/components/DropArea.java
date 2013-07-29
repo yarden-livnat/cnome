@@ -82,7 +82,7 @@ public class DropArea extends HBox implements Observable {
 		setSpacing(0);
 		setPadding(new Insets(2));
 		setMinWidth(30);
-		setPrefHeight(23);
+		setPrefHeight(18);
 		getStyleClass().add("drop-area");
 				
 		/*

@@ -1,6 +1,5 @@
 package edu.utah.sci.cyclist.ui.panels;
 
-import org.mo.closure.v1.Closure;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -28,6 +26,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType;

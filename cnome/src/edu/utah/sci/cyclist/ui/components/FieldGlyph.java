@@ -13,12 +13,9 @@ import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
@@ -78,26 +75,21 @@ public class FieldGlyph extends HBox {
 	}
 	
 	private void build() {
-		HBoxBuilder.create()
-			.styleClass("field-glyph")
-			.spacing(5)
-			.children(
-					_label = LabelBuilder.create()
-						.styleClass("text")
-						.text(getTitle())
-						.build(),
-					StackPaneBuilder.create()
-					.children(
-							_button = StackPaneBuilder.create()
-								.styleClass("arrow")
-								.maxHeight(8)
-								.maxWidth(6)
-								.build()
-						)
-						.alignment(Pos.CENTER)
-					.build()
-				)
-			.applyTo(this);
+		getStyleClass().add("field-glyph");
+		setSpacing(5);
+		
+		_label = new Label(getTitle());
+		_label.getStyleClass().add("text");
+		
+		_button = new StackPane();
+		_button.getStyleClass().add("arrow");
+		_button.setMaxSize(6, 8);
+		
+		StackPane sp = new StackPane();
+		sp.setAlignment(Pos.CENTER);
+		sp.getChildren().add(_button);
+		
+		getChildren().addAll(_label, sp);
 
 		createMenu();
 
@@ -106,9 +98,9 @@ public class FieldGlyph extends HBox {
 			@Override
 			public void invalidated(Observable observable) {
 				if (validProperty().get()) {
-					setStyle("-fx-background-color: -active-bg");
+					setStyle("-fx-background-color: #ffffc1");
 				} else {
-					setStyle("-fx-background-color: -inactive-bg");
+					setStyle("-fx-background-color: #e4a1aa");
 				}
 				
 			}

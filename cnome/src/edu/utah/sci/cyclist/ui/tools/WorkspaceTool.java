@@ -3,11 +3,9 @@ package edu.utah.sci.cyclist.ui.tools;
 import javafx.scene.image.Image;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.ChartPresenter;
 import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.views.ChartView;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 
 public class WorkspaceTool implements Tool {

@@ -74,17 +74,15 @@
  */
  
 .field-glyph {
-	-fx-background-color: -active-bg;
+	-fx-background-color: #ffffc1; /*-active-bg;*/
 	-fx-border-color: #bbbbbb;
-	-fx-border-radius: 5;
-	-fx-background-radius: 5;
-	-fx-spacing: 4;
- 	-fx-padding: 1 2 2 2; 
- 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+	/*-fx-border-radius: 5;
+	-fx-background-radius: 5;*/
+	-fx-spacing: 0;
+ 	-fx-padding: 0; /*1 2 2 2; */
 }
 
 .field-glyph .text {
-	
 }
 
 .field-glyph .arrow {
@@ -95,19 +93,22 @@
 }
 
 .field-glyph:hover .arrow {
-    -fx-background-color: -fx-mark-color, #101010;
+    -fx-background-color: -fx-mark-color, #a0a0a0;
 }
 
 
+/* Filter Glyph */
 .filter-glyph {
-	-fx-background-color: -active-bg;
+	-fx-background-color: #beffbf; /*-active-bg;*/
 	-fx-border-color: #bbbbbb;
-	-fx-border-radius: 5;
-	-fx-background-radius: 5;
-	-fx-spacing: 4;
- 	-fx-padding: 1 2 2 2; 
- 
- 	/* -fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 ); */
+	/*-fx-border-radius: 5;
+	-fx-background-radius: 5;*/
+	-fx-spacing: 0;
+ 	-fx-padding: 0; /*1 2 2 2; */ 
+ }
+
+.filter-glyph .text {
+	
 }
 
 .filter-glyph .arrow {
@@ -274,14 +275,14 @@
 /* Filters */
 
 .filter-area-title {
-	-fx-font-size: 11pt;
+	-fx-font-size: 9pt;
 	/*-fx-font-weight: bold; */
 }
 
 .filter-area {
 	-fx-background-color: #ffffff;
 	-fx-border-color: #c0c0c0; 
-	-fx-border-width: 2; 
+	-fx-border-width: 0; 
 	-fx-border-style: none;
 }
 

@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import java.text.Format;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.scene.Group;

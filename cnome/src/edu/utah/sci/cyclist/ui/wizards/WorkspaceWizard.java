@@ -25,11 +25,6 @@ package edu.utah.sci.cyclist.ui.wizards;
 
 import java.io.File;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -40,8 +35,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.MultipleSelectionModel;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -50,6 +43,10 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import edu.utah.sci.cyclist.Cyclist;
 
 public class WorkspaceWizard extends VBox {

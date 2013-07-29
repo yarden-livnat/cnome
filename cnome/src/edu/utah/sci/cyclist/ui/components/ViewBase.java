@@ -45,7 +45,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -56,12 +55,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
 
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+//
 import edu.utah.sci.cyclist.event.dnd.DnD.Status;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Filter;
@@ -117,10 +117,18 @@ public class ViewBase extends BorderPane implements View {
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
 	
+	/**
+	 * Constructor
+	 * A non toplevel default constructor
+	 */
 	public ViewBase() {	
 		this(false);
 	}
 	
+	/**
+	 * Constructor
+	 * @param toplevel specify if this view is a toplevel view that can not be moved or resized
+	 */
 	public ViewBase(boolean toplevel) {
 		super();
 		getStyleClass().add("view");
@@ -142,11 +150,7 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setSpacing(2);
 		_dataBar.setMinWidth(5);
 		_dataBar.setFillHeight(true);
-		
-		Line line = new Line();
-		line.setLayoutY(8);
-		line.setStartY(8);
-		line.setEndY(20);
+		_dataBar.setAlignment(Pos.CENTER_LEFT); 
 		
 		_dataBar.getChildren().add(new Label("|"));
 				
@@ -167,12 +171,14 @@ public class ViewBase extends BorderPane implements View {
 		_header.getChildren().addAll(
 				_title,
 				_taskControl,
-				new Label("tables: ["),
+				new Label("Tables:"),
+				new Text("["),
 				_dataBar,
-				new Label("] "),
-				new Label(" Filters: ["),
+				new Text("] "),
+				new Label(" Filters:"),
+				new Text("["),
 				_filtersArea,
-				new Label("]"),
+				new Text("]"),
 				_spring,
 				_actionsArea,
 				_minmaxButton,

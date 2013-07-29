@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.ui.views;
 
-import org.controlsfx.control.RangeSlider;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -20,7 +18,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -34,6 +31,9 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
+import org.controlsfx.control.RangeSlider;
+
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
