@@ -31,7 +31,6 @@
  */
 
 .flat-button {
- 	-fx-body-color:  transparent;
 	-fx-background-color:  -fx-body-color;
 	-fx-padding: 1;
 }
@@ -75,8 +74,6 @@
  */
  
 .field-glyph {
-	-active-bg: #FEE391;
-	-inactive-bg: #FF9900;
 	-fx-background-color: -active-bg;
 	-fx-border-color: #bbbbbb;
 	-fx-border-radius: 5;
@@ -103,8 +100,6 @@
 
 
 .filter-glyph {
-	-active-bg: #00ff00; /* #ccff33;*/
-	-inactive-bg: #FF9900;
 	-fx-background-color: -active-bg;
 	-fx-border-color: #bbbbbb;
 	-fx-border-radius: 5;
@@ -187,7 +182,7 @@
 }
 
 .titled-pane:focused > .title {
-   -fx-color: -fx-base;
+   /*-fx-color: -fx-base;*/
 }
 
 .titled-pane:focused {
@@ -225,7 +220,6 @@
 }
 
 .element-label {
-	-fx-body-color: #d0d0d0;
 	-fx-background-color: #d0d0d0;
 	-fx-background-radius: 4;
 	-fx-border-color: #b0b0b0;

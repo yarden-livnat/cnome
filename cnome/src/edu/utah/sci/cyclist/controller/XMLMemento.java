@@ -491,7 +491,8 @@ public final class XMLMemento implements IMemento {
      */
     private static final class DOMWriter extends PrintWriter {
     	
-    	private int tab;
+    	@SuppressWarnings("unused")
+		private int tab;
 
     	/* constants */
     	private static final String XML_VERSION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"; //$NON-NLS-1$

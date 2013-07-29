@@ -38,7 +38,7 @@ import edu.utah.sci.cyclist.ui.panels.TablesPanel;
 public class DatasourcesPresenter extends PresenterBase {
 	private TablesPanel _panel;
 	private ObservableList<Table> _tables;
-	private ObservableList<CyclistDatasource> _sources;
+//	private ObservableList<CyclistDatasource> _sources;
 	
 	public DatasourcesPresenter(EventBus bus) {
 		super(bus);
@@ -60,7 +60,7 @@ public class DatasourcesPresenter extends PresenterBase {
 	}
 	
 	public void setSources(ObservableList<CyclistDatasource> sources) {
-		_sources = sources;
+//		_sources = sources;
 	}
 
 	public void setPanel(TablesPanel panel) {

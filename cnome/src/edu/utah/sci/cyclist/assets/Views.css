@@ -86,8 +86,6 @@
  */
  
 .field-glyph {
-	-active-bg: #FEE391;
-	-inactive-bg: #FF9900;
 	-fx-background-color: -active-bg;
 	-fx-border-color: #bbbbbb;
 	-fx-border-radius: 5;

@@ -43,9 +43,6 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import sun.security.acl.WorldGroupImpl;
-
-
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.controller.XMLMemento;
@@ -246,24 +243,24 @@ public class Table {
 		_schema.update();
 	}
 
-	private void printTypeInfo(Connection conn) {
-		DatabaseMetaData d;
-		try {
-			d = conn.getMetaData();
-			ResultSet rs = d.getTypeInfo();
-			ResultSetMetaData cmd = rs.getMetaData();
-			System.out.println("database types:");
-			while (rs.next()) {
-				for (int i=1; i<=cmd.getColumnCount(); i++) {
-					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
-				}
-				System.out.println();
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	private void printTypeInfo(Connection conn) {
+//		DatabaseMetaData d;
+//		try {
+//			d = conn.getMetaData();
+//			ResultSet rs = d.getTypeInfo();
+//			ResultSetMetaData cmd = rs.getMetaData();
+//			System.out.println("database types:");
+//			while (rs.next()) {
+//				for (int i=1; i<=cmd.getColumnCount(); i++) {
+//					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
+//				}
+//				System.out.println();
+//			}
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public String getName() {
 		return _name;
