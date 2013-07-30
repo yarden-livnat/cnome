@@ -378,6 +378,13 @@ public class Table {
 	public void setFieldSelected(int index, boolean selected){
 		_schema.getField(index).setSelectedProperty(selected);
 	}
+
+	public boolean hasField(Field field) {
+		if (field.getTable() == this) return true;
+		
+		// for now check based on field name
+		return _schema.contain(field);
+	}
 	
 	public int getNumColumns() {
 		return _schema.size();

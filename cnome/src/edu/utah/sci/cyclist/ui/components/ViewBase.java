@@ -42,7 +42,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
@@ -61,7 +60,6 @@ import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
-//
 import edu.utah.sci.cyclist.event.dnd.DnD.Status;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Filter;
@@ -305,8 +303,9 @@ public class ViewBase extends BorderPane implements View {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		final ToggleButton button = new ToggleButton(table.getName().substring(0, 1));
+		final ToggleButton button = new ToggleButton(table.getAlias().substring(0, 1));
 		button.getStyleClass().add("flat-toggle-button");
+//		button.setMaxSize(12, 12);
 		button.setSelected(active);
 		
 		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -398,11 +397,11 @@ public class ViewBase extends BorderPane implements View {
 	/*
 	 * 
 	 */
-	protected void addActions(List<ButtonBase> actions) {
+	protected void addActions(List<Node> actions) {
 		_actionsArea.getChildren().addAll(actions);
 	}
 	
-	protected void setActions(List<ButtonBase> actions) {
+	protected void setActions(List<Node> actions) {
 		_actionsArea.getChildren().clear();
 		addActions(actions);
 	}

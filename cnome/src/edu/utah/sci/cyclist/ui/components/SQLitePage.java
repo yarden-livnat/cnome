@@ -25,23 +25,21 @@ package edu.utah.sci.cyclist.ui.components;
 import java.io.File;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-
-import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.ui.wizards.DatasourceWizardPage;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.GridPaneBuilder;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
-import javafx.scene.text.TextBuilder;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+
+import org.apache.log4j.Logger;
+
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.ui.wizards.DatasourceWizardPage;
 
 public class SQLitePage extends GridPane implements DatasourceWizardPage {
 	static Logger log = Logger.getLogger(SQLitePage.class);
@@ -85,36 +83,35 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 		return this;
 	}
 	private void build() {
-		GridPaneBuilder.create()
-			.vgap(10)
-			.hgap(35)
-			.padding(new Insets(10,3,10,3))
-			.applyTo(this);
-
+		setVgap(10);
+		setHgap(35);
+		setPadding(new Insets(10,3,10,3));
+		
 		String path = _ds.getProperties().getProperty("path");
 		if (path == null) path = "";
 
-		 _path = TextFieldBuilder.create().text(path).prefWidth(125).build();
+		 _path = new TextField(path);
+		 _path.setPrefWidth(125);
 		 
-		 HBox textBox = HBoxBuilder.create()
-				 .children(
-				 _path, 
-				 ButtonBuilder.create()
-				 .text("...")
-				 .onAction(new EventHandler<ActionEvent>() {
-					 @Override
-					 public void handle(ActionEvent event) {
-						 FileChooser chooser = new FileChooser();
-						 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
-						 File file = chooser.showOpenDialog(null);
-						 if (file != null)
-							 _path.setText(file.getPath());
-					 }
-				 })
-				 .build()
-				 ).build(); 
 		 
-		add(TextBuilder.create().text("File:").build(), 0, 0);
+		 Button button = new Button("...");
+		 button.getStyleClass().add("flat-button");
+		 button.setOnAction(new EventHandler<ActionEvent>() {
+				 @Override
+				 public void handle(ActionEvent event) {
+					 FileChooser chooser = new FileChooser();
+					 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
+					 File file = chooser.showOpenDialog(null);
+					 if (file != null)
+						 _path.setText(file.getPath());
+				 }
+		 });
+		 
+		 HBox textBox = new HBox();
+		 textBox.getChildren().addAll(_path, button);
+		 
+		 
+		add(new Text("File:"), 0, 0);
 		add(textBox, 1, 0);
 	}
 }

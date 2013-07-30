@@ -37,7 +37,6 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -129,10 +128,7 @@ public class TablesPanel extends TitledPanel  {
 	private Entry createEntry(Table table) {
 		final Entry entry = new Entry();
 		entry.table = table;
-		entry.title = LabelBuilder.create()
-						.text(table.getAlias())
-						.graphic(new ImageView(Resources.getIcon("table")))
-						.build();
+		entry.title = new Label(table.getAlias(), new ImageView(Resources.getIcon("table")));
 		
 		entry.title.setOnMouseClicked(new EventHandler<Event>() {
 

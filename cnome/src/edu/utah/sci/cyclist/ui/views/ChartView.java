@@ -24,9 +24,12 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
@@ -36,6 +39,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -94,7 +99,7 @@ public class ChartView extends ViewBase {
 //	private DropArea _colorArea;
 //	private DropArea _shapeArea;
 //	private DropArea _sizeArea;
-	private DropArea _indicatorArea;
+//	private DropArea _indicatorArea;
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
@@ -163,22 +168,40 @@ public class ChartView extends ViewBase {
 				List<Field> aggregators = new ArrayList<>();
 				List<Field> grouping = new ArrayList<>();
 				
+				Table table = getCurrentTable();
+				
+				int n = 0;
 				for (Field field : _xArea.getFields()) {
-					if (field.getRole() == Role.DIMENSION)
-						fields.add(field);
-					else
-						aggregators.add(field);
+					if (table.hasField(field)) {
+						if (field.getRole() == Role.DIMENSION)
+							fields.add(field);
+						else
+							aggregators.add(field);
+						n++;
+					}
 				}
 				
+				// is there at least one valid x field? 
+				if (n == 0) return;
+				
+				n=0;
 				for (Field field : _yArea.getFields()) {
-					if (field.getRole() == Role.DIMENSION)
-						fields.add(field);
-					else
-						aggregators.add(field);
+					if (table.hasField(field)) {
+						if (field.getRole() == Role.DIMENSION)
+							fields.add(field);
+						else
+							aggregators.add(field);
+						n++;
+					}
 				}
+				
+				// is there at least one valid y field?
+				if (n == 0) return;
 				
 				for (Field field : _lodArea.getFields()) {
-					grouping.add(field);
+					if (table.hasField(field)) {
+						grouping.add(field);
+					}
 				}
 				
 				// build the query
@@ -673,17 +696,21 @@ public class ChartView extends ViewBase {
 		clip.heightProperty().bind(_pane.heightProperty());
 		_pane.setClip(clip);
 		
-		_stackPane = new StackPane();
+		// Glass pane for indicators
 		_glassPane = new Pane();
 //		_glassPane.setStyle("-fx-background-color: rgba(200, 200, 200, 0.1)");
 		setupGlassPaneListeners();
 		
+		_stackPane = new StackPane();
 		_stackPane.getChildren().add(_glassPane);
 		
 		_pane.setCenter(_stackPane);
 		_pane.setBottom(createControl());
 		
 		setContent(_pane);
+		
+		// add actions
+		setupActions();
 		
 		_items.addListener(new ChangeListener<ObservableList<Row>>() {
 
@@ -776,6 +803,45 @@ public class ChartView extends ViewBase {
 		});
 	}
 	
+	
+	private void setupActions() {
+		// TODO: Figure out why the options button does not show (op is a temporary solution)
+		final StackPane options = new StackPane();
+		options.getStyleClass().add("arrow");
+		options.setMaxSize(6, 8);
+		
+		StackPane sp = new StackPane();
+		sp.setAlignment(Pos.CENTER);
+		sp.getChildren().add(options);
+		
+		final Button op = new Button("op");
+		op.getStyleClass().add("flat-button");
+		
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		MenuItem item = new MenuItem("Add indicator");
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				createIndicator();
+			}
+		});
+		
+		contextMenu.getItems().add(item);
+		
+		op.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(op, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		List<Node> actions = new ArrayList<>();
+		actions.add(op);
+//		actions.add(sp);
+		addActions(actions);
+	}
+	
 	private void createIndicator() {
 		Indicator indicator = new Indicator();
 		
@@ -810,7 +876,7 @@ public class ChartView extends ViewBase {
 		_xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE);
 		_yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE);
 		_lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE);
-		_indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
+//		_indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
 		
 		return grid;
 	}

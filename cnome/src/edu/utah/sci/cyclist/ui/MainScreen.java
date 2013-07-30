@@ -51,14 +51,14 @@ import edu.utah.sci.cyclist.ui.wizards.WorkspaceWizard;
 public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
 	
-	private MenuBar _menubar;
+//	private MenuBar _menubar;
 	private SplitPane _sp;
 	private SplitPane _toolsPane;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _dimensionsPanel;
 	private SchemaPanel _measuresPanel;
 	private ToolsPanel _toolsPanel;
-	private FiltersListPanel _filtersPanel;
+//	private FiltersListPanel _filtersPanel;
 	private StackPane _workspacePane;
 		
 	/**
@@ -137,7 +137,7 @@ public class MainScreen extends VBox {
 				_dimensionsPanel = new SchemaPanel("Category"),
 				_measuresPanel = new SchemaPanel("Numeric"),
 				_toolsPanel = new ToolsPanel(),
-				_filtersPanel = new FiltersListPanel()
+				/*_filtersPanel = */new FiltersListPanel()
 				);
 		_toolsPane.setDividerPositions(div);
 		
@@ -146,7 +146,7 @@ public class MainScreen extends VBox {
 				_workspacePane = new StackPane());
 		
 		this.getChildren().addAll(
-				_menubar = createMenuBar(stage),
+				createMenuBar(stage),
 				_sp
 				);
 			

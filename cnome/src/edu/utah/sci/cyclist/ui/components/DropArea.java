@@ -59,6 +59,9 @@ public class DropArea extends HBox implements Observable {
 		return _tableProperty;
 	}
 	
+	public Table getTable() {
+		return _tableProperty.get();
+	}
 	public ObservableList<Field> getFields() {
 		return _fieldsProperty.get();
 	}
@@ -68,8 +71,7 @@ public class DropArea extends HBox implements Observable {
 			FieldGlyph glyph = (FieldGlyph) node;
 			if (glyph.isDisabled())
 				return false;
-		}
-		
+		}		
 		return true;
 	}
 	
@@ -147,8 +149,27 @@ public class DropArea extends HBox implements Observable {
 				event.setDropCompleted(status);
 				event.consume();				
 			}
+			
 		});
 		
+		tableProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				Table table = tableProperty().get();
+				if (table == null) {
+					
+				} else {
+					for (Node node : getChildren()) {
+						if (node instanceof FieldGlyph) {
+							FieldGlyph glyph = (FieldGlyph) node;
+							glyph.validProperty().set(table.hasField(glyph.getField()));
+						}
+					}
+				}
+				
+			}
+		});
 		/*
 		 * Handle changes in the list of Filters
 		 */
@@ -216,7 +237,9 @@ public class DropArea extends HBox implements Observable {
 									}
 								});
 								
-								glyph.validProperty().bind(tableProperty().isEqualTo(field.tableProperty()));
+//								glyph.validProperty().bind(tableProperty().isEqualTo(field.tableProperty()));
+								if (getTable() != null)
+									glyph.validProperty().set(getTable().hasField(field));
 							}
 							
 							fireInvalidationEvent();
