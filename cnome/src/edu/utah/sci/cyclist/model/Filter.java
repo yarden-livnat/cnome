@@ -22,6 +22,7 @@ import edu.utah.sci.cyclist.model.Table.NumericRangeValues;
 public class Filter implements Observable {
 	
 	private boolean _valid = true;
+	private boolean _active = false;
 	private String _value = "true";
 	private Field _field;
 	private DataType _dataType;
@@ -135,7 +136,6 @@ public class Filter implements Observable {
 	}
 
 	public void selectAll(boolean value) {
-		
 		if (value) {
 			if (_selectedItems.size() == _field.getValues().size()) return;
 			_selectedItems.addAll(_values);
@@ -168,10 +168,20 @@ public class Filter implements Observable {
 		if (_valid) {
 			_valid = false;
 			for (InvalidationListener listener : _listeners) {
-				System.out.println("send invalidation");
 				listener.invalidated(this);
 			}
 		}
+	}
+	
+	public boolean isActive() {
+		boolean active = true;
+		if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
+			if(_selectedRangeValues.size() == 0) {
+				active = false;
+			}
+		} 
+		
+		return active;
 	}
 	
 	public String toString() {

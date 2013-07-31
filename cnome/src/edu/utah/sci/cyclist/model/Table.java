@@ -533,9 +533,11 @@ public class Table {
 						Row row = new Row(cols);
 						for (int i=0; i<cols; i++) {
 							row.value[i] = rs.getObject(i+1);
+//							System.out.print(row.value[i]+"  ");
 						}
+//						System.out.println();
 						// TODO: This is a hack. It seems that if the statement is '...where false' then a single row of nulls is return.
-						if (row.value[0] == null) break;
+						if (row.value[0] == null) row.value[0] = "";
 						rows.add(row);
 						n++;
 						if (n % 1000 == 0) {

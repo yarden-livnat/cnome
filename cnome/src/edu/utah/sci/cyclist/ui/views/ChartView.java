@@ -6,10 +6,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.mo.closure.v1.Closure;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -26,7 +25,6 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
@@ -51,10 +49,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.util.converter.NumberStringConverter;
 import javafx.util.converter.TimeStringConverter;
 
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
+import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType.Classification;
@@ -81,7 +81,7 @@ public class ChartView extends ViewBase {
 	
 	
 	private ViewType _viewType;
-	private MarkType _markType;
+//	private MarkType _markType;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
 	
@@ -365,6 +365,7 @@ public class ChartView extends ViewBase {
 			return;
 		}
 		
+		System.out.println("data has "+list.size()+" rows");
 		// separate to (x,y,attributes) lists
 		List<SeriesData> lists = splitToSeriesData(spec, list);
 		
@@ -385,10 +386,36 @@ public class ChartView extends ViewBase {
 		}
 		
 		
+//		Axis<?> axis = getChart().getYAxis();
+//		if (axis instanceof NumberAxis) {
+//			NumberAxis y = (NumberAxis) axis;
+//			 SeriesData sd = getFirst(sublists.get(0));
+//			 double min =  ((Number) sd.points.get(0).y).doubleValue();
+//			 for (SeriesDataPoint p : sd.points) {
+//				 double v = ((Number) p.y).doubleValue();
+//				 if (v < min) min = v;
+//			 }
+//			 double s0 = Math.floor(Math.log10(min));
+//			 double s1 = Math.floor(s0/3)*3;
+//			 double s2 = s1 -3;
+//			 if (s2 > 0) {
+//				 System.out.println("Adjust axis format");
+//				 NumberFormat nf = NumberFormat.getInstance();
+//				 nf.setMaximumIntegerDigits(4);
+//				 NumberStringConverter nsc = new NumberStringConverter(nf);
+//				 y.setTickLabelFormatter(nsc);
+//			 }
+//			 
+//		}
 		getChart().getData().addAll(graphs);
 //		updateAxes(graphs);
 	}
 	
+	
+//	private SeriesData getFirst(Collection<SeriesData> collection) {
+//		return collection.iterator().next();
+//	}
+//	
 	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<Row> list) {
 		List<SeriesData> all = new ArrayList<>();
 		
@@ -546,28 +573,28 @@ public class ChartView extends ViewBase {
 		
 		if (isPaneType(x, y, Classification.C, Classification.C)) {
 			_viewType = ViewType.CROSS_TAB;
-			_markType = MarkType.TEXT;
+//			_markType = MarkType.TEXT;
 		} else if (isPaneType(x, y, Classification.Qd, Classification.C)) {
 			_viewType = ViewType.BAR;
-			_markType = MarkType.BAR;
+//			_markType = MarkType.BAR;
 		} else if (isPaneType(x, y, Classification.Qd, Classification.Cdate)) {
 			_viewType = ViewType.LINE;
-			_markType = MarkType.LINE;
+//			_markType = MarkType.LINE;
 		} else if (isPaneType(x, y, Classification.Qd, Classification.Qd)) {
 			_viewType = ViewType.SCATTER_PLOT;
-			_markType = MarkType.SHAPE;
+//			_markType = MarkType.SHAPE;
 		} else if (isPaneType(x, y, Classification.Qi, Classification.C)) {
 			_viewType = ViewType.BAR;
-			_markType = MarkType.BAR;
+//			_markType = MarkType.BAR;
 		} else if (isPaneType(x, y, Classification.Qi, Classification.Qd)) {
 			_viewType = ViewType.LINE;
-			_markType = MarkType.LINE;
+//			_markType = MarkType.LINE;
 		}else if (isPaneType(x, y, Classification.Qi, Classification.Qi)) {
 			_viewType = ViewType.SCATTER_PLOT;
-			_markType = MarkType.SHAPE;
+//			_markType = MarkType.SHAPE;
 		} else {
 			_viewType = ViewType.NA;
-			_markType = MarkType.NA;
+//			_markType = MarkType.NA;
 		}
 	}
 	
@@ -772,16 +799,22 @@ public class ChartView extends ViewBase {
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+				boolean update = false;
 				while (change.next()) {
 					for (Filter f : change.getRemoved()) {
+						update = update || f.isActive();
 						f.removeListener(_filterListener);
 					}
 					for (Filter f : change.getAddedSubList()) {
+						update = update || f.isActive();
 						f.addListener(_filterListener);
 					}
 				}
-				invalidateChart();
-				fetchData();
+				
+				if (update) {
+					invalidateChart();
+					fetchData();
+				}
 			}
 		});
 		
