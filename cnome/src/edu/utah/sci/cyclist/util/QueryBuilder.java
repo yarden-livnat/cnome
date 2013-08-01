@@ -59,14 +59,13 @@ public class QueryBuilder {
 	
 	public QueryBuilder filters(List<Filter> list) {
 		
-		_filters.addAll(list);
-		/*for (Filter filter : list) {
-			
+		//_filters.addAll(list);
+		for (Filter filter : list) {
 			if (filter.getRole() == Role.DIMENSION) 
 				_filters.add(filter);
 			else
 				_having.add(filter);
-		}*/
+		}
 		return this;
 	}
 	
@@ -154,7 +153,7 @@ public class QueryBuilder {
 					builder.append(" ");
 					first = false;
 				} else {
-					builder.append(", ");
+					builder.append(" AND ");
 				}
 				builder.append(filter.toString());
 			}

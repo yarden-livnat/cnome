@@ -1,7 +1,8 @@
 package edu.utah.sci.cyclist.ui.views;
 
-import org.controlsfx.control.RangeSlider;
+//import org.controlsfx.control.RangeSlider;
 
+import controls.RangeSlider;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -21,11 +22,13 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -37,11 +40,14 @@ import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Table.NumericRangeValues;
 import edu.utah.sci.cyclist.ui.components.Spring;
 import edu.utah.sci.cyclist.ui.panels.TitledPanel;
+import edu.utah.sci.cyclist.util.SQL;
 
 public class FilterPanel extends TitledPanel {
 
@@ -69,9 +75,9 @@ public class FilterPanel extends TitledPanel {
 	}
 	
 	public FilterPanel(Filter filter) {
-		super(filter.getName());
+		//super(filter.getName());
+		super(getTitle(filter));
 		_filter = filter;
-		
 		build();
 	}
 	
@@ -282,7 +288,7 @@ public class FilterPanel extends TitledPanel {
 		_cbBox.setSpacing(4);
 		_cbBox.setPrefSize(USE_COMPUTED_SIZE,USE_COMPUTED_SIZE);
 		setContent(_cbBox);
-		_cbBox.setPadding(new Insets(0,0,0,4));
+		_cbBox.setPadding(new Insets(0,8,0,8));
 		
 		_map.addListener(new InvalidationListener() {
 			
@@ -308,6 +314,9 @@ public class FilterPanel extends TitledPanel {
 		}
 	}
 	
+	/* Populates a filter panel for a "measure" type filter.
+	 * In this case there would be a slider which displays the possible values range 
+	 * and the user can change the minimum and maximum values which are displayed */
 	private void populateRangeValues() {
 		_cbBox.getChildren().clear();
 		if (_map.get() != null) {
@@ -318,16 +327,73 @@ public class FilterPanel extends TitledPanel {
 			rangeSlider.setShowTickLabels(true);
 			rangeSlider.setShowTickMarks(true);
 			//rangeSlider.setOrientation(Orientation.VERTICAL);
-			double middelTick = (rangeSlider.getMax()-rangeSlider.getMin())/2;
-			if(middelTick > rangeSlider.getMin() && middelTick < rangeSlider.getMax() ){
-				rangeSlider.setMajorTickUnit(middelTick);
-			}
-			_cbBox.getChildren().add(rangeSlider);
+			double majorTicks = (rangeSlider.getMax()-rangeSlider.getMin())/4;
+			rangeSlider.setMajorTickUnit(majorTicks);	
+			final HBox hbox = new HBox();
+			hbox.setSpacing(20);
+			final TextField minTxt = new TextField();
+			final TextField maxTxt = new TextField();
+			hbox.getChildren().addAll(minTxt, maxTxt);
+			
+			minTxt.setPrefSize(70, 18);
+			maxTxt.setPrefSize(70, 18);
+			minTxt.setEditable(false);
+			maxTxt.setEditable(false);
+			minTxt.setAlignment(Pos.CENTER_LEFT);
+			maxTxt.setAlignment(Pos.CENTER_LEFT);
+			minTxt.setText(Double.toString(min));
+			maxTxt.setText(Double.toString(max));
+
+			_cbBox.getChildren().addAll(rangeSlider,hbox);
+			
+			this.widthProperty().addListener(new ChangeListener<Number>() {
+				public void changed(ObservableValue<? extends Number> observable, 
+                        Number oldValue, Number newValue) {
+						double width = newValue.doubleValue();
+					    _cbBox.setPrefWidth(0.95*width);
+				}
+			});
+			
+			_cbBox.widthProperty().addListener(new ChangeListener<Number>() {
+				public void changed(ObservableValue<? extends Number> observable, 
+                        Number oldValue, Number newValue) {
+						double width = newValue.doubleValue();
+					    hbox.setPrefWidth(width);
+					    hbox.setSpacing(width-120);
+				}
+			});
+				
+			
 			rangeSlider.setOnMouseReleased(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent e) {
 					_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
 				}
-			});  	
+			}); 
+			
+			rangeSlider.setOnMouseDragged(new EventHandler<Event>() {
+				public void handle(Event e) {
+					minTxt.setText(Double.toString(rangeSlider.getLowValue()));
+					maxTxt.setText(Double.toString(rangeSlider.getHighValue()));
+				}
+			});
+				
 		}
+	}
+	
+	private static String getTitle(Filter filter) {
+		String title = null;
+		if (filter.getRole() == Role.DIMENSION) {
+			title = filter.getName();
+		} else {
+			String funcName = filter.getField().get(FieldProperties.AGGREGATION_FUNC, String.class);
+			if (funcName == null){
+				funcName = filter.getField().get(FieldProperties.AGGREGATION_DEFAULT_FUNC, String.class);
+				filter.getField().set(FieldProperties.AGGREGATION_FUNC, funcName);
+			}
+			SQL.Function func = SQL.getFunction(funcName);
+			title = func.getLabel(filter.getName());
+		}
+		
+		return title;
 	}
 }

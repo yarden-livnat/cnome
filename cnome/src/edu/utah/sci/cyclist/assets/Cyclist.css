@@ -77,6 +77,7 @@
 .field-glyph {
 	-active-bg: #FEE391;
 	-inactive-bg: #FF9900;
+	-filter-bg: #00ff00;
 	-fx-background-color: -active-bg;
 	-fx-border-color: #bbbbbb;
 	-fx-border-radius: 5;
@@ -99,6 +100,12 @@
 
 .field-glyph:hover .arrow {
     -fx-background-color: -fx-mark-color, #101010;
+}
+
+.field-glyph .separator .line {
+    -fx-border-style: solid;
+    -fx-background-color: null;
+    -fx-border-color:  transparent transparent derive(-fx-base,-35%) transparent;
 }
 
 

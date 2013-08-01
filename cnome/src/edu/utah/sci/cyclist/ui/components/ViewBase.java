@@ -23,13 +23,10 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.components;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -40,15 +37,14 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
-import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
@@ -59,11 +55,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.LineBuilder;
 
 import org.mo.closure.v1.Closure;
 
@@ -123,6 +117,7 @@ public class ViewBase extends BorderPane implements View {
 	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
+	private Closure.V1<Filter> _onRemoveFilter = null;
 	
 	public ViewBase() {	
 		this(false);
@@ -147,16 +142,16 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setId("databar");
 		_dataBar.getStyleClass().add("data-bar");
 		_dataBar.setSpacing(2);
-		_dataBar.setMinWidth(20);
+		_dataBar.setMinWidth(5);
+		_dataBar.setFillHeight(true);
 		
 		Line line = new Line();
-		line.setStartY(0);
-		line.setEndY(16);
+		line.setLayoutY(8);
+		line.setStartY(8);
+		line.setEndY(20);
 		
-		_dataBar.getChildren().add(line);
-		
-		Label filtersLabel = new Label(" Filters:");
-		
+		_dataBar.getChildren().add(new Label("|"));
+				
 		_filtersArea = new FilterArea();
 		
 		_spring = new Spring();
@@ -174,13 +169,18 @@ public class ViewBase extends BorderPane implements View {
 		_header.getChildren().addAll(
 				_title,
 				_taskControl,
+				new Label("tables: ["),
 				_dataBar,
-				filtersLabel,
+				new Label("] "),
+				new Label(" Filters: ["),
 				_filtersArea,
+				new Label("]"),
 				_spring,
 				_actionsArea,
 				_minmaxButton,
 				_closeButton);
+		
+		_dataBar.setAlignment(Pos.CENTER_LEFT);
 		
 		if (toplevel) {
 			_minmaxButton.setVisible(false);
@@ -296,6 +296,18 @@ public class ViewBase extends BorderPane implements View {
 		_onShowFilter = action;
 	}
 	
+	public Closure.V1<Filter> getOnShowFilter() {
+		return _onShowFilter;
+	}
+	
+	public void setOnRemoveFilter(Closure.V1<Filter> action) {
+		_onRemoveFilter = action;
+	}
+	
+	public Closure.V1<Filter> getOnRemoveFilter() {
+		return _onRemoveFilter;
+	}
+	
 	public DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
 	}
@@ -303,11 +315,9 @@ public class ViewBase extends BorderPane implements View {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		final ToggleButton button = ToggleButtonBuilder.create()
-				.styleClass("flat-toggle-button")
-				.text(table.getName().substring(0, 1))
-				.selected(active)
-				.build();
+		final ToggleButton button = new ToggleButton(table.getName().substring(0, 1));
+		button.getStyleClass().add("flat-toggle-button");
+		button.setSelected(active);
 		
 		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
@@ -378,6 +388,7 @@ public class ViewBase extends BorderPane implements View {
 	public void addBar(Node bar, HPos pos) {
 		_header.getChildren().add(_header.getChildren().indexOf(_spring)+(pos == HPos.RIGHT ? 1 : 0), bar);
 	}
+	
 	/*
 	 * Content
 	 */
@@ -480,15 +491,23 @@ public class ViewBase extends BorderPane implements View {
 					}
 				}
 				
+				if (event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD) {
+					removeFilterFromDropArea(event.getFilter());
+				}
+				
 			}
 		});
+	}
+	
+	public void removeFilterFromDropArea(Filter filter){
+		;
 	}
 	
 	private void setDatasourcesListeners() {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 				if ( table != null ) {
 					if (_buttons.containsKey(table)) {
 						event.acceptTransferModes(TransferMode.NONE);

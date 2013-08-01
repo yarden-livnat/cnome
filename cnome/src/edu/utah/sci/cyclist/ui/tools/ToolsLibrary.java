@@ -27,6 +27,7 @@ public class ToolsLibrary {
 	public static final ToolFactory[] factories = {
 		new TableToolFactory(),
 		new ChartToolFactory(),
-		new MapToolFactory()
+		new MapToolFactory(),
+		new WorkspaceToolFactory()
 	};
 }

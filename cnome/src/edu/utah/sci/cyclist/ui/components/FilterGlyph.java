@@ -3,8 +3,6 @@ package edu.utah.sci.cyclist.ui.components;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
-import edu.utah.sci.cyclist.model.DataType.Role;
-import edu.utah.sci.cyclist.util.SQL;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -14,19 +12,15 @@ import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
 
 public class FilterGlyph extends HBox {
 
 	private Filter _filter;
 	private StackPane _button;
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
-	private Label _label;
 	
 	public FilterGlyph(Filter filter) {
 		_filter = filter;
@@ -53,12 +47,15 @@ public class FilterGlyph extends HBox {
 		this.getStyleClass().add("filter-glyph");
 		this.setSpacing(5);
 		
-		 _label = new Label(_filter.getName());
-		_label.getStyleClass().add("text");
-		
 		StackPane stackPane = new StackPane();
 		stackPane.setAlignment(Pos.CENTER);
 		
+		getStyleClass().add("filter-glyph");
+		setSpacing(5);
+		
+		Label label = new Label(_filter.getName());
+		label.getStyleClass().add("text");
+	
 		_button = new StackPane();
 		_button.getStyleClass().add("arrow");
 		_button.setMaxHeight(8);
@@ -66,7 +63,7 @@ public class FilterGlyph extends HBox {
 		
 		stackPane.getChildren().add(_button);
 		
-		this.getChildren().addAll(_label,stackPane);
+		this.getChildren().addAll(label,stackPane);
 		
 		/*HBoxBuilder.create()
 			.styleClass("filter-glyph")
@@ -89,24 +86,37 @@ public class FilterGlyph extends HBox {
 					.build()
 				)
 			.applyTo(this);*/
-		
+			
 		createMenu();
 	}
 	
 	private void createMenu() {
 		final ContextMenu contextMenu = new ContextMenu();
-		MenuItem item = new MenuItem("Show");
-		item.setOnAction(new EventHandler<ActionEvent>() {
+		MenuItem show = new MenuItem("Show");
+		show.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				/*if (getOnAction() != null) {
+				if (getOnAction() != null) {
 					getOnAction().handle(new FilterEvent(FilterEvent.SHOW, _filter));
-				}*/
-				fireActionEvent();
+				}
 			}
 		});
 		
-		contextMenu.getItems().add(item);
-	
+		MenuItem delete = new MenuItem("Delete");
+		delete.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if (getOnAction() != null) {
+					getOnAction().handle(new FilterEvent(FilterEvent.DELETE, _filter));
+					
+					//This message is for removing the filter completely also from the field glyph.
+					if(_filter.getField().getString(FieldProperties.AGGREGATION_FUNC) != null)
+				    {
+						getOnAction().handle(new FilterEvent(FilterEvent.REMOVE_FILTER_FIELD, _filter));
+				    }
+				}
+			}
+		});
+		contextMenu.getItems().addAll(show, delete);
+		
 		_button.setOnMousePressed(new EventHandler<Event>() {
 
 			@Override
@@ -114,11 +124,5 @@ public class FilterGlyph extends HBox {
 				contextMenu.show(_button, Side.BOTTOM, 0, 0);	
 			}
 		});
-	}
-	
-	private void fireActionEvent() {
-		if (getOnAction() != null) {
-			getOnAction().handle(new FilterEvent(FilterEvent.SHOW, _filter));
-		}
 	}
 }
