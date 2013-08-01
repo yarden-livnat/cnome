@@ -22,7 +22,6 @@ import edu.utah.sci.cyclist.model.Table.NumericRangeValues;
 public class Filter implements Observable {
 	
 	private boolean _valid = true;
-	private boolean _active = false;
 	private String _value = "true";
 	private Field _field;
 	private DataType _dataType;

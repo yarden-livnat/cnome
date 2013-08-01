@@ -55,13 +55,11 @@ import edu.utah.sci.cyclist.ui.tools.Tool;
 public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
-	private static final String PATH_TITLE = "Working Path: ";
 	
 	private Pane _pane;
 	private WorkspacePanelArea _filtersPane;
 //	private Pane _statusPane;
 	private double _savedDivider = 0.9;
-	private Label _pathLabel;
 	
 	private ViewBase _maximizedView = null;
 	
@@ -135,7 +133,6 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
-		_pathLabel = new Label(PATH_TITLE);
 //		addBar(_pathLabel);
 		
 //		BorderPane borderPane = new BorderPane();
@@ -295,10 +292,6 @@ public class Workspace extends ViewBase implements View {
 	
 	public void removePanel(TitledPanel panel) {
 		_filtersPane.remove(panel);
-	}
-	
-	public void setWorkDirPath(String path){
-		_pathLabel.setText(PATH_TITLE+path);
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

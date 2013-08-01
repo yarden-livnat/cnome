@@ -19,10 +19,17 @@ public class FilterGlyph extends HBox {
 
 	private Filter _filter;
 	private StackPane _button;
+	private boolean _remote;
+	
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	
 	public FilterGlyph(Filter filter) {
+		this(filter, false);
+	}
+	
+	public FilterGlyph(Filter filter, boolean remote) {
 		_filter = filter;
+		_remote = remote;
 		build();
 	}
 	
@@ -45,6 +52,10 @@ public class FilterGlyph extends HBox {
 	private void build() {
 		getStyleClass().add("filter-glyph");
 		setSpacing(5);
+		
+		if (_remote) {
+			setStyle("-fx-background-color: #d0ced1");
+		}
 		
 		Label label = new Label(_filter.getName());
 		label.getStyleClass().add("text");
@@ -74,15 +85,19 @@ public class FilterGlyph extends HBox {
 			}
 		});
 		
-		MenuItem delete = new MenuItem("Delete");
-		delete.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent e) {
-				if (getOnAction() != null) {
-					getOnAction().handle(new FilterEvent(FilterEvent.DELETE, _filter));
+		contextMenu.getItems().add(show);
+		
+		if (!_remote) {
+			MenuItem delete = new MenuItem("Delete");
+			delete.setOnAction(new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) {
+					if (getOnAction() != null) {
+						getOnAction().handle(new FilterEvent(FilterEvent.DELETE, _filter));
+					}
 				}
-			}
-		});
-		contextMenu.getItems().addAll(show, delete);
+			});
+			contextMenu.getItems().add(delete);
+		}
 		
 		_button.setOnMousePressed(new EventHandler<Event>() {
 

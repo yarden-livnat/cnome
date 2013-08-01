@@ -108,10 +108,10 @@
 .filter-glyph {
 	-fx-background-color: #beffbf; /*-active-bg;*/
 	-fx-border-color: #bbbbbb;
-	/*-fx-border-radius: 5;
-	-fx-background-radius: 5;*/
+	-fx-border-radius: 3;
+	-fx-background-radius: 3;
 	-fx-spacing: 0;
- 	-fx-padding: 0; /*1 2 2 2; */ 
+ 	-fx-padding: 0 0 0.0 1; /*1 2 2 2; */ 
  }
 
 .filter-glyph .text {

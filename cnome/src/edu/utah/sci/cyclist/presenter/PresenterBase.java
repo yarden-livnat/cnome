@@ -29,9 +29,6 @@ public class PresenterBase implements Presenter {
 		_eventBus.addHandler(type, _id, handler);
 	}
 	
-	public void addNotificationHandler(EventBus bus, String type, CyclistNotificationHandler handler) {
-		bus.addHandler(type, _id, handler);
-	}
 	
 	@Override
 	public void broadcast(CyclistNotification notification) {

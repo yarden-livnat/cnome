@@ -115,6 +115,10 @@ public class ViewPresenter extends PresenterBase{
 		getSelectionModel().setRemoteTables(list);
 	}
 	
+	public void addRemoteFilters(List<Filter> filters) {
+		getView().remoteFilters().addAll(filters);
+	}
+	
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
 		getView().addTable(table, remote, false);
 		getSelectionModel().addTable(table, remote, active, remoteActive);
