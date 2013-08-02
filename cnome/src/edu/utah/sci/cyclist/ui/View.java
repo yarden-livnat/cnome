@@ -40,6 +40,7 @@ public interface View {
 	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
 	void setOnSelectAction(Closure.V0 action);
 	void setOnShowFilter(Closure.V1<Filter> action);
+	void setOnRemoveFilter(Closure.V1<Filter> action);
 	
 	void addTable(Table table, boolean remote, boolean active);
 	void removeTable(Table table);

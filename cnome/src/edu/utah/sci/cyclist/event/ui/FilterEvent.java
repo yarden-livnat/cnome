@@ -11,8 +11,7 @@ public class FilterEvent extends CyclistEvent {
 
 	public static final EventType<CyclistDropEvent> SHOW = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "SHOW");
 	public static final EventType<CyclistDropEvent> DELETE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DELETE");
-
-
+	public static final EventType<CyclistDropEvent> REMOVE_FILTER_FIELD = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "REMOVE_FILTER_FIELD");
 	
 	private Filter _filter;
 	

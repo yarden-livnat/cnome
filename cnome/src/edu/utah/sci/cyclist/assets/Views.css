@@ -132,3 +132,7 @@
 	-fx-spacing: 10;
 	-fx-padding:  5;
 }
+
+.FilterPanel .TextField{
+	-fx-font-size:10;
+}

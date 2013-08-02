@@ -89,6 +89,13 @@ public class ViewPresenter extends PresenterBase{
 					broadcast(new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
 			});
+			
+			_view.setOnRemoveFilter(new Closure.V1<Filter>() {
+				@Override
+				public void call(Filter filter) {
+					broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_FILTER, filter));
+				}
+			});
 		}
 	}
 

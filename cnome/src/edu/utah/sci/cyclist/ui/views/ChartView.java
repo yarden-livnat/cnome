@@ -57,6 +57,7 @@ import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.DataType.Classification;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
@@ -953,7 +954,7 @@ public class ChartView extends ViewBase {
 	
 		@Override
 		public void invalidated(Observable observable) {			
-			invalidateChart();		
+			invalidateChart();
 			if (getCurrentTable() == null) {
 				DropArea area = (DropArea) observable;
 				if (area.getFields().size() == 1) {
@@ -965,8 +966,28 @@ public class ChartView extends ViewBase {
 		}
 	};
 	
-	
-	
+	/*Name: setAreaFiltersListeners 
+	 * This method handles fields which are connected to a filter
+	 * If the field SQL function has changed the filter has to be changed accordingly 
+	 * and the filter panel has to be adjusted. */
+	private void setAreaFiltersListeners(DropArea area) {
+		    area.setOnAction(new EventHandler<FilterEvent>() {
+			
+			@Override
+			public void handle(FilterEvent event) {
+				
+				Filter filter = event.getFilter();
+				if(event.getEventType() == FilterEvent.DELETE){
+					filters().remove(filter);
+					getOnRemoveFilter().call(event.getFilter());
+				}else if(event.getEventType() == FilterEvent.SHOW){
+					filters().add(filter);
+					getOnShowFilter().call(event.getFilter());
+				}
+			}
+		});
+	}
+	 	
 	private DropArea createControlArea(GridPane grid, String title, int  row, int col, int colspan, DropArea.Policy policy) {		
 		Text text = new Text(title);
 		text.getStyleClass().add("input-area-header");
@@ -974,6 +995,9 @@ public class ChartView extends ViewBase {
 		DropArea area = new DropArea(policy);
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaListener);
+		
+		setAreaFiltersListeners(area);
+
 		grid.add(text, col, row);
 		grid.add(area, col+1, row, colspan, 1);
 		
@@ -1022,8 +1046,17 @@ public class ChartView extends ViewBase {
 			}
 		});
 	}
-		
-		
+	
+	
+	/*Name: removeFilterFromDropArea
+	 * If a filter is removed - check if it is connected to a numeric field. By searching this field in the drop areas.
+	 * If so - change also the field display to indicate that is doesn't connect to a filter anymore */
+	@Override 
+	public void removeFilterFromDropArea(Filter filter){
+		_xArea.removeFilterFromGlyph(filter);
+		_yArea.removeFilterFromGlyph(filter);
+	}
+	
 	private class FieldInfo {
 		Field field;
 		int index;
@@ -1033,6 +1066,5 @@ public class ChartView extends ViewBase {
 			this.index = index;
 		}
 	}
-	
 	
 }

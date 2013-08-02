@@ -209,7 +209,7 @@ public class FilterArea extends ToolBar {
 		glyph.setOnAction(new EventHandler<FilterEvent>() {
 			@Override
 			public void handle(FilterEvent event) {
-				if (event.getEventType() == FilterEvent.SHOW) {
+				if (event.getEventType() == FilterEvent.SHOW ) {
 					if (getOnAction() != null) {
 						getOnAction().handle(event);
 					}
@@ -217,6 +217,11 @@ public class FilterArea extends ToolBar {
 //					if (getOnAction() != null) {
 //						getOnAction().handle(event);
 					getFilters().remove(glyph.getFilter());
+				} else if(event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD){
+					//If filter is connected to a numeric field - clean the field connection as well.
+					if (getOnAction() != null) {
+						getOnAction().handle(event);
+					}
 				}
 			}
 		});

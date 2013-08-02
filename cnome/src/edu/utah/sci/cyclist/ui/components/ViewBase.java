@@ -36,6 +36,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -112,6 +113,7 @@ public class ViewBase extends BorderPane implements View {
 	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
+	private Closure.V1<Filter> _onRemoveFilter = null;
 	
 	/**
 	 * Constructor
@@ -179,6 +181,8 @@ public class ViewBase extends BorderPane implements View {
 				_actionsArea,
 				_minmaxButton,
 				_closeButton);
+		
+		_dataBar.setAlignment(Pos.CENTER_LEFT);
 		
 		if (toplevel) {
 			_minmaxButton.setVisible(false);
@@ -294,6 +298,18 @@ public class ViewBase extends BorderPane implements View {
 		_onShowFilter = action;
 	}
 	
+	public Closure.V1<Filter> getOnShowFilter() {
+		return _onShowFilter;
+	}
+	
+	public void setOnRemoveFilter(Closure.V1<Filter> action) {
+		_onRemoveFilter = action;
+	}
+	
+	public Closure.V1<Filter> getOnRemoveFilter() {
+		return _onRemoveFilter;
+	}
+	
 	public DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
 	}
@@ -375,6 +391,7 @@ public class ViewBase extends BorderPane implements View {
 	public void addBar(Node bar, HPos pos) {
 		_header.getChildren().add(_header.getChildren().indexOf(_spring)+(pos == HPos.RIGHT ? 1 : 0), bar);
 	}
+	
 	/*
 	 * Content
 	 */
@@ -476,16 +493,25 @@ public class ViewBase extends BorderPane implements View {
 						_onShowFilter.call(event.getFilter());
 					}
 				}
+				// If filter is connected to a field and its sql function, clean the field when the filter is removed.
+				if (event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD) {
+					removeFilterFromDropArea(event.getFilter());
+				}
 				
 			}
 		});
+	}
+	
+	//Virtual method - should only be implemented in the sub class.
+	public void removeFilterFromDropArea(Filter filter){
+		;
 	}
 	
 	private void setDatasourcesListeners() {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 				if ( table != null ) {
 					if (_buttons.containsKey(table)) {
 						event.acceptTransferModes(TransferMode.NONE);

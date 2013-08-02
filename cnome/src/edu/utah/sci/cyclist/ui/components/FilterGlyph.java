@@ -1,5 +1,8 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.model.FieldProperties;
+import edu.utah.sci.cyclist.model.Filter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -12,8 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import edu.utah.sci.cyclist.event.ui.FilterEvent;
-import edu.utah.sci.cyclist.model.Filter;
 
 public class FilterGlyph extends HBox {
 
@@ -50,6 +51,12 @@ public class FilterGlyph extends HBox {
 	}
 	
 	private void build() {
+		this.getStyleClass().add("filter-glyph");
+		this.setSpacing(5);
+		
+		StackPane stackPane = new StackPane();
+		stackPane.setAlignment(Pos.CENTER);
+		
 		getStyleClass().add("filter-glyph");
 		setSpacing(5);
 		
@@ -65,12 +72,9 @@ public class FilterGlyph extends HBox {
 		_button.setMaxHeight(8);
 		_button.setMaxWidth(6);
 		
-		StackPane sp = new StackPane();
-		sp.getChildren().add(_button);
-		sp.setAlignment(Pos.CENTER);
-			
-		getChildren().addAll(label, sp);
+		stackPane.getChildren().add(_button);
 		
+		this.getChildren().addAll(label,stackPane);
 		createMenu();
 	}
 	

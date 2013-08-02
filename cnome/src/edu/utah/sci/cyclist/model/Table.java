@@ -47,6 +47,8 @@ import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.controller.XMLMemento;
 import edu.utah.sci.cyclist.util.QueryBuilder;
+import edu.utah.sci.cyclist.util.SQL;
+import edu.utah.sci.cyclist.util.SQL.Function;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
@@ -782,6 +784,11 @@ public class Table {
 		}
 	}
 	
+	
+	/* Name: getFieldRange
+	 * For a numeric field filter - gets the minimum and maximum values within its possible range, for any possible grouping.
+	 * It checks for the field SQL function and finds the values accordingly. 
+	 */
 	public Task<ObservableMap<Object, Object>> getFieldRange(final Field field) {
 		final CyclistDatasource ds = getDataSource();
 		
@@ -793,7 +800,33 @@ public class Table {
 				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
 					updateMessage("querying");
 					System.out.println("querying field range");
-					String query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+getName();
+					SQL.Functions function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
+					String query = "";
+					Boolean checkForSum = false;
+					double min,max=0;
+					
+					switch(function){
+					case AVG:
+					case MIN:
+					case MAX:
+						query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
+						break;
+					case COUNT:
+						query = "SELECT 0 AS min, COUNT(" + field.getName() + ") AS max FROM "+ getName();
+						break;
+					case COUNT_DISTINCT:
+						query = "SELECT 0 AS min, COUNT( DISTINCT " + field.getName() + ") AS max FROM "+ getName();
+					case SUM:
+						query = "SELECT SUM( CASE WHEN " + field.getName()+ " <0 THEN " + field.getName() + " ELSE 0 END) AS neg_sum, " +  
+								"SUM( CASE WHEN " + field.getName()+ " >0 THEN " + field.getName() + " ELSE 0 END) AS pos_sum, " + 
+								"MIN(" + field.getName() +") as min, MAX(" + field.getName() +") as max "+
+								"FROM " + getName();
+						checkForSum = true;
+						break;
+					}
+					
+					
+					
 					log.debug("query: "+query);
 					System.out.println(query);
 					ResultSet rs = stmt.executeQuery(query);
@@ -805,8 +838,19 @@ public class Table {
 							break;
 						}
 					
-						values.put(NumericRangeValues.MIN, rs.getDouble("min"));
-						values.put(NumericRangeValues.MAX, rs.getDouble("max"));
+						min = rs.getDouble("min");
+						max = rs.getDouble("max");
+						if(checkForSum)
+						{
+							double posSum = rs.getDouble("pos_sum");
+							max= (posSum==0)?max:posSum;
+							
+							double negSum = rs.getDouble("neg_sum");
+							min= (negSum==0)?min:negSum;
+						}
+						
+						values.put(NumericRangeValues.MIN, min);
+						values.put(NumericRangeValues.MAX, max);
 					}
 				}catch(Exception e){
 					e.printStackTrace();

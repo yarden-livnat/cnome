@@ -34,6 +34,11 @@ public class Filter implements Observable {
 	public Filter(Field field){
 		_field = field;
 		_dataType = new DataType(field.getDataType());
+		
+		/*if(_dataType.getRole() != Role.DIMENSION){
+			_field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
+		}*/
+		
 		if (_field.getValues() != null) {
 			_selectedItems.addAll(_field.getValues());
 			_values.set(_field.getValues());
@@ -187,7 +192,9 @@ public class Filter implements Observable {
 		if (!_valid) {
 			if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
 				if(_selectedRangeValues.size() > 0){
-					String str = getName()+" >=" + _selectedRangeValues.get(NumericRangeValues.MIN) + " AND " + getName()+" <=" + _selectedRangeValues.get(NumericRangeValues.MAX);
+					String function = _field.getString(FieldProperties.AGGREGATION_FUNC);
+					String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
+					String str = name+" >=" + _selectedRangeValues.get(NumericRangeValues.MIN) + " AND " + name +" <=" + _selectedRangeValues.get(NumericRangeValues.MAX);
 					_value = str;
 					
 				}else{
