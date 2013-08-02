@@ -784,6 +784,11 @@ public class Table {
 		}
 	}
 	
+	
+	/* Name: getFieldRange
+	 * For a numeric field filter - gets the minimum and maximum values within its possible range, for any possible grouping.
+	 * It checks for the field SQL function and finds the values accordingly. 
+	 */
 	public Task<ObservableMap<Object, Object>> getFieldRange(final Field field) {
 		final CyclistDatasource ds = getDataSource();
 		

@@ -966,6 +966,10 @@ public class ChartView extends ViewBase {
 		}
 	};
 	
+	/*Name: setAreaFiltersListeners 
+	 * This method handles fields which are connected to a filter
+	 * If the field SQL function has changed the filter has to be changed accordingly 
+	 * and the filter panel has to be adjusted. */
 	private void setAreaFiltersListeners(DropArea area) {
 		    area.setOnAction(new EventHandler<FilterEvent>() {
 			
@@ -1043,6 +1047,10 @@ public class ChartView extends ViewBase {
 		});
 	}
 	
+	
+	/*Name: removeFilterFromDropArea
+	 * If a filter is removed - check if it is connected to a numeric field. By searching this field in the drop areas.
+	 * If so - change also the field display to indicate that is doesn't connect to a filter anymore */
 	@Override 
 	public void removeFilterFromDropArea(Filter filter){
 		_xArea.removeFilterFromGlyph(filter);

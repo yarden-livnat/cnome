@@ -283,7 +283,9 @@ public class FilterPanel extends TitledPanel {
 	}
 	
 	
-	/* For numerical values - get the minimum and maximum values of the filter */
+	/* Name: createRange
+	 * For numerical Fields - get the possible minimum and maximum values of the field 
+	 * and creates a filter within that range */
 	private void createRange() {
 		
 		_cbBox = new VBox();
@@ -308,7 +310,6 @@ public class FilterPanel extends TitledPanel {
 			
 			Task<ObservableMap<Object,Object>> task = table.getFieldRange(field);
 			setTask(task);
-			//_map.bind(task.valueProperty());
 			field.rangeValuesProperty().bind(task.valueProperty());
 		}
 		else{
@@ -316,8 +317,9 @@ public class FilterPanel extends TitledPanel {
 		}
 	}
 	
-	/* Populates a filter panel for a "measure" type filter.
-	 * In this case there would be a slider which displays the possible values range 
+	/* Name: populateRangeValues
+	 * Populates a filter panel for a "measure" type filter.
+	 * In this case there would be a range slider which displays the possible values in the range 
 	 * and the user can change the minimum and maximum values which are displayed */
 	private void populateRangeValues() {
 		_cbBox.getChildren().clear();
@@ -355,6 +357,7 @@ public class FilterPanel extends TitledPanel {
 
 			_cbBox.getChildren().addAll(rangeSlider,hbox);
 			
+			//Listen to the width property of the parent - so the slider width can be changed accordingly.
 			this.widthProperty().addListener(new ChangeListener<Number>() {
 				public void changed(ObservableValue<? extends Number> observable, 
                         Number oldValue, Number newValue) {
@@ -373,12 +376,14 @@ public class FilterPanel extends TitledPanel {
 			});
 				
 			
+			// Change the filter's values according to the user new choice.
 			rangeSlider.setOnMouseReleased(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent e) {
 					_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
 				}
 			}); 
 			
+			// Update the text field to show the current value on the slider.
 			rangeSlider.setOnMouseDragged(new EventHandler<Event>() {
 				public void handle(Event e) {
 					minTxt.setText(Double.toString(rangeSlider.getLowValue()));
@@ -388,6 +393,12 @@ public class FilterPanel extends TitledPanel {
 				
 		}
 	}
+	
+	/* Name: getTitle
+	 * Gets the filter name and function (if exists).
+	 * If the filter is connected to a field, and the field has an aggregation function
+	 * sets the filter panel header to display both the filter name and the function*/
+	
 	
 	private static String getTitle(Filter filter) {
 		String title = null;

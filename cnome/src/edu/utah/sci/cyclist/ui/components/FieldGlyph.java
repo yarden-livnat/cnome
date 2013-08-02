@@ -184,6 +184,7 @@ public class FieldGlyph extends HBox {
 		
 		contextMenu.getItems().add(new SeparatorMenuItem());
 		
+		//Add a filter which is connected directly to the field and its SQL functions.
 		item = new MenuItem("Add Filter");
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e){

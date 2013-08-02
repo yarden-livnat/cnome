@@ -495,7 +495,7 @@ public class ViewBase extends BorderPane implements View {
 						_onShowFilter.call(event.getFilter());
 					}
 				}
-				
+				// If filter is connected to a field and its sql function, clean the field when the filter is removed.
 				if (event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD) {
 					removeFilterFromDropArea(event.getFilter());
 				}
@@ -504,6 +504,7 @@ public class ViewBase extends BorderPane implements View {
 		});
 	}
 	
+	//Virtual method - should only be implemented in the sub class.
 	public void removeFilterFromDropArea(Filter filter){
 		;
 	}

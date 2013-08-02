@@ -64,29 +64,6 @@ public class FilterGlyph extends HBox {
 		stackPane.getChildren().add(_button);
 		
 		this.getChildren().addAll(label,stackPane);
-		
-		/*HBoxBuilder.create()
-			.styleClass("filter-glyph")
-			.spacing(5)
-			.children(
-					LabelBuilder.create()
-						.styleClass("text")
-						//.text(_filter.getName())
-						.text(getTitle())
-						.build(),
-					StackPaneBuilder.create()
-						.children(
-							_button = StackPaneBuilder.create()
-								.styleClass("arrow")
-								.maxHeight(8)
-								.maxWidth(6)
-								.build()
-							)
-						.alignment(Pos.CENTER)
-					.build()
-				)
-			.applyTo(this);*/
-			
 		createMenu();
 	}
 	
