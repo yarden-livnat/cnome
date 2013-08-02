@@ -346,8 +346,8 @@ public class FilterPanel extends TitledPanel {
 			 hbox.setPrefWidth(currentWidth);
 			 hbox.setSpacing(currentWidth-120);
 			
-			minTxt.setPrefSize(70, 18);
-			maxTxt.setPrefSize(70, 18);
+			minTxt.setPrefSize(80, 18);
+			maxTxt.setPrefSize(80, 18);
 			minTxt.setEditable(false);
 			maxTxt.setEditable(false);
 			minTxt.setAlignment(Pos.CENTER_LEFT);
@@ -371,7 +371,7 @@ public class FilterPanel extends TitledPanel {
                         Number oldValue, Number newValue) {
 						double width = newValue.doubleValue();
 					    hbox.setPrefWidth(width);
-					    hbox.setSpacing(width-120);
+					    hbox.setSpacing(width-160);
 				}
 			});
 				
