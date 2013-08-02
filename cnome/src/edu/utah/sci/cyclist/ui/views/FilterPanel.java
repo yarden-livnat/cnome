@@ -329,6 +329,10 @@ public class FilterPanel extends TitledPanel {
 			rangeSlider.setShowTickLabels(true);
 			rangeSlider.setShowTickMarks(true);
 			//rangeSlider.setOrientation(Orientation.VERTICAL);
+			
+			double currentWidth = this.widthProperty().doubleValue();
+			_cbBox.setPrefWidth(0.95*currentWidth);
+			
 			double majorTicks = (rangeSlider.getMax()-rangeSlider.getMin())/4;
 			rangeSlider.setMajorTickUnit(majorTicks);	
 			final HBox hbox = new HBox();
@@ -336,6 +340,9 @@ public class FilterPanel extends TitledPanel {
 			final TextField minTxt = new TextField();
 			final TextField maxTxt = new TextField();
 			hbox.getChildren().addAll(minTxt, maxTxt);
+			
+			 hbox.setPrefWidth(currentWidth);
+			 hbox.setSpacing(currentWidth-120);
 			
 			minTxt.setPrefSize(70, 18);
 			maxTxt.setPrefSize(70, 18);
@@ -361,7 +368,7 @@ public class FilterPanel extends TitledPanel {
                         Number oldValue, Number newValue) {
 						double width = newValue.doubleValue();
 					    hbox.setPrefWidth(width);
-					    hbox.setSpacing(width+6-120);
+					    hbox.setSpacing(width-120);
 				}
 			});
 				
