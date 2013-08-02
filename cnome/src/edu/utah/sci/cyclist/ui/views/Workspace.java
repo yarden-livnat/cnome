@@ -34,11 +34,14 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.shape.Rectangle;
 
 import org.mo.closure.v1.Closure;
@@ -55,13 +58,11 @@ import edu.utah.sci.cyclist.ui.tools.Tool;
 public class Workspace extends ViewBase implements View {
 
 	public static final String WORKSPACE_ID = "workspace";
-	private static final String PATH_TITLE = "Working Path: ";
 	
 	private Pane _pane;
 	private WorkspacePanelArea _filtersPane;
 //	private Pane _statusPane;
 	private double _savedDivider = 0.9;
-	private Label _pathLabel;
 	
 	private ViewBase _maximizedView = null;
 	
@@ -109,7 +110,14 @@ public class Workspace extends ViewBase implements View {
 		setPadding(new Insets(5, 10, 5, 10));
 		setPrefSize(600, 300);
 
+//		TilePane tp = new TilePane();
+//		tp.setHgap(5);
+////		tp.setPrefColumns(1);
+//		FlowPane fp = new FlowPane();
+//		fp.setVgap(8);
+//		fp.setHgap(4);
 		_pane = new Pane();
+		
 		_filtersPane = new WorkspacePanelArea();
 		
 		final SplitPane splitPane = new SplitPane();
@@ -135,7 +143,6 @@ public class Workspace extends ViewBase implements View {
 			}
 		});
 		
-		_pathLabel = new Label(PATH_TITLE);
 //		addBar(_pathLabel);
 		
 //		BorderPane borderPane = new BorderPane();
@@ -231,9 +238,14 @@ public class Workspace extends ViewBase implements View {
 		ViewBase node = (ViewBase) view;
 		node.toFront();
 	}
-	
+	/**
+	 * add a new view to the workspace
+	 * @param view
+	 */
 	public void addView(final ViewBase view) {
 		_pane.getChildren().add(view);
+//		TilePane tp = (TilePane) _pane;
+//		tp.setPrefColumns((int)Math.floor(Math.sqrt(_pane.getChildren().size())));
 		
 		view.setOnSelect(new EventHandler<ActionEvent>() {
 			@Override
@@ -295,10 +307,6 @@ public class Workspace extends ViewBase implements View {
 	
 	public void removePanel(TitledPanel panel) {
 		_filtersPane.remove(panel);
-	}
-	
-	public void setWorkDirPath(String path){
-		_pathLabel.setText(PATH_TITLE+path);
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

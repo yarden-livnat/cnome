@@ -717,7 +717,7 @@ public class ChartView extends ViewBase {
 		
 		// main view
 		_pane = new BorderPane();
-		_pane.setPrefSize(200, 300);
+		_pane.setPrefSize(600, 300);
 		
 		Rectangle clip = new Rectangle(0, 0, 100, 100);
 		clip.widthProperty().bind(_pane.widthProperty());

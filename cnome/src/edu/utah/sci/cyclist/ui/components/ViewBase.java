@@ -31,7 +31,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -87,7 +86,6 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
-	private ObservableList<Filter> _remoteFilters = FXCollections.observableArrayList();
 	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
 	
@@ -223,7 +221,7 @@ public class ViewBase extends BorderPane implements View {
 	}
 	
 	public ObservableList<Filter> remoteFilters() {
-		return _remoteFilters;
+		return _filtersArea.getRemoteFilters();
 	}
 	
 	/*

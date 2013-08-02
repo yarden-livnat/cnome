@@ -115,7 +115,7 @@ public class CyclistController {
 		
 		// set up the main workspace
 		Workspace workspace = new Workspace(true);
-		workspace.setWorkDirPath(getLastChosenWorkDirectory());
+//		workspace.setWorkDirPath(getLastChosenWorkDirectory());
 		screen.setWorkspace(workspace);
 		
 		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
@@ -151,11 +151,11 @@ public class CyclistController {
 						_screen.getDimensionPanel().setFields(emptyList);
 						_screen.getMeauresPanel().setFields(emptyList);
 						
-						//Set the workspace to display the new path at the title.
-						Workspace workspace = _screen.getWorkSpace();
-						if(workspace != null){
-							workspace.setWorkDirPath(getLastChosenWorkDirectory());
-						}
+//						//Set the workspace to display the new path at the title.
+//						Workspace workspace = _screen.getWorkSpace();
+//						if(workspace != null){
+//							workspace.setWorkDirPath(getLastChosenWorkDirectory());
+//						}
 						
 					}
 				}
