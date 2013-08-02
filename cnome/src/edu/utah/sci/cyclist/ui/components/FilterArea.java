@@ -47,8 +47,8 @@ public class FilterArea extends ToolBar {
 	}
 	
 	private void build() {
-		setPrefHeight(25);
-		setMinWidth(5);
+//		setPrefHeight(25);
+		setMinWidth(15);
 		getStyleClass().add("drop-area");
 		setOrientation(Orientation.HORIZONTAL);
 		

@@ -27,16 +27,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
 import javax.sql.DataSource;
 
 import edu.utah.sci.cyclist.controller.IMemento;
@@ -50,7 +49,7 @@ public class CyclistDatasource implements DataSource {
 	private boolean _ready = false;
 	
 	// SQLite hack
-	private boolean _isSQLite = false;
+//	private boolean _isSQLite = false;
 	private final Semaphore _SQLiteSemaphore = new Semaphore(1, true);
 	private Connection _SQLiteConnection = null;
 	
@@ -231,13 +230,13 @@ public class CyclistDatasource implements DataSource {
 	}
 	
 	
-	private void initSQLite(Connection connection) {
-		try (Statement stmt = connection.createStatement()) {
-			boolean ok = stmt.execute("PRAGMA journal_mode = WAL");
-			System.out.println("SQLite PRAGMA statement: "+ok);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	private void initSQLite(Connection connection) {
+//		try (Statement stmt = connection.createStatement()) {
+//			boolean ok = stmt.execute("PRAGMA journal_mode = WAL");
+//			System.out.println("SQLite PRAGMA statement: "+ok);
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
  }

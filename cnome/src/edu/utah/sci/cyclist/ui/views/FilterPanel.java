@@ -1,8 +1,9 @@
 package edu.utah.sci.cyclist.ui.views;
 
-//import org.controlsfx.control.RangeSlider;
 
+//import org.controlsfx.control.RangeSlider;
 import controls.RangeSlider;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -37,6 +38,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Field;
@@ -359,7 +361,7 @@ public class FilterPanel extends TitledPanel {
                         Number oldValue, Number newValue) {
 						double width = newValue.doubleValue();
 					    hbox.setPrefWidth(width);
-					    hbox.setSpacing(width-120);
+					    hbox.setSpacing(width+6-120);
 				}
 			});
 				

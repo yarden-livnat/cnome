@@ -73,7 +73,7 @@ public class TaskControl extends HBox {
 		_indicator = new ProgressIndicator(-1);
 		_indicator.setPrefSize(14, 14);
 		_indicator.setVisible(false);
-	
+		_indicator.setStyle("-fx-background-color: #fffeec");
 		_imageView = new ImageView(Resources.getIcon("error"));
 		
 		getChildren().addAll(_indicator, _imageView);

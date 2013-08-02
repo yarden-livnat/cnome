@@ -22,11 +22,10 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.tools;
 
+import javafx.scene.image.Image;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.Presenter;
 import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.ui.View;
-import javafx.scene.image.Image;
 
 public interface Tool {
 

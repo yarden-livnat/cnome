@@ -4,11 +4,11 @@ package edu.utah.sci.cyclist.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.model.DataType.Role;
 
 public class QueryBuilder {
 	

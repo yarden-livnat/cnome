@@ -24,16 +24,14 @@ package edu.utah.sci.cyclist.ui.components;
 
 import java.util.Properties;
 
-import edu.utah.sci.cyclist.model.CyclistDatasource;
-import edu.utah.sci.cyclist.ui.wizards.DatasourceWizardPage;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.PasswordFieldBuilder;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.GridPaneBuilder;
-import javafx.scene.text.TextBuilder;
+import javafx.scene.text.Text;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.ui.wizards.DatasourceWizardPage;
 
 /*
  * A general pane that defines characteristics of all data sources
@@ -92,26 +90,27 @@ public class DatasourcePage extends GridPane implements DatasourceWizardPage {
 	
 	// * * * Build the page * * * //
 	protected void build() {
-		 GridPaneBuilder.create()
-				.vgap(10)
-				.hgap(5)
-				.padding(new Insets(10,3,10,3))
-				.applyTo(this);
-
-		add(TextBuilder.create().text("User:").build(), 0, 0);
-		add(_user = TextFieldBuilder.create().build(), 1, 0);
-
-		add(TextBuilder.create().text("Password:").build(), 0, 1);
-		add(_password = PasswordFieldBuilder.create().build(), 1, 1);
-
-		add(TextBuilder.create().text("Host:").build(), 0, 2);
-		add(_host = TextFieldBuilder.create().build(), 1, 2);
+		setVgap(10);
+		setHgap(5);
+		setPadding(new Insets(10,3,10,3));
 		
-		add(TextBuilder.create().text("Schema:").build(), 0, 3);
-		add(_schema = TextFieldBuilder.create().build(), 1, 3);
+
+		add(new Text("User:"), 0, 0);
+		add(_user = new TextField(), 1, 0);
+
+		add(new Text("Password:"), 0, 1);
+		add(_password = new PasswordField(), 1, 1);
+
+		add(new Text("Host:"), 0, 2);
+		add(_host = new TextField(), 1, 2);
+		
+		add(new Text("Schema:"), 0, 3);
+		add(_schema = new TextField(), 1, 3);
 	
-		add(TextBuilder.create().text("Port:").focusTraversable(true).build(), 2, 2);
-		add(_port = TextFieldBuilder.create().build(), 3, 2);
+		Text port = new Text("Port:");
+		port.setFocusTraversable(true);
+		add(port, 2, 2);
+		add(_port = new TextField(), 3, 2);
 
 	}
 

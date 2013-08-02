@@ -59,7 +59,7 @@ public class Workspace extends ViewBase implements View {
 	
 	private Pane _pane;
 	private WorkspacePanelArea _filtersPane;
-	private Pane _statusPane;
+//	private Pane _statusPane;
 	private double _savedDivider = 0.9;
 	private Label _pathLabel;
 	
@@ -100,12 +100,14 @@ public class Workspace extends ViewBase implements View {
 	public Workspace(boolean toplevel) {
 		super(toplevel);
 		build();
+		enableDragging(!toplevel);
 	}
 	
 	private void build() {
 		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
+		setPrefSize(600, 300);
 
 		_pane = new Pane();
 		_filtersPane = new WorkspacePanelArea();
@@ -153,7 +155,7 @@ public class Workspace extends ViewBase implements View {
 		//setContent(borderPane, true /* allowMove */);
 		setContent(splitPane);
 			
-		enableDragging(false);
+//		enableDragging(false);
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
@@ -167,24 +169,9 @@ public class Workspace extends ViewBase implements View {
 						event.acceptTransferModes(TransferMode.MOVE);
 						event.consume();
 					}
-					
-					
 				}
 			}
 		});	
-		
-//		setOnDragEntered(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {		
-////				event.consume();
-//			}
-//		});
-//		
-//		setOnDragExited(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {
-//				// do nothing
-////				event.consume();
-//			}
-//		});
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {

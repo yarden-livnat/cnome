@@ -31,7 +31,6 @@
  */
 
 .flat-button {
- 	-fx-body-color:  transparent;
 	-fx-background-color:  -fx-body-color;
 	-fx-padding: 1;
 }
@@ -50,6 +49,7 @@
     -fx-background-color: #a0a0a0, #505050, #f0f0f0;
     -fx-background-insets: 0, 0, 0;
     -fx-background-radius: 3, 2, 1;
+    -fx-padding:0.0 4;
  	-fx-text-fill: -fx-text-base-color;
     -fx-alignment: CENTER;
     -fx-content-display: LEFT;
@@ -70,25 +70,27 @@
 	-fx-background-insets: 0, 1, 1 1 1 1;
 }
 
+.arrow {
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-background-color: transparent;
+    -fx-padding: 0; /*0.166667em 0.333333em 0.166667em 0.333333em;*/ /* 2 4 2 4 */
+    -fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
 /*
  * Glyphs
  */
  
 .field-glyph {
-	-active-bg: #FEE391;
-	-inactive-bg: #FF9900;
 	-filter-bg: #00ff00;
-	-fx-background-color: -active-bg;
+	-fx-background-color: #ffffc1; /*-active-bg;*/
 	-fx-border-color: #bbbbbb;
-	-fx-border-radius: 5;
-	-fx-background-radius: 5;
-	-fx-spacing: 4;
- 	-fx-padding: 1 2 2 2; 
- 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+	/*-fx-border-radius: 5;
+	-fx-background-radius: 5;*/
+	-fx-spacing: 0;
+ 	-fx-padding: 0; /*1 2 2 2; */
 }
 
 .field-glyph .text {
-	
 }
 
 .field-glyph .arrow {
@@ -99,7 +101,7 @@
 }
 
 .field-glyph:hover .arrow {
-    -fx-background-color: -fx-mark-color, #101010;
+    -fx-background-color: -fx-mark-color, #a0a0a0;
 }
 
 .field-glyph .separator .line {
@@ -109,17 +111,18 @@
 }
 
 
+/* Filter Glyph */
 .filter-glyph {
-	-active-bg: #00ff00; /* #ccff33;*/
-	-inactive-bg: #FF9900;
-	-fx-background-color: -active-bg;
+	-fx-background-color: #beffbf; /*-active-bg;*/
 	-fx-border-color: #bbbbbb;
-	-fx-border-radius: 5;
-	-fx-background-radius: 5;
-	-fx-spacing: 4;
- 	-fx-padding: 1 2 2 2; 
- 
- 	/* -fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 ); */
+	/*-fx-border-radius: 5;
+	-fx-background-radius: 5;*/
+	-fx-spacing: 0;
+ 	-fx-padding: 0; /*1 2 2 2; */ 
+ }
+
+.filter-glyph .text {
+	
 }
 
 .filter-glyph .arrow {
@@ -194,7 +197,7 @@
 }
 
 .titled-pane:focused > .title {
-   -fx-color: -fx-base;
+   /*-fx-color: -fx-base;*/
 }
 
 .titled-pane:focused {
@@ -232,7 +235,6 @@
 }
 
 .element-label {
-	-fx-body-color: #d0d0d0;
 	-fx-background-color: #d0d0d0;
 	-fx-background-radius: 4;
 	-fx-border-color: #b0b0b0;
@@ -287,14 +289,14 @@
 /* Filters */
 
 .filter-area-title {
-	-fx-font-size: 11pt;
+	-fx-font-size: 9pt;
 	/*-fx-font-weight: bold; */
 }
 
 .filter-area {
 	-fx-background-color: #ffffff;
 	-fx-border-color: #c0c0c0; 
-	-fx-border-width: 2; 
+	-fx-border-width: 0; 
 	-fx-border-style: none;
 }
 

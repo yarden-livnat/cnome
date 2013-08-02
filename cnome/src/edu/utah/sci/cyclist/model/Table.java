@@ -43,9 +43,6 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
-import sun.security.acl.WorldGroupImpl;
-
-
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.controller.XMLMemento;
@@ -248,24 +245,24 @@ public class Table {
 		_schema.update();
 	}
 
-	private void printTypeInfo(Connection conn) {
-		DatabaseMetaData d;
-		try {
-			d = conn.getMetaData();
-			ResultSet rs = d.getTypeInfo();
-			ResultSetMetaData cmd = rs.getMetaData();
-			System.out.println("database types:");
-			while (rs.next()) {
-				for (int i=1; i<=cmd.getColumnCount(); i++) {
-					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
-				}
-				System.out.println();
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	private void printTypeInfo(Connection conn) {
+//		DatabaseMetaData d;
+//		try {
+//			d = conn.getMetaData();
+//			ResultSet rs = d.getTypeInfo();
+//			ResultSetMetaData cmd = rs.getMetaData();
+//			System.out.println("database types:");
+//			while (rs.next()) {
+//				for (int i=1; i<=cmd.getColumnCount(); i++) {
+//					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
+//				}
+//				System.out.println();
+//			}
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public String getName() {
 		return _name;
@@ -382,6 +379,13 @@ public class Table {
 
 	public void setFieldSelected(int index, boolean selected){
 		_schema.getField(index).setSelectedProperty(selected);
+	}
+
+	public boolean hasField(Field field) {
+		if (field.getTable() == this) return true;
+		
+		// for now check based on field name
+		return _schema.contain(field);
 	}
 	
 	public int getNumColumns() {
@@ -531,9 +535,11 @@ public class Table {
 						Row row = new Row(cols);
 						for (int i=0; i<cols; i++) {
 							row.value[i] = rs.getObject(i+1);
+//							System.out.print(row.value[i]+"  ");
 						}
+//						System.out.println();
 						// TODO: This is a hack. It seems that if the statement is '...where false' then a single row of nulls is return.
-						if (row.value[0] == null) break;
+						if (row.value[0] == null) row.value[0] = "";
 						rows.add(row);
 						n++;
 						if (n % 1000 == 0) {

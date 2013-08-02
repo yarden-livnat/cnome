@@ -4,7 +4,6 @@ import javafx.scene.image.Image;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.presenter.MapPresenter;
-import edu.utah.sci.cyclist.presenter.Presenter;
 import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.MapView;
