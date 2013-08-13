@@ -97,6 +97,11 @@ public class FilterGlyph extends HBox {
 				public void handle(ActionEvent e) {
 					if (getOnAction() != null) {
 						getOnAction().handle(new FilterEvent(FilterEvent.DELETE, _filter));
+						//This message is for removing the filter completely also from the field glyph.
+						if(_filter.getField().getString(FieldProperties.AGGREGATION_FUNC) != null)
+							{
+								getOnAction().handle(new FilterEvent(FilterEvent.REMOVE_FILTER_FIELD, _filter));
+							}
 					}
 				}
 			});
