@@ -51,6 +51,10 @@ public class FilterPresenter extends PresenterBase {
 		return _panel;
 	}
 	
+	public void highlight(boolean value) {
+		_panel.setHighlight(value);
+	}
+	
 	private void addNotificationListeners() {
 		addNotificationHandler(CyclistNotifications.HIGHLIGHT_FILTER, new CyclistNotificationHandler() {
 			

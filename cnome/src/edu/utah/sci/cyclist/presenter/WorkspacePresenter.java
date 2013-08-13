@@ -56,6 +56,7 @@ public class WorkspacePresenter extends ViewPresenter {
 	public WorkspacePresenter(EventBus bus/*, Model model*/) {
 		super(bus);
 		build();
+		_localBus = /*getWorkspace().isToplevel() ? getEventBus() : */ new SimpleEventBus();
 		addListeners();
 	}
 	
@@ -69,6 +70,10 @@ public class WorkspacePresenter extends ViewPresenter {
 		if (view instanceof Workspace) {
 			Workspace workspace = getWorkspace();
 			
+
+			if (getWorkspace().isToplevel())
+				addToplevelListeners();
+
 			workspace.setOnToolDrop(new Closure.V3<Tool, Double, Double>() {
 
 				@Override
@@ -167,8 +172,7 @@ public class WorkspacePresenter extends ViewPresenter {
 	}
 	
 	private void build() {
-		_localBus = new SimpleEventBus();
-
+		
 		SelectionModel selectionModel = new SingleSelection();
 		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
 
@@ -212,6 +216,15 @@ public class WorkspacePresenter extends ViewPresenter {
 			public void handle(CyclistNotification event) {
 				View view = ((CyclistViewNotification)event).getView();
 				getWorkspace().selectView(view);
+				if (view instanceof ViewBase) {
+					ViewBase base = (ViewBase) view;
+					List<Filter> f1 = base.filters();
+					List<Filter> f2 = base.remoteFilters();
+					for (FilterPresenter p : _filterPresenters) {
+						Filter f = p.getFilter();
+						p.highlight(f1.contains(f) || f2.contains(f));
+					}
+				}
 			}
 		});
 		
@@ -276,6 +289,24 @@ public class WorkspacePresenter extends ViewPresenter {
 				broadcast(getLocalEventBus(), event);
 			}
 		});
+		
+	}
+	
+	private void addToplevelListeners() {
+		addLocalNotificationHandler(CyclistNotifications.DATASOURCE_FOCUS, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(event);
+			}
+		});
+	}
+	
+	@Override
+	public void onViewSelected(View view) {
+		super.onViewSelected(view);
+		if (getWorkspace().isToplevel())
+			broadcast(getLocalEventBus(), (new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view)));
 	}
 	
 	private FilterPresenter getFilterPresenter(Filter filter) {

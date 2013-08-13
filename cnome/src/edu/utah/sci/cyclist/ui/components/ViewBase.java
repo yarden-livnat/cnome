@@ -88,7 +88,7 @@ public class ViewBase extends BorderPane implements View {
 	private FilterArea _filtersArea;
 	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
-	
+	private boolean _toplevel;
 	private boolean _maximized = false;
 	private final Resize resize = new Resize();
 	
@@ -191,6 +191,8 @@ public class ViewBase extends BorderPane implements View {
 			_closeButton.setManaged(false);
 		}
 		
+		_toplevel = toplevel;
+		
 		setHeaderListeners();
 		setDatasourcesListeners();
 		setFiltersListeners();
@@ -203,6 +205,9 @@ public class ViewBase extends BorderPane implements View {
 		_title.setText(title);
 	}
 	
+	public boolean isToplevel() {
+		return _toplevel;
+	}
 	
 	public boolean isMaximized() {
 		return _maximized;

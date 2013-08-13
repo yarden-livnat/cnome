@@ -75,12 +75,7 @@ public class ViewPresenter extends PresenterBase{
 			_view.setOnSelectAction(new Closure.V0() {
 				@Override
 				public void call() {
-					broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, _view));
-					
-					Table table = getSelectionModel().getSelected();
-					if (table != null)
-						broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
-				}
+					onViewSelected(_view);				}
 			});
 			
 			_view.setOnShowFilter(new Closure.V1<Filter>() {
@@ -112,6 +107,14 @@ public class ViewPresenter extends PresenterBase{
 		
 	}
 
+	public void onViewSelected(View view) {
+		broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view));
+		
+		Table table = getSelectionModel().getSelected();
+		if (table != null)
+			broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
+
+	}
 
 	public void setRemoteTables(List<SelectionModel.Entry> list) {
 		for (SelectionModel.Entry record : list) {

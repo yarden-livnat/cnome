@@ -9,7 +9,7 @@ public class CyclistFilterNotification extends CyclistNotification {
 		super(type);
 		_filter = filter;
 	}
-	
+
 	public Filter getFilter() {
 		return _filter;
 	}
