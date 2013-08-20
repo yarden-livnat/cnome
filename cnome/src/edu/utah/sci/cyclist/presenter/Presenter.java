@@ -22,12 +22,8 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.presenter;
 
-import java.util.List;
-
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.model.Table;
 
 public abstract interface Presenter {
 	String getId();

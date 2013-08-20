@@ -2,14 +2,10 @@ package edu.utah.sci.cyclist.ui.panels;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPaneBuilder;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 
 public class TitledPanel extends VBox {
 
@@ -20,8 +16,6 @@ public class TitledPanel extends VBox {
 	public TitledPanel(String title) {
 		build(title);
 	}
-	
-	
 	
 	private void build(String title) {
 		getStyleClass().add("cnome-panel");

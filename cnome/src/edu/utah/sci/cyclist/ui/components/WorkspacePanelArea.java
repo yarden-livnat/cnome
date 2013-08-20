@@ -43,7 +43,7 @@ public class WorkspacePanelArea extends SplitPane {
 	private void configure() {
 		setId("hiddenSplitter");
 		setMinWidth(0);
-		setPrefHeight(USE_COMPUTED_SIZE);
+		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		setOrientation(Orientation.VERTICAL);
 		setVisible(false);
 		setManaged(false);

@@ -75,18 +75,20 @@ public class ViewPresenter extends PresenterBase{
 			_view.setOnSelectAction(new Closure.V0() {
 				@Override
 				public void call() {
-					broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, _view));
-					
-					Table table = getSelectionModel().getSelected();
-					if (table != null)
-						broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
-				}
+					onViewSelected(_view);				}
 			});
 			
 			_view.setOnShowFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
 					broadcast(new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
+				}
+			});
+			
+			_view.setOnRemoveFilter(new Closure.V1<Filter>() {
+				@Override
+				public void call(Filter filter) {
+					broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_FILTER, filter));
 				}
 			});
 		}
@@ -105,6 +107,14 @@ public class ViewPresenter extends PresenterBase{
 		
 	}
 
+	public void onViewSelected(View view) {
+		broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view));
+		
+		Table table = getSelectionModel().getSelected();
+		if (table != null)
+			broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
+
+	}
 
 	public void setRemoteTables(List<SelectionModel.Entry> list) {
 		for (SelectionModel.Entry record : list) {
@@ -113,6 +123,10 @@ public class ViewPresenter extends PresenterBase{
 //			getSelectionModel().addTable(record.table, true, false, record.active);
 		}
 		getSelectionModel().setRemoteTables(list);
+	}
+	
+	public void addRemoteFilters(List<Filter> filters) {
+		getView().remoteFilters().addAll(filters);
 	}
 	
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {

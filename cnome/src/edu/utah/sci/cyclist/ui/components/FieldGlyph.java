@@ -13,15 +13,15 @@ import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
+import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.util.SQL;
 
 public class FieldGlyph extends HBox {
@@ -30,8 +30,10 @@ public class FieldGlyph extends HBox {
 	private StackPane _button;
 	private Label _label;
 	private BooleanProperty _validProperty = new SimpleBooleanProperty();
+	private Filter _currFilter = null;
 	
 	private ObjectProperty<EventHandler<ActionEvent>> _action = new SimpleObjectProperty<>();
+	private ObjectProperty<EventHandler<FilterEvent>> _filterAction = new SimpleObjectProperty<>();
 	
 	public FieldGlyph(Field field) {
 		_field = field;
@@ -52,6 +54,18 @@ public class FieldGlyph extends HBox {
 	
 	public EventHandler<ActionEvent> getOnAction() {
 		return _action.get();
+	}
+	
+	public ObjectProperty<EventHandler<FilterEvent>> onFilterAction() {
+		return _filterAction;
+	}
+	
+	public void setOnFilterAction( EventHandler<FilterEvent> handler) {
+		_filterAction.set(handler);
+	}
+	
+	public EventHandler<FilterEvent> getOnFilterAction() {
+		return _filterAction.get();
 	}
 	
 	public BooleanProperty validProperty() {
@@ -77,27 +91,32 @@ public class FieldGlyph extends HBox {
 		return title;
 	}
 	
+	public boolean removeFieldFilter(Object filter){
+		if(_field == ((Filter)filter).getField()){
+			_currFilter = null;
+			setStyle("-fx-background-color: #ffffc1");
+			return true;
+		}
+		return false;
+		
+	}
+	
 	private void build() {
-		HBoxBuilder.create()
-			.styleClass("field-glyph")
-			.spacing(5)
-			.children(
-					_label = LabelBuilder.create()
-						.styleClass("text")
-						.text(getTitle())
-						.build(),
-					StackPaneBuilder.create()
-					.children(
-							_button = StackPaneBuilder.create()
-								.styleClass("arrow")
-								.maxHeight(8)
-								.maxWidth(6)
-								.build()
-						)
-						.alignment(Pos.CENTER)
-					.build()
-				)
-			.applyTo(this);
+		getStyleClass().add("field-glyph");
+		setSpacing(5);
+		
+		_label = new Label(getTitle());
+		_label.getStyleClass().add("text");
+			
+		_button = new StackPane();
+		_button.getStyleClass().add("arrow");
+		_button.setMaxSize(6, 8);
+		
+		StackPane sp = new StackPane();
+		sp.setAlignment(Pos.CENTER);
+		sp.getChildren().add(_button);
+		
+		getChildren().addAll(_label, sp);
 
 		createMenu();
 
@@ -106,9 +125,9 @@ public class FieldGlyph extends HBox {
 			@Override
 			public void invalidated(Observable observable) {
 				if (validProperty().get()) {
-					setStyle("-fx-background-color: -active-bg");
+					setStyle("-fx-background-color: #ffffc1");
 				} else {
-					setStyle("-fx-background-color: -inactive-bg");
+					setStyle("-fx-background-color: #e4a1aa");
 				}
 				
 			}
@@ -118,6 +137,18 @@ public class FieldGlyph extends HBox {
 	private void fireActionEvent() {
 		if (getOnAction() != null) {
 			getOnAction().handle(new ActionEvent(this, null));
+		}
+	}
+	
+	private void fireFilterActionEvent() {
+		if (getOnFilterAction() != null) {
+			if(_currFilter != null){
+				getOnFilterAction().handle(new FilterEvent(FilterEvent.DELETE, _currFilter));
+				_field.rangeValuesProperty().unbind();
+				_field.setRangeValues(null);
+			}
+			_currFilter = new Filter(_field);
+			getOnFilterAction().handle(new FilterEvent(FilterEvent.SHOW, _currFilter));
 		}
 	}
 	
@@ -143,11 +174,26 @@ public class FieldGlyph extends HBox {
 					_field.set(FieldProperties.AGGREGATION_FUNC, func.getName());
 					_label.setText(getTitle());
 					fireActionEvent();
+					if(_currFilter != null){
+						fireFilterActionEvent();
+					}
 				}
 			});
 			contextMenu.getItems().add(item);
 		}
-				
+		
+		contextMenu.getItems().add(new SeparatorMenuItem());
+		
+		//Add a filter which is connected directly to the field and its SQL functions.
+		item = new MenuItem("Add Filter");
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e){
+				setStyle("-fx-background-color: -filter-bg");
+				fireFilterActionEvent();
+			}
+		});
+		contextMenu.getItems().add(item);
+
 		_button.setOnMousePressed(new EventHandler<Event>() {
 
 			@Override

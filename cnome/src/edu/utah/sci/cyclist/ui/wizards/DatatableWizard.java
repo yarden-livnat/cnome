@@ -41,7 +41,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ListViewBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.layout.HBox;
@@ -51,13 +50,13 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.components.DatasourceSelector;
@@ -79,8 +78,9 @@ public class DatatableWizard extends TilePane {
 	
 	// DataType elements
 	private CyclistDatasource     _current;
-	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
-	private DatasourceSelector    _selector; 
+	private ObjectProperty<Table> _selection =  new SimpleObjectProperty<>();
+	private DatasourceSelector    _selector;
+	private String               _workDir = WorkDirectoryController.SAVE_DIR;
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -99,7 +99,7 @@ public class DatatableWizard extends TilePane {
 	}
 			
 	// * * * Show the dialog * * * //
-	public ObjectProperty<Table> show(Window window) {
+	public  ObjectProperty<Table>  show(Window window) {
 
 		 _dialog.initOwner(window);
 		 _dialog.show();	
@@ -258,12 +258,7 @@ public class DatatableWizard extends TilePane {
 				.padding(new Insets(5))
 				.maxHeight(Double.MAX_VALUE)
 				.children(	
-//						TextBuilder.create().text("Select Table:").build(),
 						new Text("Select Table:"),
-//						_tablesView = ListViewBuilder.create(String.class) // Java 8
-//						_tablesView = ListViewBuilder.<String>create()
-//						.maxHeight(Double.MAX_VALUE)
-//						.build()	
 						_tablesView = new ListView<String>()
 						).build();
 		_tablesView.setMaxHeight(Double.MAX_VALUE);
@@ -297,6 +292,7 @@ public class DatatableWizard extends TilePane {
 							public void handle(ActionEvent arg0) {
 								updateTable(table);
 								_selection.setValue(table);
+								//(table.getName());
 								dialog.hide();
 							};
 						})
@@ -373,9 +369,9 @@ public class DatatableWizard extends TilePane {
 		table.setName(name); 
 		table.setAlias(_selector.getAlias());
 		table.setDataSource(_current);
-		table.setLocalDatafile();
+		table.setLocalDatafile(_workDir);
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
-		table.extractSchema();
+		//table.extractSchema();
 	}
 
 	public CyclistDatasource getSelectedSource() {
@@ -387,6 +383,8 @@ public class DatatableWizard extends TilePane {
 		_sourcesView.getSelectionModel().select(_current);
 	}
 	
-	
+	public void setWorkDir(String workDir){
+		_workDir = workDir;
+	}
 	
 }

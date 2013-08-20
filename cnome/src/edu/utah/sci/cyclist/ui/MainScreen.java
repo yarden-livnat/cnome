@@ -33,14 +33,11 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
@@ -54,14 +51,14 @@ import edu.utah.sci.cyclist.ui.wizards.WorkspaceWizard;
 public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
 	
-	private MenuBar _menubar;
+//	private MenuBar _menubar;
 	private SplitPane _sp;
 	private SplitPane _toolsPane;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _dimensionsPanel;
 	private SchemaPanel _measuresPanel;
 	private ToolsPanel _toolsPanel;
-	private FiltersListPanel _filtersPanel;
+//	private FiltersListPanel _filtersPanel;
 	private StackPane _workspacePane;
 		
 	/**
@@ -78,9 +75,9 @@ public class MainScreen extends VBox {
 		return getScene().getWindow();
 	}
 	
-	public ObjectProperty<String> selectWorkspace(ObservableList<String> list) {
+	public ObservableList<String> selectWorkspace(ObservableList<String> list, int chosenIndex) {
 		WorkspaceWizard wizard = new WorkspaceWizard();
-		wizard.setItems(list);
+		wizard.setItems(list,chosenIndex);
 		return wizard.show(getScene().getWindow());
 	}
 	
@@ -105,44 +102,53 @@ public class MainScreen extends VBox {
 		return _toolsPanel;
 	}
 	
+	public Workspace getWorkSpace(){
+		for(Object obj : _workspacePane.getChildren()){
+			if (obj.getClass() == Workspace.class) {
+				return (Workspace)obj;
+			}
+		}
+		return null;
+	}
+	
 	private double toolsWidth = 120; 
 	private void build(Stage stage){
 		double[] div = {0.2, 0.4, 0.6, 0.8};
 		
 		double [] mainDividers = {toolsWidth/600.0};
 		
-		VBoxBuilder.create()
-			.prefWidth(600)
-			.prefHeight(400)
-			.padding(new Insets(0))
-			.spacing(0)
-			.children(
-				_menubar = createMenuBar(stage),
-				_sp = SplitPaneBuilder.create()
-					.id("hiddenSplitter")
-					.orientation(Orientation.HORIZONTAL)
-					.dividerPositions(mainDividers)
-					.items(
-							_toolsPane = SplitPaneBuilder.create()
-								.id("hiddenSplitter")
-								.prefWidth(USE_COMPUTED_SIZE/*toolsWidth*/)
-								.prefHeight(USE_COMPUTED_SIZE)
-								.orientation(Orientation.VERTICAL)
-								.items(
-										_datasourcesPanel = new TablesPanel(),	
-										_dimensionsPanel = new SchemaPanel("Category"),
-										_measuresPanel = new SchemaPanel("Numeric"),
-										_toolsPanel = new ToolsPanel(),
-										_filtersPanel = new FiltersListPanel()
-									)
-								.dividerPositions(div)
-								.build(),
-							_workspacePane = StackPaneBuilder.create()
-								.build()
-						)
-					.build()
-				)
-			.applyTo(this);
+		this.setPrefWidth(600);
+		this.setPrefHeight(400);
+		this.setPadding(new Insets(0));
+		this.setSpacing(0);
+		
+		_sp = new SplitPane();
+		_sp.setId("hiddenSplitter");
+		_sp.setOrientation(Orientation.HORIZONTAL);
+		_sp.setDividerPositions(mainDividers);
+		
+		_toolsPane = new SplitPane();
+		_toolsPane.setId("hiddenSplitter");
+		_toolsPane.setPrefWidth(USE_COMPUTED_SIZE);
+		_toolsPane.setPrefHeight(USE_COMPUTED_SIZE);
+		_toolsPane.setOrientation(Orientation.VERTICAL);
+		_toolsPane.getItems().addAll(
+				_datasourcesPanel = new TablesPanel(),
+				_dimensionsPanel = new SchemaPanel("Category"),
+				_measuresPanel = new SchemaPanel("Numeric"),
+				_toolsPanel = new ToolsPanel(),
+				/*_filtersPanel = */new FiltersListPanel()
+				);
+		_toolsPane.setDividerPositions(div);
+		
+		_sp.getItems().addAll(
+				_toolsPane,
+				_workspacePane = new StackPane());
+		
+		this.getChildren().addAll(
+				createMenuBar(stage),
+				_sp
+				);
 			
 		VBox.setVgrow(_sp, Priority.ALWAYS);
 		
@@ -182,13 +188,17 @@ public class MainScreen extends VBox {
 		Menu fileMenu = createFileMenu();
 
 		menubar.getMenus().add(fileMenu);
+		
+		//Data menu
+		Menu dataMenu = createDataMenu();
+		menubar.getMenus().add(dataMenu);
+		
 		return menubar;
 	}
 	
 	private Menu createFileMenu() {
-		_datasourceMenuItem = new MenuItem("Add Datatable", new ImageView(Resources.getIcon("open.png")));
 		
-		_workspaceMenuItem = new MenuItem("Workspace"); //new ImageView(Resources.getIcon("workspace.png")));
+		_workspaceMenuItem = new MenuItem("Work Directory"); //new ImageView(Resources.getIcon("workspace.png")));
 		
 		_saveMenuItem = new MenuItem("Save");
 		_saveMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+S"));
@@ -200,13 +210,22 @@ public class MainScreen extends VBox {
 		// -- setup the menu 
 		Menu fileMenu = new Menu("File");
 		fileMenu.getItems().addAll(
-					_datasourceMenuItem, 
 					new SeparatorMenuItem(), 
 					_workspaceMenuItem, 
 					_saveMenuItem,
 					new SeparatorMenuItem(), 
 					_quitMenuItem);
 		return fileMenu;
+	}
+	
+	private Menu createDataMenu() {
+		_datasourceMenuItem = new MenuItem("Add Datatable", new ImageView(Resources.getIcon("open.png")));
+		
+		// -- setup the menu 
+		Menu dataMenu = new Menu("Data");
+		dataMenu.getItems().addAll(
+				_datasourceMenuItem);
+		return dataMenu;
 	}
 
 }

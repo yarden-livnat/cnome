@@ -33,10 +33,15 @@ import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.shape.Rectangle;
 
 import org.mo.closure.v1.Closure;
@@ -56,7 +61,7 @@ public class Workspace extends ViewBase implements View {
 	
 	private Pane _pane;
 	private WorkspacePanelArea _filtersPane;
-	private Pane _statusPane;
+//	private Pane _statusPane;
 	private double _savedDivider = 0.9;
 	
 	private ViewBase _maximizedView = null;
@@ -93,17 +98,26 @@ public class Workspace extends ViewBase implements View {
 	/**
 	 * Constructor
 	 */
-	public Workspace() {
-		super(true);
+	public Workspace(boolean toplevel) {
+		super(toplevel);
 		build();
+		enableDragging(!toplevel);
 	}
 	
 	private void build() {
 		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
+		setPrefSize(600, 300);
 
+//		TilePane tp = new TilePane();
+//		tp.setHgap(5);
+////		tp.setPrefColumns(1);
+//		FlowPane fp = new FlowPane();
+//		fp.setVgap(8);
+//		fp.setHgap(4);
 		_pane = new Pane();
+		
 		_filtersPane = new WorkspacePanelArea();
 		
 		final SplitPane splitPane = new SplitPane();
@@ -111,6 +125,8 @@ public class Workspace extends ViewBase implements View {
 		splitPane.setOrientation(Orientation.HORIZONTAL);
 		splitPane.getItems().addAll(_pane, _filtersPane);
 		splitPane.setDividerPosition(0, 1);
+		
+		SplitPane.setResizableWithParent(_filtersPane, false);
 		
 		_filtersPane.visibleProperty().addListener(new ChangeListener<Boolean>() {
 
@@ -126,6 +142,8 @@ public class Workspace extends ViewBase implements View {
 				
 			}
 		});
+		
+//		addBar(_pathLabel);
 		
 //		BorderPane borderPane = new BorderPane();
 
@@ -144,7 +162,7 @@ public class Workspace extends ViewBase implements View {
 		//setContent(borderPane, true /* allowMove */);
 		setContent(splitPane);
 			
-		enableDragging(false);
+//		enableDragging(false);
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
@@ -158,24 +176,9 @@ public class Workspace extends ViewBase implements View {
 						event.acceptTransferModes(TransferMode.MOVE);
 						event.consume();
 					}
-					
-					
 				}
 			}
 		});	
-		
-//		setOnDragEntered(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {		
-////				event.consume();
-//			}
-//		});
-//		
-//		setOnDragExited(new EventHandler<DragEvent>() {
-//			public void handle(DragEvent event) {
-//				// do nothing
-////				event.consume();
-//			}
-//		});
 		
 		setOnDragDropped(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
@@ -185,8 +188,10 @@ public class Workspace extends ViewBase implements View {
 				if (event.getGestureSource() != this) {
 					if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
 						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
-						if (_onToolDrop != null)
-							_onToolDrop.call(tool, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
+						if (_onToolDrop != null) {
+							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
+							_onToolDrop.call(tool, p.getX(), p.getY()); 
+						}
 						status = true;
 					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
 						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
@@ -233,9 +238,14 @@ public class Workspace extends ViewBase implements View {
 		ViewBase node = (ViewBase) view;
 		node.toFront();
 	}
-	
+	/**
+	 * add a new view to the workspace
+	 * @param view
+	 */
 	public void addView(final ViewBase view) {
 		_pane.getChildren().add(view);
+//		TilePane tp = (TilePane) _pane;
+//		tp.setPrefColumns((int)Math.floor(Math.sqrt(_pane.getChildren().size())));
 		
 		view.setOnSelect(new EventHandler<ActionEvent>() {
 			@Override

@@ -5,7 +5,6 @@ import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -21,9 +20,9 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Table;
@@ -36,11 +35,25 @@ public class DropArea extends HBox implements Observable {
 	private Policy _policy;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	private List<InvalidationListener> _listeners = new ArrayList<>();
+	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	
 	public DropArea(Policy policy) {
 		_policy = policy;
 		build();
 		init();
+	}
+	
+	
+	public ObjectProperty<EventHandler<FilterEvent>> onAction() {
+		return _action;
+	}
+	
+	public void setOnAction( EventHandler<FilterEvent> handler) {
+		_action.set(handler);
+	}
+	
+	public EventHandler<FilterEvent> getOnAction() {
+		return _action.get();
 	}
 	
 	public ObjectProperty<ObservableList<Field>> fieldsProperty() {
@@ -61,6 +74,9 @@ public class DropArea extends HBox implements Observable {
 		return _tableProperty;
 	}
 	
+	public Table getTable() {
+		return _tableProperty.get();
+	}
 	public ObservableList<Field> getFields() {
 		return _fieldsProperty.get();
 	}
@@ -70,9 +86,17 @@ public class DropArea extends HBox implements Observable {
 			FieldGlyph glyph = (FieldGlyph) node;
 			if (glyph.isDisabled())
 				return false;
-		}
-		
+		}		
 		return true;
+	}
+	
+	public void removeFilterFromGlyph(Object filter){
+		for (Node node : getChildren()) {
+			FieldGlyph glyph = (FieldGlyph) node;
+			if(glyph.removeFieldFilter(filter)){
+				break;
+			}
+		}
 	}
 	
 	public String getFieldTitle(int index) {
@@ -80,14 +104,12 @@ public class DropArea extends HBox implements Observable {
 		return glyph.getTitle();
 	}
 	
-	private void build() {		
-		HBoxBuilder.create()
-			.spacing(0)
-			.padding(new Insets(2))
-			.minWidth(30)
-			.prefHeight(23)
-			.styleClass("drop-area")
-			.applyTo(this);
+	private void build() {	
+		setSpacing(0);
+		setPadding(new Insets(2));
+		setMinWidth(30);
+		setPrefHeight(18);
+		getStyleClass().add("drop-area");
 				
 		/*
 		 * DnD handlers
@@ -151,8 +173,27 @@ public class DropArea extends HBox implements Observable {
 				event.setDropCompleted(status);
 				event.consume();				
 			}
+			
 		});
 		
+		tableProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				Table table = tableProperty().get();
+				if (table == null) {
+					
+				} else {
+					for (Node node : getChildren()) {
+						if (node instanceof FieldGlyph) {
+							FieldGlyph glyph = (FieldGlyph) node;
+							glyph.validProperty().set(table.hasField(glyph.getField()));
+						}
+					}
+				}
+				
+			}
+		});
 		/*
 		 * Handle changes in the list of Filters
 		 */
@@ -220,7 +261,20 @@ public class DropArea extends HBox implements Observable {
 									}
 								});
 								
-								glyph.validProperty().bind(tableProperty().isEqualTo(field.tableProperty()));
+
+								glyph.setOnFilterAction(new EventHandler<FilterEvent>() {
+								
+									@Override
+									public void handle(FilterEvent event) {
+										if (getOnAction() != null) {
+											getOnAction().handle(event);
+										}
+									}
+								});
+								
+//								glyph.validProperty().bind(tableProperty().isEqualTo(field.tableProperty()));
+								if (getTable() != null)
+									glyph.validProperty().set(getTable().hasField(field));
 							}
 							
 							fireInvalidationEvent();

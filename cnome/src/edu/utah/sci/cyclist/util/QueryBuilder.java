@@ -4,11 +4,11 @@ package edu.utah.sci.cyclist.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.model.DataType.Role;
 
 public class QueryBuilder {
 	
@@ -58,6 +58,8 @@ public class QueryBuilder {
 	}
 	
 	public QueryBuilder filters(List<Filter> list) {
+		
+		//_filters.addAll(list);
 		for (Filter filter : list) {
 			if (filter.getRole() == Role.DIMENSION) 
 				_filters.add(filter);
@@ -151,7 +153,7 @@ public class QueryBuilder {
 					builder.append(" ");
 					first = false;
 				} else {
-					builder.append(", ");
+					builder.append(" AND ");
 				}
 				builder.append(filter.toString());
 			}

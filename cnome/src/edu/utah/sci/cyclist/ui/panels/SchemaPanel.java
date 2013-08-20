@@ -1,19 +1,23 @@
 package edu.utah.sci.cyclist.ui.panels;
 
-import org.mo.closure.v1.Closure;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -22,6 +26,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType;
@@ -61,8 +68,57 @@ public class SchemaPanel extends TitledPanel {
 		VBox vbox = (VBox) getContent();
 		vbox.getChildren().clear();
 		
+		SortedList<Field> sorted = _fields.sorted(new Comparator<Field>() {
+
+			@Override
+			public int compare(Field o1, Field o2) {
+				return o1.getName().compareToIgnoreCase(o2.getName());
+			}
+			
+			/*@Override
+			public Comparator<Field> reverseOrder() {
+				// TODO Auto-generated method stub
+				return null;
+			}*/
+
+			@Override
+			public Comparator<Field> thenComparing(
+					Comparator<? super Field> other) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
+					Function<? super Field, ? extends U> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<Field> thenComparing(
+					ToIntFunction<? super Field> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<Field> thenComparing(
+					ToLongFunction<? super Field> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<Field> thenComparing(
+					ToDoubleFunction<? super Field> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		});
+		
 		_entries = new ArrayList<>();
-		for (Field field : _fields) {
+		for (Field field : sorted) {
 			Entry entry = createEntry(field);
 			_entries.add(entry);
 			vbox.getChildren().add(entry.label);
@@ -73,10 +129,7 @@ public class SchemaPanel extends TitledPanel {
 		final Entry entry = new Entry();
 		entry.field = field;
 		
-		entry.label = LabelBuilder.create()
-						.text(field.getName())
-						.graphic(new ImageView(Resources.getIcon(_type2Icon.get(field.getType()))))
-						.build();
+		entry.label = new Label(field.getName(),new ImageView(Resources.getIcon(_type2Icon.get(field.getType()))));
 		
 		entry.label.setOnDragDetected(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {					

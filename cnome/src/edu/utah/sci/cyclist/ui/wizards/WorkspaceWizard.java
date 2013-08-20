@@ -25,8 +25,7 @@ package edu.utah.sci.cyclist.ui.wizards;
 
 import java.io.File;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -34,21 +33,20 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ComboBoxBuilder;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.DirectoryChooserBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageBuilder;
 import javafx.stage.Window;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import edu.utah.sci.cyclist.Cyclist;
 
 public class WorkspaceWizard extends VBox {
@@ -56,33 +54,34 @@ public class WorkspaceWizard extends VBox {
 	private Stage dialog;
 	private ComboBox<String> cb;
 	private String current = null;
-
-	private ObjectProperty<String> selection = new SimpleObjectProperty<>();
+	//private ObjectProperty<ObservableList<String>> _selection = new SimpleObjectProperty<ObservableList<String>>(FXCollections.<String>observableArrayList());
+	private ObservableList<String> _selectionList = FXCollections.observableArrayList();
 	
-	public ObjectProperty<String> show(Window window) {
-		 dialog.initOwner(window);
-		 dialog.show();
-		 dialog.setX(window.getX() + (window.getWidth() - dialog.getWidth())*0.5);
-		 dialog.setY(window.getY() + (window.getHeight() - dialog.getHeight())*0.5);
-		 return selection;
+	public ObservableList<String> show(Window window) {
+		dialog.initOwner(window);
+		dialog.show();
+		dialog.setX(window.getX() + (window.getWidth() - dialog.getWidth())*0.5);
+		dialog.setY(window.getY() + (window.getHeight() - dialog.getHeight())*0.5);
+		//_selection.set(_selectionList);
+		return _selectionList;
 	}
 	
-	public void setItems(ObservableList<String> items) {
+	public void setItems(ObservableList<String> items, int chosenIndex) {
 		cb.setItems(items);
 		if (items.size() > 0) {
-			current = items.get(0);
+			current = items.get(chosenIndex);
 			cb.setValue(current);
 		}
 	}
 	
 	public WorkspaceWizard() {
 	
-		dialog = StageBuilder.create()
-				.title("Select Workspace Directory")
-				.maxWidth(250).minWidth(250)
-				.maxHeight(100).minHeight(95)
-				.build();
-		
+		dialog = new Stage();
+		dialog.setTitle("Select Workspace Directory");
+		dialog.setMaxWidth(250);
+		dialog.setMinWidth(250);
+		dialog.setMaxHeight(120);
+		dialog.setMinHeight(95);
 		dialog.initModality(Modality.WINDOW_MODAL);
 		dialog.setScene( createScene(dialog) );
 	    dialog.centerOnScreen();
@@ -108,93 +107,131 @@ public class WorkspaceWizard extends VBox {
 
 
 	private Scene createScene(final Stage dialog) {
-		//Text header = TextBuilder.create()
-		//		.id("workspace-wizard-header")
-		//		.text("Select workspace directory")
-		//		.build();
+		HBox pane = new HBox();  //set spacing;
+		pane.setAlignment(Pos.CENTER);
+		pane.setPadding(new Insets(5));
+		pane.setSpacing(10);
 		
-		HBox pane = HBoxBuilder.create()		
-				.alignment(Pos.CENTER)
-				.padding(new Insets(5))
-				.spacing(10)
-				.children(
-//						cb = ComboBoxBuilder.create(String.class) // Java 8
-//						cb = ComboBoxBuilder.<String>create()     // Java 7
-//						.prefWidth(200)
-//						.editable(true)
-//						.value(current)
-//						.build(),
-						cb = new ComboBox<>(),
-						ButtonBuilder.create()
-						.text("...")
-						.onAction(new EventHandler<ActionEvent>() {
-							@Override
-							public void handle(ActionEvent event) {
-								DirectoryChooser chooser = DirectoryChooserBuilder.create()
-										.title("Select directory")
-										.build();
-
-								if (cb.getValue() != null && cb.getValue() != "") {
-									File dir = new File(cb.getValue());
-									if(dir.isDirectory())
-										chooser.setInitialDirectory(dir);									
-								}
-								File dir = chooser.showDialog(null);
-								if (dir != null) { 
-									cb.getItems().add(0, dir.getAbsolutePath());
-									cb.setValue(cb.getItems().get(0));
-								}
-							}
-						})
-						.build()
-						)
-						.build();
+		Button btn = new Button("...");
+		btn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				DirectoryChooser chooser = new DirectoryChooser();
+				chooser.setTitle("Select directory");
+				
+				if (cb.getValue() != null && cb.getValue() != "") {
+					File dir = new File(cb.getValue());
+					if(dir.isDirectory())
+						chooser.setInitialDirectory(dir);									
+				}
+				File dir = chooser.showDialog(dialog);
+				if(dir != null)
+				{
+					String absolutePath = dir.getAbsolutePath().replace("\\", "/");
+					if (!directoryExists(absolutePath)) { 
+					
+						//It means the "..." button was pressed without following o.k or cancel.
+						//The former new directory which was added by pressing the "..." should be replaced.
+						if(_selectionList.size() >0 ){
+							cb.getItems().set(0,absolutePath );
+							_selectionList.clear();
+						} else{
+							//No former new item - just add the new path to the combo box with index 0.
+							cb.getItems().add(0, absolutePath);
+						}
+						cb.setValue(cb.getItems().get(0));	
+						_selectionList.add(cb.getValue());
+					}
+				}
+			}
+		});
+		
+		pane.getChildren().addAll(cb = new ComboBox<>(),btn);
+		
 		HBox.setHgrow(cb, Priority.ALWAYS);
 		
-		HBox buttons = HBoxBuilder.create()
-					.id("worksapce-wizard-buttons")
-					.spacing(10)
-					.padding(new Insets(5))
-					.alignment(Pos.CENTER_RIGHT)
-					.children(
-							ButtonBuilder.create()
-								.text("Cancel")
-								.onAction(new EventHandler<ActionEvent>() {
-									@Override
-									public void handle(ActionEvent event) {
-										current = null;
-										dialog.close();
-									}
-								})
-								.build(),
-							ButtonBuilder.create()
-								.text("Ok")
-								.defaultButton(true)
-								.onAction(new EventHandler<ActionEvent>() {
-									@Override
-									public void handle(ActionEvent event) {
-										selection.set(cb.getValue());
-										dialog.close();
-									}
-								})
-								.build()
-					)
-					.build();
+		HBox buttons = new HBox();
+		buttons.setId("worksapce-wizard-buttons");
+		buttons.setSpacing(10);
+		buttons.setPadding(new Insets(5));
+		buttons.setAlignment(Pos.CENTER_RIGHT);
 		
+		Button cancel = new Button("Cancel");
+		cancel.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				current = null;
+				//A new directory has been added
+				if(_selectionList.size()>0){
+					cb.getItems().remove(0);
+				}
+				dialog.close();
+			}
+		});
+		
+		Button ok = new Button("Ok");
+		ok.setDefaultButton(true);
+		ok.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				//If the selection list contains value - it means the "..." button was pressed before the o.k button.
+				if(_selectionList.size() > 0 ){
+					
+					//If the current chosen directory matches the new directory which was added to the combo:
+					if(_selectionList.get(0).equals(cb.getValue())){
+						//new value should be added to the general config file.
+						_selectionList.add(cb.getValue());
+					} else {
+						//In this case after choosing a new directory, the user has chosen a new directory from the existing directories in the combo
+						//The new directory should be deleted and the chosen directory should be marked as last chosen.
+						_selectionList.set(0,Integer.toString(cb.getSelectionModel().getSelectedIndex()-1));
+						_selectionList.add(cb.getValue());
+						cb.getItems().remove(0);
+					}
+					
+					
+				} else{
+					//If an existing directory was chosen - add its index to the list.
+					//It means -no need to add the value to the general config file, just mark it as last chosen.
+					_selectionList.add(Integer.toString(cb.getSelectionModel().getSelectedIndex()));
+					_selectionList.add(cb.getValue());
+				}
+					
+				dialog.close();
+			}
+		});
+		
+		buttons.getChildren().addAll(cancel,ok);
+			
 		HBox.setHgrow(buttons,  Priority.ALWAYS);
 		
-		Scene scene = new Scene(
-				VBoxBuilder.create()
-					.spacing(5)
-					.padding(new Insets(5))
-					.id("workspace-wizard")
-					//.children(header, pane, buttons)
-					.children(pane, buttons)
-					.build()
-				);
+		VBox vBox = new VBox();
+		vBox.setSpacing(5);
+		vBox.setPadding(new Insets(5));
+		vBox.setId("workspace-wizard");
+		vBox.getChildren().addAll(pane,buttons);
+		
+		Scene scene = new Scene(vBox);
 		
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
 		return scene;
+	}
+	
+	/**
+	 * Checks if the new chosen directory already exists in the combo box .
+	 */
+	private Boolean directoryExists(String directory)
+	{
+		ObservableList<String> list = cb.getItems();
+		for(String item:list){
+			if(item.equals(directory)){
+				JFrame jFrame = new JFrame();
+				jFrame.setAlwaysOnTop(true);
+				JOptionPane.showMessageDialog(jFrame, "Directory already exists, please choose it from the list");
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	// records relative x and y co-ordinates.

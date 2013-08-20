@@ -23,34 +23,27 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.components;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleButtonBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -59,10 +52,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.LineBuilder;
+import javafx.scene.text.Text;
 
 import org.mo.closure.v1.Closure;
 
@@ -94,10 +86,9 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _dataBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
-	private ObservableList<Filter> _remoteFilters = FXCollections.observableArrayList();
 	
 	private ObjectProperty<EventHandler<ActionEvent>> selectPropery = new SimpleObjectProperty<>();
-	
+	private boolean _toplevel;
 	private boolean _maximized = false;
 	private final Resize resize = new Resize();
 	
@@ -122,39 +113,76 @@ public class ViewBase extends BorderPane implements View {
 	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
+	private Closure.V1<Filter> _onRemoveFilter = null;
 	
+	/**
+	 * Constructor
+	 * A non toplevel default constructor
+	 */
 	public ViewBase() {	
 		this(false);
 	}
 	
+	/**
+	 * Constructor
+	 * @param toplevel specify if this view is a toplevel view that can not be moved or resized
+	 */
 	public ViewBase(boolean toplevel) {
 		super();
 		getStyleClass().add("view");
 		
 		// Header
-		_header = HBoxBuilder.create()
-				.spacing(2)
-				.styleClass("header")
-				.alignment(Pos.CENTER_LEFT)
-				.children(
-					_title = LabelBuilder.create().prefWidth(70).build(),
-					_taskControl = new TaskControl(),
-					_dataBar = HBoxBuilder.create()
-						.id("databar")
-						.styleClass("data-bar")
-						.spacing(2)
-						.minWidth(20)
-						.children(
-								LineBuilder.create().startY(0).endY(16).build()
-							)
-						.build(),
-					_filtersArea = new FilterArea(),
-					_spring = new Spring(),
-					_actionsArea = new HBox(),
-					_minmaxButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("maximize"))).build(),
-					_closeButton = ButtonBuilder.create().styleClass("flat-button").graphic(new ImageView(Resources.getIcon("close_view"))).build()
-				)
-				.build();
+		_header = new HBox();
+		_header.setSpacing(2);
+		_header.getStyleClass().add("header");
+		_header.setAlignment(Pos.CENTER_LEFT);
+		
+		_title = new Label();
+		_title.setPrefWidth(70);
+		
+		_taskControl = new TaskControl();
+		
+		_dataBar = new HBox();
+		_dataBar.setId("databar");
+		_dataBar.getStyleClass().add("data-bar");
+		_dataBar.setSpacing(2);
+		_dataBar.setMinWidth(5);
+		_dataBar.setFillHeight(true);
+		_dataBar.setAlignment(Pos.CENTER_LEFT); 
+		
+		_dataBar.getChildren().add(new Label("|"));
+				
+		_filtersArea = new FilterArea();
+		
+		_spring = new Spring();
+		
+		_actionsArea = new HBox();
+		
+		_minmaxButton = new Button();
+		_minmaxButton.getStyleClass().add("flat-button");
+		_minmaxButton.setGraphic(new ImageView(Resources.getIcon("maximize")));
+		
+		_closeButton = new Button();
+		_closeButton.getStyleClass().add("flat-button");
+		_closeButton.setGraphic(new ImageView(Resources.getIcon("close_view")));
+		
+		_header.getChildren().addAll(
+				_title,
+				_taskControl,
+				new Label("Tables:"),
+				new Text("["),
+				_dataBar,
+				new Text("] "),
+				new Label(" Filters:"),
+				new Text("["),
+				_filtersArea,
+				new Text("]"),
+				_spring,
+				_actionsArea,
+				_minmaxButton,
+				_closeButton);
+		
+		_dataBar.setAlignment(Pos.CENTER_LEFT);
 		
 		if (toplevel) {
 			_minmaxButton.setVisible(false);
@@ -162,6 +190,9 @@ public class ViewBase extends BorderPane implements View {
 			_closeButton.setVisible(false);
 			_closeButton.setManaged(false);
 		}
+		
+		_toplevel = toplevel;
+		
 		setHeaderListeners();
 		setDatasourcesListeners();
 		setFiltersListeners();
@@ -174,6 +205,9 @@ public class ViewBase extends BorderPane implements View {
 		_title.setText(title);
 	}
 	
+	public boolean isToplevel() {
+		return _toplevel;
+	}
 	
 	public boolean isMaximized() {
 		return _maximized;
@@ -192,7 +226,7 @@ public class ViewBase extends BorderPane implements View {
 	}
 	
 	public ObservableList<Filter> remoteFilters() {
-		return _remoteFilters;
+		return _filtersArea.getRemoteFilters();
 	}
 	
 	/*
@@ -269,6 +303,18 @@ public class ViewBase extends BorderPane implements View {
 		_onShowFilter = action;
 	}
 	
+	public Closure.V1<Filter> getOnShowFilter() {
+		return _onShowFilter;
+	}
+	
+	public void setOnRemoveFilter(Closure.V1<Filter> action) {
+		_onRemoveFilter = action;
+	}
+	
+	public Closure.V1<Filter> getOnRemoveFilter() {
+		return _onRemoveFilter;
+	}
+	
 	public DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
 	}
@@ -276,11 +322,10 @@ public class ViewBase extends BorderPane implements View {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		final ToggleButton button = ToggleButtonBuilder.create()
-				.styleClass("flat-toggle-button")
-				.text(table.getName().substring(0, 1))
-				.selected(active)
-				.build();
+		final ToggleButton button = new ToggleButton(table.getAlias().substring(0, 1));
+		button.getStyleClass().add("flat-toggle-button");
+//		button.setMaxSize(12, 12);
+		button.setSelected(active);
 		
 		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
@@ -351,6 +396,7 @@ public class ViewBase extends BorderPane implements View {
 	public void addBar(Node bar, HPos pos) {
 		_header.getChildren().add(_header.getChildren().indexOf(_spring)+(pos == HPos.RIGHT ? 1 : 0), bar);
 	}
+	
 	/*
 	 * Content
 	 */
@@ -371,11 +417,11 @@ public class ViewBase extends BorderPane implements View {
 	/*
 	 * 
 	 */
-	protected void addActions(List<ButtonBase> actions) {
+	protected void addActions(List<Node> actions) {
 		_actionsArea.getChildren().addAll(actions);
 	}
 	
-	protected void setActions(List<ButtonBase> actions) {
+	protected void setActions(List<Node> actions) {
 		_actionsArea.getChildren().clear();
 		addActions(actions);
 	}
@@ -452,16 +498,25 @@ public class ViewBase extends BorderPane implements View {
 						_onShowFilter.call(event.getFilter());
 					}
 				}
+				// If filter is connected to a field and its sql function, clean the field when the filter is removed.
+				if (event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD) {
+					removeFilterFromDropArea(event.getFilter());
+				}
 				
 			}
 		});
+	}
+	
+	//Virtual method - should only be implemented in the sub class.
+	public void removeFilterFromDropArea(Filter filter){
+		;
 	}
 	
 	private void setDatasourcesListeners() {
 		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 				if ( table != null ) {
 					if (_buttons.containsKey(table)) {
 						event.acceptTransferModes(TransferMode.NONE);

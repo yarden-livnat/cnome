@@ -92,7 +92,7 @@ public class Schema {
 		String remote_type_name = field.getString(FieldProperties.REMOTE_DATA_TYPE_NAME);
 		field.set(FieldProperties.DATA_TYPE_NAME, remote_type_name);
 		
-		int remote_type = (int) field.get(FieldProperties.REMOTE_DATA_TYPE);
+//		int remote_type = (int) field.get(FieldProperties.REMOTE_DATA_TYPE);
 		DataType.Type type = SQLUtil.fromSQL(remote_type_name);
 		
 		DataType dataType = new DataType(type);

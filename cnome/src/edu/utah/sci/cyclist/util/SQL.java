@@ -30,6 +30,38 @@ public class SQL {
 	public static final List<Function> FUNCTIONS = new ArrayList<>();
 	public static final String DEFAULT_FUNCTION = "Avg";
 	
+	public enum Functions{AVG,SUM,COUNT,COUNT_DISTINCT,MIN,MAX;
+		public String toName() {
+		   //only capitalize the first letter
+		   String s = super.toString();
+		   
+		   int index = s.indexOf("_");
+		   if(index >-1){
+			   s = s.substring(0,index)+"("+s.substring(index+1,s.length())+")";
+		   }
+		   
+		   return s.substring(0, 1) + s.substring(1).toLowerCase();
+		}
+		
+		public String toLabel() {
+			   String s = super.toString();
+			   int index = s.indexOf("_");
+			   if(index >-1){
+				   s = s.substring(0,index);
+			   }
+			   
+			   return s.substring(0, 1) + s.substring(1).toLowerCase();
+		}
+		
+		public static Functions getEnum(String name) {
+	        if(name == null)
+	            throw new IllegalArgumentException();
+	        for(Functions n : values())
+	            if(n.toName().equals(name)) return n;
+	        throw new IllegalArgumentException();
+	    }
+	};
+	
 	public static Function getFunction(String name) {
 		for (Function f : FUNCTIONS) {
 			if (f.getName().equals(name))
@@ -49,7 +81,7 @@ public class SQL {
 		FUNCTIONS.add(new Function("Sum", "SUM"));
 //		FUNCTIONS.add(new Function("Median", "MEDIAN"));
 		FUNCTIONS.add(new Function("Count", "COUNT"));
-		FUNCTIONS.add(new Function("Count(disinct)", "COUNT") {
+		FUNCTIONS.add(new Function("Count(distinct)", "COUNT") {
 			@Override
 			public String format(String col) {
 				return "Count(Distinct "+col+")";

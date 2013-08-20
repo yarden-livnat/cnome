@@ -24,7 +24,9 @@ import edu.utah.sci.cyclist.model.Filter;
 public class FilterArea extends ToolBar {
 	
 	private ObservableList<Filter> _filters = FXCollections.observableArrayList();
+	private ObservableList<Filter> _remoteFilters = FXCollections.observableArrayList();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
+	private int _lastRemoteFilter = 0;
 	
 	public FilterArea() {
 		build();
@@ -32,6 +34,10 @@ public class FilterArea extends ToolBar {
 	
 	public ObservableList<Filter> getFilters() {
 		return _filters;
+	}
+	
+	public ObservableList<Filter> getRemoteFilters() {
+		return _remoteFilters;
 	}
 	
 	public ObjectProperty<EventHandler<FilterEvent>> onAction() {
@@ -47,8 +53,9 @@ public class FilterArea extends ToolBar {
 	}
 	
 	private void build() {
-		setPrefHeight(25);
-		setMinWidth(50);
+//		setPrefHeight(25);
+		setMinWidth(15);
+		setMinHeight(15);
 		getStyleClass().add("drop-area");
 		setOrientation(Orientation.HORIZONTAL);
 		
@@ -115,7 +122,7 @@ public class FilterArea extends ToolBar {
 				while (c.next()) {
 					if (c.wasAdded()) {
 						for (Filter filter : c.getAddedSubList()) {
-							FilterGlyph glyph = createFilterGlyph(filter);
+							FilterGlyph glyph = createFilterGlyph(filter, false);
 							getItems().add(glyph);
 						}
 					} else if (c.wasRemoved()) {
@@ -133,10 +140,37 @@ public class FilterArea extends ToolBar {
 			}
 			
 		});
+		
+		_remoteFilters.addListener(new ListChangeListener<Filter>() {
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> c) {
+				while (c.next()) {
+					if (c.wasAdded()) {
+						for (Filter filter : c.getAddedSubList()) {
+							FilterGlyph glyph = createFilterGlyph(filter, true);
+							getItems().add(_lastRemoteFilter++, glyph);
+						}
+					} else if (c.wasRemoved()) {
+						for (Filter filter : c.getRemoved()) {
+							for (Node node : getItems()) {
+								FilterGlyph glyph = (FilterGlyph) node;
+								if (glyph.getFilter() == filter) {
+									getItems().remove(glyph);
+									_lastRemoteFilter--;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+		});
 	}
 	
-	private FilterGlyph createFilterGlyph(Filter filter) {
-		final FilterGlyph glyph = new FilterGlyph(filter);
+	private FilterGlyph createFilterGlyph(Filter filter, boolean remote) {
+		final FilterGlyph glyph = new FilterGlyph(filter, remote);
 		
 		glyph.setOnDragDetected(new EventHandler<MouseEvent>() {
 
@@ -144,7 +178,7 @@ public class FilterArea extends ToolBar {
 			public void handle(MouseEvent event) {
 //				Field field = glyph.getFilter().getField();
 				Filter filter  = glyph.getFilter();
-				Dragboard db = glyph.startDragAndDrop(TransferMode.MOVE);
+				Dragboard db = glyph.startDragAndDrop(TransferMode.COPY);
 				
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 				clipboard.put(DnD.FILTER_FORMAT, Filter.class, filter);
@@ -160,7 +194,7 @@ public class FilterArea extends ToolBar {
 				db.setContent(content);
 				
 //				getChildren().remove(glyph);
-				getFilters().remove(glyph.getFilter());
+//				getFilters().remove(glyph.getFilter());
 			}
 		});
 		
@@ -175,7 +209,16 @@ public class FilterArea extends ToolBar {
 		glyph.setOnAction(new EventHandler<FilterEvent>() {
 			@Override
 			public void handle(FilterEvent event) {
-				if (event.getEventType() == FilterEvent.SHOW) {
+				if (event.getEventType() == FilterEvent.SHOW ) {
+					if (getOnAction() != null) {
+						getOnAction().handle(event);
+					}
+				} else if (event.getEventType() == FilterEvent.DELETE) {
+//					if (getOnAction() != null) {
+//						getOnAction().handle(event);
+					getFilters().remove(glyph.getFilter());
+				} else if(event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD){
+					//If filter is connected to a numeric field - clean the field connection as well.
 					if (getOnAction() != null) {
 						getOnAction().handle(event);
 					}

@@ -9,6 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.ui.components.FilterGlyph;
 
@@ -36,7 +37,7 @@ public class FiltersListPanel extends TitledPanel {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				
 				if (clipboard.hasContent(DnD.FILTER_FORMAT)) {
-					event.acceptTransferModes(TransferMode.MOVE);
+					event.acceptTransferModes(TransferMode.COPY);
 				}
 				event.consume();
 			}
@@ -69,7 +70,7 @@ public class FiltersListPanel extends TitledPanel {
 			@Override
 			public void handle(MouseEvent event) {
 				Filter filter  = glyph.getFilter();
-				Dragboard db = glyph.startDragAndDrop(TransferMode.MOVE);
+				Dragboard db = glyph.startDragAndDrop(TransferMode.COPY);
 				
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 				clipboard.put(DnD.FILTER_FORMAT, Filter.class, filter);
@@ -84,7 +85,7 @@ public class FiltersListPanel extends TitledPanel {
 				
 				db.setContent(content);
 				
-				getContent().getChildren().remove(glyph);
+//				getContent().getChildren().remove(glyph);
 			}
 		});
 		
@@ -96,16 +97,18 @@ public class FiltersListPanel extends TitledPanel {
 		});
 		
 		
-//		glyph.setOnAction(new EventHandler<FilterEvent>() {
-//			@Override
-//			public void handle(FilterEvent event) {
-//				if (event.getEventType() == FilterEvent.SHOW) {
+		glyph.setOnAction(new EventHandler<FilterEvent>() {
+			@Override
+			public void handle(FilterEvent event) {
+				if (event.getEventType() == FilterEvent.SHOW) {
 //					if (getOnAction() != null) {
 //						getOnAction().handle(event);
 //					}
-//				}
-//			}
-//		});
+				} else if (event.getEventType() == FilterEvent.DELETE) {
+					getContent().getChildren().remove(glyph);
+				}
+			}
+		});
 	}
 	
 	private DnD.LocalClipboard getLocalClipboard() {

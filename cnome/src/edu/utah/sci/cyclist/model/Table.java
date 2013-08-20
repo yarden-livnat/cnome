@@ -23,6 +23,10 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.model;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -37,21 +41,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.controller.IMemento;
-import edu.utah.sci.cyclist.model.DataType.Type;
+import edu.utah.sci.cyclist.controller.WorkDirectoryController;
+import edu.utah.sci.cyclist.controller.XMLMemento;
 import edu.utah.sci.cyclist.util.QueryBuilder;
+import edu.utah.sci.cyclist.util.SQL;
+import edu.utah.sci.cyclist.util.SQL.Function;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 
 public class Table {
 
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
-	private static final String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+
+	static Logger log = Logger.getLogger(Table.class);
 	
 	public enum SourceLocation {
 		REMOTE,
@@ -59,6 +69,12 @@ public class Table {
 		LOCAL_SUBSET
 	}
 	
+	public enum NumericRangeValues {
+		MIN,
+		MAX,
+		CHOSEN_MIN,
+		CHOSEN_MAX
+	}
 	
 	private String _alias;
 	private String _name;
@@ -71,6 +87,7 @@ public class Table {
 
 	private SourceLocation _sourceLocation;
 	private int _dataSubset;
+	private String _saveDir = "";
 	
 	public Table() {
 		this("");
@@ -81,6 +98,17 @@ public class Table {
 		_sourceLocation = SourceLocation.REMOTE;
 		_dataSubset = 0;
 		setProperty("uid", UUID.randomUUID().toString());
+	}
+	
+	public Table(Table tbl){
+		_name = tbl.getName();
+		_alias = tbl.getAlias();
+		_sourceLocation = tbl.getSourceLocation();
+		_datasource = tbl.getDataSource();
+		_localDataFile = tbl.getLocalDatafile();
+		_saveDir = tbl.getSaveDir();
+        setProperty(REMOTE_TABLE_NAME, _name);	
+        extractSchema();
 	}
 	
     // Save the table
@@ -217,24 +245,24 @@ public class Table {
 		_schema.update();
 	}
 
-	private void printTypeInfo(Connection conn) {
-		DatabaseMetaData d;
-		try {
-			d = conn.getMetaData();
-			ResultSet rs = d.getTypeInfo();
-			ResultSetMetaData cmd = rs.getMetaData();
-			System.out.println("database types:");
-			while (rs.next()) {
-				for (int i=1; i<=cmd.getColumnCount(); i++) {
-					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
-				}
-				System.out.println();
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	private void printTypeInfo(Connection conn) {
+//		DatabaseMetaData d;
+//		try {
+//			d = conn.getMetaData();
+//			ResultSet rs = d.getTypeInfo();
+//			ResultSetMetaData cmd = rs.getMetaData();
+//			System.out.println("database types:");
+//			while (rs.next()) {
+//				for (int i=1; i<=cmd.getColumnCount(); i++) {
+//					System.out.print(cmd.getColumnName(i)+": "+rs.getObject(i)+"  ");
+//				}
+//				System.out.println();
+//			}
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public String getName() {
 		return _name;
@@ -352,6 +380,13 @@ public class Table {
 	public void setFieldSelected(int index, boolean selected){
 		_schema.getField(index).setSelectedProperty(selected);
 	}
+
+	public boolean hasField(Field field) {
+		if (field.getTable() == this) return true;
+		
+		// for now check based on field name
+		return _schema.contain(field);
+	}
 	
 	public int getNumColumns() {
 		return _schema.size();
@@ -420,38 +455,45 @@ public class Table {
 			@Override
 			protected ObservableList<Object> call() throws Exception {
 				List<Object> values = new ArrayList<>();
-				try {
-					updateMessage("connecting");
-					Connection conn = ds.getConnection();
+				values = readFieldValuesFromFile(field.getName());
+				if(values.size() == 0)
+				{
+					try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+//						updateMessage("connecting");
+						updateMessage("querying");
+						System.out.println("querying field values");
+						long t1 = System.currentTimeMillis();
 					
-					updateMessage("querying");
-					System.out.println("querying field values");
-					long t1 = System.currentTimeMillis();
-					Statement stmt = conn.createStatement();
+						// TODO: Fix this query building hack 
+						String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
+						log.debug("query: "+query);
+						System.out.println(query);
+						ResultSet rs = stmt.executeQuery(query);
+						long t2 = System.currentTimeMillis();
+						System.out.println("time: "+(t2-t1)/1000.0);
 					
-					// TODO: Fix this hack
-					ResultSet rs = stmt.executeQuery("select distinct "+field.getName()+" from "+getName());
-					long t2 = System.currentTimeMillis();
-					System.out.println("time: "+(t2-t1)/1000.0);
-					
-					while (rs.next()) {
-						if (isCancelled()) {
-							System.out.println("task canceled");
-							updateMessage("Canceled");
-							break;
-						}
+						while (rs.next()) {
+							if (isCancelled()) {
+								System.out.println("task canceled");
+								stmt.cancel();
+								updateMessage("Canceled");
+								break;
+							}
 						
-						values.add(rs.getObject(1));
-					}
+							values.add(rs.getObject(1));
+						}
 					
-					long t3 = System.currentTimeMillis();
-					System.out.println("gathering time: "+(t3-t2)/1000.0);
-				} catch (SQLException e) {
-					System.out.println("task sql exception: "+e.getLocalizedMessage());
-					updateMessage(e.getLocalizedMessage());
-					throw new Exception(e.getMessage(), e);
+						long t3 = System.currentTimeMillis();
+						System.out.println("gathering time: "+(t3-t2)/1000.0);
+						writeFieldValuesToFile(field.getName(), values);
+					} catch (SQLException e) {
+						System.out.println("task sql exception: "+e.getLocalizedMessage());
+						updateMessage(e.getLocalizedMessage());
+						throw new Exception(e.getMessage(), e);
+					} finally {
+						ds.releaseConnection();
+					}
 				}
-				
 				return FXCollections.observableList(values);
 			}
 		};
@@ -471,18 +513,10 @@ public class Table {
 			@Override
 			protected ObservableList<Row> call() throws Exception {
 				List<Row> rows = new ArrayList<>();
-				try {
-					updateMessage("connecting");
-					Connection conn = ds.getConnection();
-					
+				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
 					updateMessage("querying");
-					
-//					PreparedStatement stmt = conn.prepareStatement(query);
-//					ResultSet rs = stmt.executeQuery()
-					
-					System.out.println("querying rows");
 					long t1 = System.currentTimeMillis();
-					Statement stmt = conn.createStatement();
+					
 					ResultSet rs = stmt.executeQuery(query);
 					long t2 = System.currentTimeMillis();
 					System.out.println("time: "+(t2-t1)/1000.0);
@@ -494,15 +528,18 @@ public class Table {
 					while (rs.next()) {
 						if (isCancelled()) {
 							System.out.println("task canceled");
+							stmt.cancel();
 							updateMessage("Canceled");
 							break;
 						}
 						Row row = new Row(cols);
 						for (int i=0; i<cols; i++) {
 							row.value[i] = rs.getObject(i+1);
+//							System.out.print(row.value[i]+"  ");
 						}
+//						System.out.println();
 						// TODO: This is a hack. It seems that if the statement is '...where false' then a single row of nulls is return.
-						if (row.value[0] == null) break;
+						if (row.value[0] == null) row.value[0] = "";
 						rows.add(row);
 						n++;
 						if (n % 1000 == 0) {
@@ -511,10 +548,12 @@ public class Table {
 					}
 					long t3 = System.currentTimeMillis();
 					System.out.println("gathering time: "+(t3-t2)/1000.0);
-				}catch (SQLException e) {
+				} catch (SQLException e) {
 					System.out.println("task sql exception: "+e.getLocalizedMessage());
 					updateMessage(e.getLocalizedMessage());
 					throw new Exception(e.getMessage(), e);
+				} finally {
+					ds.releaseConnection();
 				}
 				
 				return FXCollections.observableList(rows);
@@ -536,8 +575,7 @@ public class Table {
 			@Override
 			protected ObservableList<Row> call() throws Exception {
 				List<Row> rows = new ArrayList<>();
-				try {
-					Connection conn = ds.getConnection();
+				try (Connection conn = ds.getConnection()){				
 					StringBuilder builder = new StringBuilder("select ");
 					for (int i=0; i<fields.size(); i++) {
 						Field field = fields.get(i);
@@ -547,21 +585,24 @@ public class Table {
 					}
 					builder.append(" from ").append(getName()).append(" limit ").append(limit);
 					System.out.println("query: ["+builder.toString()+"]");
-					PreparedStatement stmt = conn.prepareStatement(builder.toString());
+					try (PreparedStatement stmt = conn.prepareStatement(builder.toString())) {
 					
 					ResultSet rs = stmt.executeQuery();
-					int cols = fields.size();
-					
-					while (rs.next()) {
-						Row row = new Row(cols);
-						for (int i=0; i<cols; i++) {
-							row.value[i] = rs.getObject(i+1);
+						int cols = fields.size();
+						
+						while (rs.next()) {
+							Row row = new Row(cols);
+							for (int i=0; i<cols; i++) {
+								row.value[i] = rs.getObject(i+1);
+							}
+							rows.add(row);
 						}
-						rows.add(row);
-					}
+					} 
 				}catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} finally {
+					ds.releaseConnection();
 				}
 				
 				return FXCollections.observableList(rows);
@@ -586,8 +627,13 @@ public class Table {
 	public String getLocalDatafile() {
 		return _localDataFile;
 	}
-	public void setLocalDatafile() {
-		_localDataFile = SAVE_DIR + getDataSource() + getName() + ".sqlite";
+	public void setLocalDatafile(String workDir) {
+		_saveDir = workDir;
+		_localDataFile = workDir + "/" + getDataSource()+"/" + getName() + ".sqlite";
+	}
+	
+	public String getSaveDir(){
+		return _saveDir;
 	}
 	
 	public class Row  {
@@ -597,8 +643,234 @@ public class Table {
 			value = new Object[size];
 		}
 	}
+	
+	/* Saves the values of a chosen filter into a file 
+	 * Creates an xml file with the table name, and writes the filter's field name and its values
+	 * If the field already exist in the file - do nothing. */
+	private void writeFieldValuesToFile(String fieldName, List<Object> values){
+		if(_saveDir == ""){
+			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
+		}
+		
+		// If the save directory does not exist, create it
+		File saveDir = new File(_saveDir+ "/" + getDataSource()+"/");
+		if (!saveDir.exists()){
+			saveDir.mkdir();
+		}
+			
+		// The save file
+		File saveFile = new File(saveDir+"/"+ getName() + ".xml");
+		
+		XMLMemento root;
+		IMemento fieldsNode = null;
+		Boolean writeNewNode= true;
+		
+		 try {
+			 //If file already exists - read the existing nodes, and add the new Field in its place.
+			 if(saveFile.exists()){
+				 Reader reader = new FileReader(saveFile);
+				 
+				 //Checks if the root node exists.
+				 try{
+					 root = XMLMemento.createReadRoot(reader);
+					 fieldsNode = root.getChild("Fields");
+				 }catch(Exception e){
+					 root = XMLMemento.createWriteRoot("root");
+				 }
+				 
+				 // Checks if the "Fields" node exists. 
+				 // If yes - try to find the Field node with the given name. 
+				 // If not - creates a new "Fields" node and mark that a new field node has to be written.
+				 if(fieldsNode != null)
+				 {
+					 //Check if the field node already exists. If yes - no need to write it again to the table xml file.
+					 if (getField(fieldsNode, fieldName) != null)
+					 {
+						 writeNewNode = false;
+					 }
+				 } else{
+					 fieldsNode = root.createChild("Fields");
+				 }
+			 } else{
+		
+				 // If new file - Create the root memento
+				 root = XMLMemento.createWriteRoot("root");
+				// Create Fields node
+				 fieldsNode = root.createChild("Fields");
+			 }
+	    
+			 //If no such field node yet - write the field and its values into the file.
+			 if(writeNewNode){
+				 writeFieldNodeToFile(fieldName, fieldsNode, values);
+			 }
+			 root.save(new PrintWriter(saveFile));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
+	/*Checks if a given field already exists in the table xml file.
+	 * If field exists - return the field else- return null */
+	private IMemento getField(IMemento fields, String fieldName){
+		IMemento fieldResult = null;
+		try
+		{
+			 IMemento[] fieldNodes = fields.getChildren("Field");
+			 for (IMemento field:fieldNodes){
+				 String name = field.getString("name");
+				 if (name.equals(fieldName)){
+					 fieldResult = field;
+					 break;
+				 }
+			 }
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return fieldResult;
+	}
+	
+	/* Creates a new Field node in the table xml file*/
+	private void writeFieldNodeToFile(String fieldName, IMemento fieldsNode, List<Object> values){
+		
+		//Create the Field node
+		 IMemento FieldNode = fieldsNode.createChild("Field");
+		
+		 // Set the field name
+		 FieldNode.putString("name", fieldName);
+		 StringBuilder sb = new StringBuilder(); 
+		 for(Object value:values){
+			 if (value == null) {
+				 System.out.println("*** Warning: field '"+fieldName+"' has a null value");
+			 } else  {
+				 sb.append(value.toString()+";");
+			 }
+		 }
+		 FieldNode.putTextData(sb.toString());
+	}
+	
+	/* Reads distinct values from a file 
+	 * For a given field in a given table- 
+	 * if the table xml file exists and it contains the field values - read the values from the file */
+	private List<Object> readFieldValuesFromFile(String fieldName){
+		
+		List<Object> values = new ArrayList<>();
+		if(_saveDir == ""){
+			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
+		}
+		
+		// If the save file does not exist - return an empty list.
+		File saveFile = new File(_saveDir+ "/" + getDataSource() +"/"+ getName() + ".xml");
+		if (!saveFile.exists()){
+			return values;
+		} else{
+			try{
+				 Reader reader = new FileReader(saveFile);
+				 XMLMemento root = XMLMemento.createReadRoot(reader);
+				 IMemento fieldsNode = root.getChild("Fields");
+				 IMemento field = getField(fieldsNode, fieldName);
+				 if(field != null){
+					 String[] tmpValues = field.getTextData().split(";");
+					 for(String value: tmpValues){
+						 values.add(value);
+					 }
+				 }
+				 return values;
+			 }catch(Exception e){
+				return values;
+			 }
+		}
+	}
+	
+	
+	/* Name: getFieldRange
+	 * For a numeric field filter - gets the minimum and maximum values within its possible range, for any possible grouping.
+	 * It checks for the field SQL function and finds the values accordingly. 
+	 */
+	public Task<ObservableMap<Object, Object>> getFieldRange(final Field field) {
+		final CyclistDatasource ds = getDataSource();
+		
+		Task<ObservableMap<Object, Object>> task = new Task<ObservableMap<Object, Object>>() {
+			
+			@Override
+			protected ObservableMap<Object, Object> call() throws Exception {
+				Map<Object, Object> values = new HashMap<>();
+				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+					updateMessage("querying");
+					System.out.println("querying field range");
+					SQL.Functions function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
+					String query = "";
+					Boolean checkForSum = false;
+					double min,max=0;
+					
+					switch(function){
+					case AVG:
+					case MIN:
+					case MAX:
+						query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
+						break;
+					case COUNT:
+						query = "SELECT 0 AS min, COUNT(" + field.getName() + ") AS max FROM "+ getName();
+						break;
+					case COUNT_DISTINCT:
+						query = "SELECT 0 AS min, COUNT( DISTINCT " + field.getName() + ") AS max FROM "+ getName();
+					case SUM:
+						query = "SELECT SUM( CASE WHEN " + field.getName()+ " <0 THEN " + field.getName() + " ELSE 0 END) AS neg_sum, " +  
+								"SUM( CASE WHEN " + field.getName()+ " >0 THEN " + field.getName() + " ELSE 0 END) AS pos_sum, " + 
+								"MIN(" + field.getName() +") as min, MAX(" + field.getName() +") as max "+
+								"FROM " + getName();
+						checkForSum = true;
+						break;
+					}
+					
+					
+					
+					log.debug("query: "+query);
+					System.out.println(query);
+					ResultSet rs = stmt.executeQuery(query);
+					
+					while (rs.next()) {
+						if (isCancelled()) {
+							System.out.println("task canceled");
+							updateMessage("Canceled");
+							break;
+						}
+					
+						min = rs.getDouble("min");
+						max = rs.getDouble("max");
+						if(checkForSum)
+						{
+							double posSum = rs.getDouble("pos_sum");
+							max= (posSum==0)?max:posSum;
+							
+							double negSum = rs.getDouble("neg_sum");
+							min= (negSum==0)?min:negSum;
+						}
+						
+						values.put(NumericRangeValues.MIN, min);
+						values.put(NumericRangeValues.MAX, max);
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				return FXCollections.observableMap(values);
+			}
+			
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		return task;
+		
+	}
+	
+	
 
 	
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
-	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
+//	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
 }

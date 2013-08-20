@@ -34,16 +34,18 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
+import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
-import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.ui.MainScreen;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
@@ -56,9 +58,9 @@ public class CyclistController {
 	private final EventBus _eventBus;
 	private MainScreen _screen;
 	private Model _model = new Model();
-	private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
-	private String SAVE_FILE = SAVE_DIR+"save.xml";
-	private ObservableList<String> _workspaces = FXCollections.observableArrayList();
+	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	private String SAVE_FILE = "save.xml";
+	private WorkDirectoryController _workDirectoryController;
 	
 	/**
 	 * Constructor
@@ -67,8 +69,19 @@ public class CyclistController {
 	 */
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
-		_workspaces.add("/Users/yarden/software");
-		_workspaces.add("/Users/yarden");
+		
+		_workDirectoryController = new WorkDirectoryController();
+		
+		// If the save directory does not exist, create it
+		File saveDir = new File(WorkDirectoryController.SAVE_DIR);
+		if (!saveDir.exists())	
+			saveDir.mkdir();  
+	
+		
+		if(_workDirectoryController.initGeneralConfigFile())
+		{
+			_workDirectoryController.restoreGeneralConfigFile();
+		}
 		
 		load();
 	}
@@ -101,10 +114,11 @@ public class CyclistController {
 		tp.setFactories(Arrays.asList(ToolsLibrary.factories));
 		
 		// set up the main workspace
-		Workspace workspace = new Workspace();
+		Workspace workspace = new Workspace(true);
+//		workspace.setWorkDirPath(getLastChosenWorkDirectory());
 		screen.setWorkspace(workspace);
 		
-		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus, _model);
+		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
 		presenter.setView(workspace);
 		
 		// do something?
@@ -116,13 +130,39 @@ public class CyclistController {
 	 * 
 	 */
 	public void selectWorkspace() {
-		ObjectProperty<String> selection = _screen.selectWorkspace(_workspaces);
-		selection.addListener(new ChangeListener<String>() {
+		
+		if(_workDirectoryController == null){
+			return;
+		}
+		
+		ObservableList<String> selection = _screen.selectWorkspace(_workDirectoryController.getWorkDirectories(),
+																   _workDirectoryController.getLastChosenIndex());
+		
+		selection.addListener(new ListChangeListener<String>(){
 
 			@Override
-			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {			
+			public void onChanged(Change<? extends String> list ){
+				if(_workDirectoryController != null){
+					if(_workDirectoryController.handleWorkDirectoriesListChangedEvent(list)){
+						load();
+						
+						//Set all the views to match the new tables.
+						ObservableList<Field> emptyList = FXCollections.observableArrayList();
+						_screen.getDimensionPanel().setFields(emptyList);
+						_screen.getMeauresPanel().setFields(emptyList);
+						
+//						//Set the workspace to display the new path at the title.
+//						Workspace workspace = _screen.getWorkSpace();
+//						if(workspace != null){
+//							workspace.setWorkDirPath(getLastChosenWorkDirectory());
+//						}
+						
+					}
+				}
+				
 			}
 		});
+		
 	}	
 		
 	private void addActions() {
@@ -134,19 +174,24 @@ public class CyclistController {
 				final DatatableWizard wizard = new DatatableWizard();
 				wizard.setItems(_model.getSources());
 				wizard.setSelectedSource(_model.getSelectedDatasource());
+				String currDirectory = getLastChosenWorkDirectory();
+				wizard.setWorkDir(currDirectory);
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
 				
-				
 			//	wizard.getDataSources()
-					
 				
 				selection.addListener(new ChangeListener<Table>() {
 					@Override
 					public void changed(ObservableValue<? extends Table> arg0, Table oldVal, Table newVal) {
-						_model.getTables().add(newVal);
-						_model.setSelectedDatasource(wizard.getSelectedSource());
+						if(newVal != null)
+						{
+							Table tbl = new Table(newVal);
+							_model.getTables().add(tbl);
+							_model.setSelectedDatasource(wizard.getSelectedSource());
+						}
 					}
-				});		
+				});
+				
 			}
 		});
 		
@@ -184,13 +229,15 @@ public class CyclistController {
 	
 	private void save() {
 		
+		String currDirectory = getLastChosenWorkDirectory();
+		
 		// If the save directory does not exist, create it
-		File saveDir = new File(SAVE_DIR);
+		File saveDir = new File(currDirectory);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
 		// The save file
-		File saveFile = new File(SAVE_FILE);
+		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
 
 		// Create the root memento
 		XMLMemento memento = XMLMemento.createWriteRoot("root");
@@ -217,13 +264,18 @@ public class CyclistController {
 	// Load saved properties
 	private void load() {
 		
+		String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+		
 		// Check if the save file exists
-		File saveFile = new File(SAVE_FILE);
+		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
+		
+		//Clear the previous data
+		_model.getSources().clear();
+		_model.getTables().clear();
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
 			
-	
 			Reader reader;
 			try {
 				reader = new FileReader(saveFile);
@@ -245,6 +297,7 @@ public class CyclistController {
 					for(IMemento table: tables){
 						Table tbl = new Table();
 						tbl.restore(table, _model.getSources());
+						tbl.setLocalDatafile(getLastChosenWorkDirectory());
 						_model.getTables().add(tbl);
 					}
 					
@@ -257,5 +310,16 @@ public class CyclistController {
 				e1.printStackTrace();
 			} 		
 		}
+	}
+	
+	/*
+	 * Gets the path of the last chosen work directory.
+	 * If not available - return the default work directory
+	 */
+	private String getLastChosenWorkDirectory(){
+		if(_workDirectoryController == null){
+			return WorkDirectoryController.SAVE_DIR;
+		}
+		return _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
 	}
 }

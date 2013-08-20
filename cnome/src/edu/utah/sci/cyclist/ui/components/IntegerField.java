@@ -12,8 +12,6 @@ import javafx.scene.input.KeyEvent;
 public class IntegerField extends TextField {
 
 	private IntegerProperty _value;
-	private int _min;
-	private int _max;
 	private boolean _valid = true;
 	
 	public int getValue() { 
@@ -43,8 +41,6 @@ public class IntegerField extends TextField {
 		super();
 		
 		setPromptText("no limit");
-		_min = min;
-		_max = max;
 		
 		_value = new SimpleIntegerProperty(value);
 		

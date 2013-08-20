@@ -36,9 +36,9 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Filter;
-import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
@@ -51,9 +51,12 @@ public class WorkspacePresenter extends ViewPresenter {
 
 	private List<ViewPresenter> _presenters = new ArrayList<>();
 	private List<FilterPresenter> _filterPresenters = new ArrayList<>();
+	private EventBus _localBus;
 	
-	public WorkspacePresenter(EventBus bus, Model model) {
-		super(bus);		
+	public WorkspacePresenter(EventBus bus/*, Model model*/) {
+		super(bus);
+		build();
+		_localBus = /*getWorkspace().isToplevel() ? getEventBus() : */ new SimpleEventBus();
 		addListeners();
 	}
 	
@@ -67,6 +70,10 @@ public class WorkspacePresenter extends ViewPresenter {
 		if (view instanceof Workspace) {
 			Workspace workspace = getWorkspace();
 			
+
+			if (getWorkspace().isToplevel())
+				addToplevelListeners();
+
 			workspace.setOnToolDrop(new Closure.V3<Tool, Double, Double>() {
 
 				@Override
@@ -80,7 +87,7 @@ public class WorkspacePresenter extends ViewPresenter {
 				@Override
 				public void call(Table table) {
 					addTable(table, false /*remote*/, false /* active */, false /* remoteActive */);
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
+					broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
 					getSelectionModel().selectTable(table, true);
 				}
 				
@@ -90,7 +97,7 @@ public class WorkspacePresenter extends ViewPresenter {
 				@Override
 				public void call(Table table) {
 					removeTable(table);
-					broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
+					broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
 					getSelectionModel().removeTable(table);
 				}
 			});
@@ -108,18 +115,37 @@ public class WorkspacePresenter extends ViewPresenter {
 
 				@Override
 				public void onChanged(ListChangeListener.Change<? extends Filter> change) {
-					System.out.println("workspace filters list changed");
 					while (change.next()) {
 						for (Filter filter : change.getRemoved()) {
-							broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
 						}
 						for (Filter filter : change.getAddedSubList()) {
-							broadcast(new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
 						}
 					}
-					
+				}				
+			});
+			
+			workspace.remoteFilters().addListener(new ListChangeListener<Filter>() {
+
+				@Override
+				public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+					while (change.next()) {
+						for (Filter filter : change.getRemoved()) {
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+						}
+						for (Filter filter : change.getAddedSubList()) {
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
+						}
+					}
+				}				
+			});
+			
+			workspace.setOnShowFilter(new Closure.V1<Filter>() {
+				@Override
+				public void call(Filter filter) {
+					broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
-				
 			});
 		}
 	}
@@ -133,22 +159,44 @@ public class WorkspacePresenter extends ViewPresenter {
 		view.setTranslateY(y);
 		getWorkspace().addView(view);
 		
-		ViewPresenter presenter = tool.getPresenter(getEventBus());
+		ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
 		if (presenter != null) {	
 			_presenters.add(presenter);
 			presenter.setView(view);	
 			presenter.setRemoteTables(getTableRecords());
+			presenter.addRemoteFilters(getWorkspace().filters());
+			presenter.addRemoteFilters(getWorkspace().remoteFilters());
 		}
 		
 		return presenter;
 	}
+	
+	private void build() {
+		
+		SelectionModel selectionModel = new SingleSelection();
+		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+
+			@Override
+			public void call(Table table, Boolean activate) {
+				getView().selectTable(table, activate);	
+				String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
+				broadcast(getLocalEventBus(), new CyclistTableNotification(msg, table));
+			}
+		
+		});
+		
+		setSelectionModel(selectionModel);
+	}
+	
 	
 	
 	/*
 	 * addListeners
 	 */
 	private void addListeners() {
-		addNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {	
+		
+		// local notifications
+		addLocalNotificationHandler(CyclistNotifications.REMOVE_VIEW, new CyclistNotificationHandler() {	
 			@Override
 			public void handle(CyclistNotification event) {
 				String id = ((SimpleNotification)event).getMsg();
@@ -163,15 +211,24 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.VIEW_SELECTED, new CyclistNotificationHandler() {
+		addLocalNotificationHandler(CyclistNotifications.VIEW_SELECTED, new CyclistNotificationHandler() {
 			@Override
 			public void handle(CyclistNotification event) {
 				View view = ((CyclistViewNotification)event).getView();
 				getWorkspace().selectView(view);
+				if (view instanceof ViewBase) {
+					ViewBase base = (ViewBase) view;
+					List<Filter> f1 = base.filters();
+					List<Filter> f2 = base.remoteFilters();
+					for (FilterPresenter p : _filterPresenters) {
+						Filter f = p.getFilter();
+						p.highlight(f1.contains(f) || f2.contains(f));
+					}
+				}
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
+		addLocalNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {
@@ -180,7 +237,7 @@ public class WorkspacePresenter extends ViewPresenter {
 				FilterPresenter presenter = getFilterPresenter(filter);
 				if (presenter == null) {
 					FilterPanel panel = new FilterPanel(filter);
-					 presenter = new FilterPresenter(getEventBus());
+					 presenter = new FilterPresenter(getLocalEventBus());
 					 presenter.setPanel(panel);
 					 getWorkspace().addPanel(panel);
 					 _filterPresenters.add(presenter);
@@ -190,7 +247,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.HIDE_FILTER, new CyclistNotificationHandler() {
+		addLocalNotificationHandler(CyclistNotifications.HIDE_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {
@@ -202,7 +259,7 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.REMOVE_FILTER, new CyclistNotificationHandler() {
+		addLocalNotificationHandler(CyclistNotifications.REMOVE_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {
@@ -215,19 +272,41 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 				
-		SelectionModel selectionModel = new SingleSelection();
-		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
-
-			@Override
-			public void call(Table table, Boolean activate) {
-				getView().selectTable(table, activate);	
-				String msg = activate ? CyclistNotifications.DATASOURCE_SELECTED : CyclistNotifications.DATASOURCE_UNSELECTED;
-				broadcast(new CyclistTableNotification(msg, table));
-			}
 		
+		// parent notifications
+		addNotificationHandler(CyclistNotifications.REMOVE_REMOTE_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(getLocalEventBus(), event);
+			}
 		});
 		
-		setSelectionModel(selectionModel);
+		addNotificationHandler(CyclistNotifications.ADD_REMOTE_FILTER, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(getLocalEventBus(), event);
+			}
+		});
+		
+	}
+	
+	private void addToplevelListeners() {
+		addLocalNotificationHandler(CyclistNotifications.DATASOURCE_FOCUS, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(event);
+			}
+		});
+	}
+	
+	@Override
+	public void onViewSelected(View view) {
+		super.onViewSelected(view);
+		if (getWorkspace().isToplevel())
+			broadcast(getLocalEventBus(), (new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view)));
 	}
 	
 	private FilterPresenter getFilterPresenter(Filter filter) {
@@ -236,5 +315,13 @@ public class WorkspacePresenter extends ViewPresenter {
 				return p;
 		}
 		return null;
+	}
+	
+	private EventBus getLocalEventBus() {
+		return _localBus;
+	}
+	
+	public void addLocalNotificationHandler(String type, CyclistNotificationHandler handler) {
+		_localBus.addHandler(type, getId(), handler);
 	}
 }

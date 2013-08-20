@@ -7,11 +7,9 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import edu.utah.sci.cyclist.Resources;
 
 public class TaskControl extends HBox {
@@ -72,17 +70,13 @@ public class TaskControl extends HBox {
 	}
 	
 	private void build() {
-		HBoxBuilder.create()
-			.children(
-				_indicator = ProgressIndicatorBuilder.create()
-					.progress(-1)
-					.maxWidth(20)
-					.maxHeight(20)
-					.visible(false)
-					.build(),
-				_imageView = new ImageView(Resources.getIcon("error"))
-				)
-			.applyTo(this);
+		_indicator = new ProgressIndicator(-1);
+		_indicator.setPrefSize(14, 14);
+		_indicator.setVisible(false);
+		_indicator.setStyle("-fx-background-color: #fffeec");
+		_imageView = new ImageView(Resources.getIcon("error"));
+		
+		getChildren().addAll(_indicator, _imageView);
 		
 		Tooltip.install(this, _msg);
 		

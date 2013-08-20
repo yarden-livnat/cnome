@@ -25,6 +25,7 @@ package edu.utah.sci.cyclist.ui.wizards;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -38,15 +39,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ComboBoxBuilder;
-import javafx.scene.control.Control;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.GridPaneBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
@@ -131,7 +128,7 @@ public class DatasourceWizard extends VBox {
 						.prefWidth(125)
 						.text(sourceName)
 						.build())
-						.build();
+					.build();
 						
 			
 		// The selector for type of connection
