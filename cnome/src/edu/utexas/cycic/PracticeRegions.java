@@ -94,6 +94,6 @@ public class PracticeRegions {
 		commodityDemand.add(null);
 		
 		growthRegion.add(commodityDemand);
-		cycicScenarios.workingCycicScenario.regionStructs.add(growthRegion);
+		CycicScenarios.workingCycicScenario.regionStructs.add(growthRegion);
 	}
 }

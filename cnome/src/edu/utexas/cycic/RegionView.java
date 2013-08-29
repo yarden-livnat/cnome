@@ -61,8 +61,8 @@ public class RegionView extends ViewBase{
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				structureCB.getItems().clear();
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.regionNodes.size(); i++){
-					structureCB.getItems().add((String) cycicScenarios.workingCycicScenario.regionNodes.get(i).name);
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.regionNodes.size(); i++){
+					structureCB.getItems().add((String) CycicScenarios.workingCycicScenario.regionNodes.get(i).name);
 				}
 				structureCB.getItems().add("New Region");
 			}
@@ -76,17 +76,17 @@ public class RegionView extends ViewBase{
 				} else if(newValue == "New Region"){
 					grid.getChildren().clear();
 					rowNumber = 0;
-					cycicScenarios.workingCycicScenario.regionNodes.add(new regionNode());
-					workingRegion = cycicScenarios.workingCycicScenario.regionNodes.get(cycicScenarios.workingCycicScenario.regionNodes.size()-1);
+					CycicScenarios.workingCycicScenario.regionNodes.add(new regionNode());
+					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(CycicScenarios.workingCycicScenario.regionNodes.size()-1);
 					workingRegion.type = "GrowthRegion";
-					workingRegion.regionStruct = (ArrayList<Object>) cycicScenarios.workingCycicScenario.regionStructs.get(0);
+					workingRegion.regionStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.regionStructs.get(0);
 					FormBuilderFunctions.formArrayBuilder(workingRegion.regionStruct, workingRegion.regionData);
 					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
 				} else {
 					rowNumber = 0;
 					grid.getChildren().clear();
 					facilityList.getItems().clear();
-					workingRegion = cycicScenarios.workingCycicScenario.regionNodes.get(structureCB.getItems().indexOf(newValue));
+					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(structureCB.getItems().indexOf(newValue));
 					for(int i = 0; i < workingRegion.availFacilities.size(); i++){
 						facilityList.getItems().add(workingRegion.availFacilities.get(i));
 					}
@@ -114,7 +114,7 @@ public class RegionView extends ViewBase{
 		addNewFacilityBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacilityBox.getItems().clear();
-				for (FacilityCircle circle: cycicScenarios.workingCycicScenario.FacilityNodes){
+				for (FacilityCircle circle: CycicScenarios.workingCycicScenario.FacilityNodes){
 					for (FacilityCircle child: circle.childrenList) {
 						addNewFacilityBox.getItems().add((String)child.name);
 					}
@@ -139,7 +139,7 @@ public class RegionView extends ViewBase{
 		addNewInstitBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent event){
 				addNewInstitBox.getItems().clear();
-				for (instituteNode instit: cycicScenarios.workingCycicScenario.institNodes){
+				for (instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
 					addNewInstitBox.getItems().add(instit.name);
 				}
 			}
@@ -191,7 +191,7 @@ public class RegionView extends ViewBase{
 		setContent(regionBox);
 		setPrefSize(600,400);
 		
-		if (cycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
+		if (CycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
 			PracticeRegions.init();
 		}
 	}

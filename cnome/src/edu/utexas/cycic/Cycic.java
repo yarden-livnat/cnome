@@ -25,10 +25,10 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
-		if (cycicScenarios.cycicScenarios.size() < 1){
+		if (CycicScenarios.cycicScenarios.size() < 1){
 			DataArrays scenario = new DataArrays();
 			workingScenario = scenario;
-			cycicScenarios.cycicScenarios.add(scenario);
+			CycicScenarios.cycicScenarios.add(scenario);
 		}
 		init();
 	}
@@ -45,7 +45,7 @@ public class Cycic extends ViewBase{
 		setTitle(TITLE);
 		setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				cycicScenarios.workingCycicScenario = workingScenario;
+				CycicScenarios.workingCycicScenario = workingScenario;
 			}
 		});
 		if (RealFacs.alfredStructs.size() < 1){
@@ -89,8 +89,8 @@ public class Cycic extends ViewBase{
 			@Override
 			public void handle(ActionEvent event){
 				Nodes.addNode(facNameField.getText());
-				cycicScenarios.workingCycicScenario.FacilityNodes.get(cycicScenarios.workingCycicScenario.FacilityNodes.size()-1).facilityType = structureCB.getValue();
-				FacilityCircle workingTest = cycicScenarios.workingCycicScenario.FacilityNodes.get(cycicScenarios.workingCycicScenario.FacilityNodes.size()-1);
+				CycicScenarios.workingCycicScenario.FacilityNodes.get(CycicScenarios.workingCycicScenario.FacilityNodes.size()-1).facilityType = structureCB.getValue();
+				FacilityCircle workingTest = CycicScenarios.workingCycicScenario.FacilityNodes.get(CycicScenarios.workingCycicScenario.FacilityNodes.size()-1);
 				for (int i = 0; i < RealFacs.alfredStructs.size(); i++){
 					if (RealFacs.alfredStructsNames.get(i) == structureCB.getValue()){
 						workingTest.facilityStructure = RealFacs.alfredStructs.get(i);
@@ -115,7 +115,7 @@ public class Cycic extends ViewBase{
 			@Override
 			public void handle(ActionEvent event){
 				MarketNodes.addMarket(markNameField.getText());
-				Cycic.workingMarket = cycicScenarios.workingCycicScenario.marketNodes.get(cycicScenarios.workingCycicScenario.marketNodes.size() - 1);
+				Cycic.workingMarket = CycicScenarios.workingCycicScenario.marketNodes.get(CycicScenarios.workingCycicScenario.marketNodes.size() - 1);
 			}
 		});
 		grid.add(submit2, 3, 1);

@@ -74,7 +74,7 @@ public class MarketView extends ViewBase{
 		marketCommod.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				marketCommod.getItems().clear();
-				for (Label commod: cycicScenarios.workingCycicScenario.CommoditiesList){
+				for (Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
 					marketCommod.getItems().add(commod.getText());
 				}
 				marketCommod.getItems().add("Add New Commodity");

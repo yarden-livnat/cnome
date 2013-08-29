@@ -67,8 +67,8 @@ public class InstitutionView extends ViewBase{
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				structureCB.getItems().clear();
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.institNodes.size(); i++){
-					structureCB.getItems().add((String) cycicScenarios.workingCycicScenario.institNodes.get(i).name);
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.institNodes.size(); i++){
+					structureCB.getItems().add((String) CycicScenarios.workingCycicScenario.institNodes.get(i).name);
 				}
 				structureCB.getItems().add("New Institution");
 			}
@@ -83,16 +83,16 @@ public class InstitutionView extends ViewBase{
 				} else if(newValue == "New Institution"){
 					grid.getChildren().clear();
 					rowNumber = 0;
-					cycicScenarios.workingCycicScenario.institNodes.add(new instituteNode());
-					workingInstit = cycicScenarios.workingCycicScenario.institNodes.get(cycicScenarios.workingCycicScenario.institNodes.size()-1);
+					CycicScenarios.workingCycicScenario.institNodes.add(new instituteNode());
+					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(CycicScenarios.workingCycicScenario.institNodes.size()-1);
 					workingInstit.type = "deployInst";
-					workingInstit.institStruct = (ArrayList<Object>) cycicScenarios.workingCycicScenario.institStructs.get(0);
+					workingInstit.institStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.institStructs.get(0);
 					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
 				} else {
-					workingInstit = cycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
+					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
 					rowNumber = 0;
 					grid.getChildren().clear();
 					facilityList.getItems().clear();
@@ -123,7 +123,7 @@ public class InstitutionView extends ViewBase{
 		addNewProtoBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewProtoBox.getItems().clear();
-				for (FacilityCircle circle: cycicScenarios.workingCycicScenario.FacilityNodes){
+				for (FacilityCircle circle: CycicScenarios.workingCycicScenario.FacilityNodes){
 					for (FacilityCircle child: circle.childrenList) {
 						addNewProtoBox.getItems().add((String)child.name);
 					}
@@ -150,7 +150,7 @@ public class InstitutionView extends ViewBase{
 		addNewFacBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacBox.getItems().clear();
-				for (FacilityCircle circle: cycicScenarios.workingCycicScenario.FacilityNodes){
+				for (FacilityCircle circle: CycicScenarios.workingCycicScenario.FacilityNodes){
 					for (FacilityCircle child: circle.childrenList) {
 						addNewFacBox.getItems().add((String)child.name);
 					}
@@ -249,7 +249,7 @@ public class InstitutionView extends ViewBase{
 		setPrefSize(600,400);
 		
 		// Ensures the temperary institution is initiated only once. 
-		if (cycicScenarios.workingCycicScenario.institStructs.size() < 1) {
+		if (CycicScenarios.workingCycicScenario.institStructs.size() < 1) {
 			PracticeInstitute.init();
 		}
 	}

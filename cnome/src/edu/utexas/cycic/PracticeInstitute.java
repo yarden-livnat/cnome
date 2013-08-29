@@ -70,6 +70,6 @@ public class PracticeInstitute {
 		
 		deployInst.add(buildOrderArray);
 		
-		cycicScenarios.workingCycicScenario.institStructs.add(deployInst);
+		CycicScenarios.workingCycicScenario.institStructs.add(deployInst);
 	}
 }

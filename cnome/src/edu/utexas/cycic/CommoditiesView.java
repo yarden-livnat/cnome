@@ -40,27 +40,27 @@ public class CommoditiesView extends ViewBase{
 	 */
 	public static void init(){
 		commodGrid.getChildren().clear();
-		for (int i = 0; i < cycicScenarios.workingCycicScenario.CommoditiesList.size(); i++){
+		for (int i = 0; i < CycicScenarios.workingCycicScenario.CommoditiesList.size(); i++){
 			TextField commodity = new TextField();
-			commodity.setText(cycicScenarios.workingCycicScenario.CommoditiesList.get(i).getText());
+			commodity.setText(CycicScenarios.workingCycicScenario.CommoditiesList.get(i).getText());
 			commodGrid.add(commodity, 0, i );
 			final int index = i;
 			commodity.textProperty().addListener(new ChangeListener<String>(){
 				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-					cycicScenarios.workingCycicScenario.CommoditiesList.get(index).setText(newValue);
+					CycicScenarios.workingCycicScenario.CommoditiesList.get(index).setText(newValue);
 				}
 			});
 			Button removeCommod = new Button();
 			removeCommod.setText("Delete Commodity");
 			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent e){
-					cycicScenarios.workingCycicScenario.CommoditiesList.remove(index);
+					CycicScenarios.workingCycicScenario.CommoditiesList.remove(index);
 					init();
 				}
 			});	
 			commodGrid.add(removeCommod, 1, index);
 		}
-		commodGrid.add(addNewCommod, 0, cycicScenarios.workingCycicScenario.CommoditiesList.size());
+		commodGrid.add(addNewCommod, 0, CycicScenarios.workingCycicScenario.CommoditiesList.size());
 	}
 	
 	/**
@@ -70,12 +70,12 @@ public class CommoditiesView extends ViewBase{
 	static public void addNewCommodity(){
 		Label commodity = new Label();
 		commodity.setText("");
-		cycicScenarios.workingCycicScenario.CommoditiesList.add(commodity);
+		CycicScenarios.workingCycicScenario.CommoditiesList.add(commodity);
 		TextField newCommod = new TextField();
-		newCommod.setText(cycicScenarios.workingCycicScenario.CommoditiesList.get(cycicScenarios.workingCycicScenario.CommoditiesList.size()-1).getText());
+		newCommod.setText(CycicScenarios.workingCycicScenario.CommoditiesList.get(CycicScenarios.workingCycicScenario.CommoditiesList.size()-1).getText());
 		newCommod.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				cycicScenarios.workingCycicScenario.CommoditiesList.get(cycicScenarios.workingCycicScenario.CommoditiesList.size()-1).setText(newValue);
+				CycicScenarios.workingCycicScenario.CommoditiesList.get(CycicScenarios.workingCycicScenario.CommoditiesList.size()-1).setText(newValue);
 			}
 		});
 		init();

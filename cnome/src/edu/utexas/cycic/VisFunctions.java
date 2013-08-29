@@ -129,24 +129,24 @@ public class VisFunctions {
 		link.line.setEndX(target.getCenterX());
 		link.line.setEndY(target.getCenterY());
 
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			if(cycicScenarios.workingCycicScenario.marketNodes.get(i) == target){
-				markIndex = cycicScenarios.workingCycicScenario.marketNodes.get(i);
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
+			if(CycicScenarios.workingCycicScenario.marketNodes.get(i) == target){
+				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
 			}
 		}
 		// Adding the Parent to childMarket link //
-		if(cycicScenarios.workingCycicScenario.hiddenLinks.size() == 0){
-			addHiddenLink(cycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex), markIndex);
+		if(CycicScenarios.workingCycicScenario.hiddenLinks.size() == 0){
+			addHiddenLink(CycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex), markIndex);
 		}
-		for(int n = 0; n < cycicScenarios.workingCycicScenario.hiddenLinks.size(); n++){
-			if( (MarketCircle) cycicScenarios.workingCycicScenario.hiddenLinks.get(n).target == target && cycicScenarios.workingCycicScenario.hiddenLinks.get(n).source == cycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex)){
+		for(int n = 0; n < CycicScenarios.workingCycicScenario.hiddenLinks.size(); n++){
+			if( (MarketCircle) CycicScenarios.workingCycicScenario.hiddenLinks.get(n).target == target && CycicScenarios.workingCycicScenario.hiddenLinks.get(n).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex)){
 				hiddenLinkCheck = true;
 			}
 		} 
 		if ( hiddenLinkCheck == false) {
-			addHiddenLink(cycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex), markIndex);
+			addHiddenLink(CycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex), markIndex);
 		}
-		cycicScenarios.workingCycicScenario.Links.add(link);
+		CycicScenarios.workingCycicScenario.Links.add(link);
 		Cycic.pane.getChildren().addAll(link.line);
 		link.line.toBack();
 	}
@@ -163,7 +163,7 @@ public class VisFunctions {
 		hiddenLink.line.setStartY(parent.getCenterY());
 		hiddenLink.line.setEndX(market.getCenterX());
 		hiddenLink.line.setEndY(market.getCenterY());
-		cycicScenarios.workingCycicScenario.hiddenLinks.add(hiddenLink);
+		CycicScenarios.workingCycicScenario.hiddenLinks.add(hiddenLink);
 		if(parent.childrenShow == false){
 			Cycic.pane.getChildren().addAll(hiddenLink.line);
 			hiddenLink.line.toBack();
@@ -175,41 +175,41 @@ public class VisFunctions {
 	 */
 	static void reloadPane(){
 		Cycic.pane.getChildren().remove(0, Cycic.pane.getChildren().size());
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i));
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).menu);
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).text);
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).image);
-			if(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenShow == false){
-				for(int ii = 0; ii < cycicScenarios.workingCycicScenario.hiddenLinks.size(); ii++){
-					if(cycicScenarios.workingCycicScenario.FacilityNodes.get(i) == cycicScenarios.workingCycicScenario.hiddenLinks.get(ii).source){
-						Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.hiddenLinks.get(ii).line);
-						cycicScenarios.workingCycicScenario.hiddenLinks.get(ii).line.toBack();
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i));
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).menu);
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).text);
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).image);
+			if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenShow == false){
+				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.hiddenLinks.size(); ii++){
+					if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i) == CycicScenarios.workingCycicScenario.hiddenLinks.get(ii).source){
+						Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.hiddenLinks.get(ii).line);
+						CycicScenarios.workingCycicScenario.hiddenLinks.get(ii).line.toBack();
 					}
 				}
 			}else{
-				for(int ii = 0; ii < cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size(); ii++){
-					Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii));
-					Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).menu);
-					Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).text);
-					Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).image);
-					for(int n = 0; n < cycicScenarios.workingCycicScenario.Links.size(); n++){
-						if(cycicScenarios.workingCycicScenario.Links.get(n).source == cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii)){
-							Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.Links.get(n).line);
-							cycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
+				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size(); ii++){
+					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii));
+					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).menu);
+					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).text);
+					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).image);
+					for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
+						if(CycicScenarios.workingCycicScenario.Links.get(n).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii)){
+							Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
+							CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
 						}
 					}
 				}
-				for(int n = 0; n < cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenLinks.size(); n++){
-					Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenLinks.get(n).line);
-					cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenLinks.get(n).line.toBack();
+				for(int n = 0; n < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenLinks.size(); n++){
+					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenLinks.get(n).line);
+					CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenLinks.get(n).line.toBack();
 				}
 			}
 		}
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.marketNodes.get(i));
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.marketNodes.get(i).menu);
-			Cycic.pane.getChildren().add(cycicScenarios.workingCycicScenario.marketNodes.get(i).text);			
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i));
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).menu);
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).text);			
 		}
 	}
 	
@@ -222,12 +222,12 @@ public class VisFunctions {
 	 */
 	public static void hiddenLinkTest(FacilityCircle parentName, Object oldMarket){
 		int hiddenLinkCount = 0;
-		for (int j = 0; j < cycicScenarios.workingCycicScenario.hiddenLinks.size(); j++){
-			if(cycicScenarios.workingCycicScenario.hiddenLinks.get(j).source == parentName && cycicScenarios.workingCycicScenario.hiddenLinks.get(j).target == oldMarket){
+		for (int j = 0; j < CycicScenarios.workingCycicScenario.hiddenLinks.size(); j++){
+			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(j).source == parentName && CycicScenarios.workingCycicScenario.hiddenLinks.get(j).target == oldMarket){
 				hiddenLinkCount += 1;
 			}
 			if (hiddenLinkCount > 1){
-				cycicScenarios.workingCycicScenario.hiddenLinks.remove(j);
+				CycicScenarios.workingCycicScenario.hiddenLinks.remove(j);
 				j = j - 1;
 			}
 		}
@@ -241,10 +241,10 @@ public class VisFunctions {
 	 */
 	public static void hiddenLinkRemoval(FacilityCircle parentName, Object oldMarket, Boolean test){
 
-		for (int j = 0; j < cycicScenarios.workingCycicScenario.hiddenLinks.size(); j++){
-			if(cycicScenarios.workingCycicScenario.hiddenLinks.get(j).source == parentName && cycicScenarios.workingCycicScenario.hiddenLinks.get(j).target == (MarketCircle) oldMarket){
+		for (int j = 0; j < CycicScenarios.workingCycicScenario.hiddenLinks.size(); j++){
+			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(j).source == parentName && CycicScenarios.workingCycicScenario.hiddenLinks.get(j).target == (MarketCircle) oldMarket){
 				if (test == false){
-					cycicScenarios.workingCycicScenario.hiddenLinks.remove(j);
+					CycicScenarios.workingCycicScenario.hiddenLinks.remove(j);
 					j = j - 1;
 				}
 			}

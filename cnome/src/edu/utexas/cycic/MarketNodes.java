@@ -121,16 +121,16 @@ public class MarketNodes{
 				circle.text.setX(circle.getCenterX()-circle.text.getBoundsInLocal().getWidth()/2);
 				circle.text.setY(circle.getCenterY());
 				
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.Links.size(); i++){
-					if(cycicScenarios.workingCycicScenario.Links.get(i).target == circle){
-						cycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
-						cycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
+					if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
 					}
 				}				
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
-					if(cycicScenarios.workingCycicScenario.hiddenLinks.get(i).target == circle){
-						cycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setEndX(circle.getCenterX());
-						cycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setEndY(circle.getCenterY());
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
+					if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).target == circle){
+						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setEndX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setEndY(circle.getCenterY());
 					}
 				}
 				mousex = event.getX();
@@ -145,7 +145,7 @@ public class MarketNodes{
 				}
 			}
 		});
-		cycicScenarios.workingCycicScenario.marketNodes.add(circle);
+		CycicScenarios.workingCycicScenario.marketNodes.add(circle);
 		Cycic.pane.getChildren().add(circle);
 		Cycic.pane.getChildren().add(circle.menu);
 		Cycic.pane.getChildren().add(circle.text);
@@ -156,15 +156,15 @@ public class MarketNodes{
 	 * @param name MarketCircle to be deleted.
 	 */
 	static void deleteMarket(MarketCircle circle){
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.Links.size(); i++){
-			if(cycicScenarios.workingCycicScenario.Links.get(i).target == circle){
-				cycicScenarios.workingCycicScenario.Links.remove(i);
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
+			if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
+				CycicScenarios.workingCycicScenario.Links.remove(i);
 				i = i-1;
 			}
 		}
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			if(cycicScenarios.workingCycicScenario.marketNodes.get(i) == circle){
-				cycicScenarios.workingCycicScenario.marketNodes.remove(i);
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
+			if(CycicScenarios.workingCycicScenario.marketNodes.get(i) == circle){
+				CycicScenarios.workingCycicScenario.marketNodes.remove(i);
 			}
 		}
 		VisFunctions.reloadPane();

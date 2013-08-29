@@ -54,8 +54,8 @@ public class RecipeForm extends ViewBase{
 			@Override
 			public void handle(MouseEvent e){
 				recipiesList.getItems().clear();
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.Recipes.size(); i++){
-					recipiesList.getItems().add(cycicScenarios.workingCycicScenario.Recipes.get(i).Name);
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.Recipes.size(); i++){
+					recipiesList.getItems().add(CycicScenarios.workingCycicScenario.Recipes.get(i).Name);
 				}
 				recipiesList.getItems().add("Add New Recipe");
 			}
@@ -69,10 +69,10 @@ public class RecipeForm extends ViewBase{
 				} else if (newValue == "Add New Recipe") {
 					rowNumber = 3;
 					Nrecipe recipe = new Nrecipe();
-					cycicScenarios.workingCycicScenario.Recipes.add(recipe);
+					CycicScenarios.workingCycicScenario.Recipes.add(recipe);
 					recipeGenInfo(recipe);
 				} else {
-					for(Nrecipe recipe: cycicScenarios.workingCycicScenario.Recipes) {
+					for(Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes) {
 						if (recipe.Name == newValue) {
 							loadRecipe(recipe);
 						}
@@ -90,7 +90,7 @@ public class RecipeForm extends ViewBase{
 				if (recipiesList.getValue() == "Add New Recipe"){
 					// Do nothing
 				} else {
-					cycicScenarios.workingCycicScenario.Recipes.remove(recipiesList.getItems().indexOf(recipiesList.getValue()));
+					CycicScenarios.workingCycicScenario.Recipes.remove(recipiesList.getItems().indexOf(recipiesList.getValue()));
 				}
 			}
 		});

@@ -265,7 +265,7 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: cycicScenarios.workingCycicScenario.marketNodes){
+				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
 					cb.getItems().add(circle.commodity);
 				}
 				cb.getItems().add("New Commodity");
@@ -287,7 +287,7 @@ public class FormBuilderFunctions {
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
-					for (MarketCircle circle: cycicScenarios.workingCycicScenario.marketNodes){
+					for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
 						if (newValue == circle.commodity){
 							marketCircle = circle;
 						}
@@ -295,17 +295,17 @@ public class FormBuilderFunctions {
 							oldMarket = circle;
 						}
 					}
-					for (int j = 0; j < cycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (cycicScenarios.workingCycicScenario.Links.get(j).source == facNode && cycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-							cycicScenarios.workingCycicScenario.Links.remove(j);
+					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
+						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
+							CycicScenarios.workingCycicScenario.Links.remove(j);
 							j -= 1;
 						}
 					}
-					parentName = cycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.parentIndex);
+					parentName = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.parentIndex);
 					for ( int ii = 0; ii < parentName.childrenList.size(); ii++){
 						lazySpaceSaver = parentName.childrenList.get(ii);
-						for (int j = 0; j < cycicScenarios.workingCycicScenario.Links.size(); j++){
-							if (cycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && cycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
+						for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++){
+							if (CycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
 								hiddenLinkTest = true;
 							}
 						}
@@ -340,7 +340,7 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: cycicScenarios.workingCycicScenario.marketNodes){
+				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
 					cb.getItems().add(circle.commodity);
 				}
 				cb.getItems().add("New Commodity");
@@ -361,7 +361,7 @@ public class FormBuilderFunctions {
 				if (newValue == "New Commodity"){
 					//
 				} else {
-					for (MarketCircle circle: cycicScenarios.workingCycicScenario.marketNodes){
+					for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
 						if (newValue == circle.commodity){
 							marketCircle = circle;
 						}
@@ -369,17 +369,17 @@ public class FormBuilderFunctions {
 							oldMarket = circle;
 						}
 					}
-					for (int j = 0; j < cycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (cycicScenarios.workingCycicScenario.Links.get(j).source == facNode && cycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-							cycicScenarios.workingCycicScenario.Links.remove(j);
+					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
+						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
+							CycicScenarios.workingCycicScenario.Links.remove(j);
 							j -= 1;
 						}
 					}
-					parentName = cycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.parentIndex);
+					parentName = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.parentIndex);
 					for ( int ii = 0; ii < parentName.childrenList.size(); ii++){
 						lazySpaceSaver = parentName.childrenList.get(ii);
-						for (int j = 0; j < cycicScenarios.workingCycicScenario.Links.size(); j++){
-							if (cycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && cycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
+						for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++){
+							if (CycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
 								hiddenLinkTest = true;
 							}
 						}
@@ -413,7 +413,7 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Nrecipe recipe: cycicScenarios.workingCycicScenario.Recipes) {
+				for (Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes) {
 					cb.getItems().add(recipe.Name);
 				}
 			}

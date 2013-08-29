@@ -176,16 +176,16 @@ public class Nodes{
 				circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
 				circle.text.setY(circle.getCenterY());
 				
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.Links.size(); i++){
-					if(cycicScenarios.workingCycicScenario.Links.get(i).source == circle){
-						cycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
-						cycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
+					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
 					}
 				}
-				for(int i = 0; i < cycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
-					if(cycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == circle){
-						cycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setStartX(circle.getCenterX());
-						cycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setStartY(circle.getCenterY());
+				for(int i = 0; i < CycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
+					if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == circle){
+						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setStartX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setStartY(circle.getCenterY());
 					}
 				}
 				for(int i = 0; i < circle.childrenLinks.size(); i++){
@@ -199,10 +199,10 @@ public class Nodes{
 					circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
 					circle.childrenList.get(i).text.setX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
 					circle.childrenList.get(i).text.setY(circle.childrenList.get(i).getCenterY());
-					for(int ii = 0; ii < cycicScenarios.workingCycicScenario.Links.size(); ii++){
-						if(circle.childrenList.get(i) == cycicScenarios.workingCycicScenario.Links.get(ii).source){
-							cycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
-							cycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
+					for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
+						if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
+							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
+							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
 						}
 					}
 				}
@@ -235,7 +235,7 @@ public class Nodes{
 			}
 		});
 		
-		cycicScenarios.workingCycicScenario.FacilityNodes.add(circle);
+		CycicScenarios.workingCycicScenario.FacilityNodes.add(circle);
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
@@ -269,31 +269,31 @@ public class Nodes{
 	 * @param circle The facilityCircle to be removed. 
 	 */
 	static void deleteNode(FacilityCircle circle){
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.Links.size(); i++){
-			if(cycicScenarios.workingCycicScenario.Links.get(i).source == circle){
-				cycicScenarios.workingCycicScenario.Links.remove(i);
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
+			if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
+				CycicScenarios.workingCycicScenario.Links.remove(i);
 			}
 		}
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
-			if(cycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == circle){
-				cycicScenarios.workingCycicScenario.hiddenLinks.remove(i);
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
+			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == circle){
+				CycicScenarios.workingCycicScenario.hiddenLinks.remove(i);
 			}
 		}
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
-			if(cycicScenarios.workingCycicScenario.FacilityNodes.get(i) == circle){
-				for(int ii = 0; ii < cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size();ii++){
-					for(int iii = 0; iii < cycicScenarios.workingCycicScenario.Links.size(); iii++){
-						if(cycicScenarios.workingCycicScenario.Links.get(i).source == cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(iii)){
-							cycicScenarios.workingCycicScenario.Links.remove(i);
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
+			if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i) == circle){
+				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size();ii++){
+					for(int iii = 0; iii < CycicScenarios.workingCycicScenario.Links.size(); iii++){
+						if(CycicScenarios.workingCycicScenario.Links.get(i).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(iii)){
+							CycicScenarios.workingCycicScenario.Links.remove(i);
 						}
 					}
 				}
-				cycicScenarios.workingCycicScenario.FacilityNodes.remove(i);
+				CycicScenarios.workingCycicScenario.FacilityNodes.remove(i);
 			}
 		}
-		for(int i = 0; i < cycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
-			for(int ii = 0; ii < cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size(); ii++){
-				cycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).parentIndex = i;
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
+			for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size(); ii++){
+				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).parentIndex = i;
 			}
 		}
 		VisFunctions.reloadPane();

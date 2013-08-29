@@ -42,10 +42,10 @@ public class SimulationInfo extends ViewBase{
 	 */
 	public void init(){
 		TextField duration = new TextField();
-		duration.setText(cycicScenarios.workingCycicScenario.simulationData.duration);
+		duration.setText(CycicScenarios.workingCycicScenario.simulationData.duration);
 		duration.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				cycicScenarios.workingCycicScenario.simulationData.duration = newValue;
+				CycicScenarios.workingCycicScenario.simulationData.duration = newValue;
 			}
 		});
 		simInfo.add(new Label("Duration"), 0, 0);
@@ -54,43 +54,43 @@ public class SimulationInfo extends ViewBase{
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
-		startMonth.setValue(cycicScenarios.workingCycicScenario.simulationData.startMonth);
+		startMonth.setValue(CycicScenarios.workingCycicScenario.simulationData.startMonth);
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
 		startMonth.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				cycicScenarios.workingCycicScenario.simulationData.startMonth = months.get(newValue);
+				CycicScenarios.workingCycicScenario.simulationData.startMonth = months.get(newValue);
 			}
 		});
 		simInfo.add(new Label("Start Month"), 0, 1);
 		simInfo.add(startMonth, 1, 1);
 		
 		TextField startYear = new TextField();
-		startYear.setText(cycicScenarios.workingCycicScenario.simulationData.startYear);
+		startYear.setText(CycicScenarios.workingCycicScenario.simulationData.startYear);
 		startYear.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				cycicScenarios.workingCycicScenario.simulationData.startYear = newValue;
+				CycicScenarios.workingCycicScenario.simulationData.startYear = newValue;
 			}
 		});
 		simInfo.add(new Label("Start Year"), 0, 2);
 		simInfo.add(startYear, 1, 2);
 		
 		TextField simStart = new TextField();
-		simStart.setText(cycicScenarios.workingCycicScenario.simulationData.simStart);
+		simStart.setText(CycicScenarios.workingCycicScenario.simulationData.simStart);
 		simStart.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				cycicScenarios.workingCycicScenario.simulationData.simStart = newValue;
+				CycicScenarios.workingCycicScenario.simulationData.simStart = newValue;
 			}
 		});
 		simInfo.add(new Label("Simulation Start"), 0 ,3);
 		simInfo.add(simStart, 1, 3);
 		
 		TextField decay = new TextField();
-		decay.setText(cycicScenarios.workingCycicScenario.simulationData.decay);
+		decay.setText(CycicScenarios.workingCycicScenario.simulationData.decay);
 		decay.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				cycicScenarios.workingCycicScenario.simulationData.decay = newValue;
+				CycicScenarios.workingCycicScenario.simulationData.decay = newValue;
 			}
 		});
 		simInfo.add(new Label("Decay Flag"), 0, 4);

@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 
 import javafx.scene.control.Label;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,12 +40,12 @@ public class OutPut {
 			controlSetup(doc, control);
 			
 			// Commodities
-			for(Label commod: cycicScenarios.workingCycicScenario.CommoditiesList){
+			for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
 				commodityBuilder(doc, rootElement, commod);
 			}
 			
 			// Markets
-			for(MarketCircle market: cycicScenarios.workingCycicScenario.marketNodes){
+			for(MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
 				Element marketID = doc.createElement("market");
 				
 				rootElement.appendChild(marketID);
@@ -54,7 +53,7 @@ public class OutPut {
 			}
 			
 			// Facilities
-			for(FacilityCircle facility : cycicScenarios.workingCycicScenario.FacilityNodes){
+			for(FacilityCircle facility : CycicScenarios.workingCycicScenario.FacilityNodes){
 				if (facility.childrenList.size() > 0) {
 					for (int i = 0; i < facility.childrenList.size(); i++){
 						Element facID = doc.createElement("facility");
@@ -65,7 +64,7 @@ public class OutPut {
 			}
 			
 			// Regions
-			for(regionNode region : cycicScenarios.workingCycicScenario.regionNodes) {
+			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
 				
@@ -80,7 +79,7 @@ public class OutPut {
 				
 				regionBuilder(doc, regionID, region.regionStruct, region.regionData, "GrowthRegion");
 				// Building the institutions within regions.
-				for (instituteNode institution: cycicScenarios.workingCycicScenario.institNodes){
+				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 					for (String instit: region.institutions){
 						if (institution.name == instit) {
 							Element institID = doc.createElement("institution");
@@ -109,7 +108,7 @@ public class OutPut {
 			}
 			
 			//Recipes
-			for(Nrecipe recipe : cycicScenarios.workingCycicScenario.Recipes){
+			for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
 				recipeBuilder(doc, rootElement, recipe);
 			}
 			
@@ -137,23 +136,23 @@ public class OutPut {
 	public static void controlSetup(Document doc, Element control){
 		
 		Element simDuration = doc.createElement("duration");
-		simDuration.appendChild(doc.createTextNode(cycicScenarios.workingCycicScenario.simulationData.duration));
+		simDuration.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.duration));
 		control.appendChild(simDuration);
 		
 		Element simStartMon = doc.createElement("startmonth");
-		simStartMon.appendChild(doc.createTextNode(cycicScenarios.workingCycicScenario.simulationData.startMonth));
+		simStartMon.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startMonth));
 		control.appendChild(simStartMon);
 		
 		Element simStartYear = doc.createElement("startyear");
-		simStartYear.appendChild(doc.createTextNode(cycicScenarios.workingCycicScenario.simulationData.startYear));
+		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
 		control.appendChild(simStartYear);
 		
 		Element simStart = doc.createElement("simstart");
-		simStart.appendChild(doc.createTextNode(cycicScenarios.workingCycicScenario.simulationData.simStart));
+		simStart.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simStart));
 		control.appendChild(simStart);
 		
 		Element decay = doc.createElement("decay");
-		decay.appendChild(doc.createTextNode(cycicScenarios.workingCycicScenario.simulationData.decay));
+		decay.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
 		control.appendChild(decay);
 	}
 	
@@ -381,6 +380,7 @@ public class OutPut {
 		} catch (Exception exc){
 			exc.printStackTrace();
 		}
-	}*/
+	}
+	*/
 }
 
