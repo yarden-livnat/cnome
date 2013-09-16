@@ -76,7 +76,7 @@ public class SchemaPanel extends TitledPanel {
 			}
 
 			@Override
-			public Comparator<Field> reverseOrder() {
+			public Comparator<Field> reversed() {
 				// TODO Auto-generated method stub
 				return null;
 			}
@@ -115,6 +115,16 @@ public class SchemaPanel extends TitledPanel {
 				// TODO Auto-generated method stub
 				return null;
 			}
+
+			@Override
+			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
+					Function<? super Field, ? extends U> keyExtractor,
+					Comparator<? super U> keyComparator) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			
 		});
 		
 		_entries = new ArrayList<>();
