@@ -24,7 +24,7 @@ public class TitledPanel extends VBox {
 		
 		// header
 		Label label = new Label(title);
-		label.getStyleClass().add("header");
+		label.getStyleClass().add("label");
 		
 		_header = new HBox();
 		_header.getStyleClass().add("header");
