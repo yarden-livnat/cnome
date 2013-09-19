@@ -107,6 +107,8 @@ public class FilterGlyph extends HBox {
 			
 			@Override
 			public void invalidated(Observable observable) {
+				
+				//Change color according to remote and validity parameters.
 				String color = "#beffbf";
 				if (validProperty().get()) {
 					color= (_remote) ? "#d0ced1": "#beffbf";

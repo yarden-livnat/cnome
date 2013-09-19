@@ -1011,6 +1011,7 @@ public class ChartView extends ViewBase {
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaListener);
 		
+		//Let the filters area know when the selected table is changed.
 		getFiltersArea().tableProperty().bind(_currentTableProperty);
 		
 		setAreaFiltersListeners(area);

@@ -184,6 +184,8 @@ public class FilterArea extends ToolBar {
 			}
 			
 		});
+		
+		//Change the glyph display when the selected table changes.
 		tableProperty().addListener(new InvalidationListener() {
 			
 			@Override

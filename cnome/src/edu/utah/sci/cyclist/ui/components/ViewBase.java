@@ -427,6 +427,7 @@ public class ViewBase extends BorderPane implements View {
 		addActions(actions);
 	}
 	
+	//Let the sub classes have access to the filters area
 	protected FilterArea getFiltersArea(){
 		return _filtersArea;
 	}
