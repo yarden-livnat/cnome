@@ -996,6 +996,8 @@ public class ChartView extends ViewBase {
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaListener);
 		
+		getFiltersArea().tableProperty().bind(_currentTableProperty);
+		
 		setAreaFiltersListeners(area);
 
 		grid.add(text, col, row);
@@ -1046,7 +1048,6 @@ public class ChartView extends ViewBase {
 			}
 		});
 	}
-	
 	
 	/*Name: removeFilterFromDropArea
 	 * If a filter is removed - check if it is connected to a numeric field. By searching this field in the drop areas.
