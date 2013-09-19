@@ -102,6 +102,7 @@ public class FilterGlyph extends HBox {
 		
 		this.getChildren().addAll(label,stackPane);
 		createMenu();
+		validProperty().set(_valid);
 		
 		validProperty().addListener(new InvalidationListener() {
 			
