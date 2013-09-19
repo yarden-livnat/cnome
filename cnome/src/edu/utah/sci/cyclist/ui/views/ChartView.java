@@ -205,14 +205,29 @@ public class ChartView extends ViewBase {
 					}
 				}
 				
+				List<Filter> filtersList = new ArrayList();
+				
+				//Check the filters current validity
+				for(Filter filter : filters()){
+					if(getCurrentTable().hasField(filter.getField())){
+						filtersList.add(filter);
+					}
+				}
+				
+				//Check the remote filters current validity
+				for(Filter filter : remoteFilters()){
+					if(getCurrentTable().hasField(filter.getField())){
+						filtersList.add(filter);
+					}
+				}
+				
 				// build the query
 				QueryBuilder builder = 
 							getCurrentTable().queryBuilder()
 							.fields(fields)
 							.aggregates(aggregators)
 							.grouping(grouping)
-							.filters(filters())
-							.filters(remoteFilters())
+							.filters(filtersList)
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
 //				log.info("Query: "+builder.toString());
