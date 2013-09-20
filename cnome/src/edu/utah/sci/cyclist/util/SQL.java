@@ -30,7 +30,7 @@ public class SQL {
 	public static final List<Function> FUNCTIONS = new ArrayList<>();
 	public static final String DEFAULT_FUNCTION = "Avg";
 	
-	public enum Functions{AVG,SUM,COUNT,COUNT_DISTINCT,MIN,MAX;
+	public enum Functions{VALUE,AVG,SUM,COUNT,COUNT_DISTINCT,MIN,MAX;
 		public String toName() {
 		   //only capitalize the first letter
 		   String s = super.toString();
@@ -77,6 +77,18 @@ public class SQL {
 //				return col;
 //			}
 //		});
+		FUNCTIONS.add(new Function("Value", "") {
+			@Override
+			public String getLabel(String col) {
+				return col;
+			}
+			
+			@Override
+			public String format(String col) {
+				return col;
+			}
+		});
+		
 		FUNCTIONS.add(new Function("Avg", "AVG"));
 		FUNCTIONS.add(new Function("Sum", "SUM"));
 //		FUNCTIONS.add(new Function("Median", "MEDIAN"));

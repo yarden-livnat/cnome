@@ -37,7 +37,6 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -432,7 +431,7 @@ public class ViewBase extends BorderPane implements View {
 		return _filtersArea;
 	}
 	
-	private void fireSelectEvent() {
+	public void select() { 
 		if (_onSelectAction != null) 
 			_onSelectAction.call();
 	}
@@ -452,7 +451,7 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				delta.x = getTranslateX() - event.getSceneX();
 				delta.y = getTranslateY() - event.getSceneY();
-				fireSelectEvent();
+				select();
 				event.consume();
 			}
 		});
@@ -481,7 +480,7 @@ public class ViewBase extends BorderPane implements View {
 		EventHandler<MouseEvent> eh = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				fireSelectEvent();
+				select();
 				event.consume();
 			}
 		};

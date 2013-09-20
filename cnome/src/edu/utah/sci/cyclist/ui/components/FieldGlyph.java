@@ -15,8 +15,10 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.DataType.Interpretation;
 import edu.utah.sci.cyclist.model.DataType.Role;
@@ -153,20 +155,50 @@ public class FieldGlyph extends HBox {
 		}
 	}
 	
+
 	private void createMenu() {
 		
 		final ContextMenu contextMenu = new ContextMenu();
 
-		MenuItem item = new MenuItem("Dimension");
-		item.setOnAction(new EventHandler<ActionEvent>() {
+		final MenuItem categoryIitem = new MenuItem("Category", new ImageView(Resources.getIcon("ok")));
+		final MenuItem numericIitem = new MenuItem("Measure", new ImageView(Resources.getIcon("ok")));
+		
+		if (_field.getRole() == Role.DIMENSION) {
+			numericIitem.getGraphic().setVisible(false);
+		} else {
+			categoryIitem.getGraphic().setVisible(false);
+		}
+		
+		
+		contextMenu.getItems().add(categoryIitem);	
+		contextMenu.getItems().add(numericIitem);
+		
+		categoryIitem.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				_field.setRole(Role.DIMENSION);
-				_label.setText(getTitle());
-				fireActionEvent();
+				if (_field.getRole() != Role.DIMENSION) {
+					numericIitem.getGraphic().setVisible(false);
+					categoryIitem.getGraphic().setVisible(true);
+					_field.setRole(Role.DIMENSION);
+					_label.setText(getTitle());
+					fireActionEvent();
+				}
 			}
 		});
-		contextMenu.getItems().add(item);
 		
+		
+		numericIitem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if (_field.getRole() != Role.MEASURE) {
+					numericIitem.getGraphic().setVisible(true);
+					categoryIitem.getGraphic().setVisible(false);
+					_field.setRole(Role.MEASURE);
+					_label.setText(getTitle());
+					fireActionEvent();
+				}
+			}
+		});
+
+		MenuItem item;
 		for (final SQL.Function func : SQL.FUNCTIONS) {
 			item = new MenuItem(func.getName());
 			item.setOnAction(new EventHandler<ActionEvent>() {
@@ -198,22 +230,44 @@ public class FieldGlyph extends HBox {
 		contextMenu.getItems().add(new SeparatorMenuItem());
 		
 		//Change field type to discrete.
-		item = new MenuItem("Discrete");
-		item.setOnAction(new EventHandler<ActionEvent>() {
+		final MenuItem discreteItem = new MenuItem("Discrete", new ImageView(Resources.getIcon("ok")));
+		contextMenu.getItems().add(discreteItem);
+		
+		final MenuItem continuousIitem = new MenuItem("Continuous", new ImageView(Resources.getIcon("ok")));
+		contextMenu.getItems().add(continuousIitem);
+		
+		if (_field.getDataType().getInterpretation() == Interpretation.DISCRETE) {
+			continuousIitem.getGraphic().setVisible(false);
+		}
+		else {
+			discreteItem.getGraphic().setVisible(false);	
+		}
+		
+		discreteItem.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e){
-						_field.getDataType().setInterpetation(Interpretation.DISCRETE);			
+//				if (_field.getDataType().getInterpretation() != Interpretation.DISCRETE) {
+					discreteItem.getGraphic().setVisible(true);
+					continuousIitem.getGraphic().setVisible(false);
+					_field.getDataType().setInterpetation(Interpretation.DISCRETE);
+					fireActionEvent();
+//				}
 			}
 		});
-		contextMenu.getItems().add(item);
+		
 		
 		//Change field type to continuous.
-		item = new MenuItem("Continuous");
-		item.setOnAction(new EventHandler<ActionEvent>() {
+		
+		continuousIitem.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e){
-				_field.getDataType().setInterpetation(Interpretation.CONTINUOUS);			
+//				if (_field.getDataType().getInterpretation() != Interpretation.CONTINUOUS) {
+					discreteItem.getGraphic().setVisible(false);
+					continuousIitem.getGraphic().setVisible(true);
+					_field.getDataType().setInterpetation(Interpretation.CONTINUOUS);
+					fireActionEvent();
+//				}
 			}
 		});
-		contextMenu.getItems().add(item);
+		
 		
 
 		_button.setOnMousePressed(new EventHandler<Event>() {
