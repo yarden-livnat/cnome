@@ -3,7 +3,11 @@ package edu.utah.sci.cyclist.ui.components;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -21,16 +25,20 @@ public class FilterGlyph extends HBox {
 	private Filter _filter;
 	private StackPane _button;
 	private boolean _remote;
+	private boolean _valid;
 	
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	
+	private BooleanProperty _validProperty = new SimpleBooleanProperty();
+	
 	public FilterGlyph(Filter filter) {
-		this(filter, false);
+		this(filter, false, true);
 	}
 	
-	public FilterGlyph(Filter filter, boolean remote) {
+	public FilterGlyph(Filter filter, boolean remote, boolean valid) {
 		_filter = filter;
 		_remote = remote;
+		_valid = valid;
 		build();
 	}
 	
@@ -50,6 +58,15 @@ public class FilterGlyph extends HBox {
 		return _action.get();
 	}
 	
+	public BooleanProperty validProperty() {
+		return _validProperty;
+	}
+	
+	public boolean isValid() {
+		return _validProperty.get();
+	}
+	
+	
 	private void build() {
 		this.getStyleClass().add("filter-glyph");
 		this.setSpacing(5);
@@ -61,7 +78,16 @@ public class FilterGlyph extends HBox {
 		setSpacing(5);
 		
 		if (_remote) {
-			setStyle("-fx-background-color: #d0ced1");
+			if(_valid){
+				setStyle("-fx-background-color: #d0ced1");
+			} else {
+				setStyle("-fx-background-color: #D7737F");
+			}
+				
+		} else {
+			if(!_valid){
+				setStyle("-fx-background-color: #e4a1aa");
+			}
 		}
 		
 		Label label = new Label(_filter.getName());
@@ -76,6 +102,26 @@ public class FilterGlyph extends HBox {
 		
 		this.getChildren().addAll(label,stackPane);
 		createMenu();
+		validProperty().set(_valid);
+		
+		validProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				
+				//Change color according to remote and validity parameters.
+				String color = "#beffbf";
+				if (validProperty().get()) {
+					color= (_remote) ? "#d0ced1": "#beffbf";
+					_valid=true;
+				} else {
+					color= (_remote) ? "#D7737F": "#e4a1aa";
+					_valid=false;
+				}
+				setStyle("-fx-background-color:" + color);
+				
+			}
+		});
 	}
 	
 	private void createMenu() {

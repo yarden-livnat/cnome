@@ -205,14 +205,29 @@ public class ChartView extends ViewBase {
 					}
 				}
 				
+				List<Filter> filtersList = new ArrayList();
+				
+				//Check the filters current validity
+				for(Filter filter : filters()){
+					if(getCurrentTable().hasField(filter.getField())){
+						filtersList.add(filter);
+					}
+				}
+				
+				//Check the remote filters current validity
+				for(Filter filter : remoteFilters()){
+					if(getCurrentTable().hasField(filter.getField())){
+						filtersList.add(filter);
+					}
+				}
+				
 				// build the query
 				QueryBuilder builder = 
 							getCurrentTable().queryBuilder()
 							.fields(fields)
 							.aggregates(aggregators)
 							.grouping(grouping)
-							.filters(filters())
-							.filters(remoteFilters())
+							.filters(filtersList)
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
 //				log.info("Query: "+builder.toString());
@@ -996,6 +1011,9 @@ public class ChartView extends ViewBase {
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaListener);
 		
+		//Let the filters area know when the selected table is changed.
+		getFiltersArea().tableProperty().bind(_currentTableProperty);
+		
 		setAreaFiltersListeners(area);
 
 		grid.add(text, col, row);
@@ -1046,7 +1064,6 @@ public class ChartView extends ViewBase {
 			}
 		});
 	}
-	
 	
 	/*Name: removeFilterFromDropArea
 	 * If a filter is removed - check if it is connected to a numeric field. By searching this field in the drop areas.
