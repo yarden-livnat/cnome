@@ -156,7 +156,7 @@ public class FieldGlyph extends HBox {
 		
 		final ContextMenu contextMenu = new ContextMenu();
 
-		MenuItem item = new MenuItem("Dimension");
+		MenuItem item = new MenuItem("Category");
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				_field.setRole(Role.DIMENSION);
