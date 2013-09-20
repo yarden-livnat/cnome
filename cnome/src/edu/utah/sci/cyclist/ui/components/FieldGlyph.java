@@ -18,6 +18,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.model.DataType.Interpretation;
 import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
@@ -193,6 +194,27 @@ public class FieldGlyph extends HBox {
 			}
 		});
 		contextMenu.getItems().add(item);
+		
+		contextMenu.getItems().add(new SeparatorMenuItem());
+		
+		//Change field type to discrete.
+		item = new MenuItem("Discrete");
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e){
+						_field.getDataType().setInterpetation(Interpretation.DISCRETE);			
+			}
+		});
+		contextMenu.getItems().add(item);
+		
+		//Change field type to continuous.
+		item = new MenuItem("Continuous");
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e){
+				_field.getDataType().setInterpetation(Interpretation.CONTINUOUS);			
+			}
+		});
+		contextMenu.getItems().add(item);
+		
 
 		_button.setOnMousePressed(new EventHandler<Event>() {
 
