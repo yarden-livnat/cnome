@@ -39,6 +39,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -56,6 +57,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.DataType.Classification;
@@ -67,6 +69,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.ui.components.DropArea;
+import edu.utah.sci.cyclist.ui.components.FieldGlyph;
 import edu.utah.sci.cyclist.ui.components.IntegerField;
 import edu.utah.sci.cyclist.ui.components.LineIndicator;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
@@ -104,6 +107,7 @@ public class ChartView extends ViewBase {
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
+	private ObjectProperty<Boolean> _forceZeroProperty = new SimpleObjectProperty<>();
 	private IntegerField _limitEntry;
 	
 	private StackPane _stackPane;
@@ -127,6 +131,14 @@ public class ChartView extends ViewBase {
 	}
 	public Table getCurrentTable() {
 		return _currentTableProperty.get();
+	}
+	
+	public ObjectProperty<Boolean> forceZeroProperty() {
+		return _forceZeroProperty;
+	}
+	
+	public Boolean getZeroProperty() {
+		return _forceZeroProperty.get();
 	}
 	
 	@Override
@@ -671,6 +683,7 @@ public class ChartView extends ViewBase {
 	private Axis createAxis(Field field, String title) {
 		Axis axis =  null;
 		System.out.println("field clasification: "+field.getClassification());
+	
 		switch (field.getClassification()) {
 
 		case C:
@@ -679,7 +692,7 @@ public class ChartView extends ViewBase {
 			break;
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
-			cd.forceZeroInRangeProperty().set(false);
+			cd.forceZeroInRangeProperty().set(forceZeroProperty().get());
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
 				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
 				@Override
@@ -692,12 +705,12 @@ public class ChartView extends ViewBase {
 			break;
 		case Qd:
 			NumberAxis t = new NumberAxis();
-			t.forceZeroInRangeProperty().set(false);
+			t.forceZeroInRangeProperty().set(forceZeroProperty().get());
 			axis = t;
 			break;
 		case Qi:
 			NumberAxis a = new NumberAxis();
-			a.forceZeroInRangeProperty().set(false);
+			a.forceZeroInRangeProperty().set(forceZeroProperty().get());
 			axis = a;
 		}
 		
@@ -850,6 +863,19 @@ public class ChartView extends ViewBase {
 				fetchData();
 			}
 		});
+		
+		
+        forceZeroProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				invalidateChart();
+				fetchData();
+			}
+		});
+        forceZeroProperty().set(false);
+		
+		
 	}
 	
 	
@@ -878,6 +904,30 @@ public class ChartView extends ViewBase {
 		
 		contextMenu.getItems().add(item);
 		
+		final MenuItem forceZeroItem = new MenuItem("Force Zero", new ImageView(Resources.getIcon("ok")));
+		contextMenu.getItems().add(forceZeroItem);
+		
+		final MenuItem releaseZeroItem = new MenuItem("Release Zero", new ImageView(Resources.getIcon("ok")));
+		contextMenu.getItems().add(releaseZeroItem);
+		
+		forceZeroItem.getGraphic().setVisible(false);
+		
+		forceZeroItem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				forceZeroItem.getGraphic().setVisible(true);
+				releaseZeroItem.getGraphic().setVisible(false);
+				forceZeroProperty().set(true);
+			}
+		});
+		
+		releaseZeroItem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				releaseZeroItem.getGraphic().setVisible(true);
+				forceZeroItem.getGraphic().setVisible(false);
+				forceZeroProperty().set(false);
+			}
+		});
+		
 		op.setOnMousePressed(new EventHandler<Event>() {
 			@Override
 			public void handle(Event event) {
@@ -889,6 +939,26 @@ public class ChartView extends ViewBase {
 		actions.add(op);
 //		actions.add(sp);
 		addActions(actions);
+		
+        chartProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				if(chartProperty().get() != null){
+					Axis<?> yAxis = chartProperty().get().getYAxis();
+					if (! (yAxis instanceof NumberAxis)){
+						forceZeroItem.setVisible(false);
+						releaseZeroItem.setVisible(false);
+					} else{
+						forceZeroItem.setVisible(true);
+						releaseZeroItem.setVisible(true);
+					}
+				}
+			}
+		});
+        
+        
+        forceZeroProperty().set(false);
 	}
 	
 	private void createIndicator() {
