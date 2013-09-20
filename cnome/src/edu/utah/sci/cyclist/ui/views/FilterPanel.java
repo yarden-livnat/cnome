@@ -1,8 +1,7 @@
 package edu.utah.sci.cyclist.ui.views;
 
 
-//import org.controlsfx.control.RangeSlider;
-import controls.RangeSlider;
+import org.controlsfx.control.RangeSlider;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
