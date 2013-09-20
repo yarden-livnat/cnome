@@ -39,7 +39,7 @@ public class Nodes{
 	 * built from this node will mimic its structure. 
 	 * @param name Name of the new prototype facility.
 	 */
-	static void addNode(String name) {
+	static FacilityCircle addNode(String name) {
 		final FacilityCircle circle = new FacilityCircle();
 		circle.setId(name);
 		circle.setRadius(30);
@@ -235,7 +235,7 @@ public class Nodes{
 			}
 		});
 		
-		CycicScenarios.workingCycicScenario.FacilityNodes.add(circle);
+		Cycic.workingScenario.FacilityNodes.add(circle);
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
@@ -262,6 +262,8 @@ public class Nodes{
 		Cycic.pane.getChildren().add(circle.text);
 		Cycic.pane.getChildren().add(circle.image);
 		circle.image.toBack();
+		
+		return circle;
 	}
 	
 	/**

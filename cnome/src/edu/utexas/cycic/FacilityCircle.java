@@ -15,7 +15,7 @@ import javafx.scene.text.Text;
  * @author Robert
  *
  */
-public class FacilityCircle extends Circle implements Serializable{
+public class FacilityCircle extends Circle {
 	String facilityType = "";
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
@@ -27,12 +27,12 @@ public class FacilityCircle extends Circle implements Serializable{
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
 	/*ArrayList<String> incommods = new ArrayList<String>();
 	ArrayList<String> outcommods = new ArrayList<String>();*/
-	transient MenuBar menu = new MenuBar();
-	transient Text text = new Text();
-	transient ImageView image = new ImageView();
+	MenuBar menu = new MenuBar();
+	Text text = new Text();
+	ImageView image = new ImageView();
 	String type = new String();
 	String parent = new String();
 	Integer parentIndex;
-	transient Object name; 
+	Object name; 
 	Boolean childrenShow;
 }

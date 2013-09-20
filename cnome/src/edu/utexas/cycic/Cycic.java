@@ -54,7 +54,7 @@ public class Cycic extends ViewBase{
 		
 		VBox cycicBox = new VBox();
 		Cycic.pane.setId("cycicPane");
-		Cycic.pane.setPrefSize(500, 500);
+		Cycic.pane.setPrefSize(600, 500);
 		Cycic.pane.setStyle("-fx-background-color: white;");
 		
 		// Temp Toolbar //
@@ -88,15 +88,15 @@ public class Cycic extends ViewBase{
 		submit1.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent event){
-				Nodes.addNode(facNameField.getText());
-				CycicScenarios.workingCycicScenario.FacilityNodes.get(CycicScenarios.workingCycicScenario.FacilityNodes.size()-1).facilityType = structureCB.getValue();
-				FacilityCircle workingTest = CycicScenarios.workingCycicScenario.FacilityNodes.get(CycicScenarios.workingCycicScenario.FacilityNodes.size()-1);
+				facilityNode tempCircle = new facilityNode();
+				tempCircle.facilityType = structureCB.getValue();
 				for (int i = 0; i < RealFacs.alfredStructs.size(); i++){
 					if (RealFacs.alfredStructsNames.get(i) == structureCB.getValue()){
-						workingTest.facilityStructure = RealFacs.alfredStructs.get(i);
-					}
+						tempCircle.facilityStructure = RealFacs.alfredStructs.get(i);
+					}				
 				}
-				FormBuilderFunctions.formArrayBuilder(workingTest.facilityStructure, workingTest.facilityData);
+				tempCircle.cycicCircle = Nodes.addNode(facNameField.getText());	
+				FormBuilderFunctions.formArrayBuilder(tempCircle.facilityStructure, tempCircle.facilityData);
 			}
 		});
 		grid.add(submit1, 4, 0);
@@ -115,7 +115,7 @@ public class Cycic extends ViewBase{
 			@Override
 			public void handle(ActionEvent event){
 				MarketNodes.addMarket(markNameField.getText());
-				Cycic.workingMarket = CycicScenarios.workingCycicScenario.marketNodes.get(CycicScenarios.workingCycicScenario.marketNodes.size() - 1);
+				Cycic.workingMarket = workingScenario.marketNodes.get(workingScenario.marketNodes.size() - 1);
 			}
 		});
 		grid.add(submit2, 3, 1);

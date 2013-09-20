@@ -12,12 +12,9 @@ import javafx.scene.shape.Line;
  *
  */
 public class DataArrays implements Serializable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4627284174636070992L;
 	
 	static ArrayList<FacilityCircle> FacilityNodes = new ArrayList<FacilityCircle>();
+	ArrayList<facilityNode> testArray = new ArrayList<facilityNode>();
 	static ArrayList<Label> FacilityTypes = new ArrayList<Label>();	
 	
 	static ArrayList<nodeLink> Links = new ArrayList<nodeLink>();
@@ -127,6 +124,15 @@ class simInfo{
 	String startYear;
 	String simStart;
 	String decay;
+}
+
+class facilityNode{
+	String facilityType = "";
+	Integer facTypeIndex = 0;
+	ArrayList<Object> facilityData = new ArrayList<Object>();
+	ArrayList<Object> facilityStructure = new ArrayList<Object>();
+	FacilityCircle cycicCircle = new FacilityCircle();
+	FacilityCircle sorterCircle = new FacilityCircle();
 }
 
 
