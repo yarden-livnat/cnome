@@ -53,13 +53,14 @@ public class ViewPresenter extends PresenterBase{
 		addListeners();
 	}
 	
-	public ViewPresenter clone(View view) {
-		return null;
-	}
-	
-	public void setActive(boolean active) {
-	}
-	
+	 public ViewPresenter clone(View view) {
+            return null;
+    }
+		        
+    public void setActive(boolean active) {
+    }
+		        
+		 
 	public void setView(View view) {
 		_view = view;
 		if (_view != null) {

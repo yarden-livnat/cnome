@@ -36,6 +36,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -179,8 +180,12 @@ public class ChartView extends ViewBase {
 		return _forceZeroProperty;
 	}
 	
-	public Boolean getZeroProperty() {
+	public Boolean getForceZero() {
 		return _forceZeroProperty.get();
+	}
+	
+	public void setForceZero(Boolean value) {
+		_forceZeroProperty.set(value);
 	}
 	
 	@Override
@@ -736,7 +741,8 @@ public class ChartView extends ViewBase {
 			break;
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
-			cd.forceZeroInRangeProperty().set(forceZeroProperty().get());
+//			cd.forceZeroInRangeProperty().set(forceZeroProperty().get());
+			cd.forceZeroInRangeProperty().bind(forceZeroProperty());
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
 				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
 				@Override
@@ -749,12 +755,14 @@ public class ChartView extends ViewBase {
 			break;
 		case Qd:
 			NumberAxis t = new NumberAxis();
-			t.forceZeroInRangeProperty().set(forceZeroProperty().get());
+//			t.forceZeroInRangeProperty().set(forceZeroProperty().get());
+			t.forceZeroInRangeProperty().bind(forceZeroProperty());
 			axis = t;
 			break;
 		case Qi:
 			NumberAxis a = new NumberAxis();
-			a.forceZeroInRangeProperty().set(forceZeroProperty().get());
+//			a.forceZeroInRangeProperty().set(forceZeroProperty().get());
+			a.forceZeroInRangeProperty().bind(forceZeroProperty());
 			axis = a;
 		}
 		
@@ -913,8 +921,12 @@ public class ChartView extends ViewBase {
 			
 			@Override
 			public void invalidated(Observable observable) {
-				invalidateChart();
-				fetchData();
+				// FIXME: seems to be a bug in JavaFX.
+				// The chart does not refresh itself if the axis forceRangeZero changes.
+				// This is a hack to force the chart to redraw.
+				ObservableList<Series<Object, Object>> list = getChart().getData();
+				getChart().setData(null);
+				getChart().setData(list);
 			}
 		});
         forceZeroProperty().set(false);
@@ -949,29 +961,15 @@ public class ChartView extends ViewBase {
 		contextMenu.getItems().add(item);
 		
 		final MenuItem forceZeroItem = new MenuItem("Force Zero", new ImageView(Resources.getIcon("ok")));
+		forceZeroItem.getGraphic().visibleProperty().bind(forceZeroProperty());
 		contextMenu.getItems().add(forceZeroItem);
-		
-		final MenuItem releaseZeroItem = new MenuItem("Release Zero", new ImageView(Resources.getIcon("ok")));
-		contextMenu.getItems().add(releaseZeroItem);
-		
-		forceZeroItem.getGraphic().setVisible(false);
-		
+				
 		forceZeroItem.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				forceZeroItem.getGraphic().setVisible(true);
-				releaseZeroItem.getGraphic().setVisible(false);
-				forceZeroProperty().set(true);
+				setForceZero(!getForceZero());
 			}
 		});
 		
-		releaseZeroItem.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent e) {
-				releaseZeroItem.getGraphic().setVisible(true);
-				forceZeroItem.getGraphic().setVisible(false);
-				forceZeroProperty().set(false);
-			}
-		});
-
 		MenuItem duplicateItem = new MenuItem("Duplicate chart");
 		duplicateItem.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
@@ -1003,10 +1001,8 @@ public class ChartView extends ViewBase {
 					Axis<?> yAxis = chartProperty().get().getYAxis();
 					if (! (yAxis instanceof NumberAxis)){
 						forceZeroItem.setVisible(false);
-						releaseZeroItem.setVisible(false);
 					} else{
 						forceZeroItem.setVisible(true);
-						releaseZeroItem.setVisible(true);
 					}
 				}
 			}
