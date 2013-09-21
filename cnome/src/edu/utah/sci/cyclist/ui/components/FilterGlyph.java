@@ -81,7 +81,7 @@ public class FilterGlyph extends HBox {
 			if(_valid){
 				setStyle("-fx-background-color: #d0ced1");
 			} else {
-				setStyle("-fx-background-color: #D7737F");
+				setStyle("-fx-background-color: #d0ced1;"+"-fx-border-color:#D7737F;"+"-fx-border-width:2;");
 			}
 				
 		} else {
@@ -115,10 +115,13 @@ public class FilterGlyph extends HBox {
 					color= (_remote) ? "#d0ced1": "#beffbf";
 					_valid=true;
 				} else {
-					color= (_remote) ? "#D7737F": "#e4a1aa";
+					color= (_remote) ? "#d0ced1": "#e4a1aa";
 					_valid=false;
 				}
 				setStyle("-fx-background-color:" + color);
+				if(!_valid && _remote){
+					setStyle("-fx-border-color:#D7737F;"+"-fx-background-color:" + color+";" + "-fx-border-width:2;");
+				}
 				
 			}
 		});
