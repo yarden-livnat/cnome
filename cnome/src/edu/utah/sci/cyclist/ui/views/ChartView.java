@@ -85,6 +85,8 @@ public class ChartView extends ViewBase {
 	
 	
 	private ViewType _viewType;
+	private boolean _active = true;
+	
 //	private MarkType _markType;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
@@ -93,7 +95,8 @@ public class ChartView extends ViewBase {
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
 	
-
+	private Closure.V0 _onDuplicate = null;
+	
 	private MapSpec _spec;
 	
 	private BorderPane _pane;
@@ -117,6 +120,45 @@ public class ChartView extends ViewBase {
 		super();
 		build();
 	}
+	
+	@Override 
+	public ViewBase clone() {
+		ChartView copy = new ChartView();
+		copy.setActive(false);
+
+		return copy;
+	}
+	
+	public void copy(ChartView other) {
+		for (Field field : other._xArea.getFields()) {
+			_xArea.getFields().add(field.clone());
+		}
+		
+		for (Field field : other._yArea.getFields()) {
+			_yArea.getFields().add(field.clone());
+		}
+		
+		for (Field field : other._lodArea.getFields()) {
+			_lodArea.getFields().add(field.clone());
+		}
+		
+		
+		getFiltersArea().copy(other.getFiltersArea());
+		
+	}
+	
+	public void setActive(boolean state) {
+		_active = state;
+		if (_active) {
+			invalidateChart();
+			fetchData();
+		}
+	}
+	 
+	public void setOnDuplicate(Closure.V0 action) {
+		_onDuplicate = action;
+	}
+	
 	
 	public ObjectProperty<XYChart<Object,Object>> chartProperty() {
 		return _chartProperty;
@@ -169,6 +211,8 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void fetchData() {
+		if (!_active) return;
+		
 		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (!_xArea.isValid() || !_yArea.isValid())
 				return;
@@ -927,6 +971,17 @@ public class ChartView extends ViewBase {
 				forceZeroProperty().set(false);
 			}
 		});
+
+		MenuItem duplicateItem = new MenuItem("Duplicate chart");
+		duplicateItem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if (_onDuplicate != null) {
+					_onDuplicate.call();
+				}
+			}
+		});
+		
+		contextMenu.getItems().add(duplicateItem);
 		
 		op.setOnMousePressed(new EventHandler<Event>() {
 			@Override

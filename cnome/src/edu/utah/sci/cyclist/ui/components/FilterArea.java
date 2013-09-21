@@ -67,6 +67,11 @@ public class FilterArea extends ToolBar {
 		return _tableProperty.get();
 	}
 	
+	public void copy(FilterArea other) {
+		_filters.addAll(other._filters);
+		_remoteFilters.addAll(other._remoteFilters);
+	}
+	
 	private void build() {
 //		setPrefHeight(25);
 		setMinWidth(15);

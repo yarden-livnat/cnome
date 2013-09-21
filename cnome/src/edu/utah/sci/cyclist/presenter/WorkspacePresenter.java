@@ -228,6 +228,17 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
+		addLocalNotificationHandler(CyclistNotifications.DUPLICATE_VIEW, new CyclistNotificationHandler() {
+			@Override
+			public void handle(CyclistNotification event) {
+				Presenter presenter = (Presenter) event.getSource();
+				if (presenter instanceof ChartPresenter) {
+					duplicateView((ChartPresenter) presenter);
+				}
+			}
+			
+		});
+		
 		addLocalNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
@@ -290,6 +301,18 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
+	}
+	
+	private void duplicateView(ViewPresenter presenter) {
+		ViewBase view = (ViewBase) presenter.getView();
+		
+		ViewBase newView = view.clone();
+		newView.setTranslateX( view.getTranslateX()+10);
+		newView.setTranslateY( view.getTranslateY()+10);
+		getWorkspace().addView(newView);
+		
+		ViewPresenter newPresenter = presenter.clone(newView);
+		_presenters.add(newPresenter);
 	}
 	
 	private void addToplevelListeners() {

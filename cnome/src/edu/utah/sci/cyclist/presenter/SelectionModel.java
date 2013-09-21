@@ -12,6 +12,10 @@ public class SelectionModel {
 	private Closure.V2<Table, Boolean> _onSelectTableAction = null;
 	private Entry _explicitSelection = null;
 	
+	public List<Entry> getEntries() {
+		return _list;
+	}
+	
 	public void setOnSelectTableAction(Closure.V2<Table, Boolean> action) {
 		_onSelectTableAction = action;
 	}

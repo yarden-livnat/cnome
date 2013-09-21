@@ -201,6 +201,10 @@ public class ViewBase extends BorderPane implements View {
 		setListeners();
 	}
 	
+	public ViewBase clone() {
+		return null;
+	}
+	
 	public void setTitle(String title) {
 		_title.setText(title);
 	}
