@@ -32,9 +32,10 @@ public class Clones {
 	 * @param parent facilityCircle node the new child will be added to.
 	 * @param parentChildShow Boolean to indicate whether or not to show the child when it is built.
 	 */
-	static void addClone(String name, final FacilityCircle parent, Boolean parentChildShow) {
+	static void addClone(String name, final facilityNode parent, Boolean parentChildShow) {
 		// Building the facilityCircle and adding the basic information.
-		final FacilityCircle clone = new FacilityCircle();
+		final facilityNode cloneNode = new facilityNode();
+		final FacilityCircle clone = cloneNode.cycicCircle;
 		clone.setId(name);
 		clone.setRadius(25);
 		clone.parent = (String) parent.name;
@@ -44,18 +45,19 @@ public class Clones {
 		// Providing the child with the index of its parent node in the dataArrays.facilityNodes ArrayList.
 		for(int i = 0; i < DataArrays.FacilityNodes.size(); i++){
 			if(DataArrays.FacilityNodes.get(i) == parent){
-				clone.parentIndex = i;
+				cloneNode.parentIndex = i;
 			}
 		}
 		// Copying important information from parent to child.
-		clone.facilityStructure = DataArrays.FacilityNodes.get(clone.parentIndex).facilityStructure;
-		parent.childrenList.add(clone);
+		cloneNode.facilityStructure = DataArrays.FacilityNodes.get(clone.parentIndex).facilityStructure;
+		parent.cycicCircle.childrenList.add(clone);
+		parent.facilityClones.add(cloneNode);
 		clone.facTypeIndex = parent.facTypeIndex;
-		clone.setCenterX(parent.getCenterX()+60);
-		clone.setCenterY(parent.getCenterY()+60);
+		clone.setCenterX(parent.cycicCircle.getCenterX()+60);
+		clone.setCenterY(parent.cycicCircle.getCenterY()+60);
 		clone.facilityType = parent.facilityType;
 		// Building the child's facility data ArrayList
-		FormBuilderFunctions.formArrayBuilder(clone.facilityStructure, clone.facilityData);
+		FormBuilderFunctions.formArrayBuilder(cloneNode.facilityStructure, cloneNode.facilityData);
 		
 		// Setting the Fill Color //
 		clone.rgbColor = VisFunctions.stringToColor((String) parent.name);
@@ -78,7 +80,7 @@ public class Clones {
 		MenuItem delete = new MenuItem("Delete");
 		delete.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				removeClone(clone, parent);
+				removeClone(cloneNode, parent);
 			}
 		});
 		menu1.getItems().addAll(facForm, delete);
@@ -95,15 +97,15 @@ public class Clones {
 		
 		// Adding the Parent Child Link different from normal market links.//
 		final nodeLink parentChild = new nodeLink();
-		parentChild.source = parent;
+		parentChild.source = parent.cycicCircle;
 		parentChild.target = name;
 		parentChild.line.setStroke(Color.GRAY);
 		parentChild.line.setStrokeWidth(1.5);
 		parentChild.line.getStrokeDashArray().addAll(15d, 5d);
-		parentChild.line.setStartX(parent.getCenterX());
-		parentChild.line.setStartY(parent.getCenterY());
-		parentChild.line.setEndX(parent.childrenList.get(parent.childrenList.size()-1).getCenterX());
-		parentChild.line.setEndY(parent.childrenList.get(parent.childrenList.size()-1).getCenterY());
+		parentChild.line.setStartX(parent.cycicCircle.getCenterX());
+		parentChild.line.setStartY(parent.cycicCircle.getCenterY());
+		parentChild.line.setEndX(parent.cycicCircle.childrenList.get(parent.cycicCircle.childrenList.size()-1).getCenterX());
+		parentChild.line.setEndY(parent.cycicCircle.childrenList.get(parent.cycicCircle.childrenList.size()-1).getCenterY());
 		
 		// Mouse drag detection function for initiating the construction of a new view. 
 		clone.setOnDragDetected(new EventHandler<MouseEvent>(){
@@ -128,7 +130,7 @@ public class Clones {
 		clone.onMousePressedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				Cycic.workingNode = clone;
+				Cycic.workingNode = cloneNode;
 				x = clone.getCenterX() - event.getX();
 				y = clone.getCenterY() - event.getY();
 				mousex = event.getX();
@@ -187,14 +189,14 @@ public class Clones {
 		});
 		
 		// Used for tracking the objects //
-		parent.childrenLinks.add(parentChild);	
+		parent.cycicCircle.childrenLinks.add(parentChild);	
 		
 		// If applicable adding node to CYCIC pane.
-		int childIndex = parent.childrenList.size();
+		int childIndex = parent.cycicCircle.childrenList.size();
 		if(parentChildShow == true){	
-			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).childrenList.get(childIndex-1));
-			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).childrenList.get(childIndex-1).menu);
-			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).childrenList.get(childIndex-1).text);
+			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).cycicCircle.childrenList.get(childIndex-1));
+			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).cycicCircle.childrenList.get(childIndex-1).menu);
+			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).cycicCircle.childrenList.get(childIndex-1).text);
 			Cycic.pane.getChildren().add(parentChild.line);
 			parentChild.line.toBack();
 		}
@@ -205,16 +207,21 @@ public class Clones {
 	 * @param child This is the name of the clone to be removed. 
 	 * @param parent Parent of the clone being removed.
 	 */
-	static void removeClone(FacilityCircle child, FacilityCircle parent){
+	static void removeClone(facilityNode child, facilityNode parent){
 		for(int i = 0; i < DataArrays.Links.size(); i++){
-			if(DataArrays.Links.get(i).source == child){
+			if(DataArrays.Links.get(i).source == child.cycicCircle){
 				DataArrays.Links.remove(i);
 			}
 		}
-		for(int i = 0; i < parent.childrenList.size(); i++){
-			if(parent.childrenList.get(i) == child){
-				parent.childrenList.remove(i);
-				parent.childrenLinks.remove(i);
+		for(int i = 0; i < parent.cycicCircle.childrenList.size(); i++){
+			if(parent.cycicCircle.childrenList.get(i) == child.cycicCircle){
+				parent.cycicCircle.childrenList.remove(i);
+				parent.cycicCircle.childrenLinks.remove(i);
+			}
+		}
+		for( int i = 0; i < parent.facilityClones.size(); i++){
+			if(parent.facilityClones.get(i) == child){
+				parent.facilityClones.remove(i);
 			}
 		}
 		VisFunctions.reloadPane();

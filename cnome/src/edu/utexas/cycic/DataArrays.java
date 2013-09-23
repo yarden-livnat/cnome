@@ -13,7 +13,7 @@ import javafx.scene.shape.Line;
  */
 public class DataArrays implements Serializable{
 	
-	static ArrayList<FacilityCircle> FacilityNodes = new ArrayList<FacilityCircle>();
+	static ArrayList<facilityNode> FacilityNodes = new ArrayList<facilityNode>();
 	ArrayList<facilityNode> testArray = new ArrayList<facilityNode>();
 	static ArrayList<Label> FacilityTypes = new ArrayList<Label>();	
 	
@@ -127,10 +127,13 @@ class simInfo{
 }
 
 class facilityNode{
+	Object name;
 	String facilityType = "";
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
 	ArrayList<Object> facilityStructure = new ArrayList<Object>();
+	ArrayList<facilityNode> facilityClones = new ArrayList<facilityNode>();
+	int parentIndex;
 	FacilityCircle cycicCircle = new FacilityCircle();
 	FacilityCircle sorterCircle = new FacilityCircle();
 }

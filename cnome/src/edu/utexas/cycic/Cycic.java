@@ -34,7 +34,7 @@ public class Cycic extends ViewBase{
 	}
 	public static final String TITLE = "Cycic";
 	static Pane pane = new Pane();
-	static FacilityCircle workingNode = null;
+	static facilityNode workingNode = null;
 	static MarketCircle workingMarket = null;
 	static DataArrays workingScenario;
 	

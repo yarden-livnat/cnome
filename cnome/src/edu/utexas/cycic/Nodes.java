@@ -40,7 +40,8 @@ public class Nodes{
 	 * @param name Name of the new prototype facility.
 	 */
 	static FacilityCircle addNode(String name) {
-		final FacilityCircle circle = new FacilityCircle();
+		final facilityNode circleNode = new facilityNode();
+		final FacilityCircle circle = circleNode.cycicCircle;
 		circle.setId(name);
 		circle.setRadius(30);
 		circle.setCenterX(40);
@@ -83,7 +84,7 @@ public class Nodes{
 		
 		delete.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				deleteNode(circle);
+				deleteNode(circleNode);
 			}
 		});
 		
@@ -93,7 +94,7 @@ public class Nodes{
 		cloneNode.setHideOnClick(false);
 		cloneNode.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				Clones.addClone("", circle, circle.childrenShow);
+				Clones.addClone("", circleNode, circleNode.cycicCircle.childrenShow);
 			}
 		});
 		
@@ -133,7 +134,7 @@ public class Nodes{
 		circle.onMousePressedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				Cycic.workingNode = circle;
+				Cycic.workingNode = circleNode;
 				circle.childrenDeltaX.clear();
 				circle.childrenDeltaY.clear();
 				for(int i = 0; i < circle.childrenList.size(); i++){
@@ -235,7 +236,7 @@ public class Nodes{
 			}
 		});
 		
-		Cycic.workingScenario.FacilityNodes.add(circle);
+		Cycic.workingScenario.FacilityNodes.add(circleNode);
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
@@ -270,22 +271,22 @@ public class Nodes{
 	 * Removes a facilityCircle from the simulation.
 	 * @param circle The facilityCircle to be removed. 
 	 */
-	static void deleteNode(FacilityCircle circle){
+	static void deleteNode(facilityNode node){
 		for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
-			if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
+			if(CycicScenarios.workingCycicScenario.Links.get(i).source == node.cycicCircle){
 				CycicScenarios.workingCycicScenario.Links.remove(i);
 			}
 		}
 		for(int i = 0; i < CycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
-			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == circle){
+			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == node.cycicCircle){
 				CycicScenarios.workingCycicScenario.hiddenLinks.remove(i);
 			}
 		}
 		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
-			if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i) == circle){
-				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size();ii++){
+			if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i) == node){
+				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.size();ii++){
 					for(int iii = 0; iii < CycicScenarios.workingCycicScenario.Links.size(); iii++){
-						if(CycicScenarios.workingCycicScenario.Links.get(i).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(iii)){
+						if(CycicScenarios.workingCycicScenario.Links.get(i).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(iii)){
 							CycicScenarios.workingCycicScenario.Links.remove(i);
 						}
 					}
@@ -294,8 +295,8 @@ public class Nodes{
 			}
 		}
 		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
-			for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.size(); ii++){
-				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).childrenList.get(ii).parentIndex = i;
+			for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.size(); ii++){
+				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).parentIndex = i;
 			}
 		}
 		VisFunctions.reloadPane();

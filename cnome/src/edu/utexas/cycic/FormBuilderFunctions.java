@@ -88,14 +88,14 @@ public class FormBuilderFunctions {
 	 * @param dataArray The ArrayList<Object> that contains the name field data for the facility.
 	 * @return TextField that controls the input of this field. 
 	 */
-	static TextField nameFieldBuilder(final FacilityCircle node, final ArrayList<Object> dataArray){
+	static TextField nameFieldBuilder(final facilityNode node, final ArrayList<Object> dataArray){
 		TextField textField = new TextField();
 		textField.setText((String)node.name);
 		
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = newValue;
-				node.text.setText(newValue);
+				node.cycicCircle.text.setText(newValue);
 				dataArray.set(0, newValue);
 			}
 		});

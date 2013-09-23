@@ -18,8 +18,6 @@ import javafx.scene.text.Text;
 public class FacilityCircle extends Circle {
 	String facilityType = "";
 	Integer facTypeIndex = 0;
-	ArrayList<Object> facilityData = new ArrayList<Object>();
-	ArrayList<Object> facilityStructure = new ArrayList<Object>();
 	ArrayList<FacilityCircle> childrenList = new ArrayList<FacilityCircle>();
 	ArrayList<nodeLink> childrenLinks = new ArrayList<nodeLink>();
 	ArrayList<Double> childrenDeltaX = new ArrayList<Double>();
@@ -32,6 +30,7 @@ public class FacilityCircle extends Circle {
 	ImageView image = new ImageView();
 	String type = new String();
 	String parent = new String();
+	Integer nodeIndex;
 	Integer parentIndex;
 	Object name; 
 	Boolean childrenShow;

@@ -91,7 +91,7 @@ public class FormBuilder extends ViewBase {
 	private ComboBox<String> userLevelBox = new ComboBox<String>();
 	private GridPane grid = new GridPane();
 	private GridPane topGrid = new GridPane();
-	private FacilityCircle formNode = null;
+	private facilityNode formNode = null;
 	private int rowNumber = 0;
 	private int columnNumber = 0;
 	private int columnEnd = 0;
