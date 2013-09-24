@@ -46,10 +46,11 @@ public class Clones {
 		for(int i = 0; i < DataArrays.FacilityNodes.size(); i++){
 			if(DataArrays.FacilityNodes.get(i) == parent){
 				cloneNode.parentIndex = i;
+				clone.parentIndex = i;
 			}
 		}
 		// Copying important information from parent to child.
-		cloneNode.facilityStructure = DataArrays.FacilityNodes.get(clone.parentIndex).facilityStructure;
+		cloneNode.facilityStructure = parent.facilityStructure;
 		parent.cycicCircle.childrenList.add(clone);
 		parent.facilityClones.add(cloneNode);
 		clone.facTypeIndex = parent.facTypeIndex;
@@ -194,9 +195,9 @@ public class Clones {
 		// If applicable adding node to CYCIC pane.
 		int childIndex = parent.cycicCircle.childrenList.size();
 		if(parentChildShow == true){	
-			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).cycicCircle.childrenList.get(childIndex-1));
-			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).cycicCircle.childrenList.get(childIndex-1).menu);
-			Cycic.pane.getChildren().add(DataArrays.FacilityNodes.get(clone.parentIndex).cycicCircle.childrenList.get(childIndex-1).text);
+			Cycic.pane.getChildren().add(parent.cycicCircle.childrenList.get(childIndex-1));
+			Cycic.pane.getChildren().add(parent.cycicCircle.childrenList.get(childIndex-1).menu);
+			Cycic.pane.getChildren().add(parent.cycicCircle.childrenList.get(childIndex-1).text);
 			Cycic.pane.getChildren().add(parentChild.line);
 			parentChild.line.toBack();
 		}

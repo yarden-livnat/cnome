@@ -53,11 +53,11 @@ public class OutPut {
 			}
 			
 			// Facilities
-			for(FacilityCircle facility : CycicScenarios.workingCycicScenario.FacilityNodes){
-				if (facility.childrenList.size() > 0) {
-					for (int i = 0; i < facility.childrenList.size(); i++){
+			for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
+				if (facility.facilityClones.size() > 0) {
+					for (int i = 0; i < facility.facilityClones.size(); i++){
 						Element facID = doc.createElement("facility");
-						facilityBuilder(doc, facID, facility.facilityStructure, facility.childrenList.get(i).facilityData, facility.type);
+						facilityBuilder(doc, facID, facility.facilityStructure, facility.facilityClones.get(i).facilityData, facility.facilityType);
 						rootElement.appendChild(facID);
 					}
 				} 

@@ -123,8 +123,8 @@ public class InstitutionView extends ViewBase{
 		addNewProtoBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewProtoBox.getItems().clear();
-				for (FacilityCircle circle: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (FacilityCircle child: circle.childrenList) {
+				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
+					for (FacilityCircle child: node.cycicCircle.childrenList) {
 						addNewProtoBox.getItems().add((String)child.name);
 					}
 				}
@@ -150,8 +150,8 @@ public class InstitutionView extends ViewBase{
 		addNewFacBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacBox.getItems().clear();
-				for (FacilityCircle circle: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (FacilityCircle child: circle.childrenList) {
+				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
+					for (FacilityCircle child: node.cycicCircle.childrenList) {
 						addNewFacBox.getItems().add((String)child.name);
 					}
 				}
@@ -355,7 +355,7 @@ public class InstitutionView extends ViewBase{
 							grid.add(FormBuilderFunctions.institNameBuilder(workingInstit, dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 							break;
-						case "Incommodity":
+						/*case "Incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;
 						case "Outcommodity":
@@ -363,7 +363,7 @@ public class InstitutionView extends ViewBase{
 							break;
 						case "Recipe":
 							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
+							break;*/
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;

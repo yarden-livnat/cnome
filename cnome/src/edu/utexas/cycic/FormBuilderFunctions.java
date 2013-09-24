@@ -257,7 +257,7 @@ public class FormBuilderFunctions {
 	 * @param defaultValue The ArrayList<Object> that contains the default value of this input field for the facilityCircle.
 	 * @return ComboBox containing all of the commodities currently linked to markets, with the value shown being the current incommodity for the facNode.
 	 */
-	static ComboBox<String> comboBoxInCommod(final FacilityCircle facNode, final ArrayList<Object> defaultValue){
+	static ComboBox<String> comboBoxInCommod(final facilityNode facNode, final ArrayList<Object> defaultValue){
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
@@ -281,7 +281,7 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
 				Object oldMarket = null;
-				FacilityCircle parentName = null;
+				facilityNode parentName = null;
 				Object lazySpaceSaver = null;
 				Boolean hiddenLinkTest = false;
 				if (newValue == "New Commodity"){
@@ -296,24 +296,24 @@ public class FormBuilderFunctions {
 						}
 					}
 					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
+						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode.cycicCircle && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
 							CycicScenarios.workingCycicScenario.Links.remove(j);
 							j -= 1;
 						}
 					}
-					parentName = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.parentIndex);
-					for ( int ii = 0; ii < parentName.childrenList.size(); ii++){
-						lazySpaceSaver = parentName.childrenList.get(ii);
+					parentName = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.cycicCircle.parentIndex);
+					for ( int ii = 0; ii < parentName.cycicCircle.childrenList.size(); ii++){
+						lazySpaceSaver = parentName.cycicCircle.childrenList.get(ii);
 						for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++){
 							if (CycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
 								hiddenLinkTest = true;
 							}
 						}
-						VisFunctions.hiddenLinkRemoval(parentName, oldMarket, hiddenLinkTest);
+						VisFunctions.hiddenLinkRemoval(parentName.cycicCircle, oldMarket, hiddenLinkTest);
 						hiddenLinkTest = false;
 					}
 					if (marketCircle != null){
-						VisFunctions.linkNodesSimple(facNode, marketCircle);
+						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
 						defaultValue.set(0, newValue);
 						VisFunctions.reloadPane();
 					}
@@ -332,7 +332,7 @@ public class FormBuilderFunctions {
 	 * @param defaultValue The ArrayList<Object> that contains the default value of this input field for the facilityCircle.
 	 * @return ComboBox containing all of the commodities currently linked to markets, with the value shown being the current outcommodity for the facNode.
 	 */
-	static ComboBox<String> comboBoxOutCommod(final FacilityCircle facNode, final ArrayList<Object> defaultValue){
+	static ComboBox<String> comboBoxOutCommod(final facilityNode facNode, final ArrayList<Object> defaultValue){
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
@@ -355,7 +355,7 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
 				Object oldMarket = null;
-				FacilityCircle parentName = null;
+				facilityNode parent = null;
 				Object lazySpaceSaver = null;
 				Boolean hiddenLinkTest = false;
 				if (newValue == "New Commodity"){
@@ -370,24 +370,24 @@ public class FormBuilderFunctions {
 						}
 					}
 					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
+						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode.cycicCircle && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
 							CycicScenarios.workingCycicScenario.Links.remove(j);
 							j -= 1;
 						}
 					}
-					parentName = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.parentIndex);
-					for ( int ii = 0; ii < parentName.childrenList.size(); ii++){
-						lazySpaceSaver = parentName.childrenList.get(ii);
+					parent = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.cycicCircle.parentIndex);
+					for ( int ii = 0; ii < parent.cycicCircle.childrenList.size(); ii++){
+						lazySpaceSaver = parent.cycicCircle.childrenList.get(ii);
 						for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++){
 							if (CycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
 								hiddenLinkTest = true;
 							}
 						}
-						VisFunctions.hiddenLinkRemoval(parentName, oldMarket, hiddenLinkTest);
+						VisFunctions.hiddenLinkRemoval(parent.cycicCircle, oldMarket, hiddenLinkTest);
 						hiddenLinkTest = false;
 					}
 					if (marketCircle != null){
-						VisFunctions.linkNodesSimple(facNode, marketCircle);
+						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
 						defaultValue.set(0, newValue);
 						VisFunctions.reloadPane();
 					}
@@ -405,7 +405,7 @@ public class FormBuilderFunctions {
 	 * @param defaultValue ArrayList<Object> containing the data for a "recipe" field in the facilityCircle. 
 	 * @return ComboBox containing all of the recipies currently available in the simulation, tied to the value of this recipe field. 
 	 */
-	static ComboBox<String> recipeComboBox(FacilityCircle facNode, final ArrayList<Object> defaultValue){
+	static ComboBox<String> recipeComboBox(facilityNode facNode, final ArrayList<Object> defaultValue){
 		final ComboBox<String> cb = new ComboBox<String>();
 		
 		cb.setValue((String) defaultValue.get(0));

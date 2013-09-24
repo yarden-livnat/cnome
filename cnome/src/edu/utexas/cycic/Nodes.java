@@ -39,9 +39,8 @@ public class Nodes{
 	 * built from this node will mimic its structure. 
 	 * @param name Name of the new prototype facility.
 	 */
-	static FacilityCircle addNode(String name) {
-		final facilityNode circleNode = new facilityNode();
-		final FacilityCircle circle = circleNode.cycicCircle;
+	static FacilityCircle addNode(String name, final facilityNode parent) {
+		final FacilityCircle circle = parent.cycicCircle;
 		circle.setId(name);
 		circle.setRadius(30);
 		circle.setCenterX(40);
@@ -84,7 +83,7 @@ public class Nodes{
 		
 		delete.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				deleteNode(circleNode);
+				deleteNode(parent);
 			}
 		});
 		
@@ -94,7 +93,8 @@ public class Nodes{
 		cloneNode.setHideOnClick(false);
 		cloneNode.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				Clones.addClone("", circleNode, circleNode.cycicCircle.childrenShow);
+				Clones.addClone("", parent, parent.cycicCircle.childrenShow);
+				System.out.println(parent.facilityStructure);
 			}
 		});
 		
@@ -134,7 +134,7 @@ public class Nodes{
 		circle.onMousePressedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				Cycic.workingNode = circleNode;
+				Cycic.workingNode = parent;
 				circle.childrenDeltaX.clear();
 				circle.childrenDeltaY.clear();
 				for(int i = 0; i < circle.childrenList.size(); i++){
@@ -236,7 +236,7 @@ public class Nodes{
 			}
 		});
 		
-		Cycic.workingScenario.FacilityNodes.add(circleNode);
+		Cycic.workingScenario.FacilityNodes.add(parent);
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){

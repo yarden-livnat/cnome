@@ -114,8 +114,8 @@ public class RegionView extends ViewBase{
 		addNewFacilityBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacilityBox.getItems().clear();
-				for (FacilityCircle circle: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (FacilityCircle child: circle.childrenList) {
+				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
+					for (facilityNode child: node.facilityClones) {
 						addNewFacilityBox.getItems().add((String)child.name);
 					}
 				}
@@ -292,7 +292,7 @@ public class RegionView extends ViewBase{
 							grid.add(FormBuilderFunctions.regionNameBuilder(workingRegion, dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 							break;
-						case "Incommodity":
+						/*case "Incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;
 						case "Outcommodity":
@@ -300,7 +300,7 @@ public class RegionView extends ViewBase{
 							break;
 						case "Recipe":
 							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
+							break;*/
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
