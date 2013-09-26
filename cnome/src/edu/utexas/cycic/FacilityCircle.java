@@ -1,6 +1,5 @@
 package edu.utexas.cycic;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import javafx.scene.control.MenuBar;

@@ -26,7 +26,7 @@ import javafx.scene.text.Text;
  * @author Robert
  *
  */
-public class Nodes{
+public class CycicCircles{
 
 	protected static double mousey;
 	protected static double mousex;

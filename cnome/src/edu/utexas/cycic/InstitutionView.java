@@ -124,7 +124,7 @@ public class InstitutionView extends ViewBase{
 			public void handle(MouseEvent e){
 				addNewProtoBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (FacilityCircle child: node.cycicCircle.childrenList) {
+					for (facilityNode child: node.facilityClones) {
 						addNewProtoBox.getItems().add((String)child.name);
 					}
 				}
@@ -151,7 +151,7 @@ public class InstitutionView extends ViewBase{
 			public void handle(MouseEvent e){
 				addNewFacBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (FacilityCircle child: node.cycicCircle.childrenList) {
+					for (facilityNode child: node.facilityClones) {
 						addNewFacBox.getItems().add((String)child.name);
 					}
 				}

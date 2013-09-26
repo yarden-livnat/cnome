@@ -1,6 +1,5 @@
 package edu.utexas.cycic;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import javafx.scene.control.Label;
@@ -11,10 +10,9 @@ import javafx.scene.shape.Line;
  * @author Robert
  *
  */
-public class DataArrays implements Serializable{
+public class DataArrays{
 	
 	static ArrayList<facilityNode> FacilityNodes = new ArrayList<facilityNode>();
-	ArrayList<facilityNode> testArray = new ArrayList<facilityNode>();
 	static ArrayList<Label> FacilityTypes = new ArrayList<Label>();	
 	
 	static ArrayList<nodeLink> Links = new ArrayList<nodeLink>();

@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @author Robert
  *
  */
-public class CycicScenarios implements Serializable{
+public class CycicScenarios{
 	static ArrayList<DataArrays> cycicScenarios = new ArrayList<DataArrays>();
 	static DataArrays workingCycicScenario;
 }

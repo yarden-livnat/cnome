@@ -95,7 +95,8 @@ public class Cycic extends ViewBase{
 						tempCircle.facilityStructure = RealFacs.alfredStructs.get(i);
 					}				
 				}
-				tempCircle.cycicCircle = Nodes.addNode(facNameField.getText(), tempCircle);
+				tempCircle.cycicCircle = CycicCircles.addNode(facNameField.getText(), tempCircle);
+				tempCircle.sorterCircle = SorterCircles.addNode(facNameField.getText(), tempCircle);
 				tempCircle.name = facNameField.getText();
 				FormBuilderFunctions.formArrayBuilder(tempCircle.facilityStructure, tempCircle.facilityData);
 			}
