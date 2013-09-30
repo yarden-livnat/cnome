@@ -117,6 +117,8 @@ public class ChartView extends ViewBase {
 	private StackPane _stackPane;
 	private Pane _glassPane;
 	
+	
+	
 	public ChartView() {
 		super();
 		build();
@@ -741,7 +743,6 @@ public class ChartView extends ViewBase {
 			break;
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
-//			cd.forceZeroInRangeProperty().set(forceZeroProperty().get());
 			cd.forceZeroInRangeProperty().bind(forceZeroProperty());
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
 				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
@@ -755,13 +756,11 @@ public class ChartView extends ViewBase {
 			break;
 		case Qd:
 			NumberAxis t = new NumberAxis();
-//			t.forceZeroInRangeProperty().set(forceZeroProperty().get());
 			t.forceZeroInRangeProperty().bind(forceZeroProperty());
 			axis = t;
 			break;
 		case Qi:
 			NumberAxis a = new NumberAxis();
-//			a.forceZeroInRangeProperty().set(forceZeroProperty().get());
 			a.forceZeroInRangeProperty().bind(forceZeroProperty());
 			axis = a;
 		}
