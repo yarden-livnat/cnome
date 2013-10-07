@@ -13,6 +13,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 /**
@@ -34,24 +36,34 @@ public class MarketNodes{
 	 */
 	static void addMarket(String name) {
 		final MarketCircle circle = new MarketCircle();
-		circle.setId(name);
-		circle.setRadiusX(30);
-		circle.setRadiusY(20);
-		circle.setCenterX(40);
-		circle.setCenterY(40);
+		circle.setRadiusX(40);
+		circle.setRadiusY(30);
+		circle.setCenterX(60);
+		circle.setCenterY(60);
 		
 		// Adding the text to the circle.
 		circle.text = new Text(name);
 		circle.name = name;
 		circle.text.setX(circle.getCenterX()-circle.text.getBoundsInLocal().getWidth()/2);
 		circle.text.setY(circle.getCenterY());
-		circle.text.setWrappingWidth(circle.getRadiusX()*1);
+		circle.text.setWrappingWidth(circle.getRadiusX()*1.5);
 		circle.text.setMouseTransparent(true);
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.setFill(Color.rgb(100, 150, 200));
 		circle.text.setFill(Color.WHITE);
+		circle.text.setFont(new Font(14));
+		
+		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
+			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
+				((Shape) Cycic.pane.getChildren().get(i)).setStroke(Color.BLACK);
+				((Shape) Cycic.pane.getChildren().get(i)).setStrokeWidth(1);
+			}
+		}
+		circle.setEffect(VisFunctions.lighting);
+		circle.setStrokeWidth(5);
+		circle.setStroke(Color.DARKGRAY);
 		
 		//Adding the circle's menu and it's functions.
 		final Menu menu1 = new Menu(circle.getId());
@@ -127,12 +139,6 @@ public class MarketNodes{
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
 					}
 				}				
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
-					if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).target == circle){
-						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setEndX(circle.getCenterX());
-						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setEndY(circle.getCenterY());
-					}
-				}
 				mousex = event.getX();
 				mousey = event.getY();
 			}
@@ -142,6 +148,16 @@ public class MarketNodes{
 			public void handle(MouseEvent event){
 				if(event.getButton().equals(MouseButton.SECONDARY)){
 					circle.menu.setVisible(true);
+				}
+				if(event.getButton().equals(MouseButton.PRIMARY)){
+					for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
+						if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
+							((Shape) Cycic.pane.getChildren().get(i)).setStroke(Color.BLACK);
+							((Shape) Cycic.pane.getChildren().get(i)).setStrokeWidth(1);
+						}
+					}
+					circle.setStrokeWidth(5);
+					circle.setStroke(Color.DARKGRAY);
 				}
 			}
 		});

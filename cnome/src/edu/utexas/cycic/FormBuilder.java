@@ -73,7 +73,6 @@ public class FormBuilder extends ViewBase {
 		VBox formGrid = new VBox();
 		formGrid.getChildren().addAll(topGrid, grid);
 		final ScrollPane sc = new ScrollPane();
-		sc.setPrefSize(500, 800);
 		sc.setStyle("-fx-background-color: silver;");
 		sc.setContent(formGrid);
 		
@@ -85,7 +84,6 @@ public class FormBuilder extends ViewBase {
 		});
 		
 		setContent(formGrid);
-		setPrefSize(600,400);
 	}
 	
 	private ComboBox<String> userLevelBox = new ComboBox<String>();
@@ -242,14 +240,11 @@ public class FormBuilder extends ViewBase {
 						case "outcommodity":
 							grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;
-						case "inrecipe":
+						case "inrecipe": case "outrecipe": case "recipe":
 							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;
-						case "outrecipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "recipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
+						case "commodity":
+							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
 							break;
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);

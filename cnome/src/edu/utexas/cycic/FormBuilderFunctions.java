@@ -96,6 +96,7 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = newValue;
 				node.cycicCircle.text.setText(newValue);
+				node.sorterCircle.text.setText(newValue);
 				dataArray.set(0, newValue);
 			}
 		});
@@ -281,9 +282,6 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
 				Object oldMarket = null;
-				facilityNode parentName = null;
-				Object lazySpaceSaver = null;
-				Boolean hiddenLinkTest = false;
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
@@ -300,17 +298,6 @@ public class FormBuilderFunctions {
 							CycicScenarios.workingCycicScenario.Links.remove(j);
 							j -= 1;
 						}
-					}
-					parentName = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.cycicCircle.parentIndex);
-					for ( int ii = 0; ii < parentName.cycicCircle.childrenList.size(); ii++){
-						lazySpaceSaver = parentName.cycicCircle.childrenList.get(ii);
-						for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++){
-							if (CycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-								hiddenLinkTest = true;
-							}
-						}
-						VisFunctions.hiddenLinkRemoval(parentName.cycicCircle, oldMarket, hiddenLinkTest);
-						hiddenLinkTest = false;
 					}
 					if (marketCircle != null){
 						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
@@ -355,9 +342,6 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
 				Object oldMarket = null;
-				facilityNode parent = null;
-				Object lazySpaceSaver = null;
-				Boolean hiddenLinkTest = false;
 				if (newValue == "New Commodity"){
 					//
 				} else {
@@ -374,17 +358,6 @@ public class FormBuilderFunctions {
 							CycicScenarios.workingCycicScenario.Links.remove(j);
 							j -= 1;
 						}
-					}
-					parent = CycicScenarios.workingCycicScenario.FacilityNodes.get(facNode.cycicCircle.parentIndex);
-					for ( int ii = 0; ii < parent.cycicCircle.childrenList.size(); ii++){
-						lazySpaceSaver = parent.cycicCircle.childrenList.get(ii);
-						for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++){
-							if (CycicScenarios.workingCycicScenario.Links.get(j).source == lazySpaceSaver && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-								hiddenLinkTest = true;
-							}
-						}
-						VisFunctions.hiddenLinkRemoval(parent.cycicCircle, oldMarket, hiddenLinkTest);
-						hiddenLinkTest = false;
 					}
 					if (marketCircle != null){
 						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
@@ -426,6 +399,28 @@ public class FormBuilderFunctions {
 		});
 		
 		
+		return cb;
+	}
+	
+	/**
+	 * Creates a ComboBox that contains the list of commodities in the current working scenario.
+	 * @param defaultValue ArrayList of containing the default value of this field.
+	 * @return ComboBox containing the list of commodities in the scenario.
+	 */
+	static ComboBox<String> comboBoxCommod(final ArrayList<Object> defaultValue){
+		// Create and fill the comboBox
+		final ComboBox<String> cb = new ComboBox<String>();
+		cb.setMinWidth(80);
+
+		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				cb.getItems().clear();
+				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
+					cb.getItems().add(circle.commodity);
+				}
+				cb.getItems().add("New Commodity");
+			}
+		});
 		return cb;
 	}
 }

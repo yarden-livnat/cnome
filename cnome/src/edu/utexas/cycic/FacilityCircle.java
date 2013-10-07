@@ -33,4 +33,7 @@ public class FacilityCircle extends Circle {
 	Integer parentIndex;
 	Object name; 
 	Boolean childrenShow;
+	{
+		setId("cycicNode");
+	}
 }

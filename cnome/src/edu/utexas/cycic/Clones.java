@@ -13,6 +13,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.shape.Shape;
 
 /**
  * The Clones class deals with all functions regarding generating and 
@@ -36,8 +38,7 @@ public class Clones {
 		// Building the facilityCircle and adding the basic information.
 		final facilityNode cloneNode = new facilityNode();
 		final FacilityCircle clone = cloneNode.cycicCircle;
-		clone.setId(name);
-		clone.setRadius(25);
+		clone.setRadius(30);
 		clone.parent = (String) parent.name;
 		clone.type = "Child";
 		clone.name = name;
@@ -53,9 +54,10 @@ public class Clones {
 		cloneNode.facilityStructure = parent.facilityStructure;
 		parent.cycicCircle.childrenList.add(clone);
 		parent.facilityClones.add(cloneNode);
+		cloneNode.sorterCircle = SorterCircles.addNode(name, parent, cloneNode);
 		clone.facTypeIndex = parent.facTypeIndex;
-		clone.setCenterX(parent.cycicCircle.getCenterX()+60);
-		clone.setCenterY(parent.cycicCircle.getCenterY()+60);
+		clone.setCenterX(parent.cycicCircle.getCenterX()+80);
+		clone.setCenterY(parent.cycicCircle.getCenterY()+80);
 		clone.facilityType = parent.facilityType;
 		// Building the child's facility data ArrayList
 		FormBuilderFunctions.formArrayBuilder(cloneNode.facilityStructure, cloneNode.facilityData);
@@ -73,7 +75,15 @@ public class Clones {
 		}else{
 			clone.text.setFill(Color.BLACK);
 		}
-		clone.setStroke(Color.BLACK);
+		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
+			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
+				((Shape) Cycic.pane.getChildren().get(i)).setStroke(Color.BLACK);
+				((Shape) Cycic.pane.getChildren().get(i)).setStrokeWidth(1);
+			}
+		}
+		clone.setEffect(VisFunctions.lighting);
+		clone.setStrokeWidth(5);
+		clone.setStroke(Color.DARKGRAY);
 		
 		// Adding the facility menu //
 		final Menu menu1 = new Menu((String) clone.name);
@@ -95,6 +105,7 @@ public class Clones {
 		clone.text.setY(clone.getCenterY());
 		clone.text.setWrappingWidth(clone.getRadius()*1.6);
 		clone.text.setMouseTransparent(true);
+		clone.text.setFont(new Font(14));
 		
 		// Adding the Parent Child Link different from normal market links.//
 		final nodeLink parentChild = new nodeLink();
@@ -182,9 +193,13 @@ public class Clones {
 				}
 				if(event.getButton().equals(MouseButton.PRIMARY)){
 					for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
-						Cycic.pane.getChildren().get(i).setEffect(null);	
+						if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
+							((Shape) Cycic.pane.getChildren().get(i)).setStroke(Color.BLACK);
+							((Shape) Cycic.pane.getChildren().get(i)).setStrokeWidth(1);
+						}
 					}
-					clone.setEffect(VisFunctions.colorAdjust);
+					clone.setStrokeWidth(5);
+					clone.setStroke(Color.DARKGRAY);
 				}
 			}
 		});

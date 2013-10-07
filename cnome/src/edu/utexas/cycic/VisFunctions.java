@@ -1,8 +1,11 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+
 import javafx.scene.effect.Bloom;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Light.Distant;
+import javafx.scene.effect.Lighting;
 
 /**
  * Contains all of the generic and misc visualization functions 
@@ -69,11 +72,11 @@ public class VisFunctions {
 	public static boolean colorTest(ArrayList<Integer> array){
 		int tally = 0;
 		for(int i = 0; i < array.size(); i++){
-			if(array.get(i) < 80){
+			if(array.get(i) < 120){
 				tally +=1;
 			}
 		}
-		if(tally > 1){
+		if(tally > 0){
 			return true;
 		}else{
 			return false;
@@ -113,6 +116,20 @@ public class VisFunctions {
 		}
 	};
 	
+	// Really cool effect, not ready for testing yet.
+	static Distant light = new Distant(){
+		{
+			setAzimuth(-90);
+			setElevation(55);
+		}
+	};
+	static Lighting lighting = new Lighting(){
+		{
+			setLight(light);
+			setSurfaceScale(2);
+		}
+	};
+	
 	/**
 	 * Code used to link a facilityCircle and a marketCircle in the CYCIC pane.
 	 * @param source facilityCircle that starts the line.
@@ -120,7 +137,6 @@ public class VisFunctions {
 	 */
 	static void linkNodesSimple(FacilityCircle source, MarketCircle target){
 		MarketCircle markIndex = null;
-		boolean hiddenLinkCheck = false;
 		nodeLink link = new nodeLink();
 		link.source = source;
 		link.target = target;
@@ -134,41 +150,9 @@ public class VisFunctions {
 				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
 			}
 		}
-		// Adding the Parent to childMarket link //
-		if(CycicScenarios.workingCycicScenario.hiddenLinks.size() == 0){
-			addHiddenLink(CycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex).cycicCircle, markIndex);
-		}
-		for(int n = 0; n < CycicScenarios.workingCycicScenario.hiddenLinks.size(); n++){
-			if( (MarketCircle) CycicScenarios.workingCycicScenario.hiddenLinks.get(n).target == target 
-				&& CycicScenarios.workingCycicScenario.hiddenLinks.get(n).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex).cycicCircle){
-				hiddenLinkCheck = true;
-			}
-		} 
-		if ( hiddenLinkCheck == false) {
-			addHiddenLink(CycicScenarios.workingCycicScenario.FacilityNodes.get(source.parentIndex).cycicCircle, markIndex);
-		}
 		CycicScenarios.workingCycicScenario.Links.add(link);
 		Cycic.pane.getChildren().addAll(link.line);
 		link.line.toBack();
-	}
-	/**
-	 * Adds a link between a prototype facilityCircle and a marketCircle.
-	 * @param parent facilityCircle of the prototype.
-	 * @param market marketCircle for the market.
-	 */
-	static void addHiddenLink(FacilityCircle parent, MarketCircle market){
-		nodeLink hiddenLink = new nodeLink();
-		hiddenLink.source = parent;
-		hiddenLink.target = market;
-		hiddenLink.line.setStartX(parent.getCenterX());
-		hiddenLink.line.setStartY(parent.getCenterY());
-		hiddenLink.line.setEndX(market.getCenterX());
-		hiddenLink.line.setEndY(market.getCenterY());
-		CycicScenarios.workingCycicScenario.hiddenLinks.add(hiddenLink);
-		if(parent.childrenShow == false){
-			Cycic.pane.getChildren().addAll(hiddenLink.line);
-			hiddenLink.line.toBack();
-		}
 	}
 	
 	/**
@@ -181,30 +165,15 @@ public class VisFunctions {
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.menu);
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.text);
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.image);
-			if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenShow == false){
-				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.hiddenLinks.size(); ii++){
-					if(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle == CycicScenarios.workingCycicScenario.hiddenLinks.get(ii).source){
-						Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.hiddenLinks.get(ii).line);
-						CycicScenarios.workingCycicScenario.hiddenLinks.get(ii).line.toBack();
-					}
-				}
-			}else{
-				for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.size(); ii++){
-					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii));
-					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).menu);
-					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).text);
-					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).image);
-					for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
-						if(CycicScenarios.workingCycicScenario.Links.get(n).source == CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii)){
-							Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
-							CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
-						}
-					}
-				}
-				for(int n = 0; n < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.size(); n++){
-					Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line);
-					CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line.toBack();
-				}
+			for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.size(); ii++){
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii));
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).menu);
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).text);
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).image);
+			}
+			for(int n = 0; n < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.size(); n++){
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line);
+				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line.toBack();
 			}
 		}
 		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
@@ -212,43 +181,9 @@ public class VisFunctions {
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).menu);
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).text);			
 		}
-	}
-	
-	/**
-	 * Tests for the presence of a hiddenLink to see if it can be removed 
-	 * or if it is still required after a commodities has changed.
-	 * @param parentName facilityCircle of the parent
-	 * @param oldMarket marketCircle that is removed from the facility
-	 * circle's commodity list.
-	 */
-	public static void hiddenLinkTest(FacilityCircle parentName, Object oldMarket){
-		int hiddenLinkCount = 0;
-		for (int j = 0; j < CycicScenarios.workingCycicScenario.hiddenLinks.size(); j++){
-			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(j).source == parentName && CycicScenarios.workingCycicScenario.hiddenLinks.get(j).target == oldMarket){
-				hiddenLinkCount += 1;
-			}
-			if (hiddenLinkCount > 1){
-				CycicScenarios.workingCycicScenario.hiddenLinks.remove(j);
-				j = j - 1;
-			}
-		}
-	}
-	
-	/**
-	 * Removing a hiddenLink after a facilities commodity has been changed.
-	 * @param parentName facilityCircle at the start of the hiddenLink.
-	 * @param oldMarket marketCircle at the end of the hiddenLink.
-	 * @param test Boolean return of the hiddenLinkTest.
-	 */
-	public static void hiddenLinkRemoval(FacilityCircle parentName, Object oldMarket, Boolean test){
-
-		for (int j = 0; j < CycicScenarios.workingCycicScenario.hiddenLinks.size(); j++){
-			if(CycicScenarios.workingCycicScenario.hiddenLinks.get(j).source == parentName && CycicScenarios.workingCycicScenario.hiddenLinks.get(j).target == (MarketCircle) oldMarket){
-				if (test == false){
-					CycicScenarios.workingCycicScenario.hiddenLinks.remove(j);
-					j = j - 1;
-				}
-			}
+		for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
+			CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
 		}
 	}
 }

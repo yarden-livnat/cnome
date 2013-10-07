@@ -9,6 +9,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -37,6 +40,12 @@ public class Cycic extends ViewBase{
 	static facilityNode workingNode = null;
 	static MarketCircle workingMarket = null;
 	static DataArrays workingScenario;
+	static ToggleGroup group = new ToggleGroup();
+	static ToggleButton toggle = new ToggleButton("RANDOM TEXT"){
+		{
+			setToggleGroup(group);
+		}
+	};
 	
 	/**
 	 * Initiates the Pane and GridPane.
@@ -54,7 +63,7 @@ public class Cycic extends ViewBase{
 		
 		VBox cycicBox = new VBox();
 		Cycic.pane.setId("cycicPane");
-		Cycic.pane.setPrefSize(600, 500);
+		Cycic.pane.setPrefSize(800, 600);
 		Cycic.pane.setStyle("-fx-background-color: white;");
 		
 		// Temp Toolbar //
@@ -95,9 +104,9 @@ public class Cycic extends ViewBase{
 						tempCircle.facilityStructure = RealFacs.alfredStructs.get(i);
 					}				
 				}
-				tempCircle.cycicCircle = CycicCircles.addNode(facNameField.getText(), tempCircle);
-				tempCircle.sorterCircle = SorterCircles.addNode(facNameField.getText(), tempCircle);
 				tempCircle.name = facNameField.getText();
+				tempCircle.cycicCircle = CycicCircles.addNode(facNameField.getText(), tempCircle);
+				tempCircle.sorterCircle = SorterCircles.addNode(facNameField.getText(), tempCircle, tempCircle);
 				FormBuilderFunctions.formArrayBuilder(tempCircle.facilityStructure, tempCircle.facilityData);
 			}
 		});
@@ -136,13 +145,14 @@ public class Cycic extends ViewBase{
 		
 		// Prints the Cyclus input associated with this simulator. 
 		Button output = new Button();
-		output.setText("Print Output");
+		output.setText("Generate Cyclus Input");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				OutPut.output();
 			}
 		});
 		grid.add(output, 0, 2);
+		grid.add(toggle, 0, 3);
 		/*
 		Button save = new Button();
 		save.setText("Save");

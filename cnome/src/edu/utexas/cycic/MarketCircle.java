@@ -21,4 +21,7 @@ public class MarketCircle extends Ellipse {
 	MenuBar menu = new MenuBar();
 	Text text = new Text();
 	String commodity;
+	{
+		setId("cycicNode");
+	}
 }

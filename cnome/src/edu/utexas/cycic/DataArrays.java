@@ -16,7 +16,6 @@ public class DataArrays{
 	static ArrayList<Label> FacilityTypes = new ArrayList<Label>();	
 	
 	static ArrayList<nodeLink> Links = new ArrayList<nodeLink>();
-	static ArrayList<nodeLink> hiddenLinks = new ArrayList<nodeLink>();
 	
 	static ArrayList<Label> CommoditiesList = new ArrayList<Label>();
 	
@@ -31,6 +30,8 @@ public class DataArrays{
 	
 	static ArrayList<Object> marketStructs = new ArrayList<Object>();
 	static ArrayList<MarketCircle> marketNodes = new ArrayList<MarketCircle>();
+	
+	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 
 	static simInfo simulationData = new simInfo();
 }
@@ -137,3 +138,10 @@ class facilityNode{
 }
 
 
+class skinSet{
+	String reactor;
+	String mine;
+	String generic;
+	String storage;
+	String facility;
+}

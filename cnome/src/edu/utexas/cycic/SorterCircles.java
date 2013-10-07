@@ -39,18 +39,14 @@ public class SorterCircles{
 	 * built from this node will mimic its structure. 
 	 * @param name Name of the new prototype facility.
 	 */
-	static FacilityCircle addNode(String name, final facilityNode parent) {
-		final FacilityCircle circle = parent.sorterCircle;
-		circle.setId(name);
+	static FacilityCircle addNode(String name, final facilityNode parent, final facilityNode cloneNode) {
+		final FacilityCircle circle = new FacilityCircle();
 		circle.setRadius(30);
 		circle.setCenterX(40);
 		circle.setCenterY(40);
-		circle.type = "Parent";
-		circle.childrenShow = true;
-		
-		//Setting up the name and nameing structure of the circle.
-		circle.text = new Text(name);
 		circle.name = name;
+		//Setting up the name and nameing structure of the circle.
+		circle.text.setText(name);
 		circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
 		circle.text.setY(circle.getCenterY());	
 		circle.text.setWrappingWidth(circle.getRadius()*1.6);
@@ -58,8 +54,9 @@ public class SorterCircles{
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
-		circle.rgbColor=VisFunctions.stringToColor(circle.getId());
+		circle.rgbColor=VisFunctions.stringToColor((String)parent.name);
 		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
+		circle.setEffect(VisFunctions.lighting);
 		
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
@@ -67,15 +64,7 @@ public class SorterCircles{
 		}else{
 			circle.text.setFill(Color.WHITE);
 		}
-		
-		// Really cool effect, not ready for testing yet.
-		/*Distant light = new Distant();
-		light.setAzimuth(-120.0f);
-		final Lighting l = new Lighting();
-		l.setLight(light);
-		l.setSurfaceScale(1.0f);
-		circle.setEffect(l);*/
-		
+			
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
 		MenuItem facForm = new MenuItem("Facility Form");
@@ -86,19 +75,6 @@ public class SorterCircles{
 				CycicCircles.deleteNode(parent);
 			}
 		});
-		
-		final Menu clonesList = new Menu("Children");
-		
-		CustomMenuItem cloneNode = new CustomMenuItem(new Label("Add Child"));
-		cloneNode.setHideOnClick(false);
-		cloneNode.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				Clones.addClone("", parent, parent.cycicCircle.childrenShow);
-				System.out.println(parent.facilityStructure);
-			}
-		});
-		
-		clonesList.getItems().add(cloneNode);
 		
 		MenuItem showImage = new MenuItem("Show Image");
 		showImage.setOnAction(new EventHandler<ActionEvent>(){
@@ -117,14 +93,13 @@ public class SorterCircles{
 			}
 		});
 		
-		menu1.getItems().addAll(facForm, clonesList, delete, showImage, hideImage);
+		menu1.getItems().addAll(facForm, delete, showImage, hideImage);
 		circle.menu.getMenus().add(menu1);
 		circle.menu.setLayoutX(circle.getCenterX());
 		circle.menu.setLayoutY(circle.getCenterY());
 		circle.menu.setVisible(false);
 		
 		// Piece of test code for changing the look of the facility circles.
-		//circle.image.setImage(new Image("reactor.png"));
 		circle.image.setLayoutX(circle.getCenterX()-60);
 		circle.image.setLayoutY(circle.getCenterY()-60);
 		circle.image.setMouseTransparent(true);
@@ -134,13 +109,7 @@ public class SorterCircles{
 		circle.onMousePressedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				Cycic.workingNode = parent;
-				circle.childrenDeltaX.clear();
-				circle.childrenDeltaY.clear();
-				for(int i = 0; i < circle.childrenList.size(); i++){
-					circle.childrenDeltaX.add(circle.getCenterX() - circle.childrenList.get(i).getCenterX());
-					circle.childrenDeltaY.add(circle.getCenterY() - circle.childrenList.get(i).getCenterY());
-				}
+				Cycic.workingNode = cloneNode;
 				x = circle.getCenterX() - event.getX();
 				y = circle.getCenterY() - event.getY();
 				mousex = event.getX();
@@ -176,65 +145,11 @@ public class SorterCircles{
 				
 				circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
 				circle.text.setY(circle.getCenterY());
-				
-				/*for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
-					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
-						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
-						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
-					}
-				}
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.hiddenLinks.size(); i++){
-					if(CycicScenarios.workingCycicScenario.hiddenLinks.get(i).source == circle){
-						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setStartX(circle.getCenterX());
-						CycicScenarios.workingCycicScenario.hiddenLinks.get(i).line.setStartY(circle.getCenterY());
-					}
-				}
-				for(int i = 0; i < circle.childrenLinks.size(); i++){
-					circle.childrenLinks.get(i).line.setStartX(circle.getCenterX());
-					circle.childrenLinks.get(i).line.setStartY(circle.getCenterY());
-					circle.childrenList.get(i).setCenterX(mousex-circle.childrenDeltaX.get(i)+x);
-					circle.childrenList.get(i).setCenterY(mousey-circle.childrenDeltaY.get(i)+y);
-					circle.childrenLinks.get(i).line.setEndX(circle.childrenList.get(i).getCenterX());
-					circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
-					circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
-					circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-					circle.childrenList.get(i).text.setX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
-					circle.childrenList.get(i).text.setY(circle.childrenList.get(i).getCenterY());
-					for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
-						if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
-							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
-							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
-						}
-					}
-				}*/
+
 				mousex = event.getX();
 				mousey = event.getY();
 			}
 		});
-		// Double click functionality to show/hide children. As well as a bloom feature to show which node is selected.
-		/*circle.setOnMouseClicked(new EventHandler<MouseEvent>(){
-			@Override
-			public void handle(MouseEvent event){
-				if(event.getButton().equals(MouseButton.SECONDARY)){
-					circle.menu.setVisible(true);
-				}
-				if (event.getClickCount() >= 2){
-					if(circle.childrenShow == true){
-						circle.childrenShow = false;
-						VisFunctions.reloadPane();
-					}else{
-						circle.childrenShow = true;
-						VisFunctions.reloadPane();
-					}
-				}
-				if(event.getButton().equals(MouseButton.PRIMARY)){
-					for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
-						Cycic.pane.getChildren().get(i).setEffect(null);
-					}
-					circle.setEffect(VisFunctions.colorAdjust);
-				}
-			}
-		});*/
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
@@ -249,7 +164,6 @@ public class SorterCircles{
 					content.put( DnD.TOOL_FORMAT, "Facility Form");
 					db.setContent(content);
 					
-//					DnDIcon.getInstance().show(icon, title);
 					event.consume();
 				}
 			}
