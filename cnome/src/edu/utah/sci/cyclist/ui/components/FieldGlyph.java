@@ -15,7 +15,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-<<<<<<< HEAD
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
@@ -161,7 +161,7 @@ public class FieldGlyph extends HBox {
 		}
 	}
 	
-<<<<<<< HEAD
+
 =======
 
 >>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
@@ -235,8 +235,6 @@ public class FieldGlyph extends HBox {
 			}
 		});
 		contextMenu.getItems().add(item);
-<<<<<<< HEAD
-=======
 		
 		contextMenu.getItems().add(new SeparatorMenuItem());
 		
@@ -280,7 +278,6 @@ public class FieldGlyph extends HBox {
 		});
 		
 		
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 
 		_button.setOnMousePressed(new EventHandler<Event>() {
 

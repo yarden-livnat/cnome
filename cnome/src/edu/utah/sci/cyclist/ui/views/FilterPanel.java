@@ -1,12 +1,8 @@
 package edu.utah.sci.cyclist.ui.views;
 
 
-<<<<<<< HEAD
-//import org.controlsfx.control.RangeSlider;
-import controls.RangeSlider;
-=======
 import org.controlsfx.control.RangeSlider;
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
+
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -26,10 +22,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-<<<<<<< HEAD
-import javafx.geometry.Orientation;
-=======
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;

@@ -140,6 +140,10 @@ public class WorkspacePresenter extends ViewPresenter {
 						for (Filter filter : change.getAddedSubList()) {
 							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
 						}
+						}
+						for (Filter filter : change.getAddedSubList()) {
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
+						}
 					}
 				}				
 			});
@@ -249,8 +253,6 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
-<<<<<<< HEAD
-=======
 		addLocalNotificationHandler(CyclistNotifications.DUPLICATE_VIEW, new CyclistNotificationHandler() {
 			@Override
 			public void handle(CyclistNotification event) {
@@ -262,7 +264,6 @@ public class WorkspacePresenter extends ViewPresenter {
 			
 		});
 		
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		addLocalNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
@@ -326,9 +327,10 @@ public class WorkspacePresenter extends ViewPresenter {
 		});
 		
 	}
+		});
+		
+	}
 	
-<<<<<<< HEAD
-=======
 	private void duplicateView(ViewPresenter presenter) {
 		ViewBase view = (ViewBase) presenter.getView();
 		
@@ -341,11 +343,13 @@ public class WorkspacePresenter extends ViewPresenter {
 		_presenters.add(newPresenter);
 	}
 	
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	private void addToplevelListeners() {
 		addLocalNotificationHandler(CyclistNotifications.DATASOURCE_FOCUS, new CyclistNotificationHandler() {
 			
 			@Override
+			public void handle(CyclistNotification event) {
+				broadcast(event);
+			}
 			public void handle(CyclistNotification event) {
 				broadcast(event);
 			}

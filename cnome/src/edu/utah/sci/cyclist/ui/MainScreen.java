@@ -134,11 +134,7 @@ public class MainScreen extends VBox {
 		_toolsPane.getItems().addAll(
 				_datasourcesPanel = new TablesPanel(),
 				_dimensionsPanel = new SchemaPanel("Category"),
-<<<<<<< HEAD
-				_measuresPanel = new SchemaPanel("Numeric"),
-=======
 				_measuresPanel = new SchemaPanel("Measure"),
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 				_toolsPanel = new ToolsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);

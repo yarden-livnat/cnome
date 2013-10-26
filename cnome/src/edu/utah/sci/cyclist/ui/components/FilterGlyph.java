@@ -25,24 +25,13 @@ public class FilterGlyph extends HBox {
 	private Filter _filter;
 	private StackPane _button;
 	private boolean _remote;
-<<<<<<< HEAD
-=======
 	private boolean _valid;
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	
 	private BooleanProperty _validProperty = new SimpleBooleanProperty();
 	
 	public FilterGlyph(Filter filter) {
-<<<<<<< HEAD
-		this(filter, false);
-	}
-	
-	public FilterGlyph(Filter filter, boolean remote) {
-		_filter = filter;
-		_remote = remote;
-=======
 		this(filter, false, true);
 	}
 	
@@ -50,7 +39,6 @@ public class FilterGlyph extends HBox {
 		_filter = filter;
 		_remote = remote;
 		_valid = valid;
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		build();
 	}
 	
@@ -85,16 +73,6 @@ public class FilterGlyph extends HBox {
 		
 		StackPane stackPane = new StackPane();
 		stackPane.setAlignment(Pos.CENTER);
-<<<<<<< HEAD
-		
-		getStyleClass().add("filter-glyph");
-		setSpacing(5);
-		
-		if (_remote) {
-			setStyle("-fx-background-color: #d0ced1");
-		}
-		
-=======
 		
 		getStyleClass().add("filter-glyph");
 		setSpacing(5);
@@ -105,6 +83,8 @@ public class FilterGlyph extends HBox {
 			} else {
 				setStyle("-fx-background-color: #d0ced1;"+"-fx-border-color:#D7737F;"+"-fx-border-width:2;");
 			}
+		
+		stackPane.getChildren().add(_button);
 				
 		} else {
 			if(!_valid){
@@ -112,7 +92,6 @@ public class FilterGlyph extends HBox {
 			}
 		}
 		
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		Label label = new Label(_filter.getName());
 		label.getStyleClass().add("text");
 	

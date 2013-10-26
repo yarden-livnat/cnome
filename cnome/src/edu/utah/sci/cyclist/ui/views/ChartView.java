@@ -36,17 +36,11 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-<<<<<<< HEAD
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-=======
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -64,10 +58,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
-<<<<<<< HEAD
-=======
 import edu.utah.sci.cyclist.Resources;
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.DataType.Classification;
@@ -95,11 +86,14 @@ public class ChartView extends ViewBase {
 	
 	
 	private ViewType _viewType;
-<<<<<<< HEAD
-=======
 	private boolean _active = true;
 	
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
+	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
+	
+	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
+	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
+	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
+	
 //	private MarkType _markType;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
@@ -108,12 +102,8 @@ public class ChartView extends ViewBase {
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
 	
-<<<<<<< HEAD
-
-=======
 	private Closure.V0 _onDuplicate = null;
 	
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	private MapSpec _spec;
 	
 	private BorderPane _pane;
@@ -127,27 +117,19 @@ public class ChartView extends ViewBase {
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
-<<<<<<< HEAD
-=======
 	private ObjectProperty<Boolean> _forceZeroProperty = new SimpleObjectProperty<>();
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	private IntegerField _limitEntry;
 	
 	private StackPane _stackPane;
 	private Pane _glassPane;
 	
-<<<<<<< HEAD
-=======
 	
 	
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	public ChartView() {
 		super();
 		build();
 	}
 	
-<<<<<<< HEAD
-=======
 	@Override 
 	public ViewBase clone() {
 		ChartView copy = new ChartView();
@@ -187,7 +169,6 @@ public class ChartView extends ViewBase {
 	}
 	
 	
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	public ObjectProperty<XYChart<Object,Object>> chartProperty() {
 		return _chartProperty;
 	}
@@ -268,7 +249,11 @@ public class ChartView extends ViewBase {
 							aggregators.add(field);
 						n++;
 					}
+					}
 				}
+				
+				// is there at least one valid x field? 
+				if (n == 0) return;
 				
 				// is there at least one valid x field? 
 				if (n == 0) return;
@@ -291,8 +276,6 @@ public class ChartView extends ViewBase {
 					if (table.hasField(field)) {
 						grouping.add(field);
 					}
-<<<<<<< HEAD
-=======
 				}
 				
 				List<Filter> filtersList = new ArrayList();
@@ -309,7 +292,6 @@ public class ChartView extends ViewBase {
 					if(getCurrentTable().hasField(filter.getField())){
 						filtersList.add(filter);
 					}
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 				}
 				
 				// build the query
@@ -1213,12 +1195,9 @@ public class ChartView extends ViewBase {
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaListener);
 		
-<<<<<<< HEAD
-=======
 		//Let the filters area know when the selected table is changed.
 		getFiltersArea().tableProperty().bind(_currentTableProperty);
 		
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		setAreaFiltersListeners(area);
 
 		grid.add(text, col, row);
@@ -1270,10 +1249,6 @@ public class ChartView extends ViewBase {
 		});
 	}
 	
-<<<<<<< HEAD
-	
-=======
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	/*Name: removeFilterFromDropArea
 	 * If a filter is removed - check if it is connected to a numeric field. By searching this field in the drop areas.
 	 * If so - change also the field display to indicate that is doesn't connect to a filter anymore */

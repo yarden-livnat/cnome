@@ -33,7 +33,7 @@ public class FilterArea extends ToolBar {
 	private ObservableList<Filter> _remoteFilters = FXCollections.observableArrayList();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	private int _lastRemoteFilter = 0;
-<<<<<<< HEAD
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 =======
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 >>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
@@ -168,7 +168,7 @@ public class FilterArea extends ToolBar {
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> c) {
-<<<<<<< HEAD
+				java.util.List<Filter> addedFilters = new ArrayList<Filter>(); 
 =======
 				java.util.List<Filter> addedFilters = new ArrayList<Filter>(); 
 >>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
@@ -177,7 +177,7 @@ public class FilterArea extends ToolBar {
 						for (Filter filter : c.getAddedSubList()) {
 							FilterGlyph glyph = createFilterGlyph(filter, true);
 							getItems().add(_lastRemoteFilter++, glyph);
-<<<<<<< HEAD
+							addedFilters.add(filter);
 =======
 							addedFilters.add(filter);
 >>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
@@ -198,12 +198,6 @@ public class FilterArea extends ToolBar {
 			}
 			
 		});
-<<<<<<< HEAD
-	}
-	
-	private FilterGlyph createFilterGlyph(Filter filter, boolean remote) {
-		final FilterGlyph glyph = new FilterGlyph(filter, remote);
-=======
 		
 		//Change the glyph display when the selected table changes.
 		tableProperty().addListener(new InvalidationListener() {
@@ -232,7 +226,6 @@ public class FilterArea extends ToolBar {
 		}
 		
 		final FilterGlyph glyph = new FilterGlyph(filter, remote, filterIsValid);
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		
 		glyph.setOnDragDetected(new EventHandler<MouseEvent>() {
 
