@@ -1,5 +1,10 @@
 package edu.utah.sci.cyclist.ui.components;
 
+import java.awt.List;
+import java.util.ArrayList;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -20,6 +25,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Table;
 
 public class FilterArea extends ToolBar {
 	
@@ -27,6 +33,7 @@ public class FilterArea extends ToolBar {
 	private ObservableList<Filter> _remoteFilters = FXCollections.observableArrayList();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	private int _lastRemoteFilter = 0;
+	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	
 	public FilterArea() {
 		build();
@@ -50,6 +57,19 @@ public class FilterArea extends ToolBar {
 	
 	public EventHandler<FilterEvent> getOnAction() {
 		return _action.get();
+	}
+	
+	public ObjectProperty<Table> tableProperty() {
+		return _tableProperty;
+	}
+	
+	public Table getTable() {
+		return _tableProperty.get();
+	}
+	
+	public void copy(FilterArea other) {
+		_filters.addAll(other._filters);
+		_remoteFilters.addAll(other._remoteFilters);
 	}
 	
 	private void build() {
@@ -145,11 +165,13 @@ public class FilterArea extends ToolBar {
 
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> c) {
+				java.util.List<Filter> addedFilters = new ArrayList<Filter>(); 
 				while (c.next()) {
 					if (c.wasAdded()) {
 						for (Filter filter : c.getAddedSubList()) {
 							FilterGlyph glyph = createFilterGlyph(filter, true);
 							getItems().add(_lastRemoteFilter++, glyph);
+							addedFilters.add(filter);
 						}
 					} else if (c.wasRemoved()) {
 						for (Filter filter : c.getRemoved()) {
@@ -167,10 +189,34 @@ public class FilterArea extends ToolBar {
 			}
 			
 		});
+		
+		//Change the glyph display when the selected table changes.
+		tableProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				Table table = tableProperty().get();
+				if (table == null) {
+					
+				} else {
+					for (Node node : getItems()) {
+						FilterGlyph glyph = (FilterGlyph) node;
+						glyph.validProperty().set(table.hasField(glyph.getFilter().getField()));
+					}
+				}
+				
+			}
+		});
 	}
 	
 	private FilterGlyph createFilterGlyph(Filter filter, boolean remote) {
-		final FilterGlyph glyph = new FilterGlyph(filter, remote);
+		
+		boolean filterIsValid = true;
+		if(tableProperty().get() != null){
+			filterIsValid = tableProperty().get().hasField(filter.getField());
+		}
+		
+		final FilterGlyph glyph = new FilterGlyph(filter, remote, filterIsValid);
 		
 		glyph.setOnDragDetected(new EventHandler<MouseEvent>() {
 

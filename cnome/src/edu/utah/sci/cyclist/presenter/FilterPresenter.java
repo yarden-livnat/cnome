@@ -67,7 +67,7 @@ public class FilterPresenter extends PresenterBase {
 			}
 		});
 		
-		addNotificationHandler(CyclistNotifications.HIGHLIGHT_FILTER, new CyclistNotificationHandler() {
+		addNotificationHandler(CyclistNotifications.UNHIGHLIGHT_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
 			public void handle(CyclistNotification event) {

@@ -62,7 +62,6 @@ public class MainScreen extends VBox {
 	private StackPane _workspacePane;
 		
 	/**
-	 * Constructor
 	 */
 	public  MainScreen(Stage stage) {
 		super();
@@ -135,7 +134,7 @@ public class MainScreen extends VBox {
 		_toolsPane.getItems().addAll(
 				_datasourcesPanel = new TablesPanel(),
 				_dimensionsPanel = new SchemaPanel("Category"),
-				_measuresPanel = new SchemaPanel("Numeric"),
+				_measuresPanel = new SchemaPanel("Measure"),
 				_toolsPanel = new ToolsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);

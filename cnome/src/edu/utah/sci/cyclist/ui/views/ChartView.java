@@ -36,9 +36,11 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -56,6 +58,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.DataType.Classification;
@@ -67,6 +70,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.ui.components.DropArea;
+import edu.utah.sci.cyclist.ui.components.FieldGlyph;
 import edu.utah.sci.cyclist.ui.components.IntegerField;
 import edu.utah.sci.cyclist.ui.components.LineIndicator;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
@@ -82,6 +86,14 @@ public class ChartView extends ViewBase {
 	
 	
 	private ViewType _viewType;
+	private boolean _active = true;
+	
+	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
+	
+	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
+	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
+	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
+	
 //	private MarkType _markType;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
@@ -90,7 +102,8 @@ public class ChartView extends ViewBase {
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
 	
-
+	private Closure.V0 _onDuplicate = null;
+	
 	private MapSpec _spec;
 	
 	private BorderPane _pane;
@@ -104,15 +117,57 @@ public class ChartView extends ViewBase {
 	
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<Row> _items = new SimpleListProperty<>();
+	private ObjectProperty<Boolean> _forceZeroProperty = new SimpleObjectProperty<>();
 	private IntegerField _limitEntry;
 	
 	private StackPane _stackPane;
 	private Pane _glassPane;
 	
+	
+	
 	public ChartView() {
 		super();
 		build();
 	}
+	
+	@Override 
+	public ViewBase clone() {
+		ChartView copy = new ChartView();
+		copy.setActive(false);
+
+		return copy;
+	}
+	
+	public void copy(ChartView other) {
+		for (Field field : other._xArea.getFields()) {
+			_xArea.getFields().add(field.clone());
+		}
+		
+		for (Field field : other._yArea.getFields()) {
+			_yArea.getFields().add(field.clone());
+		}
+		
+		for (Field field : other._lodArea.getFields()) {
+			_lodArea.getFields().add(field.clone());
+		}
+		
+		
+		getFiltersArea().copy(other.getFiltersArea());
+		
+	}
+	
+	public void setActive(boolean state) {
+		_active = state;
+		if (_active) {
+			invalidateChart();
+			fetchData();
+		}
+	}
+	 
+	public void setOnDuplicate(Closure.V0 action) {
+		_onDuplicate = action;
+	}
+	
 	
 	public ObjectProperty<XYChart<Object,Object>> chartProperty() {
 		return _chartProperty;
@@ -127,6 +182,18 @@ public class ChartView extends ViewBase {
 	}
 	public Table getCurrentTable() {
 		return _currentTableProperty.get();
+	}
+	
+	public ObjectProperty<Boolean> forceZeroProperty() {
+		return _forceZeroProperty;
+	}
+	
+	public Boolean getForceZero() {
+		return _forceZeroProperty.get();
+	}
+	
+	public void setForceZero(Boolean value) {
+		_forceZeroProperty.set(value);
 	}
 	
 	@Override
@@ -157,6 +224,8 @@ public class ChartView extends ViewBase {
 	}
 	
 	private void fetchData() {
+		if (!_active) return;
+		
 		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
 			if (!_xArea.isValid() || !_yArea.isValid())
 				return;
@@ -180,7 +249,11 @@ public class ChartView extends ViewBase {
 							aggregators.add(field);
 						n++;
 					}
+					}
 				}
+				
+				// is there at least one valid x field? 
+				if (n == 0) return;
 				
 				// is there at least one valid x field? 
 				if (n == 0) return;
@@ -205,14 +278,29 @@ public class ChartView extends ViewBase {
 					}
 				}
 				
+				List<Filter> filtersList = new ArrayList();
+				
+				//Check the filters current validity
+				for(Filter filter : filters()){
+					if(getCurrentTable().hasField(filter.getField())){
+						filtersList.add(filter);
+					}
+				}
+				
+				//Check the remote filters current validity
+				for(Filter filter : remoteFilters()){
+					if(getCurrentTable().hasField(filter.getField())){
+						filtersList.add(filter);
+					}
+				}
+				
 				// build the query
 				QueryBuilder builder = 
 							getCurrentTable().queryBuilder()
 							.fields(fields)
 							.aggregates(aggregators)
 							.grouping(grouping)
-							.filters(filters())
-							.filters(remoteFilters())
+							.filters(filtersList)
 							.limit(_limitEntry.getValue());
 				System.out.println("Query: "+builder.toString());
 //				log.info("Query: "+builder.toString());
@@ -656,6 +744,7 @@ public class ChartView extends ViewBase {
 	private Axis createAxis(Field field, String title) {
 		Axis axis =  null;
 		System.out.println("field clasification: "+field.getClassification());
+	
 		switch (field.getClassification()) {
 
 		case C:
@@ -664,7 +753,7 @@ public class ChartView extends ViewBase {
 			break;
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
-			cd.forceZeroInRangeProperty().set(false);
+			cd.forceZeroInRangeProperty().bind(forceZeroProperty());
 			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
 				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
 				@Override
@@ -677,12 +766,12 @@ public class ChartView extends ViewBase {
 			break;
 		case Qd:
 			NumberAxis t = new NumberAxis();
-			t.forceZeroInRangeProperty().set(false);
+			t.forceZeroInRangeProperty().bind(forceZeroProperty());
 			axis = t;
 			break;
 		case Qi:
 			NumberAxis a = new NumberAxis();
-			a.forceZeroInRangeProperty().set(false);
+			a.forceZeroInRangeProperty().bind(forceZeroProperty());
 			axis = a;
 		}
 		
@@ -835,6 +924,116 @@ public class ChartView extends ViewBase {
 				fetchData();
 			}
 		});
+		
+		
+        forceZeroProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				// FIXME: seems to be a bug in JavaFX.
+				// The chart does not refresh itself if the axis forceRangeZero changes.
+				// This is a hack to force the chart to redraw.
+				ObservableList<Series<Object, Object>> list = getChart().getData();
+				getChart().setData(null);
+				getChart().setData(list);
+			}
+		});
+        forceZeroProperty().set(false);
+		
+		
+	}
+	
+	
+	private void setupActions() {
+		// TODO: Figure out why the options button does not show (op is a temporary solution)
+		final StackPane options = new StackPane();
+		options.getStyleClass().add("arrow");
+		options.setMaxSize(6, 8);
+		
+		StackPane sp = new StackPane();
+		sp.setAlignment(Pos.CENTER);
+		sp.getChildren().add(options);
+		
+		final Button op = new Button("op");
+		op.getStyleClass().add("flat-button");
+		
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		MenuItem item = new MenuItem("Add indicator");
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				createIndicator();
+			}
+		});
+		
+		contextMenu.getItems().add(item);
+		
+		final MenuItem forceZeroItem = new MenuItem("Force Zero", new ImageView(Resources.getIcon("ok")));
+		forceZeroItem.getGraphic().visibleProperty().bind(forceZeroProperty());
+		contextMenu.getItems().add(forceZeroItem);
+				
+		forceZeroItem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				setForceZero(!getForceZero());
+			}
+		});
+		
+		MenuItem duplicateItem = new MenuItem("Duplicate chart");
+		duplicateItem.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if (_onDuplicate != null) {
+					_onDuplicate.call();
+				}
+			}
+		});
+		
+		contextMenu.getItems().add(duplicateItem);
+		
+		op.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(op, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		List<Node> actions = new ArrayList<>();
+		actions.add(op);
+//		actions.add(sp);
+		addActions(actions);
+		
+        chartProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				if(chartProperty().get() != null){
+					Axis<?> yAxis = chartProperty().get().getYAxis();
+					if (! (yAxis instanceof NumberAxis)){
+						forceZeroItem.setVisible(false);
+					} else{
+						forceZeroItem.setVisible(true);
+					}
+				}
+			}
+		});
+        
+        
+        forceZeroProperty().set(false);
+	}
+	
+	private void createIndicator() {
+		Indicator indicator = new Indicator();
+		
+		if (getChart() != null) {
+			Axis<?> axis = getChart().getXAxis();
+			if (axis instanceof NumberAxis) {
+				NumberAxis x = (NumberAxis) axis;
+				double value = (x.getUpperBound() - x.getLowerBound())/2;
+				indicator.valueProperty().set(value);
+			}
+	
+		}
+		_indicators.add(indicator);
 	}
 	
 	
@@ -996,6 +1195,9 @@ public class ChartView extends ViewBase {
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaListener);
 		
+		//Let the filters area know when the selected table is changed.
+		getFiltersArea().tableProperty().bind(_currentTableProperty);
+		
 		setAreaFiltersListeners(area);
 
 		grid.add(text, col, row);
@@ -1046,7 +1248,6 @@ public class ChartView extends ViewBase {
 			}
 		});
 	}
-	
 	
 	/*Name: removeFilterFromDropArea
 	 * If a filter is removed - check if it is connected to a numeric field. By searching this field in the drop areas.

@@ -74,12 +74,12 @@ public class SchemaPanel extends TitledPanel {
 			public int compare(Field o1, Field o2) {
 				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
-			
-			/*@Override
-			public Comparator<Field> reverseOrder() {
+
+			@Override
+			public Comparator<Field> reversed() {
 				// TODO Auto-generated method stub
 				return null;
-			}*/
+			}
 
 			@Override
 			public Comparator<Field> thenComparing(
@@ -115,6 +115,16 @@ public class SchemaPanel extends TitledPanel {
 				// TODO Auto-generated method stub
 				return null;
 			}
+
+			@Override
+			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
+					Function<? super Field, ? extends U> keyExtractor,
+					Comparator<? super U> keyComparator) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			
 		});
 		
 		_entries = new ArrayList<>();

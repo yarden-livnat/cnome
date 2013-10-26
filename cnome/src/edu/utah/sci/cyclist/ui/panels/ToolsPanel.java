@@ -25,6 +25,10 @@ package edu.utah.sci.cyclist.ui.panels;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
@@ -57,6 +61,55 @@ public class ToolsPanel extends TitledPanel {
 		Collections.sort(factories, new Comparator<ToolFactory>() {
 			public int compare(ToolFactory a, ToolFactory b) {
 				return a.getToolName().compareTo(b.getToolName());
+			}
+
+			@Override
+			public Comparator<ToolFactory> reversed() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<ToolFactory> thenComparing(
+					Comparator<? super ToolFactory> other) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public <U extends Comparable<? super U>> Comparator<ToolFactory> thenComparing(
+					Function<? super ToolFactory, ? extends U> keyExtractor,
+					Comparator<? super U> keyComparator) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public <U extends Comparable<? super U>> Comparator<ToolFactory> thenComparing(
+					Function<? super ToolFactory, ? extends U> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<ToolFactory> thenComparing(
+					ToIntFunction<? super ToolFactory> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<ToolFactory> thenComparing(
+					ToLongFunction<? super ToolFactory> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<ToolFactory> thenComparing(
+					ToDoubleFunction<? super ToolFactory> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
 			}
 		});
 		

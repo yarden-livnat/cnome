@@ -15,13 +15,13 @@
  
  #hiddenSplitter {
 	-fx-background-color: null;
-    -fx-padding: 2px;
+    -fx-padding: 1px;
 }
 
 #hiddenSplitter *.split-pane-divider,
 #hiddenSplitter *.vertical-grabber, 
 #hiddenSplitter *.horizontal-grabber {
-    -fx-background-color: null;
+    -fx-background-color: #f0f0f0;
     -fx-border-color: null;
     -fx-padding: 3px;
 }

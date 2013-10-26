@@ -280,6 +280,8 @@ public class Workspace extends ViewBase implements View {
 					
 					view.setMaximized(true);
 					_maximizedView = view;
+					
+					view.select();
 				}
 					
 			}
