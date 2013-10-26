@@ -118,6 +118,7 @@ public class WorkspacePresenter extends ViewPresenter {
 					while (change.next()) {
 						for (Filter filter : change.getRemoved()) {
 							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+<<<<<<< HEAD
 						}
 						for (Filter filter : change.getAddedSubList()) {
 							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
@@ -133,6 +134,8 @@ public class WorkspacePresenter extends ViewPresenter {
 					while (change.next()) {
 						for (Filter filter : change.getRemoved()) {
 							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+=======
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 						}
 						for (Filter filter : change.getAddedSubList()) {
 							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
@@ -141,6 +144,24 @@ public class WorkspacePresenter extends ViewPresenter {
 				}				
 			});
 			
+<<<<<<< HEAD
+=======
+			workspace.remoteFilters().addListener(new ListChangeListener<Filter>() {
+
+				@Override
+				public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+					while (change.next()) {
+						for (Filter filter : change.getRemoved()) {
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.REMOVE_REMOTE_FILTER, filter));
+						}
+						for (Filter filter : change.getAddedSubList()) {
+							broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.ADD_REMOTE_FILTER, filter));
+						}
+					}
+				}				
+			});
+			
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 			workspace.setOnShowFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
@@ -228,6 +249,20 @@ public class WorkspacePresenter extends ViewPresenter {
 			}
 		});
 		
+<<<<<<< HEAD
+=======
+		addLocalNotificationHandler(CyclistNotifications.DUPLICATE_VIEW, new CyclistNotificationHandler() {
+			@Override
+			public void handle(CyclistNotification event) {
+				Presenter presenter = (Presenter) event.getSource();
+				if (presenter instanceof ChartPresenter) {
+					duplicateView((ChartPresenter) presenter);
+				}
+			}
+			
+		});
+		
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		addLocalNotificationHandler(CyclistNotifications.SHOW_FILTER, new CyclistNotificationHandler() {
 			
 			@Override
@@ -292,6 +327,21 @@ public class WorkspacePresenter extends ViewPresenter {
 		
 	}
 	
+<<<<<<< HEAD
+=======
+	private void duplicateView(ViewPresenter presenter) {
+		ViewBase view = (ViewBase) presenter.getView();
+		
+		ViewBase newView = view.clone();
+		newView.setTranslateX( view.getTranslateX()+10);
+		newView.setTranslateY( view.getTranslateY()+10);
+		getWorkspace().addView(newView);
+		
+		ViewPresenter newPresenter = presenter.clone(newView);
+		_presenters.add(newPresenter);
+	}
+	
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	private void addToplevelListeners() {
 		addLocalNotificationHandler(CyclistNotifications.DATASOURCE_FOCUS, new CyclistNotificationHandler() {
 			

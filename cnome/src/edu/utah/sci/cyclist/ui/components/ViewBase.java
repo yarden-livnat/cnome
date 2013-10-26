@@ -31,6 +31,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+<<<<<<< HEAD
+=======
+import javafx.collections.ListChangeListener;
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -199,6 +203,10 @@ public class ViewBase extends BorderPane implements View {
 		
 		setTop(_header);
 		setListeners();
+	}
+	
+	public ViewBase clone() {
+		return null;
 	}
 	
 	public void setTitle(String title) {
@@ -426,7 +434,12 @@ public class ViewBase extends BorderPane implements View {
 		addActions(actions);
 	}
 	
-	private void fireSelectEvent() {
+	//Let the sub classes have access to the filters area
+	protected FilterArea getFiltersArea(){
+		return _filtersArea;
+	}
+	
+	public void select() { 
 		if (_onSelectAction != null) 
 			_onSelectAction.call();
 	}
@@ -446,7 +459,7 @@ public class ViewBase extends BorderPane implements View {
 			public void handle(MouseEvent event) {
 				delta.x = getTranslateX() - event.getSceneX();
 				delta.y = getTranslateY() - event.getSceneY();
-				fireSelectEvent();
+				select();
 				event.consume();
 			}
 		});
@@ -475,7 +488,7 @@ public class ViewBase extends BorderPane implements View {
 		EventHandler<MouseEvent> eh = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				fireSelectEvent();
+				select();
 				event.consume();
 			}
 		};
@@ -494,6 +507,7 @@ public class ViewBase extends BorderPane implements View {
 			@Override
 			public void handle(FilterEvent event) {
 				if (event.getEventType() == FilterEvent.SHOW) {
+<<<<<<< HEAD
 					if (_onShowFilter != null) {
 						_onShowFilter.call(event.getFilter());
 					}
@@ -503,6 +517,15 @@ public class ViewBase extends BorderPane implements View {
 					removeFilterFromDropArea(event.getFilter());
 				}
 				
+=======
+						if (_onShowFilter != null) {
+							_onShowFilter.call(event.getFilter());
+						} 
+				} else if (event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD) {
+					// If filter is connected to a field and its sql function, clean the field when the filter is removed.
+					removeFilterFromDropArea(event.getFilter());
+				} 
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 			}
 		});
 	}

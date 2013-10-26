@@ -38,6 +38,7 @@ public class ToolsLibrary {
 		new TableToolFactory(),
 		new ChartToolFactory(),
 		new MapToolFactory(),
+<<<<<<< HEAD
 		new WorkspaceToolFactory(),
 		new CycicToolFactory(),
 		new CommoditiesViewToolFactory(),
@@ -46,5 +47,8 @@ public class ToolsLibrary {
 		new RegionViewToolFactory(),
 		new SimulationInfoToolFactory(),
 		new FacilitySorterToolFactory()
+=======
+		new WorkspaceToolFactory()
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	};
 }

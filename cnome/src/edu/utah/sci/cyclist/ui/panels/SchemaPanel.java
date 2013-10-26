@@ -74,12 +74,21 @@ public class SchemaPanel extends TitledPanel {
 			public int compare(Field o1, Field o2) {
 				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
+<<<<<<< HEAD
 			
 			/*@Override
 			public Comparator<Field> reverseOrder() {
 				// TODO Auto-generated method stub
 				return null;
 			}*/
+=======
+
+			@Override
+			public Comparator<Field> reversed() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 
 			@Override
 			public Comparator<Field> thenComparing(
@@ -115,6 +124,19 @@ public class SchemaPanel extends TitledPanel {
 				// TODO Auto-generated method stub
 				return null;
 			}
+<<<<<<< HEAD
+=======
+
+			@Override
+			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
+					Function<? super Field, ? extends U> keyExtractor,
+					Comparator<? super U> keyComparator) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		});
 		
 		_entries = new ArrayList<>();

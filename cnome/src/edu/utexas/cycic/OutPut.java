@@ -54,13 +54,9 @@ public class OutPut {
 			
 			// Facilities
 			for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
-				if (facility.facilityClones.size() > 0) {
-					for (int i = 0; i < facility.facilityClones.size(); i++){
-						Element facID = doc.createElement("facility");
-						facilityBuilder(doc, facID, facility.facilityStructure, facility.facilityClones.get(i).facilityData, facility.facilityType);
-						rootElement.appendChild(facID);
-					}
-				} 
+				Element facID = doc.createElement("facility");
+				facilityBuilder(doc, facID, facility.facilityStructure, facility.facilityData, facility.facilityType);
+				rootElement.appendChild(facID);
 			}
 			
 			// Regions
@@ -116,7 +112,7 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("C:\\XMLs/file.xml"));
+			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
 			
 			transformer.transform(source, result);
 			
@@ -125,6 +121,7 @@ public class OutPut {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
+		saveFile();
 	}
 	/**
 	 * Sets up the control information for the simulation.
@@ -173,7 +170,7 @@ public class OutPut {
 	}
 	
 	/**
-	 * Function used to add recipies to the Cyclus input xml.
+	 * Function used to add recipes to the Cyclus input xml.
 	 * @param doc The xml.parser document that controls the cyclus input document.
 	 * @param rootElement The element that will serve as the heading for 
 	 * substructures built in this function.
@@ -267,7 +264,7 @@ public class OutPut {
 	 * @param structArray ArrayList<Object> containing the 
 	 * facility input field information.
 	 * @param dataArray ArrayList<Object> containing the data associated 
-	 * with the input field informtation.
+	 * with the input field information.
 	 */
 	@SuppressWarnings("unchecked")
 	public static void facilityDataElement(Document doc, Element rootElement, ArrayList<Object> structArray, ArrayList<Object> dataArray){
@@ -359,28 +356,37 @@ public class OutPut {
 		marketModel.appendChild(marketType);
 		rootElement.appendChild(marketModel);	
 	}
-	/*
-	public static void save(DataArrays scenario){
-		try{
-			FileOutputStream saveFile = new FileOutputStream("C:\\XMLs/SaveObj.ser");
-			ObjectOutputStream save = new ObjectOutputStream(saveFile);
-			save.writeObject(scenario);
-			save.close();						
-		} catch (Exception exc){
-			exc.printStackTrace();
-		}
-	}
 	
-	public static void load(){
-		try{
-			FileInputStream loadFile = new FileInputStream("C:\\XMLs/SaveObj.ser");
-			ObjectInputStream load = new ObjectInputStream(loadFile);
-			cycicScenarios.cycicScenarios.add((DataArrays) load.readObject());
-			load.close();						
-		} catch (Exception exc){
-			exc.printStackTrace();
+	
+	public static void saveFile(){
+		try {
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
+			Document doc = docBuilder.newDocument();
+			Element rootElement = doc.createElement("CycicSimulation");
+			doc.appendChild(rootElement);
+			
+			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
+				Element facElement = doc.createElement("facility");
+				Element facName = doc.createElement("name");
+				facName.appendChild(doc.createTextNode((String) facility.name));
+				facElement.appendChild(facName);
+				rootElement.appendChild(facElement);
+			}
+			
+			
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
+			
+			transformer.transform(source, result);
+			
+		} catch (ParserConfigurationException pce){
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
 		}
 	}
-	*/
 }
 

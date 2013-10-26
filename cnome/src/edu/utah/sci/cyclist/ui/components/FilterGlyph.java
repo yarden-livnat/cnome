@@ -3,7 +3,11 @@ package edu.utah.sci.cyclist.ui.components;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Filter;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -21,16 +25,32 @@ public class FilterGlyph extends HBox {
 	private Filter _filter;
 	private StackPane _button;
 	private boolean _remote;
+<<<<<<< HEAD
+=======
+	private boolean _valid;
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 	
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	
+	private BooleanProperty _validProperty = new SimpleBooleanProperty();
+	
 	public FilterGlyph(Filter filter) {
+<<<<<<< HEAD
 		this(filter, false);
 	}
 	
 	public FilterGlyph(Filter filter, boolean remote) {
 		_filter = filter;
 		_remote = remote;
+=======
+		this(filter, false, true);
+	}
+	
+	public FilterGlyph(Filter filter, boolean remote, boolean valid) {
+		_filter = filter;
+		_remote = remote;
+		_valid = valid;
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		build();
 	}
 	
@@ -50,12 +70,22 @@ public class FilterGlyph extends HBox {
 		return _action.get();
 	}
 	
+	public BooleanProperty validProperty() {
+		return _validProperty;
+	}
+	
+	public boolean isValid() {
+		return _validProperty.get();
+	}
+	
+	
 	private void build() {
 		this.getStyleClass().add("filter-glyph");
 		this.setSpacing(5);
 		
 		StackPane stackPane = new StackPane();
 		stackPane.setAlignment(Pos.CENTER);
+<<<<<<< HEAD
 		
 		getStyleClass().add("filter-glyph");
 		setSpacing(5);
@@ -64,6 +94,25 @@ public class FilterGlyph extends HBox {
 			setStyle("-fx-background-color: #d0ced1");
 		}
 		
+=======
+		
+		getStyleClass().add("filter-glyph");
+		setSpacing(5);
+		
+		if (_remote) {
+			if(_valid){
+				setStyle("-fx-background-color: #d0ced1");
+			} else {
+				setStyle("-fx-background-color: #d0ced1;"+"-fx-border-color:#D7737F;"+"-fx-border-width:2;");
+			}
+				
+		} else {
+			if(!_valid){
+				setStyle("-fx-background-color: #e4a1aa");
+			}
+		}
+		
+>>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 		Label label = new Label(_filter.getName());
 		label.getStyleClass().add("text");
 	
@@ -76,6 +125,29 @@ public class FilterGlyph extends HBox {
 		
 		this.getChildren().addAll(label,stackPane);
 		createMenu();
+		validProperty().set(_valid);
+		
+		validProperty().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				
+				//Change color according to remote and validity parameters.
+				String color = "#beffbf";
+				if (validProperty().get()) {
+					color= (_remote) ? "#d0ced1": "#beffbf";
+					_valid=true;
+				} else {
+					color= (_remote) ? "#d0ced1": "#e4a1aa";
+					_valid=false;
+				}
+				setStyle("-fx-background-color:" + color);
+				if(!_valid && _remote){
+					setStyle("-fx-border-color:#D7737F;"+"-fx-background-color:" + color+";" + "-fx-border-width:2;");
+				}
+				
+			}
+		});
 	}
 	
 	private void createMenu() {
