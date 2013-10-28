@@ -83,6 +83,8 @@ public class FilterGlyph extends HBox {
 			} else {
 				setStyle("-fx-background-color: #d0ced1;"+"-fx-border-color:#D7737F;"+"-fx-border-width:2;");
 			}
+		
+		stackPane.getChildren().add(_button);
 				
 		} else {
 			if(!_valid){

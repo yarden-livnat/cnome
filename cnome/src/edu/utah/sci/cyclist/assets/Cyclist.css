@@ -110,7 +110,6 @@
     -fx-border-color:  transparent transparent derive(-fx-base,-35%) transparent;
 }
 
-
 /* Filter Glyph */
 .filter-glyph {
 	-fx-background-color: #beffbf; /*-active-bg;*/
