@@ -46,100 +46,96 @@ import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.tools.ToolFactory;
 
 public class ToolsPanel extends TitledPanel {
-	public static final String ID 		= "tools-panel";
-	public static final String TITLE	= "Views";
-	
-	
-	public ImageView dragView = new ImageView();
-	public Pane root;
-	
-	public ToolsPanel() {
-		super(TITLE);
-	}
-	
-	public void setToolFactories(List<ToolFactory> factories) {		
-		Collections.sort(factories, new Comparator<ToolFactory>() {
-			public int compare(ToolFactory a, ToolFactory b) {
-				return a.getToolName().compareTo(b.getToolName());
-			}
+        public static final String ID                 = "tools-panel";
+        public static final String TITLE        = "Views";
+        
+        
+        public ImageView dragView = new ImageView();
+        public Pane root;
+        
+        public ToolsPanel() {
+                super(TITLE);
+        }
+        
+        public void setToolFactories(List<ToolFactory> factories) {                
+                Collections.sort(factories, new Comparator<ToolFactory>() {
+                        public int compare(ToolFactory a, ToolFactory b) {
+                                return a.getToolName().compareTo(b.getToolName());
+                        }
 
-			@Override
-			public Comparator<ToolFactory> reversed() {
-				// TODO Auto-generated method stub
-				return null;
-			}
+                        @Override
+                        public Comparator<ToolFactory> reversed() {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
 
-			@Override
-			public Comparator<ToolFactory> thenComparing(
-					Comparator<? super ToolFactory> other) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+                        @Override
+                        public Comparator<ToolFactory> thenComparing(
+                                        Comparator<? super ToolFactory> other) {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
 
-			@Override
-			public <U extends Comparable<? super U>> Comparator<ToolFactory> thenComparing(
-					Function<? super ToolFactory, ? extends U> keyExtractor,
-					Comparator<? super U> keyComparator) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+                        @Override
+                        public <U extends Comparable<? super U>> Comparator<ToolFactory> thenComparing(
+                                        Function<? super ToolFactory, ? extends U> keyExtractor,
+                                        Comparator<? super U> keyComparator) {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
 
-			@Override
-			public <U extends Comparable<? super U>> Comparator<ToolFactory> thenComparing(
-					Function<? super ToolFactory, ? extends U> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+                        @Override
+                        public <U extends Comparable<? super U>> Comparator<ToolFactory> thenComparing(
+                                        Function<? super ToolFactory, ? extends U> keyExtractor) {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
 
-			@Override
-			public Comparator<ToolFactory> thenComparing(
-					ToIntFunction<? super ToolFactory> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+                        public Comparator<ToolFactory> thenComparing(
+                                        ToIntFunction<? super ToolFactory> keyExtractor) {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
 
-			@Override
-			public Comparator<ToolFactory> thenComparing(
-					ToLongFunction<? super ToolFactory> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
+                        public Comparator<ToolFactory> thenComparing(
+                                        ToLongFunction<? super ToolFactory> keyExtractor) {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
 
-			@Override
-			public Comparator<ToolFactory> thenComparing(
-					ToDoubleFunction<? super ToolFactory> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		});
-		
-		VBox vbox = (VBox) getContent();
-		
-		for (final ToolFactory factory : factories) {
-			final Image icon = Resources.getIcon(factory.getIconName());
-			
-			final Label title = new Label(factory.getToolName(), new ImageView(icon));
-			title.setPrefWidth(USE_COMPUTED_SIZE);
-			title.getStyleClass().add("tools-entry");
-			
-			title.setOnDragDetected(new EventHandler<MouseEvent>() {
-				public void handle(MouseEvent event) {					
-					
-					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-					clipboard.put(DnD.TOOL_FORMAT, Tool.class, factory.create());
-					
-					Dragboard db = title.startDragAndDrop(TransferMode.COPY);
-					ClipboardContent content = new ClipboardContent();				
-					content.put( DnD.TOOL_FORMAT, factory.getToolName());
-					db.setContent(content);
-					
-//					DnDIcon.getInstance().show(icon, title);
-					event.consume();
-				}
-			});
-			
-			vbox.getChildren().add(title);
-		}
-	}
+                        public Comparator<ToolFactory> thenComparing(
+                                        ToDoubleFunction<? super ToolFactory> keyExtractor) {
+                                // TODO Auto-generated method stub
+                                return null;
+                        }
+                });
+                
+                VBox vbox = (VBox) getContent();
+                
+                for (final ToolFactory factory : factories) {
+                        final Image icon = Resources.getIcon(factory.getIconName());
+                        
+                        final Label title = new Label(factory.getToolName(), new ImageView(icon));
+                        title.setPrefWidth(USE_COMPUTED_SIZE);
+                        title.getStyleClass().add("tools-entry");
+                        
+                        title.setOnDragDetected(new EventHandler<MouseEvent>() {
+                                public void handle(MouseEvent event) {                                        
+                                        
+                                        DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+                                        clipboard.put(DnD.TOOL_FORMAT, Tool.class, factory.create());
+                                        
+                                        Dragboard db = title.startDragAndDrop(TransferMode.COPY);
+                                        ClipboardContent content = new ClipboardContent();                                
+                                        content.put( DnD.TOOL_FORMAT, factory.getToolName());
+                                        db.setContent(content);
+                                        
+//                                        DnDIcon.getInstance().show(icon, title);
+                                        event.consume();
+                                }
+                        });
+                        
+                        vbox.getChildren().add(title);
+                }
+        }
 }
-

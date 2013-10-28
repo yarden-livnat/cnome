@@ -3,6 +3,7 @@ package edu.utah.sci.cyclist.ui.views;
 
 import org.controlsfx.control.RangeSlider;
 
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
