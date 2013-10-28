@@ -90,41 +90,39 @@ public class SchemaPanel extends TitledPanel {
 
 			@Override
 			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
-					Function<? super Field, ? extends U> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Comparator<Field> thenComparing(
-					ToIntFunction<? super Field> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Comparator<Field> thenComparing(
-					ToLongFunction<? super Field> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Comparator<Field> thenComparing(
-					ToDoubleFunction<? super Field> keyExtractor) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
 					Function<? super Field, ? extends U> keyExtractor,
 					Comparator<? super U> keyComparator) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
-			
+			@Override
+			public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
+					Function<? super Field, ? extends U> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<Field> thenComparingInt(
+					ToIntFunction<? super Field> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<Field> thenComparingLong(
+					ToLongFunction<? super Field> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Comparator<Field> thenComparingDouble(
+					ToDoubleFunction<? super Field> keyExtractor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		});
 		
 		_entries = new ArrayList<>();

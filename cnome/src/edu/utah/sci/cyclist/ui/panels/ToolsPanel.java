@@ -92,21 +92,21 @@ public class ToolsPanel extends TitledPanel {
 			}
 
 			@Override
-			public Comparator<ToolFactory> thenComparing(
+			public Comparator<ToolFactory> thenComparingInt(
 					ToIntFunction<? super ToolFactory> keyExtractor) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public Comparator<ToolFactory> thenComparing(
+			public Comparator<ToolFactory> thenComparingLong(
 					ToLongFunction<? super ToolFactory> keyExtractor) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public Comparator<ToolFactory> thenComparing(
+			public Comparator<ToolFactory> thenComparingDouble(
 					ToDoubleFunction<? super ToolFactory> keyExtractor) {
 				// TODO Auto-generated method stub
 				return null;
