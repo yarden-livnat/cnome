@@ -7,10 +7,12 @@ import com.sun.xml.internal.bind.v2.runtime.Name;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 /**
@@ -29,10 +31,16 @@ public class RegionShape extends Circle {
 	protected static double y;
 	protected static double deltax;
 	protected static double deltay;
+	Object name;
+	Text text;
+	MenuBar menuBar = new MenuBar();
 
-	static void addRegion(String name) {
-		final RegionCircle circle = new RegionCircle();
-		circle.setRadius(15);
+	static RegionShape addRegion(final String name) {
+		final RegionShape circle = new RegionShape(){
+			{
+				setRadius(15);
+			}
+		};
 		circle.setCenterX(50);
 		circle.setCenterY(50);
 		circle.setStroke(Color.BLACK);
@@ -40,7 +48,12 @@ public class RegionShape extends Circle {
 
 		circle.name = name;
 		circle.text = new Text(name);
-		// why does putting this in the brackets not work??
+		circle.text.setX(circle.getCenterX()-circle.getRadius()*0.7);
+		circle.text.setY(circle.getCenterY());	
+		circle.text.setWrappingWidth(circle.getRadius()*1.6);
+		circle.text.setMouseTransparent(true);
+		circle.text.setFont(new Font(14));
+
 
 		//Adding the circle's menu and its functions.
 
@@ -59,11 +72,12 @@ public class RegionShape extends Circle {
 		final Menu menu = new Menu();
 		menu.getItems().addAll(regionForm, delete, exit);
 
-		/*circle.menu.getMenus().add(menu);
-		circle.menu.setLayoutX(circle.getCenterX());
-		circle.menu.setLayoutY(circle.getCenterY());
-		circle.menu.setVisible(false);*/
+		circle.menuBar.getMenus().add(menu);
+		circle.menuBar.setLayoutX(circle.getCenterX());
+		circle.menuBar.setLayoutY(circle.getCenterY());
+		circle.menuBar.setVisible(false);
 		
+		return circle;	
 	};
 
 	{	
@@ -82,16 +96,10 @@ public class RegionShape extends Circle {
 			onMouseDraggedProperty().set(new EventHandler<MouseEvent>(){
 				@Override
 				public void handle(MouseEvent event){
-					setCenterX(mousex+x);
-					setCenterY(mousey+y);
-
-					deltax = getCenterX()-mousex;
-					deltay = getCenterY()-mousey;
-
-
-					setCenterX(deltax+event.getX());
-					setCenterY(deltay+event.getY());
-
+					
+					setCenterX(x+event.getX());
+					setCenterY(y+event.getY());
+					
 					if(getCenterX() <= RegionCorralView.corralPane.getLayoutBounds().getMinX()+getRadius()){
 						setCenterX(RegionCorralView.corralPane.getLayoutBounds().getMinX()+getRadius());
 					}
@@ -104,6 +112,10 @@ public class RegionShape extends Circle {
 					if(getCenterX() >= RegionCorralView.corralPane.getLayoutBounds().getMaxX()-getRadius()){
 						setCenterX(RegionCorralView.corralPane.getLayoutBounds().getMaxX()-getRadius());
 					}
+					
+					text.setX(getCenterX()-getRadius()*0.6);
+					text.setY(getCenterY());
+					
 				}
 			});
 

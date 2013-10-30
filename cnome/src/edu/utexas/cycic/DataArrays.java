@@ -82,6 +82,7 @@ class regionNode{
 	ArrayList<Object> regionData  = new ArrayList<Object>();
 	ArrayList<String> availFacilities = new ArrayList<String>(); 
 	ArrayList<String> institutions = new ArrayList<String>();
+	static RegionShape regionCircle = new RegionShape();
 }
 
 /**

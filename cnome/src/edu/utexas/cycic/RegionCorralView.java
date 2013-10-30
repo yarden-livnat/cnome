@@ -145,14 +145,15 @@ public class RegionCorralView extends ViewBase {
 		EventHandler addRegion = new EventHandler<MouseEvent>(){
 			@SuppressWarnings("unchecked")
 			public void handle(MouseEvent event) {
-				final RegionShape region = new RegionShape();
-				region.addRegion(regionText.getText());
+				final regionNode region = new regionNode();
+				regionNode.regionCircle = RegionShape.addRegion(regionText.getText());
 
 				//region.regionStruct = (ArrayList<Object>) cycicScenarios.workingCycicScenario.regionStructs.get(0);
 				//FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
 				//from line 82-83 of RegionView
 
-				corralPane.getChildren().add(region);
+				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text);
+
 
 			}	//ends definition of EventHandler addRegion  
 		};	//ends EventHandler addRegion
