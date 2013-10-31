@@ -102,15 +102,7 @@
 
 .field-glyph:hover .arrow {
     -fx-background-color: -fx-mark-color, #a0a0a0;
-<<<<<<< HEAD
-=======
-}
 
-.field-glyph .separator .line {
-    -fx-border-style: solid;
-    -fx-background-color: null;
-    -fx-border-color:  transparent transparent derive(-fx-base,-35%) transparent;
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 }
 
 .field-glyph .separator .line {
@@ -119,10 +111,13 @@
     -fx-border-color:  transparent transparent derive(-fx-base,-35%) transparent;
 }
 
-<<<<<<< HEAD
+.field-glyph .separator .line {
+    -fx-border-style: solid;
+    -fx-background-color: null;
+    -fx-border-color:  transparent transparent derive(-fx-base,-35%) transparent;
+}
 
-=======
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
+
 /* Filter Glyph */
 .filter-glyph {
 	-fx-background-color: #beffbf; /*-active-bg;*/

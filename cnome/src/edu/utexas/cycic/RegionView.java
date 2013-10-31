@@ -33,6 +33,7 @@ public class RegionView extends ViewBase{
 	 */
 	public RegionView(){
 		super();
+		workingRegion = RegionCorralView.workingRegion;
 		// Facility list view for available facilities list of the region
 		final ListView<String> facilityList = new ListView<String>();
 		facilityList.setOrientation(Orientation.VERTICAL);
@@ -191,9 +192,8 @@ public class RegionView extends ViewBase{
 		setContent(regionBox);
 		setPrefSize(600,400);
 		
-		if (CycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
-			PracticeRegions.init();
-		}
+		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+
 	}
 	
 	private ComboBox<String> structureCB = new ComboBox<String>();

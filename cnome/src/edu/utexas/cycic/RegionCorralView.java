@@ -27,7 +27,7 @@ public class RegionCorralView extends ViewBase {
 		setMaxWidth(650);
 	}
 
-	static regionNode whatever = null; 
+	static regionNode workingRegion = null; 
 
 	static Pane corralPane = new Pane(){
 		{
@@ -50,8 +50,7 @@ public class RegionCorralView extends ViewBase {
 		regionLabel.setFont(new Font(50));
 		final TextField regionText = new TextField(); 
 
-		ObservableList<String> typeList = FXCollections.observableArrayList(
-				"Growth Region", "Other");
+		ObservableList<String> typeList = FXCollections.observableArrayList("Growth Region", "Other");
 		final ComboBox typeOptions = new ComboBox(typeList);
 
 		final Button corralButton = new Button();
@@ -159,6 +158,10 @@ public class RegionCorralView extends ViewBase {
 		};	//ends EventHandler addRegion
 
 		corralButton.setOnMouseClicked(addRegion);
+		
+		if (CycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
+			PracticeRegions.init();
+		}
 
 	}
 }
