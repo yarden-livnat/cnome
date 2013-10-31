@@ -28,6 +28,7 @@ import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import edu.utexas.cycic.tools.InstitutionViewToolFactory;
 import edu.utexas.cycic.tools.MarketViewToolFactory;
 import edu.utexas.cycic.tools.RecipeFormToolFactory;
+import edu.utexas.cycic.tools.RegionCorralViewToolFactory;
 import edu.utexas.cycic.tools.RegionViewToolFactory;
 import edu.utexas.cycic.tools.SimulationInfoToolFactory;
 
@@ -45,6 +46,7 @@ public class ToolsLibrary {
 		new MarketViewToolFactory(),
 		new RecipeFormToolFactory(),
 		new RegionViewToolFactory(),
-		new SimulationInfoToolFactory()
+		new SimulationInfoToolFactory(),
+		new RegionCorralViewToolFactory()
 	};
 }

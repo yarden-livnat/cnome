@@ -209,6 +209,9 @@ public class CycicCircles{
 				if(event.getButton().equals(MouseButton.SECONDARY)){
 					circle.menu.setVisible(true);
 				}
+				if(event.isAltDown() && event.isControlDown()){
+					
+				}
 				if (event.getClickCount() >= 2){
 					if(circle.childrenShow == true){
 						circle.childrenShow = false;
