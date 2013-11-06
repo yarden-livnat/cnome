@@ -2,7 +2,10 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utexas.cycic.tools.RegionViewTool;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -17,7 +20,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -192,9 +198,22 @@ public class RegionView extends ViewBase{
 		setContent(regionBox);
 		setPrefSize(600,400);
 		
-		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+		regionNode.regionCircle.setOnDragDetected(new EventHandler<MouseEvent>(){
+			@Override
+			public void handle(MouseEvent regionViewCreate){
+				if(regionViewCreate.isShiftDown() == true){
 
+				} else {
+					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+				}
+			}
+		});
+		
+		regionNode.regionCircle.institutionList = institList;
+		regionNode.regionCircle.facilityList = facilityList;
+		
 	}
+	
 	
 	private ComboBox<String> structureCB = new ComboBox<String>();
 	private GridPane grid = new GridPane();

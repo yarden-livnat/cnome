@@ -248,7 +248,7 @@ public class CycicCircles{
 					
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
 					ClipboardContent content = new ClipboardContent();				
-					content.put( DnD.TOOL_FORMAT, "Facility Form");
+					content.put(DnD.TOOL_FORMAT, "Facility Form");
 					db.setContent(content);
 					
 //					DnDIcon.getInstance().show(icon, title);
