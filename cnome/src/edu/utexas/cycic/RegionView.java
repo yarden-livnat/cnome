@@ -65,45 +65,6 @@ public class RegionView extends ViewBase{
 			}
 		});		
 		// Selection for new or currently built regions.
-		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent e){
-				structureCB.getItems().clear();
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.regionNodes.size(); i++){
-					structureCB.getItems().add((String) CycicScenarios.workingCycicScenario.regionNodes.get(i).name);
-				}
-				structureCB.getItems().add("New Region");
-			}
-		});
-		
-		structureCB.valueProperty().addListener(new ChangeListener<String>(){
-			@SuppressWarnings("unchecked")
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if (newValue == null){
-					
-				} else if(newValue == "New Region"){
-					grid.getChildren().clear();
-					rowNumber = 0;
-					CycicScenarios.workingCycicScenario.regionNodes.add(new regionNode());
-					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(CycicScenarios.workingCycicScenario.regionNodes.size()-1);
-					workingRegion.type = "GrowthRegion";
-					workingRegion.regionStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.regionStructs.get(0);
-					FormBuilderFunctions.formArrayBuilder(workingRegion.regionStruct, workingRegion.regionData);
-					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
-				} else {
-					rowNumber = 0;
-					grid.getChildren().clear();
-					facilityList.getItems().clear();
-					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(structureCB.getItems().indexOf(newValue));
-					for(int i = 0; i < workingRegion.availFacilities.size(); i++){
-						facilityList.getItems().add(workingRegion.availFacilities.get(i));
-					}
-					for (int i = 0; i < workingRegion.institutions.size(); i++){
-						institList.getItems().add(workingRegion.institutions.get(i));
-					}
-					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
-				}
-			}
-		});
 		
 		Button button = new Button();
 		button.setText("Check Array");
@@ -112,8 +73,6 @@ public class RegionView extends ViewBase{
 				System.out.println(workingRegion.regionData);
 			}
 		});
-		
-		topGrid.add(structureCB, 0, 0);
 		topGrid.add(button, 2, 0);
 		
 		// Code section to add new facility to region.
@@ -198,7 +157,10 @@ public class RegionView extends ViewBase{
 		setContent(regionBox);
 		setPrefSize(600,400);
 		
-		regionNode.regionCircle.setOnDragDetected(new EventHandler<MouseEvent>(){
+
+		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+		
+		/*regionNode.regionCircle.setOnDragDetected(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent regionViewCreate){
 				if(regionViewCreate.isShiftDown() == true){
@@ -207,18 +169,16 @@ public class RegionView extends ViewBase{
 					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
 				}
 			}
-		});
+		});*/
+
 		
 		regionNode.regionCircle.institutionList = institList;
 		regionNode.regionCircle.facilityList = facilityList;
 		
 	}
 	
-	
-	private ComboBox<String> structureCB = new ComboBox<String>();
 	private GridPane grid = new GridPane();
 	private GridPane topGrid = new GridPane();
-	private FacilityCircle formNode = null;
 	private int rowNumber = 0;
 	private int columnNumber = 0;
 	private int columnEnd = 0;

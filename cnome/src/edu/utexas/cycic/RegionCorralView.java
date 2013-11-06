@@ -160,6 +160,8 @@ public class RegionCorralView extends ViewBase {
 			@SuppressWarnings("unchecked")
 			public void handle(MouseEvent event) {
 				final regionNode region = new regionNode();
+				region.regionStruct = PracticeRegions.growthRegion;
+				FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
 				regionNode.regionCircle = RegionShape.addRegion(regionText.getText());
 
 				//region.regionStruct = (ArrayList<Object>) cycicScenarios.workingCycicScenario.regionStructs.get(0);
