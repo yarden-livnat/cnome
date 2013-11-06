@@ -97,17 +97,17 @@ public class Cycic extends ViewBase{
 		submit1.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent event){
-				facilityNode tempCircle = new facilityNode();
-				tempCircle.facilityType = structureCB.getValue();
+				facilityNode tempNode = new facilityNode();
+				tempNode.facilityType = structureCB.getValue();
 				for (int i = 0; i < RealFacs.alfredStructs.size(); i++){
 					if (RealFacs.alfredStructsNames.get(i) == structureCB.getValue()){
-						tempCircle.facilityStructure = RealFacs.alfredStructs.get(i);
+						tempNode.facilityStructure = RealFacs.alfredStructs.get(i);
 					}				
 				}
-				tempCircle.name = facNameField.getText();
-				tempCircle.cycicCircle = CycicCircles.addNode(facNameField.getText(), tempCircle);
-				tempCircle.sorterCircle = SorterCircles.addNode(facNameField.getText(), tempCircle, tempCircle);
-				FormBuilderFunctions.formArrayBuilder(tempCircle.facilityStructure, tempCircle.facilityData);
+				tempNode.name = facNameField.getText();
+				tempNode.cycicCircle = CycicCircles.addNode(facNameField.getText(), tempNode);
+				tempNode.sorterCircle = SorterCircles.addNode(facNameField.getText(), tempNode, tempNode);
+				FormBuilderFunctions.formArrayBuilder(tempNode.facilityStructure, tempNode.facilityData);
 			}
 		});
 		grid.add(submit1, 4, 0);

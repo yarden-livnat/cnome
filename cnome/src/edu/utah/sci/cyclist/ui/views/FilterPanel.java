@@ -1,8 +1,8 @@
 package edu.utah.sci.cyclist.ui.views;
 
 
-//import org.controlsfx.control.RangeSlider;
-import controls.RangeSlider;
+import org.controlsfx.control.RangeSlider;
+
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -22,7 +22,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
@@ -177,9 +176,9 @@ public class FilterPanel extends TitledPanel {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> arg0,
 					Boolean oldValue, Boolean newValue) {
-				System.out.println("highlight: "+oldValue+"  "+newValue);
+				System.out.println("highlight: "+newValue);
 				if (newValue)
-					getHeader().setStyle("-fx-background-color: #808080");
+					getHeader().setStyle("-fx-background-color: #beffbf");
 				else
 					getHeader().setStyle("-fx-background-color: #e0e0ef");
 				
@@ -249,7 +248,7 @@ public class FilterPanel extends TitledPanel {
 	
 	private Node createAllEntry() {
 		CheckBox cb = new CheckBox("All");
-//		cb.setSelected(true)
+		cb.setSelected(true);
 		cb.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override

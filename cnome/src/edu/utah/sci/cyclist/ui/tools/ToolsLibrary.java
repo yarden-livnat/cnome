@@ -24,11 +24,11 @@ package edu.utah.sci.cyclist.ui.tools;
 
 import edu.utexas.cycic.tools.CommoditiesViewToolFactory;
 import edu.utexas.cycic.tools.CycicToolFactory;
-import edu.utexas.cycic.tools.FacilitySorterToolFactory;
 import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import edu.utexas.cycic.tools.InstitutionViewToolFactory;
 import edu.utexas.cycic.tools.MarketViewToolFactory;
 import edu.utexas.cycic.tools.RecipeFormToolFactory;
+import edu.utexas.cycic.tools.RegionCorralViewToolFactory;
 import edu.utexas.cycic.tools.RegionViewToolFactory;
 import edu.utexas.cycic.tools.SimulationInfoToolFactory;
 
@@ -41,10 +41,12 @@ public class ToolsLibrary {
 		new WorkspaceToolFactory(),
 		new CycicToolFactory(),
 		new CommoditiesViewToolFactory(),
+		new FormBuilderToolFactory(),
 		new InstitutionViewToolFactory(),
+		new MarketViewToolFactory(),
 		new RecipeFormToolFactory(),
 		new RegionViewToolFactory(),
 		new SimulationInfoToolFactory(),
-		new FacilitySorterToolFactory()
+		new RegionCorralViewToolFactory()
 	};
 }

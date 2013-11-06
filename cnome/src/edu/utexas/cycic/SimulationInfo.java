@@ -41,7 +41,20 @@ public class SimulationInfo extends ViewBase{
 	 * Adds the GridPane and input nodes to the simulationInfo view.
 	 */
 	public void init(){
-		TextField duration = new TextField();
+		TextField duration = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
+		
 		duration.setText(CycicScenarios.workingCycicScenario.simulationData.duration);
 		duration.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -54,7 +67,7 @@ public class SimulationInfo extends ViewBase{
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
-		startMonth.setValue(CycicScenarios.workingCycicScenario.simulationData.startMonth);
+		startMonth.setValue(months.get(CycicScenarios.workingCycicScenario.simulationData.startMonth));
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
@@ -66,7 +79,19 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(new Label("Start Month"), 0, 1);
 		simInfo.add(startMonth, 1, 1);
 		
-		TextField startYear = new TextField();
+		TextField startYear = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
 		startYear.setText(CycicScenarios.workingCycicScenario.simulationData.startYear);
 		startYear.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -76,7 +101,19 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(new Label("Start Year"), 0, 2);
 		simInfo.add(startYear, 1, 2);
 		
-		TextField simStart = new TextField();
+		TextField simStart = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
 		simStart.setText(CycicScenarios.workingCycicScenario.simulationData.simStart);
 		simStart.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -86,7 +123,19 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(new Label("Simulation Start"), 0 ,3);
 		simInfo.add(simStart, 1, 3);
 		
-		TextField decay = new TextField();
+		TextField decay = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
 		decay.setText(CycicScenarios.workingCycicScenario.simulationData.decay);
 		decay.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){

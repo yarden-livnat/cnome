@@ -9,6 +9,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.views.ChartView;
 
 public class ChartPresenter extends ViewPresenter {
 
@@ -29,6 +30,33 @@ public class ChartPresenter extends ViewPresenter {
 		addNotificationHandlers();
 	}
 	
+	
+	@Override
+	public ViewPresenter clone(View view) {
+		ChartPresenter copy = new ChartPresenter(getEventBus());
+		copy.setView(view);
+		
+		// copy tables
+		for (SelectionModel.Entry entry : getSelectionModel().getEntries()) {
+			copy.addTable(entry.table, entry.remote, entry.active, entry.remoteActive);
+		}
+		
+		ChartView chartView = (ChartView) view;
+		chartView.copy(getView());
+
+		chartView.setActive(true);
+		return copy;
+	}
+	
+	@Override 
+	public void setActive(boolean active) {
+		getView().setActive(active);
+	}
+	
+	@Override
+	public ChartView getView() {
+		return (ChartView) super.getView();
+	}
 	
 	/**
 	 * setView
@@ -52,7 +80,13 @@ public class ChartPresenter extends ViewPresenter {
 			public void call(Table table) {
 				removeTable(table);			
 			}
-			
+		});
+		
+		getView().setOnDuplicate(new Closure.V0() {
+			@Override
+			public void call() {
+				broadcast(new CyclistNotification(CyclistNotifications.DUPLICATE_VIEW));
+			}
 		});
 	}
 	
