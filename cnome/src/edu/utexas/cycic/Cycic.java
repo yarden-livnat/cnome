@@ -9,13 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -152,7 +150,7 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(output, 0, 2);
-		grid.add(toggle, 0, 3);
+		//grid.add(toggle, 0, 3);
 		/*
 		Button save = new Button();
 		save.setText("Save");

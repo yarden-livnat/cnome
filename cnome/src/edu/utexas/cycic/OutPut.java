@@ -368,9 +368,19 @@ public class OutPut {
 			
 			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
 				Element facElement = doc.createElement("facility");
+				// Name
 				Element facName = doc.createElement("name");
 				facName.appendChild(doc.createTextNode((String) facility.name));
 				facElement.appendChild(facName);
+				// X position
+				Element xPosition = doc.createElement("xPosition");
+				xPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterX())));
+				facElement.appendChild(xPosition);
+				// Y position
+				Element yPosition = doc.createElement("yPosition");
+				yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
+				facElement.appendChild(yPosition);
+				
 				rootElement.appendChild(facElement);
 			}
 			

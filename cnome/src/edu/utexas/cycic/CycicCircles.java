@@ -250,8 +250,6 @@ public class CycicCircles{
 					ClipboardContent content = new ClipboardContent();				
 					content.put(DnD.TOOL_FORMAT, "Facility Form");
 					db.setContent(content);
-					
-//					DnDIcon.getInstance().show(icon, title);
 					event.consume();
 				}
 			}

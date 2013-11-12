@@ -52,7 +52,7 @@ public class RealFacs {
 		FuelPairSub.add(ReactorIncommodity);
 		FuelPairSub.add(ReactorInrecipe);
 		fuelInput.add(FuelPairSub);
-		fuelInput.add("fuel_input");
+		fuelInput.add("oneOrMore");
 		fuelInput.add(null);
 		fuelInput.add(null);
 		fuelInput.add(null);
