@@ -186,4 +186,34 @@ public class VisFunctions {
 			CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
 		}
 	}
+	
+	/**
+	 * Reloads the CYCIC pane without Markets.
+	 */
+	static void marketHide(){
+		Cycic.pane.getChildren().remove(0, Cycic.pane.getChildren().size());
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle);
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.menu);
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.text);
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.image);
+			for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.size(); ii++){
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii));
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).menu);
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).text);
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).image);
+			}
+			for(int n = 0; n < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.size(); n++){
+				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line);
+				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line.toBack();
+			}
+		}
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i));		
+		}
+		for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
+			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
+			CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
+		}
+	}
 }

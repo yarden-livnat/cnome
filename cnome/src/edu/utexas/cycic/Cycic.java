@@ -44,6 +44,7 @@ public class Cycic extends ViewBase{
 			setToggleGroup(group);
 		}
 	};
+	static boolean marketHideBool = false;
 	
 	/**
 	 * Initiates the Pane and GridPane.
@@ -150,6 +151,21 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(output, 0, 2);
+		
+		Button hideMarkets = new Button();
+		hideMarkets.setText("Hide Yo' Markets");
+		hideMarkets.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent event){
+				if (Cycic.marketHideBool == true){
+					VisFunctions.marketHide();
+					marketHideBool = false;
+				} else {
+					VisFunctions.reloadPane();
+					marketHideBool = true;
+				}
+			}
+		});
+		grid.add(hideMarkets, 0, 3);
 		//grid.add(toggle, 0, 3);
 		/*
 		Button save = new Button();
