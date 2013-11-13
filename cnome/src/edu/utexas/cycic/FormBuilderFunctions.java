@@ -281,7 +281,7 @@ public class FormBuilderFunctions {
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
-				Object oldMarket = null;
+				MarketCircle oldMarket = null;
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
@@ -302,6 +302,16 @@ public class FormBuilderFunctions {
 					if (marketCircle != null){
 						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
 						defaultValue.set(0, newValue);
+						facNode.cycicCircle.incommods.add(newValue);
+						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+							if (facNode.cycicCircle.incommods.get(i) == (String) oldMarket.name){
+								facNode.cycicCircle.incommods.remove(i);
+								i--;
+							}
+						}
+						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+							System.out.println(facNode.cycicCircle.incommods.get(i));
+						}
 						VisFunctions.reloadPane();
 					}
 					
