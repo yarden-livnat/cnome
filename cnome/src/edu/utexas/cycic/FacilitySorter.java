@@ -54,45 +54,61 @@ public class FacilitySorter extends ViewBase {
 		}
 	};
 	static ArrayList<Object> structure=new ArrayList<>();
-	static Integer facilityIndex; 
+	static Integer facilityIndex;
+	static ArrayList<Object> displayList=new ArrayList<>();
 
 	private void init (){
 		//initialize most variables
 		final Text list=new Text ();
 		HBox topBox= new HBox();
+		topBox.setSpacing(50);
+
+
 		final HBox searchBox=new HBox(){
 			{
 				setSpacing(10);
 				setMaxWidth(600);
+				setMaxHeight(35);
+				setStyle("-fx-border-color: black;");
 			}
 		};
-		searchBox.setMaxHeight(35);
-		searchBox.setStyle("-fx-border-color: black;");
 
-		final ComboBox<String> facilityList=new ComboBox<String>();
-		facilityList.setVisibleRowCount(5);
+		final ComboBox<String> facilityList=new ComboBox<String>(){
+			{
+				setVisibleRowCount(6);
+			}
+		};
 		searchBox.getChildren().add(facilityList);
 
 		final Label number=new Label();
 		searchBox.getChildren().add(number);
 
-		final Slider numberShowen=new Slider(0,0,0);
-		numberShowen.setShowTickMarks(true);
-		numberShowen.setShowTickLabels(true);
-		numberShowen.setMinorTickCount(0);
-		numberShowen.setValue(numberShowen.getMax());
-		numberShowen.setMajorTickUnit(1);
-		numberShowen.setSnapToTicks(true);
+
+		
+		final Slider numberShowen=new Slider(0,0,0){
+			{
+				setShowTickMarks(true);
+				setShowTickLabels(true);
+				setMinorTickCount(0);
+				setValue(getMax());
+				setMajorTickUnit(1);
+				setSnapToTicks(true);
+				setMax(displayList.size());
+			}
+		};
+
 		numberShowen.valueProperty().addListener(new ChangeListener<Number>(){
 			public void changed(ObservableValue<? extends Number> ov,Number old_val, Number new_val) {
 				number.setText("number of nodes shown:" +Integer.toString(new_val.intValue()));
 				display.getChildren().clear();
 				for (int iii=0;iii<new_val.intValue();iii++){
-					display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(iii).sorterCircle);
-					display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(iii).sorterCircle.text);
+					Object appear=displayList.get(iii);
+					display.getChildren().add(((facilityNode)appear).sorterCircle);
+					display.getChildren().add(((facilityNode)appear).sorterCircle.text);
 				}
 			}
 		});
+		
 		searchBox.getChildren().add(numberShowen);
 
 		final Label type=new Label();
@@ -101,29 +117,36 @@ public class FacilitySorter extends ViewBase {
 		final VBox criteria = new VBox(){
 			{
 				setSpacing(10);
+				setStyle("-fx-border-color: black;");
+				setPrefHeight(getHeight());
 			}
 		};
 		final Button add= new Button();
 		add.setText("add Criteria");
 
-		final VBox addMore= new VBox();
+		final Button clear=new Button(){
+			{
+				setText("Clear All");
+			}
+		};
 
+		final VBox addMore= new VBox();
+		addMore.setSpacing(10);
 		final ArrayList<Object>data=new ArrayList<>();
-		final ArrayList<Object> filt=new ArrayList<>();
+		final ArrayList<Object> filter=new ArrayList<>();
 		//variables default info
 
 
-		final Button start=new Button();
-		start.setText("Start");
-		criteria.setStyle("-fx-border-color: black;");
-		criteria.setPrefHeight(getHeight());
-		addMore.setSpacing(10);
+		final Button start=new Button(){
+			{
+				setText("Start");
+			}
+		};
+
 
 		topBox.getChildren().add(searchBox);
 		topBox.getChildren().add(criteria);
-		//top searchbox information
 
-		topBox.setSpacing(50);
 
 		//right criteria column 
 		//drop down for all parent nodes
@@ -146,19 +169,36 @@ public class FacilitySorter extends ViewBase {
 						break;
 					}
 				}
-				numberShowen.setMax(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size());
+				//numberShowen.setMax(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size());
 				//update data array
 				for (int i=0;i<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.size();i++){
 					ArrayList<Object>element=new ArrayList<>();
 					for (int ii=0;ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size();ii++){
-						element.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii).facilityData.get(i));
+						ArrayList <Object>Subelement=new ArrayList<>();
+						ArrayList <Object> check= (ArrayList )CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii).facilityData.get(i);
+						if (check instanceof ArrayList){
+							for (int iii=0;iii<check.size();iii++){
+								ArrayList <Object>moreThanOneCase=new ArrayList<>();
+								moreThanOneCase.add(check.get(iii));
+								moreThanOneCase.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii));
+								Subelement.add(moreThanOneCase);
+
+							}
+
+						}
+						else {
+							Subelement.add(check);
+							Subelement.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii));
+						}
+						element.add(Subelement);
 					}
 					data.add(element);
 				}
-				for (int i=0;i<numberShowen.getMax();i++){
-					display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i).sorterCircle);
-					display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i).sorterCircle.text);
-				}
+				/*	for (int i=0;i<numberShowen.getMax();i++){
+display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i).sorterCircle);
+display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i).sorterCircle.text);
+}
+				 */
 				number.setVisible(true);
 				number.setText("number of nodes shown:" +Integer.toString(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size()));
 
@@ -170,10 +210,21 @@ public class FacilitySorter extends ViewBase {
 				//System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityStructure);
 				//System.out.println(structure);
 				criteria.getChildren().add(add);
+				criteria.getChildren().add(clear);
 				criteria.getChildren().add(addMore);
 				criteria.getChildren().add(start);
+				initialize( displayList);
 
 
+			}
+		});
+
+		//clear function
+		clear.setOnMouseClicked(new EventHandler<MouseEvent>(){
+
+			public void handle (MouseEvent e){
+				addMore.getChildren().clear();
+				initialize (displayList);
 			}
 		});
 
@@ -202,13 +253,14 @@ public class FacilitySorter extends ViewBase {
 				detailBox.getChildren().add(detail);
 				addMore.getChildren().add(detailBox);
 
-				//		System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes.get(0).facilityData);
-				//		System.out.println(data);
+				//	System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes.get(0).facilityData);
+				//	System.out.println(data);
 				detail.valueProperty().addListener(new ChangeListener <String>(){
 					@Override
 					public void changed(ObservableValue<? extends String> arg0,	String oldValue, final String newValue) {
-						for (int i = 0; i < order.size(); i++){
+						for ( int i = 0; i < order.size(); i++){
 							if(order.get(i) == newValue){
+								final int listOrder=i;
 								if (struc.get(i).get(2).equals("String")){
 									if (detailBox.getChildren().size()>=1){
 										detailBox.getChildren().remove(1);
@@ -216,8 +268,8 @@ public class FacilitySorter extends ViewBase {
 									final ComboBox <String> information=new ComboBox<>();
 									for (int ii=0;ii<((ArrayList<Object>) listed.get(i)).size();ii++){
 										ArrayList<ArrayList>newList=(ArrayList<ArrayList>)listed.get(i);
-										if(!(information.getItems().contains(newList.get(ii).get(0)))){
-											information.getItems().add(newList.get(ii).get(0).toString());
+										if(!(information.getItems().contains(((ArrayList<Object>) newList.get(ii).get(0)).get(0)))){
+											information.getItems().add(((ArrayList) newList.get(ii).get(0)).get(0).toString());
 										}
 
 									}
@@ -228,9 +280,9 @@ public class FacilitySorter extends ViewBase {
 										public void changed(ObservableValue<? extends String> arg,
 												String oldProperty, String newProperty) {
 											ArrayList <Object>subfilt=new ArrayList<>();
-											subfilt.add(newValue);
+											subfilt.add(listOrder);
 											subfilt.add(newProperty);
-											filt.add(subfilt);	
+											filter.add(subfilt);	
 										}
 									});
 								}
@@ -272,10 +324,10 @@ public class FacilitySorter extends ViewBase {
 												lowvalue=Integer.parseInt(lBValue.getText());
 												upvalue=Integer.parseInt(uBValue.getText());
 												ArrayList <Object>Subfilt=new ArrayList<>();
-												Subfilt.add(newValue);
+												Subfilt.add(listOrder);
 												Subfilt.add(lowvalue);
 												Subfilt.add(upvalue);
-												filt.add(Subfilt);
+												filter.add(Subfilt);
 											}
 										}
 									});
@@ -294,117 +346,38 @@ public class FacilitySorter extends ViewBase {
 
 					@Override
 					public void handle(MouseEvent event) {
-						display.getChildren().clear();
-						System.out.println(filt);
-						ArrayList<Object> displaylist=new ArrayList<>();
-						ArrayList<ArrayList> struc=new ArrayList<>();
-						for (int ii=0;ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size();ii++){
-							facilityNode dataarray=CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii);
-							for (int iv=0;iv<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.size();iv++){
-								if (!(((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.get(iv)).get(1) instanceof ArrayList)){
-									struc.add((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.get(iv));
-								} else {
-									ArrayList<ArrayList> subtruc =(ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.get(iv);
-									ArrayList<ArrayList> realsub=(ArrayList)subtruc.get(1);
-									struc.add(realsub);
+						for (int i = 0;i < filter.size();i++){
+							ArrayList<Object> fit=new ArrayList<>();
+							if (((ArrayList<Object>) filter.get(i)).size() < 3){
+								ArrayList <Object> choose= listed.get((int) ((ArrayList<Object>) filter.get(i)).get(0));
+								for (int ii = 0; ii < choose.size(); ii++){
+									if (((ArrayList<Object>) choose.get(ii)).get(1).equals(((ArrayList<Object>) filter.get(i)).get(1))){
+										fit.add(((ArrayList<Object>) filter.get(i)).get(0));
+									}
+								}
+							} else {
+								ArrayList <Object> choose= listed.get((int) ((ArrayList<Object>) filter.get(i)).get(0));
+								for (int ii = 0; ii < choose.size(); ii++){
+									int testNumber = Integer.parseInt(((ArrayList<Object>) choose.get(ii)).get(1).toString());
+									int upperBound = Integer.parseInt(((ArrayList<Object>) filter.get(i)).get(2).toString());
+									int lowerBound = Integer.parseInt(((ArrayList<Object>) filter.get(i)).get(1).toString());
+									if (testNumber <=upperBound && testNumber >= lowerBound){
+										fit.add(((ArrayList<Object>) filter.get(i)).get(0));
+									}
 								}
 							}
-							boolean truth=false;
-							//logic error occur
-							for (int i=0;i<filt.size();i++){
-								ArrayList <String>filter=(ArrayList)filt.get(i);
-								System.out.println(filter);
-								int lev=-1;
-								int ord=-1;
-								int ordernum=-1;
-								boolean found=false;
-								for (int l=0;l<struc.size();l++){
-									if (!(found)){
-										if ((struc.get(l).get(0)instanceof ArrayList)){
-											lev++;
-											ord=-1;
-											for (int ll=0;ll<struc.get(l).size();ll++){
-												ord++;
-												if (((ArrayList) struc.get(l).get(ll)).get(0).equals(filter.get(0))){
-													found=true;
-													ordernum=ord;
-												}
-											}
-
-										}else{
-											lev++;
-											ord=-1;
-											if (struc.get(l).get(0).equals(filter.get(0))){
-												found=true;
-											}
-										}
-									} else {
-										System.out.println(lev+"+"+ordernum);
-									}
+							ArrayList<Object> match=new ArrayList<>();
+							//update the displaylist
+							for (int ii = 0;ii < displayList.size();ii++){
+								if (fit.contains(displayList.get(ii))){
+									match.add(displayList.get(ii));
 								}
-								if (filter.size()<=2){
-									if (ordernum==-1){ 	
-										System.out.println(lev);
-										System.out.println(ii);
-										if ((dataarray.facilityData.get(lev).equals(filter.get(1)))){
-											truth=true;
-										}
-									} else if(ordernum>-1){
-										if ((((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)).get(ordernum).equals(filter.get(1))))
-										{
-											truth=true;
-										}
-									}
-								} else if (filter.size()>2){
-
-									if (ordernum==-1){
-										// System.out.println((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev));
-										if (((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)).equals(null)){
-											truth=false;
-
-										}
-										else if (!((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)).toString().equals("[]")) {
-											System.out.println( (CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)));
-											//System.out.println(filter.get(2));
-											if (((Integer.parseInt((CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev).toString())))
-
-													<Integer.parseInt(filter.get(2)))&&
-													Integer.parseInt(( CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev).toString()))
-													>Integer.parseInt(filter.get(1))){
-												truth=true;
-											}
-										}
-									}
-
-
-									else {
-										if (((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)).get(ordernum).equals("")){
-											truth=false;
-										}
-										else{
-											if ((Integer.parseInt((String) ((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)).get(ordernum))
-
-													<Integer.parseInt(filter.get(2))&&
-													Integer.parseInt((String) ((ArrayList) CycicScenarios.workingCycicScenario.FacilityNodes.get(ii).facilityData.get(lev)).get(ordernum))
-													>Integer.parseInt(filter.get(1)))){
-												truth=true;
-											}
-										}
-									}
-								}
-
-
-							}							
-							if (truth==true){
-								displaylist.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii));
-								display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii).sorterCircle);
-								display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii).sorterCircle.text);
 							}
-
+							displayList.clear();
+							for (int ii=0;ii <match.size(); ii++){
+								displayList.add(match.get(ii));
+							}
 						}
-						System.out.println(displaylist.toString());
-						System.out.println(struc);
-						System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(0).facilityData);
 					}
 				});
 
@@ -427,6 +400,13 @@ public class FacilitySorter extends ViewBase {
 		}
 		// only got here if we didn't return false
 		return true;
+	}
+
+	protected void initialize(ArrayList<Object>al){
+		al.clear();
+		for (int i = 0;i < CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size();i++){
+			al.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i));
+		}
 	}
 
 	//need fix the data for this
@@ -453,10 +433,12 @@ public class FacilitySorter extends ViewBase {
 						ArrayList <Object> newData=new ArrayList<>();
 						ArrayList<Object> newStruc=(ArrayList<Object>)struc.get(1);
 						for (int ii=0;ii<newStruc.size();ii++){
+							System.out.println(newStruc.get(i));
 							ArrayList<Object> element=new ArrayList<>();
 							for (int iii=0;iii<data.size();iii++){
 								ArrayList<Object> subData=(ArrayList<Object>) data.get(iii);
-								ArrayList<Object>dataCol=(ArrayList<Object>)subData.get(0);
+								ArrayList<Object> dataCol=(ArrayList<Object>)subData.get(0);
+								System.out.println(dataCol);
 								element.add(dataCol.get(ii));
 							}
 							newData.add(element);

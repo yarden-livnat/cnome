@@ -24,6 +24,7 @@ package edu.utah.sci.cyclist.ui.tools;
 
 import edu.utexas.cycic.tools.CommoditiesViewToolFactory;
 import edu.utexas.cycic.tools.CycicToolFactory;
+import edu.utexas.cycic.tools.FacilitySorterToolFactory;
 import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import edu.utexas.cycic.tools.InstitutionViewToolFactory;
 import edu.utexas.cycic.tools.MarketViewToolFactory;
@@ -47,6 +48,7 @@ public class ToolsLibrary {
 		new RecipeFormToolFactory(),
 		new RegionViewToolFactory(),
 		new SimulationInfoToolFactory(),
-		new RegionCorralViewToolFactory()
+		new RegionCorralViewToolFactory(),
+		new FacilitySorterToolFactory()
 	};
 }
