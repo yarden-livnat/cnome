@@ -366,22 +366,8 @@ public class OutPut {
 			Element rootElement = doc.createElement("CycicSimulation");
 			doc.appendChild(rootElement);
 			
-			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
-				Element facElement = doc.createElement("facility");
-				// Name
-				Element facName = doc.createElement("name");
-				facName.appendChild(doc.createTextNode((String) facility.name));
-				facElement.appendChild(facName);
-				// X position
-				Element xPosition = doc.createElement("xPosition");
-				xPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterX())));
-				facElement.appendChild(xPosition);
-				// Y position
-				Element yPosition = doc.createElement("yPosition");
-				yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
-				facElement.appendChild(yPosition);
-				
-				rootElement.appendChild(facElement);
+			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){				
+				rootElement.appendChild(outputFacility(doc, facility));
 			}
 			
 			
@@ -397,6 +383,47 @@ public class OutPut {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
+	}
+	
+	static Element outputFacility(Document doc, facilityNode facility){
+		Element facElement = doc.createElement("facility");
+		// Name
+		Element facName = doc.createElement("name");
+		facName.appendChild(doc.createTextNode((String) facility.name));
+		facElement.appendChild(facName);
+		// X position
+		Element xPosition = doc.createElement("xPosition");
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterX())));
+		facElement.appendChild(xPosition);
+		// Y position
+		Element yPosition = doc.createElement("yPosition");
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
+		facElement.appendChild(yPosition);
+		for (String commodity: facility.cycicCircle.incommods){
+			Element commodityObj = doc.createElement("inCommod");
+			commodityObj.appendChild(doc.createTextNode(commodity));
+		}
+		
+		
+		return facElement;
+	}
+	
+	static Element outputMarket(Document doc, MarketCircle market){
+		Element markElement = doc.createElement("market");
+		Element marketName = doc.createElement("name");
+		marketName.appendChild(doc.createTextNode((String) market.name));
+		markElement.appendChild(marketName);
+		// X position
+		Element xPosition = doc.createElement("xPosition");
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterX())));
+		markElement.appendChild(xPosition);
+		// Y position
+		Element yPosition = doc.createElement("yPosition");
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterY())));
+		markElement.appendChild(yPosition);
+		
+		
+		return markElement;
 	}
 }
 
