@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.ui.views;
 
+import javax.swing.DropMode;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
@@ -56,15 +58,15 @@ public class MapView extends ViewBase {
 		cc.setHgrow(Priority.ALWAYS);
 		grid.getColumnConstraints().add(cc);
 		
-		_colorArea = createControlArea(grid, "Color", 0, 0, DropArea.Policy.SINGLE);
+		_colorArea = createControlArea(grid, "Color", 0, 0, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
 		
 		return grid;
 	}
 	
-	private DropArea createControlArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy) {
+	private DropArea createControlArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy, DropArea.AcceptedRoles acceptedRoles) {
 		
 		Text text = TextBuilder.create().text(title).styleClass("input-area-header").build();
-		DropArea area = new DropArea(policy);
+		DropArea area = new DropArea(policy, acceptedRoles);
 		area.tableProperty().bind(_currentTableProperty);
 		area.addListener(_areaLister);
 		grid.add(text, col, row);

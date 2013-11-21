@@ -226,4 +226,8 @@ public class Filter implements Observable {
 		
 		return _value;
 	}
+	
+	public void setValid(Boolean isValid) {
+		_valid = isValid;
+	}
 }

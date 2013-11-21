@@ -23,6 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.model.DataType.Role;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.FieldProperties;
 import edu.utah.sci.cyclist.model.Table;
@@ -30,15 +31,19 @@ import edu.utah.sci.cyclist.model.Table;
 public class DropArea extends HBox implements Observable {
 	
 	public enum Policy {SINGLE, MULTIPLE};
+	public enum AcceptedRoles{ALL,DIMENSION};
 	
 	private ObjectProperty<ObservableList<Field>> _fieldsProperty = new SimpleObjectProperty<>();
 	private Policy _policy;
+	private AcceptedRoles _acceptedRoles;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	private List<InvalidationListener> _listeners = new ArrayList<>();
+	private List<Field> _preOccupiedFields = new ArrayList<>();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	
-	public DropArea(Policy policy) {
+	public DropArea(Policy policy, AcceptedRoles acceptedRoles) {
 		_policy = policy;
+		_acceptedRoles = acceptedRoles;
 		build();
 		init();
 	}
@@ -104,6 +109,14 @@ public class DropArea extends HBox implements Observable {
 		return glyph.getTitle();
 	}
 	
+	/* Name: updatePreOccupiedField
+     * Saves all the fields already used by other drop areas.
+     * (Cannot add them to the current drop area as long as they are used by the other drop areas) */
+	public void updatePreOccupiedField(List<Field> fields){
+		_preOccupiedFields.clear();
+		_preOccupiedFields.addAll(fields);
+	}
+	
 	private void build() {	
 		setSpacing(0);
 		setPadding(new Insets(2));
@@ -140,7 +153,8 @@ public class DropArea extends HBox implements Observable {
 			public void handle(DragEvent event) {
 				if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT)) {
 					setEffect(null);
-					setStyle("-fx-border-color: -fx-body-color");
+					//setStyle("-fx-border-color: -fx-body-color");
+					setStyle("-fx-box-border: transparent");
 					event.consume();
 				}
 				
@@ -159,7 +173,11 @@ public class DropArea extends HBox implements Observable {
 					}
 				}
 				if (field != null) {
-					if (getFields().size() == 0) {
+					if(_acceptedRoles == AcceptedRoles.DIMENSION && field.getRole() != Role.DIMENSION){
+						System.out.println("Cannot add non-discrete field to this drop area");
+					} else if(isPreOccupiedField(field)){
+						System.out.println("Field already exists in another drop area");
+					}else if (getFields().size() == 0) {
 						getFields().add(field);
 					} else if(_policy == Policy.SINGLE){
 						getFields().set(0, field);
@@ -296,6 +314,17 @@ public class DropArea extends HBox implements Observable {
 
 	private DnD.LocalClipboard getLocalClipboard() {
 		return DnD.getInstance().getLocalClipboard();
+	}
+	
+	/* Name: isPreOccupiedField
+     * Checks if the specified field is already used by other drop areas */
+	private Boolean isPreOccupiedField(Field testedField){
+		for(Field field : _preOccupiedFields){
+			if(testedField.getName().equals(field.getName()) && testedField.getTable().getName().equals(field.getTable().getName())){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

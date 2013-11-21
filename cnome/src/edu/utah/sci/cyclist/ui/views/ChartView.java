@@ -57,7 +57,6 @@ import javafx.util.converter.TimeStringConverter;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
-
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
@@ -117,8 +116,9 @@ public class ChartView extends ViewBase {
         private StackPane _stackPane;
         private Pane _glassPane;
         
-        
-        
+        //Saves the latest results from the database, organized by keys.
+        private  List<Map<MultiKey, SeriesData>> _lastSubLists = new ArrayList<Map<MultiKey, SeriesData>>();
+                
         public ChartView() {
                 super();
                 build();
@@ -268,7 +268,7 @@ public class ChartView extends ViewBase {
                                         }
                                 }
                                 
-                                List<Filter> filtersList = new ArrayList();
+                                List<Filter> filtersList = new ArrayList<Filter>();
                                 
                                 //Check the filters current validity
                                 for(Filter filter : filters()){
@@ -537,6 +537,7 @@ public class ChartView extends ViewBase {
                 }
                 
                 Map<MultiKey, SeriesData> map = new HashMap<>();
+                _lastSubLists.clear();
                 
                 for (SeriesDataPoint point : data.points) {
                         MultiKey key = new MultiKey(point.attribues, false);
@@ -552,6 +553,7 @@ public class ChartView extends ViewBase {
                 }
                 
                 System.out.println("attributes:"+map.keySet());
+                _lastSubLists.add(map);
                 return map.values();
         }
         
@@ -676,8 +678,7 @@ public class ChartView extends ViewBase {
 //                        _markType = MarkType.NA;
                 }
         }
-        
-        
+          
         @SuppressWarnings({ "rawtypes", "unchecked" })
         private void createChart() {
                 System.out.println("create new chart");
@@ -710,6 +711,7 @@ public class ChartView extends ViewBase {
                         break;
                 case NA:
                         setChart(null);
+               
                 }
                  
 //                chart.setCreateSymbols(false);
@@ -946,7 +948,7 @@ public class ChartView extends ViewBase {
                 
                 final Button op = new Button("op");
                 op.getStyleClass().add("flat-button");
-                
+                    
                 // create menu
                 final ContextMenu contextMenu = new ContextMenu();
                 
@@ -1042,9 +1044,9 @@ public class ChartView extends ViewBase {
                 cc.setHgrow(Priority.SOMETIMES);
                 grid.getColumnConstraints().add(cc);
                 
-                _xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE);
-                _yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE);
-                _lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE);
+                _xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
+                _yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.ALL);
+                _lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 //                _indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
                 
                 return grid;
@@ -1080,8 +1082,14 @@ public class ChartView extends ViewBase {
                 public void invalidated(Observable o) {
                         Filter f = (Filter) o;
                         System.out.println("filter changed: "+f.getName());
-                        invalidateChart();
-                        fetchData();
+                        //If possible - take data directly from memory instead of quering the database.
+                        if(handleLODFilters(f))
+                        {
+                        	f.setValid(true);
+                        }else{
+                        	invalidateChart();
+                        	fetchData();
+                        }
                 }
         };
         
@@ -1090,16 +1098,163 @@ public class ChartView extends ViewBase {
                 @Override
                 public void invalidated(Observable observable) {                        
                         invalidateChart();
+                        DropArea area = (DropArea) observable;
                         if (getCurrentTable() == null) {
-                                DropArea area = (DropArea) observable;
                                 if (area.getFields().size() == 1) {
                                         if (getOnTableDrop() != null)
                                                 getOnTableDrop().call(area.getFields().get(0).getTable());
                                 }
                         }
+                        updatePreOccupiedFields(area);
                         fetchData();
                 }
         };
+        
+        
+        /* Name: updatePreOccupiedFields
+         * This method prevents the same field to appear in more than one drop area.
+         * Each drop area gets the list of fields already used by the other drop areas.
+    	 * When there is a change in the fields of one of the drop areas, update all the other drop area with the updated fields list. */
+        
+        private void updatePreOccupiedFields(DropArea area)
+        {
+        	if (area == _lodArea){
+        		List<Field> newList = new ArrayList<Field>(_lodArea.getFields());
+        		newList.addAll(_yArea.getFields());
+        		_xArea.updatePreOccupiedField(newList);
+        		
+        		newList.clear();
+        		newList.addAll(_lodArea.getFields());
+        		newList.addAll(_xArea.getFields());
+        		_yArea.updatePreOccupiedField(newList);
+        		
+        		
+        	} else if(area == _xArea){
+        		List<Field> newList = new ArrayList<Field>(_xArea.getFields());
+        		newList.addAll(_lodArea.getFields());
+        		_yArea.updatePreOccupiedField(newList);
+        		
+        		newList.clear();
+        		newList.addAll(_xArea.getFields());
+        		newList.addAll(_yArea.getFields());
+        		_lodArea.updatePreOccupiedField(newList);
+        		
+        		
+        	} else if(area == _yArea){
+        		List<Field> newList = new ArrayList<Field>(_yArea.getFields());
+        		newList.addAll(_lodArea.getFields());
+        		_xArea.updatePreOccupiedField(newList);
+        		
+        		newList.clear();
+        		newList.addAll(_yArea.getFields());
+        		newList.addAll(_xArea.getFields());
+        		_lodArea.updatePreOccupiedField(newList);
+        	}
+        }
+        
+        /* Name: "isInLodArea"
+         * Checks that the field is from the LOD drop area (physically contained or has the same name and table as the field in the lod area  */
+        private Boolean isInLodArea(Field field){
+        	for(Field lodField : _lodArea.getFields()){
+        		if(_xArea.getFields().contains(field) || _yArea.getFields().contains(field))
+        		{
+        			return false;
+        		}else if (_lodArea.getFields().contains(field) || (lodField.getName().equals(field.getName()) && lodField.getTable().getName().equals(field.getTable().getName())) ){
+        			return true;
+        		}
+        	}
+        	return false;
+        }
+        
+        /* Name: "filterItemsExistInMap"
+         * Checks that all the selected values of a given filter appear as keys in the given map */
+        private Boolean filterItemsExistInMap(Filter currentFilter, Map<MultiKey, SeriesData> map ){
+        	
+        	for(Object item:currentFilter.getSelectedValues()){
+        		String filterItem = item.toString();
+        		Boolean filterWasFound = false;
+        		for ( MultiKey key : map.keySet() ) {
+        			if(Arrays.asList(key.getKeys()).contains(filterItem)){ 
+        				filterWasFound = true;
+        				break;
+        			}
+        		}
+        		if(!filterWasFound){
+        			return false;
+        		}
+  		  	}
+        	return true;
+        }
+        
+        /* Name: "handleLODFilters"
+         * When a filter based on a LOD field is applied, no need to query the database again
+         * Since the data already exists and organized by keys based on the LOD field, it's enough to hide/unhide the data   
+         * under the corresponding key */ 
+        private Boolean handleLODFilters(Filter currentFilter){
+        	
+        	//Verify that the filter which has been updated is category and if from a LOD field.
+        	//Otherwise - return false and fetch the data with the SQL query.
+             if(currentFilter.getField().getClassification() != Classification.C || !isInLodArea(currentFilter.getField())){
+            	 
+            	 //Set all the LOD filters validity to false - to include them in the query.
+            	 //Since they are not build with the query builder, their validity is not set automatically.
+            	 for(Filter filter : filters()){
+            		 if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+            			 filter.setValid(false);
+            		 }
+            	 }
+            	 return false;
+             }
+        	 
+        	   if(_lastSubLists != null){
+        		 getChart().getData().clear();
+        		 List<XYChart.Series<Object, Object>> graphs = new ArrayList<>();
+        		 
+				 for (Map<MultiKey, SeriesData> map : _lastSubLists) {
+					 
+					//First check that all the selected items in the filter exist in "_lastSubLists", otherwise - need to fetch them with SQL query.
+					//It happens when a filter based on LOD field has one or more unchecked items and then a filter based on non-LOD field is applied.
+					// It queries the database and the returned results are missing the LOD unchecked values.
+	        		if(!filterItemsExistInMap(currentFilter, map)){
+	        			return false;
+	        		}
+	        		 
+					 
+					 for (Map.Entry<MultiKey, SeriesData> entry : map.entrySet()) {
+						 Boolean addValues = true;
+						 MultiKey key = entry.getKey();
+						 for(Filter filter : filters()){
+							 Boolean filterFound=false;
+							 //ignores filters which are not in the LOD area or are not under C classification.
+							 if(!(filter.getField().getClassification() == Classification.C) || !isInLodArea(filter.getField())){
+	                			 continue;
+							 }
+							 for(Object item: filter.getSelectedValues()){
+                				 String filterKey = item.toString();
+                				 if(Arrays.asList(key.getKeys()).contains(filterKey)){
+                					 filterFound=true;
+                					 break;
+                				 }
+                			 }
+                			//If none of the current filter values exists in the tested points series - it is no use to continue to check the other filters
+                			 //Just move to the next points series.
+                			 if(!filterFound){
+                				 addValues = false;
+                				 break;
+                			 }
+						 }
+						 if(addValues){
+							 convertData(entry.getValue(), _spec);
+                             graphs.add(createChartSeries(entry.getValue(), _spec));
+						 }
+					 }
+					 getChart().getData().addAll(graphs);
+				 }
+				 return true;
+        	 }
+        	 return false;
+        }
+        
         
         /*Name: setAreaFiltersListeners 
          * This method handles fields which are connected to a filter
@@ -1123,11 +1278,11 @@ public class ChartView extends ViewBase {
                 });
         }
                  
-        private DropArea createControlArea(GridPane grid, String title, int  row, int col, int colspan, DropArea.Policy policy) {                
+        private DropArea createControlArea(GridPane grid, String title, int  row, int col, int colspan, DropArea.Policy policy, DropArea.AcceptedRoles acceptedRoles) {                
                 Text text = new Text(title);
                 text.getStyleClass().add("input-area-header");
                 
-                DropArea area = new DropArea(policy);
+                DropArea area = new DropArea(policy,acceptedRoles);
                 area.tableProperty().bind(_currentTableProperty);
                 area.addListener(_areaListener);
                 
@@ -1142,11 +1297,11 @@ public class ChartView extends ViewBase {
                 return area;
         }
         
-        private DropArea createIndicatorArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy) {
+        private DropArea createIndicatorArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy, DropArea.AcceptedRoles acceptedRoles) {
                 Text text = new Text(title);
                 text.getStyleClass().add("input-area-header");
                 
-                DropArea area = new DropArea(policy);
+                DropArea area = new DropArea(policy, acceptedRoles);
                 area.tableProperty().bind(_currentTableProperty);
                 area.addListener(_areaListener);
                 
