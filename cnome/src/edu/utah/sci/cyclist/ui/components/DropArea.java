@@ -2,6 +2,7 @@ package edu.utah.sci.cyclist.ui.components;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -40,6 +41,7 @@ public class DropArea extends HBox implements Observable {
 	private List<InvalidationListener> _listeners = new ArrayList<>();
 	private List<Field> _preOccupiedFields = new ArrayList<>();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
+	private Map<Class<?>, TransferMode[]> _sourcesTransferModes;
 	
 	public DropArea(Policy policy, AcceptedRoles acceptedRoles) {
 		_policy = policy;
@@ -117,6 +119,14 @@ public class DropArea extends HBox implements Observable {
 		_preOccupiedFields.addAll(fields);
 	}
 	
+	/**
+     * @name setDragAndDropModes
+     * @param sourcesTransferModes - Maps for each possible source the accepted drag and drop transfer modes.
+     */
+	public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes){
+		_sourcesTransferModes = sourcesTransferModes;
+	}
+	
 	private void build() {	
 		setSpacing(0);
 		setPadding(new Insets(2));
@@ -142,7 +152,15 @@ public class DropArea extends HBox implements Observable {
 			public void handle(DragEvent event) {
 //				if (_policy == Policy.MUTLIPLE || getFilters().size() == 0) {
 					if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT)) {
-						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+						
+						//Accepts the drag and drop transfer mode according to the source and the 
+                    	//predefined accepted transfer modes.
+						if(getLocalClipboard().hasContent(DnD.DnD_SOURCE_FORMAT)){
+                        	Class<?> key = getLocalClipboard().getType(DnD.DnD_SOURCE_FORMAT);
+                    	    if(key != null && _sourcesTransferModes!= null && _sourcesTransferModes.containsKey(key) ){
+                    	    	event.acceptTransferModes(_sourcesTransferModes.get(key));
+                    	    }
+                        }
 					}
 					event.consume();
 //				}
@@ -166,16 +184,16 @@ public class DropArea extends HBox implements Observable {
 				boolean status = false;
 
 				Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
-				if (event.getAcceptedTransferMode() == TransferMode.COPY) {
+				//if (event.getAcceptedTransferMode() == TransferMode.COPY) {
 					field = field.clone();
 					if (field.getString(FieldProperties.AGGREGATION_FUNC) == null) {
 						field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
 					}
-				}
+				//}
 				if (field != null) {
 					if(_acceptedRoles == AcceptedRoles.DIMENSION && field.getRole() != Role.DIMENSION){
 						System.out.println("Cannot add non-discrete field to this drop area");
-					} else if(isPreOccupiedField(field)){
+					} else if(isPreOccupiedField(field, event)){
 						System.out.println("Field already exists in another drop area");
 					}else if (getFields().size() == 0) {
 						getFields().add(field);
@@ -234,12 +252,13 @@ public class DropArea extends HBox implements Observable {
 
 									@Override
 									public void handle(MouseEvent event) {
-										Dragboard db = glyph.startDragAndDrop(TransferMode.MOVE);
+										Dragboard db = glyph.startDragAndDrop(TransferMode.COPY_OR_MOVE);
 										
 										DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 										clipboard.put(DnD.FIELD_FORMAT, Field.class, field);
 										
 										ClipboardContent content = new ClipboardContent();
+										
 										content.putString(field.getName());
 										
 										SnapshotParameters snapParams = new SnapshotParameters();
@@ -247,11 +266,14 @@ public class DropArea extends HBox implements Observable {
 							            
 							            content.putImage(glyph.snapshot(snapParams, null));	
 										db.setContent(content);
+										clipboard.put(DnD.DnD_SOURCE_FORMAT, DropArea.class, DropArea.this);
+										
+										event.consume();
 										
 //										glyph.setManaged(false);
 //										glyph.setVisible(false);
-										getChildren().remove(glyph);
-										getFields().remove(field);
+//										getChildren().remove(glyph);
+										//getFields().remove(field);
 									}
 								});
 								
@@ -260,14 +282,15 @@ public class DropArea extends HBox implements Observable {
 									@Override
 									public void handle(DragEvent event) {
 //										glyph.setCursor(Cursor.DEFAULT);
-//										System.out.println("Filter drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
-//										if (/*event.isDropCompleted()*/ event.getAcceptedTransferMode() == TransferMode.COPY) {
-//											glyph.setVisible(true);
-//											glyph.setManaged(true);
-//										} else {
-//											getChildren().remove(glyph);
-//											getFilters().remove(Filter);
-//										}
+										System.out.println("Filter drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
+										if (event.isAccepted() && event.getAcceptedTransferMode() == TransferMode.COPY) {
+											glyph.setVisible(true);
+											glyph.setManaged(true);
+										} else {
+											getChildren().remove(glyph);
+											//getFilters().remove(Filter);
+											getFields().remove(field);
+										}
 									}
 								});
 								
@@ -317,9 +340,26 @@ public class DropArea extends HBox implements Observable {
 	}
 	
 	/* Name: isPreOccupiedField
-     * Checks if the specified field is already used by other drop areas */
-	private Boolean isPreOccupiedField(Field testedField){
-		for(Field field : _preOccupiedFields){
+	 * Parameter: Field - the dragged field to test.
+	 * Parameter: event - the current drag event.
+	 * Returns: Boolean. Returns true if the field already exists in another drop area, false if not.
+     * Description: Checks if the specified field is already used by other drop areas.
+     */
+	private Boolean isPreOccupiedField(Field testedField, DragEvent event){
+		
+		//Check if the field was dragged from another drop area.
+		//If it came from another drop area - if the transfer mode is "Move" the source drop area is going to remove the field anyway at the end of the drag and drop.
+		//So no need to worry about a duplicate field.
+		Class<?> key = getLocalClipboard().getType(DnD.DnD_SOURCE_FORMAT);
+	    if(key != null && key.equals(DropArea.class)){
+	    	TransferMode[] transferMode = _sourcesTransferModes.get(key);
+	    	if(transferMode.length == 1 && transferMode[0].equals(TransferMode.MOVE)){
+	    		return false;
+			}
+	    }
+	    
+	    //In any other case - check for duplicate fields in the other drop areas.
+	    for(Field field : _preOccupiedFields){
 			if(testedField.getName().equals(field.getName()) && testedField.getTable().getName().equals(field.getTable().getName())){
 				return true;
 			}

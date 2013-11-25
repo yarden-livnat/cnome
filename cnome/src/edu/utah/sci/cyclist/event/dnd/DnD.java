@@ -81,6 +81,12 @@ public class DnD {
 			return entry == null ? null : type.cast(entry.value);
 		}
 		
+		public Class<?> getType(DataFormat key) {
+			Entry<?> entry = _items.get(key);
+			return entry.value.getClass();
+		}
+		
+		
 		public boolean hasContent(DataFormat key) {
 			return _items.containsKey(key);
 		}

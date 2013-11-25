@@ -70,9 +70,11 @@ import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.ui.components.DropArea;
 import edu.utah.sci.cyclist.ui.components.FieldGlyph;
+import edu.utah.sci.cyclist.ui.components.FilterArea;
 import edu.utah.sci.cyclist.ui.components.IntegerField;
 import edu.utah.sci.cyclist.ui.components.LineIndicator;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.util.QueryBuilder;
 
 public class ChartView extends ViewBase {
@@ -1052,6 +1054,17 @@ public class ChartView extends ViewBase {
                 return grid;
         }
         
+        /*
+         * Name: createDragAndDropModes
+         * Returns: Map<Class<?>, TransferMode[]>
+         * Description: Maps for each possible drag and drop source the accepted transfer modes.
+         */
+        private Map<Class<?>, TransferMode[]> createDragAndDropModes() {
+    		Map<Class<?>, TransferMode[]> sourcesTransferModes = new HashMap<Class<?>, TransferMode[]>();
+    		sourcesTransferModes.put(DropArea.class, new TransferMode[]{TransferMode.MOVE});
+    		sourcesTransferModes.put(SchemaPanel.class, TransferMode.COPY_OR_MOVE);
+            return sourcesTransferModes;
+    	}
         private void showDistances(Indicator selected) {
                 clearDistances();
                 
@@ -1282,9 +1295,13 @@ public class ChartView extends ViewBase {
                 Text text = new Text(title);
                 text.getStyleClass().add("input-area-header");
                 
-                DropArea area = new DropArea(policy,acceptedRoles);
+                DropArea area = new DropArea(policy, acceptedRoles);
                 area.tableProperty().bind(_currentTableProperty);
                 area.addListener(_areaListener);
+                
+                //Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
+                Map<Class<?>, TransferMode[]> sourcesTransferModes = createDragAndDropModes();
+                area.setDragAndDropModes(sourcesTransferModes);
                 
                 //Let the filters area know when the selected table is changed.
                 getFiltersArea().tableProperty().bind(_currentTableProperty);

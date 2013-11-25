@@ -1,7 +1,7 @@
 package edu.utah.sci.cyclist.ui.components;
 
-import java.awt.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -34,10 +34,19 @@ public class FilterArea extends ToolBar {
         private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
         private int _lastRemoteFilter = 0;
         private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
+        private Map<Class<?>, TransferMode[]> _sourcesTransferModes;
         
         public FilterArea() {
                 build();
         }
+        
+        /**
+         * @name setDragAndDropModes
+         * @param sourcesTransferModes - Maps for each possible source the accepted drag and drop transfer modes.
+         */
+        public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes){
+    		_sourcesTransferModes = sourcesTransferModes;
+    	}
         
         public ObservableList<Filter> getFilters() {
                 return _filters;
@@ -94,7 +103,15 @@ public class FilterArea extends ToolBar {
                 setOnDragOver(new EventHandler<DragEvent>() {
                         public void handle(DragEvent event) {
                                 if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
-                                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                                        if(getLocalClipboard().hasContent(DnD.DnD_SOURCE_FORMAT)){
+                                        	Class<?> key = getLocalClipboard().getType(DnD.DnD_SOURCE_FORMAT);
+	                                	    
+                                        	//Accepts the drag and drop transfer mode according to the source and the 
+                                        	//predefined accepted transfer modes.
+                                        	if(key != null && _sourcesTransferModes!= null &&_sourcesTransferModes.containsKey(key)){
+	                                	    	event.acceptTransferModes(_sourcesTransferModes.get(key));
+	                                	    }
+                                        }
                                 }
                                 event.consume();
                         }
@@ -231,6 +248,8 @@ public class FilterArea extends ToolBar {
                                 
                                 ClipboardContent content = new ClipboardContent();
                                 content.putString(filter.getName());
+                                
+                                clipboard.put(DnD.DnD_SOURCE_FORMAT, FilterArea.class, FilterArea.this);
                                 
                                 SnapshotParameters snapParams = new SnapshotParameters();
                     snapParams.setFill(Color.TRANSPARENT);

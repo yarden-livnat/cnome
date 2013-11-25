@@ -65,6 +65,7 @@ import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
 
 public class ViewBase extends BorderPane implements View {
 	
@@ -153,6 +154,9 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.getChildren().add(new Label("|"));
 				
 		_filtersArea = new FilterArea();
+		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
+		Map<Class<?>, TransferMode[]> sourcesTransferModes = createDragAndDropModes();
+		_filtersArea.setDragAndDropModes(sourcesTransferModes);
 		
 		_spring = new Spring();
 		
@@ -670,6 +674,19 @@ public class ViewBase extends BorderPane implements View {
 			setCursor(Cursor.DEFAULT);
 		}
 	};
+	
+	/*
+     * Name: createDragAndDropModes
+     * Returns: Map<Class<?>, TransferMode[]>
+     * Description: Maps for each possible drag and drop source the accepted transfer modes.
+     */
+	private Map<Class<?>, TransferMode[]> createDragAndDropModes() {
+		Map<Class<?>, TransferMode[]> sourcesTransferModes = new HashMap<Class<?>, TransferMode[]>();
+		sourcesTransferModes.put(DropArea.class, new TransferMode[]{TransferMode.COPY});
+        sourcesTransferModes.put(SchemaPanel.class, new TransferMode[]{TransferMode.COPY});
+        sourcesTransferModes.put(FilterArea.class, new TransferMode[]{TransferMode.COPY});
+        return sourcesTransferModes;
+	}
 	
 	
 	class Delta {
