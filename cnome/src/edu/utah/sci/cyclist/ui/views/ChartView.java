@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.xa.XAResource;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
@@ -40,6 +42,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
@@ -488,7 +491,9 @@ public class ChartView extends ViewBase {
 //                         }
 //                         
 //                }
-                getChart().getData().addAll(graphs);
+                if(getChart() != null && getChart().getData() != null){
+                	getChart().getData().addAll(graphs);
+                }
 //                updateAxes(graphs);
         }
         
@@ -1041,6 +1046,8 @@ public class ChartView extends ViewBase {
                 cc.setHgrow(Priority.SOMETIMES);
                 grid.getColumnConstraints().add(cc);
                 
+//                grid.getColumnConstraints().add(new ColumnConstraints(17));
+                
                 grid.getColumnConstraints().add(new ColumnConstraints(20));
                 cc = new ColumnConstraints();
                 cc.setHgrow(Priority.SOMETIMES);
@@ -1049,7 +1056,30 @@ public class ChartView extends ViewBase {
                 _xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
                 _yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.ALL);
                 _lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
+//                _lodArea = createControlArea(grid, "LOD", 0, 3, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 //                _indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
+//                Button swapButton = new Button("", new ImageView(Resources.getIcon("swap")));
+//                swapButton.getStyleClass().add("flat-button");
+//                swapButton.setOnAction(new EventHandler<ActionEvent>() {
+//                        
+//                        @Override
+//                        public void handle(ActionEvent arg0) {
+//                                if(_xArea.getFields().size() == 1 && _lodArea.getFields().size() == 1){
+//                                   Field lodField = _lodArea.getFields().get(0);
+//                                   Field xField = _xArea.getFields().get(0);
+//                                   if(lodField.getClassification() == Classification.C && xField.getClassification() == Classification.C ){
+//                                	   _lodArea.getFields().removeAll(_lodArea.getFields());
+//                                	   //_xArea.getChildren().removeAll(_xArea.getChildren());
+//                                	   _xArea.getFields().removeAll(_xArea.getFields());
+//                                	   _xArea.getFields().add(lodField);
+//                                	   _lodArea.getFields().add(xField);
+//                                   }
+//                                   
+//                                }
+//                        }
+//                });
+//                
+//                grid.add(swapButton, 2, 0, 1, 1);
                 
                 return grid;
         }
@@ -1216,6 +1246,11 @@ public class ChartView extends ViewBase {
             			 filter.setValid(false);
             		 }
             	 }
+            	 for(Filter filter : remoteFilters()){
+            		 if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+            			 filter.setValid(false);
+            		 }
+            	 }
             	 return false;
              }
         	 
@@ -1236,25 +1271,10 @@ public class ChartView extends ViewBase {
 					 for (Map.Entry<MultiKey, SeriesData> entry : map.entrySet()) {
 						 Boolean addValues = true;
 						 MultiKey key = entry.getKey();
-						 for(Filter filter : filters()){
-							 Boolean filterFound=false;
-							 //ignores filters which are not in the LOD area or are not under C classification.
-							 if(!(filter.getField().getClassification() == Classification.C) || !isInLodArea(filter.getField())){
-	                			 continue;
-							 }
-							 for(Object item: filter.getSelectedValues()){
-                				 String filterKey = item.toString();
-                				 if(Arrays.asList(key.getKeys()).contains(filterKey)){
-                					 filterFound=true;
-                					 break;
-                				 }
-                			 }
-                			//If none of the current filter values exists in the tested points series - it is no use to continue to check the other filters
-                			 //Just move to the next points series.
-                			 if(!filterFound){
-                				 addValues = false;
-                				 break;
-                			 }
+						 if(isKeyInFilter(key,filters())){
+							 addValues = isKeyInFilter(key,remoteFilters());
+						 }else{
+							 addValues = false;
 						 }
 						 if(addValues){
 							 convertData(entry.getValue(), _spec);
@@ -1266,6 +1286,34 @@ public class ChartView extends ViewBase {
 				 return true;
         	 }
         	 return false;
+        }
+        
+        /* Name: "isKeyInFilter"
+         * parameter: MultiKey, key to check if included in the filters list.
+         * parameter: List<Filter>, List of the currently applied filters.
+         * Gets a key and checks if it appears in the filters list */ 
+        private Boolean isKeyInFilter(MultiKey key, List<Filter> filters ) {
+        	for(Filter filter : filters){
+				 Boolean filterFound=false;
+				 //ignores filters which are not in the LOD area or are not under C classification.
+				 if(!(filter.getField().getClassification() == Classification.C) || !isInLodArea(filter.getField())){
+					 continue;
+				 }
+				 for(Object item: filter.getSelectedValues()){
+	   				 String filterKey = item.toString();
+	   				 if(Arrays.asList(key.getKeys()).contains(filterKey)){
+	   					 filterFound=true;
+	   					 break;
+	   				 }
+				 }
+	   			//If none of the current filter values exists in the tested points series - it is no use to continue to check the other filters
+	   			//Just return false, so the calling method continues to the next set of points.
+	   			 if(!filterFound){
+	   				 return false;
+	   			 }
+        	}
+        	return true;
+        	
         }
         
         
