@@ -33,6 +33,7 @@ public class FormBuilder extends ViewBase {
 	public FormBuilder(){
 		super();
 		formNode = Cycic.workingNode;
+		TITLE = (String) Cycic.workingNode.name;
 		
 		formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 		
@@ -82,7 +83,7 @@ public class FormBuilder extends ViewBase {
 				Cycic.workingNode = formNode;
 			}
 		});
-		
+		setTitle(TITLE);
 		setContent(formGrid);
 	}
 	
@@ -94,6 +95,7 @@ public class FormBuilder extends ViewBase {
 	private int columnNumber = 0;
 	private int columnEnd = 0;
 	private int userLevel= 0;
+	public static String TITLE;
 	
 	/**
 	 * Function builds a button to add a orMore button to the facility form.

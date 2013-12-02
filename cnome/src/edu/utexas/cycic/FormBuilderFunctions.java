@@ -97,6 +97,8 @@ public class FormBuilderFunctions {
 				node.name = newValue;
 				node.cycicCircle.text.setText(newValue);
 				node.sorterCircle.text.setText(newValue);
+				node.cycicCircle.tooltip.setText(newValue);
+				node.sorterCircle.tooltip.setText(newValue);
 				dataArray.set(0, newValue);
 			}
 		});

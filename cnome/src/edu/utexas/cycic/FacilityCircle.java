@@ -2,7 +2,9 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
@@ -25,7 +27,7 @@ public class FacilityCircle extends Circle {
 	ArrayList<String> incommods = new ArrayList<String>();
 	ArrayList<String> outcommods = new ArrayList<String>();
 	MenuBar menu = new MenuBar();
-	Text text = new Text();
+	Label text = new Label();
 	ImageView image = new ImageView();
 	String type = new String();
 	String parent = new String();
@@ -33,6 +35,7 @@ public class FacilityCircle extends Circle {
 	Integer parentIndex;
 	Object name; 
 	Boolean childrenShow;
+	Tooltip tooltip = new Tooltip();
 	{
 		setId("cycicNode");
 	}

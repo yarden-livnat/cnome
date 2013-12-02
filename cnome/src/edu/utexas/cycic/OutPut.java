@@ -385,6 +385,9 @@ public class OutPut {
 		}
 	}
 	
+	public static void loadFile(String filePath){
+		
+	}
 	static Element outputFacility(Document doc, facilityNode facility){
 		Element facElement = doc.createElement("facility");
 		// Name
@@ -403,7 +406,10 @@ public class OutPut {
 			Element commodityObj = doc.createElement("inCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
 		}
-		
+		for (String commodity: facility.cycicCircle.outcommods){
+			Element commodityObj = doc.createElement("outCommod");
+			commodityObj.appendChild(doc.createTextNode(commodity));
+		}
 		
 		return facElement;
 	}

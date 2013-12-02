@@ -208,9 +208,6 @@ public class VisFunctions {
 				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line.toBack();
 			}
 		}
-		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i));		
-		}
 		for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
 			CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
