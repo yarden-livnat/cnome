@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 import javafx.scene.control.Label;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -385,9 +386,10 @@ public class OutPut {
 		}
 	}
 	
-	public static void loadFile(String filePath){
+	public static void loadFile(File file){
 		
 	}
+	
 	static Element outputFacility(Document doc, facilityNode facility){
 		Element facElement = doc.createElement("facility");
 		// Name
@@ -431,5 +433,6 @@ public class OutPut {
 		
 		return markElement;
 	}
+
 }
 
