@@ -4,9 +4,11 @@ import java.io.*;
 import java.util.ArrayList;
 
 import javafx.scene.control.Label;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.Node;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -15,6 +17,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 /**
  * Output class for the CYCIC GUI.
  * @author Robert
@@ -112,7 +115,7 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
+			StreamResult result = new StreamResult(new File("file.xml"));
 			
 			transformer.transform(source, result);
 			
@@ -374,7 +377,7 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
+			StreamResult result = new StreamResult(new File("savefile.xml"));
 			
 			transformer.transform(source, result);
 			
@@ -385,9 +388,38 @@ public class OutPut {
 		}
 	}
 	
-	public static void loadFile(String filePath){
+	public static void loadFile(File file){
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(file);
+			
+			doc.getDocumentElement().getNodeName();
+			
+			NodeList facList = doc.getElementsByTagName("facility");
+			
+			for (int i = 0; i < facList.getLength(); i++){
+				org.w3c.dom.Node facNode = facList.item(i);
+				
+				facilityNode tempNode = new facilityNode();	
+				Element element = (Element) facNode;
+				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
+				tempNode.cycicCircle = CycicCircles.addNode(element.getElementsByTagName("name").item(0).getTextContent(), tempNode);
+				tempNode.cycicCircle.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
+				tempNode.cycicCircle.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
+				
+				CycicScenarios.workingCycicScenario.FacilityNodes.add(tempNode);
+			}
+			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
+			VisFunctions.reloadPane();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+		
+
 		
 	}
+	
 	static Element outputFacility(Document doc, facilityNode facility){
 		Element facElement = doc.createElement("facility");
 		// Name
