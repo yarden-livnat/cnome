@@ -131,6 +131,9 @@ public class RegionView extends ViewBase{
 		topGrid.setHgap(10);
 		topGrid.setVgap(2);
 		
+		topGrid.add(new Label("Name"), 0, 4);
+		topGrid.add(FormBuilderFunctions.regionNameBuilder(workingRegion), 1, 4);
+		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);
 		grid.setVgap(10);
@@ -267,10 +270,6 @@ public class RegionView extends ViewBase{
 						}
 					} else {
 						switch ((String) facArray.get(0)) {
-						case "Name":
-							grid.add(FormBuilderFunctions.regionNameBuilder(workingRegion, dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
 						/*case "Incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;

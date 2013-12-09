@@ -10,18 +10,6 @@ public class RealFacs {
 	public static void init(){
 		//build an recipereactor array
 		ArrayList<Object> BatchReactor=new ArrayList<Object>();
-		//reactor name
-		ArrayList<Object> name = new ArrayList<Object>();
-		name.add("Name");
-		name.add("String");
-		name.add("String");
-		name.add(null);
-		name.add(null);
-		name.add("Reactor 1");
-		name.add(0);
-		name.add(null);
-		name.add(null);
-		BatchReactor.add(name);
 		//build an fuelpair array
 		ArrayList<Object> fuelInput=new ArrayList<Object>();
 		fuelInput.add("fuel_input");
@@ -212,18 +200,6 @@ public class RealFacs {
 		
 		//build enrichment facility array
 		ArrayList<Object>EnrichmentFacility=new ArrayList<Object>();
-		// name
-		ArrayList<Object> nameEnrich = new ArrayList<Object>();
-		nameEnrich.add("Name");
-		nameEnrich.add("String");
-		nameEnrich.add("String");
-		nameEnrich.add(null);
-		nameEnrich.add(null);
-		nameEnrich.add("EnrichmentPlant");
-		nameEnrich.add(0);
-		nameEnrich.add(null);
-		nameEnrich.add(null);
-		EnrichmentFacility.add(nameEnrich);
 		//build input array
 		ArrayList<Object>EnrichInput=new ArrayList<Object>();
 		EnrichInput.add("input");
@@ -324,18 +300,6 @@ public class RealFacs {
 		alfredStructs.add(EnrichmentFacility);
 		
 		ArrayList<Object>  SourceFacility=new ArrayList<Object>();
-		//build the name array
-		ArrayList<Object> Name=new ArrayList<Object>();
-		Name.add("Name");
-		Name.add("String");
-		Name.add("String");
-		Name.add(null);
-		Name.add(null);
-		Name.add(null);
-		Name.add(0);
-		Name.add("Name of the Facility");
-		Name.add(null);
-		SourceFacility.add(Name);
 		//build subarray inside OUTPUT
 		ArrayList<Object> SubOutput=new ArrayList<Object>();
 		
@@ -404,18 +368,6 @@ public class RealFacs {
 		
 		//build Sink Facility
 		ArrayList<Object> SinkFacility=new ArrayList<Object>();
-		//name
-		ArrayList<Object> nameStore = new ArrayList<Object>();
-		nameStore.add("Name");
-		nameStore.add("String");
-		nameStore.add("String");
-		nameStore.add(null);
-		nameStore.add(null);
-		nameStore.add(null);
-		nameStore.add(0);
-		nameStore.add("Name of Sink Facility");
-		nameStore.add(null);
-		SinkFacility.add(nameStore);
 		//Build Incommodities array
 		ArrayList<Object> Incommodities=new ArrayList<Object>();
 		Incommodities.add("Incommodities");

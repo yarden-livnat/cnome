@@ -65,6 +65,9 @@ public class FormBuilder extends ViewBase {
 		topGrid.setHgap(10);
 		topGrid.setVgap(10);
 		
+		topGrid.add(new Label("Name"), 0, 1);
+		topGrid.add(FormBuilderFunctions.nameFieldBuilder(formNode), 1, 1);
+		
 		grid.setAlignment(Pos.BASELINE_CENTER);
 		grid.setVgap(15);
 		grid.setHgap(10);
@@ -232,10 +235,6 @@ public class FormBuilder extends ViewBase {
 					} else {
 						// Special form building functions that are used for specific tags
 						switch ((String) facArray.get(0).toString().toLowerCase()) {
-						case "name":
-							grid.add(FormBuilderFunctions.nameFieldBuilder(formNode, dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
 						case "incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;

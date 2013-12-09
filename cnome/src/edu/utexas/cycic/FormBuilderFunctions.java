@@ -88,7 +88,7 @@ public class FormBuilderFunctions {
 	 * @param dataArray The ArrayList<Object> that contains the name field data for the facility.
 	 * @return TextField that controls the input of this field. 
 	 */
-	static TextField nameFieldBuilder(final facilityNode node, final ArrayList<Object> dataArray){
+	static TextField nameFieldBuilder(final facilityNode node){
 		TextField textField = new TextField();
 		textField.setText((String)node.name);
 		
@@ -99,7 +99,6 @@ public class FormBuilderFunctions {
 				node.sorterCircle.text.setText(newValue);
 				node.cycicCircle.tooltip.setText(newValue);
 				node.sorterCircle.tooltip.setText(newValue);
-				dataArray.set(0, newValue);
 			}
 		});
 		
@@ -131,27 +130,25 @@ public class FormBuilderFunctions {
 	 * @param dataArray ArrayList<Object> that contains the name field for this regionNode.
 	 * @return TextField linked to the name of a regionNode.
 	 */
-	static TextField regionNameBuilder(final regionNode node, final ArrayList<Object> dataArray){
+	static TextField regionNameBuilder(final regionNode node){
 		TextField textField = new TextField();
 		textField.setText((String) node.name);
 		
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
-				dataArray.set(0, newValue);
 			}
 		});
 		return textField;
 	}
 	
-	static TextField institNameBuilder(final instituteNode node, final ArrayList<Object> dataArray){
+	static TextField institNameBuilder(final instituteNode node){
 		TextField textField = new TextField();
 		textField.setText((String) node.name);
 		
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
-				dataArray.set(0, newValue);
 			}
 		});
 		return textField;

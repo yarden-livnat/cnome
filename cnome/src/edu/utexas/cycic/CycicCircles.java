@@ -184,6 +184,7 @@ public class CycicCircles{
 					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
 					}
 				}
 				for(int i = 0; i < circle.childrenLinks.size(); i++){
@@ -201,6 +202,7 @@ public class CycicCircles{
 						if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
 							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
+							CycicScenarios.workingCycicScenario.Links.get(ii).line.updatePosition();
 						}
 					}
 				}

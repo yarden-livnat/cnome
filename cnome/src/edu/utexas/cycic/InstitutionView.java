@@ -220,6 +220,9 @@ public class InstitutionView extends ViewBase{
 		topGrid.add(addAvailFac, 2, 3);
 		topGrid.setHgap(10);
 		
+		topGrid.add(new Label("Name"), 0, 4);
+		topGrid.add(FormBuilderFunctions.institNameBuilder(workingInstit), 1, 4);
+		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);
 		grid.setVgap(10);
@@ -351,10 +354,6 @@ public class InstitutionView extends ViewBase{
 					} else {
 						// Switch that will contain current and future key words to indicate special form functions.
 						switch ((String) facArray.get(0)) {
-						case "Name":
-							grid.add(FormBuilderFunctions.institNameBuilder(workingInstit, dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
 						/*case "Incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;

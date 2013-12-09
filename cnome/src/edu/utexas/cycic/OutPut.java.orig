@@ -389,6 +389,8 @@ public class OutPut {
 	}
 	
 	public static void loadFile(File file){
+<<<<<<< HEAD
+=======
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -401,19 +403,14 @@ public class OutPut {
 			for (int i = 0; i < facList.getLength(); i++){
 				org.w3c.dom.Node facNode = facList.item(i);
 				
-				CycicScenarios.workingCycicScenario.FacilityNodes.add(new facilityNode());
-				facilityNode tempNode = CycicScenarios.workingCycicScenario.FacilityNodes.get(i);
+				facilityNode tempNode = new facilityNode();	
 				Element element = (Element) facNode;
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
 				tempNode.cycicCircle = CycicCircles.addNode(element.getElementsByTagName("name").item(0).getTextContent(), tempNode);
-				double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
-				tempNode.cycicCircle.setCenterX(xPosition);
-				tempNode.cycicCircle.text.setLayoutX(xPosition);
-				tempNode.cycicCircle.menu.setLayoutX(xPosition);
-				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
-				tempNode.cycicCircle.setCenterY(yPosition);
-				tempNode.cycicCircle.text.setLayoutY(yPosition);
-				tempNode.cycicCircle.menu.setLayoutY(yPosition);
+				tempNode.cycicCircle.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
+				tempNode.cycicCircle.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
+				
+				CycicScenarios.workingCycicScenario.FacilityNodes.add(tempNode);
 			}
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			VisFunctions.reloadPane();
@@ -422,6 +419,7 @@ public class OutPut {
 		}
 		
 
+>>>>>>> 045a42562274e3d3aca429011f6fca6a4f64bcba
 		
 	}
 	

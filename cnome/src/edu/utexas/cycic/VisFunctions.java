@@ -150,9 +150,11 @@ public class VisFunctions {
 				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
 			}
 		}
+		link.line.updatePosition();
 		CycicScenarios.workingCycicScenario.Links.add(link);
-		Cycic.pane.getChildren().addAll(link.line);
+		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
 		link.line.toBack();
+		System.out.println(Cycic.pane.getChildren());
 	}
 	
 	/**
