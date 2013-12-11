@@ -261,7 +261,7 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-
+		
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
@@ -269,18 +269,19 @@ public class FormBuilderFunctions {
 					cb.getItems().add(circle.commodity);
 				}
 				cb.getItems().add("New Commodity");
+				
+				if ( defaultValue.get(0) != "") {
+					cb.setValue((String) defaultValue.get(0));
+				}
 			}
 		});
 		
-		if ( defaultValue.get(0) != "") {
-			cb.setValue((String) defaultValue.get(0));
-		}
+
 		
 		
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
-				MarketCircle oldMarket = null;
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
@@ -288,22 +289,13 @@ public class FormBuilderFunctions {
 						if (newValue == circle.commodity){
 							marketCircle = circle;
 						}
-						if (defaultValue.get(0) == circle.commodity) {
-							oldMarket = circle;
-						}
-					}
-					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode.cycicCircle && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-							CycicScenarios.workingCycicScenario.Links.remove(j);
-							j -= 1;
-						}
 					}
 					if (marketCircle != null){
-						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
+						VisFunctions.linkMarketFac(marketCircle, facNode.cycicCircle);
 						defaultValue.set(0, newValue);
 						facNode.cycicCircle.incommods.add(newValue);
 						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
-							if (facNode.cycicCircle.incommods.get(i) == (String) oldMarket.name){
+							if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
 								facNode.cycicCircle.incommods.remove(i);
 								i--;
 							}
@@ -340,6 +332,10 @@ public class FormBuilderFunctions {
 					cb.getItems().add(circle.commodity);
 				}
 				cb.getItems().add("New Commodity");
+				
+				if ( defaultValue.get(0) != "") {
+					cb.setValue((String) defaultValue.get(0));
+				}
 			}
 		});
 		
@@ -350,7 +346,7 @@ public class FormBuilderFunctions {
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
-				Object oldMarket = null;
+
 				if (newValue == "New Commodity"){
 					//
 				} else {
@@ -358,18 +354,20 @@ public class FormBuilderFunctions {
 						if (newValue == circle.commodity){
 							marketCircle = circle;
 						}
-						if (defaultValue.get(0) == circle.commodity) {
-							oldMarket = circle;
-						}
-					}
-					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode.cycicCircle && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-							CycicScenarios.workingCycicScenario.Links.remove(j);
-							j -= 1;
-						}
+
 					}
 					if (marketCircle != null){
-						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
+						VisFunctions.linkFacMarket(facNode.cycicCircle, marketCircle);
+						facNode.cycicCircle.outcommods.add(newValue);
+						for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
+							if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
+								facNode.cycicCircle.outcommods.remove(i);
+								i--;
+							}
+						}
+						/*for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
+							System.out.println(facNode.cycicCircle.outcommods.get(i));
+						}*/
 						defaultValue.set(0, newValue);
 						VisFunctions.reloadPane();
 					}
@@ -385,7 +383,7 @@ public class FormBuilderFunctions {
 	 * Function used to link a recipe to a facility. 
 	 * @param facNode facilityCircle that was used to construct the form. 
 	 * @param defaultValue ArrayList<Object> containing the data for a "recipe" field in the facilityCircle. 
-	 * @return ComboBox containing all of the recipies currently available in the simulation, tied to the value of this recipe field. 
+	 * @return ComboBox containing all of the recipes currently available in the simulation, tied to the value of this recipe field. 
 	 */
 	static ComboBox<String> recipeComboBox(facilityNode facNode, final ArrayList<Object> defaultValue){
 		final ComboBox<String> cb = new ComboBox<String>();

@@ -64,7 +64,7 @@ class isotopeData {
  *
  */
 class nodeLink {
-	FacilityCircle source;
+	Object source;
 	Object target;
 	ConnectorLine line = new ConnectorLine();
 }

@@ -139,6 +139,11 @@ public class MarketNodes{
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
 						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
 					}
+					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+					}
 				}				
 				mousex = event.getX();
 				mousey = event.getY();

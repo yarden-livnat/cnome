@@ -48,7 +48,7 @@ public class Cycic extends ViewBase{
 			setToggleGroup(group);
 		}
 	};
-	static boolean marketHideBool = false;
+	static boolean marketHideBool = true;
 	static Window window;
 	
 	/**
@@ -161,7 +161,7 @@ public class Cycic extends ViewBase{
 		grid.add(output, 0, 2);
 		
 		Button hideMarkets = new Button();
-		hideMarkets.setText("Hide Yo' Markets");
+		hideMarkets.setText("Hide Markets");
 		hideMarkets.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				if (Cycic.marketHideBool == true){

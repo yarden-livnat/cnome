@@ -186,6 +186,11 @@ public class CycicCircles{
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
 						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
 					}
+					if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+					}
 				}
 				for(int i = 0; i < circle.childrenLinks.size(); i++){
 					circle.childrenLinks.get(i).line.setStartX(circle.getCenterX());

@@ -15,11 +15,11 @@ public class ConnectorLine extends Line {
 	};
 	
 	public void updatePosition(){
-		double x1 = getStartX();
-		double y1 = getStartY();
+		double x1 = getEndX();
+		double y1 = getEndY();
 		
-		double x2 = getEndX();
-		double y2 = getEndY();
+		double x2 = getStartX();
+		double y2 = getStartY();
 		
 		right.setStartX(x1 + (x2-x1)*0.5);
 		right.setStartY(y1 + (y2-y1)*0.5);
