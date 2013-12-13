@@ -373,6 +373,10 @@ public class OutPut {
 				rootElement.appendChild(outputFacility(doc, facility));
 			}
 			
+			for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
+				rootElement.appendChild(outputMarket(doc, market));
+			}
+			
 			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
@@ -401,19 +405,21 @@ public class OutPut {
 			for (int i = 0; i < facList.getLength(); i++){
 				org.w3c.dom.Node facNode = facList.item(i);
 				
-				CycicScenarios.workingCycicScenario.FacilityNodes.add(new facilityNode());
-				facilityNode tempNode = CycicScenarios.workingCycicScenario.FacilityNodes.get(i);
+				facilityNode tempNode = new facilityNode();
 				Element element = (Element) facNode;
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
-				tempNode.cycicCircle = CycicCircles.addNode(element.getElementsByTagName("name").item(0).getTextContent(), tempNode);
+				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
+				double radius = Double.parseDouble(element.getElementsByTagName("radius").item(0).getTextContent());
 				double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterX(xPosition);
-				tempNode.cycicCircle.text.setLayoutX(xPosition);
+				tempNode.cycicCircle.text.setLayoutX(xPosition-radius*0.6);
 				tempNode.cycicCircle.menu.setLayoutX(xPosition);
 				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterY(yPosition);
-				tempNode.cycicCircle.text.setLayoutY(yPosition);
+				tempNode.cycicCircle.text.setLayoutY(yPosition-radius*0.6);
 				tempNode.cycicCircle.menu.setLayoutY(yPosition);
+				//CycicScenarios.workingCycicScenario.FacilityNodes.add(tempNode);
+				System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes);
 			}
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			VisFunctions.reloadPane();
@@ -439,6 +445,11 @@ public class OutPut {
 		Element yPosition = doc.createElement("yPosition");
 		yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
 		facElement.appendChild(yPosition);
+		
+		Element radius = doc.createElement("radius");
+		radius.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getRadius())));
+		facElement.appendChild(radius);
+		
 		for (String commodity: facility.cycicCircle.incommods){
 			Element commodityObj = doc.createElement("inCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));

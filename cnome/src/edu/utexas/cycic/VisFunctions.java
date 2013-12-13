@@ -151,8 +151,10 @@ public class VisFunctions {
 			}
 		}
 		link.line.updatePosition();
+		link.line.text.setText(target.commodity);
 		CycicScenarios.workingCycicScenario.Links.add(link);
 		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
+		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
 		link.line.toBack();
 	}
 
@@ -173,8 +175,10 @@ public class VisFunctions {
 			}
 		}
 		link.line.updatePosition();
+		link.line.text.setText(source.commodity);
 		CycicScenarios.workingCycicScenario.Links.add(link);
 		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
+		Cycic.pane.getChildren().addAll( link.line.left1, link.line.right1);
 		link.line.toBack();
 	}
 
@@ -195,6 +199,7 @@ public class VisFunctions {
 		link.line.updatePosition();
 		CycicScenarios.workingCycicScenario.Links.add(link);
 		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
+		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
 		link.line.toBack();
 	}
 
