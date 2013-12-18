@@ -13,6 +13,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -61,6 +62,7 @@ public class FilterPanel extends TitledPanel {
 	private boolean _reportChange = true;
 	private BooleanProperty _highlight = new SimpleBooleanProperty(false);
 	MapProperty<Object, Object> _map = new SimpleMapProperty<>();
+	private ObjectProperty<EventHandler<ActionEvent>> _closeAction = new SimpleObjectProperty<>();
 			
 	
 	public BooleanProperty highlight() {
@@ -112,15 +114,15 @@ public class FilterPanel extends TitledPanel {
 	 * Close 
 	 */
 	public ObjectProperty<EventHandler<ActionEvent>> onCloseProperty() {
-		return _closeButton.onActionProperty();
+		return _closeAction;
 	}
 	
 	public EventHandler<ActionEvent> getOnClose() {
-		return _closeButton.getOnAction();
+		return _closeAction.get();
 	}
 	
 	public void setOnClose(EventHandler<ActionEvent> handler) {
-		_closeButton.setOnAction(handler);
+		_closeAction.set(handler);
 	}
 	
 	
@@ -139,6 +141,15 @@ public class FilterPanel extends TitledPanel {
 		_closeButton = new Button();
 		_closeButton.getStyleClass().add("flat-button");
 		_closeButton.setGraphic(new ImageView(Resources.getIcon("close_view")));
+		
+		_closeButton.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				setTask(null);
+				if(getOnClose() != null){
+					getOnClose().handle(e);
+				}
+			}
+		});
 	
 		header.getChildren().addAll(_indicator, new Spring(), _closeButton);		
 		
