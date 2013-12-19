@@ -9,12 +9,14 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -45,25 +47,29 @@ public class CycicCircles{
 		circle.type = "Parent";
 		circle.childrenShow = true;
 		
-		//Setting up the name and nameing structure of the circle.
-		circle.text = new Text(name);
-		circle.name = name;
-		circle.text.setX(circle.getCenterX()-circle.getRadius()*0.7);
-		circle.text.setY(circle.getCenterY());	
-		circle.text.setWrappingWidth(circle.getRadius()*1.6);
+		//Setting up the name and naming structure of the circle.
+		circle.text.setText(name);
+		circle.tooltip.setText(name);
+		circle.text.setTooltip(circle.tooltip);
+		circle.text.setWrapText(true);
+		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+		circle.text.setMaxWidth(circle.getRadius()*1.4);
 		circle.text.setMouseTransparent(true);
-		circle.text.setFont(new Font(14));
+		circle.text.setFont(new Font("ComicSans", 14));
+		circle.text.setMaxHeight(circle.getRadius()*1.2);
+		
+		
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
-		circle.rgbColor=VisFunctions.stringToColor((String)circle.name);
+		circle.rgbColor=VisFunctions.stringToColor(name);
 		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
-		
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setFill(Color.BLACK);
+			circle.text.setTextFill(Color.BLACK);
 		}else{
-			circle.text.setFill(Color.WHITE);
+			circle.text.setTextFill(Color.WHITE);
 		}
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
@@ -171,13 +177,19 @@ public class CycicCircles{
 				circle.image.setLayoutX(circle.getCenterX()-60);
 				circle.image.setLayoutY(circle.getCenterY()-50);
 				
-				circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
-				circle.text.setY(circle.getCenterY());
+				circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+				circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
 				
 				for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+					}
+					if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
 					}
 				}
 				for(int i = 0; i < circle.childrenLinks.size(); i++){
@@ -189,12 +201,13 @@ public class CycicCircles{
 					circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
 					circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
 					circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-					circle.childrenList.get(i).text.setX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
-					circle.childrenList.get(i).text.setY(circle.childrenList.get(i).getCenterY());
+					circle.childrenList.get(i).text.setLayoutX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
+					circle.childrenList.get(i).text.setLayoutY(circle.childrenList.get(i).getCenterY()-circle.childrenList.get(i).getRadius()*0.6);
 					for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 						if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
 							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
+							CycicScenarios.workingCycicScenario.Links.get(ii).line.updatePosition();
 						}
 					}
 				}

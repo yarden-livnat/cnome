@@ -7,19 +7,6 @@ public class PracticeRegions {
 	static ArrayList<Object> growthRegion = new ArrayList<Object>();
 	
 	public static void init(){
-		// Name //
-		ArrayList<Object> name = new ArrayList<Object>();
-		name.add("Name");
-		name.add("String");
-		name.add("String");
-		name.add(null);
-		name.add(null);
-		name.add("GrowthRegion");
-		name.add("0");
-		name.add(null);
-		
-		growthRegion.add(name);
-		
 		// Commodity Requirements	
 		ArrayList<Object> commodityDemand = new ArrayList<Object>();
 		commodityDemand.add("Commodity");

@@ -1,5 +1,7 @@
 package edu.utexas.cycic;
 
+import java.io.File;
+
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -18,6 +20,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 
 public class Cycic extends ViewBase{
@@ -44,7 +48,8 @@ public class Cycic extends ViewBase{
 			setToggleGroup(group);
 		}
 	};
-	static boolean marketHideBool = false;
+	static boolean marketHideBool = true;
+	static Window window;
 	
 	/**
 	 * Initiates the Pane and GridPane.
@@ -96,6 +101,9 @@ public class Cycic extends ViewBase{
 		submit1.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent event){
+				if (structureCB.getValue() == null){
+					return;
+				}
 				facilityNode tempNode = new facilityNode();
 				tempNode.facilityType = structureCB.getValue();
 				for (int i = 0; i < RealFacs.alfredStructs.size(); i++){
@@ -153,7 +161,7 @@ public class Cycic extends ViewBase{
 		grid.add(output, 0, 2);
 		
 		Button hideMarkets = new Button();
-		hideMarkets.setText("Hide Yo' Markets");
+		hideMarkets.setText("Hide Markets");
 		hideMarkets.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				if (Cycic.marketHideBool == true){
@@ -166,29 +174,20 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(hideMarkets, 0, 3);
+		
 		//grid.add(toggle, 0, 3);
-		/*
-		Button save = new Button();
-		save.setText("Save");
-		save.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent event){
-				OutPut.save(workingScenario);
-			}
-		});
 		
 		Button load = new Button();
 		load.setText("Load");
 		load.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				OutPut.load();
-				workingScenario = cycicScenarios.cycicScenarios.get(cycicScenarios.cycicScenarios.size()-1);
-				cycicScenarios.workingCycicScenario = workingScenario;
-				VisFunctions.reloadPane();			
+				FileChooser fc = new FileChooser();
+				fc.setTitle("Choose a saved scenario");
+				File file = fc.showOpenDialog(window);
+				OutPut.loadFile(file);
 			}
 		});
-		grid.add(save, 1, 2);
 		grid.add(load, 2, 2);
-		*/
 		cycicBox.getChildren().addAll(grid, pane);
 		setContent(cycicBox);
 	}

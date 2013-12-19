@@ -74,8 +74,17 @@ public class MarketView extends ViewBase{
 		marketCommod.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				marketCommod.getItems().clear();
+
 				for (Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
-					marketCommod.getItems().add(commod.getText());
+					boolean singularityCheck = false;
+					for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
+						if (market.commodity == commod.getText()){
+							singularityCheck = true;
+						}
+					}
+					if (singularityCheck == false){
+						marketCommod.getItems().add(commod.getText());
+					}
 				}
 				marketCommod.getItems().add("Add New Commodity");
 				marketCommod.setValue(formNode.commodity);

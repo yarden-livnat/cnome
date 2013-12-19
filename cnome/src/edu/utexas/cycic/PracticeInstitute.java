@@ -6,19 +6,6 @@ public class PracticeInstitute {
 	static ArrayList<Object> deployInst = new ArrayList<Object>();
 	
 	public static void init(){
-		// Name
-		ArrayList<Object> name = new ArrayList<Object>();
-		name.add("Name");
-		name.add("String");
-		name.add("String");
-		name.add(null);
-		name.add(null);
-		name.add("DeplayInst");
-		name.add("0");
-		name.add(null);
-		
-		deployInst.add(name);
-		
 		ArrayList<Object> buildOrderArray = new ArrayList<Object>();
 		buildOrderArray.add("buildOrder");
 		// Build Orders

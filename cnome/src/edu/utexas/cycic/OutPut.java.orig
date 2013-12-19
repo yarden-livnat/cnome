@@ -115,12 +115,7 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-<<<<<<< HEAD
-			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
-			StreamResult result = new StreamResult(new File("test.xml"));
-=======
 			StreamResult result = new StreamResult(new File("file.xml"));
->>>>>>> 7aaaf2544e78ead9b3249c6dbd21ccc3d7641ad0
 			
 			transformer.transform(source, result);
 			
@@ -378,21 +373,12 @@ public class OutPut {
 				rootElement.appendChild(outputFacility(doc, facility));
 			}
 			
-			for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
-				rootElement.appendChild(outputMarket(doc, market));
-			}
-			
 			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-<<<<<<< HEAD
-			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
-			StreamResult result = new StreamResult(new File("savefile.xml"));
-=======
 			StreamResult result = new StreamResult(new File("savefile.xml"));
 			
->>>>>>> 7aaaf2544e78ead9b3249c6dbd21ccc3d7641ad0
 			transformer.transform(source, result);
 			
 		} catch (ParserConfigurationException pce){
@@ -403,6 +389,8 @@ public class OutPut {
 	}
 	
 	public static void loadFile(File file){
+<<<<<<< HEAD
+=======
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -415,21 +403,14 @@ public class OutPut {
 			for (int i = 0; i < facList.getLength(); i++){
 				org.w3c.dom.Node facNode = facList.item(i);
 				
-				facilityNode tempNode = new facilityNode();
+				facilityNode tempNode = new facilityNode();	
 				Element element = (Element) facNode;
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
-				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
-				double radius = Double.parseDouble(element.getElementsByTagName("radius").item(0).getTextContent());
-				double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
-				tempNode.cycicCircle.setCenterX(xPosition);
-				tempNode.cycicCircle.text.setLayoutX(xPosition-radius*0.6);
-				tempNode.cycicCircle.menu.setLayoutX(xPosition);
-				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
-				tempNode.cycicCircle.setCenterY(yPosition);
-				tempNode.cycicCircle.text.setLayoutY(yPosition-radius*0.6);
-				tempNode.cycicCircle.menu.setLayoutY(yPosition);
-				//CycicScenarios.workingCycicScenario.FacilityNodes.add(tempNode);
-				System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes);
+				tempNode.cycicCircle = CycicCircles.addNode(element.getElementsByTagName("name").item(0).getTextContent(), tempNode);
+				tempNode.cycicCircle.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
+				tempNode.cycicCircle.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
+				
+				CycicScenarios.workingCycicScenario.FacilityNodes.add(tempNode);
 			}
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			VisFunctions.reloadPane();
@@ -438,6 +419,7 @@ public class OutPut {
 		}
 		
 
+>>>>>>> 045a42562274e3d3aca429011f6fca6a4f64bcba
 		
 	}
 	
@@ -455,11 +437,6 @@ public class OutPut {
 		Element yPosition = doc.createElement("yPosition");
 		yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
 		facElement.appendChild(yPosition);
-		
-		Element radius = doc.createElement("radius");
-		radius.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getRadius())));
-		facElement.appendChild(radius);
-		
 		for (String commodity: facility.cycicCircle.incommods){
 			Element commodityObj = doc.createElement("inCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
@@ -489,28 +466,6 @@ public class OutPut {
 		
 		return markElement;
 	}
-<<<<<<< HEAD
-	
-	static Element outputRegion(Document doc, regionNode region){
-		Element regionElement = doc.createElement("market");
-		Element regionName = doc.createElement("name");
-		regionName.appendChild(doc.createTextNode((String) region.name));
-		regionElement.appendChild(regionName);
-		// X position
-		Element xPosition = doc.createElement("xPosition");
-		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterX())));
-		regionElement.appendChild(xPosition);
-		// Y position
-		Element yPosition = doc.createElement("yPosition");
-		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterY())));
-		
-		regionElement.appendChild(yPosition);
-		
-		
-		return regionElement;
-	}
-=======
 
->>>>>>> 7aaaf2544e78ead9b3249c6dbd21ccc3d7641ad0
 }
 
