@@ -62,6 +62,7 @@ public class SchemaPresenter  extends PresenterBase {
 				_measures.remove(field);
 				_dimensions.add(field);	
 				field.setRole(DataType.Role.DIMENSION);
+				_dimensionsPanel.addForceNumericFilterMenu();
 			}
 			
 		});
@@ -106,6 +107,7 @@ public class SchemaPresenter  extends PresenterBase {
 				}
 				
 				_dimensionsPanel.setFields(_dimensions);
+				_dimensionsPanel.addForceNumericFilterMenu();
 				_measuresPanel.setFields(_measures);
 			}
 

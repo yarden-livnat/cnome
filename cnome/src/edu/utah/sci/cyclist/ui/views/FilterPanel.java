@@ -212,7 +212,11 @@ public class FilterPanel extends TitledPanel {
 			createRange();
 			break;
 		case Qi:
-			createList();
+			if(_filter.getForceNumericFilter()){
+				createRange();
+			}else{
+				createList();
+			}
 		}
 	}
 	

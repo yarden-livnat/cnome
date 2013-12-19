@@ -76,6 +76,11 @@
     -fx-padding: 0; /*0.166667em 0.333333em 0.166667em 0.333333em;*/ /* 2 4 2 4 */
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
+
+.entry:hover{
+	-fx-background-color:#e0e0e0;
+}
+
 /*
  * Glyphs
  */

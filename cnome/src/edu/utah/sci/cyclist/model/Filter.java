@@ -98,6 +98,10 @@ public class Filter implements Observable {
 		return _dataType.getClassification();
 	}
 	
+	public Boolean getForceNumericFilter(){
+		return _dataType.getForceNumericFilter();
+	}
+	
 	public Type getType() {
 		return _dataType.getType();
 	}

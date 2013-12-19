@@ -14,16 +14,23 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -33,6 +40,7 @@ import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.Field;
+import edu.utah.sci.cyclist.model.DataType.Classification;
 
 public class SchemaPanel extends TitledPanel {
                 
@@ -40,6 +48,7 @@ public class SchemaPanel extends TitledPanel {
         private ObservableList<Field> _fields;
         private List<Entry> _entries;
         private Closure.V1<Field> _onFieldDropAction = null;
+        
         
         public SchemaPanel(String title) {
                 super(title);
@@ -62,6 +71,36 @@ public class SchemaPanel extends TitledPanel {
                 }
                 
                 resetContent();
+        }
+        
+        /**
+         * Sets the menu for forcing numeric filter visible. 
+         * On mouse right click the user can choose if the filter is numeric or a distinct text.
+         * This option is only for entries with field classification of "Qi", and should be called only for the "dimentions panel".
+         */
+        
+        public void addForceNumericFilterMenu(){
+			 for(final Entry entry : _entries){
+				 if(entry.field.getClassification() == Classification.Qi && entry.label.getOnMouseClicked() == null){
+					 final ContextMenu contextMenu = new ContextMenu();
+						MenuItem changeFilter = new MenuItem("Numeric filter", new ImageView(Resources.getIcon("ok")));
+						changeFilter.getGraphic().visibleProperty().bind(entry.field.getDataType().forceNumericFilterProperty());
+						changeFilter.setOnAction(new EventHandler<ActionEvent>() {
+							public void handle(ActionEvent e) { 
+								entry.field.getDataType().setForceNumericFilter(!entry.field.getDataType().getForceNumericFilter());
+							}
+						});
+						contextMenu.getItems().add(changeFilter);
+						entry.label.setOnMouseClicked(new EventHandler<MouseEvent>(){
+							@Override
+				             public void handle(MouseEvent event) {
+								 if (event.getButton() == MouseButton.SECONDARY){      
+									 contextMenu.show(entry.label, Side.BOTTOM, 0, 0);
+								 }
+				             }
+						});
+				 }
+			 }
         }
         
         private void resetContent() {
@@ -167,6 +206,8 @@ public class SchemaPanel extends TitledPanel {
 			public void handle(DragEvent event) {			
 			}
 		});
+		
+		entry.label.getStyleClass().add("entry");
 		return entry;
 	}
 
