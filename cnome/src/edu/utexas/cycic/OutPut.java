@@ -112,7 +112,8 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
+			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
+			StreamResult result = new StreamResult(new File("test.xml"));
 			
 			transformer.transform(source, result);
 			
@@ -374,8 +375,8 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
-			
+			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
+			StreamResult result = new StreamResult(new File("savefile.xml"));
 			transformer.transform(source, result);
 			
 		} catch (ParserConfigurationException pce){
@@ -424,6 +425,25 @@ public class OutPut {
 		
 		
 		return markElement;
+	}
+	
+	static Element outputRegion(Document doc, regionNode region){
+		Element regionElement = doc.createElement("market");
+		Element regionName = doc.createElement("name");
+		regionName.appendChild(doc.createTextNode((String) region.name));
+		regionElement.appendChild(regionName);
+		// X position
+		Element xPosition = doc.createElement("xPosition");
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterX())));
+		regionElement.appendChild(xPosition);
+		// Y position
+		Element yPosition = doc.createElement("yPosition");
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterY())));
+		
+		regionElement.appendChild(yPosition);
+		
+		
+		return regionElement;
 	}
 }
 
