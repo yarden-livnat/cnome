@@ -286,6 +286,11 @@ public class CyclistController {
 			table.save(memento.createChild("Table"));
 		}
 		
+		//Save the Simulation
+		for(Simulation simulation: _model.getSimulationIds()){
+			simulation.save(memento.createChild("Simulation"));
+		}
+		
 		try {
 			memento.save(new PrintWriter(saveFile));
 
@@ -334,6 +339,14 @@ public class CyclistController {
 						tbl.restore(table, _model.getSources());
 						tbl.setLocalDatafile(getLastChosenWorkDirectory());
 						_model.getTables().add(tbl);
+					}
+					
+					//Read the simulations
+					IMemento[] simulations = memento.getChildren("Simulation");
+					for(IMemento simulation:simulations){
+						Simulation sim = new Simulation();
+						sim.restore(simulation,_model.getSources());
+						_model.getSimulationIds().add(sim);
 					}
 					
 				} catch (Exception e) {

@@ -84,44 +84,14 @@ public class Simulation {
 		_simulationId = sim.getSimulationId();
 	}
 	
-    // Save the table
+    // Save the simulation
 	public void save(IMemento memento) {
 
 		// Set the name
-		memento.putString("name", getSimulationId());
-		
-		// Set the alias
-		memento.putString("alias", getSimulationId());
-			
+		memento.putString("simulation-id", getSimulationId());
 		
 		// Save the uid of the data source
 		memento.putString("datasource-uid", _datasource.getUID());
-		
-		// Save the map
-		IMemento mapMemento = memento.createChild("property-map");
-
-		// Set things saved in the properties map
-		Set<String> keys = _properties.keySet();
-		for(String key: keys){
-			
-			Object value = _properties.get(key);
-
-			IMemento entryMemento = mapMemento.createChild("entry");
-			entryMemento.putString("key", key);
-			entryMemento.putString("class", value.getClass().toString());
-			
-
-			// Save integers or strings as strings
-			if(value.getClass().toString().equals(String.class.toString()) || 
-  			   value.getClass().toString().equals(Integer.class.toString()))
-				entryMemento.putTextData((String)value);
-			else{
-
-				System.out.println("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
-				IMemento valueMemento = entryMemento.createChild("value");
-				valueMemento.putString("value-ID", value.toString());		
-			}
-		}
 	}
 	
 	// Restore the table
@@ -129,9 +99,6 @@ public class Simulation {
 	
 		// Get the name
 		setSimulationId(memento.getString("simulation-id"));
-		
-		// Get the number of rows
-//		_numRows = memento.getInteger("NumRows");
 
 		// Get the datasource
 		String datasourceUID = memento.getString("datasource-uid");
@@ -139,33 +106,6 @@ public class Simulation {
 			if(source.getUID().equals(datasourceUID))
 				setDataSource(source);
 		}
-		
-		// Get values in the property map	
-		IMemento mapMemento = memento.getChild("property-map");
-		IMemento[] entries =  mapMemento.getChildren("entry");
-		for(IMemento entry: entries){
-
-			// Get the key of the object
-			String key = entry.getString("key");
-			
-			// Get the class of the object
-			String classType = entry.getString("class");
-				
-			// If we have a string
-			if(classType.equals(String.class.toString())){
-				 String value = entry.getTextData();
-				 setProperty(key, value);
-			}
-			// If we have an Integer
-			else if(classType.equals(Integer.class.toString())){
-				 Integer value = Integer.parseInt(entry.getTextData());
-				 setProperty(key, value);
-			}
-			else{
-				System.out.println("Table:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
-			}	
-		}
-		
 	}
 	
 	public String getSimulationId(){
