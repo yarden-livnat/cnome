@@ -43,6 +43,7 @@ import javafx.stage.Window;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.ui.panels.FiltersListPanel;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
+import edu.utah.sci.cyclist.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.ui.panels.ToolsPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
@@ -60,6 +61,7 @@ public class MainScreen extends VBox {
 	private ToolsPanel _toolsPanel;
 //	private FiltersListPanel _filtersPanel;
 	private StackPane _workspacePane;
+	private SimulationsPanel _simulationPanel;
 		
 	/**
 	 */
@@ -101,6 +103,10 @@ public class MainScreen extends VBox {
 		return _toolsPanel;
 	}
 	
+	public SimulationsPanel getSimulationPanel(){
+		return _simulationPanel;
+	}
+	
 	public Workspace getWorkSpace(){
 		for(Object obj : _workspacePane.getChildren()){
 			if (obj.getClass() == Workspace.class) {
@@ -112,7 +118,7 @@ public class MainScreen extends VBox {
 	
 	private double toolsWidth = 120; 
 	private void build(Stage stage){
-		double[] div = {0.2, 0.4, 0.6, 0.8};
+		double[] div = {0.2, 0.4, 0.6,0.6, 0.8};
 		
 		double [] mainDividers = {toolsWidth/600.0};
 		
@@ -135,6 +141,7 @@ public class MainScreen extends VBox {
 				_datasourcesPanel = new TablesPanel(),
 				_dimensionsPanel = new SchemaPanel("Category"),
 				_measuresPanel = new SchemaPanel("Measure"),
+				_simulationPanel = new SimulationsPanel(),
 				_toolsPanel = new ToolsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);
@@ -162,10 +169,14 @@ public class MainScreen extends VBox {
 	private MenuItem _workspaceMenuItem;
 	private MenuItem _quitMenuItem;
 	private MenuItem _saveMenuItem;
-	
+	private MenuItem _simulationMenuItem;
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onAddSimulation() {
+		return _simulationMenuItem.onActionProperty();
 	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onSelectWorkspace() {
@@ -220,10 +231,13 @@ public class MainScreen extends VBox {
 	private Menu createDataMenu() {
 		_datasourceMenuItem = new MenuItem("Add Datatable", new ImageView(Resources.getIcon("open.png")));
 		
+		_simulationMenuItem = new MenuItem("Add Simulation", new ImageView(Resources.getIcon("open.png")));
+		
+		
 		// -- setup the menu 
 		Menu dataMenu = new Menu("Data");
 		dataMenu.getItems().addAll(
-				_datasourceMenuItem);
+				_datasourceMenuItem,_simulationMenuItem);
 		return dataMenu;
 	}
 

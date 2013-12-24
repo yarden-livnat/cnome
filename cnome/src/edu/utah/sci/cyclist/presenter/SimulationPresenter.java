@@ -20,47 +20,35 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.model;
+package edu.utah.sci.cyclist.presenter;
 
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
+import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.Simulation;
+import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.ui.panels.SimulationsPanel;
 
-public class Model {
+public class SimulationPresenter extends PresenterBase {
 
-	private ObservableList<Table> _tables = FXCollections.observableArrayList();
-	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
-	private CyclistDatasource _currentSource;
-	private ObservableList<Simulation> _simulationIds = FXCollections.observableArrayList();
+	private SimulationsPanel _simPanel;
+	private ObservableList<Simulation> _simulationIds;
 	
-	/**
-	 * getTables
-	 * @return
-	 */
-	public ObservableList<Table> getTables() {
-		return _tables;
+	public SimulationPresenter(EventBus bus) {
+		super(bus);
 	}
 	
-	public Table getTable(String name) {
-		for (Table table : _tables) {
-			if (table.getName().equals(name)) 
-				return table;
+	public void setSimPanel(SimulationsPanel panel){
+		_simPanel = panel;
+		_simPanel.setItems(_simulationIds);
+	}
+	
+	public void setSimIds(ObservableList<Simulation> simulationsIds) {
+		if(simulationsIds != null && simulationsIds != _simulationIds){
+			_simulationIds = simulationsIds;
 		}
-		return null;
-	}
-	
-	public ObservableList<CyclistDatasource> getSources() {
-		return _sources;
-	}	
-	
-	public CyclistDatasource getSelectedDatasource(){
-		return _currentSource;
-	}
-	
-	public void setSelectedDatasource(CyclistDatasource source){
-		_currentSource = source;
-	}
-	public ObservableList<Simulation> getSimulationIds() {
-		return _simulationIds;
 	}
 	
 }

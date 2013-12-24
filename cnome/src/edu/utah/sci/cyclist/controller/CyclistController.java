@@ -42,15 +42,18 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
+import edu.utah.sci.cyclist.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.ui.MainScreen;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.ui.wizards.SimulationWizard;
 
 
 public class CyclistController {
@@ -107,6 +110,12 @@ public class CyclistController {
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
 		sp.setPanels(screen.getDimensionPanel(), screen.getMeauresPanel());
+		
+		//Simulation panel
+		SimulationPresenter sip = new SimulationPresenter(_eventBus);
+		sip.setSimIds(_model.getSimulationIds());
+		sip.setSimPanel(screen.getSimulationPanel());
+		
 		
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
@@ -195,6 +204,31 @@ public class CyclistController {
 			}
 		});
 		
+		_screen.onAddSimulation().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				final SimulationWizard wizard = new SimulationWizard();
+				
+				wizard.setItems(_model.getSources());
+				wizard.setSelectedSource(_model.getSelectedDatasource());
+				String currDirectory = getLastChosenWorkDirectory();
+				wizard.setWorkDir(currDirectory);
+				ObjectProperty<Simulation> selection = wizard.show(_screen.getWindow());
+				
+				selection.addListener(new ChangeListener<Simulation>() {
+					@Override
+					public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal, Simulation newVal) {
+						if(newVal != null)
+						{
+							Simulation sim = new Simulation(newVal);
+							_model.getSimulationIds().add(sim);	
+							_model.setSelectedDatasource(wizard.getSelectedSource());
+						}
+					}
+				});
+			}
+		});
+		
 		_screen.onSelectWorkspace().set(new EventHandler<ActionEvent>(){
 
 			@Override
@@ -272,6 +306,7 @@ public class CyclistController {
 		//Clear the previous data
 		_model.getSources().clear();
 		_model.getTables().clear();
+		_model.getSimulationIds().clear();
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
