@@ -82,10 +82,6 @@ public class SimulationWizard extends TilePane {
 	public SimulationWizard() {
 		createDialog(new Simulation());
 	}
-
-	public SimulationWizard(Simulation simulationProperty){
-		createDialog(simulationProperty);
-	}
 	
 	// * * * Set the existing data sources in the combo box * * * //
 	public void setItems(final ObservableList<CyclistDatasource> sources) {

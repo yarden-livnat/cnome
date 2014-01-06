@@ -31,12 +31,18 @@ import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import edu.utah.sci.cyclist.model.Simulation;
+import edu.utah.sci.cyclist.ui.wizards.SimulationEditorWizard;
 
 public class SimulationsPanel extends TitledPanel  {
 	public static final String ID 		= "simulations-panel";
@@ -83,15 +89,6 @@ public class SimulationsPanel extends TitledPanel  {
 		resetContent();
 	}
 	
-	public void focus(Simulation simulation) {
-		for (Entry entry : _entries) {
-			if (entry.simulation == simulation) {
-				select(entry);
-				break;
-			}
-		}
-	}
-	
 	private void resetContent() {
 		VBox vbox = (VBox) getContent();
 		vbox.getChildren().clear();
@@ -122,12 +119,28 @@ public class SimulationsPanel extends TitledPanel  {
 		entry.simulation = simulation;
 		entry.title = new Label(simulation.getSimulationId());
 		
+		final SimulationsPanel _panel = this;
+		
 		entry.title.setOnMouseClicked(new EventHandler<Event>() {
 
 			@Override
 			public void handle(Event event) {
 			    
-				; //TBD 
+				MouseEvent mouseEvent = (MouseEvent)event;
+				select(entry);
+				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
+					Window window = _panel.getParent().getScene().getWindow();
+					SimulationEditorWizard wizard = new SimulationEditorWizard(entry.simulation);
+					ObjectProperty<Simulation> selection = wizard.show(window);
+					
+					selection.addListener(new ChangeListener<Simulation>(){
+						@Override
+						public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
+							if(newVal.getSimulationId().equals("delete"))
+								removeSimulation(entry);	
+						}	
+					});
+				}
 			}
 		});
 		
@@ -136,28 +149,9 @@ public class SimulationsPanel extends TitledPanel  {
 		
 		
 		
-	public void removeTable(Entry entry) {
+	public void removeSimulation(Entry entry) {
 		_items.remove(entry.simulation);
 	}
-
-		
-//	private void editTable(final Entry entry) {
-//		TableEditorWizard wizard = new TableEditorWizard(entry.table);
-//		
-//		ObjectProperty<Table> selection = wizard.show(this.getParent().getScene().getWindow());
-//		
-//		selection.addListener(new ChangeListener<Table>(){
-//			@Override
-//			public void changed(ObservableValue<? extends Table> arg0, Table oldVal,Table newVal) {
-//				if(newVal.getName().equals("DELETE_ME"))
-//					removeTable(entry);
-//				else{
-//					entry.table = newVal;
-//					entry.title.setText(entry.table.getAlias());
-//				}		
-//			}	
-//		});
-//	}	
 	
 	class Entry {
 		Label title;

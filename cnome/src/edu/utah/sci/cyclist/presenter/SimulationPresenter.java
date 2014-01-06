@@ -22,13 +22,9 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.presenter;
 
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
-import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Simulation;
-import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.panels.SimulationsPanel;
 
 public class SimulationPresenter extends PresenterBase {
