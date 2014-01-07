@@ -27,18 +27,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -46,16 +38,7 @@ import org.apache.log4j.Logger;
 import edu.utah.sci.cyclist.controller.IMemento;
 import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.controller.XMLMemento;
-import edu.utah.sci.cyclist.model.Table.SourceLocation;
-import edu.utah.sci.cyclist.util.QueryBuilder;
-import edu.utah.sci.cyclist.util.SQL;
-import edu.utah.sci.cyclist.util.SQL.Function;
-
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.concurrent.Task;
 
 public class Simulation {
 

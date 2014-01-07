@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -43,6 +44,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -67,20 +69,20 @@ public class SimulationWizard extends TilePane {
 	// GUI elements
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
-	private String						_simulationId;
+	private List<String> 				_simulationsIds;
 	private ImageView                   _statusDisplay;
-	private ComboBox<String> 			_cmbSimulation;
+	private ListView<String>            _simulationsView;
 	
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
 	// DataType elements
 	private CyclistDatasource     _current;
-	private ObjectProperty<Simulation> _selection =  new SimpleObjectProperty<>();
+	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
 	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID FROM SimulationTimeInfo order by SimID";
 	
 	// * * * Constructor creates a new stage * * * //
 	public SimulationWizard() {
-		createDialog(new Simulation());
+		createDialog();
 	}
 	
 	// * * * Set the existing data sources in the combo box * * * //
@@ -91,7 +93,7 @@ public class SimulationWizard extends TilePane {
 	}
 			
 	// * * * Show the dialog * * * //
-	public  ObjectProperty<Simulation>  show(Window window) {
+	public  ObservableList<Simulation>  show(Window window) {
 
 		 _dialog.initOwner(window);
 		 _dialog.show();	
@@ -105,20 +107,20 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	// * * * Create the dialog
-	private void createDialog(Simulation simulationProperty){
+	private void createDialog(){
 		
 		_dialog = new Stage();
 		_dialog.setTitle("Create Simulation");
 		
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
-		_dialog.setScene( createScene(_dialog, simulationProperty) );	
+		_dialog.setScene( createScene(_dialog) );	
 	
 		System.out.println("changed" + _sourcesView.getSelectionModel().selectedItemProperty()) ;
 	}
 	
 	// * * * Create scene creates the GUI * * * //
-	private Scene createScene(final Stage dialog, final Simulation simulation) {
+	private Scene createScene(final Stage dialog) {
 			
 		// * * * The connection settings group
 		VBox connectionBox = new VBox();
@@ -221,7 +223,7 @@ public class SimulationWizard extends TilePane {
 			}	
 		});	
 		
-		HBox simulationBox = new HBox();
+		VBox simulationBox = new VBox();
 		simulationBox.setSpacing(5);
 		simulationBox.setPadding(new Insets(5));
 		simulationBox.setMaxHeight(Double.MAX_VALUE);
@@ -230,12 +232,14 @@ public class SimulationWizard extends TilePane {
 		simLbl.setAlignment(Pos.CENTER);
 		simLbl.setFont(new Font(12));
 		simLbl.setPadding(new Insets(3,0,0,0));
-		_cmbSimulation = new ComboBox<>();
-		_cmbSimulation.setPrefWidth(200);
-		_cmbSimulation.setDisable(true);
-		simulationBox.getChildren().addAll(simLbl,_cmbSimulation);
+		_simulationsView = new ListView<>();
+		_simulationsView.setPrefWidth(250);
+		_simulationsView.setDisable(true);
+		_simulationsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		_simulationsView.setMaxHeight(Double.MAX_VALUE);
+		simulationBox.getChildren().addAll(simLbl,_simulationsView);
 		simulationBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
-		HBox.setHgrow(_cmbSimulation,  Priority.ALWAYS);
+		VBox.setVgrow(_simulationsView,  Priority.ALWAYS);
 		
 		// The ok/cancel buttons
 		HBox buttonsBox = new HBox();
@@ -254,8 +258,7 @@ public class SimulationWizard extends TilePane {
 		btnOk.setOnAction(new EventHandler<ActionEvent>() {	
 			@Override
 			public void handle(ActionEvent arg0) {
-				updateSimulation(simulation);
-				_selection.setValue(simulation);
+				updateSimulation();
 				dialog.hide();
 			};
 		});
@@ -263,14 +266,14 @@ public class SimulationWizard extends TilePane {
 		buttonsBox.getChildren().addAll(btnCancel,btnOk);	
 		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
 		
-		btnOk.disableProperty().bind(_cmbSimulation.getSelectionModel().selectedItemProperty().isNull());
+		btnOk.disableProperty().bind(_simulationsView.getSelectionModel().selectedItemProperty().isNull());
 	
 		
 		// Create the scene
 		VBox wizardVbox = new VBox();
 		wizardVbox.setSpacing(5);
 		wizardVbox.setPadding(new Insets(5));
-		wizardVbox.setPrefHeight(250);
+		wizardVbox.setPrefHeight(300);
 		wizardVbox.setId("datatable-wizard");
 		Scene scene = new Scene(wizardVbox);
 		wizardVbox.getChildren().addAll(connectionBox,simulationBox,buttonsBox);
@@ -300,10 +303,9 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	private void selectConnection(CyclistDatasource ds) {
-		
-		_cmbSimulation.getItems().clear();
-		if(_cmbSimulation.isDisabled()){
-			_cmbSimulation.setDisable(false);
+		_simulationsView.getItems().clear();
+		if(_simulationsView.isDisabled()){
+			_simulationsView.setDisable(false);
 		}
 		
 		try (Connection conn = ds.getConnection()) {
@@ -312,9 +314,8 @@ public class SimulationWizard extends TilePane {
 			ResultSet rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 			while (rs.next()) {
 				 String simulationId = rs.getString("SimID");
-				 _cmbSimulation.getItems().add(simulationId);
+				 _simulationsView.getItems().add(simulationId);
 			}
-			_cmbSimulation.getSelectionModel().selectFirst();
 			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimID doesn't exist");
@@ -324,10 +325,14 @@ public class SimulationWizard extends TilePane {
 		}
 	}
 	
-	private void updateSimulation(Simulation simulation) {
-		_simulationId = (String)_cmbSimulation.getSelectionModel().getSelectedItem();
-		simulation.setSimulationId(_simulationId);
-		simulation.setDataSource(_current);
+	private void updateSimulation() {
+		_simulationsIds = (List<String>)_simulationsView.getSelectionModel().getSelectedItems();
+		_selection.clear();
+		for(String simId:_simulationsIds){
+			Simulation simulation = new Simulation(simId);
+			simulation.setDataSource(_current);
+			_selection.add(simulation);
+		}
 	}
 
 	public CyclistDatasource getSelectedSource() {

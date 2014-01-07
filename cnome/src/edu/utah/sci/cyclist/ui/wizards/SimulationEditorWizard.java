@@ -63,16 +63,16 @@ public class SimulationEditorWizard extends VBox {
 			hbox.setPadding(new Insets(5));
 			hbox.setMinWidth(200);
 			
-			Button ok = new Button("Ok");
+			Button delete = new Button("Delete");
 			Button cancel = new Button("Cancel");
-			hbox.getChildren().addAll(ok,cancel);
+			hbox.getChildren().addAll(delete,cancel);
 			cancel.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent arg0) {
 					_dialog.hide();
 				};
 			});
-			ok.setOnAction(new EventHandler<ActionEvent>() {
+			delete.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent arg0) {
 					_selection.set(new Simulation("delete"));

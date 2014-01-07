@@ -38,6 +38,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
+import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
@@ -213,15 +215,20 @@ public class CyclistController {
 				wizard.setSelectedSource(_model.getSelectedDatasource());
 				String currDirectory = getLastChosenWorkDirectory();
 				wizard.setWorkDir(currDirectory);
-				ObjectProperty<Simulation> selection = wizard.show(_screen.getWindow());
+				ObservableList<Simulation> selection = wizard.show(_screen.getWindow());
 				
-				selection.addListener(new ChangeListener<Simulation>() {
+				
+				selection.addListener(new ListChangeListener<Simulation>() {
 					@Override
-					public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal, Simulation newVal) {
-						if(newVal != null)
+					public void onChanged(ListChangeListener.Change<? extends Simulation> newList) {
+						if(newList != null)
 						{
-							Simulation sim = new Simulation(newVal);
-							_model.getSimulationIds().add(sim);	
+							for(Simulation simulation:newList.getList()){
+								if(!_model.simExists(simulation)){
+									Simulation sim = new Simulation(simulation);
+									_model.getSimulationIds().add(sim);
+								}
+							}
 							_model.setSelectedDatasource(wizard.getSelectedSource());
 						}
 					}

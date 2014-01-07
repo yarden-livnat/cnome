@@ -62,5 +62,20 @@ public class Model {
 	public ObservableList<Simulation> getSimulationIds() {
 		return _simulationIds;
 	}
+	/**
+	 * Checkes if a given simulation already exists in the list.
+	 * @param simId - the simulation id to check
+	 * @return true - if simulation id already exists, false - if not.
+	 */
+	public Boolean simExists(Simulation simulation){
+		Boolean response = false;
+		for(Simulation sim: _simulationIds){
+			if(sim.getSimulationId().equals(simulation.getSimulationId())){
+				response = true;
+				break;
+			}
+		}
+		return response;
+	}
 	
 }
