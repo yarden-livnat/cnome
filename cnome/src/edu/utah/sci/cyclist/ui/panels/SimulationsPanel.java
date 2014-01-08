@@ -56,6 +56,7 @@ public class SimulationsPanel extends TitledPanel  {
 	private ObservableList<Simulation> _items;
 	private ObjectProperty<Simulation> _simulationProperty = new SimpleObjectProperty<>();
 	private Entry _selected = null;
+	private ObjectProperty<Boolean> _editSimulationProperty = new SimpleObjectProperty<>();
 	private InvalidationListener _listener = new InvalidationListener() {
 		
 		@Override
@@ -88,6 +89,19 @@ public class SimulationsPanel extends TitledPanel  {
 		
 		resetContent();
 	}
+	
+	public ObjectProperty<Boolean> editSimulationProperty() {
+        return _editSimulationProperty;
+}
+
+	public Boolean getEditSimulation() {
+	        return _editSimulationProperty.get();
+	}
+	
+	public void setEditSimulation(Boolean value) {
+		 _editSimulationProperty.set(value);
+	}
+
 	
 	private void resetContent() {
 		VBox vbox = (VBox) getContent();
@@ -137,7 +151,8 @@ public class SimulationsPanel extends TitledPanel  {
 						@Override
 						public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
 							if(newVal.getSimulationId().equals("delete"))
-								removeSimulation(entry);	
+								removeSimulation(entry);
+								setEditSimulation(true);
 						}	
 					});
 				}

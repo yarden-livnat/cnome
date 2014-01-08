@@ -38,8 +38,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
-import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
+import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
@@ -55,6 +54,7 @@ import edu.utah.sci.cyclist.ui.MainScreen;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.ui.wizards.SimulationWizard;
 
 
@@ -66,6 +66,7 @@ public class CyclistController {
 	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
+	private Boolean _dirtyFlag = false;
 	
 	/**
 	 * Constructor
@@ -174,7 +175,7 @@ public class CyclistController {
 			}
 		});
 		
-	}	
+	}
 		
 	private void addActions() {
 		
@@ -199,6 +200,7 @@ public class CyclistController {
 							Table tbl = new Table(newVal);
 							_model.getTables().add(tbl);
 							_model.setSelectedDatasource(wizard.getSelectedSource());
+							_dirtyFlag = true;
 						}
 					}
 				});
@@ -227,6 +229,7 @@ public class CyclistController {
 								if(!_model.simExists(simulation)){
 									Simulation sim = new Simulation(simulation);
 									_model.getSimulationIds().add(sim);
+									_dirtyFlag = true;
 								}
 							}
 							_model.setSelectedDatasource(wizard.getSelectedSource());
@@ -261,11 +264,55 @@ public class CyclistController {
 				quit();
 			}
 		});
+		
+		_screen.editDataSourceProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+				if(newVal){
+					_dirtyFlag = true;
+					_screen.editDataSourceProperty().setValue(false);
+				}
+			}
+		});
+		
+		_screen.editSimulationProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+				if(newVal){
+					_dirtyFlag = true;
+					_screen.editSimulationProperty().setValue(false);
+				}
+			}
+		});
+		
+		_screen.onSystemClose().set(new EventHandler<WindowEvent>() {
+
+			@Override
+			public void handle(WindowEvent event) {
+				event.consume();
+				quit();
+			}
+		});
+		
 	}
 	
 	private void quit() {
 		// TODO: check is we need to save  
-		System.exit(0);
+		if(_dirtyFlag){
+			SaveWsWizard wizard = new SaveWsWizard();
+			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
+			selection.addListener(new ChangeListener<Boolean>(){
+				@Override
+				public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+					if(newVal){
+						save();
+					}
+					System.exit(0);
+				}
+			});
+		}else{
+			System.exit(0);
+		}
 	}
 	
 	private void save() {
@@ -300,6 +347,7 @@ public class CyclistController {
 		
 		try {
 			memento.save(new PrintWriter(saveFile));
+			_dirtyFlag = false;
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -355,6 +403,7 @@ public class CyclistController {
 						sim.restore(simulation,_model.getSources());
 						_model.getSimulationIds().add(sim);
 					}
+					_dirtyFlag = false;
 					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

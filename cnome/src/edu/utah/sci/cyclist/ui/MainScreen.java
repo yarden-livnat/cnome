@@ -40,6 +40,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.ui.panels.FiltersListPanel;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
@@ -62,6 +63,7 @@ public class MainScreen extends VBox {
 //	private FiltersListPanel _filtersPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
+	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
 		
 	/**
 	 */
@@ -159,6 +161,8 @@ public class MainScreen extends VBox {
 		VBox.setVgrow(_sp, Priority.ALWAYS);
 		
 		SplitPane.setResizableWithParent(_toolsPane, false);
+		
+		_stageCloseProperty = stage.onCloseRequestProperty();
 	}
 	
 	/*
@@ -190,6 +194,19 @@ public class MainScreen extends VBox {
 	public ObjectProperty<EventHandler<ActionEvent>> onQuit() {
 		return _quitMenuItem.onActionProperty();
 	}
+	
+	public ObjectProperty<Boolean> editDataSourceProperty() {
+		return _datasourcesPanel.editTableProperty();
+	}
+	
+	public ObjectProperty<Boolean> editSimulationProperty() {
+		return _simulationPanel.editSimulationProperty();
+	}
+	
+	public ObjectProperty<EventHandler<WindowEvent>> onSystemClose(){
+		return _stageCloseProperty;
+	}
+	
 	
 	private MenuBar createMenuBar(Stage stage) {
 		MenuBar menubar = new MenuBar();

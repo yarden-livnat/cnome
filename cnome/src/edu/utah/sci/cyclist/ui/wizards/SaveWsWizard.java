@@ -16,20 +16,19 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.model.Simulation;
 
-public class SimulationEditorWizard extends VBox {
+public class SaveWsWizard extends VBox {
 	
 	// GUI elements
 	private Stage                 _dialog;
-	private ObjectProperty<Simulation> _selection = new SimpleObjectProperty<>();
+	private ObjectProperty<Boolean> _selection = new SimpleObjectProperty<>();
 	// * * * Constructor creates a new stage * * * //
-	public SimulationEditorWizard(Simulation simulation) {	
-		createDialog(simulation);
+	public SaveWsWizard() {	
+		createDialog();
 	}
 
 	// * * * Show the dialog * * * //
-	public ObjectProperty<Simulation> show(Window window) {
+	public ObjectProperty<Boolean> show(Window window) {
 		_dialog.initOwner	(window);
 		_dialog.show();
 		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
@@ -38,46 +37,60 @@ public class SimulationEditorWizard extends VBox {
 	}
 		
 	// * * * Create the dialog
-	private void createDialog(Simulation simulation){	
+	private void createDialog(){	
 
 		_dialog = new Stage();
-		_dialog.setTitle("Delete Simulation");
+		_dialog.setTitle("Save WorkSpace");
 		_dialog.setHeight(100);
 		
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
-		_dialog.setScene( createScene(_dialog, simulation) );
+		_dialog.setScene( createScene(_dialog) );
 	}
 
 		// * * * Create scene creates the GUI * * * //
-		private Scene createScene(final Stage dialog, final Simulation simulation) {
+		private Scene createScene(final Stage dialog) {
 
 			VBox vbox = new VBox();
-			vbox.setSpacing(5);
+			vbox.setSpacing(10);
 			vbox.setAlignment(Pos.CENTER);
-			vbox.setMinWidth(350);
 			
-			Text text = new Text("Delete Simulation:  " + simulation.getSimulationId());
+			Text text = new Text("WorkSpace has been modified. Save changed? ");  
 			text.setFont(new Font(12));
 			
 			HBox hbox = new HBox();
-			hbox.setAlignment(Pos.CENTER);
+			hbox.setAlignment(Pos.BOTTOM_CENTER);
 			hbox.setSpacing(10);
 			hbox.setPadding(new Insets(5));
+			hbox.setMinWidth(300);
 			
-			Button delete = new Button("Delete");
+			Button yes = new Button("Yes");
+			yes.setMinWidth(50);
+			yes.setAlignment(Pos.CENTER);
+			Button no = new Button("No");
+			no.setMinWidth(50);
+			no.setAlignment(Pos.CENTER);
 			Button cancel = new Button("Cancel");
-			hbox.getChildren().addAll(delete,cancel);
+			cancel.setMinWidth(50);
+			cancel.setAlignment(Pos.CENTER);
+			hbox.getChildren().addAll(yes,no,cancel);
 			cancel.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent arg0) {
 					_dialog.hide();
 				};
 			});
-			delete.setOnAction(new EventHandler<ActionEvent>() {
+			yes.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent arg0) {
-					_selection.set(new Simulation("delete"));
+					_selection.set(true);
+					_dialog.hide();
+				};
+			});
+			no.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent arg0) {
+					_selection.set(false);
 					_dialog.hide();
 				};
 			});

@@ -61,6 +61,7 @@ public class TablesPanel extends TitledPanel  {
 	private ObservableList<Table> _items;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	private Entry _selected = null;
+	private ObjectProperty<Boolean> _editTableProperty = new SimpleObjectProperty<>();
 	private InvalidationListener _listener = new InvalidationListener() {
 		
 		@Override
@@ -100,6 +101,18 @@ public class TablesPanel extends TitledPanel  {
 				break;
 			}
 		}
+	}
+	
+	public ObjectProperty<Boolean> editTableProperty() {
+	         return _editTableProperty;
+	}
+	 
+	public Boolean getEditTable() {
+	         return _editTableProperty.get();
+	}
+	 
+	public void setEditTable(Boolean value) {
+		 _editTableProperty.set(value);
 	}
 	
 	private void resetContent() {
@@ -193,7 +206,8 @@ public class TablesPanel extends TitledPanel  {
 				else{
 					entry.table = newVal;
 					entry.title.setText(entry.table.getAlias());
-				}		
+				}
+					setEditTable(true);
 			}	
 		});
 	}	
