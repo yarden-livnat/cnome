@@ -67,7 +67,6 @@ public class Workspace extends ViewBase implements View {
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
 	private Closure.V4<TableTool, Table, Double, Double> _onShowTable = null;
-//	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
 		_onToolDrop = action;
@@ -190,9 +189,7 @@ public class Workspace extends ViewBase implements View {
 						if (_onToolDrop != null) {
 							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
 							_onToolDrop.call(tool, p.getX(), p.getY());
-//							_toolsList.add(new ToolData(tool,p.getX(),p.getY(),
-//														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight()));
-							if(getOnToolDrop() != null){
+						if(getOnToolDrop() != null){
 								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP, tool, null, p.getX(),p.getY()));
 							}
 						}
@@ -202,10 +199,7 @@ public class Workspace extends ViewBase implements View {
 						TableTool tool = new TableTool();
 						if (_onShowTable != null) {
 							_onShowTable.call(tool, table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
-//							_toolsList.add(new ToolData(tool,event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY(),
-//														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight(),
-//														table));
-							if(getOnToolDrop() != null){
+						if(getOnToolDrop() != null){
 								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, 
 																			event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY()));
 							}
