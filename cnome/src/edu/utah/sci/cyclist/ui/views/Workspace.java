@@ -341,6 +341,20 @@ public class Workspace extends ViewBase implements View {
 		return _toolsList;
 	}
 	
+	/**
+	 * Gets a restored tool data and displays its view in the workspace.
+	 * @param: ToolData.
+	 */
+	public void showLoadedTool(ToolData toolData, Table table){
+		if(toolData.getTool().getClass().equals(TableTool.class) && toolData.getTableName() != null && table != null){
+			_onShowTable.call((TableTool)toolData.getTool(), table, toolData.getPoint().getX(), toolData.getPoint().getY());
+		}else{
+			_onToolDrop.call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
+		}
+		((Region)toolData.getTool().getView()).setPrefSize(toolData.getWidth(), toolData.getHeight());
+		_toolsList.add(toolData);
+	}
+	
 	private ViewPos _viewPos = new ViewPos();
 }
 

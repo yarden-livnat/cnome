@@ -419,7 +419,11 @@ public class CyclistController {
 					for(IMemento tool:tools){
 						ToolData toolData = new ToolData();
 						toolData.restore(tool);
-						showTool(toolData);
+						Table table = null;
+						if(toolData.getTool().getClass().equals(TableTool.class)){
+							table = findTable(toolData.getTableName(), toolData.getTableDatasource());
+						}
+						_screen.getWorkSpace().showLoadedTool(toolData, table);
 					}
 					
 					
@@ -442,34 +446,16 @@ public class CyclistController {
 	 * @return: Table. The table instance if found, null otherwise.
 	 */
 	private Table findTable(String tableName, String dataSource){
-		for(Table tbl:_model.getTables()){
-			if(tbl.getName().equals(tableName) && tbl.getDataSource().getUID().equals(dataSource)){
-				return tbl;
+		if(tableName != null && dataSource != null)
+		{
+			for(Table tbl:_model.getTables()){
+				if(tbl.getName().equals(tableName) && tbl.getDataSource().getUID().equals(dataSource)){
+					return tbl;
+				}
 			}
 		}
 		return null;
 	}
-	
-	/*
-	 * Gets a restored tool data and displays its view in the workspace.
-	 * @param: ToolData.
-	 */
-	private void showTool(ToolData toolData){
-		if(toolData.getTool().getClass().equals(TableTool.class) && toolData.getTableName() != null){
-			Table table = findTable(toolData.getTableName(), toolData.getTableDatasource());
-			if(table != null){
-				_screen.getWorkSpace().getOnShowTable().call((TableTool)toolData.getTool(), table, toolData.getPoint().getX(), toolData.getPoint().getY());
-			}else{
-				_screen.getWorkSpace().getOnToolDropAction().call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
-			}
-		}else{
-			_screen.getWorkSpace().getOnToolDropAction().call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
-		}
-		((Region)toolData.getTool().getView()).setPrefSize(toolData.getWidth(), toolData.getHeight());
-		_screen.getWorkSpace().getTools().add(toolData);
-	}
-	
-	
 	
 	/*
 	 * Gets the path of the last chosen work directory.
