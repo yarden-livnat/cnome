@@ -41,6 +41,7 @@ import javafx.event.EventHandler;
 import javafx.scene.layout.Region;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
@@ -53,7 +54,9 @@ import edu.utah.sci.cyclist.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.ui.MainScreen;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.ui.tools.TableTool;
+import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
@@ -135,6 +138,7 @@ public class CyclistController {
 		
 		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
 		presenter.setView(workspace);
+		setWorkspaceDragAndDropAction();
 		
 		// do something?
 		//selectWorkspace();
@@ -297,7 +301,6 @@ public class CyclistController {
 				quit();
 			}
 		});
-		
 	}
 	
 	private void quit() {
@@ -349,7 +352,7 @@ public class CyclistController {
 			simulation.save(memento.createChild("Simulation"));
 		}
 		
-		for(ToolData tool : _screen.getWorkSpace().getTools()){
+		for(ToolData tool : _model.getTools()){
 				tool.save(memento.createChild("Tool"));
 		}
 			
@@ -424,6 +427,7 @@ public class CyclistController {
 							table = findTable(toolData.getTableName(), toolData.getTableDatasource());
 						}
 						_screen.getWorkSpace().showLoadedTool(toolData, table);
+						_model.getTools().add(toolData);
 					}
 					
 					
@@ -467,4 +471,39 @@ public class CyclistController {
 		}
 		return _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
 	}
+	
+	private void setWorkspaceDragAndDropAction(){
+		
+		_screen.getWorkSpace().setOnToolDrop(new EventHandler<CyclistDropEvent>() {
+            
+	        @Override
+	        public void handle(CyclistDropEvent event) {
+	                if(event.getEventType() == CyclistDropEvent.DROP){
+	                	Tool tool = event.getTool();
+	                	ToolData toolData = new ToolData(tool, event.getX(), event.getY(), 
+	                									((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight());
+	                	_model.getTools().add(toolData);
+	                        
+	                }else if(event.getEventType() == CyclistDropEvent.DROP_DATASOURCE){
+	                	Tool tool = event.getTool();
+	                	ToolData toolData = new ToolData(tool, event.getX(), event.getY(), 
+								((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight(),
+								event.getTable());
+	                	_model.getTools().add(toolData);
+	                }else if(event.getEventType() == CyclistDropEvent.REMOVE){
+	                	removeTool(event.getView());
+	                }
+	        }
+      });
+	}
+	
+	private void removeTool(ViewBase view){
+		for(ToolData tool : _model.getTools()){
+			if(tool.getTool().getView() == view){
+				 _model.getTools().remove(tool);
+				 break;
+			}
+		}
+	}
+	
 }

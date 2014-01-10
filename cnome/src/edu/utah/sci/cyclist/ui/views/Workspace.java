@@ -28,8 +28,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -69,22 +67,14 @@ public class Workspace extends ViewBase implements View {
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
 	private Closure.V4<TableTool, Table, Double, Double> _onShowTable = null;
-	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
+//	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
 		_onToolDrop = action;
 	}
 	
-	public Closure.V3<Tool, Double, Double> getOnToolDropAction() {
-		return _onToolDrop;
-	}
-	
 	public void setOnShowTable(Closure.V4<TableTool, Table, Double, Double> action) {
 		_onShowTable = action;
-	}
-	
-	public Closure.V4<TableTool, Table, Double, Double> getOnShowTable(){
-		return _onShowTable;
 	}
 	
 	// -- Properties
@@ -103,7 +93,6 @@ public class Workspace extends ViewBase implements View {
 	public final EventHandler<CyclistDropEvent> getOnToolDrop() {
 		return _propertyOnToolDrop.get();
 	}
-	
 	
 	/**
 	 * Constructor
@@ -201,8 +190,11 @@ public class Workspace extends ViewBase implements View {
 						if (_onToolDrop != null) {
 							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
 							_onToolDrop.call(tool, p.getX(), p.getY());
-							_toolsList.add(new ToolData(tool,p.getX(),p.getY(),
-														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight()));
+//							_toolsList.add(new ToolData(tool,p.getX(),p.getY(),
+//														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight()));
+							if(getOnToolDrop() != null){
+								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP, tool, null, p.getX(),p.getY()));
+							}
 						}
 						status = true;
 					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
@@ -210,9 +202,13 @@ public class Workspace extends ViewBase implements View {
 						TableTool tool = new TableTool();
 						if (_onShowTable != null) {
 							_onShowTable.call(tool, table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
-							_toolsList.add(new ToolData(tool,event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY(),
-														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight(),
-														table));
+//							_toolsList.add(new ToolData(tool,event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY(),
+//														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight(),
+//														table));
+							if(getOnToolDrop() != null){
+								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, 
+																			event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY()));
+							}
 						}
 						status = true;
 					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
@@ -244,15 +240,6 @@ public class Workspace extends ViewBase implements View {
 			
 		}
 	};
-	
-	private void removeTool(ViewBase view){
-		for(ToolData tool : _toolsList){
-			if(tool.getTool().getView() == view){
-				_toolsList.remove(tool);
-				break;
-			}
-		}
-	}
 	
 	@Override
 	public void setTitle(String title) {
@@ -321,7 +308,9 @@ public class Workspace extends ViewBase implements View {
 	public void removeView(ViewBase view) {
 		view.setOnSelect(null);
 		_pane.getChildren().remove(view);
-		removeTool(view);
+		if(getOnToolDrop() != null){
+			getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.REMOVE, view));
+		}
 	}
 	
 	
@@ -337,10 +326,6 @@ public class Workspace extends ViewBase implements View {
 		_filtersPane.remove(panel);
 	}
 	
-	public ObservableList<ToolData> getTools(){
-		return _toolsList;
-	}
-	
 	/**
 	 * Gets a restored tool data and displays its view in the workspace.
 	 * @param: ToolData.
@@ -352,7 +337,6 @@ public class Workspace extends ViewBase implements View {
 			_onToolDrop.call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
 		}
 		((Region)toolData.getTool().getView()).setPrefSize(toolData.getWidth(), toolData.getHeight());
-		_toolsList.add(toolData);
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

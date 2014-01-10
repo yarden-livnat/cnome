@@ -23,6 +23,8 @@
 package edu.utah.sci.cyclist.event.ui;
 
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.tools.Tool;
 import javafx.event.Event;
 import javafx.event.EventType;
 
@@ -31,17 +33,28 @@ public class CyclistDropEvent extends CyclistEvent {
 	
 	public static final EventType<CyclistDropEvent> DROP = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DROP");
 	public static final EventType<CyclistDropEvent> DROP_DATASOURCE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DROP_DATASOURCE");
+	public static final EventType<CyclistDropEvent> REMOVE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "REMOVE");
 	
 	private Table _table;
 	private double _x;
 	private double _y;
+	private Tool _tool;
+	private ViewBase _view;
 	
-	public CyclistDropEvent(EventType<? extends Event> eventType, Table table, double x, double y) {
+	public CyclistDropEvent(EventType<? extends Event> eventType, Tool tool, Table table, double x, double y) {
 		super(eventType);
+		_tool = tool;
 		_table = table;
 		_x = x;
 		_y = y;
+		_view = (ViewBase)_tool.getView();
 	}
+	
+	public CyclistDropEvent(EventType<? extends Event> eventType, ViewBase view) {
+		super(eventType);
+		_view = view;
+	}
+	
 	
 	public Table getTable() {
 		return _table;
@@ -53,6 +66,14 @@ public class CyclistDropEvent extends CyclistEvent {
 	
 	public double getY() {
 		return _y;
+	}
+	
+	public Tool getTool(){
+		return _tool;
+	}
+	
+	public ViewBase getView(){
+		return _view;
 	}
 	
 }
