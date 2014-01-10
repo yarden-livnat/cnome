@@ -58,6 +58,7 @@ import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
+import edu.utah.sci.cyclist.ui.tools.WorkspaceTool;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.ui.wizards.SaveWsWizard;
@@ -73,6 +74,7 @@ public class CyclistController {
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
+	private EventHandler<CyclistDropEvent> handleToolDropped;
 	
 	/**
 	 * Constructor
@@ -139,6 +141,7 @@ public class CyclistController {
 		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
 		presenter.setView(workspace);
 		setWorkspaceDragAndDropAction();
+		_screen.getWorkSpace().setOnToolDrop(handleToolDropped);
 		
 		// do something?
 		//selectWorkspace();
@@ -474,8 +477,8 @@ public class CyclistController {
 	
 	private void setWorkspaceDragAndDropAction(){
 		
-		_screen.getWorkSpace().setOnToolDrop(new EventHandler<CyclistDropEvent>() {
-            
+		 handleToolDropped = new EventHandler<CyclistDropEvent>() {
+	        
 	        @Override
 	        public void handle(CyclistDropEvent event) {
 	                if(event.getEventType() == CyclistDropEvent.DROP){
@@ -483,6 +486,9 @@ public class CyclistController {
 	                	ToolData toolData = new ToolData(tool, event.getX(), event.getY(), 
 	                									((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight());
 	                	_model.getTools().add(toolData);
+	                	if(tool.getClass().equals(WorkspaceTool.class)){
+	                	   ((Workspace)tool.getView()).setOnToolDrop(handleToolDropped);
+	                	}
 	                        
 	                }else if(event.getEventType() == CyclistDropEvent.DROP_DATASOURCE){
 	                	Tool tool = event.getTool();
@@ -494,7 +500,7 @@ public class CyclistController {
 	                	removeTool(event.getView());
 	                }
 	        }
-      });
+	  };
 	}
 	
 	private void removeTool(ViewBase view){
