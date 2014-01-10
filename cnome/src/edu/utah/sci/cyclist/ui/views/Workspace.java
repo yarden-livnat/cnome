@@ -28,20 +28,19 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.TilePane;
+import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 
 import org.mo.closure.v1.Closure;
@@ -49,10 +48,12 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.ToolData;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.ui.panels.TitledPanel;
+import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 
 public class Workspace extends ViewBase implements View {
@@ -67,14 +68,23 @@ public class Workspace extends ViewBase implements View {
 	private ViewBase _maximizedView = null;
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
-	private Closure.V3<Table, Double, Double> _onShowTable = null;
+	private Closure.V4<TableTool, Table, Double, Double> _onShowTable = null;
+	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
 		_onToolDrop = action;
 	}
 	
-	public void setOnShowTable(Closure.V3<Table, Double, Double> action) {
+	public Closure.V3<Tool, Double, Double> getOnToolDropAction() {
+		return _onToolDrop;
+	}
+	
+	public void setOnShowTable(Closure.V4<TableTool, Table, Double, Double> action) {
 		_onShowTable = action;
+	}
+	
+	public Closure.V4<TableTool, Table, Double, Double> getOnShowTable(){
+		return _onShowTable;
 	}
 	
 	// -- Properties
@@ -190,13 +200,19 @@ public class Workspace extends ViewBase implements View {
 						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
 						if (_onToolDrop != null) {
 							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
-							_onToolDrop.call(tool, p.getX(), p.getY()); 
+							_onToolDrop.call(tool, p.getX(), p.getY());
+							_toolsList.add(new ToolData(tool,p.getX(),p.getY(),
+														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight()));
 						}
 						status = true;
 					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
 						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
+						TableTool tool = new TableTool();
 						if (_onShowTable != null) {
-							_onShowTable.call(table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
+							_onShowTable.call(tool, table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
+							_toolsList.add(new ToolData(tool,event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY(),
+														((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight(),
+														table));
 						}
 						status = true;
 					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
@@ -228,6 +244,15 @@ public class Workspace extends ViewBase implements View {
 			
 		}
 	};
+	
+	private void removeTool(ViewBase view){
+		for(ToolData tool : _toolsList){
+			if(tool.getTool().getView() == view){
+				_toolsList.remove(tool);
+				break;
+			}
+		}
+	}
 	
 	@Override
 	public void setTitle(String title) {
@@ -296,6 +321,7 @@ public class Workspace extends ViewBase implements View {
 	public void removeView(ViewBase view) {
 		view.setOnSelect(null);
 		_pane.getChildren().remove(view);
+		removeTool(view);
 	}
 	
 	
@@ -309,6 +335,10 @@ public class Workspace extends ViewBase implements View {
 	
 	public void removePanel(TitledPanel panel) {
 		_filtersPane.remove(panel);
+	}
+	
+	public ObservableList<ToolData> getTools(){
+		return _toolsList;
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

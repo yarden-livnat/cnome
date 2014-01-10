@@ -38,6 +38,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.layout.Region;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
@@ -45,12 +46,14 @@ import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
 import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.ToolData;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.ui.MainScreen;
+import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
@@ -89,7 +92,7 @@ public class CyclistController {
 			_workDirectoryController.restoreGeneralConfigFile();
 		}
 		
-		load();
+//		load();
 	}
 
 	/**
@@ -135,6 +138,7 @@ public class CyclistController {
 		
 		// do something?
 		//selectWorkspace();
+		load();
 	}
 	
 	/**
@@ -345,6 +349,11 @@ public class CyclistController {
 			simulation.save(memento.createChild("Simulation"));
 		}
 		
+		for(ToolData tool : _screen.getWorkSpace().getTools()){
+				tool.save(memento.createChild("Tool"));
+		}
+			
+		
 		try {
 			memento.save(new PrintWriter(saveFile));
 			_dirtyFlag = false;
@@ -405,6 +414,15 @@ public class CyclistController {
 					}
 					_dirtyFlag = false;
 					
+					//Read the main workspace
+					IMemento[] tools = memento.getChildren("Tool");
+					for(IMemento tool:tools){
+						ToolData toolData = new ToolData();
+						toolData.restore(tool);
+						showTool(toolData);
+					}
+					
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -415,6 +433,43 @@ public class CyclistController {
 			} 		
 		}
 	}
+	
+	
+	/*
+	 * Finds a table in the Model tables list according to it's name and data source.
+	 * @param : tableName
+	 * @param:  datasource
+	 * @return: Table. The table instance if found, null otherwise.
+	 */
+	private Table findTable(String tableName, String dataSource){
+		for(Table tbl:_model.getTables()){
+			if(tbl.getName().equals(tableName) && tbl.getDataSource().getUID().equals(dataSource)){
+				return tbl;
+			}
+		}
+		return null;
+	}
+	
+	/*
+	 * Gets a restored tool data and displays its view in the workspace.
+	 * @param: ToolData.
+	 */
+	private void showTool(ToolData toolData){
+		if(toolData.getTool().getClass().equals(TableTool.class) && toolData.getTableName() != null){
+			Table table = findTable(toolData.getTableName(), toolData.getTableDatasource());
+			if(table != null){
+				_screen.getWorkSpace().getOnShowTable().call((TableTool)toolData.getTool(), table, toolData.getPoint().getX(), toolData.getPoint().getY());
+			}else{
+				_screen.getWorkSpace().getOnToolDropAction().call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
+			}
+		}else{
+			_screen.getWorkSpace().getOnToolDropAction().call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
+		}
+		((Region)toolData.getTool().getView()).setPrefSize(toolData.getWidth(), toolData.getHeight());
+		_screen.getWorkSpace().getTools().add(toolData);
+	}
+	
+	
 	
 	/*
 	 * Gets the path of the last chosen work directory.
