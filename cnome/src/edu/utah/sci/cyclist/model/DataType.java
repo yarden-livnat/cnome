@@ -1,5 +1,8 @@
 package edu.utah.sci.cyclist.model;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 public class DataType {
 
 	public static enum Role {
@@ -33,6 +36,7 @@ public class DataType {
 	private Classification _classification;
 	private StructureType  _structureType;
 	private FieldStructure _structure;
+	private ObjectProperty<Boolean> _forceNumericFilterProperty = new SimpleObjectProperty<>();
 	
 	public DataType(Type type) {
 		_type = type;
@@ -53,6 +57,8 @@ public class DataType {
 			break;
 		}
 		
+		_forceNumericFilterProperty.set(false);
+		
 		update();
 	}
 	
@@ -61,6 +67,7 @@ public class DataType {
 		_type = type;
 		_interp = interp;
 		_classification = classification;
+		_forceNumericFilterProperty.set(false);
 	}
 	
 	public DataType(DataType copy) {
@@ -68,6 +75,7 @@ public class DataType {
 		_type = copy._type;
 		_interp = copy._interp;
 		_classification = copy._classification;
+		_forceNumericFilterProperty = copy._forceNumericFilterProperty;
 	}
 	
 	/**
@@ -158,6 +166,18 @@ public class DataType {
 	public FieldStructure getStructure() {
 		return _structure;
 	}
+	
+	public ObjectProperty<Boolean> forceNumericFilterProperty() {
+        return _forceNumericFilterProperty;
+    }
+
+    public Boolean getForceNumericFilter() {
+        return _forceNumericFilterProperty.get();
+    }
+
+    public void setForceNumericFilter(Boolean value) {
+    	_forceNumericFilterProperty.set(value);
+    }
 	
 	private void update() {
 		if (_interp == Interpretation.DISCRETE) {

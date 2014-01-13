@@ -30,6 +30,8 @@ public class Model {
 	private ObservableList<Table> _tables = FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	private CyclistDatasource _currentSource;
+	private ObservableList<Simulation> _simulationIds = FXCollections.observableArrayList();
+	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
 	
 	/**
 	 * getTables
@@ -58,4 +60,29 @@ public class Model {
 	public void setSelectedDatasource(CyclistDatasource source){
 		_currentSource = source;
 	}
+
+	public ObservableList<Simulation> getSimulationIds() {
+		return _simulationIds;
+	}
+	
+	public ObservableList<ToolData> getTools() {
+		return _toolsList;
+	}
+	
+	/**
+	 * Checkes if a given simulation already exists in the list.
+	 * @param simId - the simulation id to check
+	 * @return true - if simulation id already exists, false - if not.
+	 */
+	public Boolean simExists(Simulation simulation){
+		Boolean response = false;
+		for(Simulation sim: _simulationIds){
+			if(sim.getSimulationId().equals(simulation.getSimulationId())){
+				response = true;
+				break;
+			}
+		}
+		return response;
+	}
+	
 }

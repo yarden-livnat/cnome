@@ -38,19 +38,31 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.layout.Region;
+import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Model;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.ToolData;
 import edu.utah.sci.cyclist.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.presenter.SchemaPresenter;
+import edu.utah.sci.cyclist.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.ui.MainScreen;
+import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.tools.TableTool;
+import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.tools.ToolsLibrary;
+import edu.utah.sci.cyclist.ui.tools.WorkspaceTool;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 import edu.utah.sci.cyclist.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.ui.wizards.SaveWsWizard;
+import edu.utah.sci.cyclist.ui.wizards.SimulationWizard;
 
 
 public class CyclistController {
@@ -61,6 +73,8 @@ public class CyclistController {
 	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
+	private Boolean _dirtyFlag = false;
+	private EventHandler<CyclistDropEvent> handleToolDropped;
 	
 	/**
 	 * Constructor
@@ -83,7 +97,7 @@ public class CyclistController {
 			_workDirectoryController.restoreGeneralConfigFile();
 		}
 		
-		load();
+//		load();
 	}
 
 	/**
@@ -108,6 +122,12 @@ public class CyclistController {
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
 		sp.setPanels(screen.getDimensionPanel(), screen.getMeauresPanel());
 		
+		//Simulation panel
+		SimulationPresenter sip = new SimulationPresenter(_eventBus);
+		sip.setSimIds(_model.getSimulationIds());
+		sip.setSimPanel(screen.getSimulationPanel());
+		
+		
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);
 		tp.setPanel(screen.getToolsPanel());
@@ -120,9 +140,12 @@ public class CyclistController {
 		
 		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
 		presenter.setView(workspace);
+		setWorkspaceDragAndDropAction();
+		_screen.getWorkSpace().setOnToolDrop(handleToolDropped);
 		
 		// do something?
 		//selectWorkspace();
+		load();
 	}
 	
 	/**
@@ -163,7 +186,7 @@ public class CyclistController {
 			}
 		});
 		
-	}	
+	}
 		
 	private void addActions() {
 		
@@ -188,10 +211,42 @@ public class CyclistController {
 							Table tbl = new Table(newVal);
 							_model.getTables().add(tbl);
 							_model.setSelectedDatasource(wizard.getSelectedSource());
+							_dirtyFlag = true;
 						}
 					}
 				});
 				
+			}
+		});
+		
+		_screen.onAddSimulation().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				final SimulationWizard wizard = new SimulationWizard();
+				
+				wizard.setItems(_model.getSources());
+				wizard.setSelectedSource(_model.getSelectedDatasource());
+				String currDirectory = getLastChosenWorkDirectory();
+				wizard.setWorkDir(currDirectory);
+				ObservableList<Simulation> selection = wizard.show(_screen.getWindow());
+				
+				
+				selection.addListener(new ListChangeListener<Simulation>() {
+					@Override
+					public void onChanged(ListChangeListener.Change<? extends Simulation> newList) {
+						if(newList != null)
+						{
+							for(Simulation simulation:newList.getList()){
+								if(!_model.simExists(simulation)){
+									Simulation sim = new Simulation(simulation);
+									_model.getSimulationIds().add(sim);
+									_dirtyFlag = true;
+								}
+							}
+							_model.setSelectedDatasource(wizard.getSelectedSource());
+						}
+					}
+				});
 			}
 		});
 		
@@ -220,11 +275,54 @@ public class CyclistController {
 				quit();
 			}
 		});
+		
+		_screen.editDataSourceProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+				if(newVal){
+					_dirtyFlag = true;
+					_screen.editDataSourceProperty().setValue(false);
+				}
+			}
+		});
+		
+		_screen.editSimulationProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+				if(newVal){
+					_dirtyFlag = true;
+					_screen.editSimulationProperty().setValue(false);
+				}
+			}
+		});
+		
+		_screen.onSystemClose().set(new EventHandler<WindowEvent>() {
+
+			@Override
+			public void handle(WindowEvent event) {
+				event.consume();
+				quit();
+			}
+		});
 	}
 	
 	private void quit() {
 		// TODO: check is we need to save  
-		System.exit(0);
+		if(_dirtyFlag){
+			SaveWsWizard wizard = new SaveWsWizard();
+			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
+			selection.addListener(new ChangeListener<Boolean>(){
+				@Override
+				public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+					if(newVal){
+						save();
+					}
+					System.exit(0);
+				}
+			});
+		}else{
+			System.exit(0);
+		}
 	}
 	
 	private void save() {
@@ -252,8 +350,19 @@ public class CyclistController {
 			table.save(memento.createChild("Table"));
 		}
 		
+		//Save the Simulation
+		for(Simulation simulation: _model.getSimulationIds()){
+			simulation.save(memento.createChild("Simulation"));
+		}
+		
+		for(ToolData tool : _model.getTools()){
+				tool.save(memento.createChild("Tool"));
+		}
+			
+		
 		try {
 			memento.save(new PrintWriter(saveFile));
+			_dirtyFlag = false;
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -272,6 +381,7 @@ public class CyclistController {
 		//Clear the previous data
 		_model.getSources().clear();
 		_model.getTables().clear();
+		_model.getSimulationIds().clear();
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
@@ -301,6 +411,29 @@ public class CyclistController {
 						_model.getTables().add(tbl);
 					}
 					
+					//Read the simulations
+					IMemento[] simulations = memento.getChildren("Simulation");
+					for(IMemento simulation:simulations){
+						Simulation sim = new Simulation();
+						sim.restore(simulation,_model.getSources());
+						_model.getSimulationIds().add(sim);
+					}
+					_dirtyFlag = false;
+					
+					//Read the main workspace
+					IMemento[] tools = memento.getChildren("Tool");
+					for(IMemento tool:tools){
+						ToolData toolData = new ToolData();
+						toolData.restore(tool);
+						Table table = null;
+						if(toolData.getTool().getClass().equals(TableTool.class)){
+							table = findTable(toolData.getTableName(), toolData.getTableDatasource());
+						}
+						_screen.getWorkSpace().showLoadedTool(toolData, table);
+						_model.getTools().add(toolData);
+					}
+					
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -310,6 +443,25 @@ public class CyclistController {
 				e1.printStackTrace();
 			} 		
 		}
+	}
+	
+	
+	/*
+	 * Finds a table in the Model tables list according to it's name and data source.
+	 * @param : tableName
+	 * @param:  datasource
+	 * @return: Table. The table instance if found, null otherwise.
+	 */
+	private Table findTable(String tableName, String dataSource){
+		if(tableName != null && dataSource != null)
+		{
+			for(Table tbl:_model.getTables()){
+				if(tbl.getName().equals(tableName) && tbl.getDataSource().getUID().equals(dataSource)){
+					return tbl;
+				}
+			}
+		}
+		return null;
 	}
 	
 	/*
@@ -322,4 +474,42 @@ public class CyclistController {
 		}
 		return _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
 	}
+	
+	private void setWorkspaceDragAndDropAction(){
+		
+		 handleToolDropped = new EventHandler<CyclistDropEvent>() {
+	        
+	        @Override
+	        public void handle(CyclistDropEvent event) {
+	                if(event.getEventType() == CyclistDropEvent.DROP){
+	                	Tool tool = event.getTool();
+	                	ToolData toolData = new ToolData(tool, event.getX(), event.getY(), 
+	                									((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight());
+	                	_model.getTools().add(toolData);
+	                	if(tool.getClass().equals(WorkspaceTool.class)){
+	                	   ((Workspace)tool.getView()).setOnToolDrop(handleToolDropped);
+	                	}
+	                        
+	                }else if(event.getEventType() == CyclistDropEvent.DROP_DATASOURCE){
+	                	Tool tool = event.getTool();
+	                	ToolData toolData = new ToolData(tool, event.getX(), event.getY(), 
+								((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight(),
+								event.getTable());
+	                	_model.getTools().add(toolData);
+	                }else if(event.getEventType() == CyclistDropEvent.REMOVE){
+	                	removeTool(event.getView());
+	                }
+	        }
+	  };
+	}
+	
+	private void removeTool(ViewBase view){
+		for(ToolData tool : _model.getTools()){
+			if(tool.getTool().getView() == view){
+				 _model.getTools().remove(tool);
+				 break;
+			}
+		}
+	}
+	
 }

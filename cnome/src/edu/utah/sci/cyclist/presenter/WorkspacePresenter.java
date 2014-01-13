@@ -102,11 +102,11 @@ public class WorkspacePresenter extends ViewPresenter {
                                 }
                         });
                         
-                        workspace.setOnShowTable(new Closure.V3<Table, Double, Double>() {
+                        workspace.setOnShowTable(new Closure.V4<TableTool, Table, Double, Double>() {
 
                                 @Override
-                                public void call(Table table, Double x, Double y) {
-                                        TablePresenter presenter = (TablePresenter) addTool(new TableTool(), x, y);
+                                public void call(TableTool tool, Table table, Double x, Double y) {
+                                        TablePresenter presenter = (TablePresenter) addTool(tool, x, y);
                                         presenter.addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
                                 }
                         });

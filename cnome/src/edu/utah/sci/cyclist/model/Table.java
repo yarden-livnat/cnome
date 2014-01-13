@@ -800,7 +800,10 @@ public class Table {
 				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
 					updateMessage("querying");
 					System.out.println("querying field range");
-					SQL.Functions function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
+					SQL.Functions function = SQL.Functions.VALUE;
+					if(field.getString(FieldProperties.AGGREGATION_FUNC) != null){
+						function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
+					}
 					String query = "";
 					Boolean checkForSum = false;
 					double min,max=0;
@@ -809,6 +812,7 @@ public class Table {
 					case AVG:
 					case MIN:
 					case MAX:
+					case VALUE:
 						query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
 						break;
 					case COUNT:

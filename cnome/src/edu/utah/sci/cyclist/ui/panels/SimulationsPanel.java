@@ -37,31 +37,26 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
-import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.ui.wizards.TableEditorWizard;
+import javafx.stage.Window;
+import edu.utah.sci.cyclist.model.Simulation;
+import edu.utah.sci.cyclist.ui.wizards.SimulationEditorWizard;
 
-public class TablesPanel extends TitledPanel  {
-	public static final String ID 		= "cnome-panel";
-	public static final String TITLE	= "Tables";
+public class SimulationsPanel extends TitledPanel  {
+	public static final String ID 		= "simulations-panel";
+	public static final String TITLE	= "Simulations ids";
 	
 	public static final String SELECTED_STYLE = "-fx-background-color: #99ccff";
 	public static final String UNSELECTED_STYLE = "-fx-background-color: #f0f0f0";
 	
 	
 	private List<Entry> _entries;
-	private ObservableList<Table> _items;
-	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
+	private ObservableList<Simulation> _items;
+	private ObjectProperty<Simulation> _simulationProperty = new SimpleObjectProperty<>();
 	private Entry _selected = null;
-	private ObjectProperty<Boolean> _editTableProperty = new SimpleObjectProperty<>();
+	private ObjectProperty<Boolean> _editSimulationProperty = new SimpleObjectProperty<>();
 	private InvalidationListener _listener = new InvalidationListener() {
 		
 		@Override
@@ -71,8 +66,9 @@ public class TablesPanel extends TitledPanel  {
 		}
 	};
 	
-	public TablesPanel() {
+	public SimulationsPanel() {
 		super(TITLE);
+		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 	}
 	
 //	@Override
@@ -81,7 +77,7 @@ public class TablesPanel extends TitledPanel  {
 	}
 
 	
-	public void setItems(final ObservableList<Table> items) {
+	public void setItems(final ObservableList<Simulation> items) {
 		if (_items != items) {
 			if (_items != null) {
 				_items.removeListener(_listener);
@@ -94,36 +90,30 @@ public class TablesPanel extends TitledPanel  {
 		resetContent();
 	}
 	
-	public void focus(Table table) {
-		for (Entry entry : _entries) {
-			if (entry.table == table) {
-				select(entry);
-				break;
-			}
-		}
+	public ObjectProperty<Boolean> editSimulationProperty() {
+        return _editSimulationProperty;
+}
+
+	public Boolean getEditSimulation() {
+	        return _editSimulationProperty.get();
 	}
 	
-	public ObjectProperty<Boolean> editTableProperty() {
-	         return _editTableProperty;
+	public void setEditSimulation(Boolean value) {
+		 _editSimulationProperty.set(value);
 	}
-	 
-	public Boolean getEditTable() {
-	         return _editTableProperty.get();
-	}
-	 
-	public void setEditTable(Boolean value) {
-		 _editTableProperty.set(value);
-	}
+
 	
 	private void resetContent() {
 		VBox vbox = (VBox) getContent();
 		vbox.getChildren().clear();
 		
 		_entries = new ArrayList<>();
-		for (Table table : _items) {
-			Entry entry = createEntry(table);
-			_entries.add(entry);
-			vbox.getChildren().add(entry.title);
+		if(_items != null){
+			for (Simulation simulation : _items) {
+				Entry entry = createEntry(simulation);
+				_entries.add(entry);
+				vbox.getChildren().add(entry.title);
+			}
 		}
 	}
 	
@@ -134,14 +124,16 @@ public class TablesPanel extends TitledPanel  {
 		_selected.title.setStyle(SELECTED_STYLE);
 	}
 	
-	public ReadOnlyObjectProperty<Table> selectedItemProperty() {
-		return _tableProperty;
+	public ReadOnlyObjectProperty<Simulation> selectedItemProperty() {
+		return _simulationProperty;
 	}
 	
-	private Entry createEntry(Table table) {
+	private Entry createEntry(Simulation simulation) {
 		final Entry entry = new Entry();
-		entry.table = table;
-		entry.title = new Label(table.getAlias(), new ImageView(Resources.getIcon("table")));
+		entry.simulation = simulation;
+		entry.title = new Label(simulation.getSimulationId());
+		
+		final SimulationsPanel _panel = this;
 		
 		entry.title.setOnMouseClicked(new EventHandler<Event>() {
 
@@ -149,71 +141,35 @@ public class TablesPanel extends TitledPanel  {
 			public void handle(Event event) {
 			    
 				MouseEvent mouseEvent = (MouseEvent)event;
+				select(entry);
 				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
-					editTable(entry);
-				}
-				else{
-					if(mouseEvent.getClickCount() == 1){
-						_tableProperty.set(entry.table);
-						select(entry);
-					}
-					else if(mouseEvent.getClickCount() == 2){
-						editTable(entry);
-					}
-				
+					Window window = _panel.getParent().getScene().getWindow();
+					SimulationEditorWizard wizard = new SimulationEditorWizard(entry.simulation);
+					ObjectProperty<Simulation> selection = wizard.show(window);
+					
+					selection.addListener(new ChangeListener<Simulation>(){
+						@Override
+						public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
+							if(newVal.getSimulationId().equals("delete"))
+								removeSimulation(entry);
+								setEditSimulation(true);
+						}	
+					});
 				}
 			}
 		});
 		
-		
-		
-		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {
-			public void handle(MouseEvent event) {					
-				_tableProperty.set(entry.table);
-		    	select(entry);
-		    	
-				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-				clipboard.put(DnD.TABLE_FORMAT, Table.class, entry.table);
-				
-				Dragboard db = entry.title.startDragAndDrop(TransferMode.COPY);
-				
-				ClipboardContent content = new ClipboardContent();
-				content.put(DnD.TABLE_FORMAT, entry.title.getText());
-				content.putImage(Resources.getIcon("table"));
-				
-				db.setContent(content);
-			}
-		});		
 		return entry;
 	}
-	
 		
-	public void removeTable(Entry entry) {
-		_items.remove(entry.table);
+		
+		
+	public void removeSimulation(Entry entry) {
+		_items.remove(entry.simulation);
 	}
-
-		
-	private void editTable(final Entry entry) {
-		TableEditorWizard wizard = new TableEditorWizard(entry.table);
-		
-		ObjectProperty<Table> selection = wizard.show(this.getParent().getScene().getWindow());
-		
-		selection.addListener(new ChangeListener<Table>(){
-			@Override
-			public void changed(ObservableValue<? extends Table> arg0, Table oldVal,Table newVal) {
-				if(newVal.getName().equals("DELETE_ME"))
-					removeTable(entry);
-				else{
-					entry.table = newVal;
-					entry.title.setText(entry.table.getAlias());
-				}
-					setEditTable(true);
-			}	
-		});
-	}	
 	
 	class Entry {
 		Label title;
-		Table table;
+		Simulation simulation;
 	}
 }

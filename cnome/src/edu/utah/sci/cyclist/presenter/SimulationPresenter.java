@@ -20,60 +20,31 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.event.ui;
+package edu.utah.sci.cyclist.presenter;
 
-import edu.utah.sci.cyclist.model.Table;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
-import edu.utah.sci.cyclist.ui.tools.Tool;
-import javafx.event.Event;
-import javafx.event.EventType;
+import javafx.collections.ObservableList;
+import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.Simulation;
+import edu.utah.sci.cyclist.ui.panels.SimulationsPanel;
 
-public class CyclistDropEvent extends CyclistEvent {
-	private static final long serialVersionUID = 119736699487888637L;
+public class SimulationPresenter extends PresenterBase {
+
+	private SimulationsPanel _simPanel;
+	private ObservableList<Simulation> _simulationIds;
 	
-	public static final EventType<CyclistDropEvent> DROP = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DROP");
-	public static final EventType<CyclistDropEvent> DROP_DATASOURCE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "DROP_DATASOURCE");
-	public static final EventType<CyclistDropEvent> REMOVE = new EventType<CyclistDropEvent>(CyclistEvent.ANY, "REMOVE");
-	
-	private Table _table;
-	private double _x;
-	private double _y;
-	private Tool _tool;
-	private ViewBase _view;
-	
-	public CyclistDropEvent(EventType<? extends Event> eventType, Tool tool, Table table, double x, double y) {
-		super(eventType);
-		_tool = tool;
-		_table = table;
-		_x = x;
-		_y = y;
-		_view = (ViewBase)_tool.getView();
+	public SimulationPresenter(EventBus bus) {
+		super(bus);
 	}
 	
-	public CyclistDropEvent(EventType<? extends Event> eventType, ViewBase view) {
-		super(eventType);
-		_view = view;
+	public void setSimPanel(SimulationsPanel panel){
+		_simPanel = panel;
+		_simPanel.setItems(_simulationIds);
 	}
 	
-	
-	public Table getTable() {
-		return _table;
-		
-	}
-	public double getX() {
-		return _x;
-	}
-	
-	public double getY() {
-		return _y;
-	}
-	
-	public Tool getTool(){
-		return _tool;
-	}
-	
-	public ViewBase getView(){
-		return _view;
+	public void setSimIds(ObservableList<Simulation> simulationsIds) {
+		if(simulationsIds != null && simulationsIds != _simulationIds){
+			_simulationIds = simulationsIds;
+		}
 	}
 	
 }
