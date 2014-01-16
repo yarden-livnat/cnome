@@ -47,14 +47,16 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.ToolData;
+import edu.utah.sci.cyclist.ui.CyclistView;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 
-public class Workspace extends ViewBase implements View {
+public class Workspace extends CyclistViewBase implements CyclistView {
 
 	public static final String WORKSPACE_ID = "workspace";
 	

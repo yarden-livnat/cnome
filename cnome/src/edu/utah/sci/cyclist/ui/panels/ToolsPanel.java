@@ -124,14 +124,21 @@ public class ToolsPanel extends TitledPanel {
 			
 			title.setOnDragDetected(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent event) {					
-					
-					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-					clipboard.put(DnD.TOOL_FORMAT, Tool.class, factory.create());
-					
-					Dragboard db = title.startDragAndDrop(TransferMode.COPY);
-					ClipboardContent content = new ClipboardContent();				
-					content.put( DnD.TOOL_FORMAT, factory.getToolName());
-					db.setContent(content);
+					Tool tool;
+					try {
+						tool = factory.create();
+
+						DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+						clipboard.put(DnD.TOOL_FORMAT, Tool.class, tool);
+						
+						Dragboard db = title.startDragAndDrop(TransferMode.COPY);
+						ClipboardContent content = new ClipboardContent();				
+						content.put( DnD.TOOL_FORMAT, factory.getToolName());
+						db.setContent(content);
+						
+					} catch (InstantiationException | IllegalAccessException e) {
+						// TODO: report an error
+					}					
 					
 //					DnDIcon.getInstance().show(icon, title);
 					event.consume();

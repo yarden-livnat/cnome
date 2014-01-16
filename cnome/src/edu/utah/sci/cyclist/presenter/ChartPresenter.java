@@ -11,7 +11,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.ChartView;
 
-public class ChartPresenter extends ViewPresenter {
+public class ChartPresenter extends CyclistViewPresenter {
 
 	public ChartPresenter(EventBus bus) {
 		super(bus);

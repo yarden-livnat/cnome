@@ -29,6 +29,8 @@ import javafx.scene.input.DataFormat;
 
 public class DnD {
 	
+	public static final DataFormat SOURCE_FORMAT		= new DataFormat("cyclist.dnd.source");
+	public static final DataFormat VALUE_FORMAT			= new DataFormat("cyclist.dnd.value");
 	public static final DataFormat TYPE_FORMAT			= new DataFormat("cyclist.dnd.type");
 	public static final DataFormat TABLE_FORMAT			= new DataFormat("cyclist.dnd.datasource");
 	public static final DataFormat TOOL_FORMAT			= new DataFormat("cyclist.dnd.tool");

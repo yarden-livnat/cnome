@@ -33,7 +33,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
 
-public class TablePresenter extends ViewPresenter {
+public class TablePresenter extends CyclistViewPresenter {
 	
 	/**
 	 * TablePresenter

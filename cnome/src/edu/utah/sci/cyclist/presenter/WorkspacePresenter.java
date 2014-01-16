@@ -41,13 +41,14 @@ import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
+import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.ui.components.ViewBase;
 import edu.utah.sci.cyclist.ui.tools.TableTool;
 import edu.utah.sci.cyclist.ui.tools.Tool;
 import edu.utah.sci.cyclist.ui.views.FilterPanel;
 import edu.utah.sci.cyclist.ui.views.Workspace;
 
-public class WorkspacePresenter extends ViewPresenter {
+public class WorkspacePresenter extends CyclistViewPresenter {
 
         private List<ViewPresenter> _presenters = new ArrayList<>();
         private List<FilterPresenter> _filterPresenters = new ArrayList<>();
@@ -162,10 +163,13 @@ public class WorkspacePresenter extends ViewPresenter {
                 ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
                 if (presenter != null) {        
                         _presenters.add(presenter);
-                        presenter.setView(view);        
-                        presenter.setRemoteTables(getTableRecords());
-                        presenter.addRemoteFilters(getWorkspace().filters());
-                        presenter.addRemoteFilters(getWorkspace().remoteFilters());
+                        presenter.setView(view);   
+                        if (presenter instanceof CyclistViewPresenter) {
+                        	CyclistViewPresenter p = (CyclistViewPresenter) presenter;
+	                        p.setRemoteTables(getTableRecords());
+	                        p.addRemoteFilters(getWorkspace().filters());
+	                        p.addRemoteFilters(getWorkspace().remoteFilters());
+                        }
                 }
                 
                 return presenter;
@@ -216,8 +220,8 @@ public class WorkspacePresenter extends ViewPresenter {
                         public void handle(CyclistNotification event) {
                                 View view = ((CyclistViewNotification)event).getView();
                                 getWorkspace().selectView(view);
-                                if (view instanceof ViewBase) {
-                                        ViewBase base = (ViewBase) view;
+                                if (view instanceof CyclistViewBase) {
+                                	CyclistViewBase base = (CyclistViewBase) view;
                                         List<Filter> f1 = base.filters();
                                         List<Filter> f2 = base.remoteFilters();
                                         for (FilterPresenter p : _filterPresenters) {

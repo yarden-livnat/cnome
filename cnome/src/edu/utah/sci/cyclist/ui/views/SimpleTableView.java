@@ -27,20 +27,31 @@ import java.util.List;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import edu.utah.sci.cyclist.event.dnd.DnD;
+import edu.utah.sci.cyclist.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Schema;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
 
-public class SimpleTableView extends ViewBase {
+public class SimpleTableView extends CyclistViewBase {
 	public static final String ID = "table-view";
 	public static final String TITLE = "Table";
 	
@@ -54,14 +65,6 @@ public class SimpleTableView extends ViewBase {
 	
 	private void build() {
 		setTitle(TITLE);
-		
-//		_tableView = TableViewBuilder.create(Table.Row.class) // Java 8
-//		_tableView = TableViewBuilder.<Table.Row>create()
-//				.styleClass("simple-table-view")
-//				.prefWidth(300)
-//				.prefHeight(200)
-//				.columnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY)
-//				.build();
 		
 		_tableView = new TableView<Table.Row>();
 		_tableView.getStyleClass().add("simple-table-view");
@@ -105,35 +108,6 @@ public class SimpleTableView extends ViewBase {
 	
 	
 	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
-		
-//		return TableColumnBuilder.create(Table.Row.class, Object.class) // Java 8
-//		return TableColumnBuilder.<Table.Row, Object>create() // Java 7
-//				.text(field.getName())
-//				.cellValueFactory( new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
-//
-//					@Override
-//					public ObservableValue<Object> call(CellDataFeatures<Row, Object> cell) {
-//						return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
-//							
-//							@Override
-//							public Object getValue() {
-//								Row row = (Row) getBean();
-//								return row.value[col];
-//							}
-//						};
-//					}
-//				
-//				})
-
-////					new PropertyValueFactory<Table.Row, T>(field.getName()))
-////				.cellFactory(new Callback<TableColumn<Row,T>, TableCell<Row,T>>() {
-////
-////					@Override
-////					public TableCell<Row, T> call(TableColumn<Row, T> col) {
-////						return new GenericCell<T>(field);
-////					}
-////				})
-//				.build();
 				
 		TableColumn<Table.Row, Object> tc = new TableColumn<>();
 		tc.setText(field.getName());
@@ -150,6 +124,14 @@ public class SimpleTableView extends ViewBase {
 				};
 			}
 		});		
+		tc.setCellFactory(new Callback<TableColumn<Row, Object>, TableCell<Row, Object>>() {
+
+			@Override
+			public TableCell<Row, Object> call(TableColumn<Row, Object> arg0) {
+				return new GenericCell<Object>(field);
+			}
+			
+		});
 		
 		return tc;
 					
@@ -157,15 +139,45 @@ public class SimpleTableView extends ViewBase {
 	
 	class GenericCell<T> extends TableCell<Table.Row, T> {
 		private Field _field; 
+		private Label _label;
 
 		public GenericCell(Field field) {
 			_field = field;
+			_label = new Label("");
+			_label.setAlignment(Pos.CENTER);
+			setGraphic(_label);
+			
+			_label.setOnDragDetected(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+					clipboard.put(DnD.SOURCE_FORMAT, DnDSource.class, DnDSource.VALUE);
+					clipboard.put(DnD.VALUE_FORMAT, Object.class, getItem()); // fix the class
+					clipboard.put(DnD.FIELD_FORMAT, Field.class, _field);
+					clipboard.put(DnD.TABLE_FORMAT, Table.class, _currentTable);
+					
+					Dragboard db = _label.startDragAndDrop(TransferMode.COPY);
+					
+					ClipboardContent content = new ClipboardContent();
+					content.putString("value dnd"); // fix: do we need this?
+					
+					SnapshotParameters snapParams = new SnapshotParameters();
+//		            snapParams.setFill(Color.TRANSPARENT);
+		            snapParams.setFill(Color.AQUA);
+		            
+		            content.putImage(_label.snapshot(snapParams, null));	            
+					
+					db.setContent(content);
+					event.consume();
+				}
+			});
 		}
 		
 		@Override
 		protected void updateItem(T item, boolean empty){
 			super.updateItem(item,empty);
-			System.out.println("field: "+_field.getName()+"  item: "+(item == null? "null" : item.toString())+"  empty: "+empty);
+			
+			_label.setText(item != null ? item.toString() : "");
 		}
 	}
 }
