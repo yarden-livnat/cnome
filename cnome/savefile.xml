@@ -1,1 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><CycicSimulation><facility><name>test</name><xPosition>110.00</xPosition><yPosition>199.00</yPosition></facility><facility><name>sdfe</name><xPosition>434.00</xPosition><yPosition>197.00</yPosition></facility></CycicSimulation>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><CycicSimulation><facility><name>test</name><xPosition>283.00</xPosition><yPosition>118.00</yPosition><radius>45.00</radius></facility><market><name>aaa</name><xPosition>85.00</xPosition><yPosition>136.00</yPosition></market></CycicSimulation>

@@ -131,7 +131,7 @@ class facilityNode{
 	String facilityType = "";
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
-	ArrayList<Object> facilityStructure = new ArrayList<Object>();
+	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
 	ArrayList<facilityNode> facilityClones = new ArrayList<facilityNode>();
 	int parentIndex;
 	FacilityCircle cycicCircle = new FacilityCircle();

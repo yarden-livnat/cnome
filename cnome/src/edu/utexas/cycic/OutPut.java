@@ -58,7 +58,7 @@ public class OutPut {
 			// Facilities
 			for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
 				Element facID = doc.createElement("facility");
-				facilityBuilder(doc, facID, facility.facilityStructure, facility.facilityData, facility.facilityType);
+				facilityBuilder(doc, facID, facility);
 				rootElement.appendChild(facID);
 			}
 			
@@ -115,12 +115,8 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-<<<<<<< HEAD
 			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
-			StreamResult result = new StreamResult(new File("test.xml"));
-=======
 			StreamResult result = new StreamResult(new File("file.xml"));
->>>>>>> 7aaaf2544e78ead9b3249c6dbd21ccc3d7641ad0
 			
 			transformer.transform(source, result);
 			
@@ -225,8 +221,14 @@ public class OutPut {
 	 * @param facType A string that indicates the type of the facility. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static void facilityBuilder(Document doc, Element rootElement, ArrayList<Object> facArray, ArrayList<Object> dataArray, String facType){
-		rootElement.appendChild(facilityNameElement(doc, (ArrayList<Object>)dataArray.get(0)));
+	public static void facilityBuilder(Document doc, Element rootElement, facilityNode facility){
+		String facType = facility.facilityType;
+		ArrayList<Object> facArray = facility.facilityStructure;
+		ArrayList<Object> dataArray = facility.facilityData;
+		
+		Element name = doc.createElement("name");
+		
+		rootElement.appendChild(name);
 		
 		Element model = doc.createElement("model");
 		rootElement.appendChild(model);
@@ -386,13 +388,9 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-<<<<<<< HEAD
 			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
 			StreamResult result = new StreamResult(new File("savefile.xml"));
-=======
-			StreamResult result = new StreamResult(new File("savefile.xml"));
 			
->>>>>>> 7aaaf2544e78ead9b3249c6dbd21ccc3d7641ad0
 			transformer.transform(source, result);
 			
 		} catch (ParserConfigurationException pce){
@@ -455,7 +453,7 @@ public class OutPut {
 		Element yPosition = doc.createElement("yPosition");
 		yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
 		facElement.appendChild(yPosition);
-		
+		// radius
 		Element radius = doc.createElement("radius");
 		radius.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getRadius())));
 		facElement.appendChild(radius);
@@ -489,7 +487,6 @@ public class OutPut {
 		
 		return markElement;
 	}
-<<<<<<< HEAD
 	
 	static Element outputRegion(Document doc, regionNode region){
 		Element regionElement = doc.createElement("market");
@@ -509,8 +506,5 @@ public class OutPut {
 		
 		return regionElement;
 	}
-=======
-
->>>>>>> 7aaaf2544e78ead9b3249c6dbd21ccc3d7641ad0
 }
 
