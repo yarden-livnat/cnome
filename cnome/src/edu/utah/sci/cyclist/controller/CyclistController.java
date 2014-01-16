@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -75,6 +74,7 @@ public class CyclistController {
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
 	private EventHandler<CyclistDropEvent> handleToolDropped;
+	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
 	
 	/**
 	 * Constructor
@@ -304,6 +304,7 @@ public class CyclistController {
 				quit();
 			}
 		});
+		
 	}
 	
 	private void quit() {
@@ -346,8 +347,11 @@ public class CyclistController {
 		}
 		
 		// Save the data tables
+		// Saves only tables added by the user (not loaded by the simulation configuration file).
 		for(Table table: _model.getTables()){
-			table.save(memento.createChild("Table"));
+			if(!table.getIsStandardSimulation()){
+				table.save(memento.createChild("Table"));
+			}
 		}
 		
 		//Save the Simulation
@@ -442,6 +446,38 @@ public class CyclistController {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} 		
+		}
+		readSimulationsTables();
+	}
+	
+	/*
+	 * Reads the configuration file which defines the tables required for simulation.
+	 * The tables are loaded with a null database property.
+	 * The tables are added to the model tables list.
+	 */
+	private void readSimulationsTables(){
+		File simulationsFile = new File(SIMULATIONS_TABLES_FILE);
+		if(simulationsFile.exists()){
+			Reader reader;
+			try {
+				reader = new FileReader(simulationsFile);
+				// Create the root memento
+				XMLMemento memento = XMLMemento.createReadRoot(reader);
+				
+				// Read in the data sources
+				IMemento[] tables = memento.getChildren("Table");
+				for(IMemento table:tables){
+					
+					Table tbl = new Table();
+					tbl.restoreSimulated(table);
+					tbl.setLocalDatafile(getLastChosenWorkDirectory());
+					_model.getSimulationsTablesDef().add(tbl);
+					_model.getTables().add(tbl);
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

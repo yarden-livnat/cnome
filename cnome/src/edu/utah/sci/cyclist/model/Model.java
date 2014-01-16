@@ -22,6 +22,8 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -32,6 +34,7 @@ public class Model {
 	private CyclistDatasource _currentSource;
 	private ObservableList<Simulation> _simulationIds = FXCollections.observableArrayList();
 	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
+	private List<Table> _simulationTablesDef = new ArrayList<>();
 	
 	/**
 	 * getTables
@@ -83,6 +86,10 @@ public class Model {
 			}
 		}
 		return response;
+	}
+	
+	public List<Table> getSimulationsTablesDef(){
+		return _simulationTablesDef;
 	}
 	
 }

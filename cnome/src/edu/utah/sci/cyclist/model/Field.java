@@ -38,6 +38,8 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
 import edu.utah.sci.cyclist.controller.IMemento;
+import edu.utah.sci.cyclist.model.DataType.Role;
+import edu.utah.sci.cyclist.util.SQL;
 
 public class Field {
 	
@@ -163,9 +165,11 @@ public class Field {
 		memento.putString("name", _name);
 		
 		IMemento dataMemento = memento.createChild("datatype");
-		dataMemento.putString("role", getRole().toString());
+		String role = getRole()!=null?getRole().toString():"";
+		dataMemento.putString("role", role);
 		dataMemento.putString("type", getType().toString());
-		dataMemento.putString("interp", _dataType.getInterpretation().toString());		
+		String interp =  _dataType.getInterpretation()!=null?_dataType.getInterpretation().toString():"";
+		dataMemento.putString("interp", interp);		
 		dataMemento.putString("classification", getClassification().toString());
 
 		memento.putBoolean("selected", _selected.get());
@@ -211,9 +215,9 @@ public class Field {
 		_name = memento.getString("name");
 		
 		IMemento dataMemento = memento.getChild("datatype");
-		DataType.Role role = DataType.Role.valueOf(dataMemento.getString("role"));
+		DataType.Role role = dataMemento.getString("role")!= "" ? DataType.Role.valueOf(dataMemento.getString("role")):null;
 		DataType.Type type = DataType.Type.valueOf(dataMemento.getString("type"));
-		DataType.Interpretation interp = DataType.Interpretation.valueOf(dataMemento.getString("interp"));
+		DataType.Interpretation interp = dataMemento.getString("interp")!= "" ? DataType.Interpretation.valueOf(dataMemento.getString("interp")):null;
 		DataType.Classification classification = DataType.Classification.valueOf(dataMemento.getString("classification"));
 
 		_dataType = new DataType(role, type, interp, classification);
@@ -247,6 +251,26 @@ public class Field {
 		} catch(NullPointerException e){
 			
 		}
+	}
+	
+	/*
+	 * Restores fields from the simulation configuration file.
+	 * Restores only the information which is relevant to the simulation fields.
+	 */
+	public void restoreSimulated(IMemento memento) {
+			_name = memento.getString("name");
+			IMemento dataTypeMemento = memento.getChild("datatype");
+			
+			DataType.Type type = DataType.Type.valueOf(dataTypeMemento.getString("type"));
+			_dataType = new DataType(type);
+			DataType.Role role = dataTypeMemento.getString("role")!= "" ? DataType.Role.valueOf(dataTypeMemento.getString("role")):null;
+			if(role != null){
+				_dataType.setRole(role);
+			}
+			if (_dataType.getRole() == Role.MEASURE){
+				set(FieldProperties.AGGREGATION_DEFAULT_FUNC, SQL.DEFAULT_FUNCTION);
+			}
+			
 	}
 
 	public BooleanProperty getSelectedProperty() {

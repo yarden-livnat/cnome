@@ -96,13 +96,16 @@ public class SchemaPresenter  extends PresenterBase {
 				for (int f=0; f < _schema.size(); f++) {
 					Field field = _schema.getField(f);
 					DataType.Role role = field.getRole();
-					switch (role) {
-					case DIMENSION:
-						_dimensions.add(field);
-						break;
-					case MEASURE:
-						_measures.add(field);
-						break;
+					if(role != null)
+					{
+						switch (role) {
+						case DIMENSION:
+							_dimensions.add(field);
+							break;
+						case MEASURE:
+							_measures.add(field);
+							break;
+						}
 					}
 				}
 				
