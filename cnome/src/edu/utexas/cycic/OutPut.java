@@ -461,10 +461,12 @@ public class OutPut {
 		for (String commodity: facility.cycicCircle.incommods){
 			Element commodityObj = doc.createElement("inCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
+			facElement.appendChild(commodityObj);
 		}
 		for (String commodity: facility.cycicCircle.outcommods){
 			Element commodityObj = doc.createElement("outCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
+			facElement.appendChild(commodityObj);
 		}
 		
 		return facElement;
