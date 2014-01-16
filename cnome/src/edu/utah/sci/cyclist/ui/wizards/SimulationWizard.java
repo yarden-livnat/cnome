@@ -30,7 +30,6 @@ import java.sql.Statement;
 import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -41,10 +40,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -72,6 +71,7 @@ public class SimulationWizard extends TilePane {
 	private List<String> 				_simulationsIds;
 	private ImageView                   _statusDisplay;
 	private ListView<String>            _simulationsView;
+	private TextField                   _aliasField;
 	
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
@@ -237,9 +237,31 @@ public class SimulationWizard extends TilePane {
 		_simulationsView.setDisable(true);
 		_simulationsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		_simulationsView.setMaxHeight(Double.MAX_VALUE);
-		simulationBox.getChildren().addAll(simLbl,_simulationsView);
+		
+		HBox aliasHbox = new HBox();
+		aliasHbox.setSpacing(10);
+		aliasHbox.setAlignment(Pos.CENTER_LEFT);
+		aliasHbox.setPadding(new Insets(5));
+		
+		Label aliasLbl =  new Label("Alias:");
+		aliasLbl.setAlignment(Pos.CENTER);
+		aliasLbl.setFont(new Font(12));
+		aliasLbl.setPadding(new Insets(3,0,0,0));
+		
+		_aliasField = new TextField();
+		_aliasField.setPrefWidth(210);
+		_aliasField.setMinHeight(20);
+		
+		aliasHbox.getChildren().addAll(aliasLbl, _aliasField);
+		
+		aliasHbox.disableProperty().bind(_simulationsView.getSelectionModel().selectedItemProperty().isNull());
+		
+		
+		simulationBox.getChildren().addAll(simLbl,_simulationsView, aliasHbox);
 		simulationBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
 		VBox.setVgrow(_simulationsView,  Priority.ALWAYS);
+		VBox.setVgrow(aliasHbox,  Priority.ALWAYS);
+		
 		
 		// The ok/cancel buttons
 		HBox buttonsBox = new HBox();
@@ -331,6 +353,7 @@ public class SimulationWizard extends TilePane {
 		for(String simId:_simulationsIds){
 			Simulation simulation = new Simulation(simId);
 			simulation.setDataSource(_current);
+			simulation.setAlias(_aliasField.getText());
 			_selection.add(simulation);
 		}
 	}

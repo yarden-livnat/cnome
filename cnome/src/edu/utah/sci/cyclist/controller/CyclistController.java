@@ -535,6 +535,7 @@ public class CyclistController {
 	                }else if(event.getEventType() == CyclistDropEvent.REMOVE){
 	                	removeTool(event.getView());
 	                }
+	                _dirtyFlag = true;
 	        }
 	  };
 	}

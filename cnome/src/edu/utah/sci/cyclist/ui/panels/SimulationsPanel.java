@@ -131,7 +131,7 @@ public class SimulationsPanel extends TitledPanel  {
 	private Entry createEntry(Simulation simulation) {
 		final Entry entry = new Entry();
 		entry.simulation = simulation;
-		entry.title = new Label(simulation.getSimulationId());
+		entry.title = new Label(simulation.getALias());
 		
 		final SimulationsPanel _panel = this;
 		
@@ -150,9 +150,14 @@ public class SimulationsPanel extends TitledPanel  {
 					selection.addListener(new ChangeListener<Simulation>(){
 						@Override
 						public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
-							if(newVal.getSimulationId().equals("delete"))
+							if(newVal.getSimulationId().equals("delete")){
 								removeSimulation(entry);
 								setEditSimulation(true);
+							}else{
+								entry.simulation.setAlias(newVal.getALias());
+								entry.title.setText(newVal.getALias());
+								setEditSimulation(true);
+							}
 						}	
 					});
 				}

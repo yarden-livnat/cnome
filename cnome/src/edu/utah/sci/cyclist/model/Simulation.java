@@ -41,6 +41,7 @@ public class Simulation {
 	private String _simulationId;
 	
 	private CyclistDatasource _datasource;
+	private String _alias;
 	private Map<String, Object> _properties = new HashMap<>();
 
 	private String _saveDir = "";
@@ -51,12 +52,14 @@ public class Simulation {
 	public Simulation(String simulationId) {
 		setProperty("uid", UUID.randomUUID().toString());
 		_simulationId = simulationId;
+		_alias = _simulationId;
 	}
 	
 	public Simulation(Simulation sim){
 		_datasource = sim.getDataSource();
 		_saveDir = sim.getSaveDir();
 		_simulationId = sim.getSimulationId();
+		_alias = sim.getALias();
 	}
 	
     // Save the simulation
@@ -67,6 +70,9 @@ public class Simulation {
 		
 		// Save the uid of the data source
 		memento.putString("datasource-uid", _datasource.getUID());
+		
+		//Save the alias
+		memento.putString("alias", getALias());
 	}
 	
 	// Restore the simulation
@@ -81,6 +87,9 @@ public class Simulation {
 			if(source.getUID().equals(datasourceUID))
 				setDataSource(source);
 		}
+		
+		//Get the alias
+		setAlias(memento.getString("alias"));
 	}
 	
 	public String getSimulationId(){
@@ -142,4 +151,11 @@ public class Simulation {
 		return _saveDir;
 	}
 	
+	public String getALias(){
+		return _alias;
+	}
+	
+	public void setAlias(String alias){
+		_alias = alias;
+	}
 }

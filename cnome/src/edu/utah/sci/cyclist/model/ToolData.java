@@ -66,7 +66,7 @@ public class ToolData {
 		_point = new Point2D(x, y);
 		_tool = tool;
 		_tableName = table.getName();
-		_dataSourceUid = table.getDataSource().getUID();
+		_dataSourceUid = table.getDataSource()!=null?table.getDataSource().getUID():"";
 		_width = width;
 		_height = height;
 	}
