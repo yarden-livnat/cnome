@@ -37,10 +37,14 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
+import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.ui.wizards.SimulationEditorWizard;
 
@@ -131,7 +135,7 @@ public class SimulationsPanel extends TitledPanel  {
 	private Entry createEntry(Simulation simulation) {
 		final Entry entry = new Entry();
 		entry.simulation = simulation;
-		entry.title = new Label(simulation.getALias());
+		entry.title = new Label(simulation.getAlias());
 		
 		final SimulationsPanel _panel = this;
 		
@@ -154,8 +158,8 @@ public class SimulationsPanel extends TitledPanel  {
 								removeSimulation(entry);
 								setEditSimulation(true);
 							}else{
-								entry.simulation.setAlias(newVal.getALias());
-								entry.title.setText(newVal.getALias());
+								entry.simulation.setAlias(newVal.getAlias());
+								entry.title.setText(newVal.getAlias());
 								setEditSimulation(true);
 							}
 						}	
@@ -163,6 +167,23 @@ public class SimulationsPanel extends TitledPanel  {
 				}
 			}
 		});
+		
+		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent event) {					
+				_simulationProperty.set(entry.simulation);
+		    	select(entry);
+		    	
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.SIMULATION_FORMAT, Simulation.class, entry.simulation);
+				
+				Dragboard db = entry.title.startDragAndDrop(TransferMode.COPY);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.put(DnD.SIMULATION_FORMAT, entry.title.getText());
+				
+				db.setContent(content);
+			}
+		});	
 		
 		return entry;
 	}

@@ -36,6 +36,7 @@ public class DnD {
 	public static final DataFormat DnD_SOURCE_FORMAT 	= new DataFormat("cyclist.dnd.dnd_source");
 	public static final DataFormat FILTER_FORMAT 		= new DataFormat("cyclist.dnd.filter");
 	public static final DataFormat INDICATOR_FORMAT		= new DataFormat("cyclist.dnd.indicator");
+	public static final DataFormat SIMULATION_FORMAT		= new DataFormat("cyclist.dnd.simulation");
 	
 	private static DnD _instance = new DnD();
 	

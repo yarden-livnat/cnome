@@ -59,7 +59,7 @@ public class Simulation {
 		_datasource = sim.getDataSource();
 		_saveDir = sim.getSaveDir();
 		_simulationId = sim.getSimulationId();
-		_alias = sim.getALias();
+		_alias = sim.getAlias();
 	}
 	
     // Save the simulation
@@ -72,7 +72,7 @@ public class Simulation {
 		memento.putString("datasource-uid", _datasource.getUID());
 		
 		//Save the alias
-		memento.putString("alias", getALias());
+		memento.putString("alias", getAlias());
 	}
 	
 	// Restore the simulation
@@ -151,7 +151,7 @@ public class Simulation {
 		return _saveDir;
 	}
 	
-	public String getALias(){
+	public String getAlias(){
 		return _alias;
 	}
 	

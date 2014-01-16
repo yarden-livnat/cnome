@@ -63,6 +63,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.dnd.DnD.Status;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
@@ -85,6 +86,7 @@ public class ViewBase extends BorderPane implements View {
 	private HBox _header;
 	private HBox _actionsArea;
 	private HBox _dataBar;
+	private HBox _simulationBar;
 	private Spring _spring;
 	private FilterArea _filtersArea;
 	
@@ -106,6 +108,7 @@ public class ViewBase extends BorderPane implements View {
 	}
 	
 	private Map<Table, ButtonEntry> _buttons = new HashMap<>();
+	private Map<Simulation, ButtonEntry> _simulationButtons = new HashMap<>();
 	private int _numOfRemotes = 0;
 	
 	// Actions
@@ -115,6 +118,7 @@ public class ViewBase extends BorderPane implements View {
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
 	private Closure.V1<Filter> _onRemoveFilter = null;
+	private Closure.V1<Simulation> _onSimulationDrop = null;
 	
 	/**
 	 * Constructor
@@ -152,6 +156,16 @@ public class ViewBase extends BorderPane implements View {
 		_dataBar.setAlignment(Pos.CENTER_LEFT); 
 		
 		_dataBar.getChildren().add(new Label("|"));
+		
+		_simulationBar = new HBox();
+		_simulationBar.setId("simulationbar");
+		_simulationBar.getStyleClass().add("data-bar");
+		_simulationBar.setSpacing(2);
+		_simulationBar.setMinWidth(5);
+		_simulationBar.setFillHeight(true);
+		_simulationBar.setAlignment(Pos.CENTER_LEFT);
+		_simulationBar.getChildren().add(new Label("|"));
+		
 				
 		_filtersArea = new FilterArea();
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
@@ -173,6 +187,10 @@ public class ViewBase extends BorderPane implements View {
 		_header.getChildren().addAll(
 				_title,
 				_taskControl,
+				new Label("Simulations:"),
+				new Text("["),
+				_simulationBar,
+				new Text("] "),
 				new Label("Tables:"),
 				new Text("["),
 				_dataBar,
@@ -187,6 +205,7 @@ public class ViewBase extends BorderPane implements View {
 				_closeButton);
 		
 		_dataBar.setAlignment(Pos.CENTER_LEFT);
+		_simulationBar.setAlignment(Pos.CENTER_LEFT);
 		
 		if (toplevel) {
 			_minmaxButton.setVisible(false);
@@ -200,6 +219,7 @@ public class ViewBase extends BorderPane implements View {
 		setHeaderListeners();
 		setDatasourcesListeners();
 		setFiltersListeners();
+		setSimulationsListeners();
 		
 		setTop(_header);
 		setListeners();
@@ -292,6 +312,14 @@ public class ViewBase extends BorderPane implements View {
 	
 	public Closure.V1<Table> getOnTableDrop() {
 		return _onTableDrop;
+	}
+	
+	public void setOnSimulationDrop(Closure.V1<Simulation> action) {
+		_onSimulationDrop = action;
+	}
+	
+	public Closure.V1<Simulation> getOnSimulationDrop() {
+		return _onSimulationDrop;
 	}
 	
 	public void setOnTableRemoved(Closure.V1<Table> action) {
@@ -394,6 +422,13 @@ public class ViewBase extends BorderPane implements View {
 	@Override
 	public void selectTable(Table table, boolean value) {
 		_buttons.get(table).button.setSelected(value);
+	}
+	
+	@Override
+	public void addSimulation(final Simulation simulation, boolean remote ) {
+		final ToggleButton button = new ToggleButton(simulation.getAlias().substring(0, 1));
+		button.getStyleClass().add("flat-toggle-button");
+		_simulationButtons.put(simulation, new ButtonEntry(button, remote));
 	}
 	
 	
@@ -521,6 +556,42 @@ public class ViewBase extends BorderPane implements View {
 	//Virtual method - should only be implemented in the sub class.
 	public void removeFilterFromDropArea(Filter filter){
 		;
+	}
+	
+	
+	private void setSimulationsListeners() {
+		_simulationBar.setOnDragOver(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				Simulation simulation = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
+				if ( simulation != null ) {
+					if (_simulationButtons.containsKey(simulation)) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					}
+				}
+				event.consume();
+			}
+		});
+		
+		_simulationBar.setOnDragDropped(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				Simulation simulation = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
+				if (simulation != null) {
+					if (_simulationButtons.containsKey(simulation)) {
+						getLocalClipboard().setStatus(Status.IGNORED);
+					} else 	if (_onTableDrop != null) {
+						getLocalClipboard().setStatus(Status.ACCEPTED);
+						_onSimulationDrop.call(simulation);
+						event.setDropCompleted(true);
+						event.consume();
+					}
+				}
+				
+			}
+		});
 	}
 	
 	private void setDatasourcesListeners() {

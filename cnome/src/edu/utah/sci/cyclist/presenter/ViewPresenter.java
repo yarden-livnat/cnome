@@ -37,6 +37,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -146,6 +147,11 @@ public class ViewPresenter extends PresenterBase{
 	public void removeTable(Table table) {
 		getSelectionModel().removeTable(table);
 		getView().removeTable(table);
+	}
+	
+	public void addSimulation(Simulation simulation, boolean remote) {
+		getView().addSimulation(simulation, remote);
+//		getSelectionModel().addTable(table, remote, active, remoteActive);
 	}
 	
 	public List<SelectionModel.Entry> getTableRecords() {
