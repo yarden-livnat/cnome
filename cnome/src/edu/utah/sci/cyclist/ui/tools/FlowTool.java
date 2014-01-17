@@ -3,16 +3,16 @@ package edu.utah.sci.cyclist.ui.tools;
 import javafx.scene.image.Image;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.MapPresenter;
+import edu.utah.sci.cyclist.presenter.FlowPresenter;
 import edu.utah.sci.cyclist.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.views.MapView;
+import edu.utah.sci.cyclist.ui.views.FlowView;
 
-public class MapTool implements Tool {
+public class FlowTool implements Tool {
 	
-	public static final String ID 			= "edu.utah.sci.cyclist.MapTool";
-	public static final String TOOL_NAME 	= "Map";
-	public static final String ICON_NAME 	= "map";
+	public static final String ID 			= "edu.utah.sci.cyclist.FlowTool";
+	public static final String TOOL_NAME 	= "Flow";
+	public static final String ICON_NAME 	= "flow";
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
@@ -35,14 +35,14 @@ public class MapTool implements Tool {
 	@Override
 	public View getView() {
 		if (_view == null) 
-			_view = new MapView();
+			_view = new FlowView();
 		return _view;
 	}
 	
 	@Override
 	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null)
-			_presenter = new MapPresenter(bus);
+			_presenter = new FlowPresenter(bus);
 		return _presenter;
 	}
 }

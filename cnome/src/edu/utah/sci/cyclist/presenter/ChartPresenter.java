@@ -12,7 +12,7 @@ import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.ChartView;
 
-public class ChartPresenter extends ViewPresenter {
+public class ChartPresenter extends CyclistViewPresenter {
 
 	public ChartPresenter(EventBus bus) {
 		super(bus);
@@ -90,12 +90,12 @@ public class ChartPresenter extends ViewPresenter {
 			}
 		});
 		
-		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
-			@Override
-			public void call(Simulation simulation) {
-				addSimulation(simulation, false);
-			}
-		});
+//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
+//			@Override
+//			public void call(Simulation simulation) {
+//				addSimulation(simulation, false/* remote */);
+//			}
+//		});
 	}
 	
 	/**

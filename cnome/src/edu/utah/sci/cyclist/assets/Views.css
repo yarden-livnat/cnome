@@ -85,7 +85,34 @@
 	/*-fx-min-height: 20;*/
 }
 
-
+/*
+ * flow
+ */
+ 
+ .flow-view {
+ 	-fx-background-color: beige;
+ }
+ 
+ .flow-node {
+ 	-fx-padding: 5;
+ 	-fx-background-color: #99FF99;
+ 	-fx-background-radius: 5;
+ 	-fx-border-color: #808080;
+ 	-fx-border-radius:5;
+ }
+ 
+ .flow-node:hover {
+ 	-fx-border-width: 2;
+ }
+ 
+ .flow-node .selected {
+ 	-fx-background-color: derive(#99FF99, -20%);
+ }
+ .node-header {
+ 	-fx-font-size: 8px;	
+ }
+ 
+ 
 
 /*
  * Line Charts

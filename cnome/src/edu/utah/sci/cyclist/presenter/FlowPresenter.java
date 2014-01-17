@@ -9,9 +9,9 @@ import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
-public class MapPresenter extends ViewPresenter {
+public class FlowPresenter extends CyclistViewPresenter {
 
-	public MapPresenter(EventBus bus) {
+	public FlowPresenter(EventBus bus) {
 		super(bus);
 		SingleSelection selectionModel = new SingleSelection();
 		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {

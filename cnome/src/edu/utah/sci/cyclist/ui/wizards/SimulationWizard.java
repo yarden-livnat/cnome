@@ -339,6 +339,12 @@ public class SimulationWizard extends TilePane {
 				 _simulationsView.getItems().add(simulationId);
 			}
 			
+			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
+			_simulationsView.getItems().add("first demo simulation");
+			_simulationsView.getItems().add("second demo simulation");
+			_simulationsView.getItems().add("third demo simulation");
+			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
+			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimID doesn't exist");
 		}
@@ -353,7 +359,13 @@ public class SimulationWizard extends TilePane {
 		for(String simId:_simulationsIds){
 			Simulation simulation = new Simulation(simId);
 			simulation.setDataSource(_current);
-			simulation.setAlias(_aliasField.getText());
+			String alias =_aliasField.getText();
+			if(alias == null){
+				alias = "null";
+			}else if(alias.isEmpty()){
+				alias = "emtpy";
+			}
+			simulation.setAlias(_aliasField.getText().isEmpty()?simId:_aliasField.getText());
 			_selection.add(simulation);
 		}
 	}

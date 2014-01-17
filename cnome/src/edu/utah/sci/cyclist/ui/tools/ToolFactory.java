@@ -4,5 +4,5 @@ public interface ToolFactory {
 	String getToolName();
 	String getIconName();
 	
-	Tool create();
+	Tool create() throws InstantiationException, IllegalAccessException;
 }

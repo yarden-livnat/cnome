@@ -22,32 +22,11 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui;
 
-import org.mo.closure.v1.Closure;
-
-import edu.utah.sci.cyclist.model.Filter;
-import edu.utah.sci.cyclist.model.Simulation;
-import edu.utah.sci.cyclist.model.Table;
 import javafx.beans.property.ObjectProperty;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 public interface View {
 	ObjectProperty<EventHandler<ActionEvent>> onMinmaxProperty();
 	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
-	
-	void setOnTableDrop(Closure.V1<Table> action);
-	void setOnTableRemoved(Closure.V1<Table> action);
-	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
-	void setOnSelectAction(Closure.V0 action);
-	void setOnShowFilter(Closure.V1<Filter> action);
-	void setOnRemoveFilter(Closure.V1<Filter> action);
-	
-	void addTable(Table table, boolean remote, boolean active);
-	void removeTable(Table table);
-	void selectTable(Table table, boolean value);
-	
-	void addSimulation(Simulation simulation, boolean remote);
-	
-	ObservableList<Filter> remoteFilters();
 }
