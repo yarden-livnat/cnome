@@ -28,7 +28,7 @@ public class OutPut {
 	 * Function to convert the information stored in the CYCIC
 	 * simulation into a cylcus input file. 
 	 */
-	public static void output(){
+	public static void output(File file){
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
@@ -115,8 +115,7 @@ public class OutPut {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
-			StreamResult result = new StreamResult(new File("file.xml"));
+			StreamResult result = new StreamResult(file);
 			
 			transformer.transform(source, result);
 			
@@ -407,7 +406,7 @@ public class OutPut {
 			Document doc = dBuilder.parse(file);
 			
 			doc.getDocumentElement().getNodeName();
-			
+			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			NodeList facList = doc.getElementsByTagName("facility");
 			
 			for (int i = 0; i < facList.getLength(); i++){
@@ -426,10 +425,21 @@ public class OutPut {
 				tempNode.cycicCircle.setCenterY(yPosition);
 				tempNode.cycicCircle.text.setLayoutY(yPosition-radius*0.6);
 				tempNode.cycicCircle.menu.setLayoutY(yPosition);
-				//CycicScenarios.workingCycicScenario.FacilityNodes.add(tempNode);
-				System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes);
 			}
-			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
+			
+			NodeList marketList = doc.getElementsByTagName("market");
+			
+			for (int i = 0; i < marketList.getLength(); i++){
+				org.w3c.dom.Node marketNode = marketList.item(i);
+				
+				Element element = (Element) marketNode;
+				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
+				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
+				tempNode.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
+				tempNode.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
+			}
+			
+			
 			VisFunctions.reloadPane();
 		} catch (Exception e){
 			e.printStackTrace();
@@ -486,7 +496,9 @@ public class OutPut {
 		yPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterY())));
 		markElement.appendChild(yPosition);
 		
-		
+		Element commodityObj = doc.createElement("inCommod");
+		commodityObj.appendChild(doc.createTextNode(market.commodity));
+		markElement.appendChild(commodityObj);
 		return markElement;
 	}
 	

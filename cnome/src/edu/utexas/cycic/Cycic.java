@@ -155,7 +155,15 @@ public class Cycic extends ViewBase{
 		output.setText("Generate Cyclus Input");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				OutPut.output();
+	              FileChooser fileChooser = new FileChooser();
+	              
+	              //Set extension filter
+	              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+	              fileChooser.getExtensionFilters().add(extFilter);
+	              
+	              //Show save file dialog
+	              File file = fileChooser.showSaveDialog(window);
+				OutPut.output(file);
 			}
 		});
 		grid.add(output, 0, 2);
