@@ -11,6 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 
 /**
  * This class is built to handle all of the functions used in building the forms for CYCIC. 
@@ -88,6 +91,7 @@ public class FormBuilderFunctions {
 	 * @param dataArray The ArrayList<Object> that contains the name field data for the facility.
 	 * @return TextField that controls the input of this field. 
 	 */
+
 	static TextField nameFieldBuilder(final facilityNode node){
 		TextField textField = new TextField();
 		textField.setText((String)node.name);
@@ -97,6 +101,7 @@ public class FormBuilderFunctions {
 				node.name = newValue;
 				node.cycicCircle.text.setText(newValue);
 				node.sorterCircle.text.setText(newValue);
+
 				node.cycicCircle.tooltip.setText(newValue);
 				node.sorterCircle.tooltip.setText(newValue);
 			}
@@ -130,18 +135,32 @@ public class FormBuilderFunctions {
 	 * @param dataArray ArrayList<Object> that contains the name field for this regionNode.
 	 * @return TextField linked to the name of a regionNode.
 	 */
+
 	static TextField regionNameBuilder(final regionNode node){
 		TextField textField = new TextField();
+		RegionCorralView.workingRegion = node;
 		textField.setText((String) node.name);
 		
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
+
+				node.regionCircle.name.equals(newValue);
+				node.regionCircle.text.setText(newValue);
+				node.regionCircle.rgbColor = VisFunctions.stringToColor(newValue);
+				node.regionCircle.setFill(Color.rgb(node.regionCircle.rgbColor.get(0), node.regionCircle.rgbColor.get(1), node.regionCircle.rgbColor.get(2)));
+				// Setting font color for visibility //
+				if(VisFunctions.colorTest(node.regionCircle.rgbColor) == true){
+					node.regionCircle.text.setFill(Color.BLACK);
+				}else{
+					node.regionCircle.text.setFill(Color.WHITE);
+				}
 			}
 		});
 		return textField;
 	}
 	
+
 	static TextField institNameBuilder(final instituteNode node){
 		TextField textField = new TextField();
 		textField.setText((String) node.name);
@@ -149,6 +168,7 @@ public class FormBuilderFunctions {
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
+
 			}
 		});
 		return textField;
@@ -282,6 +302,7 @@ public class FormBuilderFunctions {
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
+
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {

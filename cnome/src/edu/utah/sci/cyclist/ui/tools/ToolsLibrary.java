@@ -42,11 +42,8 @@ public class ToolsLibrary {
 		new WorkspaceToolFactory(),
 		new CycicToolFactory(),
 		new CommoditiesViewToolFactory(),
-		new FormBuilderToolFactory(),
 		new InstitutionViewToolFactory(),
-		new MarketViewToolFactory(),
 		new RecipeFormToolFactory(),
-		new RegionViewToolFactory(),
 		new SimulationInfoToolFactory(),
 		new RegionCorralViewToolFactory(),
 		new FacilitySorterToolFactory()
