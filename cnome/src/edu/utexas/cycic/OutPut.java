@@ -484,7 +484,7 @@ public class OutPut {
 	}
 	
 	static Element outputRegion(Document doc, regionNode region){
-		Element regionElement = doc.createElement("market");
+		Element regionElement = doc.createElement("regionNode");
 		Element regionName = doc.createElement("name");
 		regionName.appendChild(doc.createTextNode((String) region.name));
 		regionElement.appendChild(regionName);
