@@ -111,6 +111,8 @@ public class OutPut {
 				recipeBuilder(doc, rootElement, recipe);
 			}
 			
+			saveFile(doc, rootElement);
+			
 			// Writing out the xml file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
@@ -124,7 +126,6 @@ public class OutPut {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
-		saveFile();
 	}
 	/**
 	 * Sets up the control information for the simulation.
@@ -366,37 +367,17 @@ public class OutPut {
 		rootElement.appendChild(marketModel);	
 	}
 	
-	
-	public static void saveFile(){
-		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
-			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("CycicSimulation");
-			doc.appendChild(rootElement);
+	public static void saveFile(Document doc, Element rootElement){
+			Element cycicElement = doc.createElement("CycicSimulation");
+			rootElement.appendChild(cycicElement);
 			
 			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){				
-				rootElement.appendChild(outputFacility(doc, facility));
+				cycicElement.appendChild(outputFacility(doc, facility));
 			}
 			
 			for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
-				rootElement.appendChild(outputMarket(doc, market));
+				cycicElement.appendChild(outputMarket(doc, market));
 			}
-			
-			
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			DOMSource source = new DOMSource(doc);
-			//StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
-			StreamResult result = new StreamResult(new File("savefile.xml"));
-			
-			transformer.transform(source, result);
-			
-		} catch (ParserConfigurationException pce){
-			pce.printStackTrace();
-		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
-		}
 	}
 	
 	public static void loadFile(File file){
@@ -407,7 +388,7 @@ public class OutPut {
 			
 			doc.getDocumentElement().getNodeName();
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
-			NodeList facList = doc.getElementsByTagName("facility");
+			NodeList facList = doc.getElementsByTagName("facilityNode");
 			
 			for (int i = 0; i < facList.getLength(); i++){
 				org.w3c.dom.Node facNode = facList.item(i);
@@ -427,7 +408,7 @@ public class OutPut {
 				tempNode.cycicCircle.menu.setLayoutY(yPosition);
 			}
 			
-			NodeList marketList = doc.getElementsByTagName("market");
+			NodeList marketList = doc.getElementsByTagName("marketNode");
 			
 			for (int i = 0; i < marketList.getLength(); i++){
 				org.w3c.dom.Node marketNode = marketList.item(i);
@@ -450,7 +431,7 @@ public class OutPut {
 	}
 	
 	static Element outputFacility(Document doc, facilityNode facility){
-		Element facElement = doc.createElement("facility");
+		Element facElement = doc.createElement("facilityNode");
 		// Name
 		Element facName = doc.createElement("name");
 		facName.appendChild(doc.createTextNode((String) facility.name));
@@ -483,7 +464,7 @@ public class OutPut {
 	}
 	
 	static Element outputMarket(Document doc, MarketCircle market){
-		Element markElement = doc.createElement("market");
+		Element markElement = doc.createElement("marketNode");
 		Element marketName = doc.createElement("name");
 		marketName.appendChild(doc.createTextNode((String) market.name));
 		markElement.appendChild(marketName);
