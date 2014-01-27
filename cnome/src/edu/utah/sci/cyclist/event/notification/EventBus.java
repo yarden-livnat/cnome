@@ -26,6 +26,7 @@ public abstract class EventBus {
 	
 	public abstract void addHandler(String type, String target, CyclistNotificationHandler handler); 
 	public abstract void removeHandler(String type, String target, CyclistNotificationHandler handler);
+	public abstract void removeAllTargetHandlers(String target);
 	
 	public abstract void notify(CyclistNotification event);
 	

@@ -24,8 +24,10 @@ package edu.utah.sci.cyclist.event.notification;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SimpleEventBus extends EventBus {
 
@@ -55,9 +57,31 @@ public class SimpleEventBus extends EventBus {
 						break;
 					}
 				}
-			} else {
+			} else if(target != null && !target.isEmpty()) {
+				if (list.get(0).targetId.equals(target)) {
+					_handlers.remove(type);
+				}
+			} else{
 				_handlers.remove(type);
 			}
+		}
+	}
+	
+	/**
+	 * Removes all the handlers of the specified target.
+	 * @param String Target - the target id to remove.
+	 */
+	@Override
+	public void removeAllTargetHandlers(String target){
+		
+		//First save all the keys - to prevent deleting keys from the map while iterating it.
+		List<String> types = new ArrayList<String>();
+		for(String key:_handlers.keySet()){
+			types.add(key);
+		}
+						
+		for (String type :types) {
+		    removeHandler(type, target, null);
 		}
 	}
 	

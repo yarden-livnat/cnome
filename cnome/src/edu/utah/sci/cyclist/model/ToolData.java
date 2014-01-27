@@ -131,9 +131,6 @@ public class ToolData {
 			e.printStackTrace();
 		}
 		
-		String tmp = _tool.getName();
-		System.out.println(tmp);
-		
 		if(_tool.getClass().equals(TableTool.class)){
 			IMemento tableMemento = memento.getChild("toolTable");
 			_tableName = tableMemento.getString("name");

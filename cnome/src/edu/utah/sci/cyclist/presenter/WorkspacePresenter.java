@@ -207,6 +207,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                                         if (presenter.getId().equals(id)) {
                                                 _presenters.remove(presenter);
                                                 getWorkspace().removeView((ViewBase)presenter.getView());
+                                                removePresenterIdFromEventBus(id);
                                                 break;
                                         }
                                 }
@@ -391,7 +392,12 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                 return _localBus;
         }
         
+        private void removePresenterIdFromEventBus(String target){
+        	_localBus.removeAllTargetHandlers(target);
+        }
+        
         public void addLocalNotificationHandler(String type, CyclistNotificationHandler handler) {
                 _localBus.addHandler(type, getId(), handler);
         }
+        
 }
