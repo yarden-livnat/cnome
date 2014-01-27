@@ -104,7 +104,7 @@ public class SelectionModel {
 	
 	public void setRemoteTables(List<SelectionModel.Entry> list) {
 		for (Entry entry : list) {
-			addTable((Table)entry.object, entry.remote, entry.active, entry.remoteActive);
+			addTable((Table)entry.object, true/*entry.remote*/, entry.active, entry.remoteActive);
 		}
 	}
 	

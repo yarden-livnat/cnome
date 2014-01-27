@@ -392,6 +392,10 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                 return _localBus;
         }
         
+        /* 
+         * Calls the local event bus to remove all the handlers of the specified target.
+         * @param String target - the target id to be removed.
+         */
         private void removePresenterIdFromEventBus(String target){
         	_localBus.removeAllTargetHandlers(target);
         }
