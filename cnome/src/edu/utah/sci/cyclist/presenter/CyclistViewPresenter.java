@@ -80,7 +80,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void setRemoteTables(List<SelectionModel.Entry> list) {
 		for (SelectionModel.Entry record : list) {
 			// infom the view but let the selection model determine if it should be active
-			getView().addTable(record.table, true /*remote*/, false /* active */);
+			getView().addTable((Table)record.object, true /*remote*/, false /* active */);
 			//getSelectionModel().addTable(record.table, true, false, record.active);
 		}
 		getSelectionModel().setRemoteTables(list);

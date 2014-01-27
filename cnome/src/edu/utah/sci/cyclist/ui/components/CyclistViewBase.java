@@ -248,14 +248,20 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	@Override
 	public void removeTable(Table table) {
 		ButtonEntry entry = _buttons.remove(table);
-		_dataBar.getChildren().remove(entry.button);
-		if (entry.remote)
-			_numOfRemotes--;
+		if(entry != null){
+			_dataBar.getChildren().remove(entry.button);
+			if (entry.remote)
+				_numOfRemotes--;
+		}
 	}
 	
 	@Override
 	public void selectTable(Table table, boolean value) {
-		_buttons.get(table).button.setSelected(value);
+		try{
+			_buttons.get(table).button.setSelected(value);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

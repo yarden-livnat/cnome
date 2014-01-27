@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.presenter;
 
+import javafx.scene.control.SelectionMode;
+
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
@@ -38,8 +40,8 @@ public class ChartPresenter extends CyclistViewPresenter {
 		copy.setView(view);
 		
 		// copy tables
-		for (SelectionModel.Entry entry : getSelectionModel().getEntries()) {
-			copy.addTable(entry.table, entry.remote, entry.active, entry.remoteActive);
+		for (SelectionModel.Entry entry : getSelectionModel().getEntries(SelectionModel.selectedTypes.TABLE)) {
+			copy.addTable((Table)entry.object, entry.remote, entry.active, entry.remoteActive);
 		}
 		
 		ChartView chartView = (ChartView) view;
