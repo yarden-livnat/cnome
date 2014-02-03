@@ -430,8 +430,17 @@ public class Table {
 	}
 	
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
-		final CyclistDatasource ds = getDataSource();
-		
+		CyclistDatasource ds = getDataSource();
+		return getRows(ds, n);
+	}
+	
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds, final int n) {
+		return getRows(ds, n, false);
+	}
+	
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds1, final int n, boolean force) {
+		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
+
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
 
 			@Override
@@ -472,49 +481,60 @@ public class Table {
 	}
 	
 	public Task<ObservableList<Object>> getFieldValues(final Field field) {
-		final CyclistDatasource ds = getDataSource();
-		
+		CyclistDatasource ds = getDataSource();
+		return getFieldValues(ds, field);
+	}
+	
+	public Task<ObservableList<Object>> getFieldValues(CyclistDatasource ds, final Field field)
+	{
+		return getFieldValues(ds, field, false);
+	}
+	
+	public Task<ObservableList<Object>> getFieldValues(CyclistDatasource ds1, final Field field, boolean force) {
+		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
+			
 		Task<ObservableList<Object>> task = new Task<ObservableList<Object>>() {
 			@Override
 			protected ObservableList<Object> call() throws Exception {
 				List<Object> values = new ArrayList<>();
-				values = readFieldValuesFromFile(field.getName());
-				if(values.size() == 0)
-				{
-					try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
-//						updateMessage("connecting");
-						updateMessage("querying");
-						System.out.println("querying field values");
-						long t1 = System.currentTimeMillis();
-					
-						// TODO: Fix this query building hack 
-						String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
-						log.debug("query: "+query);
-						System.out.println(query);
-						ResultSet rs = stmt.executeQuery(query);
-						long t2 = System.currentTimeMillis();
-						System.out.println("time: "+(t2-t1)/1000.0);
-					
-						while (rs.next()) {
-							if (isCancelled()) {
-								System.out.println("task canceled");
-								stmt.cancel();
-								updateMessage("Canceled");
-								break;
+				if (ds != null) {
+					values = readFieldValuesFromFile(field.getName());
+					if(values.size() == 0)
+					{
+						try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+							updateMessage("querying");
+							System.out.println("querying field values");
+							long t1 = System.currentTimeMillis();
+						
+							// TODO: Fix this query building hack 
+							String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
+							log.debug("query: "+query);
+							System.out.println(query);
+							ResultSet rs = stmt.executeQuery(query);
+							long t2 = System.currentTimeMillis();
+							System.out.println("time: "+(t2-t1)/1000.0);
+						
+							while (rs.next()) {
+								if (isCancelled()) {
+									System.out.println("task canceled");
+									stmt.cancel();
+									updateMessage("Canceled");
+									break;
+								}
+							
+								values.add(rs.getObject(1));
 							}
 						
-							values.add(rs.getObject(1));
+							long t3 = System.currentTimeMillis();
+							System.out.println("gathering time: "+(t3-t2)/1000.0);
+							writeFieldValuesToFile(field.getName(), values);
+						} catch (SQLException e) {
+							System.out.println("task sql exception: "+e.getLocalizedMessage());
+							updateMessage(e.getLocalizedMessage());
+							throw new Exception(e.getMessage(), e);
+						} finally {
+							ds.releaseConnection();
 						}
-					
-						long t3 = System.currentTimeMillis();
-						System.out.println("gathering time: "+(t3-t2)/1000.0);
-						writeFieldValuesToFile(field.getName(), values);
-					} catch (SQLException e) {
-						System.out.println("task sql exception: "+e.getLocalizedMessage());
-						updateMessage(e.getLocalizedMessage());
-						throw new Exception(e.getMessage(), e);
-					} finally {
-						ds.releaseConnection();
 					}
 				}
 				return FXCollections.observableList(values);
@@ -529,7 +549,16 @@ public class Table {
 	}
 	
 	public Task<ObservableList<Row>> getRows(final String query) {
-		final CyclistDatasource ds = getDataSource();
+		CyclistDatasource ds = getDataSource();
+		return getRows(ds, query);
+	}
+	
+	public Task<ObservableList<Row>> getRows(CyclistDatasource ds, final String query) {
+		return getRows(ds, query, false);
+	}
+	
+	public Task<ObservableList<Row>> getRows(CyclistDatasource ds1, final String query, boolean force) {
+		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
 		
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
 
@@ -590,9 +619,18 @@ public class Table {
 		
 		return task;
 	}
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final List<Field> fields, final int limit) {
-		final CyclistDatasource ds = getDataSource();
-		
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows( List<Field> fields,  int limit) {
+		CyclistDatasource ds = getDataSource();
+		return getRows(ds, fields, limit);
+	}
+	
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds,  List<Field> fields,  int limit) {
+		return getRows(ds, fields, limit, false);
+	}
+	
+	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds1,  final List<Field> fields, final int limit, boolean force) {
+		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
+
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
 
 			@Override
