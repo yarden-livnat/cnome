@@ -8,10 +8,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -20,6 +21,7 @@ import edu.utah.sci.cyclist.model.Simulation;
 
 public class SimulationEditorWizard extends VBox {
 	
+	private TextField _aliasField;
 	// GUI elements
 	private Stage                 _dialog;
 	private ObjectProperty<Simulation> _selection = new SimpleObjectProperty<>();
@@ -41,8 +43,8 @@ public class SimulationEditorWizard extends VBox {
 	private void createDialog(Simulation simulation){	
 
 		_dialog = new Stage();
-		_dialog.setTitle("Delete Simulation");
-		_dialog.setHeight(100);
+		_dialog.setTitle("Edit Simulation");
+		_dialog.setHeight(150);
 		
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
@@ -53,21 +55,36 @@ public class SimulationEditorWizard extends VBox {
 		private Scene createScene(final Stage dialog, final Simulation simulation) {
 
 			VBox vbox = new VBox();
-			vbox.setSpacing(5);
+			vbox.setSpacing(10);
 			vbox.setAlignment(Pos.CENTER);
-			vbox.setMinWidth(350);
+			vbox.setMinWidth(300);
+			vbox.setPadding(new Insets(5));
 			
-			Text text = new Text("Delete Simulation:  " + simulation.getSimulationId());
-			text.setFont(new Font(12));
+			HBox aliasHbox = new HBox();
+			aliasHbox.setSpacing(10);
+			aliasHbox.setAlignment(Pos.CENTER_LEFT);
+			aliasHbox.setPadding(new Insets(5));
+			
+			Label aliasLbl =  new Label("Alias:");
+			aliasLbl.setAlignment(Pos.CENTER);
+			aliasLbl.setFont(new Font(12));
+			aliasLbl.setPadding(new Insets(3,0,0,0));
+			
+			_aliasField = new TextField();
+			_aliasField.setPrefWidth(210);
+			_aliasField.setMinHeight(20);
+			
+			aliasHbox.getChildren().addAll(aliasLbl, _aliasField);
 			
 			HBox hbox = new HBox();
 			hbox.setAlignment(Pos.CENTER);
 			hbox.setSpacing(10);
 			hbox.setPadding(new Insets(5));
 			
+			Button ok  = new Button("OK");
 			Button delete = new Button("Delete");
 			Button cancel = new Button("Cancel");
-			hbox.getChildren().addAll(delete,cancel);
+			hbox.getChildren().addAll(ok,delete,cancel);
 			cancel.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent arg0) {
@@ -81,8 +98,17 @@ public class SimulationEditorWizard extends VBox {
 					_dialog.hide();
 				};
 			});
+			ok.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent arg0) {
+					Simulation simulation = new Simulation("edit");
+					simulation.setAlias(_aliasField.getText());
+					_selection.set(simulation);
+					_dialog.hide();
+				};
+			});
 			
-			vbox.getChildren().addAll(text,hbox);
+			vbox.getChildren().addAll(aliasHbox, hbox);
 			
 			// Create the scene
 			Scene scene = new Scene(vbox);

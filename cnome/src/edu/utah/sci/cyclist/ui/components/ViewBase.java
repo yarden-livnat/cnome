@@ -23,17 +23,9 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.ui.components;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -43,29 +35,17 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.event.dnd.DnD.Status;
-import edu.utah.sci.cyclist.event.ui.FilterEvent;
-import edu.utah.sci.cyclist.model.Filter;
-import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
 
 public class ViewBase extends BorderPane implements View {
 	
@@ -91,8 +71,6 @@ public class ViewBase extends BorderPane implements View {
 	private final Resize resize = new Resize();
 	
 	private boolean _enableDragging = true;
-	
-
 	
 	// Actions
 	private Closure.V0 _onSelectAction = null;
@@ -140,7 +118,6 @@ public class ViewBase extends BorderPane implements View {
 				_actionsArea,
 				_minmaxButton,
 				_closeButton);
-		
 		
 		if (toplevel) {
 			_minmaxButton.setVisible(false);
@@ -236,12 +213,10 @@ public class ViewBase extends BorderPane implements View {
 	/*
 	 * Actions 
 	 */
-	
 	public void setOnSelectAction(Closure.V0 action) {
 		_onSelectAction = action;
 	}
-	
-	
+
 	public void addBar(Node bar) {
 		addBar(bar, HPos.LEFT);
 	}
@@ -337,9 +312,7 @@ public class ViewBase extends BorderPane implements View {
 		_header.setOnMouseClicked(eh);
 		setOnMouseClicked(eh);
 	}
-	
-	
-	
+		
 	private void setListeners() {	
 		setOnMouseMoved(_onMouseMove);
 		setOnMousePressed(_onMousePressed);

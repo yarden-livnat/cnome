@@ -29,6 +29,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -74,6 +75,13 @@ public class TablePresenter extends CyclistViewPresenter {
 				addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 			}
 		});
+		
+//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
+//			@Override
+//			public void call(Simulation simulation) {
+//				addSimulation(simulation, false/* remote */);
+//			}
+//		});
 	}
 	
 	/**

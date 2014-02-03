@@ -48,8 +48,6 @@ import edu.utah.sci.cyclist.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.controller.XMLMemento;
 import edu.utah.sci.cyclist.util.QueryBuilder;
 import edu.utah.sci.cyclist.util.SQL;
-import edu.utah.sci.cyclist.util.SQL.Function;
-
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -88,6 +86,7 @@ public class Table {
 	private SourceLocation _sourceLocation;
 	private int _dataSubset;
 	private String _saveDir = "";
+	private Boolean _isStandardSimulation = false;
 	
 	public Table() {
 		this("");
@@ -113,7 +112,7 @@ public class Table {
 	
     // Save the table
 	public void save(IMemento memento) {
-
+		
 		// Set the name
 		memento.putString("name", getName());
 		
@@ -243,6 +242,21 @@ public class Table {
 			System.out.println("Error while parsing schema: "+e.getMessage());
 		}
 		_schema.update();
+	}
+	
+	/*
+	 * Restores table from the simulation configuration file.
+	 * Restores only the information which is relevant to the simulation.
+	 */
+	public void restoreSimulated(IMemento memento){
+		setName(memento.getString("name"));
+		setDataSource(null);
+		
+		// Restore the schema
+		Schema schema = new Schema(this);
+		schema.restoreSimulated(memento.getChild("Schema"));
+		setSchema(schema);
+		_isStandardSimulation = true;
 	}
 
 //	private void printTypeInfo(Connection conn) {
@@ -404,6 +418,15 @@ public class Table {
 	
 	public QueryBuilder queryBuilder() {
 		return new QueryBuilder(this);
+	}
+	
+	/*
+	 * Returns whether the table was loaded for simulation purpose 
+	 * (from the simulation configuration file)
+	 * @return true- if the table is for simulation, false - otherwise.
+	 */
+	public Boolean getIsStandardSimulation(){
+		return _isStandardSimulation;
 	}
 	
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {

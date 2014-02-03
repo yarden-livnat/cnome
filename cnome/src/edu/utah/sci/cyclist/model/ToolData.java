@@ -66,7 +66,7 @@ public class ToolData {
 		_point = new Point2D(x, y);
 		_tool = tool;
 		_tableName = table.getName();
-		_dataSourceUid = table.getDataSource().getUID();
+		_dataSourceUid = table.getDataSource()!=null?table.getDataSource().getUID():"";
 		_width = width;
 		_height = height;
 	}
@@ -130,9 +130,6 @@ public class ToolData {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		String tmp = _tool.getName();
-		System.out.println(tmp);
 		
 		if(_tool.getClass().equals(TableTool.class)){
 			IMemento tableMemento = memento.getChild("toolTable");

@@ -1,15 +1,21 @@
 package edu.utah.sci.cyclist.presenter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.utah.sci.cyclist.model.Table;
 
 public class SingleSelection extends SelectionModel {
-	private Entry _current = null;
+	//private Entry _current = null;
+	
+	//Saves the current selection For each selected type.
+	private Map<selectedTypes,Entry> _currentMap = new HashMap<selectedTypes,Entry>();
 	
 	@Override
 	public Table getSelected() {
-		return _current == null ? null : _current.table;
+//		return _current == null ? null : _current.table;
+		return _currentMap.get(selectedTypes.TABLE)== null ? null : (Table)_currentMap.get(selectedTypes.TABLE).object;
 	}
 	
 	@Override
@@ -17,7 +23,7 @@ public class SingleSelection extends SelectionModel {
 		super.addTable(table, remote, false, remoteActive);
 		
 		if (active) {
-			if (_current == null) {
+			if (_currentMap.get(selectedTypes.TABLE) == null) {
 				selectTable(table, true);
 			} else if (!remote) {
 				selectTable(table, true);
@@ -39,28 +45,32 @@ public class SingleSelection extends SelectionModel {
 	 */
 	public void selectTable(Table table, boolean active) {
 		Entry entry = getEntry(table);
+		Entry current = _currentMap.get(selectedTypes.TABLE);
 		//System.out.println("   SingleSelectionModel: selectTable: "+table.getName()+"  active:"+active+(entry.active == active? "   ignore": ""));
-		if (entry.active == active) {
+		
+		if (entry== null || entry.active == active) {
 			// ignore
 		} else if (active) {
-			if (_current != null) {
-				if (!_current.remote && entry.remote) {
+			if (current != null) {
+				if (!current.remote && entry.remote) {
 					// ignore.  
 					// switch from a local to a remote on on user explicit request (tableSelected) 
 					entry.remoteActive = true;
 					return;
 				} else {
-					_current.active = false;
-					selectTableAction(_current.table, false);
+					current.active = false;
+					selectTableAction((Table)current.object, false);
 				}
 			}
-			_current = entry;
+			current = entry;
 			entry.active = true;
+			_currentMap.put(selectedTypes.TABLE,current);
 			selectTableAction(table, true);
 		} else /* unselect */ {
 			entry.active = false;
-			if (entry == _current) {
-				_current = null;
+			if (entry == current) {
+				//current = null;
+				_currentMap.remove(selectedTypes.TABLE);
 			}
 			selectTableAction(table, false);
 			
@@ -75,28 +85,35 @@ public class SingleSelection extends SelectionModel {
 	public void tableSelected(Table table, boolean active) {
 		//System.out.println("tableSelected: "+table.getName()+"  active:"+active);
 		Entry entry = getEntry(table);
+		Entry current = _currentMap.get(selectedTypes.TABLE);
+		
 		if (entry == null || entry.active == active) {
 			// ignore
 		} else if (active) {
-			if (_current != entry && _current != null) {
-				_current.active = false;
-				selectTableAction(_current.table, false);
+			if (current != entry && current != null) {
+				current.active = false;
+				selectTableAction((Table)current.object, false);
 			}
-			_current = entry;
-			_current.active = true;
+			current = entry;
+			current.active = true;
 			// inform the world this table is now active.
-			selectTableAction(_current.table, true);
+			selectTableAction((Table)current.object, true);
 		} else /* not active */ {
-			_current.active = false;
-			_current = null;
+			current.active = false;
+			current = null;
+			_currentMap.remove(selectedTypes.TABLE);
 			
 			// check if there is a remoteActive
 			for (Entry remoteEntry : getRemotes()) {
 				if (remoteEntry.remoteActive) {
-					selectTable(remoteEntry.table, true);
+					selectTable((Table)remoteEntry.object, true);
 					break;
 				}
 			}
+		}
+		//Update the current selected table in the map.
+		if(current != null){
+			_currentMap.put(selectedTypes.TABLE,current);
 		}
 	}
 	
@@ -107,7 +124,7 @@ public class SingleSelection extends SelectionModel {
 		// select the first active entry
 		for (Entry entry : list) {
 			if (entry.remoteActive) {
-				selectTable(entry.table, true);
+				selectTable((Table)entry.object, true);
 				break;
 			}
 		}

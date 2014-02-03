@@ -29,6 +29,4 @@ import javafx.event.EventHandler;
 public interface View {
 	ObjectProperty<EventHandler<ActionEvent>> onMinmaxProperty();
 	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
-	
-	
 }

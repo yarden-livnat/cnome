@@ -12,6 +12,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.model.Filter;
 import edu.utah.sci.cyclist.model.Table;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.ui.CyclistView;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -59,6 +60,12 @@ public class CyclistViewPresenter extends ViewPresenter {
 					broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_FILTER, filter));
 				}
 			});
+			getView().setOnSimulationDrop(new Closure.V1<Simulation>(){
+				@Override
+				public void call(Simulation simulation) {
+//					getSelectionModel().addSimulation(simulation);
+				}
+			});
 		}
 	}
 	
@@ -73,7 +80,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void setRemoteTables(List<SelectionModel.Entry> list) {
 		for (SelectionModel.Entry record : list) {
 			// infom the view but let the selection model determine if it should be active
-			getView().addTable(record.table, true /*remote*/, false /* active */);
+			getView().addTable((Table)record.object, true /*remote*/, false /* active */);
 			//getSelectionModel().addTable(record.table, true, false, record.active);
 		}
 		getSelectionModel().setRemoteTables(list);
@@ -93,6 +100,11 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void removeTable(Table table) {
 		getSelectionModel().removeTable(table);
 		getView().removeTable(table);
+	}
+	
+	public void addSimulation(Simulation simulation, boolean remote) {
+		getView().addSimulation(simulation, remote, false);
+//		getSelectionModel().addTable(table, remote, active, remoteActive);
 	}
 	
 	public List<SelectionModel.Entry> getTableRecords() {

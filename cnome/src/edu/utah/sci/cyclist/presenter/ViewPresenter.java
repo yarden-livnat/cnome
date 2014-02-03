@@ -68,6 +68,4 @@ public class ViewPresenter extends PresenterBase{
 	public void onViewSelected(View view) {
 		broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view));	
 	}
-
-	
 }

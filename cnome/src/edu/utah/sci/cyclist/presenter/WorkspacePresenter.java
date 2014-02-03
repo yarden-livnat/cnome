@@ -99,7 +99,6 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                                 public void call(Table table) {
                                         removeTable(table);
                                         broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, table));
-                                        getSelectionModel().removeTable(table);
                                 }
                         });
                         
@@ -208,6 +207,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                                         if (presenter.getId().equals(id)) {
                                                 _presenters.remove(presenter);
                                                 getWorkspace().removeView((ViewBase)presenter.getView());
+                                                removePresenterIdFromEventBus(id);
                                                 break;
                                         }
                                 }
@@ -305,6 +305,50 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                         }
                 });
                 
+                // Handlers for an internal workspace.
+                addNotificationHandler(CyclistNotifications.DATASOURCE_ADD, new CyclistNotificationHandler() {
+        			
+        			@Override
+        			public void handle(CyclistNotification event) {
+        				CyclistTableNotification notification = (CyclistTableNotification) event;
+        				
+        				addTable(notification.getTable(), true /*remote*/, false /* active */, false /* remoteActive */);
+        				broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, notification.getTable()));
+        			}
+        		});
+                
+                addNotificationHandler(CyclistNotifications.DATASOURCE_REMOVE, new CyclistNotificationHandler() {
+        			
+        			@Override
+        			public void handle(CyclistNotification event) {
+        				CyclistTableNotification notification = (CyclistTableNotification) event;
+        				removeTable(notification.getTable());
+        				broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_REMOVE, notification.getTable()));
+        			}
+        		});
+                
+                addNotificationHandler(CyclistNotifications.DATASOURCE_SELECTED, new CyclistNotificationHandler() {
+        			
+        			@Override
+        			public void handle(CyclistNotification event) {
+        				CyclistTableNotification notification = (CyclistTableNotification) event;
+        				getSelectionModel().selectTable(notification.getTable(), true);
+        				if(!getSelectionModel().IsRemoteActive(notification.getTable())){
+        					broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_SELECTED, notification.getTable()));
+        				}
+        			}
+        		});
+                
+                addNotificationHandler(CyclistNotifications.DATASOURCE_UNSELECTED, new CyclistNotificationHandler() {
+        			
+        			@Override
+        			public void handle(CyclistNotification event) {
+        				CyclistTableNotification notification = (CyclistTableNotification) event;
+        				getSelectionModel().selectTable(notification.getTable(), false);
+        				broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_UNSELECTED, notification.getTable()));
+        			}
+        		});
+                
         }
         
         private void duplicateView(ViewPresenter presenter) {
@@ -348,7 +392,16 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                 return _localBus;
         }
         
+        /* 
+         * Calls the local event bus to remove all the handlers of the specified target.
+         * @param String target - the target id to be removed.
+         */
+        private void removePresenterIdFromEventBus(String target){
+        	_localBus.removeAllTargetHandlers(target);
+        }
+        
         public void addLocalNotificationHandler(String type, CyclistNotificationHandler handler) {
                 _localBus.addHandler(type, getId(), handler);
         }
+        
 }

@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.presenter;
 
+import javafx.scene.control.SelectionMode;
+
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
@@ -7,6 +9,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.views.ChartView;
@@ -37,8 +40,8 @@ public class ChartPresenter extends CyclistViewPresenter {
 		copy.setView(view);
 		
 		// copy tables
-		for (SelectionModel.Entry entry : getSelectionModel().getEntries()) {
-			copy.addTable(entry.table, entry.remote, entry.active, entry.remoteActive);
+		for (SelectionModel.Entry entry : getSelectionModel().getEntries(SelectionModel.selectedTypes.TABLE)) {
+			copy.addTable((Table)entry.object, entry.remote, entry.active, entry.remoteActive);
 		}
 		
 		ChartView chartView = (ChartView) view;
@@ -88,6 +91,13 @@ public class ChartPresenter extends CyclistViewPresenter {
 				broadcast(new CyclistNotification(CyclistNotifications.DUPLICATE_VIEW));
 			}
 		});
+		
+//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
+//			@Override
+//			public void call(Simulation simulation) {
+//				addSimulation(simulation, false/* remote */);
+//			}
+//		});
 	}
 	
 	/**

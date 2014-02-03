@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 
 public interface CyclistView extends View {
@@ -18,6 +19,9 @@ public interface CyclistView extends View {
 	void addTable(Table table, boolean remote, boolean active);
 	void removeTable(Table table);
 	void selectTable(Table table, boolean value);
+	
+	void addSimulation(Simulation simulation, boolean remote, boolean active);
+	void setOnSimulationDrop(Closure.V1<Simulation> action);
 	
 	ObservableList<Filter> remoteFilters();
 }

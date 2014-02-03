@@ -125,4 +125,19 @@ public class Schema {
 			addField(field);
 		}
 	}
+	
+	/*
+	 * Restores the schemas of tables, defined in the simulation configuration file.
+	 */
+	public void restoreSimulated(IMemento memento) {
+
+		// Restore each field
+		IMemento[] list = memento.getChildren("field");
+		for(IMemento fieldMemento: list){
+			Field field = new Field();
+			field.setTable(_table);
+			field.restoreSimulated(fieldMemento);
+			addField(field);
+		}
+	}
 }

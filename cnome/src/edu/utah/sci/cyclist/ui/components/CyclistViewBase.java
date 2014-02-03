@@ -5,13 +5,10 @@ import static java.util.Arrays.asList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -30,6 +27,7 @@ import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.dnd.DnD.Status;
 import edu.utah.sci.cyclist.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.CyclistView;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
@@ -39,6 +37,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 
 	private HBox _dataBar;
 	private FilterArea _filtersArea;
+	private HBox _simulationBar;
 	
 	class ButtonEntry {
 		public ToggleButton button;
@@ -51,6 +50,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	}
 	
 	private Map<Table, ButtonEntry> _buttons = new HashMap<>();
+	private Map<Simulation, ButtonEntry> _simulationButtons = new HashMap<>();
 	private int _numOfRemotes = 0;
 	
 	// Actions
@@ -59,6 +59,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
 	private Closure.V1<Filter> _onRemoveFilter = null;
+	private Closure.V1<Simulation> _onSimulationDrop = null;
 	
 	/**
 	 * Constructor
@@ -87,6 +88,16 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_dataBar.setAlignment(Pos.CENTER_LEFT); 
 		
 		_dataBar.getChildren().add(new Label("|"));
+		
+		_simulationBar = new HBox();
+		_simulationBar.setId("simulationbar");
+		_simulationBar.getStyleClass().add("data-bar");
+		_simulationBar.setSpacing(2);
+		_simulationBar.setMinWidth(5);
+		_simulationBar.setFillHeight(true);
+		_simulationBar.setAlignment(Pos.CENTER_LEFT);
+		_simulationBar.getChildren().add(new Label("|"));
+		
 				
 		_filtersArea = new FilterArea();
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
@@ -97,6 +108,10 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		getHeader().getChildren().addAll(1,
 				asList(
 				_taskControl,
+				new Label("Simulations:"),
+				new Text("["),
+				_simulationBar,
+				new Text("] "),
 				new Label("Tables:"),
 				new Text("["),
 				_dataBar,
@@ -108,9 +123,11 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 				));
 		
 		_dataBar.setAlignment(Pos.CENTER_LEFT);
+		_simulationBar.setAlignment(Pos.CENTER_LEFT);
 		
 		setDatasourcesListeners();
 		setFiltersListeners();
+		setSimulationsListeners();
 	}
 	
 	public ViewBase clone() {
@@ -145,6 +162,14 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	}
 	public void setOnTableSelectedAction(Closure.V2<Table, Boolean> action) {
 		_onTableSelectedAction = action;
+	}
+	
+	public void setOnSimulationDrop(Closure.V1<Simulation> action) {
+		_onSimulationDrop = action;
+	}
+	
+	public Closure.V1<Simulation> getOnSimulationDrop() {
+		return _onSimulationDrop;
 	}
 	
 	
@@ -223,14 +248,34 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	@Override
 	public void removeTable(Table table) {
 		ButtonEntry entry = _buttons.remove(table);
-		_dataBar.getChildren().remove(entry.button);
-		if (entry.remote)
-			_numOfRemotes--;
+		if(entry != null){
+			_dataBar.getChildren().remove(entry.button);
+			if (entry.remote)
+				_numOfRemotes--;
+		}
 	}
 	
 	@Override
 	public void selectTable(Table table, boolean value) {
-		_buttons.get(table).button.setSelected(value);
+		try{
+			_buttons.get(table).button.setSelected(value);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void addSimulation(final Simulation simulation, boolean remote, boolean active ) {
+		final ToggleButton button = new ToggleButton(simulation.getAlias().substring(0, 1));
+		button.getStyleClass().add("flat-toggle-button");
+		button.setSelected(active);
+		_simulationButtons.put(simulation, new ButtonEntry(button, remote));
+		if (remote) {
+			_simulationBar.getChildren().add(_numOfRemotes, button);
+			_numOfRemotes++;
+		} else {
+			_simulationBar.getChildren().add(button);
+		}
 	}
 	
 	
@@ -272,6 +317,44 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	//Virtual method - should only be implemented in the sub class.
 	public void removeFilterFromDropArea(Filter filter){
 		;
+	}
+	
+	private void setSimulationsListeners() {
+		_simulationBar.setOnDragOver(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				Simulation simulation = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
+				if ( simulation != null ) {
+					if (_simulationButtons.containsKey(simulation)) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					}
+				}
+				event.consume();
+			}
+		});
+		
+		_simulationBar.setOnDragDropped(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				Simulation simulation = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
+				if (simulation != null) {
+					if (_simulationButtons.containsKey(simulation)) {
+						getLocalClipboard().setStatus(Status.IGNORED);
+					} else {	
+						getLocalClipboard().setStatus(Status.ACCEPTED);
+						addSimulation(simulation, false /*remote*/, false /*active*/);
+						if (_onSimulationDrop != null) {
+							_onSimulationDrop.call(simulation);
+						}
+						event.setDropCompleted(true);
+						event.consume();
+					}
+				}
+				
+			}
+		});
 	}
 	
 	private void setDatasourcesListeners() {
