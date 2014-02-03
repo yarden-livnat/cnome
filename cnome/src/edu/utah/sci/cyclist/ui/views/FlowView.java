@@ -2,25 +2,16 @@ package edu.utah.sci.cyclist.ui.views;
 
 import java.util.ArrayList;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.dnd.DnDSource;
@@ -28,7 +19,6 @@ import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
 
 public class FlowView extends CyclistViewBase {
 	public static final String ID = "flow-view";
@@ -64,24 +54,6 @@ public class FlowView extends CyclistViewBase {
 		setContent(vbox);
 		
 		addListeners();
-		
-//		pane.widthProperty().addListener(new ChangeListener<Number>() {
-//			@Override
-//			public void changed(ObservableValue<? extends Number> observable,
-//					Number oldValue, Number newValue) {
-//				redrawCanvas();
-//			}
-//		});
-//		
-//		pane.heightProperty().addListener(new ChangeListener<Number>() {
-//			@Override
-//			public void changed(ObservableValue<? extends Number> observable,
-//					Number oldValue, Number newValue) {
-//				redrawCanvas();
-//			}
-//		});
-//		
-//		redrawCanvas();
 	}
 	
 	
@@ -184,12 +156,13 @@ class Node extends Pane {
 		setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent arg0) {
+				_selected = !_selected;	
 				if (_selected) {
-					getStyleClass().remove("selected");
+					getStyleClass().add("foo");
 				} else {
-					getStyleClass().add("selected");
+					getStyleClass().remove("foo");
 				}
-				_selected = !_selected;				
+			
 			}
 		});
 		setOnMousePressed(new EventHandler<MouseEvent>() {
