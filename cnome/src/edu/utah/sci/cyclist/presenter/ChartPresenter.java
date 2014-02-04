@@ -18,8 +18,8 @@ public class ChartPresenter extends CyclistViewPresenter {
 
 	public ChartPresenter(EventBus bus) {
 		super(bus);
-		SingleSelection selectionModel = new SingleSelection();
-		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
 			public void call(Table table, Boolean value) {
@@ -29,7 +29,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModel);
+		setSelectionModel(selectionModelTbl);
 		addNotificationHandlers();
 	}
 	
@@ -40,8 +40,8 @@ public class ChartPresenter extends CyclistViewPresenter {
 		copy.setView(view);
 		
 		// copy tables
-		for (SelectionModel.Entry entry : getSelectionModel().getEntries(SelectionModel.selectedTypes.TABLE)) {
-			copy.addTable((Table)entry.object, entry.remote, entry.active, entry.remoteActive);
+		for (SelectionModel<Table>.Entry entry : getSelectionModel().getEntries()) {
+			copy.addTable(entry.item, entry.remote, entry.active, entry.remoteActive);
 		}
 		
 		ChartView chartView = (ChartView) view;
@@ -129,7 +129,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), true);
+				getSelectionModel().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -138,7 +138,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), false);			
+				getSelectionModel().selectItem(notification.getTable(), false);			
 			}
 		});
 	}

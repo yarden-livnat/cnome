@@ -17,7 +17,7 @@ import edu.utah.sci.cyclist.ui.CyclistView;
 import edu.utah.sci.cyclist.ui.View;
 
 public class CyclistViewPresenter extends ViewPresenter {
-	private SelectionModel _selectionModel = new SelectionModel();
+	private SelectionModel<Table> _selectionModelTbl = new SelectionModel<Table>();
 	
 	public CyclistViewPresenter(EventBus bus) {
 		super(bus);
@@ -37,7 +37,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 				
 				@Override
 				public void call(Table table, Boolean active) {
-					getSelectionModel().tableSelected(table, active);
+					getSelectionModel().itemSelected(table, active);
 				}
 			});
 			
@@ -77,13 +77,13 @@ public class CyclistViewPresenter extends ViewPresenter {
 			broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
 	}
 	
-	public void setRemoteTables(List<SelectionModel.Entry> list) {
-		for (SelectionModel.Entry record : list) {
+	public void setRemoteTables(List<SelectionModel<Table>.Entry> list) {
+		for (SelectionModel<Table>.Entry record : list) {
 			// infom the view but let the selection model determine if it should be active
-			getView().addTable((Table)record.object, true /*remote*/, false /* active */);
+			getView().addTable((Table)record.item, true /*remote*/, false /* active */);
 			//getSelectionModel().addTable(record.table, true, false, record.active);
 		}
-		getSelectionModel().setRemoteTables(list);
+		getSelectionModel().setRemoteItems(list);
 	}
 	
 	
@@ -93,12 +93,12 @@ public class CyclistViewPresenter extends ViewPresenter {
 	
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
 		getView().addTable(table, remote, false);
-		getSelectionModel().addTable(table, remote, active, remoteActive);
+		getSelectionModel().addItem(table, remote, active, remoteActive);
 	}
 	
 	
 	public void removeTable(Table table) {
-		getSelectionModel().removeTable(table);
+		getSelectionModel().removeItem(table);
 		getView().removeTable(table);
 	}
 	
@@ -107,16 +107,16 @@ public class CyclistViewPresenter extends ViewPresenter {
 //		getSelectionModel().addTable(table, remote, active, remoteActive);
 	}
 	
-	public List<SelectionModel.Entry> getTableRecords() {
-		return _selectionModel.getTableRecords();
+	public List<SelectionModel<Table>.Entry> getTableRecords() {
+		return _selectionModelTbl.getItemRecords();
 	}
 	
-	public SelectionModel getSelectionModel() {
-		return _selectionModel;
+	public SelectionModel<Table> getSelectionModel() {
+		return _selectionModelTbl;
 	}
 	
-	public void setSelectionModel(SelectionModel model) {
-		_selectionModel = model;
+	public void setSelectionModel(SelectionModel<Table> model) {
+		_selectionModelTbl = model;
 		
 	}
 

@@ -89,7 +89,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                                 public void call(Table table) {
                                         addTable(table, false /*remote*/, false /* active */, false /* remoteActive */);
                                         broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
-                                        getSelectionModel().selectTable(table, true);
+                                        getSelectionModel().selectItem(table, true);
                                 }
                                 
                         });
@@ -176,8 +176,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         
         private void build() {
                 
-                SelectionModel selectionModel = new SingleSelection();
-                selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+                SelectionModel<Table> selectionModelTbl = new SingleSelection<Table>();
+                selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
                         @Override
                         public void call(Table table, Boolean activate) {
@@ -188,7 +188,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                 
                 });
                 
-                setSelectionModel(selectionModel);
+                setSelectionModel(selectionModelTbl);
         }
         
         
@@ -332,8 +332,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         			@Override
         			public void handle(CyclistNotification event) {
         				CyclistTableNotification notification = (CyclistTableNotification) event;
-        				getSelectionModel().selectTable(notification.getTable(), true);
-        				if(!getSelectionModel().IsRemoteActive(notification.getTable())){
+        				getSelectionModel().selectItem(notification.getTable(), true);
+        				if(!getSelectionModel().isRemoteActive(notification.getTable())){
         					broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_SELECTED, notification.getTable()));
         				}
         			}
@@ -344,7 +344,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         			@Override
         			public void handle(CyclistNotification event) {
         				CyclistTableNotification notification = (CyclistTableNotification) event;
-        				getSelectionModel().selectTable(notification.getTable(), false);
+        				getSelectionModel().selectItem(notification.getTable(), false);
         				broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_UNSELECTED, notification.getTable()));
         			}
         		});

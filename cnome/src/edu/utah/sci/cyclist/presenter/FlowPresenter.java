@@ -13,8 +13,8 @@ public class FlowPresenter extends CyclistViewPresenter {
 
 	public FlowPresenter(EventBus bus) {
 		super(bus);
-		SingleSelection selectionModel = new SingleSelection();
-		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
 			public void call(Table table, Boolean value) {
@@ -24,7 +24,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModel);
+		setSelectionModel(selectionModelTbl);
 		addNotificationHandlers();
 	}
 	
@@ -83,7 +83,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), true);
+				getSelectionModel().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -92,7 +92,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), false);			
+				getSelectionModel().selectItem(notification.getTable(), false);			
 			}
 		});
 	}
