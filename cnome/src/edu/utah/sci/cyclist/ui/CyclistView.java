@@ -20,8 +20,12 @@ public interface CyclistView extends View {
 	void removeTable(Table table);
 	void selectTable(Table table, boolean value);
 	
-	void addSimulation(Simulation simulation, boolean remote, boolean active);
+	
 	void setOnSimulationDrop(Closure.V1<Simulation> action);
+	public Closure.V1<Simulation> getOnSimulationDrop();
+	
+	void addSimulation(Simulation simulation, boolean remote, boolean active);
+	void selectSimulation(Simulation simulation, boolean value);
 	
 	ObservableList<Filter> remoteFilters();
 }

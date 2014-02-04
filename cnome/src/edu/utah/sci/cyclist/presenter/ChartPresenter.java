@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.presenter;
 
-import javafx.scene.control.SelectionMode;
-
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
@@ -19,6 +17,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 	public ChartPresenter(EventBus bus) {
 		super(bus);
 		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
 		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
@@ -30,6 +29,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 		});
 		
 		setSelectionModel(selectionModelTbl);
+		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
 	
@@ -91,13 +91,6 @@ public class ChartPresenter extends CyclistViewPresenter {
 				broadcast(new CyclistNotification(CyclistNotifications.DUPLICATE_VIEW));
 			}
 		});
-		
-//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
-//			@Override
-//			public void call(Simulation simulation) {
-//				addSimulation(simulation, false/* remote */);
-//			}
-//		});
 	}
 	
 	/**

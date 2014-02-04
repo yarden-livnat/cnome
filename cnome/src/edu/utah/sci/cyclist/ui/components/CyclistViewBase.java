@@ -52,6 +52,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private Map<Table, ButtonEntry> _buttons = new HashMap<>();
 	private Map<Simulation, ButtonEntry> _simulationButtons = new HashMap<>();
 	private int _numOfRemotes = 0;
+	private int _numOfRemotesSimulations = 0;
 	
 	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
@@ -271,10 +272,19 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		button.setSelected(active);
 		_simulationButtons.put(simulation, new ButtonEntry(button, remote));
 		if (remote) {
-			_simulationBar.getChildren().add(_numOfRemotes, button);
-			_numOfRemotes++;
+			_simulationBar.getChildren().add(_numOfRemotesSimulations, button);
+			_numOfRemotesSimulations++;
 		} else {
 			_simulationBar.getChildren().add(button);
+		}
+	}
+	
+	@Override
+	public void selectSimulation(Simulation simulation, boolean value) {
+		try{
+			_simulationButtons.get(simulation).button.setSelected(value);
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 	
@@ -348,6 +358,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 						if (_onSimulationDrop != null) {
 							_onSimulationDrop.call(simulation);
 						}
+						selectSimulation(simulation, true);
 						event.setDropCompleted(true);
 						event.consume();
 					}

@@ -22,28 +22,17 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.event.notification;
 
-public class CyclistNotifications {
+import edu.utah.sci.cyclist.model.Simulation;
 
-	public static final String DATASOURCE_FOCUS 		= "datasource_focus";
-	public static final String DATASOURCE_ADD 			= "datasource_add";
-	public static final String DATASOURCE_REMOVE		= "datasource_remove";
-	public static final String DATASOURCE_SELECTED 		= "datasource_selected";
-	public static final String DATASOURCE_UNSELECTED 	= "datasource_unselected";
+public class CyclistSimulationNotification extends CyclistNotification {
+	private Simulation _simulation;
 	
-	public static final String REMOVE_VIEW				= "remove_view";
-	public static final String VIEW_SELECTED			= "view_selected";
-	public static final String DUPLICATE_VIEW			= "duplicate_view";
+	public CyclistSimulationNotification(String type, Simulation simulation) {
+		super(type);
+		_simulation = simulation;
+	}
 	
-	public static final String SHOW_FILTER 				= "show_filter";
-	public static final String REMOVE_FILTER 			= "remove_filter";
-	public static final String HIDE_FILTER 				= "hide_filter";
-	public static final String HIGHLIGHT_FILTER 		= "highlight_filter";
-	public static final String UNHIGHLIGHT_FILTER 		= "unhighlight_filter";
-	public static final String HIGHLIGHT_FILTERS 		= "highlight_filters";
-	public static final String REMOVE_REMOTE_FILTER 	= "remove_remote_filter";
-	public static final String ADD_REMOTE_FILTER 		= "add_remote_filter";
-	
-	public static final String SIMULATION_ADD 			= "simulation_add";
-	public static final String SIMULATION_SELECTED 		= "simulation_selected";
-	public static final String SIMULATION_UNSELECTED 	= "simulation_unselected";
+	public Simulation getSimulation() {
+		return _simulation;
+	}
 }

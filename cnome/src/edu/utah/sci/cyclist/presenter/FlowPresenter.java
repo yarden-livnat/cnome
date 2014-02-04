@@ -6,6 +6,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -14,6 +15,8 @@ public class FlowPresenter extends CyclistViewPresenter {
 	public FlowPresenter(EventBus bus) {
 		super(bus);
 		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
+		
 		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
@@ -25,6 +28,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 		});
 		
 		setSelectionModel(selectionModelTbl);
+		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
 	

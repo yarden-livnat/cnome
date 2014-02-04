@@ -100,14 +100,12 @@ public class SelectionModel<T> {
 	}
 	
 	public class Entry {
-		//Table table;
 		T 		item;
 		boolean remote;
 		boolean active;
 		boolean remoteActive;
 		
-		public Entry(/*Table table*/ T item, boolean remote, boolean active, boolean remoteActive) {
-			//this.table = table;
+		public Entry( T item, boolean remote, boolean active, boolean remoteActive) {
 			this.item = item;
 			this.remote = remote;
 			this.active = active;
@@ -115,7 +113,6 @@ public class SelectionModel<T> {
 		}
 		
 		public Entry clone() {
-			//return new Entry(table, remote, active, remoteActive);
 			return new Entry(item, remote, active, remoteActive);
 		}
 	}

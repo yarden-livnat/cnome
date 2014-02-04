@@ -33,12 +33,14 @@ import edu.utah.sci.cyclist.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
+import edu.utah.sci.cyclist.event.notification.CyclistSimulationNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.model.Filter;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
@@ -147,6 +149,18 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                                         broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
                                 }
                         });
+                        
+                        workspace.setOnSimulationDrop(new Closure.V1<Simulation>() {
+
+                            @Override
+                            public void call(Simulation simulation) {
+                                    broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, simulation));
+                                    getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
+            						getSelectionModelSim().selectItem(simulation, true);
+                            }
+                            
+                        });
+                    
                 }
         }
 
@@ -177,6 +191,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         private void build() {
                 
                 SelectionModel<Table> selectionModelTbl = new SingleSelection<Table>();
+                SelectionModel<Simulation> selectionModelSim = new SingleSelection<Simulation>();
                 selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
                         @Override
@@ -188,7 +203,18 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                 
                 });
                 
+                selectionModelSim.setOnSelectItemAction(new Closure.V2<Simulation, Boolean>() {
+
+                    @Override
+                    public void call(Simulation simulation, Boolean activate) {  
+                            String msg = activate ? CyclistNotifications.SIMULATION_SELECTED : CyclistNotifications.SIMULATION_UNSELECTED;
+                            broadcast(getLocalEventBus(), new CyclistSimulationNotification(msg, simulation));
+                    }
+            
+            });
+                
                 setSelectionModel(selectionModelTbl);
+                setSelectionModelSim(selectionModelSim);
         }
         
         
@@ -348,6 +374,13 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         				broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_UNSELECTED, notification.getTable()));
         			}
         		});
+                addNotificationHandler(CyclistNotifications.SIMULATION_ADD, new CyclistNotificationHandler() {
+                	@Override
+        			public void handle(CyclistNotification event) {
+                		CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+                		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, notification.getSimulation()));
+                	}
+                });
                 
         }
         

@@ -46,6 +46,7 @@ public class TablePresenter extends CyclistViewPresenter {
 		super(bus);
 		
 		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
 		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
@@ -57,6 +58,7 @@ public class TablePresenter extends CyclistViewPresenter {
 		});
 		
 		setSelectionModel(selectionModelTbl);
+		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
 
@@ -75,13 +77,6 @@ public class TablePresenter extends CyclistViewPresenter {
 				addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 			}
 		});
-		
-//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
-//			@Override
-//			public void call(Simulation simulation) {
-//				addSimulation(simulation, false/* remote */);
-//			}
-//		});
 	}
 	
 	/**
