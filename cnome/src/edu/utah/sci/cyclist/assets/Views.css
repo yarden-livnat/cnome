@@ -93,9 +93,19 @@
  	-fx-background-color: beige;
  }
  
- .flow-node {
+ .flow-line {
+ 	-fx-stroke: gray;
+ 	-fx-stroke-width: 2px;
+ 	-fx-stroke-dash-array: 4;
+ }
+ 
+ .line-hover {
+ 	-fx-stroke: blue;
+ }
+ 
+.flow-node {
  	-fx-padding: 5;
- 	/*-fx-background-color: #99FF99;*/
+ 	-fx-background-color: #fefefe;
  	-fx-background-radius: 5;
  	-fx-border-color: #808080;
  	-fx-border-radius:5;
@@ -106,9 +116,11 @@
  }
  
  
- .foo {
- 	-fx-background-color: #0fddff; /*derive(#99FF99, -20%);*/
+ .node-selected {
+ 	-fx-background-color: #0fddff ; /*derive(#99FF99, -20%);*/
  }
+ 
+ 
  .node-header {
  	-fx-font-size: 8px;	
  }
