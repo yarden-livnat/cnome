@@ -1,38 +1,46 @@
 package edu.utah.sci.cyclist.ui.views;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-
-import org.mo.closure.v1.Closure;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
+import jfxtras.labs.scene.control.BigDecimalField;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.model.DataType;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
-import edu.utah.sci.cyclist.ui.components.MaterialFlowPane;
+import edu.utah.sci.cyclist.ui.components.NumericField;
 
 public class FlowView extends CyclistViewBase {
 	public static final String ID = "flow-view";
 	public static final String TITLE = "Flow";
 	
-	private MaterialFlowPane _pane;
+	private Pane _pane;
 	private Line _l1;
 	private Line _l2;
+	private int _timestep = 0;
+	private Label _timestepLabel;
+	private NumericField _timestepField;
 	private ArrayList<Node> _nodes = new ArrayList<>();
 
 	
@@ -41,6 +49,15 @@ public class FlowView extends CyclistViewBase {
 		build();
 	}
 
+	private void fakeSim() {
+//		_timestepField.setMaxValue(new BigDecimal(1000));
+	}
+	
+	private void changeTimestep(int value) {
+		_timestep = value;
+		System.out.println("t="+value);
+	}
+	
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("flow-view");
@@ -56,12 +73,21 @@ public class FlowView extends CyclistViewBase {
 		// components
 		MenuBar menubar = createMenubar();
 		
-		_pane = new MaterialFlowPane();
+		_timestepLabel= new Label("timestep:");
+		
+		_timestepField = new NumericField(34);
+		_timestepField.getStyleClass().add("flow-timestep");
+		
+		HBox hbox = new HBox();
+		hbox.getStyleClass().add("flow-timestep-bar");
+		hbox.getChildren().addAll(_timestepLabel, _timestepField);
+		
+		_pane = new Pane();
 		_pane.getChildren().addAll(_l1, _l2);
 		_pane.setPrefSize(400, 300);
 		
 		VBox vbox = new VBox();
-		vbox.getChildren().addAll(menubar, _pane);
+		vbox.getChildren().addAll(menubar, hbox, _pane);
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
@@ -188,15 +214,30 @@ public class FlowView extends CyclistViewBase {
 				}
 			}
 		});
+		
+//		_timestepField.numberProperty().addListener(new InvalidationListener() {
+//			@Override
+//			public void invalidated(Observable observable) {
+//				changeTimestep(_timestepField.getNumber().intValue());
+//				
+//			}	
+//		});
+
 
 	}
 	
 	private void addNode(Object value, Field field, Table table, Line l, double y) {
-		Node node = new Node(value, field, table, l);
+		final Node node = new Node(value, field, table, l);
 		_nodes.add(node);
 		_pane.getChildren().add(node);
 		node.setTranslateX(l.getStartX() - 30); //node.getWidth()/2);
 		node.setTranslateY(y);
+		node.widthProperty().addListener( new InvalidationListener() {
+			@Override
+			public void invalidated(Observable observable) {
+				node.setTranslateX(node.line.getStartX() - node.getWidth()/2);
+			}
+		});
 	}
 }
 
