@@ -38,7 +38,15 @@ public class CyclistViewPresenter extends ViewPresenter {
 				
 				@Override
 				public void call(Table table, Boolean active) {
-					getSelectionModel().itemSelected(table, active);
+					getSelectionModelTbl().itemSelected(table, active);
+				}
+			});
+			
+			getView().setOnSimulationSelectedAction(new Closure.V2<Simulation, Boolean>() {
+				
+				@Override
+				public void call(Simulation simulation, Boolean active) {
+					getSelectionModelSim().itemSelected(simulation, active);
 				}
 			});
 			
@@ -67,8 +75,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 				getView().setOnSimulationDrop(new Closure.V1<Simulation>(){
 					@Override
 					public void call(Simulation simulation) {
-						getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
-						getSelectionModelSim().selectItem(simulation, true);
+						addLocalSimulation(simulation);
 					}
 				});
 			}
@@ -78,7 +85,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void onViewSelected(View view) {
 		super.onViewSelected(view);
 		
-		Table table = getSelectionModel().getSelected();
+		Table table = getSelectionModelTbl().getSelected();
 		if (table != null)
 			broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
 	}
@@ -86,12 +93,11 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void setRemoteTables(List<SelectionModel<Table>.Entry> list) {
 		for (SelectionModel<Table>.Entry record : list) {
 			// infom the view but let the selection model determine if it should be active
-			getView().addTable((Table)record.item, true /*remote*/, false /* active */);
+			getView().addTable(record.item, true /*remote*/, false /* active */);
 			//getSelectionModel().addTable(record.table, true, false, record.active);
 		}
-		getSelectionModel().setRemoteItems(list);
+		getSelectionModelTbl().setRemoteItems(list);
 	}
-	
 	
 	public void addRemoteFilters(List<Filter> filters) {
 		getView().remoteFilters().addAll(filters);
@@ -99,12 +105,12 @@ public class CyclistViewPresenter extends ViewPresenter {
 	
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
 		getView().addTable(table, remote, false);
-		getSelectionModel().addItem(table, remote, active, remoteActive);
+		getSelectionModelTbl().addItem(table, remote, active, remoteActive);
 	}
 	
 	
 	public void removeTable(Table table) {
-		getSelectionModel().removeItem(table);
+		getSelectionModelTbl().removeItem(table);
 		getView().removeTable(table);
 	}
 	
@@ -112,11 +118,11 @@ public class CyclistViewPresenter extends ViewPresenter {
 		return _selectionModelTbl.getItemRecords();
 	}
 	
-	public SelectionModel<Table> getSelectionModel() {
+	public SelectionModel<Table> getSelectionModelTbl() {
 		return _selectionModelTbl;
 	}
 	
-	public void setSelectionModel(SelectionModel<Table> model) {
+	public void setSelectionModelTbl(SelectionModel<Table> model) {
 		_selectionModelTbl = model;
 		
 	}
@@ -125,14 +131,63 @@ public class CyclistViewPresenter extends ViewPresenter {
 		return _selectionModelSim;
 	}
 	
+	public List<SelectionModel<Simulation>.Entry> getSimulationRecords() {
+		return _selectionModelSim.getItemRecords();
+	}
+	
 	public void setSelectionModelSim(SelectionModel<Simulation> model) {
 		_selectionModelSim = model;
 		
+		//If none of the subclasses set its specific action - set a general action.
+		if(_selectionModelSim.getOnSelectItemAction() == null){
+			_selectionModelSim.setOnSelectItemAction(new Closure.V2<Simulation, Boolean>() {
+				@Override
+				public void call(Simulation simulation, Boolean value) {
+					getView().selectSimulation(simulation, value);			
+				}
+			
+			});
+		}
+		
 	}
 	
+	/*
+	 * For each view under the workspace - add the remote simulations inherited from the workspace.
+	 * Then call the selectionModel to decide whether to select the simulation button or not.
+	 * 
+	 * @param - List<SelectionModel<Simulation>.Entry> list , list of all the simulations entries in the 
+	 *          workspace.
+	 */
+	protected void setRemoteSimulations(List<SelectionModel<Simulation>.Entry> list) {
+		for (SelectionModel<Simulation>.Entry record : list) {
+			// infom the view but let the selection model determine if it should be active
+			getView().addSimulation(record.item, true /*remote*/, false /* active */);
+		}
+		getSelectionModelSim().setRemoteItems(list);
+	}
+	
+	/*
+	 * Add a local simulation to the view. 
+	 * (i.e. a simulation which was dropped directly to the current view). 
+	 * Add it as the active simulation.
+	 * 
+	 * @param - Simulation: The simulation to add locally.
+	 */
+	protected void addLocalSimulation(Simulation simulation){
+		getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
+	}
+	
+	/*
+	 * Add a remote simulation to the view.
+	 * (i.e. a simulation which was inherited from the workspace.). 
+	 * Add it as remote and non-active to the selection model. 
+	 * The selection model decides if to select it or keep it non active, regarding to the other simulations in the view.
+	 * 
+	 * @param - Simulation: The simulation to add as a remote.
+	 */
 	private void addRemoteSimulation(Simulation simulation) {
-		getView().addSimulation(simulation, true, false);
-		getSelectionModelSim().addItem(simulation, true, true, false);
+		getView().addSimulation(simulation, true, /*remote*/ false /*active*/);
+		getSelectionModelSim().addItem(simulation, true, /*remote*/ true, /*active*/ false /*remote active*/);
 	}
 
 	private void addListeners() {
@@ -160,6 +215,24 @@ public class CyclistViewPresenter extends ViewPresenter {
 			public void handle(CyclistNotification event) {
 				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
 				addRemoteSimulation(notification.getSimulation());
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.SIMULATION_SELECTED, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+				getSelectionModelSim().selectItem(notification.getSimulation(), true);
+			}
+		});
+		
+		addNotificationHandler(CyclistNotifications.SIMULATION_UNSELECTED, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+				getSelectionModelSim().selectItem(notification.getSimulation(), false);
 			}
 		});
 	}

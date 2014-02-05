@@ -91,7 +91,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                                 public void call(Table table) {
                                         addTable(table, false /*remote*/, false /* active */, false /* remoteActive */);
                                         broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_ADD, table));
-                                        getSelectionModel().selectItem(table, true);
+                                        getSelectionModelTbl().selectItem(table, true);
                                 }
                                 
                         });
@@ -155,8 +155,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                             @Override
                             public void call(Simulation simulation) {
                                     broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, simulation));
-                                    getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
-            						getSelectionModelSim().selectItem(simulation, true);
+                                    addLocalSimulation(simulation);
                             }
                             
                         });
@@ -180,6 +179,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                         if (presenter instanceof CyclistViewPresenter) {
                         	CyclistViewPresenter p = (CyclistViewPresenter) presenter;
 	                        p.setRemoteTables(getTableRecords());
+	                        p.setRemoteSimulations(getSimulationRecords());
 	                        p.addRemoteFilters(getWorkspace().filters());
 	                        p.addRemoteFilters(getWorkspace().remoteFilters());
                         }
@@ -207,13 +207,14 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 
                     @Override
                     public void call(Simulation simulation, Boolean activate) {  
-                            String msg = activate ? CyclistNotifications.SIMULATION_SELECTED : CyclistNotifications.SIMULATION_UNSELECTED;
+                    	 	getView().selectSimulation(simulation, activate);
+                    		String msg = activate ? CyclistNotifications.SIMULATION_SELECTED : CyclistNotifications.SIMULATION_UNSELECTED;
                             broadcast(getLocalEventBus(), new CyclistSimulationNotification(msg, simulation));
                     }
             
             });
                 
-                setSelectionModel(selectionModelTbl);
+                setSelectionModelTbl(selectionModelTbl);
                 setSelectionModelSim(selectionModelSim);
         }
         
@@ -358,8 +359,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         			@Override
         			public void handle(CyclistNotification event) {
         				CyclistTableNotification notification = (CyclistTableNotification) event;
-        				getSelectionModel().selectItem(notification.getTable(), true);
-        				if(!getSelectionModel().isRemoteActive(notification.getTable())){
+        				getSelectionModelTbl().selectItem(notification.getTable(), true);
+        				if(!getSelectionModelTbl().isRemoteActive(notification.getTable())){
         					broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_SELECTED, notification.getTable()));
         				}
         			}
@@ -370,7 +371,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         			@Override
         			public void handle(CyclistNotification event) {
         				CyclistTableNotification notification = (CyclistTableNotification) event;
-        				getSelectionModel().selectItem(notification.getTable(), false);
+        				getSelectionModelTbl().selectItem(notification.getTable(), false);
         				broadcast(getLocalEventBus(), new CyclistTableNotification(CyclistNotifications.DATASOURCE_UNSELECTED, notification.getTable()));
         			}
         		});
@@ -379,6 +380,24 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         			public void handle(CyclistNotification event) {
                 		CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
                 		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, notification.getSimulation()));
+                	}
+                });
+                
+                addNotificationHandler(CyclistNotifications.SIMULATION_SELECTED, new CyclistNotificationHandler() {
+                	@Override
+        			public void handle(CyclistNotification event) {
+                		CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+                		if(!getSelectionModelSim().isRemoteActive(notification.getSimulation())){
+        					broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_SELECTED, notification.getSimulation()));
+        				}
+                	}
+                });
+                
+                addNotificationHandler(CyclistNotifications.SIMULATION_UNSELECTED, new CyclistNotificationHandler() {
+                	@Override
+        			public void handle(CyclistNotification event) {
+                		CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+        					broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_UNSELECTED, notification.getSimulation()));
                 	}
                 });
                 

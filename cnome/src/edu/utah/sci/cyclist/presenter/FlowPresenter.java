@@ -27,7 +27,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModelTbl);
+		setSelectionModelTbl(selectionModelTbl);
 		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
@@ -87,7 +87,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectItem(notification.getTable(), true);
+				getSelectionModelTbl().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -96,7 +96,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectItem(notification.getTable(), false);			
+				getSelectionModelTbl().selectItem(notification.getTable(), false);			
 			}
 		});
 	}

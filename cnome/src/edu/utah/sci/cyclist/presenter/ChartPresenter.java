@@ -28,7 +28,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModelTbl);
+		setSelectionModelTbl(selectionModelTbl);
 		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
@@ -40,7 +40,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 		copy.setView(view);
 		
 		// copy tables
-		for (SelectionModel<Table>.Entry entry : getSelectionModel().getEntries()) {
+		for (SelectionModel<Table>.Entry entry : getSelectionModelTbl().getEntries()) {
 			copy.addTable(entry.item, entry.remote, entry.active, entry.remoteActive);
 		}
 		
@@ -122,7 +122,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectItem(notification.getTable(), true);
+				getSelectionModelTbl().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -131,7 +131,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectItem(notification.getTable(), false);			
+				getSelectionModelTbl().selectItem(notification.getTable(), false);			
 			}
 		});
 	}

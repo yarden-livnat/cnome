@@ -26,6 +26,7 @@ public interface CyclistView extends View {
 	
 	void addSimulation(Simulation simulation, boolean remote, boolean active);
 	void selectSimulation(Simulation simulation, boolean value);
+	void setOnSimulationSelectedAction(Closure.V2<Simulation, Boolean> action);
 	
 	ObservableList<Filter> remoteFilters();
 }

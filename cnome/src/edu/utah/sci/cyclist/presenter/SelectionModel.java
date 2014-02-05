@@ -21,6 +21,10 @@ public class SelectionModel<T> {
 		_onSelectItemAction = action;
 	}
 	
+	public Closure.V2<T, Boolean> getOnSelectItemAction() {
+		return _onSelectItemAction;
+	}
+	
 	public void selectItemAction(T selectedItem, Boolean remote) {
 		if (_onSelectItemAction != null) {
 			_onSelectItemAction.call(selectedItem, remote);

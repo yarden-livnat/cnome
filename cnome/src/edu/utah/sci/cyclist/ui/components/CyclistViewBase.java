@@ -58,6 +58,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private Closure.V1<Table> _onTableDrop = null;
 	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
+	private Closure.V2<Simulation, Boolean> _onSimulationSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
 	private Closure.V1<Filter> _onRemoveFilter = null;
 	private Closure.V1<Simulation> _onSimulationDrop = null;
@@ -173,6 +174,13 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		return _onSimulationDrop;
 	}
 	
+	/*
+	 * Sets an external code to run from the current class.
+	 */
+	public void setOnSimulationSelectedAction(Closure.V2<Simulation, Boolean> action) {
+		_onSimulationSelectedAction = action;
+	}
+	
 	
 	public void setOnShowFilter(Closure.V1<Filter> action) {
 		_onShowFilter = action;
@@ -270,6 +278,16 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		final ToggleButton button = new ToggleButton(simulation.getAlias().substring(0, 1));
 		button.getStyleClass().add("flat-toggle-button");
 		button.setSelected(active);
+		
+		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
+				if (_onSimulationSelectedAction != null)
+					_onSimulationSelectedAction.call(simulation, activate);
+			}
+		});
+		
 		_simulationButtons.put(simulation, new ButtonEntry(button, remote));
 		if (remote) {
 			_simulationBar.getChildren().add(_numOfRemotesSimulations, button);
@@ -354,11 +372,11 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 						getLocalClipboard().setStatus(Status.IGNORED);
 					} else {	
 						getLocalClipboard().setStatus(Status.ACCEPTED);
-						addSimulation(simulation, false /*remote*/, false /*active*/);
+						addSimulation(simulation, false /*remote*/, true /*active*/);
 						if (_onSimulationDrop != null) {
 							_onSimulationDrop.call(simulation);
 						}
-						selectSimulation(simulation, true);
+						//selectSimulation(simulation, true);
 						event.setDropCompleted(true);
 						event.consume();
 					}
