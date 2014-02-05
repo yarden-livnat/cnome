@@ -159,6 +159,14 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                             }
                             
                         });
+                        
+                        workspace.setOnSimulationRemoved(new Closure.V1<Simulation>() {
+                        	@Override
+                            public void call(Simulation simulation) {
+                                    getSelectionModelSim().removeItem(simulation);
+                                    broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_REMOVE, simulation));
+                            }
+                        });
                     
                 }
         }
@@ -382,6 +390,16 @@ public class WorkspacePresenter extends CyclistViewPresenter {
                 		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, notification.getSimulation()));
                 	}
                 });
+                
+                addNotificationHandler(CyclistNotifications.SIMULATION_REMOVE, new CyclistNotificationHandler() {
+        			
+        			@Override
+        			public void handle(CyclistNotification event) {
+        				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+        				removeSimulation(notification.getSimulation());
+        				broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_REMOVE, notification.getSimulation()));
+        			}
+        		});
                 
                 addNotificationHandler(CyclistNotifications.SIMULATION_SELECTED, new CyclistNotificationHandler() {
                 	@Override

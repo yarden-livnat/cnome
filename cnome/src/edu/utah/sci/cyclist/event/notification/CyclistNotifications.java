@@ -44,6 +44,7 @@ public class CyclistNotifications {
 	public static final String ADD_REMOTE_FILTER 		= "add_remote_filter";
 	
 	public static final String SIMULATION_ADD 			= "simulation_add";
+	public static final String SIMULATION_REMOVE 		= "simulation_remove";
 	public static final String SIMULATION_SELECTED 		= "simulation_selected";
 	public static final String SIMULATION_UNSELECTED 	= "simulation_unselected";
 }

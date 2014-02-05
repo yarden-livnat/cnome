@@ -58,10 +58,12 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private Closure.V1<Table> _onTableDrop = null;
 	private Closure.V1<Table> _onTableRemoved = null;
 	private Closure.V2<Table, Boolean> _onTableSelectedAction = null;
-	private Closure.V2<Simulation, Boolean> _onSimulationSelectedAction = null;
 	private Closure.V1<Filter> _onShowFilter = null;
 	private Closure.V1<Filter> _onRemoveFilter = null;
+	
 	private Closure.V1<Simulation> _onSimulationDrop = null;
+	private Closure.V2<Simulation, Boolean> _onSimulationSelectedAction = null;
+	private Closure.V1<Simulation> _onSimulationRemoved = null;
 	
 	/**
 	 * Constructor
@@ -166,6 +168,10 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_onTableSelectedAction = action;
 	}
 	
+	/**
+	 * Sets an external code to run from the current class, when simulation is dropped to the simulation bar.
+	 * @param - Closure.V1<Simulation> action : the code to run when the simulation is dropped.
+	 */
 	public void setOnSimulationDrop(Closure.V1<Simulation> action) {
 		_onSimulationDrop = action;
 	}
@@ -174,11 +180,24 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		return _onSimulationDrop;
 	}
 	
-	/*
-	 * Sets an external code to run from the current class.
+	/**
+	 * Sets an external code to run from the current class, when simulation is selected.
+	 * @param Closure.V2<Simulation, Boolean> action : the code to run when the simulation is selected.
 	 */
 	public void setOnSimulationSelectedAction(Closure.V2<Simulation, Boolean> action) {
 		_onSimulationSelectedAction = action;
+	}
+	
+	/**
+	 * Sets an external code to run from the current class, when simulation is removed.
+	 * @param Closure.V1<Simulation action : the code to run when the simulation is removed.
+	 */
+	public void setOnSimulationRemoved(Closure.V1<Simulation> action){
+		_onSimulationRemoved = action;
+	}
+	
+	public Closure.V1<Simulation> getOnSimulationRemoved(){
+		return _onSimulationRemoved;
 	}
 	
 	
@@ -273,6 +292,15 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		}
 	}
 	
+	/**
+	 * Adds a new simulation button to the view. (remote or local)
+	 * Decides whether or not make this button active (selected)
+	 * Adds events handling.
+	 * 
+	 *  @param Simulation: The simulation to be added.
+	 *  @param boolean remote: true if remote, false if local.
+	 *  @param boolean active: Whether or not the button could be active. 
+	 */
 	@Override
 	public void addSimulation(final Simulation simulation, boolean remote, boolean active ) {
 		final ToggleButton button = new ToggleButton(simulation.getAlias().substring(0, 1));
@@ -288,6 +316,37 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			}
 		});
 		
+		button.setOnDragDetected(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				Dragboard db = button.startDragAndDrop(TransferMode.MOVE);
+				
+				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+				clipboard.put(DnD.SIMULATION_FORMAT, Simulation.class, simulation);
+				
+				ClipboardContent content = new ClipboardContent();
+				content.putString(simulation.getSimulationId());
+				db.setContent(content);
+			}
+		});
+		
+		button.setOnDragDone(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				// ignore if the button was dragged onto self 
+				if (getLocalClipboard().getStatus() != Status.IGNORED) {
+					if (_onSimulationRemoved != null) {
+						_onSimulationRemoved.call(simulation);
+					}
+					//Should be done only as the last action to unable unselection of the removed button.
+					removeSimulation(simulation);
+				}
+				
+			}
+		});
+		
 		_simulationButtons.put(simulation, new ButtonEntry(button, remote));
 		if (remote) {
 			_simulationBar.getChildren().add(_numOfRemotesSimulations, button);
@@ -297,6 +356,25 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		}
 	}
 	
+	/**
+	 * Handles the removal of a simulation button.
+	 * @param Simulation : the simulation to be removed.
+	 */
+	@Override
+	public void removeSimulation(Simulation simulation) {
+		ButtonEntry entry = _simulationButtons.remove(simulation);
+		if(entry != null){
+			_simulationBar.getChildren().remove(entry.button);
+			if (entry.remote)
+				_numOfRemotesSimulations--;
+		}
+	}
+	
+	/**
+	 * Selects/deselects  the button of the specified simulation and makes it active/not active.
+	 * @param Simulation : the simulation to be selected.
+	 * @param boolean value : whether to select or deselect the button.
+	 */
 	@Override
 	public void selectSimulation(Simulation simulation, boolean value) {
 		try{
@@ -405,7 +483,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);;
+				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
 				if ( table != null ) {
 					if (_buttons.containsKey(table)) {
 						event.acceptTransferModes(TransferMode.NONE);

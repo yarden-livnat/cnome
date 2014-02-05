@@ -70,12 +70,21 @@ public class CyclistViewPresenter extends ViewPresenter {
 				}
 			});
 			
-			//If none of the subclasses set its specific action - set a general action.
+			//If none of the subclasses has set its specific action for simulation dropping - set a general action.
 			if(getView().getOnSimulationDrop() == null){
 				getView().setOnSimulationDrop(new Closure.V1<Simulation>(){
 					@Override
 					public void call(Simulation simulation) {
 						addLocalSimulation(simulation);
+					}
+				});
+			}
+			//If none of the subclasses has set its specific action for simulation removal - set a general action.
+			if(getView().getOnSimulationRemoved() == null){
+				getView().setOnSimulationRemoved(new Closure.V1<Simulation>(){
+					@Override
+					public void call(Simulation simulation) {
+						getSelectionModelSim().removeItem(simulation);
 					}
 				});
 			}
@@ -148,7 +157,6 @@ public class CyclistViewPresenter extends ViewPresenter {
 			
 			});
 		}
-		
 	}
 	
 	/*
@@ -189,6 +197,11 @@ public class CyclistViewPresenter extends ViewPresenter {
 		getView().addSimulation(simulation, true, /*remote*/ false /*active*/);
 		getSelectionModelSim().addItem(simulation, true, /*remote*/ true, /*active*/ false /*remote active*/);
 	}
+	
+	public void removeSimulation(Simulation simulation) {
+		getSelectionModelSim().removeItem(simulation);
+		getView().removeSimulation(simulation);
+	}
 
 	private void addListeners() {
 		addNotificationHandler(CyclistNotifications.ADD_REMOTE_FILTER, new CyclistNotificationHandler() {
@@ -217,6 +230,16 @@ public class CyclistViewPresenter extends ViewPresenter {
 				addRemoteSimulation(notification.getSimulation());
 			}
 		});
+		
+		addNotificationHandler(CyclistNotifications.SIMULATION_REMOVE, new CyclistNotificationHandler() {
+			
+			@Override
+			public void handle(CyclistNotification event) {
+				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
+				removeSimulation(notification.getSimulation());			
+			}
+		});
+		
 		
 		addNotificationHandler(CyclistNotifications.SIMULATION_SELECTED, new CyclistNotificationHandler() {
 			
