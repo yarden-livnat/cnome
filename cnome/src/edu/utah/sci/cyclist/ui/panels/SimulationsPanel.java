@@ -29,7 +29,6 @@ import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -128,7 +127,10 @@ public class SimulationsPanel extends TitledPanel  {
 		_selected.title.setStyle(SELECTED_STYLE);
 	}
 	
-	public ReadOnlyObjectProperty<Simulation> selectedItemProperty() {
+	/**
+	 * property is set each time a new simulation entry is selected.
+	 */
+	public ObjectProperty<Simulation> selectedItemProperty() {
 		return _simulationProperty;
 	}
 	
@@ -164,13 +166,14 @@ public class SimulationsPanel extends TitledPanel  {
 							}
 						}	
 					});
+				}  else if( mouseEvent.getButton()   == MouseButton.PRIMARY){
+					_simulationProperty.set(entry.simulation);
 				}
 			}
 		});
 		
 		entry.title.setOnDragDetected(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {					
-				_simulationProperty.set(entry.simulation);
 		    	select(entry);
 		    	
 				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();

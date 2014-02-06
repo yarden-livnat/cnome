@@ -42,6 +42,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.Resources;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.ui.panels.FiltersListPanel;
 import edu.utah.sci.cyclist.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.ui.panels.SimulationsPanel;
@@ -144,7 +145,6 @@ public class MainScreen extends VBox {
 				_datasourcesPanel = new TablesPanel(),
 				_dimensionsPanel = new SchemaPanel("Category"),
 				_measuresPanel = new SchemaPanel("Measure"),
-				//_simulationPanel = new SimulationsPanel(),
 				_toolsPanel = new ToolsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);
@@ -200,9 +200,24 @@ public class MainScreen extends VBox {
 		return _datasourcesPanel.editTableProperty();
 	}
 	
+	/**
+	 * Property which is changed when user wants to edit a simulation entry in the simulations panel.
+	 * (trigger - mouse right click)
+	 * @return ObjectProperty<Boolean> - property is set to true on mouse right click.
+	 */
 	public ObjectProperty<Boolean> editSimulationProperty() {
 		return _simulationPanel.editSimulationProperty();
 	}
+	
+	/**
+	 * Property which is changed when the user selects a simulation entry in the simulations panel.
+	 * (trigger - mouse click)
+	 * @return ObjectProperty<Simulation> - the selected simulation.
+	 */
+	public ObjectProperty<Simulation> selectSimulationProperty() {
+		return _simulationPanel.selectedItemProperty();
+	}
+	
 	
 	public ObjectProperty<EventHandler<WindowEvent>> onSystemClose(){
 		return _stageCloseProperty;
