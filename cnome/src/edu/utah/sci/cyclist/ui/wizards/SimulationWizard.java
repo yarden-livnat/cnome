@@ -45,6 +45,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
@@ -238,7 +239,7 @@ public class SimulationWizard extends TilePane {
 		_simulationsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		_simulationsView.setMaxHeight(Double.MAX_VALUE);
 		
-		HBox aliasHbox = new HBox();
+		final HBox aliasHbox = new HBox();
 		aliasHbox.setSpacing(10);
 		aliasHbox.setAlignment(Pos.CENTER_LEFT);
 		aliasHbox.setPadding(new Insets(5));
@@ -253,14 +254,22 @@ public class SimulationWizard extends TilePane {
 		_aliasField.setMinHeight(20);
 		
 		aliasHbox.getChildren().addAll(aliasLbl, _aliasField);
-		
-		aliasHbox.disableProperty().bind(_simulationsView.getSelectionModel().selectedItemProperty().isNull());
-		
-		
+		aliasHbox.setDisable(true);
+			
 		simulationBox.getChildren().addAll(simLbl,_simulationsView, aliasHbox);
 		simulationBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
 		VBox.setVgrow(_simulationsView,  Priority.ALWAYS);
 		VBox.setVgrow(aliasHbox,  Priority.ALWAYS);
+		
+		_simulationsView.setOnMouseClicked(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e) {
+				if(_simulationsView.getSelectionModel().getSelectedItems().size() >1 || _simulationsView.getSelectionModel().getSelectedItems().size()==0 ){
+					aliasHbox.setDisable(true);
+				} else{
+					aliasHbox.setDisable(false);
+				}
+			}
+		});
 		
 		
 		// The ok/cancel buttons

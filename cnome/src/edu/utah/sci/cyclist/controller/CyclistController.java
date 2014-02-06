@@ -238,7 +238,7 @@ public class CyclistController {
 						{
 							for(Simulation simulation:newList.getList()){
 								if(!_model.simExists(simulation)){
-									Simulation sim = new Simulation(simulation);
+									Simulation sim = simulation.clone();
 									_model.getSimulationIds().add(sim);
 									_dirtyFlag = true;
 								}
