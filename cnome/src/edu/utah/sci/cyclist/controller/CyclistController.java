@@ -238,7 +238,7 @@ public class CyclistController {
 						{
 							for(Simulation simulation:newList.getList()){
 								if(!_model.simExists(simulation)){
-									Simulation sim = new Simulation(simulation);
+									Simulation sim = simulation.clone();
 									_model.getSimulationIds().add(sim);
 									_dirtyFlag = true;
 								}
@@ -292,6 +292,20 @@ public class CyclistController {
 				if(newVal){
 					_dirtyFlag = true;
 					_screen.editSimulationProperty().setValue(false);
+				}
+			}
+		});
+		
+		_screen.selectSimulationProperty().addListener(new ChangeListener<Simulation>() {
+			@Override
+			public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal, Simulation newVal) {
+				
+				//Meanwhile - all the tables are the same for all the simulation - so load them once,
+				//when the first simulation is selected. In the future - can compare between old and new simulations
+				//and each time a different simulation is selected - change the tables accordingly.
+				
+				if(oldVal==null && newVal!=null){
+					readSimulationsTables();
 				}
 			}
 		});
@@ -447,7 +461,7 @@ public class CyclistController {
 				e1.printStackTrace();
 			} 		
 		}
-		readSimulationsTables();
+		//readSimulationsTables();
 	}
 	
 	/*

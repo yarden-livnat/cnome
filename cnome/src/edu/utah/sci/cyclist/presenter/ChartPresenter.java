@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.presenter;
 
-import javafx.scene.control.SelectionMode;
-
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.event.notification.CyclistNotification;
@@ -18,8 +16,9 @@ public class ChartPresenter extends CyclistViewPresenter {
 
 	public ChartPresenter(EventBus bus) {
 		super(bus);
-		SingleSelection selectionModel = new SingleSelection();
-		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
+		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
 			public void call(Table table, Boolean value) {
@@ -29,7 +28,8 @@ public class ChartPresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModel);
+		setSelectionModelTbl(selectionModelTbl);
+		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
 	
@@ -40,8 +40,8 @@ public class ChartPresenter extends CyclistViewPresenter {
 		copy.setView(view);
 		
 		// copy tables
-		for (SelectionModel.Entry entry : getSelectionModel().getEntries(SelectionModel.selectedTypes.TABLE)) {
-			copy.addTable((Table)entry.object, entry.remote, entry.active, entry.remoteActive);
+		for (SelectionModel<Table>.Entry entry : getSelectionModelTbl().getEntries()) {
+			copy.addTable(entry.item, entry.remote, entry.active, entry.remoteActive);
 		}
 		
 		ChartView chartView = (ChartView) view;
@@ -91,13 +91,6 @@ public class ChartPresenter extends CyclistViewPresenter {
 				broadcast(new CyclistNotification(CyclistNotifications.DUPLICATE_VIEW));
 			}
 		});
-		
-//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
-//			@Override
-//			public void call(Simulation simulation) {
-//				addSimulation(simulation, false/* remote */);
-//			}
-//		});
 	}
 	
 	/**
@@ -129,7 +122,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), true);
+				getSelectionModelTbl().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -138,7 +131,7 @@ public class ChartPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), false);			
+				getSelectionModelTbl().selectItem(notification.getTable(), false);			
 			}
 		});
 	}

@@ -45,8 +45,9 @@ public class TablePresenter extends CyclistViewPresenter {
 	public TablePresenter(EventBus bus) {
 		super(bus);
 		
-		SingleSelection selectionModel = new SingleSelection();
-		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
+		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
 			public void call(Table table, Boolean value) {
@@ -56,7 +57,8 @@ public class TablePresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModel);
+		setSelectionModelTbl(selectionModelTbl);
+		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
 
@@ -75,13 +77,6 @@ public class TablePresenter extends CyclistViewPresenter {
 				addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 			}
 		});
-		
-//		getView().setOnSimulationDrop(new Closure.V1<Simulation>() {
-//			@Override
-//			public void call(Simulation simulation) {
-//				addSimulation(simulation, false/* remote */);
-//			}
-//		});
 	}
 	
 	/**
@@ -113,7 +108,7 @@ public class TablePresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), true);
+				getSelectionModelTbl().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -122,7 +117,7 @@ public class TablePresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), false);			
+				getSelectionModelTbl().selectItem(notification.getTable(), false);			
 			}
 		});
 	}

@@ -6,6 +6,7 @@ import edu.utah.sci.cyclist.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.event.notification.EventBus;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.ui.View;
 
@@ -13,8 +14,10 @@ public class FlowPresenter extends CyclistViewPresenter {
 
 	public FlowPresenter(EventBus bus) {
 		super(bus);
-		SingleSelection selectionModel = new SingleSelection();
-		selectionModel.setOnSelectTableAction(new Closure.V2<Table, Boolean>() {
+		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
+		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
+		
+		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
 
 			@Override
 			public void call(Table table, Boolean value) {
@@ -24,7 +27,8 @@ public class FlowPresenter extends CyclistViewPresenter {
 		
 		});
 		
-		setSelectionModel(selectionModel);
+		setSelectionModelTbl(selectionModelTbl);
+		setSelectionModelSim(selectionModelSim);
 		addNotificationHandlers();
 	}
 	
@@ -83,7 +87,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), true);
+				getSelectionModelTbl().selectItem(notification.getTable(), true);
 			}
 		});
 		
@@ -92,7 +96,7 @@ public class FlowPresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistTableNotification notification = (CyclistTableNotification) event;
-				getSelectionModel().selectTable(notification.getTable(), false);			
+				getSelectionModelTbl().selectItem(notification.getTable(), false);			
 			}
 		});
 	}

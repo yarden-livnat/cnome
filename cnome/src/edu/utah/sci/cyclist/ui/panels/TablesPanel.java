@@ -44,6 +44,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import edu.utah.sci.cyclist.Resources;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.model.Table;
@@ -120,7 +122,8 @@ public class TablesPanel extends TitledPanel  {
 		vbox.getChildren().clear();
 		
 		_entries = new ArrayList<>();
-		for (Table table : _items) {
+		List<Table> sortedTables = sortRealAndSimulatedTables();
+		for (Table table : sortedTables) {
 			Entry entry = createEntry(table);
 			_entries.add(entry);
 			vbox.getChildren().add(entry.title);
@@ -142,6 +145,12 @@ public class TablesPanel extends TitledPanel  {
 		final Entry entry = new Entry();
 		entry.table = table;
 		entry.title = new Label(table.getAlias(), new ImageView(Resources.getIcon("table")));
+		
+		//Separate "real" tables (not from the simulation), by using an Italic font.
+		if(table.getDataSource() != null){
+			Font font = entry.title.getFont();
+			entry.title.setFont(Font.font(font.getFamily(),FontPosture.ITALIC, font.getSize()));
+		}
 		
 		entry.title.setOnMouseClicked(new EventHandler<Event>() {
 
@@ -210,7 +219,28 @@ public class TablesPanel extends TitledPanel  {
 					setEditTable(true);
 			}	
 		});
-	}	
+	}
+	
+	/*
+	 * Sort the list of tables so that tables which belong to simulation are the first
+	 * and "real" tables (which came from a database and not from a simulation) are at the
+	 * end of the list.
+	 * 
+	 * @return List<Table> - the list of sorted tables.
+	 */
+	private List<Table> sortRealAndSimulatedTables(){
+		List<Table> sortedList = new ArrayList<>();
+		int numOfSimulatedTables = 0;
+		for(Table tbl: _items){
+			if(tbl.getDataSource() == null){
+				sortedList.add(numOfSimulatedTables,tbl);
+				numOfSimulatedTables++;
+			}else{
+				sortedList.add(tbl);
+			}
+		}
+		return sortedList;
+	}
 	
 	class Entry {
 		Label title;

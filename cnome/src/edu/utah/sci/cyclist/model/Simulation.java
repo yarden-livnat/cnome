@@ -25,8 +25,6 @@ package edu.utah.sci.cyclist.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.controller.IMemento;
@@ -43,23 +41,20 @@ public class Simulation {
 	private CyclistDatasource _datasource;
 	private String _alias;
 	private Map<String, Object> _properties = new HashMap<>();
-
-	private String _saveDir = "";
 	
 	public Simulation() {
 		this("");
 	}
 	public Simulation(String simulationId) {
-		setProperty("uid", UUID.randomUUID().toString());
 		_simulationId = simulationId;
 		_alias = _simulationId;
 	}
 	
-	public Simulation(Simulation sim){
-		_datasource = sim.getDataSource();
-		_saveDir = sim.getSaveDir();
-		_simulationId = sim.getSimulationId();
-		_alias = sim.getAlias();
+	public Simulation clone(){
+		Simulation copy = new Simulation(_simulationId);
+		copy.setDataSource(_datasource);
+		copy.setAlias(_alias);
+		return copy;
 	}
 	
     // Save the simulation
@@ -145,10 +140,6 @@ public class Simulation {
 	 */
 	public CyclistDatasource getDataSource(){
 		return _datasource;
-	}
-	
-	public String getSaveDir(){
-		return _saveDir;
 	}
 	
 	public String getAlias(){
