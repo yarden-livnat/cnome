@@ -28,7 +28,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.net.URI;
 import java.util.Arrays;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,6 +41,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.layout.Region;
 import javafx.stage.WindowEvent;
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.event.notification.EventBus;
 import edu.utah.sci.cyclist.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.model.CyclistDatasource;
@@ -74,7 +77,7 @@ public class CyclistController {
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
 	private EventHandler<CyclistDropEvent> handleToolDropped;
-	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
+	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
 	
 	/**
 	 * Constructor
@@ -318,7 +321,6 @@ public class CyclistController {
 				quit();
 			}
 		});
-		
 	}
 	
 	private void quit() {
@@ -470,11 +472,12 @@ public class CyclistController {
 	 * The tables are added to the model tables list.
 	 */
 	private void readSimulationsTables(){
-		File simulationsFile = new File(SIMULATIONS_TABLES_FILE);
-		if(simulationsFile.exists()){
-			Reader reader;
-			try {
-				reader = new FileReader(simulationsFile);
+		try {
+			URI uri = Cyclist.class.getResource(SIMULATIONS_TABLES_FILE).toURI();
+			File simulationsFile = new File(uri);
+			if(simulationsFile.exists()){
+				
+				Reader reader = new FileReader(simulationsFile);
 				// Create the root memento
 				XMLMemento memento = XMLMemento.createReadRoot(reader);
 				
@@ -488,10 +491,9 @@ public class CyclistController {
 					_model.getSimulationsTablesDef().add(tbl);
 					_model.getTables().add(tbl);
 				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+		} catch (Exception e) {
+				e.printStackTrace();
 		}
 	}
 	

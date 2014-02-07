@@ -231,6 +231,14 @@
 	-fx-background-color: #e0e0e0;
 }
 
+/*
+ * Simulation panel
+ */
+ .simulation-text-entry{
+ 	-fx-alignment: center-left;
+ 	-fx-padding:  1 0 1 0;
+ }
+
 /* 
  * Workspace
  */
