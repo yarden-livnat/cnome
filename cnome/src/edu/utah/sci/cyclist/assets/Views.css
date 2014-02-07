@@ -95,7 +95,7 @@
  
  .flow-line {
  	-fx-stroke: gray;
- 	-fx-stroke-width: 1px;
+ 	-fx-stroke-width: 0.5px;
  	-fx-stroke-dash-array: 4;
  }
  
@@ -116,10 +116,11 @@
  }
  
  
+
  .node-selected {
- 	-fx-background-color: #0fddff ; /*derive(#99FF99, -20%);*/
+ 	/*-fx-background-color: #0fddff ;*/ /*derive(#99FF99, -20%);*/
  }
- 
+
  
  .node-header {
  	-fx-font-size: 8px;	
@@ -145,6 +146,11 @@
 	-fx-background-color: -fx-shadow-highlight-color, -fx-text-box-border, -fx-control-inner-background;
     -fx-background-insets: 0, 1, 2;
     -fx-background-radius: 3, 2, 2;
+}
+
+.connector {
+	-fx-stroke: black;
+ 	-fx-stroke-width: 1px;
 }
 
 /*

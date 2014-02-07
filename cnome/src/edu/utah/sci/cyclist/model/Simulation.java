@@ -45,6 +45,7 @@ public class Simulation {
 	public Simulation() {
 		this("");
 	}
+	
 	public Simulation(String simulationId) {
 		_simulationId = simulationId;
 		_alias = _simulationId;

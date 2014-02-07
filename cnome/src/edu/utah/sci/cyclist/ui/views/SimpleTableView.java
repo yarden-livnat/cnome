@@ -45,8 +45,10 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import edu.utah.sci.cyclist.event.dnd.DnD;
 import edu.utah.sci.cyclist.event.dnd.DnDSource;
+import edu.utah.sci.cyclist.model.CyclistDatasource;
 import edu.utah.sci.cyclist.model.Field;
 import edu.utah.sci.cyclist.model.Schema;
+import edu.utah.sci.cyclist.model.Simulation;
 import edu.utah.sci.cyclist.model.Table;
 import edu.utah.sci.cyclist.model.Table.Row;
 import edu.utah.sci.cyclist.ui.components.CyclistViewBase;
@@ -57,6 +59,7 @@ public class SimpleTableView extends CyclistViewBase {
 	
 	private TableView<Table.Row> _tableView;
 	private Table _currentTable = null;
+	private Simulation _currentSim = null;
 	
 	public SimpleTableView() {
 		super();
@@ -83,13 +86,53 @@ public class SimpleTableView extends CyclistViewBase {
 			return;
 		}
 		
-		_tableView.itemsProperty().unbind();
-		if (_tableView.getItems() != null) _tableView.getItems().clear();
-		_tableView.getColumns().clear();	
+		if (active) {
+			_currentTable = table;	
+		} else {
+			_currentTable = null;
+		}
+		
+		loadTable();
 		
 		if (active) {
 			setTitle(table.getName());
-			Schema schema = table.getSchema();	
+			
+		} else {
+			setTitle("");
+		}
+		
+
+	}
+	
+	@Override
+	public void selectSimulation(Simulation sim, boolean active) {
+		super.selectSimulation(sim, active);
+		
+		if (!active && sim != _currentSim) {
+			// ignore
+			return;
+		}
+		
+		if (active) {
+			_currentSim = sim;	
+		} else {
+			_currentSim = null;
+		}
+		
+		if (_currentTable != null) {
+			loadTable();
+		}
+
+	}
+	
+	private void loadTable() {
+		_tableView.itemsProperty().unbind();
+		if (_tableView.getItems() != null) _tableView.getItems().clear();
+		_tableView.getColumns().clear();
+		
+		if (_currentTable != null) {
+			//TODO: this be done only if the table is active
+			Schema schema = _currentTable.getSchema();	
 			
 			List<TableColumn<Table.Row, Object>> cols = new ArrayList<>();
 			for (int f=0; f<schema.size(); f++) {
@@ -98,14 +141,10 @@ public class SimpleTableView extends CyclistViewBase {
 			}
 			
 			_tableView.getColumns().addAll(cols);
-			_tableView.itemsProperty().bind(table.getRows(100));
-		} else {
-			setTitle("");
+			CyclistDatasource ds = _currentSim != null? _currentSim.getDataSource() : null;
+			_tableView.itemsProperty().bind(_currentTable.getRows(ds, 10000));
 		}
-		
-		_currentTable = table;
 	}
-	
 	
 	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
 				

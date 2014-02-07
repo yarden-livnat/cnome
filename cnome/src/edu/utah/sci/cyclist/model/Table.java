@@ -439,7 +439,7 @@ public class Table {
 	}
 	
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds1, final int n, boolean force) {
-		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
+		final CyclistDatasource ds = (!force && getDataSource() != null) ?  getDataSource(): ds1;
 
 		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
 
@@ -619,6 +619,7 @@ public class Table {
 		
 		return task;
 	}
+	
 	public ReadOnlyObjectProperty<ObservableList<Row>> getRows( List<Field> fields,  int limit) {
 		CyclistDatasource ds = getDataSource();
 		return getRows(ds, fields, limit);

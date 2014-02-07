@@ -9,6 +9,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/controlsfx-8.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/jfxtras-labs-8.0-r1-20140204.090227-55.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
