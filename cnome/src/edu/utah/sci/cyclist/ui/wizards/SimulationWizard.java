@@ -262,6 +262,7 @@ public class SimulationWizard extends TilePane {
 		VBox.setVgrow(aliasHbox,  Priority.ALWAYS);
 		
 		_simulationsView.setOnMouseClicked(new EventHandler<MouseEvent>(){
+			@Override
 			public void handle(MouseEvent e) {
 				if(_simulationsView.getSelectionModel().getSelectedItems().size() >1 || _simulationsView.getSelectionModel().getSelectedItems().size()==0 ){
 					aliasHbox.setDisable(true);
