@@ -35,7 +35,7 @@ import javafx.scene.image.Image;
  */
 public class Resources {
 
-	public static final String ICONS_DIR = "assets/icons/";
+	public static final String ICONS_DIR = "../assets/icons/";
 	public static final String UNKNOWN_ICON	= "unknown.png";
 	
 	private static Map<String, Image> _icons = new HashMap<String, Image>();
