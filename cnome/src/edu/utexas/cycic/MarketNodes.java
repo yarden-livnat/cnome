@@ -1,7 +1,7 @@
 package edu.utexas.cycic;
 
-import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utexas.cycic.tools.MarketViewTool;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

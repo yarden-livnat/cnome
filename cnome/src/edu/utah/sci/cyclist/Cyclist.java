@@ -24,12 +24,11 @@ package edu.utah.sci.cyclist;
 
 import org.apache.log4j.Logger;
 
-import edu.utah.sci.cyclist.controller.CyclistController;
-import edu.utah.sci.cyclist.event.dnd.DnDIcon;
-import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.event.notification.SimpleEventBus;
-import edu.utah.sci.cyclist.ui.MainScreen;
-
+import edu.utah.sci.cyclist.core.controller.CyclistController;
+import edu.utah.sci.cyclist.core.event.dnd.DnDIcon;
+import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.event.notification.SimpleEventBus;
+import edu.utah.sci.cyclist.core.ui.MainScreen;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;

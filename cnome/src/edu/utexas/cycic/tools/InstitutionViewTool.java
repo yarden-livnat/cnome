@@ -1,11 +1,11 @@
 package edu.utexas.cycic.tools;
 
 import javafx.scene.image.Image;
-import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.ViewPresenter;
-import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.Resources;
+import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
+import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utexas.cycic.InstitutionView;
 import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 
