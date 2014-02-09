@@ -33,7 +33,7 @@ import javafx.scene.image.Image;
  * @author yarden
  *
  */
-public class Resources {
+public class Resources1 {
 
 	public static final String ICONS_DIR = "../assets/icons/";
 	public static final String UNKNOWN_ICON	= "unknown.png";
@@ -41,7 +41,7 @@ public class Resources {
 	private static Map<String, Image> _icons = new HashMap<String, Image>();
 	
 	public static String getCSS(String name) {
-		return Resources.class.getResource(name).toExternalForm();
+		return Resources1.class.getResource(name).toExternalForm();
 	}
 	
 	/**
@@ -64,9 +64,9 @@ public class Resources {
 		String fullname =  name.contains(".") ? name : name+".png";
 		Image image = _icons.get(fullname);
 		if (image == null) {
-			InputStream is = Resources.class.getResourceAsStream(ICONS_DIR+fullname);
+			InputStream is = Resources1.class.getResourceAsStream(ICONS_DIR+fullname);
 			if (is == null)
-				is = Resources.class.getResourceAsStream(ICONS_DIR+UNKNOWN_ICON);
+				is = Resources1.class.getResourceAsStream(ICONS_DIR+UNKNOWN_ICON);
 			if (width > 0)
 				image = new Image(is, width, height, true, true);
 			else 

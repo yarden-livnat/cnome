@@ -80,7 +80,7 @@ public class Table {
 	private CyclistDatasource _datasource;
 	private Map<String, Object> _properties = new HashMap<>();
 
-	private List<Row> _rows = new ArrayList<>();
+	private List<TableRow> _rows = new ArrayList<>();
 	private String _localDataFile;
 
 	private SourceLocation _sourceLocation;
@@ -407,11 +407,11 @@ public class Table {
 	}
 
 
-	public void addRow(Row row) {
+	public void addRow(TableRow row) {
 		_rows.add(row);
 	}
 
-	public List<Row> getRows() {
+	public List<TableRow> getRows() {
 		return _rows;
 	}
 
@@ -429,23 +429,23 @@ public class Table {
 		return _isStandardSimulation;
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(final int n) {
+	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows(final int n) {
 		CyclistDatasource ds = getDataSource();
 		return getRows(ds, n);
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds, final int n) {
+	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows(CyclistDatasource ds, final int n) {
 		return getRows(ds, n, false);
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds1, final int n, boolean force) {
+	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows(CyclistDatasource ds1, final int n, boolean force) {
 		final CyclistDatasource ds = (!force && getDataSource() != null) ?  getDataSource(): ds1;
 
-		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 
 			@Override
-			protected ObservableList<Row> call() throws Exception {
-				List<Row> rows = new ArrayList<>();
+			protected ObservableList<TableRow> call() throws Exception {
+				List<TableRow> rows = new ArrayList<>();
 				try {
 					Connection conn = ds.getConnection();
 					String query = GET_ROWS_QUERY.replace("$table", getName());
@@ -457,7 +457,7 @@ public class Table {
 					
 					int cols = rmd.getColumnCount();
 					while (rs.next()) {
-						Row row = new Row(cols);
+						TableRow row = new TableRow(cols);
 						for (int i=0; i<cols; i++) {
 							row.value[i] = rs.getObject(i+1);
 						}
@@ -548,23 +548,23 @@ public class Table {
 		return task;
 	}
 	
-	public Task<ObservableList<Row>> getRows(final String query) {
+	public Task<ObservableList<TableRow>> getRows(final String query) {
 		CyclistDatasource ds = getDataSource();
 		return getRows(ds, query);
 	}
 	
-	public Task<ObservableList<Row>> getRows(CyclistDatasource ds, final String query) {
+	public Task<ObservableList<TableRow>> getRows(CyclistDatasource ds, final String query) {
 		return getRows(ds, query, false);
 	}
 	
-	public Task<ObservableList<Row>> getRows(CyclistDatasource ds1, final String query, boolean force) {
+	public Task<ObservableList<TableRow>> getRows(CyclistDatasource ds1, final String query, boolean force) {
 		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
 		
-		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 
 			@Override
-			protected ObservableList<Row> call() throws Exception {
-				List<Row> rows = new ArrayList<>();
+			protected ObservableList<TableRow> call() throws Exception {
+				List<TableRow> rows = new ArrayList<>();
 				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
 					updateMessage("querying");
 					long t1 = System.currentTimeMillis();
@@ -584,7 +584,7 @@ public class Table {
 							updateMessage("Canceled");
 							break;
 						}
-						Row row = new Row(cols);
+						TableRow row = new TableRow(cols);
 						for (int i=0; i<cols; i++) {
 							row.value[i] = rs.getObject(i+1);
 //							System.out.print(row.value[i]+"  ");
@@ -620,23 +620,23 @@ public class Table {
 		return task;
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows( List<Field> fields,  int limit) {
+	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows( List<Field> fields,  int limit) {
 		CyclistDatasource ds = getDataSource();
 		return getRows(ds, fields, limit);
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds,  List<Field> fields,  int limit) {
+	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows(CyclistDatasource ds,  List<Field> fields,  int limit) {
 		return getRows(ds, fields, limit, false);
 	}
 	
-	public ReadOnlyObjectProperty<ObservableList<Row>> getRows(CyclistDatasource ds1,  final List<Field> fields, final int limit, boolean force) {
+	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows(CyclistDatasource ds1,  final List<Field> fields, final int limit, boolean force) {
 		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
 
-		Task<ObservableList<Row>> task = new Task<ObservableList<Row>>() {
+		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 
 			@Override
-			protected ObservableList<Row> call() throws Exception {
-				List<Row> rows = new ArrayList<>();
+			protected ObservableList<TableRow> call() throws Exception {
+				List<TableRow> rows = new ArrayList<>();
 				try (Connection conn = ds.getConnection()){				
 					StringBuilder builder = new StringBuilder("select ");
 					for (int i=0; i<fields.size(); i++) {
@@ -653,7 +653,7 @@ public class Table {
 						int cols = fields.size();
 						
 						while (rs.next()) {
-							Row row = new Row(cols);
+							TableRow row = new TableRow(cols);
 							for (int i=0; i<cols; i++) {
 								row.value[i] = rs.getObject(i+1);
 							}
@@ -678,7 +678,7 @@ public class Table {
 		
 		return task.valueProperty();
 	}
-	public Row getRow(int index) {
+	public TableRow getRow(int index) {
 		return _rows.get(index);
 	}
 
@@ -698,13 +698,13 @@ public class Table {
 		return _saveDir;
 	}
 	
-	public class Row  {
-		public Object[] value;
-
-		public Row(int size) {
-			value = new Object[size];
-		}
-	}
+//	public class Row  {
+//		public Object[] value;
+//
+//		public Row(int size) {
+//			value = new Object[size];
+//		}
+//	}
 	
 	/* Saves the values of a chosen filter into a file 
 	 * Creates an xml file with the table name, and writes the filter's field name and its values

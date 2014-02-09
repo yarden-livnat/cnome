@@ -28,6 +28,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
@@ -324,6 +325,10 @@ public class FlowView extends CyclistViewBase {
 		hbox.getStyleClass().add("flow-timestep-bar");
 		hbox.getChildren().addAll(_timestepLabel, _timestepField);
 		
+		Rectangle clip = new Rectangle(0, 0, 100, 100);
+		clip.widthProperty().bind(_pane.widthProperty());
+		clip.heightProperty().bind(_pane.heightProperty());
+		_pane.setClip(clip);
 		_pane = new Pane();
 		_pane.getChildren().addAll(_srcLine, _destLine);
 		_pane.setPrefSize(400, 300);

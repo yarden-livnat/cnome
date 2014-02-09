@@ -54,9 +54,14 @@
 
 .view .header {
 	-fx-padding: 1, 2, 0, 2;
-	-fx-background-color: #e0e0e0;
+	-fx-background-color: lightblue ; /* #e0e0e0;*/
 	-fx-font-weight: bold;
 
+}
+
+.view .infobar {
+	-fx-padding: 0;
+	-fx-background-color: lightgreen;
 }
 
 .view .data-bar {
@@ -77,12 +82,11 @@
     -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
+
 .drop-area {
 	-fx-background-color: e0e0e0;
 	-fx-spacing: 2;
 	-fx-padding: 0;
-	/*-fx-pref-height: 27;*/
-	/*-fx-min-height: 20;*/
 }
 
 /*
@@ -90,7 +94,7 @@
  */
  
  .flow-view {
- 	-fx-background-color: beige;
+ 	-fx-background-color: white;
  }
  
  .flow-line {
@@ -201,5 +205,5 @@
 }
 
 .FilterPanel .TextField{
-	-fx-font-size:10;
+/* 	-fx-font-size:10;*/
 }

@@ -12,13 +12,15 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.ui.components.FilterGlyph;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class FiltersListPanel extends TitledPanel {
 	public static final String ID 		= "filters-list-panel";
 	public static final String TITLE	= "Filters";
 	
 	public FiltersListPanel() {
-		super(TITLE);
+		super(TITLE, GlyphRegistry.get(AwesomeIcon.FILTER)); //"FontAwesome|FILTER"));
 		
 		configure();
 	}

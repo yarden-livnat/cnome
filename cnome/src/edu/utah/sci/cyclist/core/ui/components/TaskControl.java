@@ -1,23 +1,26 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import edu.utah.sci.cyclist.core.Resources;
 
 public class TaskControl extends HBox {
 
 	private ObjectProperty<Task<?>> _taskProperty = new SimpleObjectProperty<>();
 	private Task<?> _task;
-	private ProgressIndicator _indicator;
-	private ImageView _imageView; 
+//	private ProgressIndicator _indicator;
+	private ProgressBar _indicator;
+	private Node _status;
 	private Tooltip _msg = new Tooltip();
 	
 	public TaskControl() {
@@ -34,7 +37,7 @@ public class TaskControl extends HBox {
 		}
 		
 		_task = task;
-		_imageView.setVisible(false);
+		_status.setVisible(false);
 		
 		if (_task == null) {
 			_indicator.visibleProperty().unbind();
@@ -42,16 +45,15 @@ public class TaskControl extends HBox {
 			_msg.textProperty().unbind();
 			_msg.setText("");
 		} else {
-			_indicator.visibleProperty().bind(_task.runningProperty());		
+			_indicator.visibleProperty().bind(_task.runningProperty());	
 			_task.setOnFailed(new EventHandler<WorkerStateEvent>() {
 				
 				@Override
 				public void handle(WorkerStateEvent event) {
-					_imageView.setVisible(true);
+					_status.setVisible(true);
 				}
 			});
-			
-			
+					
 			_indicator.setOnMouseClicked(new EventHandler<Event>() {
 	
 				@Override
@@ -66,20 +68,17 @@ public class TaskControl extends HBox {
 	}
 	
 	public void clear() {
-		_imageView.setVisible(false);
+		_status.setVisible(false);
 	}
 	
 	private void build() {
-		_indicator = new ProgressIndicator(-1);
-		_indicator.setPrefSize(14, 14);
+//		_indicator = new ProgressIndicator(-1);
+		_indicator = new ProgressBar(-1);
+		_indicator.setPrefSize(50, 14);
 		_indicator.setVisible(false);
-		_indicator.setStyle("-fx-background-color: #fffeec");
-		_imageView = new ImageView(Resources.getIcon("error"));
-		
-		getChildren().addAll(_indicator, _imageView);
-		
-		Tooltip.install(this, _msg);
-		
-		_imageView.setVisible(false);
+		_status = GlyphRegistry.get(AwesomeIcon.WARNING); 
+		getChildren().addAll(_indicator, _status);
+				
+		_status.setVisible(false);
 	}
 }

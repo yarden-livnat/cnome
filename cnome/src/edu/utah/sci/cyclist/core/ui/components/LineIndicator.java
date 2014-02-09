@@ -24,9 +24,9 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Indicator;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class LineIndicator extends Group {
 	private Indicator _indicator;
@@ -123,7 +123,7 @@ public class LineIndicator extends Group {
 					clipboard.put(DnD.INDICATOR_FORMAT, Indicator.class, indicator);
 					ClipboardContent content = new ClipboardContent();
 					content.putString("_indicator");
-					content.putImage(Resources.getIcon("_indicator"));
+//					content.putImage(GlyphRegistry.getImage("FontAwesome|QUESTION"));/*.getIcon("_indicator"));*/
 					db.setContent(content);
 				} else { 
 					_dragX = event.getX();

@@ -183,6 +183,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 	 * @param - Simulation: The simulation to add locally.
 	 */
 	protected void addLocalSimulation(Simulation simulation){
+		getView().addSimulation(simulation, false /*remote*/, true /* active */);
 		getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
 	}
 	

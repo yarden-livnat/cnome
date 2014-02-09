@@ -154,8 +154,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 
                             @Override
                             public void call(Simulation simulation) {
-                                    broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, simulation));
-                                    addLocalSimulation(simulation);
+                            	addLocalSimulation(simulation);
+                                broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, simulation));
                             }
                             
                         });

@@ -1,8 +1,5 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
-import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
-import edu.utah.sci.cyclist.core.model.FieldProperties;
-import edu.utah.sci.cyclist.core.model.Filter;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -12,18 +9,21 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.FieldProperties;
+import edu.utah.sci.cyclist.core.model.Filter;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class FilterGlyph extends HBox {
 
 	private Filter _filter;
-	private StackPane _button;
+	private Label _button;
 	private boolean _remote;
 	private boolean _valid;
 	
@@ -69,38 +69,17 @@ public class FilterGlyph extends HBox {
 	
 	private void build() {
 		this.getStyleClass().add("filter-glyph");
-		this.setSpacing(5);
-		
-		StackPane stackPane = new StackPane();
-		stackPane.setAlignment(Pos.CENTER);
-		
-		getStyleClass().add("filter-glyph");
-		setSpacing(5);
-		
-		if (_remote) {
-			if(_valid){
-				setStyle("-fx-background-color: #d0ced1");
-			} else {
-				setStyle("-fx-background-color: #d0ced1;"+"-fx-border-color:#D7737F;"+"-fx-border-width:2;");
-			}
-				
-		} else {
-			if(!_valid){
-				setStyle("-fx-background-color: #e4a1aa");
-			}
-		}
+
+		if (_remote) this.getStyleClass().add("remote");
+		if (!_valid) this.getStyleClass().add("invalid");
 		
 		Label label = new Label(_filter.getName());
 		label.getStyleClass().add("text");
 	
-		_button = new StackPane();
-		_button.getStyleClass().add("arrow");
-		_button.setMaxHeight(8);
-		_button.setMaxWidth(6);
+		_button = GlyphRegistry.get(AwesomeIcon.CARET_DOWN);
+		_button.getStyleClass().add("arrow1");
 		
-		stackPane.getChildren().add(_button);
-		
-		this.getChildren().addAll(label,stackPane);
+		this.getChildren().addAll(label, _button); 
 		createMenu();
 		validProperty().set(_valid);
 		
@@ -109,18 +88,16 @@ public class FilterGlyph extends HBox {
 			@Override
 			public void invalidated(Observable observable) {
 				
-				//Change color according to remote and validity parameters.
-				String color = "#beffbf";
 				if (validProperty().get()) {
-					color= (_remote) ? "#d0ced1": "#beffbf";
+					getStyleClass().remove("invalid");
+				} else {
+					getStyleClass().add("invalid");
+				}
+
+				if (validProperty().get()) {
 					_valid=true;
 				} else {
-					color= (_remote) ? "#d0ced1": "#e4a1aa";
 					_valid=false;
-				}
-				setStyle("-fx-background-color:" + color);
-				if(!_valid && _remote){
-					setStyle("-fx-border-color:#D7737F;"+"-fx-background-color:" + color+";" + "-fx-border-width:2;");
 				}
 				
 			}

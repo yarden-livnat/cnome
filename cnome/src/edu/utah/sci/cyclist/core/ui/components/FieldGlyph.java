@@ -15,16 +15,16 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.DataType.Interpretation;
+import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.FieldProperties;
 import edu.utah.sci.cyclist.core.model.Filter;
-import edu.utah.sci.cyclist.core.model.DataType.Interpretation;
-import edu.utah.sci.cyclist.core.model.DataType.Role;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.SQL;
 
 public class FieldGlyph extends HBox {
@@ -160,8 +160,8 @@ public class FieldGlyph extends HBox {
                 
                 final ContextMenu contextMenu = new ContextMenu();
 
-                final MenuItem categoryIitem = new MenuItem("Category", new ImageView(Resources.getIcon("ok")));
-                final MenuItem numericIitem = new MenuItem("Measure", new ImageView(Resources.getIcon("ok")));
+                final MenuItem categoryIitem = new MenuItem("Category", GlyphRegistry.get(AwesomeIcon.CHECK));
+                final MenuItem numericIitem = new MenuItem("Measure", GlyphRegistry.get(AwesomeIcon.CHECK));
                 
                 if (_field.getRole() == Role.DIMENSION) {
                         numericIitem.getGraphic().setVisible(false);
@@ -230,10 +230,10 @@ public class FieldGlyph extends HBox {
                 contextMenu.getItems().add(new SeparatorMenuItem());
                 
                 //Change field type to discrete.
-                final MenuItem discreteItem = new MenuItem("Discrete", new ImageView(Resources.getIcon("ok")));
+                final MenuItem discreteItem = new MenuItem("Discrete", GlyphRegistry.get(AwesomeIcon.CHECK));
                 contextMenu.getItems().add(discreteItem);
                 
-                final MenuItem continuousIitem = new MenuItem("Continuous", new ImageView(Resources.getIcon("ok")));
+                final MenuItem continuousIitem = new MenuItem("Continuous", GlyphRegistry.get(AwesomeIcon.CHECK));
                 contextMenu.getItems().add(continuousIitem);
                 
                 if (_field.getDataType().getInterpretation() == Interpretation.DISCRETE) {

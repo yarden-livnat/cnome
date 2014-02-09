@@ -31,8 +31,8 @@ import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import javafx.event.EventHandler;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -40,21 +40,23 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import edu.utah.sci.cyclist.core.Resources;
+import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class ToolsPanel extends TitledPanel {
-        public static final String ID                 = "tools-panel";
-        public static final String TITLE        = "Views";
+        public static final String ID = "tools-panel";
+        public static final String TITLE = "Views";
         
         
         public ImageView dragView = new ImageView();
         public Pane root;
         
         public ToolsPanel() {
-                super(TITLE);
+                super(TITLE, GlyphRegistry.get(AwesomeIcon.EYE));//"FontAwesome|EYE_OPEN"));
         }
         
         public void setToolFactories(List<ToolFactory> factories) {                
@@ -116,9 +118,8 @@ public class ToolsPanel extends TitledPanel {
 		VBox vbox = (VBox) getContent();
 		
 		for (final ToolFactory factory : factories) {
-			final Image icon = Resources.getIcon(factory.getIconName());
 			
-			final Label title = new Label(factory.getToolName(), new ImageView(icon));
+			final Label title = new Label(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
 			title.setPrefWidth(USE_COMPUTED_SIZE);
 			title.getStyleClass().add("tools-entry");
 			
@@ -134,6 +135,13 @@ public class ToolsPanel extends TitledPanel {
 						Dragboard db = title.startDragAndDrop(TransferMode.COPY);
 						ClipboardContent content = new ClipboardContent();				
 						content.put( DnD.TOOL_FORMAT, factory.getToolName());
+						
+						SnapshotParameters snapParams = new SnapshotParameters();
+//			            snapParams.setFill(Color.TRANSPARENT);
+			            snapParams.setFill(Color.AQUA);
+			            
+			            content.putImage(title.snapshot(snapParams, null));	            
+						
 						db.setContent(content);
 						
 					} catch (InstantiationException | IllegalAccessException e) {

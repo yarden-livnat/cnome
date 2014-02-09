@@ -40,6 +40,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
@@ -55,11 +56,12 @@ import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.components.DatasourceSelector;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 /*
  * Class to allow the user to create or edit a data table.
@@ -72,7 +74,8 @@ public class DatatableWizard extends TilePane {
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
 	private ListView<String>            _tablesView;
-	private ImageView                   _statusDisplay;
+//	private ImageView                   _statusDisplay;
+	private Label						_status;
 	
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
@@ -116,7 +119,7 @@ public class DatatableWizard extends TilePane {
 	private void createDialog(Table tableProperty){
 		
 		_dialog = StageBuilder.create()
-				.title("Create Data Table")
+				.title("Data Tables")
 				.build();
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
@@ -203,7 +206,8 @@ public class DatatableWizard extends TilePane {
 												selectConnection(_current);
 											};
 										}).build(),
-										_statusDisplay = ImageViewBuilder.create().build()
+//										_statusDisplay = ImageViewBuilder.create().build()
+										_status = new Label()
 										).build()
 						).build();
 		
@@ -218,7 +222,8 @@ public class DatatableWizard extends TilePane {
 						
 						_current = _sourcesView.getSelectionModel().getSelectedItem();
 						_tablesView.getItems().clear();
-						_statusDisplay.setImage(null);
+//						_statusDisplay.setImage(null);
+						_status.setGraphic(null);
 						
 					}
 				});
@@ -350,7 +355,7 @@ public class DatatableWizard extends TilePane {
 		_tablesView.getItems().clear();
 		
 		try (Connection conn = ds.getConnection()) {
-			_statusDisplay.setImage(Resources.getIcon("ok"));
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, "%", null);
 			while (rs.next()) {
@@ -358,7 +363,8 @@ public class DatatableWizard extends TilePane {
 			}
 			
 		} catch (Exception e) {
-			_statusDisplay.setImage(Resources.getIcon("error"));
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
+
 		}
 	}
 	

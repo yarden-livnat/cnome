@@ -38,8 +38,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -56,16 +56,15 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.DataType.Classification;
+import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Indicator;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.DataType.Classification;
-import edu.utah.sci.cyclist.core.model.DataType.Role;
-import edu.utah.sci.cyclist.core.model.Table.Row;
+import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
@@ -73,6 +72,8 @@ import edu.utah.sci.cyclist.core.ui.components.IntegerField;
 import edu.utah.sci.cyclist.core.ui.components.LineIndicator;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 
 public class ChartView extends CyclistViewBase {
@@ -109,7 +110,7 @@ public class ChartView extends CyclistViewBase {
 	//        private DropArea _indicatorArea;
 
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
-	private ListProperty<Row> _items = new SimpleListProperty<>();
+	private ListProperty<TableRow> _items = new SimpleListProperty<>();
 	private ObjectProperty<Boolean> _forceZeroProperty = new SimpleObjectProperty<>();
 	private IntegerField _limitEntry;
 
@@ -308,7 +309,7 @@ public class ChartView extends CyclistViewBase {
 				for (Field field : _lodArea.getFields()) {
 					_spec.lod.add(new FieldInfo(field, order.indexOf(field)));
 				}
-				Task<ObservableList<Row>> task = getCurrentTable().getRows(builder.toString());
+				Task<ObservableList<TableRow>> task = getCurrentTable().getRows(builder.toString());
 				setCurrentTask(task);
 				_items.bind(task.valueProperty());
 			}
@@ -438,7 +439,7 @@ public class ChartView extends CyclistViewBase {
 		List<SeriesDataPoint> points = new ArrayList<>();
 	}
 
-	private void assignData(MapSpec spec, ObservableList<Row> list) {
+	private void assignData(MapSpec spec, ObservableList<TableRow> list) {
 		if (list.size() == 0) {
 			System.out.println("no data");
 			return;
@@ -497,7 +498,7 @@ public class ChartView extends CyclistViewBase {
 	//                return collection.iterator().next();
 	//        }
 	//        
-	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<Row> list) {
+	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<TableRow> list) {
 		List<SeriesData> all = new ArrayList<>();
 
 		int nx = spec.numX();
@@ -515,7 +516,7 @@ public class ChartView extends CyclistViewBase {
 				SeriesData series = new SeriesData();
 				series.x = xInfo.field;
 				series.y = yInfo.field;
-				for (Row row : list) {
+				for (TableRow row : list) {
 					SeriesDataPoint p = new SeriesDataPoint();
 					p.x = row.value[ix];
 					p.y = row.value[iy];
@@ -823,12 +824,12 @@ public class ChartView extends CyclistViewBase {
 		// add actions
 		setupActions();
 
-		_items.addListener(new ChangeListener<ObservableList<Row>>() {
+		_items.addListener(new ChangeListener<ObservableList<TableRow>>() {
 
 			@Override
 			public void changed(
-					ObservableValue<? extends ObservableList<Row>> observable,
-							ObservableList<Row> oldValue, ObservableList<Row> newValue) {
+					ObservableValue<? extends ObservableList<TableRow>> observable,
+							ObservableList<TableRow> oldValue, ObservableList<TableRow> newValue) {
 
 				if (newValue != null) {
 					//assignData(newValue);
@@ -927,9 +928,11 @@ public class ChartView extends CyclistViewBase {
 				// FIXME: seems to be a bug in JavaFX.
 				// The chart does not refresh itself if the axis forceRangeZero changes.
 				// This is a hack to force the chart to redraw.
-				ObservableList<Series<Object, Object>> list = getChart().getData();
-			getChart().setData(null);
-			getChart().setData(list);
+				if (getChart() != null) {
+					ObservableList<Series<Object, Object>> list = getChart().getData();
+					getChart().setData(null);
+					getChart().setData(list);
+				}
 			}
 		});
 		forceZeroProperty().set(false);
@@ -939,18 +942,9 @@ public class ChartView extends CyclistViewBase {
 
 
 	private void setupActions() {
-		// TODO: Figure out why the options button does not show (op is a temporary solution)
-		final StackPane options = new StackPane();
-		options.getStyleClass().add("arrow");
-		options.setMaxSize(6, 8);
-
-		StackPane sp = new StackPane();
-		sp.setAlignment(Pos.CENTER);
-		sp.getChildren().add(options);
-
-		final Button op = new Button("op");
-		op.getStyleClass().add("flat-button");
-
+		final Label options = GlyphRegistry.get(AwesomeIcon.CARET_DOWN);
+		options.getStyleClass().add("flat-button");
+		
 		// create menu
 		final ContextMenu contextMenu = new ContextMenu();
 
@@ -964,7 +958,7 @@ public class ChartView extends CyclistViewBase {
 
 		contextMenu.getItems().add(item);
 
-		final MenuItem forceZeroItem = new MenuItem("Force Zero", new ImageView(Resources.getIcon("ok")));
+		final MenuItem forceZeroItem = new MenuItem("Force Zero", GlyphRegistry.get(AwesomeIcon.CHECK));
 		forceZeroItem.getGraphic().visibleProperty().bind(forceZeroProperty());
 		contextMenu.getItems().add(forceZeroItem);
 
@@ -987,16 +981,15 @@ public class ChartView extends CyclistViewBase {
 
 		contextMenu.getItems().add(duplicateItem);
 
-		op.setOnMousePressed(new EventHandler<Event>() {
+		options.setOnMousePressed(new EventHandler<Event>() {
 			@Override
 			public void handle(Event event) {
-				contextMenu.show(op, Side.BOTTOM, 0, 0);
+				contextMenu.show(options, Side.BOTTOM, 0, 0);
 			}
 		});
 
 		List<Node> actions = new ArrayList<>();
-		actions.add(op);
-		//                actions.add(sp);
+		actions.add(options);
 		addActions(actions);
 
 		chartProperty().addListener(new InvalidationListener() {

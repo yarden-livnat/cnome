@@ -26,6 +26,8 @@ package edu.utah.sci.cyclist.core.ui.panels;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.controlsfx.glyphfont.GlyphFontRegistry;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
@@ -36,6 +38,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
@@ -44,12 +47,14 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.wizards.TableEditorWizard;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class TablesPanel extends TitledPanel  {
 	public static final String ID 		= "cnome-panel";
@@ -74,7 +79,7 @@ public class TablesPanel extends TitledPanel  {
 	};
 	
 	public TablesPanel() {
-		super(TITLE);
+		super(TITLE, GlyphRegistry.get(AwesomeIcon.LIST_ALT)); 
 	}
 	
 //	@Override
@@ -144,7 +149,7 @@ public class TablesPanel extends TitledPanel  {
 	private Entry createEntry(Table table) {
 		final Entry entry = new Entry();
 		entry.table = table;
-		entry.title = new Label(table.getAlias(), new ImageView(Resources.getIcon("table")));
+		entry.title = new Label(table.getAlias()/*, GlyphFontRegistry.glyph("FontAwesome|LIST_ALT")*/);
 		
 		//Separate "real" tables (not from the simulation), by using an Italic font.
 		if(table.getDataSource() != null){
@@ -188,8 +193,11 @@ public class TablesPanel extends TitledPanel  {
 				
 				ClipboardContent content = new ClipboardContent();
 				content.put(DnD.TABLE_FORMAT, entry.title.getText());
-				content.putImage(Resources.getIcon("table"));
 				
+				SnapshotParameters snapParams = new SnapshotParameters();
+	            snapParams.setFill(Color.TRANSPARENT);
+	            
+	            content.putImage(entry.title.snapshot(snapParams, null)); 
 				db.setContent(content);
 			}
 		});		

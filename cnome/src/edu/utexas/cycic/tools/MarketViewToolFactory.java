@@ -2,6 +2,7 @@ package edu.utexas.cycic.tools;
 
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 
 public class MarketViewToolFactory implements ToolFactory {
 
@@ -11,8 +12,8 @@ public class MarketViewToolFactory implements ToolFactory {
 	}
 
 	@Override
-	public String getIconName() {
-		return MarketViewTool.ICON_NAME;
+	public AwesomeIcon getIcon() {
+		return MarketViewTool.ICON;
 	}
 	
 	@Override

@@ -33,7 +33,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -41,7 +40,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.panels.FiltersListPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
@@ -50,18 +48,18 @@ import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class MainScreen extends VBox {
 	public static final String ID = "main-screen";
 	
-//	private MenuBar _menubar;
 	private SplitPane _sp;
 	private SplitPane _toolsPane;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _dimensionsPanel;
 	private SchemaPanel _measuresPanel;
 	private ToolsPanel _toolsPanel;
-//	private FiltersListPanel _filtersPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
@@ -241,13 +239,13 @@ public class MainScreen extends VBox {
 	
 	private Menu createFileMenu() {
 		
-		_workspaceMenuItem = new MenuItem("Work Directory"); //new ImageView(Resources.getIcon("workspace.png")));
+		_workspaceMenuItem = new MenuItem("Work Directory",GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT)); 
 		
-		_saveMenuItem = new MenuItem("Save");
+		_saveMenuItem = new MenuItem("Save", GlyphRegistry.get(AwesomeIcon.SAVE));
 		_saveMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+S"));
 		
 		// -- Quit
-		_quitMenuItem = new MenuItem("Quit");
+		_quitMenuItem = new MenuItem("Quit", GlyphRegistry.get(AwesomeIcon.SIGN_OUT));
 		_quitMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+Q"));
 		
 		// -- setup the menu 
@@ -262,9 +260,9 @@ public class MainScreen extends VBox {
 	}
 	
 	private Menu createDataMenu() {
-		_datasourceMenuItem = new MenuItem("Add Datatable", new ImageView(Resources.getIcon("open.png")));
+		_datasourceMenuItem = new MenuItem("Datatable", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN));//"FontAwesome|OPEN"));
 		
-		_simulationMenuItem = new MenuItem("Add Simulation", new ImageView(Resources.getIcon("open.png")));
+		_simulationMenuItem = new MenuItem("Simulation", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN));//"FontAwesome|OPEN"));
 		
 		
 		// -- setup the menu 

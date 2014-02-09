@@ -39,11 +39,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
@@ -56,11 +55,12 @@ import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.ui.components.MySQLPage;
 import edu.utah.sci.cyclist.core.ui.components.SQLitePage;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 /*
  *  Class to create or edit a data source
@@ -71,7 +71,8 @@ public class DatasourceWizard extends VBox {
 	private Stage                             _dialog;
 	private ComboBox<String>                  _sourceBox;	
 	private TextField                         _nameField;
-	private ImageView                         _statusDisplay;
+//	private ImageView                         _statusDisplay;
+	private Label							  _status;
 	private Map<String, DatasourceWizardPage> _panes;
 	private DatasourceWizardPage              _currentPage;	
 	
@@ -182,7 +183,8 @@ public class DatasourceWizard extends VBox {
 							};
 						})
 						.build(),
-						_statusDisplay = ImageViewBuilder.create().build(),
+//						_statusDisplay = ImageViewBuilder.create().build(),
+						_status = new Label(),
 						ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),	
 						new Spring(),						
 						// Cancel
@@ -261,10 +263,11 @@ public class DatasourceWizard extends VBox {
 
 		try (Connection conn = ds.getConnection()) {
 			//System.out.println("connection ok");
-			_statusDisplay.setImage(Resources.getIcon("ok"));
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 		} catch (Exception e) {
 			//System.out.println("connection failed");
-			_statusDisplay.setImage(Resources.getIcon("error"));
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
+
 		}
 	}
 }

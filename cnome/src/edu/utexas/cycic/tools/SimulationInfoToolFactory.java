@@ -2,6 +2,7 @@ package edu.utexas.cycic.tools;
 
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 
 public class SimulationInfoToolFactory implements ToolFactory {
 
@@ -11,8 +12,8 @@ public class SimulationInfoToolFactory implements ToolFactory {
 	}
 
 	@Override
-	public String getIconName() {
-		return SimulationInfoTool.ICON_NAME;
+	public AwesomeIcon getIcon() {
+		return SimulationInfoTool.ICON;
 	}
 	
 	@Override

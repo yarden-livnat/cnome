@@ -56,9 +56,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 /*
  * Class to allow the user to create or edit a data table.
@@ -70,7 +71,8 @@ public class SimulationWizard extends TilePane {
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
 	private List<String> 				_simulationsIds;
-	private ImageView                   _statusDisplay;
+//	private ImageView                   _statusDisplay;
+	private Label						_status;
 	private ListView<String>            _simulationsView;
 	private TextField                   _aliasField;
 	
@@ -111,7 +113,7 @@ public class SimulationWizard extends TilePane {
 	private void createDialog(){
 		
 		_dialog = new Stage();
-		_dialog.setTitle("Create Simulation");
+		_dialog.setTitle("Simulations");
 		
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
@@ -138,9 +140,10 @@ public class SimulationWizard extends TilePane {
 		conHBox.setPadding(new Insets(5));
 		conHBox.setAlignment(Pos.CENTER_LEFT);
 		
-		_statusDisplay = new ImageView();
+//		_statusDisplay = new ImageView();
+		_status = new Label();
 		
-		connectionBox.getChildren().addAll(dataSrcHbox,conHBox,_statusDisplay);
+		connectionBox.getChildren().addAll(dataSrcHbox,conHBox,_status /*_statusDisplay*/);
 		
 		// Sources box
 		VBox srcVbox = new VBox();
@@ -177,8 +180,8 @@ public class SimulationWizard extends TilePane {
 				selectConnection(_current);
 			};
 		});
-		_statusDisplay = new ImageView();
-		conHBox.getChildren().addAll(selectionButton,_statusDisplay);
+//		_statusDisplay = new ImageView();
+		conHBox.getChildren().addAll(selectionButton, _status/*_statusDisplay*/);
 		
 		_sourcesView.setId("datasources-list");
 		_sourcesView.setMaxSize(100, 100);
@@ -190,8 +193,8 @@ public class SimulationWizard extends TilePane {
 							CyclistDatasource old_val, CyclistDatasource new_val) {
 						
 						_current = _sourcesView.getSelectionModel().getSelectedItem();
-						_statusDisplay.setImage(null);
-						
+//						_statusDisplay.setImage(null);
+						_status.setGraphic(null);	
 					}
 				});
 		
@@ -341,7 +344,7 @@ public class SimulationWizard extends TilePane {
 		}
 		
 		try (Connection conn = ds.getConnection()) {
-			_statusDisplay.setImage(Resources.getIcon("ok"));
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 			while (rs.next()) {
@@ -359,7 +362,7 @@ public class SimulationWizard extends TilePane {
 			System.out.println("Table for SimID doesn't exist");
 		}
 		catch (Exception e) {
-			_statusDisplay.setImage(Resources.getIcon("error"));
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
 		}
 	}
 	

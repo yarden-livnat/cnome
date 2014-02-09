@@ -29,7 +29,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
@@ -37,7 +36,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.FieldProperties;
@@ -47,6 +45,8 @@ import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.SQL;
 
 public class FilterPanel extends TitledPanel {
@@ -77,7 +77,7 @@ public class FilterPanel extends TitledPanel {
 	
 	public FilterPanel(Filter filter) {
 		//super(filter.getName());
-		super(getTitle(filter));
+		super(getTitle(filter), GlyphRegistry.get(AwesomeIcon.FILTER));//"FontAwesome|FILTER"));
 		_filter = filter;
 		build();
 	}
@@ -138,7 +138,7 @@ public class FilterPanel extends TitledPanel {
 				
 		_closeButton = new Button();
 		_closeButton.getStyleClass().add("flat-button");
-		_closeButton.setGraphic(new ImageView(Resources.getIcon("close_view")));
+		_closeButton.setGraphic(GlyphRegistry.get(AwesomeIcon.TIMES));//"FontAwesome|TIMES"));
 		
 		_closeButton.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
@@ -185,7 +185,6 @@ public class FilterPanel extends TitledPanel {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> arg0,
 					Boolean oldValue, Boolean newValue) {
-				System.out.println("highlight: "+newValue);
 				if (newValue)
 					getHeader().setStyle("-fx-background-color: #beffbf");
 				else

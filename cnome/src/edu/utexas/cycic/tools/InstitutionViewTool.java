@@ -1,11 +1,10 @@
 package edu.utexas.cycic.tools;
 
-import javafx.scene.image.Image;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utexas.cycic.InstitutionView;
 import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 
@@ -13,7 +12,7 @@ public class InstitutionViewTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.InstitutionViewTool";
 	public static final String TOOL_NAME 	= "Institution View";
-	public static final String ICON_NAME 	= "CycIC";
+	public static final AwesomeIcon ICON 	= AwesomeIcon.QUESTION_CIRCLE;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
@@ -23,11 +22,6 @@ public class InstitutionViewTool implements Tool {
 		return ID;
 	}
 	
-	@Override
-	public Image getIcon() {
-		return Resources.getIcon(ICON_NAME, 16, 16);	
-	}
-
 	@Override
 	public String getName() {
 		return TOOL_NAME;

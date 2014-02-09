@@ -27,6 +27,8 @@ import java.util.List;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.SnapshotParameters;
@@ -50,14 +52,15 @@ import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Schema;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.Table.Row;
+import edu.utah.sci.cyclist.core.model.TableRow;
+import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 
 public class SimpleTableView extends CyclistViewBase {
 	public static final String ID = "table-view";
 	public static final String TITLE = "Table";
 	
-	private TableView<Table.Row> _tableView;
+	private TableView<TableRow> _tableView;
 	private Table _currentTable = null;
 	private Simulation _currentSim = null;
 	
@@ -69,7 +72,7 @@ public class SimpleTableView extends CyclistViewBase {
 	private void build() {
 		setTitle(TITLE);
 		
-		_tableView = new TableView<Table.Row>();
+		_tableView = new TableView<TableRow>();
 		_tableView.getStyleClass().add("simple-table-view");
 		_tableView.setPrefSize(300, 200);
 		_tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -95,8 +98,7 @@ public class SimpleTableView extends CyclistViewBase {
 		loadTable();
 		
 		if (active) {
-			setTitle(table.getName());
-			
+			setTitle(table.getName());	
 		} else {
 			setTitle("");
 		}
@@ -134,39 +136,59 @@ public class SimpleTableView extends CyclistViewBase {
 			//TODO: this be done only if the table is active
 			Schema schema = _currentTable.getSchema();	
 			
-			List<TableColumn<Table.Row, Object>> cols = new ArrayList<>();
+			List<TableColumn<TableRow, Object>> cols = new ArrayList<>();
 			for (int f=0; f<schema.size(); f++) {
 				Field field = schema.getField(f);				
 				cols.add(createColumn(field, f));
 			}
 			
 			_tableView.getColumns().addAll(cols);
-			CyclistDatasource ds = _currentSim != null? _currentSim.getDataSource() : null;
-			_tableView.itemsProperty().bind(_currentTable.getRows(ds, 10000));
+			fetchRows();
 		}
 	}
 	
-	private TableColumn<Table.Row, Object> createColumn(final Field field, final int col) {
-				
-		TableColumn<Table.Row, Object> tc = new TableColumn<>();
-		tc.setText(field.getName());
-		tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Row,Object>, ObservableValue<Object>>() {
+	private void fetchRows() {	
+		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
+
 			@Override
-			public ObservableValue<Object> call(CellDataFeatures<Row, Object> cell) {
+			protected ObservableList<TableRow> call() throws Exception {
+				TableProxy proxy = new TableProxy(_currentTable);
+			
+				CyclistDatasource ds = _currentSim != null? _currentSim.getDataSource() : null;
+				return proxy.getRows(ds, 10000);
+			}
+		};
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+		setCurrentTask(task);
+
+		_tableView.itemsProperty().bind( task.valueProperty());		
+	}
+	
+	private TableColumn<TableRow, Object> createColumn(final Field field, final int col) {
+				
+		TableColumn<TableRow, Object> tc = new TableColumn<>();
+		tc.setText(field.getName());
+		tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableRow,Object>, ObservableValue<Object>>() {
+			@Override
+			public ObservableValue<Object> call(CellDataFeatures<TableRow, Object> cell) {
 				return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
 					
 					@Override
 					public Object getValue() {
-						Row row = (Row) getBean();
+						TableRow row = (TableRow) getBean();
 						return row.value[col];
 					}
 				};
 			}
 		});		
-		tc.setCellFactory(new Callback<TableColumn<Row, Object>, TableCell<Row, Object>>() {
+		tc.setCellFactory(new Callback<TableColumn<TableRow, Object>, TableCell<TableRow, Object>>() {
 
 			@Override
-			public TableCell<Row, Object> call(TableColumn<Row, Object> arg0) {
+			public TableCell<TableRow, Object> call(TableColumn<TableRow, Object> arg0) {
 				return new GenericCell<Object>(field);
 			}
 			
@@ -176,7 +198,7 @@ public class SimpleTableView extends CyclistViewBase {
 					
 	}
 	
-	class GenericCell<T> extends TableCell<Table.Row, T> {
+	class GenericCell<T> extends TableCell<TableRow, T> {
 		private Field _field; 
 		private Label _label;
 

@@ -1,18 +1,17 @@
 package edu.utah.sci.cyclist.core.ui.tools;
 
-import javafx.scene.image.Image;
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ChartPresenter;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.views.ChartView;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 
 public class ChartTool implements Tool {
 
 	public static final String ID 			= "edu.utah.sci.cyclist.ChartTool";
 	public static final String TOOL_NAME 	= "Chart";
-	public static final String ICON_NAME 	= "chart_bar";
+	public static final AwesomeIcon ICON 	= AwesomeIcon.BAR_CHART_ALT;//"FontAwesome|BAR_CHART";
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
@@ -20,11 +19,6 @@ public class ChartTool implements Tool {
 	@Override
 	public String getId() {
 		return ID;
-	}
-	
-	@Override
-	public Image getIcon() {
-		return Resources.getIcon(ICON_NAME, 16, 16);	
 	}
 
 	@Override

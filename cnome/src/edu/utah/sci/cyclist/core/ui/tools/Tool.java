@@ -22,7 +22,6 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui.tools;
 
-import javafx.scene.image.Image;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.ui.View;
@@ -30,7 +29,6 @@ import edu.utah.sci.cyclist.core.ui.View;
 public interface Tool {
 
 	String getId();
-	Image getIcon();
 	String getName();
 	View getView();
 	ViewPresenter getPresenter(EventBus bus);

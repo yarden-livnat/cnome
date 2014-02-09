@@ -13,17 +13,17 @@ public class TitledPanel extends VBox {
 	
 	private ScrollPane _pane;
 	
-	public TitledPanel(String title) {
-		build(title);
+	public TitledPanel(String title, Node glyph) {
+		build(title, glyph);
 	}
 	
-	private void build(String title) {
+	private void build(String title, Node glyph) {
 		getStyleClass().add("cnome-panel");
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
 		// header
-		Label label = new Label(title);
+		Label label = new Label(title, glyph);
 		label.getStyleClass().add("label");
 		
 		_header = new HBox();

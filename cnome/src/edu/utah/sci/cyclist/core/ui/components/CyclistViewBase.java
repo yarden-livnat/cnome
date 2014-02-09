@@ -2,57 +2,63 @@ package edu.utah.sci.cyclist.core.ui.components;
 
 import static java.util.Arrays.asList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.event.dnd.DnD.LocalClipboard;
 import edu.utah.sci.cyclist.core.event.dnd.DnD.Status;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class CyclistViewBase extends ViewBase implements CyclistView {
-	private TaskControl _taskControl;
-
-	private HBox _dataBar;
-	private FilterArea _filtersArea;
-	private HBox _simulationBar;
 	
-	class ButtonEntry {
-		public ToggleButton button;
-		public Boolean remote;
+	class Info<T> {
+		public T item;
+		public boolean remote;
 		
-		public ButtonEntry(ToggleButton button, Boolean remote) {
-			this.button = button;
+		public Info(T item, boolean remote) {
+			this.item = item;
 			this.remote = remote;
-		}	
+		}
 	}
 	
-	private Map<Table, ButtonEntry> _buttons = new HashMap<>();
-	private Map<Simulation, ButtonEntry> _simulationButtons = new HashMap<>();
-	private int _numOfRemotes = 0;
-	private int _numOfRemotesSimulations = 0;
+	private TaskControl _taskControl;
+
+	private Map<String, Info<Table>> _tables = new HashMap<>();
+	private Map<String, Info<Simulation>> _sims = new HashMap<>(); 
+
+	private ChoiceBox<String> _tableChoice;
+	private ChoiceBox<String> _simChoice;
+	private Label _simGlyph;
+	
+    private Map<Class<?>, TransferMode[]> _sourcesTransferModes;
+	private FilterArea _filtersArea;
+	private Label _filterGlyph;
 	
 	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
@@ -82,56 +88,41 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		getStyleClass().add("view");
 
 		_taskControl = new TaskControl();
-		
-		_dataBar = new HBox();
-		_dataBar.setId("databar");
-		_dataBar.getStyleClass().add("data-bar");
-		_dataBar.setSpacing(2);
-		_dataBar.setMinWidth(5);
-		_dataBar.setFillHeight(true);
-		_dataBar.setAlignment(Pos.CENTER_LEFT); 
-		
-		_dataBar.getChildren().add(new Label("|"));
-		
-		_simulationBar = new HBox();
-		_simulationBar.setId("simulationbar");
-		_simulationBar.getStyleClass().add("data-bar");
-		_simulationBar.setSpacing(2);
-		_simulationBar.setMinWidth(5);
-		_simulationBar.setFillHeight(true);
-		_simulationBar.setAlignment(Pos.CENTER_LEFT);
-		_simulationBar.getChildren().add(new Label("|"));
-		
 				
-		_filtersArea = new FilterArea();
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
-		Map<Class<?>, TransferMode[]> sourcesTransferModes = createDragAndDropModes();
-		_filtersArea.setDragAndDropModes(sourcesTransferModes);
+		_sourcesTransferModes = createDragAndDropModes();
 
-		 
-		getHeader().getChildren().addAll(1,
+		_tableChoice = new ChoiceBox<>();
+		_tableChoice.getStyleClass().add("flat-button");
+		_tableChoice.setManaged(false);
+		
+		_simGlyph = GlyphRegistry.get(AwesomeIcon.COGS);
+		_simGlyph.setManaged(isToplevel());
+		_simChoice = new ChoiceBox<>();
+		_simChoice.getStyleClass().add("flat-button");
+		_simChoice.setManaged(isToplevel());
+		
+		_filtersArea = new FilterArea();
+		_filtersArea.setManaged(false);
+		_filterGlyph = GlyphRegistry.get(AwesomeIcon.FILTER);
+		_filterGlyph.setManaged(false);
+		
+		getHeader().getChildren().remove(0);
+		getHeader().getChildren().addAll(0,
 				asList(
-				_taskControl,
-				new Label("Simulations:"),
-				new Text("["),
-				_simulationBar,
-				new Text("] "),
-				new Label("Tables:"),
-				new Text("["),
-				_dataBar,
-				new Text("] "),
-				new Label(" Filters:"),
-				new Text("["),
-				_filtersArea,
-				new Text("]")
+				_tableChoice,
+				_simGlyph,
+				_simChoice,
+				_filterGlyph,
+				_filtersArea
 				));
 		
-		_dataBar.setAlignment(Pos.CENTER_LEFT);
-		_simulationBar.setAlignment(Pos.CENTER_LEFT);
+		List<Node> actions = new ArrayList<>();
+		actions.add(_taskControl);
+		addActions(actions);
 		
-		setDatasourcesListeners();
+		setListeners();
 		setFiltersListeners();
-		setSimulationsListeners();
 	}
 	
 	public ViewBase clone() {
@@ -220,75 +211,28 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
-		final ToggleButton button = new ToggleButton(table.getAlias().substring(0, 1));
-		button.getStyleClass().add("flat-toggle-button");
-//		button.setMaxSize(12, 12);
-		button.setSelected(active);
-		
-		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				if (_onTableSelectedAction != null)
-					_onTableSelectedAction.call(table, activate);
-			}
-		});
-		
-		button.setOnDragDetected(new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				Dragboard db = button.startDragAndDrop(TransferMode.MOVE);
-				
-				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-				clipboard.put(DnD.TABLE_FORMAT, Table.class, table);
-				
-				ClipboardContent content = new ClipboardContent();
-				content.putString(table.getName());
-				db.setContent(content);
-			}
-		});
-		
-		button.setOnDragDone(new EventHandler<DragEvent>() {
-
-			@Override
-			public void handle(DragEvent event) {
-				// ignore if the button was dragged onto self 
-				if (getLocalClipboard().getStatus() != Status.IGNORED) {
-					if (_onTableRemoved != null) {
-						_onTableRemoved.call(table);
-					}
-				}
-				
-			}
-		});
-		
-		_buttons.put(table, new ButtonEntry(button, remote));
-		
-		if (remote) {
-			_dataBar.getChildren().add(_numOfRemotes, button);
-			_numOfRemotes++;
-		} else {
-			_dataBar.getChildren().add(button);
+		Info<Table> info = new Info<Table>(table, remote);
+		_tables.put(table.getName(), info);
+		_tableChoice.getItems().add(table.getName());
+		_tableChoice.setManaged(true);
+		if (active) {
+			_tableChoice.setValue(table.getName());
 		}
 	}
 	
 	@Override
 	public void removeTable(Table table) {
-		ButtonEntry entry = _buttons.remove(table);
-		if(entry != null){
-			_dataBar.getChildren().remove(entry.button);
-			if (entry.remote)
-				_numOfRemotes--;
-		}
+		_tables.remove(table.getName());
+		_tableChoice.getItems().remove(table.getName());
+		_tableChoice.setManaged(_tableChoice.getItems().size()>0);
 	}
 	
 	@Override
 	public void selectTable(Table table, boolean value) {
-		try{
-			_buttons.get(table).button.setSelected(value);
-		}catch(Exception e){
-			e.printStackTrace();
+		if (value)
+			_tableChoice.setValue(table.getName());
+		else if (table.getName().equals(_tableChoice.getValue())) {
+			_tableChoice.setValue(null);
 		}
 	}
 	
@@ -303,56 +247,15 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	 */
 	@Override
 	public void addSimulation(final Simulation simulation, boolean remote, boolean active ) {
-		final ToggleButton button = new ToggleButton(simulation.getAlias().substring(0, 1));
-		button.getStyleClass().add("flat-toggle-button");
-		button.setSelected(active);
-		
-		button.selectedProperty().addListener(new ChangeListener<Boolean>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean prevState, Boolean activate) {
-				if (_onSimulationSelectedAction != null)
-					_onSimulationSelectedAction.call(simulation, activate);
-			}
-		});
-		
-		button.setOnDragDetected(new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				Dragboard db = button.startDragAndDrop(TransferMode.MOVE);
-				
-				DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-				clipboard.put(DnD.SIMULATION_FORMAT, Simulation.class, simulation);
-				
-				ClipboardContent content = new ClipboardContent();
-				content.putString(simulation.getSimulationId());
-				db.setContent(content);
-			}
-		});
-		
-		button.setOnDragDone(new EventHandler<DragEvent>() {
-
-			@Override
-			public void handle(DragEvent event) {
-				// ignore if the button was dragged onto self 
-				if (getLocalClipboard().getStatus() != Status.IGNORED) {
-					if (_onSimulationRemoved != null) {
-						_onSimulationRemoved.call(simulation);
-					}
-					//Should be done only as the last action to unable unselection of the removed button.
-					removeSimulation(simulation);
-				}
-				
-			}
-		});
-		
-		_simulationButtons.put(simulation, new ButtonEntry(button, remote));
-		if (remote) {
-			_simulationBar.getChildren().add(_numOfRemotesSimulations, button);
-			_numOfRemotesSimulations++;
-		} else {
-			_simulationBar.getChildren().add(button);
+		Info<Simulation> info = new Info<>(simulation, remote);
+		_sims.put(simulation.getAlias(), info);
+		_simChoice.getItems().add(simulation.getAlias()); 
+		if (_sims.size() > 1 || !remote) {
+			_simChoice.setManaged(true);
+			_simGlyph.setManaged(true);
+		}
+		if (active) {
+			_simChoice.setValue(simulation.getAlias());
 		}
 	}
 	
@@ -362,12 +265,11 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	 */
 	@Override
 	public void removeSimulation(Simulation simulation) {
-		ButtonEntry entry = _simulationButtons.remove(simulation);
-		if(entry != null){
-			_simulationBar.getChildren().remove(entry.button);
-			if (entry.remote)
-				_numOfRemotesSimulations--;
-		}
+		_sims.remove(simulation.getAlias());
+		_simChoice.getItems().remove(simulation.getAlias());
+		boolean visible = _sims.size()> 1 || (_sims.size() == 1 && !_sims.get(_simChoice.getItems().get(0)).remote);
+		_simChoice.setManaged(visible);
+		_simGlyph.setManaged(isToplevel() || visible);
 	}
 	
 	/**
@@ -377,13 +279,12 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	 */
 	@Override
 	public void selectSimulation(Simulation simulation, boolean value) {
-		try{
-			_simulationButtons.get(simulation).button.setSelected(value);
-		}catch(Exception e){
-			e.printStackTrace();
+		if (value)
+			_simChoice.setValue(simulation.getAlias());
+		else if (simulation.getAlias().equals(_simChoice.getValue())) {
+			_simChoice.setValue(null);
 		}
 	}
-	
 	
 
 	/*
@@ -409,13 +310,21 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			@Override
 			public void handle(FilterEvent event) {
 				if (event.getEventType() == FilterEvent.SHOW) {
-						if (_onShowFilter != null) {
-							_onShowFilter.call(event.getFilter());
-						} 
+					if (_onShowFilter != null) {
+						_onShowFilter.call(event.getFilter());
+					} 
 				} else if (event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD) {
 					// If filter is connected to a field and its sql function, clean the field when the filter is removed.
 					removeFilterFromDropArea(event.getFilter());
 				} 
+			}
+		});
+		
+		filters().addListener(new InvalidationListener() {
+			@Override
+			public void invalidated(Observable observable) {
+				_filtersArea.setManaged(filters().size() > 0);
+				_filterGlyph.setManaged(filters().size() > 0);		
 			}
 		});
 	}
@@ -425,101 +334,144 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		;
 	}
 	
-	private void setSimulationsListeners() {
-		_simulationBar.setOnDragOver(new EventHandler<DragEvent>() {
+	
+	private void setListeners() {
+		getHeader().setOnDragEntered(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				Simulation simulation = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
-				if ( simulation != null ) {
-					if (_simulationButtons.containsKey(simulation)) {
+			}
+		});
+		
+		getHeader().setOnDragOver(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				boolean handle = true;
+				LocalClipboard clipboard = getLocalClipboard();
+				if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
+					Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
+					if (_tables.containsKey(table.getName())) {
 						event.acceptTransferModes(TransferMode.NONE);
 					} else {
 						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
 					}
+				} else if (clipboard.hasContent(DnD.SIMULATION_FORMAT)) {
+					Simulation sim = clipboard.get(DnD.SIMULATION_FORMAT, Simulation.class);
+					if (_sims.containsKey(sim.getAlias())) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					}
+				} else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
+                    if(getLocalClipboard().hasContent(DnD.DnD_SOURCE_FORMAT)){
+                    	Class<?> key = getLocalClipboard().getType(DnD.DnD_SOURCE_FORMAT);
+                	    
+                    	//Accepts the drag and drop transfer mode according to the source and the 
+                    	//predefined accepted transfer modes.}
+                    	if(key != null && _sourcesTransferModes!= null &&_sourcesTransferModes.containsKey(key)){
+                	    	event.acceptTransferModes(_sourcesTransferModes.get(key));
+                	    }
+                    }
+				} 
+				else {
+					handle = false;
 				}
-				event.consume();
+				
+				if (handle)
+					event.consume();
 			}
 		});
 		
-		_simulationBar.setOnDragDropped(new EventHandler<DragEvent>() {
+		getHeader().setOnDragExited(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				Simulation simulation = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
-				if (simulation != null) {
-					if (_simulationButtons.containsKey(simulation)) {
+				//event.consume();
+			}
+		});
+		
+		getHeader().setOnDragDropped(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				boolean accept = true;
+				// check if table
+				if (getLocalClipboard().hasContent(DnD.TABLE_FORMAT)) {
+					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
+					if (_tables.containsKey(table.getName())) {
 						getLocalClipboard().setStatus(Status.IGNORED);
-					} else {	
+					} else if (_onTableDrop != null) {
 						getLocalClipboard().setStatus(Status.ACCEPTED);
-						addSimulation(simulation, false /*remote*/, true /*active*/);
-						if (_onSimulationDrop != null) {
-							_onSimulationDrop.call(simulation);
-						}
-						//selectSimulation(simulation, true);
-						event.setDropCompleted(true);
-						event.consume();
+						_onTableDrop.call(table);	
 					}
 				}
+				// check if simulation
+				else if (getLocalClipboard().hasContent(DnD.SIMULATION_FORMAT)) {
+					Simulation sim = getLocalClipboard().get(DnD.SIMULATION_FORMAT, Simulation.class);
+					if (_sims.containsKey(sim.getAlias())) {
+						getLocalClipboard().setStatus(Status.IGNORED);
+					} else if (_onSimulationDrop != null) {
+						getLocalClipboard().setStatus(Status.ACCEPTED);
+						_onSimulationDrop.call(sim);	
+					}
+				} 
+				// check if a field
+				else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) ) {
+                    Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+                    if (field != null) {
+                        Filter filter = new Filter(field);
+                        _filtersArea.getFilters().add(filter);
+                        if (_filtersArea.getOnAction() != null) {
+                        	_filtersArea.getOnAction().handle(new FilterEvent(FilterEvent.SHOW, filter));
+                        }
+                    }
+	            } 
+				// check if a filter
+				else if (getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
+	                    Filter filter = getLocalClipboard().get(DnD.FILTER_FORMAT, Filter.class);
+	                    _filtersArea.getFilters().add(filter);
+	            }
 				
+				// reject
+				else {
+					accept = false;
+				}
+				
+				if (accept) {		
+					event.setDropCompleted(true);
+					event.consume();
+				}
+				
+			}
+		});
+		
+		_tableChoice.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable,
+					String prev, String selected) {
+				if (_onTableSelectedAction != null) {
+					if (selected != null)
+						_onTableSelectedAction.call(_tables.get(selected).item, true);
+					else
+						_onTableSelectedAction.call(_tables.get(prev).item, false);
+				}
+			}
+		});
+		
+		_simChoice.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable,
+					String prev, String selected) {
+				if (_onSimulationSelectedAction != null) {
+					if (selected != null)
+						_onSimulationSelectedAction.call(_sims.get(selected).item, true);
+					else
+						_onSimulationSelectedAction.call(_sims.get(prev).item, false);
+				}
 			}
 		});
 	}
 	
-	private void setDatasourcesListeners() {
-		_dataBar.setOnDragEntered(new EventHandler<DragEvent>() {
-			@Override
-			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
-				if ( table != null ) {
-					if (_buttons.containsKey(table)) {
-						event.acceptTransferModes(TransferMode.NONE);
-					} else {
-						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-					}
-				}
-				event.consume();
-			}
-		});
-		
-		_dataBar.setOnDragOver(new EventHandler<DragEvent>() {
-			@Override
-			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
-				if ( table != null ) {
-					if (_buttons.containsKey(table)) {
-						event.acceptTransferModes(TransferMode.NONE);
-					} else {
-						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-					}
-				}
-				event.consume();
-			}
-		});
-		
-		_dataBar.setOnDragExited(new EventHandler<DragEvent>() {
-			@Override
-			public void handle(DragEvent event) {
-//				event.consume();
-			}
-		});
-		
-		_dataBar.setOnDragDropped(new EventHandler<DragEvent>() {
-			@Override
-			public void handle(DragEvent event) {
-				Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
-				if (table != null) {
-					if (_buttons.containsKey(table)) {
-						getLocalClipboard().setStatus(Status.IGNORED);
-					} else 	if (_onTableDrop != null) {
-						getLocalClipboard().setStatus(Status.ACCEPTED);
-						_onTableDrop.call(table);
-						event.setDropCompleted(true);
-						event.consume();
-					}
-				}
-				
-			}
-		});
-	}
+//	 public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes){
+// 		_sourcesTransferModes = sourcesTransferModes;
+// 	}
 	
 	/*
      * Name: createDragAndDropModes

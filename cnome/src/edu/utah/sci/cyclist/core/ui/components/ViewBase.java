@@ -36,7 +36,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -45,9 +44,10 @@ import javafx.scene.layout.VBox;
 
 import org.mo.closure.v1.Closure;
 
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class ViewBase extends BorderPane implements View {
 	
@@ -98,6 +98,7 @@ public class ViewBase extends BorderPane implements View {
 		_header.setSpacing(2);
 		_header.getStyleClass().add("header");
 		_header.setAlignment(Pos.CENTER_LEFT);
+		_header.setFillHeight(true);
 		
 		_title = new Label();
 		_title.setPrefWidth(70);
@@ -106,11 +107,11 @@ public class ViewBase extends BorderPane implements View {
 		
 		_minmaxButton = new Button();
 		_minmaxButton.getStyleClass().add("flat-button");
-		_minmaxButton.setGraphic(new ImageView(Resources.getIcon("maximize")));
+		_minmaxButton.setGraphic(GlyphRegistry.get(AwesomeIcon.RESIZE_FULL)); 
 		
 		_closeButton = new Button();
 		_closeButton.getStyleClass().add("flat-button");
-		_closeButton.setGraphic(new ImageView(Resources.getIcon("close_view")));
+		_closeButton.setGraphic(GlyphRegistry.get(AwesomeIcon.TIMES)); 
 		
 		_spring = new Spring();
 		
@@ -163,7 +164,7 @@ public class ViewBase extends BorderPane implements View {
 	public void setMaximized(boolean value) {
 		if (_maximized != value) {
 			_maximized = value;
-			_minmaxButton.setGraphic(new ImageView(Resources.getIcon(value ? "restore" : "maximize")));
+			_minmaxButton.setGraphic(GlyphRegistry.get(value ? AwesomeIcon.RESIZE_SMALL : AwesomeIcon.RESIZE_FULL)); 
 		}
 	}
 	

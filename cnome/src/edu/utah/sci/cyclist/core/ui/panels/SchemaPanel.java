@@ -22,7 +22,6 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -32,13 +31,15 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.mo.closure.v1.Closure;
 
-import edu.utah.sci.cyclist.core.Resources;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.DataType;
-import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
+import edu.utah.sci.cyclist.core.model.Field;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class SchemaPanel extends TitledPanel {
                 
@@ -49,7 +50,7 @@ public class SchemaPanel extends TitledPanel {
         
         
         public SchemaPanel(String title) {
-                super(title);
+                super(title, GlyphRegistry.get(AwesomeIcon.LIST_UL)); 
                 _id = title;
                 addListeners();
         }
@@ -81,7 +82,7 @@ public class SchemaPanel extends TitledPanel {
 			 for(final Entry entry : _entries){
 				 if(entry.field.getClassification() == Classification.Qi && entry.label.getOnMouseClicked() == null){
 					 final ContextMenu contextMenu = new ContextMenu();
-						MenuItem changeFilter = new MenuItem("Numeric filter", new ImageView(Resources.getIcon("ok")));
+						MenuItem changeFilter = new MenuItem("Numeric filter", GlyphRegistry.get(AwesomeIcon.CHECK)); 
 						changeFilter.getGraphic().visibleProperty().bind(entry.field.getDataType().forceNumericFilterProperty());
 						changeFilter.setOnAction(new EventHandler<ActionEvent>() {
 							public void handle(ActionEvent e) { 
@@ -174,8 +175,7 @@ public class SchemaPanel extends TitledPanel {
 		final Entry entry = new Entry();
 		entry.field = field;
 		
-		entry.label = new Label(field.getName(),new ImageView(Resources.getIcon(_type2Icon.get(field.getType()))));
-		
+		entry.label = new Label(field.getName(), GlyphRegistry.get(_type2Icon.get(field.getType())));
 		entry.label.setOnDragDetected(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {					
 				
@@ -264,12 +264,12 @@ public class SchemaPanel extends TitledPanel {
                 Field field;
         }
         
-        private static Map<DataType.Type, String> _type2Icon = new HashMap<>();
+        private static Map<DataType.Type, AwesomeIcon> _type2Icon = new HashMap<>();
         
         static {
-                _type2Icon.put(DataType.Type.NUMERIC, "field/number");
-                _type2Icon.put(DataType.Type.TEXT, "field/Ab");
-                _type2Icon.put(DataType.Type.DATE, "field/date");
-                _type2Icon.put(DataType.Type.DATETIME, "field/date");                
+                _type2Icon.put(DataType.Type.NUMERIC, AwesomeIcon.SORT_NUMERIC_ASC); 
+                _type2Icon.put(DataType.Type.TEXT, AwesomeIcon.SORT_ALPHA_ASC); 
+                _type2Icon.put(DataType.Type.DATE, AwesomeIcon.CLOCK_ALT); 
+                _type2Icon.put(DataType.Type.DATETIME, AwesomeIcon.CLOCK_ALT);                 
         }
 }

@@ -1,12 +1,15 @@
 package edu.utah.sci.cyclist.core.ui.tools;
 
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utexas.cycic.tools.CycicTool;
+
 public class GenericToolFactory<ToolImpl extends Tool> implements ToolFactory {
 
 	private Class<ToolImpl> cls;
 	private String name;
-	private String iconName;
+	private AwesomeIcon iconName;
 	
-	public GenericToolFactory(Class<ToolImpl> cls, String name, String iconName) {
+	public GenericToolFactory(Class<ToolImpl> cls, String name, AwesomeIcon iconName) {
 		this.cls = cls;
 		this.name = name;
 		this.iconName = iconName;
@@ -17,7 +20,7 @@ public class GenericToolFactory<ToolImpl extends Tool> implements ToolFactory {
 	}
 
 	@Override
-	public String getIconName() {
+	public AwesomeIcon getIcon() {
 		return iconName;
 	}
 

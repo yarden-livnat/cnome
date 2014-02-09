@@ -39,6 +39,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
@@ -49,10 +50,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationEditorWizard;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class SimulationsPanel extends TitledPanel  {
 	public static final String ID 		= "simulations-panel";
@@ -81,7 +85,7 @@ public class SimulationsPanel extends TitledPanel  {
 	};
 	
 	public SimulationsPanel() {
-		super(TITLE);
+		super(TITLE, GlyphRegistry.get(AwesomeIcon.COGS)); //"FontAwesome|COGS"));
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 	}
 	
@@ -328,6 +332,10 @@ public class SimulationsPanel extends TitledPanel  {
 				
 				ClipboardContent content = new ClipboardContent();
 				content.put(DnD.SIMULATION_FORMAT, entry.title.getText());
+				
+				SnapshotParameters snapParams = new SnapshotParameters();
+	            snapParams.setFill(Color.TRANSPARENT); 
+	            content.putImage(entry.title.snapshot(snapParams, null)); 
 				
 				db.setContent(content);
 			}
