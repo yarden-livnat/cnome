@@ -6,15 +6,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.mo.closure.v1.Closure;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -34,8 +38,12 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
+import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.NumericField;
+import edu.utah.sci.cyclist.core.ui.components.Spring;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
@@ -52,12 +60,9 @@ public class FlowView extends CyclistViewBase {
 	
 	// UI components
 	private Pane _pane;
-	private Line _line[] = new Line[2];
-	private Line _srcLine;
-	private Line _destLine;
 	private Label _timestepLabel;
 	private NumericField _timestepField;
-	private Line _targetLine = null;
+	private int _targetLine = -1;
 	
 	// variables
 	private Simulation _currentSim = null;
@@ -67,6 +72,13 @@ public class FlowView extends CyclistViewBase {
 	private Column _column[] = new Column[2];
 	
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
+	
+	private Closure.V1<Node> onRemoveNode = new Closure.V1<Node>() {
+		@Override
+		public void call(Node node) {
+			removeNode(node);
+		}	
+	};
 	
 	public FlowView() {
 		super();
@@ -146,12 +158,11 @@ public class FlowView extends CyclistViewBase {
 	
 	private Node createNode(String kind, Object value, int direction, boolean explicit) {
 		Node node = new Node(kind, value, direction, explicit);
-		
+		node.setOnClose(onRemoveNode);
 		return node;
 	}
 	
-	private void addNode(Field field, Object value, int direction, double y, boolean explicit) {
-		
+	private void addNode(Field field, Object value, int direction, double y, boolean explicit) {	
 		Column col = _column[direction];
 		
 		if (col.kind == null) {
@@ -169,16 +180,40 @@ public class FlowView extends CyclistViewBase {
 			col.addNode(node);
 			_pane.getChildren().add(node);
 		} else {
-			if (node.explicit || !explicit) {
+			if (node.getExplicit() || !explicit) {
 				// nothing to do here
 				return;
 			}
 		}
 		
-		node.explicit = explicit;
+		node.setExplicit(explicit);
 	
 		if (explicit) {
 			queryMaterialFlow(node);
+		}
+	}
+	
+	private void removeNode(Node node) {
+//		for (Connector c : node.connectors) {
+//			if (c.from == node) {
+//				_pane.getChildren().remove(c);
+//				c.to.connectors.remove(c);
+//				if (c.to.connectors.size() == 0 && !c.to.getExplicit()) {
+//					removeNode(c.to);
+//				}
+//			}
+//		}
+//		if (node.connectors.size() == 0)
+		
+		_column[node.direction].removeNode(node);
+		_pane.getChildren().remove(node);
+		for (Connector c : node.connectors) {
+			_pane.getChildren().remove(c);
+			Node target = c.from != node ? c.from : c.to;
+			target.connectors.remove(c);
+			if (!target.getExplicit() && target.connectors.size() == 0) {
+				removeNode(target);
+			}
 		}
 	}
 	
@@ -208,14 +243,18 @@ public class FlowView extends CyclistViewBase {
 			Node target = col.findNode(value);
 			if (target == null) {
 				target = createNode(col.kind, value, to, false);
-				target.explicit = false;
 				//TODO: set the node's y
 				col.addNode(target);
 				
 				_pane.getChildren().add(target);
 			}
 			
-			Connector c = new Connector(node, target, entry.getValue());
+			Connector c;
+			if (node.direction == SRC) 
+				c= new Connector(node, target, entry.getValue());
+			else
+				c= new Connector(target, node, entry.getValue());
+
 			_pane.getChildren().add(c);
 		}
 	}
@@ -285,15 +324,15 @@ public class FlowView extends CyclistViewBase {
 		System.out.println("t="+value+" TODO: update display");
 	}
 	
-	private void setTargetLine(Line l) {
-		if (_targetLine == l) return;
-		if (_targetLine != null) {
-			_targetLine.getStyleClass().remove("line-hover");
+	private void setTargetLine(int line) {
+		if (_targetLine == line) return;
+		if (_targetLine != -1) {
+			_column[_targetLine].line.getStyleClass().remove("line-hover");
 		}
-		if (l != null)  {
-			l.getStyleClass().add("line-hover");
+		if (line != -1)  {
+			_column[line].line.getStyleClass().add("line-hover");
 		}
-		_targetLine = l;
+		_targetLine = line;
 	}
 	
 	
@@ -302,16 +341,7 @@ public class FlowView extends CyclistViewBase {
 		getStyleClass().add("flow-view");
 		this.setPrefWidth(400);
 		this.setPrefHeight(300);
-		// padding? spaceing?
-		
-		_srcLine = new Line();
-		_srcLine.getStyleClass().add("flow-line");
-		_destLine = new Line();
-		_destLine.getStyleClass().add("flow-line");
-		_line[SRC] = _srcLine;
-		_line[DEST] = _destLine;
-		_column[SRC].line = _srcLine;
-		_column[DEST].line = _destLine;
+
 		
 		// components
 		MenuBar menubar = createMenubar();
@@ -325,13 +355,14 @@ public class FlowView extends CyclistViewBase {
 		hbox.getStyleClass().add("flow-timestep-bar");
 		hbox.getChildren().addAll(_timestepLabel, _timestepField);
 		
+
+		_pane = new Pane();
+		_pane.getChildren().addAll(_column[SRC].line, _column[DEST].line);
+		_pane.setPrefSize(400, 300);
 		Rectangle clip = new Rectangle(0, 0, 100, 100);
 		clip.widthProperty().bind(_pane.widthProperty());
 		clip.heightProperty().bind(_pane.heightProperty());
 		_pane.setClip(clip);
-		_pane = new Pane();
-		_pane.getChildren().addAll(_srcLine, _destLine);
-		_pane.setPrefSize(400, 300);
 		
 		VBox vbox = new VBox();
 		vbox.getChildren().addAll(menubar, hbox, _pane);
@@ -364,18 +395,18 @@ public class FlowView extends CyclistViewBase {
 	 private void onWidthChanged() {
 		double w = _pane.getWidth();
 		
-		_srcLine.setStartX(w/3);
-		_srcLine.setEndX(w/3);
+		_column[SRC].line.setStartX(w/3);
+		_column[SRC].line.setEndX(w/3);
 		
-		_destLine.setStartX(2*w/3);
-		_destLine.setEndX(2*w/3);
+		_column[DEST].line.setStartX(2*w/3);
+		_column[DEST].line.setEndX(2*w/3);
 		
-		double px = _line[SRC].getStartX();
+		double px = _column[SRC].line.getStartX();
 		for (Node node : _column[SRC].nodes) {
 			node.setTranslateX(px-node.getWidth()/2);
 		}
 		
-		px = _line[DEST].getStartX();
+		px = _column[DEST].line.getStartX();
 		for (Node node : _column[DEST].nodes) {
 			node.setTranslateX(px-node.getWidth()/2);
 		}
@@ -384,11 +415,11 @@ public class FlowView extends CyclistViewBase {
 	private void onHeightChanged() {
 		double h = _pane.getHeight();
 		
-		_srcLine.setStartY(30);
-		_srcLine.setEndY(h-30);
+		_column[SRC].line.setStartY(30);
+		_column[SRC].line.setEndY(h-30);
 		
-		_destLine.setStartY(30);
-		_destLine.setEndY(h-30);
+		_column[DEST].line.setStartY(30);
+		_column[DEST].line.setEndY(h-30);
 	}
 	
 	private void addListeners() {
@@ -419,14 +450,14 @@ public class FlowView extends CyclistViewBase {
 					if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
 						// accept if it near one of the lines
 						double x = event.getX();
-						if (Math.abs(x - _srcLine.getStartX()) < 10) {
-							setTargetLine(_srcLine);
+						if (Math.abs(x - _column[SRC].line.getStartX()) < 10) {
+							setTargetLine(SRC);
 							accept = true;							
-						} else if (Math.abs(x - _destLine.getStartX()) < 10) {
-							setTargetLine(_destLine);
+						} else if (Math.abs(x - _column[DEST].line.getStartX()) < 10) {
+							setTargetLine(DEST);
 							accept = true;
 						} else {
-							setTargetLine(null);
+							setTargetLine(-1);
 						}
 						if (accept) {
 							event.acceptTransferModes(TransferMode.COPY);
@@ -445,10 +476,9 @@ public class FlowView extends CyclistViewBase {
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
 //				Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
 				
-				int direction = _targetLine == _line[0] ? SRC : DEST;
-				addNode(field, value, direction, event.getY(), true);
+				addNode(field, value, _targetLine, event.getY(), true);
 				
-				setTargetLine(null);
+				setTargetLine(-1);
 				
 				event.setDropCompleted(true);
 				event.consume();
@@ -467,15 +497,17 @@ public class FlowView extends CyclistViewBase {
 }
 
 
-class Column {
+class Column extends VBox {
 	public int direction;
 	public String kind = null;
 	public Function<Facility, Object> kindFunc;
 	public List<Node> nodes = new ArrayList<>();
 	public Line line;
+	public ChoiceBox<String> choiceBox;
 	
 	public Column(int direction) {
 		this.direction = direction;
+		build();
 	}
 	
 	public void addNode(final Node node) {
@@ -489,26 +521,41 @@ class Column {
 		});
 	}
 	
+	public void removeNode(Node node) {
+		nodes.remove(node);
+	}
+	
 	public Node findNode(Object value) {
 		for (Node node : nodes) {
-			if (node.value == value)
+			if (node.value.equals(value))
 				return node;
 		}
 		
 		return null;
 	}
+	
+	private void build() {
+		line = new Line();
+		line.getStyleClass().add("flow-line");
+		choiceBox = new ChoiceBox<>();
+		
+		getChildren().addAll(choiceBox, line);
+		VBox.getVgrow(line);
+	}
 }
 
 class Connector extends CubicCurve {
-	private Node _from;
-	private Node _to;
+	public Node from;
+	public Node to;
 	private List<Transaction> _transactions;
 	
 	public Connector(Node from, Node to, List<Transaction> transactions) {
 		super();
 		getStyleClass().add("connector");
-		_from = from;
-		_to = to;
+		this.from = from;
+		this.to = to;
+		from.addConnector(this);
+		to.addConnector(this);
 		_transactions = transactions;
 		
 		startXProperty().bind(from.anchorXProperty);
@@ -529,13 +576,14 @@ class Connector extends CubicCurve {
 class Node extends Pane {
 	public Object value;
 	public String type;
-	public boolean explicit;
+	private boolean _explicit;
 	public int direction;
 	public boolean quering = false;
 	public List<Transaction> transactions = null;
 	public List<Connector> connectors = new ArrayList();
 	public DoubleProperty anchorXProperty = new SimpleDoubleProperty();
 	public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
+	private Closure.V1<Node> _onClose = null;
 	
 	private double mx;
 	private double my;
@@ -546,9 +594,10 @@ class Node extends Pane {
 		this.type = type;
 		this.value = value;
 		this.direction = direction;
-		this.explicit = explicit;
 		
 		build(type);
+		this.setExplicit(explicit);
+		
 		setListeners();
 		
 		if (direction == FlowView.SRC) 
@@ -559,6 +608,22 @@ class Node extends Pane {
 		anchorYProperty.bind( translateYProperty().add(heightProperty().divide(2)));
 	}	
 	
+	public void setOnClose(Closure.V1<Node> action) {
+		_onClose = action;
+	}
+	
+	public void setExplicit(boolean value) {
+		_explicit = value;
+		if (value) 
+			_vbox.getStyleClass().add("node-explicit");
+		else
+			_vbox.getStyleClass().remove("node-explicit");
+	}
+	
+	public boolean getExplicit() {
+		return _explicit;
+	}
+	
 	public void setQuering(boolean value) {
 		quering = value;
 		// TODO: indicate to the user the node is (not) in query mode
@@ -566,23 +631,56 @@ class Node extends Pane {
 	
 	public void addConnector(Connector connector) {
 		connectors.add(connector);
-//		connector.update(this, getTranslateX(), getTranslateY());
 	}
 	
 	private void build(String label) {
 		_vbox = new VBox();
 		_vbox.getStyleClass().add("flow-node");
-//		if (field.getDataType().getType() != DataType.Type.TEXT) {
-			Text header = new Text(label+":");
-			header.getStyleClass().add("node-header");
-			_vbox.getChildren().add(header);
-//		}
+		
+		// header
+		HBox header = new HBox();
+		header.getStyleClass().add("node-header");
+				
+		Text text = new Text(label+":");
+		text.getStyleClass().add("node-kind");
+		
+		final Label close = GlyphRegistry.get(AwesomeIcon.TIMES, "10px");
+		close.setVisible(false);
+		close.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (_onClose != null) {
+					_onClose.call(Node.this);
+				}
+			}
+		});
+				
+		header.getChildren().addAll(
+				text, 
+				new Spring(),
+				close);
+		
+		_vbox.getChildren().add(header);
 			
 		Text body = new Text(value.toString());
 		body.getStyleClass().add("node-body");
 		_vbox.getChildren().add(body);
 	
 		getChildren().add(_vbox);
+		
+		_vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				close.setVisible(true);
+			}
+		});
+		
+		_vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				close.setVisible(false);
+			}
+		});
 	}
 	
 	private void setListeners() {
@@ -612,13 +710,6 @@ class Node extends Pane {
 			public void handle(MouseEvent event) {
 //				setTranslateX(event.getSceneX()-mx);
 				setTranslateY(event.getSceneY()-my);
-				
-//				double nx = getTranslateX() + (direction == FlowView.SRC ? getWidth()/2 : -getWidth()/2);
-//				double ny = getTranslateY();
-//				System.out.println("node pos:"+nx+", "+ny);
-//				for (Connector c : connectors) {
-//					c.update(Node.this, nx, ny);
-//				}
 			}
 		});
 	}

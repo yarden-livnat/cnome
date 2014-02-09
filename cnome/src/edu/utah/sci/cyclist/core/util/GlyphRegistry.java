@@ -25,7 +25,11 @@ public class GlyphRegistry {
 	}
 	
 	static public Label get(AwesomeIcon iconName) {
-		return get(iconName.toString(),  DEFAULT_ICON_SIZE);
+		return get(iconName,  DEFAULT_ICON_SIZE);
+	}
+	
+	static public Label get(AwesomeIcon iconName, String size) {
+		return get(iconName.toString(),  size);
 	}
 	
 	static public Label get(String name, String size) {

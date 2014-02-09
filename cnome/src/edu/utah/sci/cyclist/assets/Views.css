@@ -119,8 +119,10 @@
  	-fx-border-width: 2;
  }
  
+ .node-explicit {
+ 	-fx-background-color: #e0e0e0;
+ }
  
-
  .node-selected {
  	/*-fx-background-color: #0fddff ;*/ /*derive(#99FF99, -20%);*/
  }

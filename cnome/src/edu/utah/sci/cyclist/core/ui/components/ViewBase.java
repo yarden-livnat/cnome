@@ -104,6 +104,7 @@ public class ViewBase extends BorderPane implements View {
 		_title.setPrefWidth(70);
 		
 		_actionsArea = new HBox();
+		_actionsArea.getStyleClass().add("action-area");
 		
 		_minmaxButton = new Button();
 		_minmaxButton.getStyleClass().add("flat-button");
