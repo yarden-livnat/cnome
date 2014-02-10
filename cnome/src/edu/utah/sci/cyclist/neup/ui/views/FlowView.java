@@ -158,9 +158,6 @@ public class FlowView extends CyclistViewBase {
 		kindFactory.put("ModelType", f->f.model);
 		kindFactory.put("Prototype", f->f.prototype);
 		kindFactory.put("ID", f->f.id);
-		
-		_column[SRC] = new Column(SRC);
-		_column[DEST] = new Column(DEST);
 	}
 
 	
@@ -175,10 +172,10 @@ public class FlowView extends CyclistViewBase {
 	private void addNode(Field field, Object value, int direction, double y, boolean explicit) {	
 		Column col = _column[direction];
 		
-		if (col.kind == null) {
-			col.kind = field.getName();
-			col.kindFunc = kindFactory.get(col.kind);
-		} else if (!col.kind.equals(field.getName())) {
+		if (col.getKind() == null) {
+			col.setKind(field.getName());
+			col.kindFunc = kindFactory.get(col.getKind());
+		} else if (!col.getKind().equals(field.getName())) {
 			System.out.println("Error: REJECT node of this kind");
 			return;
 		}
@@ -246,8 +243,8 @@ public class FlowView extends CyclistViewBase {
 		int from = node.direction;
 		int to = 1-from;
 		
-		if (_column[to].kind == null) {
-			_column[to].kind = _column[from].kind;
+		if (_column[to].getKind() == null) {
+			_column[to].setKind(_column[from].getKind());
 			_column[to].kindFunc = _column[from].kindFunc;
 			
 		}
@@ -258,7 +255,7 @@ public class FlowView extends CyclistViewBase {
 			Object value = entry.getKey();
 			Node target = col.findNode(value);
 			if (target == null) {
-				target = createNode(col.kind, value, to, false);
+				target = createNode(col.getKind(), value, to, false);
 				//TODO: set the node's y
 				col.addNode(target);
 				
@@ -358,23 +355,23 @@ public class FlowView extends CyclistViewBase {
 		getStyleClass().add("flow-view");
 		this.setPrefWidth(400);
 		this.setPrefHeight(300);
-
+	
+		_column[SRC] = new Column(SRC);
+		_column[DEST] = new Column(DEST);
+		
 		
 		// components
-//		MenuBar menubar = createMenubar();
-		
-		_timestepLabel= new Label("timestep:");
-		
+//		MenuBar menubar = createMenubar();	
+		_timestepLabel= new Label("timestep:");	
 		_timestepField = new NumericField(_timestep);
 		_timestepField.getStyleClass().add("flow-timestep");
 		
 		HBox hbox = new HBox();
 		hbox.getStyleClass().add("flow-timestep-bar");
-		hbox.getChildren().addAll(_timestepLabel, _timestepField);
-		
+		hbox.getChildren().addAll(_timestepLabel, _timestepField);	
 
 		_pane = new Pane();
-		_pane.getChildren().addAll(_column[SRC].line, _column[DEST].line);
+		_pane.getChildren().addAll(_column[SRC].choiceBox, _column[SRC].line, _column[DEST].choiceBox,_column[DEST].line);
 		_pane.setPrefSize(400, 300);
 		Rectangle clip = new Rectangle(0, 0, 100, 100);
 		clip.widthProperty().bind(_pane.widthProperty());
@@ -386,6 +383,23 @@ public class FlowView extends CyclistViewBase {
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
+		_column[SRC].line.startXProperty().bind(_pane.widthProperty().multiply(0.25));
+		_column[SRC].line.endXProperty().bind(_pane.widthProperty().multiply(0.25));
+		_column[SRC].line.setStartY(40);
+		_column[SRC].line.endYProperty().bind(_pane.heightProperty().subtract(20));
+		
+		_column[SRC].choiceBox.translateXProperty().bind(_pane.widthProperty().multiply(0.25)
+				.subtract(_column[SRC].choiceBox.widthProperty().divide(2)));
+		_column[SRC].choiceBox.setTranslateY(10);
+		
+		_column[DEST].line.startXProperty().bind(_pane.widthProperty().multiply(0.75));
+		_column[DEST].line.endXProperty().bind(_pane.widthProperty().multiply(0.75));
+		_column[DEST].line.setStartY(40);
+		_column[DEST].line.endYProperty().bind(_pane.heightProperty().subtract(20));	
+		_column[DEST].choiceBox.translateXProperty().bind(_pane.widthProperty().multiply(0.75)
+				.subtract(_column[DEST].choiceBox.widthProperty().divide(2)));
+		_column[DEST].choiceBox.setTranslateY(10);
+
 		setContent(vbox);
 		
 		addListeners();
@@ -410,14 +424,6 @@ public class FlowView extends CyclistViewBase {
 	 * Ensure nodes are aligned
 	 */
 	 private void onWidthChanged() {
-		double w = _pane.getWidth();
-		
-		_column[SRC].line.setStartX(w/4);
-		_column[SRC].line.setEndX(w/4);
-		
-		_column[DEST].line.setStartX(3*w/4);
-		_column[DEST].line.setEndX(3*w/4);
-		
 		double px = _column[SRC].line.getStartX();
 		for (Node node : _column[SRC].nodes) {
 			node.setTranslateX(px-node.getWidth()/2);
@@ -429,29 +435,12 @@ public class FlowView extends CyclistViewBase {
 		}
 	}
 	
-	private void onHeightChanged() {
-		double h = _pane.getHeight();
-		
-		_column[SRC].line.setStartY(30);
-		_column[SRC].line.setEndY(h-30);
-		
-		_column[DEST].line.setStartY(30);
-		_column[DEST].line.setEndY(h-30);
-	}
-	
 	private void addListeners() {
 		
 		_pane.widthProperty().addListener(new InvalidationListener() {
 			@Override
 			public void invalidated(Observable observable) {
 				onWidthChanged();
-			}	
-		});
-		
-		_pane.heightProperty().addListener(new InvalidationListener() {
-			@Override
-			public void invalidated(Observable observable) {
-				onHeightChanged();
 			}	
 		});
 		
@@ -516,10 +505,10 @@ public class FlowView extends CyclistViewBase {
 
 class Column extends VBox {
 	public final int SPACING = 10;
-	public final int Y0 = 30;
+	public final int Y0 = 40;
 	
 	public int direction;
-	public String kind = null;
+	private String kind = null;
 	public Function<Facility, Object> kindFunc;
 	public List<Node> nodes = new ArrayList<>();
 	public Line line;
@@ -554,6 +543,15 @@ class Column extends VBox {
 		}
 	}
 	
+	public String getKind() {
+		return kind;
+	}
+	
+	public void setKind(String value) {
+		kind = value;
+		choiceBox.setValue(value);
+	}
+	
 	public Node findNode(Object value) {
 		for (Node node : nodes) {
 			if (node.value.equals(value))
@@ -567,9 +565,19 @@ class Column extends VBox {
 		line = new Line();
 		line.getStyleClass().add("flow-line");
 		choiceBox = new ChoiceBox<>();
+		choiceBox.getStyleClass().add("flow-choice");
+		choiceBox.getItems().addAll("ModelType", "Prototype", "ID");		
 		
 		getChildren().addAll(choiceBox, line);
 		VBox.getVgrow(line);
+		
+		choiceBox.valueProperty().addListener(new InvalidationListener() {	
+			@Override
+			public void invalidated(Observable observable) {
+				System.out.println("change column kind");
+				kind = choiceBox.getValue();
+			}
+		});
 	}
 }
 

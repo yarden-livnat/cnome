@@ -83,6 +83,7 @@
  
  .flow-view {
  	-fx-background-color: white;
+ 	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );
  }
  
  .flow-line {
@@ -95,12 +96,24 @@
  	-fx-stroke: blue;
  }
  
+ .flow-choice {
+ 	-fx-background-color: #e0e0e0;
+ 	-fx-border-color: gray;
+ 	-fx-border-width: 1;
+ 	-fx-border-radius: 3;
+ }
+ 
+ .flow-choice > .text {
+ 	-fx-font-size: 8px;
+ }
+ 
 .flow-node {
  	-fx-padding: 5;
  	-fx-background-color: #fefefe;
  	-fx-background-radius: 5;
  	-fx-border-color: #808080;
  	-fx-border-radius:5;
+ 	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );
  }
  
  .flow-node:hover {
@@ -145,8 +158,9 @@
 	-fx-stroke: #a0a0a0;
 	-fx-fill: transparent;
  	-fx-stroke-width: 1px;
+ 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+ 	
 }
-
 .connector-text {
 	-fx-font-size: 8px;		
 }
