@@ -93,7 +93,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
 		_sourcesTransferModes = createDragAndDropModes();
 
-		_tableGlyph = GlyphRegistry.get(AwesomeIcon.LIST_UL);
+		_tableGlyph = GlyphRegistry.get(AwesomeIcon.COLUMNS);
 		_tableGlyph.setManaged(false);
 		_tableChoice = new ChoiceBox<>();
 		_tableChoice.getStyleClass().add("flat-button");

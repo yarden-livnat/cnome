@@ -26,8 +26,6 @@ package edu.utah.sci.cyclist.core.ui.panels;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.controlsfx.glyphfont.GlyphFontRegistry;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
@@ -40,7 +38,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
@@ -79,7 +76,7 @@ public class TablesPanel extends TitledPanel  {
 	};
 	
 	public TablesPanel() {
-		super(TITLE, GlyphRegistry.get(AwesomeIcon.LIST_ALT)); 
+		super(TITLE, GlyphRegistry.get(AwesomeIcon.COLUMNS)); 
 	}
 	
 //	@Override
