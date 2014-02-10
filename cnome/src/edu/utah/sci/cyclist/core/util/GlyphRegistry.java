@@ -1,12 +1,7 @@
 package edu.utah.sci.cyclist.core.util;
 
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
-
-import org.controlsfx.glyphfont.GlyphFont;
-import org.controlsfx.glyphfont.GlyphFontRegistry;
-
 import edu.utah.sci.cyclist.Cyclist;
 
 public class GlyphRegistry {

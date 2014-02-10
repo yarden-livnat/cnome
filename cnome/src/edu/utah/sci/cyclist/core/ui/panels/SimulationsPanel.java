@@ -60,7 +60,7 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class SimulationsPanel extends TitledPanel  {
 	public static final String ID 		= "simulations-panel";
-	public static final String TITLE	= "Simulations ids";
+	public static final String TITLE	= "Simulations";
 	
 	public static final String SELECTED_STYLE = "-fx-background-color: #99ccff";
 	public static final String UNSELECTED_STYLE = "-fx-background-color: #f0f0f0";
@@ -85,7 +85,7 @@ public class SimulationsPanel extends TitledPanel  {
 	};
 	
 	public SimulationsPanel() {
-		super(TITLE, GlyphRegistry.get(AwesomeIcon.COGS)); //"FontAwesome|COGS"));
+		super(TITLE, GlyphRegistry.get(AwesomeIcon.COGS));
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 	}
 	

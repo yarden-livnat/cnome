@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -23,7 +22,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
-import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Table;
 

@@ -25,7 +25,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
@@ -112,7 +111,6 @@ public class ChartView extends CyclistViewBase {
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<TableRow> _items = new SimpleListProperty<>();
 	private ObjectProperty<Boolean> _forceZeroProperty = new SimpleObjectProperty<>();
-	private IntegerField _limitEntry;
 
 	private StackPane _stackPane;
 	private Pane _glassPane;
@@ -291,10 +289,8 @@ public class ChartView extends CyclistViewBase {
 				.fields(fields)
 				.aggregates(aggregators)
 				.grouping(grouping)
-				.filters(filtersList)
-				.limit(_limitEntry.getValue());
+				.filters(filtersList);
 				System.out.println("Query: "+builder.toString());
-				//                                log.info("Query: "+builder.toString());
 
 				List<Field> order = builder.getOrder();
 
@@ -778,26 +774,6 @@ public class ChartView extends CyclistViewBase {
 
 	private void build() {
 		setTitle(TITLE);
-		getStyleClass().add("chart-view");
-
-		// Limit box
-		_limitEntry = new IntegerField(1, Integer.MAX_VALUE, 1000);
-		_limitEntry.setEditable(true);
-		_limitEntry.setPromptText("unlimited");
-		_limitEntry.setPrefColumnCount(4);
-
-		_limitEntry.valueProperty().addListener(new ChangeListener<Number>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Number> observable,
-					Number oldValue, Number newValue) {
-				System.out.println("limit changed: "+ newValue.intValue());
-				setChart(null);
-				fetchData();        
-			}
-		});
-
-		//                addBar(_limitEntry, HPos.RIGHT);
 
 		// main view
 		_pane = new BorderPane();
@@ -810,7 +786,7 @@ public class ChartView extends CyclistViewBase {
 
 		// Glass pane for indicators
 		_glassPane = new Pane();
-		//                _glassPane.setStyle("-fx-background-color: rgba(200, 200, 200, 0.1)");
+		// _glassPane.setStyle("-fx-background-color: rgba(200, 200, 200, 0.1)");
 		setupGlassPaneListeners();
 
 		_stackPane = new StackPane();
@@ -936,13 +912,11 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 		forceZeroProperty().set(false);
-
-
 	}
 
 
 	private void setupActions() {
-		final Label options = GlyphRegistry.get(AwesomeIcon.CARET_DOWN);
+		final Button options = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		options.getStyleClass().add("flat-button");
 		
 		// create menu

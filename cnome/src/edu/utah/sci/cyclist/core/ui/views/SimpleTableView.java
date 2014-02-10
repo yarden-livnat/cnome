@@ -70,11 +70,11 @@ public class SimpleTableView extends CyclistViewBase {
 	}
 	
 	private void build() {
-		setTitle(TITLE);
+		setTitle(null);
 		
 		_tableView = new TableView<TableRow>();
 		_tableView.getStyleClass().add("simple-table-view");
-		_tableView.setPrefSize(300, 200);
+		_tableView.setPrefSize(450, 200);
 		_tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		setContent(_tableView);
 		VBox.setVgrow(_tableView, Priority.NEVER);
@@ -96,14 +96,6 @@ public class SimpleTableView extends CyclistViewBase {
 		}
 		
 		loadTable();
-		
-		if (active) {
-			setTitle(table.getName());	
-		} else {
-			setTitle("");
-		}
-		
-
 	}
 	
 	@Override

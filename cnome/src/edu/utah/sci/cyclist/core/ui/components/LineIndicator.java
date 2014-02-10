@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
-import org.mo.closure.v1.Closure;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
@@ -24,9 +22,11 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Indicator;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class LineIndicator extends Group {
 	private Indicator _indicator;

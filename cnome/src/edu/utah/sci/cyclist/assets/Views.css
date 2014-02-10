@@ -59,18 +59,6 @@
 
 }
 
-.view .infobar {
-	-fx-padding: 0;
-	-fx-background-color: lightgreen;
-}
-
-.view .data-bar {
-	-fx-padding: 0;
-	-fx-background-color: #e0e0e0;
-	/*-fx-border-color: #d0d0d0;*/
-}
-
-
 .view .chart-view {
 	-fx-background-color: #ffffff;
 }
@@ -145,7 +133,6 @@
 	-fx-max-height: 35px;
 	-fx-padding: 2;
 	-fx-alignment:baseline-right;
-	-fx-pref-column-count: 3;
 }
 
 .flow-timestep:focused {
@@ -160,6 +147,9 @@
  	-fx-stroke-width: 1px;
 }
 
+.connector-text {
+	-fx-font-size: 8px;		
+}
 /*
  * Line Charts
  */

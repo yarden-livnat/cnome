@@ -260,10 +260,8 @@ public class MainScreen extends VBox {
 	}
 	
 	private Menu createDataMenu() {
-		_datasourceMenuItem = new MenuItem("Datatable", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN));//"FontAwesome|OPEN"));
-		
-		_simulationMenuItem = new MenuItem("Simulation", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN));//"FontAwesome|OPEN"));
-		
+		_datasourceMenuItem = new MenuItem("Datatable", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));	
+		_simulationMenuItem = new MenuItem("Simulation", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));
 		
 		// -- setup the menu 
 		Menu dataMenu = new Menu("Data");

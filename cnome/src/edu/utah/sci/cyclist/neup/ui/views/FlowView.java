@@ -2,6 +2,7 @@ package edu.utah.sci.cyclist.neup.ui.views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -10,6 +11,7 @@ import org.mo.closure.v1.Closure;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -78,6 +80,13 @@ public class FlowView extends CyclistViewBase {
 		public void call(Node node) {
 			removeNode(node);
 		}	
+	};
+	
+	private Closure.V1<Node> onOpenNode = new Closure.V1<Node>() {
+		@Override
+		public void call(Node node) {
+			openNode(node);
+		}		
 	};
 	
 	public FlowView() {
@@ -159,6 +168,7 @@ public class FlowView extends CyclistViewBase {
 	private Node createNode(String kind, Object value, int direction, boolean explicit) {
 		Node node = new Node(kind, value, direction, explicit);
 		node.setOnClose(onRemoveNode);
+		node.setOnOpen(onOpenNode);
 		return node;
 	}
 	
@@ -176,7 +186,7 @@ public class FlowView extends CyclistViewBase {
 		Node node = col.findNode(value);
 		if (node == null) {
 			node = createNode(field.getName(), value, direction, explicit);
-			node.setTranslateY(y);
+//			node.setTranslateY(y);
 			col.addNode(node);
 			_pane.getChildren().add(node);
 		} else {
@@ -193,28 +203,34 @@ public class FlowView extends CyclistViewBase {
 		}
 	}
 	
+
 	private void removeNode(Node node) {
-//		for (Connector c : node.connectors) {
-//			if (c.from == node) {
-//				_pane.getChildren().remove(c);
-//				c.to.connectors.remove(c);
-//				if (c.to.connectors.size() == 0 && !c.to.getExplicit()) {
-//					removeNode(c.to);
-//				}
-//			}
-//		}
-//		if (node.connectors.size() == 0)
-		
-		_column[node.direction].removeNode(node);
-		_pane.getChildren().remove(node);
-		for (Connector c : node.connectors) {
-			_pane.getChildren().remove(c);
-			Node target = c.from != node ? c.from : c.to;
-			target.connectors.remove(c);
-			if (!target.getExplicit() && target.connectors.size() == 0) {
-				removeNode(target);
+		Iterator<Connector> i = node.connectors.iterator();
+		while (i.hasNext()) {
+			Connector c = i.next();
+			Node other = c.from == node ? c.to : c.from;
+			if (!other.getExplicit()) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+				other.connectors.remove(c);
+				if (!other.getExplicit() && other.connectors.isEmpty()) {
+					_pane.getChildren().remove(other);
+					_column[other.direction].removeNode(other);
+				}	
+				i.remove();
 			}
 		}
+		
+		if (node.connectors.isEmpty()) {
+			_column[node.direction].removeNode(node);
+			_pane.getChildren().remove(node);	
+		} else 
+			node.setExplicit(false);
+	}
+	
+	private void openNode(Node node) {
+		queryMaterialFlow(node);
+		node.setExplicit(true);
 	}
 	
 	private void addRelatedNodes(Node node, ObservableList<Transaction> transactions,  int timestep) {
@@ -256,6 +272,7 @@ public class FlowView extends CyclistViewBase {
 				c= new Connector(target, node, entry.getValue());
 
 			_pane.getChildren().add(c);
+			_pane.getChildren().add(c.text);
 		}
 	}
 	
@@ -344,7 +361,7 @@ public class FlowView extends CyclistViewBase {
 
 		
 		// components
-		MenuBar menubar = createMenubar();
+//		MenuBar menubar = createMenubar();
 		
 		_timestepLabel= new Label("timestep:");
 		
@@ -365,7 +382,7 @@ public class FlowView extends CyclistViewBase {
 		_pane.setClip(clip);
 		
 		VBox vbox = new VBox();
-		vbox.getChildren().addAll(menubar, hbox, _pane);
+		vbox.getChildren().addAll(/*menubar, */ hbox, _pane);
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
@@ -375,18 +392,18 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	
-	private MenuBar createMenubar() {
-		MenuBar menubar = new MenuBar();
-
-		MenuItem item = new MenuItem("item");
-		
-		Menu menu = new Menu("Menu");
-		menu.getItems().addAll(item);
-		
-		menubar.getMenus().add(menu);
-		
-		return menubar;
-	}
+//	private MenuBar createMenubar() {
+//		MenuBar menubar = new MenuBar();
+//
+//		MenuItem item = new MenuItem("item");
+//		
+//		Menu menu = new Menu("Menu");
+//		menu.getItems().addAll(item);
+//		
+//		menubar.getMenus().add(menu);
+//		
+//		return menubar;
+//	}
 	
 	
 	/*
@@ -395,11 +412,11 @@ public class FlowView extends CyclistViewBase {
 	 private void onWidthChanged() {
 		double w = _pane.getWidth();
 		
-		_column[SRC].line.setStartX(w/3);
-		_column[SRC].line.setEndX(w/3);
+		_column[SRC].line.setStartX(w/4);
+		_column[SRC].line.setEndX(w/4);
 		
-		_column[DEST].line.setStartX(2*w/3);
-		_column[DEST].line.setEndX(2*w/3);
+		_column[DEST].line.setStartX(3*w/4);
+		_column[DEST].line.setEndX(3*w/4);
 		
 		double px = _column[SRC].line.getStartX();
 		for (Node node : _column[SRC].nodes) {
@@ -498,6 +515,9 @@ public class FlowView extends CyclistViewBase {
 
 
 class Column extends VBox {
+	public final int SPACING = 10;
+	public final int Y0 = 30;
+	
 	public int direction;
 	public String kind = null;
 	public Function<Facility, Object> kindFunc;
@@ -511,6 +531,11 @@ class Column extends VBox {
 	}
 	
 	public void addNode(final Node node) {
+		double y = Y0;
+		if (nodes.size() > 0) {
+			Node last = nodes.get(nodes.size()-1);
+			y = last.getTranslateY()+last.getHeight()+SPACING;
+		}
 		nodes.add(node);
 		node.setTranslateX(line.getStartX()); // will be centered once the width is known
 		node.widthProperty().addListener( new InvalidationListener() {
@@ -519,10 +544,14 @@ class Column extends VBox {
 				node.setTranslateX(line.getStartX() - node.getWidth()/2);
 			}
 		});
+		node.setTranslateY(y);
 	}
 	
 	public void removeNode(Node node) {
 		nodes.remove(node);
+		if (nodes.size() == 0) {
+			kind = null;
+		}
 	}
 	
 	public Node findNode(Object value) {
@@ -548,6 +577,9 @@ class Connector extends CubicCurve {
 	public Node from;
 	public Node to;
 	private List<Transaction> _transactions;
+	private double total;
+	private String units;
+	public Text text;
 	
 	public Connector(Node from, Node to, List<Transaction> transactions) {
 		super();
@@ -568,7 +600,18 @@ class Connector extends CubicCurve {
 		controlY2Property().bind(endYProperty());
 		
 		endXProperty().bind(to.anchorXProperty);
-		endYProperty().bind(to.anchorYProperty);		
+		endYProperty().bind(to.anchorYProperty);	
+		
+		total = 0;
+		for (Transaction t : transactions) {
+			total += t.quantity*t.fraction;
+		}
+		
+		text = new Text( String.format("%4e", total));
+		text.getStyleClass().add("connector-text");
+		
+		text.translateXProperty().bind((controlX1Property().add(controlX2Property()).divide(2)));
+		text.translateYProperty().bind((controlY1Property().add(controlY2Property()).divide(2)));
 	}
 }
 
@@ -580,10 +623,12 @@ class Node extends Pane {
 	public int direction;
 	public boolean quering = false;
 	public List<Transaction> transactions = null;
-	public List<Connector> connectors = new ArrayList();
+	public List<Connector> connectors = new ArrayList<>();
 	public DoubleProperty anchorXProperty = new SimpleDoubleProperty();
 	public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
 	private Closure.V1<Node> _onClose = null;
+	private Closure.V1<Node> _onOpen = null;
+	private Label _actionButton;
 	
 	private double mx;
 	private double my;
@@ -612,12 +657,20 @@ class Node extends Pane {
 		_onClose = action;
 	}
 	
+	public void setOnOpen(Closure.V1<Node> action) {
+		_onOpen = action;
+	}
+	
 	public void setExplicit(boolean value) {
 		_explicit = value;
-		if (value) 
+		if (value) {
 			_vbox.getStyleClass().add("node-explicit");
-		else
+			_actionButton.setGraphic(GlyphRegistry.get(AwesomeIcon.TIMES, "10px"));
+		}
+		else {
 			_vbox.getStyleClass().remove("node-explicit");
+			_actionButton.setGraphic(GlyphRegistry.get(AwesomeIcon.EXTERNAL_LINK, "10px"));
+		}
 	}
 	
 	public boolean getExplicit() {
@@ -644,21 +697,27 @@ class Node extends Pane {
 		Text text = new Text(label+":");
 		text.getStyleClass().add("node-kind");
 		
-		final Label close = GlyphRegistry.get(AwesomeIcon.TIMES, "10px");
-		close.setVisible(false);
-		close.setOnMouseClicked(new EventHandler<MouseEvent>() {
+		_actionButton = new Label();
+		_actionButton.setVisible(false);
+		_actionButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (_onClose != null) {
-					_onClose.call(Node.this);
+				if (getExplicit()) {
+					if (_onClose != null) {
+						_onClose.call(Node.this);
+					}
+				} else {
+					if (_onOpen != null) {
+						_onOpen.call(Node.this);
+					}
 				}
 			}
 		});
-				
+			
 		header.getChildren().addAll(
 				text, 
 				new Spring(),
-				close);
+				_actionButton);
 		
 		_vbox.getChildren().add(header);
 			
@@ -671,14 +730,14 @@ class Node extends Pane {
 		_vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				close.setVisible(true);
+				_actionButton.setVisible(true);
 			}
 		});
 		
 		_vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				close.setVisible(false);
+				_actionButton.setVisible(false);
 			}
 		});
 	}

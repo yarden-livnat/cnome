@@ -21,9 +21,9 @@ public class SimulationProxy {
 			"select ID, ModelType, Prototype from Facilities where SimID=?";
 	
 	public static final String SELECT_TRANSACTIONS =
-			"SELECT Transactions.ReceiverID as nodeId, "
-			+ "    Resources.Quantity as quantity, Resources.Units as units, "
-			+ "    Compositions.IsoID as iso, Compositions.Quantity as fraction"
+			 "SELECT Transactions.ReceiverID as nodeId, "
+			+ "      Resources.Quantity as quantity, Resources.Units as units, "
+			+ "      Compositions.IsoID as iso, Compositions.Quantity as fraction"
 			+ " FROM Transactions, TransactedResources, Resources, Compositions, Facilities "
 			+ " WHERE" 
 			+ "     Transactions.SimID = ?"

@@ -54,6 +54,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 
 	private ChoiceBox<String> _tableChoice;
 	private ChoiceBox<String> _simChoice;
+	private Label _tableGlyph;
 	private Label _simGlyph;
 	
     private Map<Class<?>, TransferMode[]> _sourcesTransferModes;
@@ -92,6 +93,8 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
 		_sourcesTransferModes = createDragAndDropModes();
 
+		_tableGlyph = GlyphRegistry.get(AwesomeIcon.LIST_UL);
+		_tableGlyph.setManaged(false);
 		_tableChoice = new ChoiceBox<>();
 		_tableChoice.getStyleClass().add("flat-button");
 		_tableChoice.setManaged(false);
@@ -107,9 +110,10 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_filterGlyph = GlyphRegistry.get(AwesomeIcon.FILTER);
 		_filterGlyph.setManaged(false);
 		
-		getHeader().getChildren().remove(0);
-		getHeader().getChildren().addAll(0,
+//		getHeader().getChildren().remove(0);
+		getHeader().getChildren().addAll(1,
 				asList(
+				_tableGlyph,
 				_tableChoice,
 				_simGlyph,
 				_simChoice,
@@ -215,6 +219,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_tables.put(table.getName(), info);
 		_tableChoice.getItems().add(table.getName());
 		_tableChoice.setManaged(true);
+		_tableGlyph.setManaged(true);
 		if (active) {
 			_tableChoice.setValue(table.getName());
 		}
@@ -225,6 +230,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_tables.remove(table.getName());
 		_tableChoice.getItems().remove(table.getName());
 		_tableChoice.setManaged(_tableChoice.getItems().size()>0);
+		_tableGlyph.setManaged(_tableChoice.getItems().size()>0);
 	}
 	
 	@Override
