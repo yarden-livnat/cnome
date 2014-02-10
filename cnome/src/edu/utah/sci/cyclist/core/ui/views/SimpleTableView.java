@@ -25,6 +25,8 @@ package edu.utah.sci.cyclist.core.ui.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -49,24 +51,31 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
+import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Schema;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
+import edu.utah.sci.cyclist.core.util.QueryBuilder;
 
 public class SimpleTableView extends CyclistViewBase {
 	public static final String ID = "table-view";
 	public static final String TITLE = "Table";
 	
+	public static final String SIMULATION_FIELD_NAME = "SimulationID";
+	
 	private TableView<TableRow> _tableView;
 	private Table _currentTable = null;
 	private Simulation _currentSim = null;
+	private Field _simField; 
+	private Filter _simFilter; 
 	
 	public SimpleTableView() {
 		super();
 		build();
+		addListeners();
 	}
 	
 	private void build() {
@@ -80,6 +89,18 @@ public class SimpleTableView extends CyclistViewBase {
 		VBox.setVgrow(_tableView, Priority.NEVER);
 	}
 	
+	private void addListeners() {
+		InvalidationListener listener = new InvalidationListener() {	
+			@Override
+			public void invalidated(Observable observable) {
+				fetchRows();
+			}
+		};
+		
+		filters().addListener(listener);
+		remoteFilters().addListener(listener);
+	}
+	
 	@Override
 	public void selectTable(Table table, boolean active) {
 		super.selectTable(table, active);
@@ -91,8 +112,10 @@ public class SimpleTableView extends CyclistViewBase {
 		
 		if (active) {
 			_currentTable = table;	
+			_simField = table.getField(SIMULATION_FIELD_NAME);
 		} else {
 			_currentTable = null;
+			_simField = null;
 		}
 		
 		loadTable();
@@ -107,12 +130,23 @@ public class SimpleTableView extends CyclistViewBase {
 			return;
 		}
 		
+		
 		if (active) {
-			_currentSim = sim;	
+			_currentSim = sim;				
 		} else {
 			_currentSim = null;
 		}
 		
+		_simFilter = null;
+		if (_currentSim != null) {
+			if (_simField != null) {
+				_simField.getValues().removeAll();
+				_simField.getValues().add(sim.getSimulationId());
+
+				_simFilter = new Filter(_simField, false);
+			}
+		}
+				
 		if (_currentTable != null) {
 			loadTable();
 		}
@@ -139,25 +173,62 @@ public class SimpleTableView extends CyclistViewBase {
 		}
 	}
 	
+	private String buildQuery() {
+		List<Filter> filtersList = new ArrayList<Filter>();
+		
+		if (_simFilter != null)
+			filtersList.add(_simFilter);
+		
+		//Check the filters current validity
+		for(Filter filter : filters()){
+			if(_currentTable.hasField(filter.getField())){
+				filtersList.add(filter);
+			}
+		}
+
+		//Check the remote filters current validity
+		for(Filter filter : remoteFilters()){
+			if(_currentTable.hasField(filter.getField())){
+				filtersList.add(filter);
+			}
+		}
+		
+		// build the query
+		QueryBuilder builder = _currentTable.queryBuilder()
+			.filters(filtersList);
+		
+		System.out.println("TableView Query: "+builder.toString());
+		
+		return builder.toString();
+	}
+	
 	private void fetchRows() {	
+		if (_currentTable == null 
+				|| (_currentTable.getDataSource() == null && _currentSim == null)) 
+		{
+			return;
+		}
+		
+		final String query = buildQuery();
+		
+
 		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 
 			@Override
 			protected ObservableList<TableRow> call() throws Exception {
 				TableProxy proxy = new TableProxy(_currentTable);
-			
 				CyclistDatasource ds = _currentSim != null? _currentSim.getDataSource() : null;
-				return proxy.getRows(ds, 10000);
+				
+				return proxy.getRows(ds, query, 10000);
 			}
 		};
+		
+		setCurrentTask(task);
+		_tableView.itemsProperty().bind( task.valueProperty());	
 		
 		Thread th = new Thread(task);
 		th.setDaemon(true);
 		th.start();
-		
-		setCurrentTask(task);
-
-		_tableView.itemsProperty().bind( task.valueProperty());		
 	}
 	
 	private TableColumn<TableRow, Object> createColumn(final Field field, final int col) {

@@ -111,7 +111,10 @@ public class QueryBuilder {
 		StringBuilder builder = new StringBuilder("Select ");
 		
 		// dims
-		first = append(builder, first, _fields);
+		if (_fields.isEmpty()) 
+			builder.append("*");
+		else 
+			first = append(builder, first, _fields);
 			
 		// aggregates
 		for (Field field : _aggregates) {

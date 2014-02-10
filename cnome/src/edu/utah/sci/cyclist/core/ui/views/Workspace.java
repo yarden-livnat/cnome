@@ -200,10 +200,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
 						TableTool tool = new TableTool();
 						if (_onShowTable != null) {
-							_onShowTable.call(tool, table, event.getX()-_pane.getLayoutX(), event.getY()-_pane.getLayoutY());
-						if(getOnToolDrop() != null){
-								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, 
-																			event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY()));
+							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
+							_onShowTable.call(tool, table, p.getX(), p.getY());
+							if(getOnToolDrop() != null){
+								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
+//																				event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY()));
 							}
 						}
 						status = true;

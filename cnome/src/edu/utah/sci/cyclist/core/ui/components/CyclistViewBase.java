@@ -110,7 +110,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_filterGlyph = GlyphRegistry.get(AwesomeIcon.FILTER);
 		_filterGlyph.setManaged(false);
 		
-//		getHeader().getChildren().remove(0);
 		getHeader().getChildren().addAll(1,
 				asList(
 				_tableGlyph,
@@ -137,10 +136,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	public void setCurrentTask(Task<?> task) {
 		_taskControl.setTask(task);
 		
-	}
-	
-	public ObservableList<Filter> remoteFilters() {
-		return _filtersArea.getRemoteFilters();
 	}
 	
 	/*
@@ -292,24 +287,25 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		}
 	}
 	
-
-	/*
-	 * 
-	 */
 	
 	//Let the sub classes have access to the filters area
 	protected FilterArea getFiltersArea(){
 		return _filtersArea;
 	}
 	
-	/*
-	 * Listeners
-	 */
-
 	public ObservableList<Filter> filters() {
 		return _filtersArea.getFilters();
 	}
 	
+	public ObservableList<Filter> remoteFilters() {
+		return _filtersArea.getRemoteFilters();
+	}
+	
+	/*
+	 * Listeners
+	 */
+
+
 	private void setFiltersListeners() {
 		_filtersArea.setOnAction(new EventHandler<FilterEvent>() {
 			

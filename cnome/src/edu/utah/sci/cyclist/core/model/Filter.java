@@ -31,24 +31,30 @@ public class Filter implements Observable {
 	private MapProperty<Object, Object> _rangeValues = new SimpleMapProperty<>();
 	private Map<Object,Object> _selectedRangeValues = new HashMap<>();
 	
-	public Filter(Field field){
+	public Filter(Field field) {
+		this(field, true);
+	}
+	
+	public Filter(Field field, boolean auto){
 		_field = field;
 		_dataType = new DataType(field.getDataType());
 		
-		/*if(_dataType.getRole() != Role.DIMENSION){
-			_field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
-		}*/
-		
-		if (_field.getValues() != null) {
-			_selectedItems.addAll(_field.getValues());
-			_values.set(_field.getValues());
+		if (auto) {
+			/*if(_dataType.getRole() != Role.DIMENSION){
+				_field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
+			}*/
+			
+			if (_field.getValues() != null) {
+				_selectedItems.addAll(_field.getValues());
+				_values.set(_field.getValues());
+			}
+			if(_field.getRangeValues() != null){
+				_rangeValues.set(_field.getRangeValues());
+				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
+				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
+			}
 		}
-		if(_field.getRangeValues() != null){
-			_rangeValues.set(_field.getRangeValues());
-			_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-			_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-		}
-		
+	
 		_field.valuesProperty().addListener(new InvalidationListener() {
 			
 			@Override
@@ -58,7 +64,6 @@ public class Filter implements Observable {
 				else
 					_selectedItems.clear();
 				_values.set(_field.getValues());
-//				invalidate();
 			}
 		});
 		
@@ -76,6 +81,7 @@ public class Filter implements Observable {
 				_rangeValues.set(_field.getRangeValues());
 			}
 		});
+		
 	}
 	
 	public Field getField() {
