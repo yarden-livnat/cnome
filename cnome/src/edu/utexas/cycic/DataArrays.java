@@ -34,8 +34,15 @@ public class DataArrays{
 	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 
 	static simInfo simulationData = new simInfo();
+	static ArrayList<facilityStructure> simFacilities = new ArrayList<facilityStructure>();
+	
 }
 
+
+class facilityStructure {
+	String facilityName;
+	ArrayList<Object> facStruct = new ArrayList<Object>();
+}
 /**
  * Class used to build the recipes for cyclus.
  * @author Robert

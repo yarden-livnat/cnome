@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 public class RealFacs {
 	
-	static ArrayList<ArrayList<Object>> alfredStructs = new ArrayList<ArrayList<Object>>();
-	static ArrayList<String> alfredStructsNames = new ArrayList<String>();
 	
 	public static void init(){
 		//build an recipereactor array
@@ -196,7 +194,10 @@ public class RealFacs {
 		BatchReactor.add(batchsPerCore);
 		BatchReactor.add(commodityProduction);
 		
-		alfredStructs.add(BatchReactor);
+		facilityStructure batchReactorName = new facilityStructure();
+		batchReactorName.facilityName = "BatchReactor";
+		batchReactorName.facStruct = BatchReactor;
+		DataArrays.simFacilities.add(batchReactorName);
 		
 		//build enrichment facility array
 		ArrayList<Object>EnrichmentFacility=new ArrayList<Object>();
@@ -297,7 +298,10 @@ public class RealFacs {
 		EnrichmentFacility.add(EnrichInput);
 		EnrichmentFacility.add(EnrichOutput);
 		
-		alfredStructs.add(EnrichmentFacility);
+		facilityStructure enrichmentFacilityName = new facilityStructure();
+		enrichmentFacilityName.facilityName = "EnrichmentFacility";
+		enrichmentFacilityName.facStruct = EnrichmentFacility;
+		DataArrays.simFacilities.add(enrichmentFacilityName);
 		
 		ArrayList<Object>  SourceFacility=new ArrayList<Object>();
 		//build subarray inside OUTPUT
@@ -364,7 +368,10 @@ public class RealFacs {
 		Output.add(null);
 		SourceFacility.add(Output);
 		
-		alfredStructs.add(SourceFacility);
+		facilityStructure sourceFacilityName = new facilityStructure();
+		sourceFacilityName.facilityName = "SourceFacility";
+		sourceFacilityName.facStruct = SourceFacility;
+		DataArrays.simFacilities.add(sourceFacilityName);
 		
 		//build Sink Facility
 		ArrayList<Object> SinkFacility=new ArrayList<Object>();
@@ -422,11 +429,10 @@ public class RealFacs {
 		SinkFacility.add(Capacity);
 		SinkFacility.add(InventorySizeSink);
 	
-		alfredStructs.add(SinkFacility);
+		facilityStructure sinkFacilityName = new facilityStructure();
+		sinkFacilityName.facilityName = "SinkFacility";
+		sinkFacilityName.facStruct = SinkFacility;
+		DataArrays.simFacilities.add(sinkFacilityName);
 		
-		alfredStructsNames.add("BatchReactor");
-		alfredStructsNames.add("EnrichmentFacility");
-		alfredStructsNames.add("SourceFacility");
-		alfredStructsNames.add("SinkFacility");
 	}
 }

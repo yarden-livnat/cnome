@@ -418,16 +418,11 @@ public class OutPut {
 				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
 				tempNode.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
 				tempNode.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
-			}
-			
-			
+			}		
 			VisFunctions.reloadPane();
 		} catch (Exception e){
 			e.printStackTrace();
 		}
-		
-
-		
 	}
 	
 	static Element outputFacility(Document doc, facilityNode facility){
@@ -501,5 +496,41 @@ public class OutPut {
 		
 		return regionElement;
 	}
+
+	public static void loadNewFile(File file){
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(file);
+			
+			doc.getDocumentElement().getNodeName();
+			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
+			NodeList facList = doc.getElementsByTagName("facility");
+			
+			for (int i = 0; i < facList.getLength(); i++){
+				org.w3c.dom.Node facNode = facList.item(i);
+				
+				facilityNode tempNode = new facilityNode();
+				Element element = (Element) facNode;
+				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
+				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
+				tempNode.facilityStructure = ;
+			}
+			
+			NodeList marketList = doc.getElementsByTagName("market");
+			
+			for (int i = 0; i < marketList.getLength(); i++){
+				org.w3c.dom.Node marketNode = marketList.item(i);
+				
+				Element element = (Element) marketNode;
+				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
+				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
+			}		
+			VisFunctions.reloadPane();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 }
 
