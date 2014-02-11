@@ -806,7 +806,6 @@ public class ChartView extends CyclistViewBase {
 							ObservableList<TableRow> oldValue, ObservableList<TableRow> newValue) {
 
 				if (newValue != null) {
-					//assignData(newValue);
 					assignData(_spec, newValue);
 				}
 			}

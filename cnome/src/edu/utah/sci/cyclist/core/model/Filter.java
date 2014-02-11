@@ -44,44 +44,43 @@ public class Filter implements Observable {
 				_field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
 			}*/
 			
-			if (_field.getValues() != null) {
-				_selectedItems.addAll(_field.getValues());
-				_values.set(_field.getValues());
+			if (getValues() != null) {
+				_selectedItems.addAll(getValues());
+				_values.set(getValues());
 			}
 			if(_field.getRangeValues() != null){
 				_rangeValues.set(_field.getRangeValues());
 				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
 				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
 			}
-		}
-	
-		_field.valuesProperty().addListener(new InvalidationListener() {
-			
-			@Override
-			public void invalidated(Observable arg0) {
-				if (_field.getValues() != null)
-					_selectedItems.addAll(_field.getValues());
-				else
-					_selectedItems.clear();
-				_values.set(_field.getValues());
-			}
-		});
-		
-		_field.rangeValuesProperty().addListener(new InvalidationListener() {
-			
-			@Override
-			public void invalidated(Observable arg0) {
-				if (_field.getRangeValues() != null){	
-					_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-					_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-				}else{
-					_selectedRangeValues.clear();
-				}
+			_field.valuesProperty().addListener(new InvalidationListener() {
 				
-				_rangeValues.set(_field.getRangeValues());
-			}
-		});
-		
+				@Override
+				public void invalidated(Observable arg0) {
+					if (getValues() != null)
+						_selectedItems.addAll(getValues());
+					else
+						_selectedItems.clear();
+					_values.set(getValues());
+				}
+			});
+			
+			_field.rangeValuesProperty().addListener(new InvalidationListener() {
+				
+				@Override
+				public void invalidated(Observable arg0) {
+					if (_field.getRangeValues() != null){	
+						_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
+						_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
+					}else{
+						_selectedRangeValues.clear();
+					}
+					
+					_rangeValues.set(_field.getRangeValues());
+				}
+			});
+			
+		}	
 	}
 	
 	public Field getField() {
@@ -90,6 +89,10 @@ public class Filter implements Observable {
 	
 	public String getName() {
 		return _field.getName();
+	}
+	
+	public String getLabel() {
+		return getName();
 	}
 	
 	public DataType getDataType() {
@@ -113,7 +116,7 @@ public class Filter implements Observable {
 	}
 	
 	public boolean isValid() {
-		return _field.getValues() != null;
+		return getValues() != null;
 	}
 	
 	public boolean isRangeValid() {
@@ -151,7 +154,7 @@ public class Filter implements Observable {
 
 	public void selectAll(boolean value) {
 		if (value) {
-			if (_selectedItems.size() == _field.getValues().size()) return;
+			if (_selectedItems.size() == getValues().size()) return;
 			_selectedItems.addAll(_values);
 		} else {
 			if (_selectedItems.size() == 0) return;
@@ -189,7 +192,7 @@ public class Filter implements Observable {
 	
 	public boolean isActive() {
 		boolean active = true;
-		if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
+		if (getValues() == null || _selectedItems.size() == getValues().size()) {
 			if(_selectedRangeValues.size() == 0) {
 				active = false;
 			}
@@ -198,9 +201,13 @@ public class Filter implements Observable {
 		return active;
 	}
 	
+	public boolean allValuesSelected() {
+		return _selectedItems.size() == getValues().size();
+	}
+	
 	public String toString() {
 		if (!_valid) {
-			if (_field.getValues() == null || _selectedItems.size() == _field.getValues().size()) {
+			if (getValues() == null || allValuesSelected()) {
 				if(_selectedRangeValues.size() > 0){
 					String function = _field.getString(FieldProperties.AGGREGATION_FUNC);
 					String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();

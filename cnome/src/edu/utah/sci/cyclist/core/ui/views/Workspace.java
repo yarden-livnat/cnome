@@ -204,15 +204,15 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 							_onShowTable.call(tool, table, p.getX(), p.getY());
 							if(getOnToolDrop() != null){
 								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
-//																				event.getX()-_pane.getLayoutX(),event.getY()-_pane.getLayoutY()));
 							}
 						}
 						status = true;
-					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
-						// accept but don't do anything. 
-						// This allows fields to be remove from other places without causing the DnD to fail
-						status = true;
-					}
+					} 
+//					else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
+//						// accept but don't do anything. 
+//						// This allows fields to be remove from other places without causing the DnD to fail
+//						status = true;
+//					}
 				}
 				if (status) {
 					event.setDropCompleted(status);

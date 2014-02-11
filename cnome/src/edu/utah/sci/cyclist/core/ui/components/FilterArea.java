@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -31,6 +33,7 @@ public class FilterArea extends ToolBar {
 	private ObservableList<Filter> _remoteFilters = FXCollections.observableArrayList();
 	private ObjectProperty<EventHandler<FilterEvent>> _action = new SimpleObjectProperty<>();
 	private int _lastRemoteFilter = 0;
+	private BooleanProperty _showRemote = new SimpleBooleanProperty();
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 
 	public FilterArea() {
@@ -68,6 +71,18 @@ public class FilterArea extends ToolBar {
 	public void copy(FilterArea other) {
 		_filters.addAll(other._filters);
 		_remoteFilters.addAll(other._remoteFilters);
+	}
+	
+	public BooleanProperty showRemoteProperty() {
+		return _showRemote;
+	}
+	
+	public boolean getShowRemote() {
+		return _showRemote.get();
+	}
+	
+	public void setShowRemote(boolean value) {
+		_showRemote.set(value);
 	}
 
 	private void build() {
@@ -107,19 +122,21 @@ public class FilterArea extends ToolBar {
 				while (c.next()) {
 					if (c.wasAdded()) {
 						for (Filter filter : c.getAddedSubList()) {
-//							FilterGlyph glyph = createFilterGlyph(filter, true);
-//							getItems().add(_lastRemoteFilter++, glyph);
+							FilterGlyph glyph = createFilterGlyph(filter, true);
+							glyph.managedProperty().bind(showRemoteProperty());
+							glyph.visibleProperty().bind(showRemoteProperty());
+							getItems().add(_lastRemoteFilter++, glyph);
 							addedFilters.add(filter);
 						}
 					} else if (c.wasRemoved()) {
 						for (Filter filter : c.getRemoved()) {
 							for (Node node : getItems()) {
-//								FilterGlyph glyph = (FilterGlyph) node;
-//								if (glyph.getFilter() == filter) {
-//									getItems().remove(glyph);
-//									_lastRemoteFilter--;
-//									break;
-//								}
+								FilterGlyph glyph = (FilterGlyph) node;
+								if (glyph.getFilter() == filter) {
+									getItems().remove(glyph);
+									_lastRemoteFilter--;
+									break;
+								}
 							}
 						}
 					}
@@ -155,6 +172,7 @@ public class FilterArea extends ToolBar {
 		}
 
 		final FilterGlyph glyph = new FilterGlyph(filter, remote, filterIsValid);
+		glyph.setDisable(remote);
 
 		glyph.setOnDragDetected(new EventHandler<MouseEvent>() {
 

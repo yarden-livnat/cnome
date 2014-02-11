@@ -13,10 +13,16 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 
@@ -25,11 +31,13 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.dnd.DnD.LocalClipboard;
 import edu.utah.sci.cyclist.core.event.dnd.DnD.Status;
+import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
+import edu.utah.sci.cyclist.core.model.ValueFilter;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -59,7 +67,9 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
     private Map<Class<?>, TransferMode[]> _sourcesTransferModes;
 	private FilterArea _filtersArea;
-	private Label _filterGlyph;
+	private Button _filterGlyph;
+	private boolean _supportsFiltering = true;
+	private boolean _supportsTables = true;
 	
 	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
@@ -94,21 +104,22 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_sourcesTransferModes = createDragAndDropModes();
 
 		_tableGlyph = GlyphRegistry.get(AwesomeIcon.COLUMNS);
-		_tableGlyph.setManaged(false);
+		_tableGlyph.setVisible(false);
 		_tableChoice = new ChoiceBox<>();
 		_tableChoice.getStyleClass().add("flat-button");
-		_tableChoice.setManaged(false);
+		_tableChoice.setVisible(false);
 		
 		_simGlyph = GlyphRegistry.get(AwesomeIcon.COGS);
-		_simGlyph.setManaged(isToplevel());
+		_simGlyph.setVisible(isToplevel());
 		_simChoice = new ChoiceBox<>();
 		_simChoice.getStyleClass().add("flat-button");
-		_simChoice.setManaged(isToplevel());
+		_simChoice.setVisible(isToplevel());
 		
 		_filtersArea = new FilterArea();
-		_filtersArea.setManaged(false);
-		_filterGlyph = GlyphRegistry.get(AwesomeIcon.FILTER);
-		_filterGlyph.setManaged(false);
+		_filtersArea.setVisible(false);
+		_filterGlyph = new Button("", GlyphRegistry.get(AwesomeIcon.FILTER));
+		_filterGlyph.getStyleClass().add("flat-button");
+		_filterGlyph.setVisible(false);
 		
 		getHeader().getChildren().addAll(1,
 				asList(
@@ -138,6 +149,21 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		
 	}
 	
+	public boolean getSupportsFiltering() {
+		return _supportsFiltering;
+	}
+	
+	public void setSupportsFiltering(boolean value) {
+		_supportsFiltering = value;
+	}
+	
+	public boolean getSupportsTables() {
+		return _supportsTables;
+	}
+	
+	public void setSupportsTables(boolean value) {
+		_supportsTables = value;
+	}
 	/*
 	 * Actions 
 	 */
@@ -210,11 +236,13 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
+		if (!_supportsTables) return;
+		
 		Info<Table> info = new Info<Table>(table, remote);
 		_tables.put(table.getName(), info);
 		_tableChoice.getItems().add(table.getName());
-		_tableChoice.setManaged(true);
-		_tableGlyph.setManaged(true);
+		_tableChoice.setVisible(true);
+		_tableGlyph.setVisible(true);
 		if (active) {
 			_tableChoice.setValue(table.getName());
 		}
@@ -222,14 +250,18 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
 	@Override
 	public void removeTable(Table table) {
+		if (!_supportsTables) return;
+		
 		_tables.remove(table.getName());
 		_tableChoice.getItems().remove(table.getName());
-		_tableChoice.setManaged(_tableChoice.getItems().size()>0);
-		_tableGlyph.setManaged(_tableChoice.getItems().size()>0);
+		_tableChoice.setVisible(_tableChoice.getItems().size()>0);
+		_tableGlyph.setVisible(_tableChoice.getItems().size()>0);
 	}
 	
 	@Override
 	public void selectTable(Table table, boolean value) {
+		if (!_supportsTables) return;
+		
 		if (value)
 			_tableChoice.setValue(table.getName());
 		else if (table.getName().equals(_tableChoice.getValue())) {
@@ -252,8 +284,8 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_sims.put(simulation.getAlias(), info);
 		_simChoice.getItems().add(simulation.getAlias()); 
 		if (_sims.size() > 1 || !remote) {
-			_simChoice.setManaged(true);
-			_simGlyph.setManaged(true);
+			_simChoice.setVisible(true);
+			_simGlyph.setVisible(true);
 		}
 		if (active) {
 			_simChoice.setValue(simulation.getAlias());
@@ -269,8 +301,8 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_sims.remove(simulation.getAlias());
 		_simChoice.getItems().remove(simulation.getAlias());
 		boolean visible = _sims.size()> 1 || (_sims.size() == 1 && !_sims.get(_simChoice.getItems().get(0)).remote);
-		_simChoice.setManaged(visible);
-		_simGlyph.setManaged(isToplevel() || visible);
+		_simChoice.setVisible(visible);
+		_simGlyph.setVisible(isToplevel() || visible);
 	}
 	
 	/**
@@ -322,13 +354,18 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			}
 		});
 		
-		filters().addListener(new InvalidationListener() {
+		InvalidationListener listener = new InvalidationListener() {
 			@Override
 			public void invalidated(Observable observable) {
-				_filtersArea.setManaged(filters().size() > 0);
-				_filterGlyph.setManaged(filters().size() > 0);		
+				_filtersArea.setVisible(filters().size() > 0 
+						|| (_filtersArea.getShowRemote() && remoteFilters().size() > 0));
+				_filterGlyph.setVisible(filters().size() > 0 || remoteFilters().size() > 0);		
 			}
-		});
+		};
+		
+		filters().addListener(listener);
+		remoteFilters().addListener(listener);
+		_filtersArea.showRemoteProperty().addListener(listener);
 	}
 	
 	//Virtual method - should only be implemented in the sub class.
@@ -349,22 +386,12 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			public void handle(DragEvent event) {
 				boolean handle = true;
 				LocalClipboard clipboard = getLocalClipboard();
-				if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
-					Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
-					if (_tables.containsKey(table.getName())) {
-						event.acceptTransferModes(TransferMode.NONE);
-					} else {
-						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-					}
-				} else if (clipboard.hasContent(DnD.SIMULATION_FORMAT)) {
-					Simulation sim = clipboard.get(DnD.SIMULATION_FORMAT, Simulation.class);
-					if (_sims.containsKey(sim.getAlias())) {
-						event.acceptTransferModes(TransferMode.NONE);
-					} else {
-						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-					}
-				} else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
-                    if(getLocalClipboard().hasContent(DnD.DnD_SOURCE_FORMAT)){
+				if (getLocalClipboard().hasContent(DnD.VALUE_FORMAT)) {
+					if (_supportsFiltering)
+						event.acceptTransferModes(TransferMode.COPY);
+				}
+				else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) || getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
+                    if(_supportsFiltering && getLocalClipboard().hasContent(DnD.DnD_SOURCE_FORMAT)){
                     	Class<?> key = getLocalClipboard().getType(DnD.DnD_SOURCE_FORMAT);
                 	    
                     	//Accepts the drag and drop transfer mode according to the source and the 
@@ -373,6 +400,22 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
                 	    	event.acceptTransferModes(_sourcesTransferModes.get(key));
                 	    }
                     }
+				} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
+					if (_supportsTables) {
+						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
+						if (_tables.containsKey(table.getName())) {
+							event.acceptTransferModes(TransferMode.NONE);
+						} else {
+							event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+						}
+					}
+				} else if (clipboard.hasContent(DnD.SIMULATION_FORMAT)) {
+					Simulation sim = clipboard.get(DnD.SIMULATION_FORMAT, Simulation.class);
+					if (_sims.containsKey(sim.getAlias())) {
+						event.acceptTransferModes(TransferMode.NONE);
+					} else {
+						event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					}
 				} 
 				else {
 					handle = false;
@@ -394,14 +437,48 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			@Override
 			public void handle(DragEvent event) {
 				boolean accept = true;
+				// check if a value
+				if (getLocalClipboard().hasContent(DnD.VALUE_FORMAT)) {
+					if (_supportsFiltering) {
+						Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+						Object value = getLocalClipboard().get(DnD.VALUE_FORMAT, Object.class);
+	             		Filter filter = new ValueFilter(field, value);
+	             		 _filtersArea.getFilters().add(filter);
+					}
+				}
+				// check if a field
+				else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) ) {
+					if (_supportsFiltering) {
+	                    Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+	                    if (field != null) {
+	                        boolean found = false;
+	                    	for (Filter f : _filtersArea.getFilters()) {
+	                    		if (f.getField() == field) {
+	                    			// already have a filter for this field
+	                    			found = true;
+	                    			break;
+	                    		}
+	                    	}
+	                    	if (!found) {
+		                    	Filter filter = new Filter(field);
+		                        _filtersArea.getFilters().add(filter);
+		                        if (_filtersArea.getOnAction() != null) {
+		                        	_filtersArea.getOnAction().handle(new FilterEvent(FilterEvent.SHOW, filter));
+		                        }
+	                    	}
+	                    }
+					}
+	            } 
 				// check if table
-				if (getLocalClipboard().hasContent(DnD.TABLE_FORMAT)) {
-					Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
-					if (_tables.containsKey(table.getName())) {
-						getLocalClipboard().setStatus(Status.IGNORED);
-					} else if (_onTableDrop != null) {
-						getLocalClipboard().setStatus(Status.ACCEPTED);
-						_onTableDrop.call(table);	
+				else if (getLocalClipboard().hasContent(DnD.TABLE_FORMAT)) {
+					if (_supportsTables) {
+						Table table = getLocalClipboard().get(DnD.TABLE_FORMAT, Table.class);
+						if (_tables.containsKey(table.getName())) {
+							getLocalClipboard().setStatus(Status.IGNORED);
+						} else if (_onTableDrop != null) {
+							getLocalClipboard().setStatus(Status.ACCEPTED);
+							_onTableDrop.call(table);	
+						}
 					}
 				}
 				// check if simulation
@@ -414,17 +491,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 						_onSimulationDrop.call(sim);	
 					}
 				} 
-				// check if a field
-				else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) ) {
-                    Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
-                    if (field != null) {
-                        Filter filter = new Filter(field);
-                        _filtersArea.getFilters().add(filter);
-                        if (_filtersArea.getOnAction() != null) {
-                        	_filtersArea.getOnAction().handle(new FilterEvent(FilterEvent.SHOW, filter));
-                        }
-                    }
-	            } 
+				
 				// check if a filter
 				else if (getLocalClipboard().hasContent(DnD.FILTER_FORMAT)) {
 	                    Filter filter = getLocalClipboard().get(DnD.FILTER_FORMAT, Filter.class);
@@ -469,6 +536,25 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 				}
 			}
 		});
+		
+		// FilterGlyph
+		final ContextMenu contextMenu = new ContextMenu();
+
+		MenuItem item = new MenuItem("Show remotes", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(_filtersArea.showRemoteProperty());
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				_filtersArea.setShowRemote(!_filtersArea.getShowRemote());
+			}
+		});
+		contextMenu.getItems().add(item);
+		_filterGlyph.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(_filterGlyph, Side.BOTTOM, 0, 0);
+			}
+		});
 	}
 	
 //	 public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes){
@@ -485,6 +571,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		sourcesTransferModes.put(DropArea.class, new TransferMode[]{TransferMode.COPY});
         sourcesTransferModes.put(SchemaPanel.class, new TransferMode[]{TransferMode.COPY});
         sourcesTransferModes.put(FilterArea.class, new TransferMode[]{TransferMode.COPY});
+        sourcesTransferModes.put(DnDSource.class, new TransferMode[]{TransferMode.COPY});
         return sourcesTransferModes;
 	}
 }

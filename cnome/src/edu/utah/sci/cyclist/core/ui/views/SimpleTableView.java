@@ -211,7 +211,6 @@ public class SimpleTableView extends CyclistViewBase {
 		
 		final String query = buildQuery();
 		
-
 		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 
 			@Override
@@ -235,11 +234,11 @@ public class SimpleTableView extends CyclistViewBase {
 				
 		TableColumn<TableRow, Object> tc = new TableColumn<>();
 		tc.setText(field.getName());
+		
 		tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableRow,Object>, ObservableValue<Object>>() {
 			@Override
 			public ObservableValue<Object> call(CellDataFeatures<TableRow, Object> cell) {
-				return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {
-					
+				return new SimpleObjectProperty<Object>(cell.getValue(), field.getName()) {		
 					@Override
 					public Object getValue() {
 						TableRow row = (TableRow) getBean();
@@ -248,6 +247,7 @@ public class SimpleTableView extends CyclistViewBase {
 				};
 			}
 		});		
+		
 		tc.setCellFactory(new Callback<TableColumn<TableRow, Object>, TableCell<TableRow, Object>>() {
 
 			@Override
@@ -275,7 +275,7 @@ public class SimpleTableView extends CyclistViewBase {
 				@Override
 				public void handle(MouseEvent event) {
 					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-					clipboard.put(DnD.SOURCE_FORMAT, DnDSource.class, DnDSource.VALUE);
+//					clipboard.put(DnD.DnD_SOURCE_FORMAT, DnDSource.class, DnDSource.VALUE);
 					clipboard.put(DnD.VALUE_FORMAT, Object.class, getItem()); // fix the class
 					clipboard.put(DnD.FIELD_FORMAT, Field.class, _field);
 					clipboard.put(DnD.TABLE_FORMAT, Table.class, _currentTable);

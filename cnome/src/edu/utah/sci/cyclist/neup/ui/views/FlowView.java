@@ -7,13 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.mo.closure.v1.Closure;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -22,9 +18,6 @@ import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -36,11 +29,13 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.NumericField;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
@@ -91,6 +86,8 @@ public class FlowView extends CyclistViewBase {
 	
 	public FlowView() {
 		super();
+		setSupportsFiltering(false);
+		setSupportsTables(false);
 		init();
 		build();
 	}
@@ -565,7 +562,7 @@ class Column extends VBox {
 		line = new Line();
 		line.getStyleClass().add("flow-line");
 		choiceBox = new ChoiceBox<>();
-		choiceBox.getStyleClass().add("flow-choice");
+//		choiceBox.getStyleClass().add("flow-choice");
 		choiceBox.getItems().addAll("ModelType", "Prototype", "ID");		
 		
 		getChildren().addAll(choiceBox, line);
