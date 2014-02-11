@@ -9,6 +9,8 @@ import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -143,14 +145,14 @@ public class FlowView extends CyclistViewBase {
 		kindFactory.put("ModelType", f->f.model);
 		kindFactory.put("Prototype", f->f.prototype);
 		kindFactory.put("ID", f->f.id);
+		kindFactory.put("InstitutionID", f->f.intitution);
+		kindFactory.put("RegionID", f->f.region);
 	}
 
 	
 	
 	private Node createNode(String kind, Object value, int direction, boolean explicit) {
 		Node node = new Node(kind, value, direction, explicit);
-//		node.setOnClose(onRemoveNode);
-//		node.setOnOpen(onOpenNode);
 		return node;
 	}
 	
@@ -725,7 +727,7 @@ public class FlowView extends CyclistViewBase {
 			line.getStyleClass().add("flow-line");
 			choiceBox = new ChoiceBox<>();
 			choiceBox.getStyleClass().add("flow-choice");
-			choiceBox.getItems().addAll("ModelType", "Prototype", "ID");		
+			choiceBox.getItems().addAll(kindFactory.keySet());		
 			
 			getChildren().addAll(choiceBox, line);
 			VBox.getVgrow(line);
@@ -778,8 +780,41 @@ public class FlowView extends CyclistViewBase {
 			text = new Text( String.format("%.2e", total));
 			text.getStyleClass().add("connector-text");
 			
-			text.translateXProperty().bind((controlX1Property().add(controlX2Property()).divide(2)).subtract(40));
-			text.translateYProperty().bind((controlY1Property().add(controlY2Property()).divide(2)));
+			
+			DoubleBinding px = new DoubleBinding() {
+				{
+					super.bind(controlX1Property(), controlX2Property(), text.boundsInLocalProperty());
+				}
+				@Override
+				protected double computeValue() {
+					return (getControlX1()+getControlX2()-text.getBoundsInLocal().getWidth())/2;
+				}
+			};
+			
+			DoubleBinding py = new DoubleBinding() {
+				{
+					super.bind(controlY1Property(), controlY2Property(), text.boundsInLocalProperty());
+				}
+				@Override
+				protected double computeValue() {
+					return (getControlY1()+getControlY2()-text.getBoundsInLocal().getHeight())/2;
+				}
+			};
+			
+			text.translateXProperty().bind(px);
+			text.translateYProperty().bind(py);
+			
+			DoubleBinding r = new DoubleBinding() {
+				{
+					super.bind(controlX1Property(), controlX2Property(), controlY1Property(), controlY2Property());
+				}
+				@Override
+				protected double computeValue() {
+					return Math.atan2(getControlY2()-getControlY1(), getControlX2()-getControlX1()) * 180/Math.PI;
+				}
+			};
+			
+			text.rotateProperty().bind(r);
 		}
 	}
 	

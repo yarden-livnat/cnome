@@ -18,7 +18,7 @@ public class SimulationProxy {
 	private ObservableList<Facility> _facilities;
 	
 	public static final String SELECT_FACILITIES =
-			"select ID, ModelType, Prototype from Facilities where SimID=?";
+			"select ID, ModelType, Prototype, InstitutionID, RegionID from Facilities where SimID=?";
 	
 	public static final String SELECT_TRANSACTIONS =
 			 "SELECT Transactions.ReceiverID as nodeId, "
@@ -59,7 +59,8 @@ public class SimulationProxy {
 				
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
-					Facility f = new Facility(rs.getInt("ID"), rs.getString("ModelType"), rs.getString("Prototype"));
+					Facility f = new Facility(rs.getInt("ID"), rs.getString("ModelType"), rs.getString("Prototype"),
+							rs.getInt("InstitutionID"), rs.getInt("RegionID"));
 					list.add(f);
 				}
 			}		
