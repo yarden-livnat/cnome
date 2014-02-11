@@ -391,6 +391,10 @@ public class Table {
 		return _schema.getField(index);
 	}
 
+	public Field getField(String name) {
+		return _schema.getField(name);
+	}
+	
 	public void setFieldSelected(int index, boolean selected){
 		_schema.getField(index).setSelectedProperty(selected);
 	}
@@ -698,14 +702,6 @@ public class Table {
 		return _saveDir;
 	}
 	
-//	public class Row  {
-//		public Object[] value;
-//
-//		public Row(int size) {
-//			value = new Object[size];
-//		}
-//	}
-	
 	/* Saves the values of a chosen filter into a file 
 	 * Creates an xml file with the table name, and writes the filter's field name and its values
 	 * If the field already exist in the file - do nothing. */
@@ -859,67 +855,69 @@ public class Table {
 			@Override
 			protected ObservableMap<Object, Object> call() throws Exception {
 				Map<Object, Object> values = new HashMap<>();
-				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
-					updateMessage("querying");
-					System.out.println("querying field range");
-					SQL.Functions function = SQL.Functions.VALUE;
-					if(field.getString(FieldProperties.AGGREGATION_FUNC) != null){
-						function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
-					}
-					String query = "";
-					Boolean checkForSum = false;
-					double min,max=0;
-					
-					switch(function){
-					case AVG:
-					case MIN:
-					case MAX:
-					case VALUE:
-						query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
-						break;
-					case COUNT:
-						query = "SELECT 0 AS min, COUNT(" + field.getName() + ") AS max FROM "+ getName();
-						break;
-					case COUNT_DISTINCT:
-						query = "SELECT 0 AS min, COUNT( DISTINCT " + field.getName() + ") AS max FROM "+ getName();
-					case SUM:
-						query = "SELECT SUM( CASE WHEN " + field.getName()+ " <0 THEN " + field.getName() + " ELSE 0 END) AS neg_sum, " +  
-								"SUM( CASE WHEN " + field.getName()+ " >0 THEN " + field.getName() + " ELSE 0 END) AS pos_sum, " + 
-								"MIN(" + field.getName() +") as min, MAX(" + field.getName() +") as max "+
-								"FROM " + getName();
-						checkForSum = true;
-						break;
-					}
-					
-					
-					
-					log.debug("query: "+query);
-					System.out.println(query);
-					ResultSet rs = stmt.executeQuery(query);
-					
-					while (rs.next()) {
-						if (isCancelled()) {
-							System.out.println("task canceled");
-							updateMessage("Canceled");
+				if (ds != null) {
+					try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
+						updateMessage("querying");
+						System.out.println("querying field range");
+						SQL.Functions function = SQL.Functions.VALUE;
+						if(field.getString(FieldProperties.AGGREGATION_FUNC) != null){
+							function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
+						}
+						String query = "";
+						Boolean checkForSum = false;
+						double min,max=0;
+						
+						switch(function){
+						case AVG:
+						case MIN:
+						case MAX:
+						case VALUE:
+							query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
+							break;
+						case COUNT:
+							query = "SELECT 0 AS min, COUNT(" + field.getName() + ") AS max FROM "+ getName();
+							break;
+						case COUNT_DISTINCT:
+							query = "SELECT 0 AS min, COUNT( DISTINCT " + field.getName() + ") AS max FROM "+ getName();
+						case SUM:
+							query = "SELECT SUM( CASE WHEN " + field.getName()+ " <0 THEN " + field.getName() + " ELSE 0 END) AS neg_sum, " +  
+									"SUM( CASE WHEN " + field.getName()+ " >0 THEN " + field.getName() + " ELSE 0 END) AS pos_sum, " + 
+									"MIN(" + field.getName() +") as min, MAX(" + field.getName() +") as max "+
+									"FROM " + getName();
+							checkForSum = true;
 							break;
 						}
-					
-						min = rs.getDouble("min");
-						max = rs.getDouble("max");
-						if(checkForSum)
-						{
-							double posSum = rs.getDouble("pos_sum");
-							max= (posSum==0)?max:posSum;
-							
-							double negSum = rs.getDouble("neg_sum");
-							min= (negSum==0)?min:negSum;
-						}
 						
-						values.put(NumericRangeValues.MIN, min);
-						values.put(NumericRangeValues.MAX, max);
+						
+						
+						log.debug("query: "+query);
+						System.out.println(query);
+						ResultSet rs = stmt.executeQuery(query);
+						
+						while (rs.next()) {
+							if (isCancelled()) {
+								System.out.println("task canceled");
+								updateMessage("Canceled");
+								break;
+							}
+						
+							min = rs.getDouble("min");
+							max = rs.getDouble("max");
+							if(checkForSum)
+							{
+								double posSum = rs.getDouble("pos_sum");
+								max= (posSum==0)?max:posSum;
+								
+								double negSum = rs.getDouble("neg_sum");
+								min= (negSum==0)?min:negSum;
+							}
+							
+							values.put(NumericRangeValues.MIN, min);
+							values.put(NumericRangeValues.MAX, max);
+						}
+					}catch(Exception e){
+						e.printStackTrace();
 					}
-				}catch(Exception e){
-					e.printStackTrace();
 				}
 				return FXCollections.observableMap(values);
 			}
@@ -938,5 +936,4 @@ public class Table {
 
 	
 	private static final String GET_ROWS_QUERY = "select * from $table limit ?";
-//	private static final String GET_NUM_ROWS_QUERY = "select count(*) from $table";
 }

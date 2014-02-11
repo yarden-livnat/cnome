@@ -73,7 +73,7 @@ public class FilterGlyph extends HBox {
 		if (_remote) this.getStyleClass().add("remote");
 		if (!_valid) this.getStyleClass().add("invalid");
 		
-		Label label = new Label(_filter.getName());
+		Label label = new Label(_filter.getLabel());
 		label.getStyleClass().add("text");
 	
 		_button = GlyphRegistry.get(AwesomeIcon.CARET_DOWN);

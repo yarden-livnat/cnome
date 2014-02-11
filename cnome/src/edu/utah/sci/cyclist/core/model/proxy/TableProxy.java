@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +57,42 @@ public class TableProxy {
 		}catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		
+		return FXCollections.observableList(rows);
+	}
+	
+	public ObservableList<TableRow> getRows(String query, int n) {
+		CyclistDatasource ds = _table.getDataSource();
+		return getRows(ds, query, n);
+	}
+	
+	public ObservableList<TableRow> getRows(CyclistDatasource ds, String query, int n) {
+		return getRows(ds, query, n, false);
+	}
+	
+	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final String query, final int n, boolean force) {
+		final CyclistDatasource ds = (!force && _table.getDataSource() != null) ?  _table.getDataSource(): ds1;
+	
+		List<TableRow> rows = new ArrayList<>();
+		try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
+
+			ResultSet rs = stmt.executeQuery(query);
+			ResultSetMetaData rmd = rs.getMetaData();
+			
+			int cols = rmd.getColumnCount();
+			while (rs.next()) {
+				TableRow row = new TableRow(cols);
+				for (int i=0; i<cols; i++) {
+					row.value[i] = rs.getObject(i+1);
+				}
+				rows.add(row);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			ds.releaseConnection();
 		}
 		
 		return FXCollections.observableList(rows);

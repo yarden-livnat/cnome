@@ -39,6 +39,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.Region;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.Cyclist;
@@ -59,6 +60,7 @@ import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.tools.TableTool;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.tools.ToolsLibrary;
 import edu.utah.sci.cyclist.core.ui.tools.WorkspaceTool;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
@@ -71,6 +73,7 @@ public class CyclistController {
 	
 	private final EventBus _eventBus;
 	private MainScreen _screen;
+	private WorkspacePresenter _presenter;
 	private Model _model = new Model();
 	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
 	private String SAVE_FILE = "save.xml";
@@ -141,8 +144,8 @@ public class CyclistController {
 //		workspace.setWorkDirPath(getLastChosenWorkDirectory());
 		screen.setWorkspace(workspace);
 		
-		WorkspacePresenter presenter = new WorkspacePresenter(_eventBus);
-		presenter.setView(workspace);
+		_presenter = new WorkspacePresenter(_eventBus);
+		_presenter.setView(workspace);
 		setWorkspaceDragAndDropAction();
 		_screen.getWorkSpace().setOnToolDrop(handleToolDropped);
 		
@@ -321,6 +324,28 @@ public class CyclistController {
 				quit();
 			}
 		});
+		
+		EventHandler<ActionEvent> viewAction = new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				MenuItem item = (MenuItem) event.getSource();
+				for (ToolFactory factory : 	ToolsLibrary.factories) {
+					if (factory.getToolName().equals(item.getText())) {
+						try {
+							_presenter.addTool(factory.create());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				
+			}
+		};
+		
+		for (MenuItem item : _screen.getViewMenu().getItems()) {
+			item.setOnAction(viewAction);
+		}
+		
 	}
 	
 	private void quit() {

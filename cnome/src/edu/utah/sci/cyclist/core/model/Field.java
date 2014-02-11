@@ -54,6 +54,16 @@ public class Field {
 		this("");
 	}
 
+	public Field(Field other) {
+		this(other._name);
+		_dataType = new DataType(other._dataType);
+		_selected = other._selected;
+		setTable(other.getTable()); 
+		for (Map.Entry<String, Object> entry : other._properties.entrySet()) {
+			_properties.put(entry.getKey(), entry.getValue());
+		}
+	}
+	
 	public Field(String name) {
 		this._name = name;
 		_selected = new SimpleBooleanProperty();
@@ -65,11 +75,11 @@ public class Field {
 	}
 	
 	public void setValues(ObservableList<Object> values) {
-		_valuesProperty.set(values);
+		valuesProperty().set(values);
 	}
 	
 	public ObservableList<Object> getValues() {
-		return _valuesProperty.get();
+		return valuesProperty().get();
 	}
 	
 	public MapProperty<Object, Object> rangeValuesProperty() {
@@ -77,11 +87,11 @@ public class Field {
 	}
 	
 	public void setRangeValues(ObservableMap<Object, Object> rangeValues) {
-		_rangeValuesProperty.set(rangeValues);
+		rangeValuesProperty().set(rangeValues);
 	}
 	
 	public ObservableMap<Object, Object> getRangeValues() {
-		return _rangeValuesProperty.get();
+		return rangeValuesProperty().get();
 	}
 	
 	public String getName() {
