@@ -481,28 +481,36 @@ public class FlowView extends CyclistViewBase {
 			public void handle(DragEvent event) {
 				boolean accept = false;
 				DnD.LocalClipboard clipboard = getLocalClipboard();
-//				DnDSource source = clipboard.get(DnD.DnD_SOURCE_FORMAT, DnDSource.class);
-//				if (source != null && source == DnDSource.VALUE) {
-					// TODO: accept only certain fields
-					
-					if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
+				
+				if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
+					Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
+					if (kindFactory.containsKey(field.getName())) {
 						// accept if it near one of the lines
 						double x = event.getX();
 						if (Math.abs(x - _column[SRC].line.getStartX()) < 10) {
-							setTargetLine(SRC);
-							accept = true;							
+							if (_column[SRC].getKind() == null 
+									|| _column[SRC].getKind().equals(field.getName())) 
+							{
+								setTargetLine(SRC);
+								accept = true;
+							}
 						} else if (Math.abs(x - _column[DEST].line.getStartX()) < 10) {
-							setTargetLine(DEST);
-							accept = true;
+							if (_column[DEST].getKind() == null 
+									|| _column[DEST].getKind().equals(field.getName())) 
+							{
+								setTargetLine(DEST);
+								accept = true;
+							}
 						} else {
 							setTargetLine(-1);
 						}
-						if (accept) {
-							event.acceptTransferModes(TransferMode.COPY);
-							event.consume();
-						}
-					} 
-//				}
+					}
+					if (accept) {
+						
+						event.acceptTransferModes(TransferMode.COPY);
+						event.consume();
+					}
+				} 
 			}
 		});
 		
@@ -529,10 +537,7 @@ public class FlowView extends CyclistViewBase {
 				changeTimestep(_timestepField.getValue());
 			}	
 		});
-
-
 	}
-
 	
 	class Column extends VBox {
 		public final int SPACING = 10;
@@ -605,7 +610,6 @@ public class FlowView extends CyclistViewBase {
 			choiceBox.valueProperty().addListener(new InvalidationListener() {	
 				@Override
 				public void invalidated(Observable observable) {
-					System.out.println("change column kind");
 					kind = choiceBox.getValue();
 					kindFunc = kindFactory.get(kind);
 					changeColumnKind(direction);
