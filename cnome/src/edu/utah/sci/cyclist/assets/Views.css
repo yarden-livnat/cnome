@@ -139,7 +139,7 @@
 .flow-timestep-bar {
 	-fx-padding:5px;
 	-fx-spacing:5px;
-	-fx-alignment:baseline-left;
+	-fx-alignment:baseline-left ;
 }
 
 .flow-timestep {
@@ -147,7 +147,11 @@
 	-fx-max-width: 50px;
 	-fx-max-height: 35px;
 	-fx-padding: 2;
-	-fx-alignment:baseline-right;
+	-fx-alignment:bottom-center;
+}
+
+.flow-timestep-bar .flat-button {
+	-fx-alignment:top-left  ;
 }
 
 .flow-timestep:focused {

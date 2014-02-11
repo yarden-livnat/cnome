@@ -7,15 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.DragEvent;
@@ -33,7 +38,6 @@ import javafx.scene.text.Text;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
@@ -60,6 +64,8 @@ public class FlowView extends CyclistViewBase {
 	private Label _timestepLabel;
 	private NumericField _timestepField;
 	private int _targetLine = -1;
+	private Button _forward;
+	private Button _backward;
 	
 	// variables
 	private Simulation _currentSim = null;
@@ -171,7 +177,6 @@ public class FlowView extends CyclistViewBase {
 		
 		if (col.getKind() == null) {
 			col.setKind(field.getName());
-//			col.kindFunc = kindFactory.get(col.getKind());
 		} else if (!col.getKind().equals(field.getName())) {
 			System.out.println("Error: REJECT node of this kind");
 			return;
@@ -180,7 +185,6 @@ public class FlowView extends CyclistViewBase {
 		Node node = col.findNode(value);
 		if (node == null) {
 			node = createNode(field.getName(), value, direction, explicit);
-//			node.setTranslateY(y);
 			col.addNode(node);
 			_pane.getChildren().add(node);
 		} else {
@@ -362,13 +366,115 @@ public class FlowView extends CyclistViewBase {
 		
 	}
 	
+	private void queryMaterialFlow(final List<Node> nodes) {
+		final int timestep = _timestep;
+		final int isotope = 0; 
+		nodes.stream().forEach(n->n.setQuering(true));
+		Task<ObservableMap<Node, List<Transaction>>> task = new Task<ObservableMap<Node, List<Transaction>>>() {
+
+			@Override
+			protected ObservableMap<Node,List<Transaction>> call() throws Exception {
+				Map<Node, List<Transaction>> map = new HashMap<>();
+				for (Node node : nodes) {
+					List<Transaction> list = _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC, isotope);
+					map.put(node, list);
+				}
+				
+				return FXCollections.observableMap(map);
+			}
+			
+		};
+		
+		task.valueProperty().addListener(new ChangeListener<ObservableMap<Node, List<Transaction>>>() {
+
+			@Override
+			public void changed(
+					ObservableValue<? extends ObservableMap<Node, List<Transaction>>> observable,
+					ObservableMap<Node, List<Transaction>> oldValue,
+					ObservableMap<Node, List<Transaction>> map) 
+			{
+				if (map != null) {
+					for (Node node : map.keySet())
+						addRelatedNodes(node, map.get(node), timestep);
+					// remove empty implicit nodes
+					for(Iterator<Node> i = _column[SRC].nodes.iterator(); i.hasNext();) {
+						Node node = i.next();
+						if (!node.getExplicit() && node.connectors.size() == 0) {
+							i.remove();
+							_pane.getChildren().remove(node);
+						}
+					}
+					for(Iterator<Node> i = _column[DEST].nodes.iterator(); i.hasNext();) {
+						Node node = i.next();
+						if (!node.getExplicit() && node.connectors.size() == 0) {
+							i.remove();
+							_pane.getChildren().remove(node);
+						}
+					}
+				}
+			}
+			
+		});
+		
+		Thread thread = new Thread(task);
+		thread.setDaemon(true);
+		thread.start();
+		
+		setCurrentTask(task);
+		
+		
+	}
+	
 	/*
 	 * DnD interactions
 	 */
 	
 	private void changeTimestep(int value) {
+		List<Node> list = new ArrayList<>();
+		
 		_timestep = value;
-		System.out.println("t="+value+" TODO: update display");
+		
+		// remove all connectors 
+		Column src = _column[SRC];
+		Column dest = _column[DEST];
+		
+		// remove all connections 
+		for (Node node : src.nodes) {
+			for (Connector c : node.connectors) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+			}
+			node.connectors.clear();
+			node.transactions.clear();
+			if (node.getExplicit())
+				list.add(node);
+		}
+		
+		// remove all connections and implicit nodes from the other column
+		for (Node node : dest.nodes) {
+			for (Connector c : node.connectors) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+			}
+			node.connectors.clear();
+			node.transactions.clear();
+			if (node.getExplicit())
+				list.add(node);
+		}
+		
+//		// fetch data for each explicit node
+//		for (Node node : src.nodes) {
+//			if (node.getExplicit())
+//				queryMaterialFlow(node);
+//		}
+//		for (Node node : dest.nodes) {
+//			if (node.getExplicit())
+//				queryMaterialFlow(node);
+//		}
+		
+		queryMaterialFlow(list);
+		// TODO: need to remove implicit nodes with no connections once all the tasks end
+		
 	}
 	
 	private void setTargetLine(int line) {
@@ -397,10 +503,16 @@ public class FlowView extends CyclistViewBase {
 		_timestepLabel= new Label("timestep:");	
 		_timestepField = new NumericField(_timestep);
 		_timestepField.getStyleClass().add("flow-timestep");
+		_timestepField.setMinValue(0);
+		_forward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "18px"));
+		_backward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "18px")); ;
+		
+		_forward.getStyleClass().add("flat-button");
+		_backward.getStyleClass().add("flat-button");
 		
 		HBox hbox = new HBox();
 		hbox.getStyleClass().add("flow-timestep-bar");
-		hbox.getChildren().addAll(_timestepLabel, _timestepField);	
+		hbox.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
 
 		_pane = new Pane();
 		_pane.getChildren().addAll(_column[SRC].choiceBox, _column[SRC].line, _column[DEST].choiceBox,_column[DEST].line);
@@ -436,21 +548,6 @@ public class FlowView extends CyclistViewBase {
 		
 		addListeners();
 	}
-	
-	
-//	private MenuBar createMenubar() {
-//		MenuBar menubar = new MenuBar();
-//
-//		MenuItem item = new MenuItem("item");
-//		
-//		Menu menu = new Menu("Menu");
-//		menu.getItems().addAll(item);
-//		
-//		menubar.getMenus().add(menu);
-//		
-//		return menubar;
-//	}
-	
 	
 	/*
 	 * Ensure nodes are aligned
@@ -536,6 +633,20 @@ public class FlowView extends CyclistViewBase {
 			public void invalidated(Observable observable) {
 				changeTimestep(_timestepField.getValue());
 			}	
+		});
+		
+		_forward.setOnAction(new EventHandler<ActionEvent>() {	
+			@Override
+			public void handle(ActionEvent event) {
+				_timestepField.setValue(_timestepField.getValue()+1);			
+			}
+		});
+		
+		_backward.setOnAction(new EventHandler<ActionEvent>() {	
+			@Override
+			public void handle(ActionEvent event) {
+				_timestepField.setValue(_timestepField.getValue()-1);			
+			}
 		});
 	}
 	
@@ -667,7 +778,7 @@ public class FlowView extends CyclistViewBase {
 		private boolean _explicit;
 		public int direction;
 		public boolean quering = false;
-		public List<Transaction> transactions = null;
+		public List<Transaction> transactions = new ArrayList<>();
 		public List<Connector> connectors = new ArrayList<>();
 		public DoubleProperty anchorXProperty = new SimpleDoubleProperty();
 		public DoubleProperty anchorYProperty = new SimpleDoubleProperty();

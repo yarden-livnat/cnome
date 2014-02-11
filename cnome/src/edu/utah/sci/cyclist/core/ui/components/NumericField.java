@@ -9,22 +9,36 @@ import javafx.scene.control.TextField;
 public class NumericField extends TextField {
 
 	private IntegerProperty _valueProperty = new SimpleIntegerProperty();
+	private int _minValue = Integer.MIN_VALUE;
+	private int _maxValue = Integer.MAX_VALUE;
 	
 	public NumericField() {
 		this(0);
 	}
 	
 	public NumericField(int value) {
-		super(Integer.toString(value));
+		super();
 		
 		setOnAction(new EventHandler<ActionEvent>() {
-
 			@Override
 			public void handle(ActionEvent event) {
-				_valueProperty.set(Integer.parseInt(getText()));
+				valueProperty().set(Integer.parseInt(getText()));
 			}
-			
 		});
+		
+		setValue(value);
+	}
+	
+	public void setMinValue(int value) {
+		_minValue = value;
+		if (getValue() < _minValue)
+			setValue(_minValue);
+	}
+	
+	public void setMaxValue(int value) {
+		_maxValue = value;
+		if (getValue() > _maxValue)
+			setValue(_maxValue);
 	}
 	
 	public IntegerProperty valueProperty() {
@@ -32,11 +46,12 @@ public class NumericField extends TextField {
 	}
 	
 	public int getValue() {
-		return _valueProperty.get();
+		return valueProperty().get();
 	}
 	
 	public void setValue(int value) {
-		_valueProperty.set(value);
+		valueProperty().set(value);
+		setText(Integer.toString(value));
 	}
 	
 	@Override
