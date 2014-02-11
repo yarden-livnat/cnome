@@ -697,7 +697,7 @@ class Node extends Pane {
 	private void build(String label) {
 		_vbox = new VBox();
 		_vbox.getStyleClass().add("flow-node");
-		
+
 		// header
 		HBox header = new HBox();
 		header.getStyleClass().add("node-header");
