@@ -171,7 +171,7 @@ public class FlowView extends CyclistViewBase {
 		
 		if (col.getKind() == null) {
 			col.setKind(field.getName());
-			col.kindFunc = kindFactory.get(col.getKind());
+//			col.kindFunc = kindFactory.get(col.getKind());
 		} else if (!col.getKind().equals(field.getName())) {
 			System.out.println("Error: REJECT node of this kind");
 			return;
@@ -227,7 +227,7 @@ public class FlowView extends CyclistViewBase {
 		node.setExplicit(true);
 	}
 	
-	private void addRelatedNodes(Node node, ObservableList<Transaction> transactions,  int timestep) {
+	private void addRelatedNodes(Node node, List<Transaction> transactions,  int timestep) {
 		node.setQuering(false);
 		
 		if (timestep != _timestep) {
@@ -242,7 +242,7 @@ public class FlowView extends CyclistViewBase {
 		
 		if (_column[to].getKind() == null) {
 			_column[to].setKind(_column[from].getKind());
-			_column[to].kindFunc = _column[from].kindFunc;
+//			_column[to].kindFunc = _column[from].kindFunc;
 			
 		}
 		Map<Object, List<Transaction>> groups = groupTransactions(transactions, _column[to].kindFunc);
@@ -268,6 +268,42 @@ public class FlowView extends CyclistViewBase {
 			_pane.getChildren().add(c);
 			_pane.getChildren().add(c.text);
 		}
+	}
+	
+	private void changeColumnKind(int direction) {
+		Column col = _column[direction];
+		Column other = _column[1-direction];
+		
+		// remove all connections and nodes from the named column
+		for (Node node : col.nodes) {
+			for (Connector c : node.connectors) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+			}
+			node.connectors.clear();
+			_pane.getChildren().remove(node);
+		}
+		col.nodes.clear();
+		
+		// remove all connections and implicit nodes from the other column
+		for (Node node : other.nodes) {
+			for (Connector c : node.connectors) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+			}
+			node.connectors.clear();
+			if (!node.getExplicit()) {
+				_pane.getChildren().remove(node);
+				other.removeNode(node);
+			}
+		}
+		
+		//
+		for (Node node : other.nodes) {
+			addRelatedNodes(node, node.transactions, _timestep);
+		}
+		
+		
 	}
 	
 	
@@ -345,7 +381,6 @@ public class FlowView extends CyclistViewBase {
 		}
 		_targetLine = line;
 	}
-	
 	
 	private void build() {
 		setTitle(TITLE);
@@ -446,8 +481,8 @@ public class FlowView extends CyclistViewBase {
 			public void handle(DragEvent event) {
 				boolean accept = false;
 				DnD.LocalClipboard clipboard = getLocalClipboard();
-				DnDSource source = clipboard.get(DnD.SOURCE_FORMAT, DnDSource.class);
-				if (source != null && source == DnDSource.VALUE) {
+//				DnDSource source = clipboard.get(DnD.DnD_SOURCE_FORMAT, DnDSource.class);
+//				if (source != null && source == DnDSource.VALUE) {
 					// TODO: accept only certain fields
 					
 					if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
@@ -467,7 +502,7 @@ public class FlowView extends CyclistViewBase {
 							event.consume();
 						}
 					} 
-				}
+//				}
 			}
 		});
 		
@@ -497,284 +532,286 @@ public class FlowView extends CyclistViewBase {
 
 
 	}
-}
 
-
-class Column extends VBox {
-	public final int SPACING = 10;
-	public final int Y0 = 40;
 	
-	public int direction;
-	private String kind = null;
-	public Function<Facility, Object> kindFunc;
-	public List<Node> nodes = new ArrayList<>();
-	public Line line;
-	public ChoiceBox<String> choiceBox;
-	
-	public Column(int direction) {
-		this.direction = direction;
-		build();
-	}
-	
-	public void addNode(final Node node) {
-		double y = Y0;
-		if (nodes.size() > 0) {
-			Node last = nodes.get(nodes.size()-1);
-			y = last.getTranslateY()+last.getHeight()+SPACING;
+	class Column extends VBox {
+		public final int SPACING = 10;
+		public final int Y0 = 40;
+		
+		public int direction;
+		private String kind = null;
+		public Function<Facility, Object> kindFunc;
+		public List<Node> nodes = new ArrayList<>();
+		public Line line;
+		public ChoiceBox<String> choiceBox;
+		
+		public Column(int direction) {
+			this.direction = direction;
+			build();
 		}
-		nodes.add(node);
-		node.setTranslateX(line.getStartX()); // will be centered once the width is known
-		node.widthProperty().addListener( new InvalidationListener() {
-			@Override
-			public void invalidated(Observable observable) {
-				node.setTranslateX(line.getStartX() - node.getWidth()/2);
+		
+		public void addNode(final Node node) {
+			double y = Y0;
+			if (nodes.size() > 0) {
+				Node last = nodes.get(nodes.size()-1);
+				y = last.getTranslateY()+last.getHeight()+SPACING;
 			}
-		});
-		node.setTranslateY(y);
-	}
-	
-	public void removeNode(Node node) {
-		nodes.remove(node);
-		if (nodes.size() == 0) {
-			kind = null;
-		}
-	}
-	
-	public String getKind() {
-		return kind;
-	}
-	
-	public void setKind(String value) {
-		kind = value;
-		choiceBox.setValue(value);
-	}
-	
-	public Node findNode(Object value) {
-		for (Node node : nodes) {
-			if (node.value.equals(value))
-				return node;
+			nodes.add(node);
+			node.setTranslateX(line.getStartX()); // will be centered once the width is known
+			node.widthProperty().addListener( new InvalidationListener() {
+				@Override
+				public void invalidated(Observable observable) {
+					node.setTranslateX(line.getStartX() - node.getWidth()/2);
+				}
+			});
+			node.setTranslateY(y);
 		}
 		
-		return null;
-	}
-	
-	private void build() {
-		line = new Line();
-		line.getStyleClass().add("flow-line");
-		choiceBox = new ChoiceBox<>();
-//		choiceBox.getStyleClass().add("flow-choice");
-		choiceBox.getItems().addAll("ModelType", "Prototype", "ID");		
-		
-		getChildren().addAll(choiceBox, line);
-		VBox.getVgrow(line);
-		
-		choiceBox.valueProperty().addListener(new InvalidationListener() {	
-			@Override
-			public void invalidated(Observable observable) {
-				System.out.println("change column kind");
-				kind = choiceBox.getValue();
+		public void removeNode(Node node) {
+			nodes.remove(node);
+			if (nodes.size() == 0) {
+				kind = null;
 			}
-		});
-	}
-}
-
-class Connector extends CubicCurve {
-	public Node from;
-	public Node to;
-	private List<Transaction> _transactions;
-	private double total;
-	private String units;
-	public Text text;
-	
-	public Connector(Node from, Node to, List<Transaction> transactions) {
-		super();
-		getStyleClass().add("connector");
-		this.from = from;
-		this.to = to;
-		from.addConnector(this);
-		to.addConnector(this);
-		_transactions = transactions;
-		
-		startXProperty().bind(from.anchorXProperty);
-		startYProperty().bind(from.anchorYProperty);
-		
-		controlX1Property().bind(startXProperty().add(40));
-		controlY1Property().bind(startYProperty());
-		
-		controlX2Property().bind(endXProperty().subtract(40));
-		controlY2Property().bind(endYProperty());
-		
-		endXProperty().bind(to.anchorXProperty);
-		endYProperty().bind(to.anchorYProperty);	
-		
-		total = 0;
-		for (Transaction t : transactions) {
-			total += t.quantity*t.fraction;
 		}
 		
-		text = new Text( String.format("%4e", total));
-		text.getStyleClass().add("connector-text");
+		public String getKind() {
+			return kind;
+		}
 		
-		text.translateXProperty().bind((controlX1Property().add(controlX2Property()).divide(2)));
-		text.translateYProperty().bind((controlY1Property().add(controlY2Property()).divide(2)));
-	}
-}
-
-
-class Node extends Pane {
-	public Object value;
-	public String type;
-	private boolean _explicit;
-	public int direction;
-	public boolean quering = false;
-	public List<Transaction> transactions = null;
-	public List<Connector> connectors = new ArrayList<>();
-	public DoubleProperty anchorXProperty = new SimpleDoubleProperty();
-	public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
-	private Closure.V1<Node> _onClose = null;
-	private Closure.V1<Node> _onOpen = null;
-	private Label _actionButton;
-	
-	private double mx;
-	private double my;
-	private VBox _vbox;
-	private boolean _selected = false;
-	
-	public Node(String type, Object value, int direction, boolean explicit) {
-		this.type = type;
-		this.value = value;
-		this.direction = direction;
+		public void setKind(String value) {
+			kind = value;
+			choiceBox.setValue(value);
+		}
 		
-		build(type);
-		this.setExplicit(explicit);
-		
-		setListeners();
-		
-		if (direction == FlowView.SRC) 
-			anchorXProperty.bind( translateXProperty().add(widthProperty()));
-		else
-			anchorXProperty.bind( translateXProperty());
+		public Node findNode(Object value) {
+			for (Node node : nodes) {
+				if (node.value.equals(value))
+					return node;
+			}
 			
-		anchorYProperty.bind( translateYProperty().add(heightProperty().divide(2)));
-	}	
-	
-	public void setOnClose(Closure.V1<Node> action) {
-		_onClose = action;
-	}
-	
-	public void setOnOpen(Closure.V1<Node> action) {
-		_onOpen = action;
-	}
-	
-	public void setExplicit(boolean value) {
-		_explicit = value;
-		if (value) {
-			_vbox.getStyleClass().add("node-explicit");
-			_actionButton.setGraphic(GlyphRegistry.get(AwesomeIcon.TIMES, "10px"));
+			return null;
 		}
-		else {
-			_vbox.getStyleClass().remove("node-explicit");
-			_actionButton.setGraphic(GlyphRegistry.get(AwesomeIcon.EXTERNAL_LINK, "10px"));
-		}
-	}
-	
-	public boolean getExplicit() {
-		return _explicit;
-	}
-	
-	public void setQuering(boolean value) {
-		quering = value;
-		// TODO: indicate to the user the node is (not) in query mode
-	}
-	
-	public void addConnector(Connector connector) {
-		connectors.add(connector);
-	}
-	
-	private void build(String label) {
-		_vbox = new VBox();
-		_vbox.getStyleClass().add("flow-node");
 		
-		// header
-		HBox header = new HBox();
-		header.getStyleClass().add("node-header");
+		private void build() {
+			line = new Line();
+			line.getStyleClass().add("flow-line");
+			choiceBox = new ChoiceBox<>();
+			choiceBox.getStyleClass().add("flow-choice");
+			choiceBox.getItems().addAll("ModelType", "Prototype", "ID");		
+			
+			getChildren().addAll(choiceBox, line);
+			VBox.getVgrow(line);
+			
+			choiceBox.valueProperty().addListener(new InvalidationListener() {	
+				@Override
+				public void invalidated(Observable observable) {
+					System.out.println("change column kind");
+					kind = choiceBox.getValue();
+					kindFunc = kindFactory.get(kind);
+					changeColumnKind(direction);
+				}
+			});
+		}
+	}
+	
+	class Connector extends CubicCurve {
+		public Node from;
+		public Node to;
+		private List<Transaction> _transactions;
+		private double total;
+		private String units;
+		public Text text;
+		
+		public Connector(Node from, Node to, List<Transaction> transactions) {
+			super();
+			getStyleClass().add("connector");
+			this.from = from;
+			this.to = to;
+			from.addConnector(this);
+			to.addConnector(this);
+			_transactions = transactions;
+			
+			startXProperty().bind(from.anchorXProperty);
+			startYProperty().bind(from.anchorYProperty);
+			
+			controlX1Property().bind(startXProperty().add(40));
+			controlY1Property().bind(startYProperty());
+			
+			controlX2Property().bind(endXProperty().subtract(40));
+			controlY2Property().bind(endYProperty());
+			
+			endXProperty().bind(to.anchorXProperty);
+			endYProperty().bind(to.anchorYProperty);	
+			
+			total = 0;
+			for (Transaction t : transactions) {
+				total += t.quantity*t.fraction;
+			}
+			
+			text = new Text( String.format("%.2e", total));
+			text.getStyleClass().add("connector-text");
+			
+			text.translateXProperty().bind((controlX1Property().add(controlX2Property()).divide(2)));
+			text.translateYProperty().bind((controlY1Property().add(controlY2Property()).divide(2)));
+		}
+	}
+	
+	
+	class Node extends Pane {
+		public Object value;
+		public String type;
+		private boolean _explicit;
+		public int direction;
+		public boolean quering = false;
+		public List<Transaction> transactions = null;
+		public List<Connector> connectors = new ArrayList<>();
+		public DoubleProperty anchorXProperty = new SimpleDoubleProperty();
+		public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
+		private Closure.V1<Node> _onClose = null;
+		private Closure.V1<Node> _onOpen = null;
+		private Label _actionButton;
+		
+		private double mx;
+		private double my;
+		private VBox _vbox;
+		private boolean _selected = false;
+		
+		public Node(String type, Object value, int direction, boolean explicit) {
+			this.type = type;
+			this.value = value;
+			this.direction = direction;
+			
+			build(type);
+			this.setExplicit(explicit);
+			
+			setListeners();
+			
+			if (direction == FlowView.SRC) 
+				anchorXProperty.bind( translateXProperty().add(widthProperty()));
+			else
+				anchorXProperty.bind( translateXProperty());
 				
-		Text text = new Text(label+":");
-		text.getStyleClass().add("node-kind");
+			anchorYProperty.bind( translateYProperty().add(heightProperty().divide(2)));
+		}	
 		
-		_actionButton = new Label();
-		_actionButton.setVisible(false);
-		_actionButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (getExplicit()) {
-					if (_onClose != null) {
-						_onClose.call(Node.this);
-					}
-				} else {
-					if (_onOpen != null) {
-						_onOpen.call(Node.this);
+		public void setOnClose(Closure.V1<Node> action) {
+			_onClose = action;
+		}
+		
+		public void setOnOpen(Closure.V1<Node> action) {
+			_onOpen = action;
+		}
+		
+		public void setExplicit(boolean value) {
+			_explicit = value;
+			if (value) {
+				_vbox.getStyleClass().add("node-explicit");
+				_actionButton.setGraphic(GlyphRegistry.get(AwesomeIcon.TIMES, "10px"));
+			}
+			else {
+				_vbox.getStyleClass().remove("node-explicit");
+				_actionButton.setGraphic(GlyphRegistry.get(AwesomeIcon.EXTERNAL_LINK, "10px"));
+			}
+		}
+		
+		public boolean getExplicit() {
+			return _explicit;
+		}
+		
+		public void setQuering(boolean value) {
+			quering = value;
+			// TODO: indicate to the user the node is (not) in query mode
+		}
+		
+		public void addConnector(Connector connector) {
+			connectors.add(connector);
+		}
+		
+		private void build(String label) {
+			_vbox = new VBox();
+			_vbox.getStyleClass().add("flow-node");
+			
+			// header
+			HBox header = new HBox();
+			header.getStyleClass().add("node-header");
+					
+			Text text = new Text(label+":");
+			text.getStyleClass().add("node-kind");
+			
+			_actionButton = new Label();
+			_actionButton.setVisible(false);
+			_actionButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+					if (getExplicit()) {
+						if (_onClose != null) {
+							_onClose.call(Node.this);
+						}
+					} else {
+						if (_onOpen != null) {
+							_onOpen.call(Node.this);
+						}
 					}
 				}
-			}
-		});
+			});
+				
+			header.getChildren().addAll(
+					text, 
+					new Spring(),
+					_actionButton);
 			
-		header.getChildren().addAll(
-				text, 
-				new Spring(),
-				_actionButton);
+			_vbox.getChildren().add(header);
+				
+			Text body = new Text(value.toString());
+			body.getStyleClass().add("node-body");
+			_vbox.getChildren().add(body);
 		
-		_vbox.getChildren().add(header);
+			getChildren().add(_vbox);
 			
-		Text body = new Text(value.toString());
-		body.getStyleClass().add("node-body");
-		_vbox.getChildren().add(body);
-	
-		getChildren().add(_vbox);
-		
-		_vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				_actionButton.setVisible(true);
-			}
-		});
-		
-		_vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				_actionButton.setVisible(false);
-			}
-		});
-	}
-	
-	private void setListeners() {
-		setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent arg0) {
-				_selected = !_selected;	
-				if (_selected) {
-					_vbox.getStyleClass().add("node-selected");
-
-				} else {
-					_vbox.getStyleClass().remove("node-selected");
+			_vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+					_actionButton.setVisible(true);
 				}
+			});
 			
-			}
-		});
-		setOnMousePressed(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-//				mx = event.getSceneX() - getTranslateX();
-				my = event.getSceneY() - getTranslateY();
-			}
-		});
+			_vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+					_actionButton.setVisible(false);
+				}
+			});
+		}
 		
-		setOnMouseDragged(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-//				setTranslateX(event.getSceneX()-mx);
-				setTranslateY(event.getSceneY()-my);
-			}
-		});
+		private void setListeners() {
+			setOnMouseClicked(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent arg0) {
+					_selected = !_selected;	
+					if (_selected) {
+						_vbox.getStyleClass().add("node-selected");
+	
+					} else {
+						_vbox.getStyleClass().remove("node-selected");
+					}
+				
+				}
+			});
+			setOnMousePressed(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+	//				mx = event.getSceneX() - getTranslateX();
+					my = event.getSceneY() - getTranslateY();
+				}
+			});
+			
+			setOnMouseDragged(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent event) {
+	//				setTranslateX(event.getSceneX()-mx);
+					setTranslateY(event.getSceneY()-my);
+				}
+			});
+		}
 	}
 }

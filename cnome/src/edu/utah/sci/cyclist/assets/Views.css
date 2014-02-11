@@ -96,15 +96,17 @@
  	-fx-stroke: blue;
  }
  
- .flow-choice {
- 	-fx-background-color: #e0e0e0;
- 	-fx-border-color: gray;
- 	-fx-border-width: 1;
- 	-fx-border-radius: 3;
+ 
+ .flow-view *> .choice-box {
+ 	-fx-background-color: white; 
+ 	-fx-border-color: blue;
+ 	-fx-border-width: 1, 2, 3, 4;
+ 	-fx-border-radius: 7;
  }
  
- .flow-choice > .text {
- 	-fx-font-size: 8px;
+.flow-view *> .choice-box *> .text {
+ 	-fx-font-size: 10px;
+ 	-fx-font-style: italic 
  }
  
 .flow-node {
@@ -121,7 +123,7 @@
  }
  
  .node-explicit {
- 	-fx-background-color: #e0e0e0;
+ 	-fx-background-color: #f0f0f0;
  }
  
  .node-selected {
