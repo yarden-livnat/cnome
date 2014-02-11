@@ -28,6 +28,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -46,6 +47,8 @@ import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
+import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.ui.tools.ToolsLibrary;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -62,6 +65,10 @@ public class MainScreen extends VBox {
 	private ToolsPanel _toolsPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
+	
+	private Menu _perspectiveMenu;
+	private Menu _viewMenu;
+	
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
 		
 	/**
@@ -168,6 +175,14 @@ public class MainScreen extends VBox {
 	 * Menus & Actions
 	 */
 	
+	public Menu getViewMenu() {
+		return _viewMenu;
+	}
+	
+	public Menu getPerspectiveMenu() {
+		return _perspectiveMenu;
+	}
+	
 	private MenuItem _datasourceMenuItem;
 	private MenuItem _workspaceMenuItem;
 	private MenuItem _quitMenuItem;
@@ -225,14 +240,13 @@ public class MainScreen extends VBox {
 	private MenuBar createMenuBar(Stage stage) {
 		MenuBar menubar = new MenuBar();
 		
-		// -- File menu
 		Menu fileMenu = createFileMenu();
-
-		menubar.getMenus().add(fileMenu);
-		
-		//Data menu
 		Menu dataMenu = createDataMenu();
-		menubar.getMenus().add(dataMenu);
+		_viewMenu = createViewMenu();
+//		Menu panelMenu = createPanelMenu();
+		_perspectiveMenu = createPerspectiveMenu();
+		
+		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _perspectiveMenu);
 		
 		return menubar;
 	}
@@ -270,4 +284,30 @@ public class MainScreen extends VBox {
 		return dataMenu;
 	}
 
+	private Menu createViewMenu() {
+		Menu menu = new Menu("Views");			
+
+		for (final ToolFactory factory : ToolsLibrary.factories) {
+			MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+			menu.getItems().add(item);
+		}
+
+		return menu;
+	}
+	
+	private Menu createPanelMenu() {
+		
+		Menu menu = new Menu("Panel");
+		return menu;
+	}
+	
+	private Menu createPerspectiveMenu() {
+		Menu menu = new Menu("Perspectives");
+		
+		MenuItem cycic = new MenuItem("Design");
+		MenuItem cyclist = new MenuItem("Analysis");
+		
+		menu.getItems().addAll(cycic, cyclist);
+		return menu;
+	}
 }

@@ -174,6 +174,10 @@ public class WorkspacePresenter extends CyclistViewPresenter {
         /*
          * addTool
          */
+        public void addTool(Tool tool) {
+        	addTool(tool, 100, 100);
+        }
+        
         private Presenter addTool(Tool tool, double x, double y) {
                 ViewBase view = (ViewBase) tool.getView();
                 view.setTranslateX(x);
