@@ -290,7 +290,9 @@ public class FlowView extends CyclistViewBase {
 		col.nodes.clear();
 		
 		// remove all connections and implicit nodes from the other column
-		for (Node node : other.nodes) {
+		Iterator<Node> i = other.nodes.iterator();
+		while (i.hasNext()) {
+			Node node = i.next();	
 			for (Connector c : node.connectors) {
 				_pane.getChildren().remove(c);
 				_pane.getChildren().remove(c.text);
@@ -298,7 +300,7 @@ public class FlowView extends CyclistViewBase {
 			node.connectors.clear();
 			if (!node.getExplicit()) {
 				_pane.getChildren().remove(node);
-				other.removeNode(node);
+				i.remove();
 			}
 		}
 		
@@ -635,6 +637,34 @@ public class FlowView extends CyclistViewBase {
 			}	
 		});
 		
+		_timestepField.setOnDragOver(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				DnD.LocalClipboard clipboard = getLocalClipboard();
+				
+				if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
+					Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
+					if (field.getName().equals("EnterDate") || field.getName().equals("DeathDate")) {
+						event.acceptTransferModes(TransferMode.COPY);
+						event.consume();
+					}
+				}
+			}
+		});
+		
+		_timestepField.setOnDragDropped(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				DnD.LocalClipboard clipboard = getLocalClipboard();
+				
+				if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
+					Integer i = clipboard.get(DnD.VALUE_FORMAT, Integer.class);					
+					_timestepField.setValue(i);
+					event.consume();
+				}
+			}
+		});
+		
 		_forward.setOnAction(new EventHandler<ActionEvent>() {	
 			@Override
 			public void handle(ActionEvent event) {
@@ -766,7 +796,7 @@ public class FlowView extends CyclistViewBase {
 			text = new Text( String.format("%.2e", total));
 			text.getStyleClass().add("connector-text");
 			
-			text.translateXProperty().bind((controlX1Property().add(controlX2Property()).divide(2)));
+			text.translateXProperty().bind((controlX1Property().add(controlX2Property()).divide(2)).subtract(40));
 			text.translateYProperty().bind((controlY1Property().add(controlY2Property()).divide(2)));
 		}
 	}

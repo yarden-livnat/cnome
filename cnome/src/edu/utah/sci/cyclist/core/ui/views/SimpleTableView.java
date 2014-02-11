@@ -48,7 +48,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.event.dnd.DnDSource;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
@@ -85,6 +84,7 @@ public class SimpleTableView extends CyclistViewBase {
 		_tableView.getStyleClass().add("simple-table-view");
 		_tableView.setPrefSize(450, 200);
 		_tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		_tableView.getSelectionModel().setCellSelectionEnabled(true);
 		setContent(_tableView);
 		VBox.setVgrow(_tableView, Priority.NEVER);
 	}
