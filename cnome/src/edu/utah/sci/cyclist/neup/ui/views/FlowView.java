@@ -10,7 +10,6 @@ import java.util.function.Function;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -485,21 +484,25 @@ public class FlowView extends CyclistViewBase {
 		
 		
 		// components
-//		MenuBar menubar = createMenubar();	
-		_timestepLabel= new Label("timestep:");	
+		_timestepLabel= new Label("time step:");	
 		_timestepField = new NumericField(_timestep);
-		_timestepField.getStyleClass().add("flow-timestep");
-		_timestepField.setMinValue(0);
-		_forward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "18px"));
-		_backward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "18px")); ;
+		_timestepField.getStyleClass().add("timestep");
+		_timestepField.setMinValue(0);	
+		
+		HBox hbox = new HBox();
+		hbox.getStyleClass().add("timebar");
+		hbox.getChildren().addAll(_timestepLabel, _timestepField);
+		
+		_forward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "14px"));
+		_backward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "14px")); ;
 		
 		_forward.getStyleClass().add("flat-button");
 		_backward.getStyleClass().add("flat-button");
 		
-		HBox hbox = new HBox();
-		hbox.getStyleClass().add("flow-timestep-bar");
-		hbox.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
-
+		HBox header = new HBox();
+		header.getStyleClass().add("infobar");
+		header.getChildren().addAll(hbox, _backward, _forward);
+		
 		_pane = new Pane();
 		_pane.getChildren().addAll(_column[SRC].choiceBox, _column[SRC].line, _column[DEST].choiceBox,_column[DEST].line);
 		_pane.setPrefSize(400, 300);
@@ -509,7 +512,7 @@ public class FlowView extends CyclistViewBase {
 		_pane.setClip(clip);
 		
 		VBox vbox = new VBox();
-		vbox.getChildren().addAll(/*menubar, */ hbox, _pane);
+		vbox.getChildren().addAll(header, _pane);
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
@@ -831,7 +834,6 @@ public class FlowView extends CyclistViewBase {
 		public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
 		private Label _actionButton;
 		
-		private double mx;
 		private double my;
 		private VBox _vbox;
 		private boolean _selected = false;
@@ -948,7 +950,6 @@ public class FlowView extends CyclistViewBase {
 			setOnMousePressed(new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent event) {
-	//				mx = event.getSceneX() - getTranslateX();
 					my = event.getSceneY() - getTranslateY();
 				}
 			});
@@ -956,7 +957,6 @@ public class FlowView extends CyclistViewBase {
 			setOnMouseDragged(new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent event) {
-	//				setTranslateX(event.getSceneX()-mx);
 					setTranslateY(event.getSceneY()-my);
 				}
 			});
