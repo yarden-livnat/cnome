@@ -101,7 +101,7 @@ public class ViewBase extends BorderPane implements View {
 		_header.setFillHeight(true);
 		
 		_title = new Label();
-		_title.setPrefWidth(70);
+//		_title.setPrefWidth(70);
 		
 		_actionsArea = new HBox();
 		_actionsArea.getStyleClass().add("actions-area");

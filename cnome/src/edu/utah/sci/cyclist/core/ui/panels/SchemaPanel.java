@@ -31,7 +31,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;

@@ -65,7 +65,7 @@ public class FlowView extends CyclistViewBase {
 	// variables
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
-	private int _timestep = 1;
+	private int _timestep = 2;
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private Column _column[] = new Column[2];
 	
@@ -446,19 +446,7 @@ public class FlowView extends CyclistViewBase {
 				list.add(node);
 		}
 		
-//		// fetch data for each explicit node
-//		for (Node node : src.nodes) {
-//			if (node.getExplicit())
-//				queryMaterialFlow(node);
-//		}
-//		for (Node node : dest.nodes) {
-//			if (node.getExplicit())
-//				queryMaterialFlow(node);
-//		}
-		
-		queryMaterialFlow(list);
-		// TODO: need to remove implicit nodes with no connections once all the tasks end
-		
+		queryMaterialFlow(list);		
 	}
 	
 	private void setTargetLine(int line) {
@@ -480,8 +468,7 @@ public class FlowView extends CyclistViewBase {
 	
 		_column[SRC] = new Column(SRC);
 		_column[DEST] = new Column(DEST);
-		
-		
+			
 		// components
 		_timestepLabel= new Label("time step:");	
 		_timestepField = new NumericField(_timestep);
@@ -499,6 +486,7 @@ public class FlowView extends CyclistViewBase {
 		header.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
 		
 		_pane = new Pane();
+		_pane.getStyleClass().add("pane");
 		_pane.getChildren().addAll(_column[SRC].choiceBox, _column[SRC].line, _column[DEST].choiceBox,_column[DEST].line);
 		_pane.setPrefSize(400, 300);
 		Rectangle clip = new Rectangle(0, 0, 100, 100);

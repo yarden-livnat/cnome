@@ -14,14 +14,14 @@
 .cnome-panel {
 	/*-fx-background-color:  #f000ff;*/
 	-fx-fill-width: true;
+	-fx-padding: 1;
 }
 
 .cnome-panel .header {
-	-fx-background-color:  #e0e0e0;
-	/*-fx-border-color: #000000;*/
+	-fx-background-color:  #f0f0f0;
 	-fx-font-weight: bold;
 	-fx-font-size:11;
-	-fx-padding: 2;
+	-fx-padding: 0;
 	-fx-border-radius: 10 3 0 0;
 }
 
@@ -41,15 +41,33 @@
 }
 
 /* 
+ * Workspace
+ */
+.workspace-pane {
+	-fx-background-color: #ffffff;
+	-fx-border-width: 0;
+}
+
+.element-label {
+	-fx-background-color: #d0d0d0;
+	-fx-background-radius: 4;
+	-fx-border-color: #b0b0b0;
+	-fx-font-weight: bold;
+	-fx-font-size:12;
+	-fx-padding: 5;
+}
+
+/* 
  * View
  */
 .view {
-	-fx-padding: 2;
+	-fx-padding: 0;
 	-fx-spacing: 5;
 	-fx-background-color: #ffffff;
 	-fx-background-radius: 5;
-	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );
+	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
 	-fx-border-color: #d0d0d0;
+	-fx-border-width: 2px;
 }
 
 .view .header {
@@ -83,6 +101,9 @@
  
  .flow-view {
  	-fx-background-color: white;
+ }
+ 
+ .flow-view *> .shape {
  	-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );
  }
  
@@ -134,19 +155,14 @@
  	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
  	
 }
-
  
- .flow-view *> .choice-box {
+ .flow-view  *> .pane .choice-box {
  	-fx-background-color: white; 
  	-fx-border-color: blue;
  	-fx-border-width: 1, 2, 3, 4;
  	-fx-border-radius: 7;
  }
  
-.flow-view *> .choice-box *> .text {
- 	-fx-font-size: 10px;
- 	-fx-font-style: italic 
- }
  
 .flow-node {
  	-fx-padding: 5;
@@ -197,6 +213,38 @@
 
 
 .default-color0.chart-series-line { -fx-stroke: darkseagreen; }
+
+
+/* 
+ * Table View
+ */
+
+.simple-table-view {
+	-fx-background-color:-fx-control-inner-background;
+}
+
+.simple-table-view:focused {
+    -fx-background-color: -fx-control-inner-background;
+}
+
+.simple-table-view .column-header {
+	/*-fx-background-color: #fdfdfd;	*/
+}
+
+
+.simple-table-view .column-header .label {
+	/*-fx-font-size: 9px;*/
+	/*-fx-font-weight: bold;*/		
+}
+
+/* 
+.simple-table-view, .table-cell > .label { 
+	-fx-font-size: 11px;
+}
+*/
+
+
+
 
 
 /*

@@ -28,7 +28,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -126,6 +125,7 @@ public class MainScreen extends VBox {
 	
 	private double toolsWidth = 120; 
 	private void build(Stage stage){
+		getStyleClass().add("main-screen");
 		double[] div = {0.2, 0.4, 0.6,0.8, 1.0};
 		
 		double [] mainDividers = {toolsWidth/600.0};
@@ -136,12 +136,11 @@ public class MainScreen extends VBox {
 		this.setSpacing(0);
 		
 		_sp = new SplitPane();
-		_sp.setId("hiddenSplitter");
 		_sp.setOrientation(Orientation.HORIZONTAL);
 		_sp.setDividerPositions(mainDividers);
 		
 		_toolsPane = new SplitPane();
-		_toolsPane.setId("hiddenSplitter");
+		_toolsPane.getStyleClass().add("hiddenSplitter");
 		_toolsPane.setPrefWidth(USE_COMPUTED_SIZE);
 		_toolsPane.setPrefHeight(USE_COMPUTED_SIZE);
 		_toolsPane.setOrientation(Orientation.VERTICAL);

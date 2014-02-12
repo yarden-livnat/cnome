@@ -113,7 +113,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_simGlyph.setVisible(isToplevel());
 		_simChoice = new ChoiceBox<>();
 		_simChoice.getStyleClass().add("flat-button");
-		_simChoice.setVisible(isToplevel());
+		_simChoice.setVisible(false);
 		
 		_filtersArea = new FilterArea();
 		_filtersArea.setVisible(false);
