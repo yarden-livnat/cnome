@@ -347,7 +347,9 @@ public class FilterPanel extends TitledPanel {
 			_cbBox.setPrefWidth(0.95*currentWidth);
 			
 			double majorTicks = (rangeSlider.getMax()-rangeSlider.getMin())/4;
-			rangeSlider.setMajorTickUnit(majorTicks);	
+			if(majorTicks > 0){
+				rangeSlider.setMajorTickUnit(majorTicks);
+			}
 			final HBox hbox = new HBox();
 			hbox.setSpacing(20);
 			final TextField minTxt = new TextField();
