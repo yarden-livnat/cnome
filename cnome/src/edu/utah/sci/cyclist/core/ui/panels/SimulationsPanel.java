@@ -239,6 +239,21 @@ public class SimulationsPanel extends TitledPanel  {
 		return _simulationProperty;
 	}
 	
+	/**
+	 * Select a simulation entry by the code (instead of manually by the user).
+	 * Mark the entry as selected and load the simulation tables.
+	 * @param simulationId - the simulation to select.
+	 */
+	public void selectSimulation(String simulationId){
+		for(Entry entry : _entries){
+			if(entry.simulation.getSimulationId().equals(simulationId)){
+				select(entry);
+				_simulationProperty.set(entry.simulation);
+				break;
+			}
+		}
+	}
+	
 	private Entry createEntry(Simulation simulation) {
 		final Entry entry = new Entry();
 		entry.simulation = simulation;
