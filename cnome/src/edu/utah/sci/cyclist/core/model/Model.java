@@ -35,6 +35,7 @@ public class Model {
 	private ObservableList<Simulation> _simulationIds = FXCollections.observableArrayList();
 	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
 	private List<Table> _simulationTablesDef = new ArrayList<>();
+	private Simulation _lastSelectedSimulation = null;
 	
 	/**
 	 * getTables
@@ -90,6 +91,14 @@ public class Model {
 	
 	public List<Table> getSimulationsTablesDef(){
 		return _simulationTablesDef;
+	}
+	
+	public Simulation getLastSelectedSimulation(){
+		return _lastSelectedSimulation;
+	}
+	
+	public void setLastSelectedSimulation(Simulation simulation){
+		_lastSelectedSimulation = simulation;
 	}
 	
 }

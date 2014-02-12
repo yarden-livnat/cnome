@@ -313,6 +313,7 @@ public class CyclistController {
 				if(oldVal==null && newVal!=null){
 					readSimulationsTables();
 				}
+				_model.setLastSelectedSimulation(newVal);
 			}
 		});
 		
@@ -395,10 +396,16 @@ public class CyclistController {
 			}
 		}
 		
-		//Save the Simulation
+		//Save the last selected simulation
+		if(_model.getLastSelectedSimulation() != null && _model.getSimulationIds().size() >0){
+			IMemento selectedSim = memento.createChild("LastSelectedSimulation");
+			selectedSim.putString("simulation-id", _model.getLastSelectedSimulation().getSimulationId());
+		}
+		//Save the Simulations
 		for(Simulation simulation: _model.getSimulationIds()){
 			simulation.save(memento.createChild("Simulation"));
 		}
+		
 		
 		for(ToolData tool : _model.getTools()){
 				tool.save(memento.createChild("Tool"));
@@ -463,6 +470,15 @@ public class CyclistController {
 						sim.restore(simulation,_model.getSources());
 						_model.getSimulationIds().add(sim);
 					}
+					
+					//Find if there is last selected simulation
+					IMemento lastSimulation = memento.getChild("LastSelectedSimulation");
+					String lastSimulationId = "";
+					if(lastSimulation != null){
+						lastSimulationId = lastSimulation.getString("simulation-id");
+					}
+					_screen.getSimulationPanel().selectSimulation(lastSimulationId);
+					
 					_dirtyFlag = false;
 					
 					//Read the main workspace
