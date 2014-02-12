@@ -10,7 +10,6 @@ import java.util.function.Function;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -19,9 +18,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.DragEvent;
@@ -49,7 +46,7 @@ import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
 
 public class FlowView extends CyclistViewBase {
 	public static final String ID = "flow-view";
-	public static final String TITLE = "Flow";
+	public static final String TITLE = "Material Flow";
 	
 	public static final int Y_OFFSET_TOP = 30;
 	public static final int Y_OFFSET_BOTTOM = 20;
@@ -62,8 +59,8 @@ public class FlowView extends CyclistViewBase {
 	private Label _timestepLabel;
 	private NumericField _timestepField;
 	private int _targetLine = -1;
-	private Button _forward;
-	private Button _backward;
+	private Label _forward;
+	private Label _backward;
 	
 	// variables
 	private Simulation _currentSim = null;
@@ -229,11 +226,12 @@ public class FlowView extends CyclistViewBase {
 		int to = 1-from;
 		
 		if (_column[to].getKind() == null) {
-			_column[to].setKind(_column[from].getKind());
-//			_column[to].kindFunc = _column[from].kindFunc;
-			
+			_column[to].setKind(_column[from].getKind());			
 		}
-		Map<Object, List<Transaction>> groups = groupTransactions(transactions, _column[to].kindFunc);
+
+		Map<Object, List<Transaction>> groups = groupTransactions(transactions, 
+				node.direction == SRC ? t->t.receiver : t->t.sender,
+						_column[to].kindFunc);
 
 		Column col = _column[to];
 		for (Map.Entry<Object, List<Transaction>> entry : groups.entrySet()) {
@@ -297,11 +295,11 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	
-	private Map<Object, List<Transaction>> groupTransactions(List<Transaction> transactions, Function<Facility, Object> func) {
+	private Map<Object, List<Transaction>> groupTransactions(List<Transaction> transactions, Function<Transaction, Integer> targetFunc, Function<Facility, Object> func) {
 		Map<Object, List<Transaction>> map = new HashMap<>();
 		
 		for (Transaction t : transactions) {
-			Facility f = _facilities.get(t.target);
+			Facility f = _facilities.get(targetFunc.apply(t));
 			Object type = func.apply(f);
 			List<Transaction> list = map.get(type);
 			if (list == null) {
@@ -485,21 +483,21 @@ public class FlowView extends CyclistViewBase {
 		
 		
 		// components
-//		MenuBar menubar = createMenubar();	
-		_timestepLabel= new Label("timestep:");	
+		_timestepLabel= new Label("time step:");	
 		_timestepField = new NumericField(_timestep);
-		_timestepField.getStyleClass().add("flow-timestep");
-		_timestepField.setMinValue(0);
-		_forward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "18px"));
-		_backward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "18px")); ;
-		
+		_timestepField.getStyleClass().add("timestep");
+		_timestepField.setMinValue(0);	
+				
+		_forward = GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "14px");
+		_backward = GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "14px");
+
 		_forward.getStyleClass().add("flat-button");
 		_backward.getStyleClass().add("flat-button");
 		
-		HBox hbox = new HBox();
-		hbox.getStyleClass().add("flow-timestep-bar");
-		hbox.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
-
+		HBox header = new HBox();
+		header.getStyleClass().add("infobar");
+		header.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
+		
 		_pane = new Pane();
 		_pane.getChildren().addAll(_column[SRC].choiceBox, _column[SRC].line, _column[DEST].choiceBox,_column[DEST].line);
 		_pane.setPrefSize(400, 300);
@@ -509,7 +507,7 @@ public class FlowView extends CyclistViewBase {
 		_pane.setClip(clip);
 		
 		VBox vbox = new VBox();
-		vbox.getChildren().addAll(/*menubar, */ hbox, _pane);
+		vbox.getChildren().addAll(header, _pane);
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
@@ -649,16 +647,16 @@ public class FlowView extends CyclistViewBase {
 			}
 		});
 		
-		_forward.setOnAction(new EventHandler<ActionEvent>() {	
+		_forward.setOnMouseClicked(new EventHandler<MouseEvent>() {	
 			@Override
-			public void handle(ActionEvent event) {
+			public void handle(MouseEvent event) {
 				_timestepField.setValue(_timestepField.getValue()+1);			
 			}
 		});
 		
-		_backward.setOnAction(new EventHandler<ActionEvent>() {	
+		_backward.setOnMouseClicked(new EventHandler<MouseEvent>() {	
 			@Override
-			public void handle(ActionEvent event) {
+			public void handle(MouseEvent event) {
 				_timestepField.setValue(_timestepField.getValue()-1);			
 			}
 		});
@@ -831,7 +829,6 @@ public class FlowView extends CyclistViewBase {
 		public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
 		private Label _actionButton;
 		
-		private double mx;
 		private double my;
 		private VBox _vbox;
 		private boolean _selected = false;
@@ -948,7 +945,6 @@ public class FlowView extends CyclistViewBase {
 			setOnMousePressed(new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent event) {
-	//				mx = event.getSceneX() - getTranslateX();
 					my = event.getSceneY() - getTranslateY();
 				}
 			});
@@ -956,7 +952,6 @@ public class FlowView extends CyclistViewBase {
 			setOnMouseDragged(new EventHandler<MouseEvent>() {
 				@Override
 				public void handle(MouseEvent event) {
-	//				setTranslateX(event.getSceneX()-mx);
 					setTranslateY(event.getSceneY()-my);
 				}
 			});
