@@ -97,23 +97,24 @@
  }
  
  .flow-view *>.timebar {
- 	-fx-background-color:yellow;
 	-fx-padding:0px;
 	-fx-spacing:5px;
 	-fx-alignment:baseline-left ;
 }
 
 .flow-view *> .timestep {
-	-fx-background-color: green;
-	-fx-border-width: 10;
+	/*-fx-background-color: green;*/
+	-fx-border-width: 0;
 	-fx-max-width: 50px;
-	-fx-max-height: 25px;
+	-fx-max-height: 18px;
 	-fx-padding: 0;
-	-fx-alignment:bottom-right;
+ 	-fx-alignment:baseline-right;
 }
 
 .flow-view *> .infobar {
 	-fx-spacing:5px;
+	-fx-padding: 0, 0, 0, 0;
+	-fx-alignment:baseline-left;
 }
 
 .flow-timestep-bar .flat-button {

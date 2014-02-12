@@ -18,9 +18,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.DragEvent;
@@ -61,8 +59,8 @@ public class FlowView extends CyclistViewBase {
 	private Label _timestepLabel;
 	private NumericField _timestepField;
 	private int _targetLine = -1;
-	private Button _forward;
-	private Button _backward;
+	private Label _forward;
+	private Label _backward;
 	
 	// variables
 	private Simulation _currentSim = null;
@@ -488,20 +486,16 @@ public class FlowView extends CyclistViewBase {
 		_timestepField = new NumericField(_timestep);
 		_timestepField.getStyleClass().add("timestep");
 		_timestepField.setMinValue(0);	
-		
-		HBox hbox = new HBox();
-		hbox.getStyleClass().add("timebar");
-		hbox.getChildren().addAll(_timestepLabel, _timestepField);
-		
-		_forward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "14px"));
-		_backward = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "14px")); ;
-		
+				
+		_forward = GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "14px");
+		_backward = GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "14px");
+
 		_forward.getStyleClass().add("flat-button");
 		_backward.getStyleClass().add("flat-button");
 		
 		HBox header = new HBox();
 		header.getStyleClass().add("infobar");
-		header.getChildren().addAll(hbox, _backward, _forward);
+		header.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
 		
 		_pane = new Pane();
 		_pane.getChildren().addAll(_column[SRC].choiceBox, _column[SRC].line, _column[DEST].choiceBox,_column[DEST].line);
@@ -652,16 +646,16 @@ public class FlowView extends CyclistViewBase {
 			}
 		});
 		
-		_forward.setOnAction(new EventHandler<ActionEvent>() {	
+		_forward.setOnMouseClicked(new EventHandler<MouseEvent>() {	
 			@Override
-			public void handle(ActionEvent event) {
+			public void handle(MouseEvent event) {
 				_timestepField.setValue(_timestepField.getValue()+1);			
 			}
 		});
 		
-		_backward.setOnAction(new EventHandler<ActionEvent>() {	
+		_backward.setOnMouseClicked(new EventHandler<MouseEvent>() {	
 			@Override
-			public void handle(ActionEvent event) {
+			public void handle(MouseEvent event) {
 				_timestepField.setValue(_timestepField.getValue()-1);			
 			}
 		});
