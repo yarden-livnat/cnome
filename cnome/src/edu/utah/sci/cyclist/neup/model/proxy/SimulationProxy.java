@@ -18,25 +18,26 @@ public class SimulationProxy {
 	private ObservableList<Facility> _facilities;
 	
 	public static final String SELECT_FACILITIES =
-			"select ID, ModelType, Prototype, InstitutionID, RegionID from Facilities where SimID=?";
+			"SELECT ID, ModelType, Prototype, InstitutionID, RegionID FROM Facilities where SimID=?";
 	
 	public static final String SELECT_TRANSACTIONS =
-			 "SELECT Transactions.ReceiverID as nodeId, "
-			+ "      Resources.Quantity as quantity, Resources.Units as units, "
-			+ "      Compositions.IsoID as iso, Compositions.Quantity as fraction"
-			+ " FROM Transactions, TransactedResources, Resources, Compositions, Facilities "
+			 "SELECT * FROM MaterialFlow, Facilities "
 			+ " WHERE" 
-			+ "     Transactions.SimID = ?"
-			+ " and Transactions.SimID =TransactedResources.SimID"
-			+ " and Transactions.SimID = Resources.SimID"
-			+ " and Transactions.SimID = Compositions.SimID"
-			+ " and Transactions.SimID = Facilities.SimID"
-			+ " and Transactions.Time = ? "
-			+ " and Transactions.%s = Facilities.ID "
-			+"  and Facilities.%s = ?"
-			+ " and Transactions.ID = TransactedResources.TransactionID "
-			+ " and TransactedResources.ResourceID = Resources.ID "
-			+ " and Resources.ID = Compositions.ID";
+			+ "     MaterialFlow.SimID = ?"
+			+ " and Time = ? "
+			+ " and MaterialFlow.SimID = Facilities.SimID"
+			+ " and %s = Facilities.ID "
+			+"  and Facilities.%s = ?";
+	
+	public static final String SELECT_TRANSACTIONS_1 =
+			 "SELECT * FROM MaterialFlow LEFT JOIN Facilities "
+			+ " on (MaterialFlow.SimID = Facilities.SimID)"
+			+ " WHERE" 
+			+ "     MaterialFlow.SimID = ?"
+			+ " and Time = ? "
+			+ " and %s = Facilities.ID "
+			+"  and Facilities.%s = ?";
+
 	
 	
 	public SimulationProxy(Simulation sim) {
@@ -87,12 +88,17 @@ public class SimulationProxy {
 				
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
-					int target = rs.getInt("nodeId");
-					double quantity = rs.getDouble("quantity");
-					String units = rs.getString("units");
-					int iso = rs.getInt("iso");
-					double fraction = rs.getDouble("fraction");
-					Transaction tr = new Transaction(timestep, target, iso, fraction, quantity, units);
+					Transaction tr = new Transaction();
+					tr.sender = rs.getInt("SenderID");
+					tr.receiver = rs.getInt("ReceiverID");
+					tr.market = rs.getInt("MarketID");
+					tr.commodity = rs.getString("Commodity");
+					tr.price = rs.getDouble("Price");
+					tr.iso = rs.getInt("IsoID");
+					tr.quantity = rs.getDouble("Quantity");
+					tr.fraction = rs.getDouble("Fraction");
+					tr.units = rs.getString("Units");
+					
 					list.add(tr);
 				}
 			}		

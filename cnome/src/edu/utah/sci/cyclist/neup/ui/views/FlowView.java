@@ -46,7 +46,7 @@ import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
 
 public class FlowView extends CyclistViewBase {
 	public static final String ID = "flow-view";
-	public static final String TITLE = "Flow";
+	public static final String TITLE = "Material Flow";
 	
 	public static final int Y_OFFSET_TOP = 30;
 	public static final int Y_OFFSET_BOTTOM = 20;
@@ -226,11 +226,12 @@ public class FlowView extends CyclistViewBase {
 		int to = 1-from;
 		
 		if (_column[to].getKind() == null) {
-			_column[to].setKind(_column[from].getKind());
-//			_column[to].kindFunc = _column[from].kindFunc;
-			
+			_column[to].setKind(_column[from].getKind());			
 		}
-		Map<Object, List<Transaction>> groups = groupTransactions(transactions, _column[to].kindFunc);
+
+		Map<Object, List<Transaction>> groups = groupTransactions(transactions, 
+				node.direction == SRC ? t->t.receiver : t->t.sender,
+						_column[to].kindFunc);
 
 		Column col = _column[to];
 		for (Map.Entry<Object, List<Transaction>> entry : groups.entrySet()) {
@@ -294,11 +295,11 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	
-	private Map<Object, List<Transaction>> groupTransactions(List<Transaction> transactions, Function<Facility, Object> func) {
+	private Map<Object, List<Transaction>> groupTransactions(List<Transaction> transactions, Function<Transaction, Integer> targetFunc, Function<Facility, Object> func) {
 		Map<Object, List<Transaction>> map = new HashMap<>();
 		
 		for (Transaction t : transactions) {
-			Facility f = _facilities.get(t.target);
+			Facility f = _facilities.get(targetFunc.apply(t));
 			Object type = func.apply(f);
 			List<Transaction> list = map.get(type);
 			if (list == null) {
