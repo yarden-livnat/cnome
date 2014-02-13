@@ -236,6 +236,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
 	@Override
 	public void addTable(final Table table, boolean remote, boolean active) {
+//		System.out.println("CViewBase:add table:"+table.getName()+" r:"+remote+" active:"+active);
 		if (!_supportsTables) return;
 		
 		Info<Table> info = new Info<Table>(table, remote);
@@ -260,10 +261,12 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
 	@Override
 	public void selectTable(Table table, boolean value) {
+//		System.out.println("CViewBase:select table:"+table.getName()+" v:"+value);
 		if (!_supportsTables) return;
 		
-		if (value)
+		if (value) {
 			_tableChoice.setValue(table.getName());
+		}
 		else if (table.getName().equals(_tableChoice.getValue())) {
 			_tableChoice.setValue(null);
 		}
@@ -515,6 +518,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			@Override
 			public void changed(ObservableValue<? extends String> observable,
 					String prev, String selected) {
+//				System.out.println("CViewBase:table choice changed: selected:"+selected);
 				if (_onTableSelectedAction != null) {
 					if (selected != null)
 						_onTableSelectedAction.call(_tables.get(selected).item, true);
