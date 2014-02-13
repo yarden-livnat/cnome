@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import javafx.scene.control.TextField;
 import javafx.scene.effect.Bloom;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Light.Distant;
@@ -14,6 +15,23 @@ import javafx.scene.effect.Lighting;
  *
  */
 public class VisFunctions {
+	
+	public static TextField numberField(){
+		TextField numberField = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
+		return numberField;
+	}
 	/**
 	 * Converts a string to a color.
 	 * @param string String to be converted.

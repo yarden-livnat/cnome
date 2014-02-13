@@ -61,7 +61,7 @@ public class Cycic extends ViewBase{
 				CycicScenarios.workingCycicScenario = workingScenario;
 			}
 		});
-		if (RealFacs.alfredStructs.size() < 1){
+		if (DataArrays.simFacilities.size() < 1){
 			RealFacs.init();
 		}
 		
@@ -87,8 +87,8 @@ public class Cycic extends ViewBase{
 		grid.add(facNameField, 2, 0);
 		// Facility Type
 		final ComboBox<String> structureCB = new ComboBox<String>();
-		for(int i = 0; i < RealFacs.alfredStructs.size(); i++){
-			structureCB.getItems().add((String) RealFacs.alfredStructsNames.get(i));	
+		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+			structureCB.getItems().add((String) DataArrays.simFacilities.get(i).facilityName);	
 		}
 		structureCB.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -106,9 +106,9 @@ public class Cycic extends ViewBase{
 				}
 				facilityNode tempNode = new facilityNode();
 				tempNode.facilityType = structureCB.getValue();
-				for (int i = 0; i < RealFacs.alfredStructs.size(); i++){
-					if (RealFacs.alfredStructsNames.get(i) == structureCB.getValue()){
-						tempNode.facilityStructure = RealFacs.alfredStructs.get(i);
+				for (int i = 0; i < DataArrays.simFacilities.size(); i++){
+					if (DataArrays.simFacilities.get(i).facilityName == structureCB.getValue()){
+						tempNode.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
 					}				
 				}
 				tempNode.name = facNameField.getText();

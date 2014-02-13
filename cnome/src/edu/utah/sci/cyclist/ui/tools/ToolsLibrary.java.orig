@@ -30,7 +30,6 @@ public class ToolsLibrary {
 		new MapToolFactory(),
 		new WorkspaceToolFactory(),
 		new CycicToolFactory(),
-		new CommoditiesViewToolFactory(),
 		new InstitutionViewToolFactory(),
 		new RecipeFormToolFactory(),
 		new RegionViewToolFactory(),

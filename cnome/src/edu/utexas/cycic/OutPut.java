@@ -514,7 +514,6 @@ public class OutPut {
 				Element element = (Element) facNode;
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
 				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
-				tempNode.facilityStructure = ;
 			}
 			
 			NodeList marketList = doc.getElementsByTagName("market");
