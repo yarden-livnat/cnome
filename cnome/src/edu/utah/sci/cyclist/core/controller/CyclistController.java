@@ -406,9 +406,16 @@ public class CyclistController {
 			simulation.save(memento.createChild("Simulation"));
 		}
 		
+		//First save the main workspace
+		IMemento mainWs = memento.createChild("mainWorkSpace");
+//		mainWs.putString("x", Double.toString(_screen.getWorkSpace()));
+//		memento.putString("x", Double.toString(((Node)_tool.getView()).getTranslateX()));
+//		memento.putString("y", Double.toString(((Node)_tool.getView()).getTranslateY()));
+//		memento.putString("width", Double.toString(((Region)_tool.getView()).getPrefWidth()));
+//		memento.putString("height", Double.toString(((Region)_tool.getView()).getPrefHeight()));
 		
 		for(ToolData tool : _model.getTools()){
-				tool.save(memento.createChild("Tool"));
+				tool.save(mainWs.createChild("Tool"));
 		}
 			
 		
@@ -482,7 +489,8 @@ public class CyclistController {
 					_dirtyFlag = false;
 					
 					//Read the main workspace
-					IMemento[] tools = memento.getChildren("Tool");
+					IMemento mainWs = memento.getChild("mainWorkSpace");
+					IMemento[] tools = mainWs.getChildren("Tool");
 					for(IMemento tool:tools){
 						ToolData toolData = new ToolData();
 						toolData.restore(tool);
@@ -546,11 +554,17 @@ public class CyclistController {
 	 * @return: Table. The table instance if found, null otherwise.
 	 */
 	private Table findTable(String tableName, String dataSource){
-		if(tableName != null && dataSource != null)
+		if(tableName != null)
 		{
 			for(Table tbl:_model.getTables()){
-				if(tbl.getName().equals(tableName) && tbl.getDataSource().getUID().equals(dataSource)){
-					return tbl;
+				if(tbl.getName().equals(tableName)){
+					if(dataSource!=null && !dataSource.isEmpty()){
+						if(tbl.getDataSource() != null && tbl.getDataSource().getUID().equals(dataSource)){
+							return tbl;
+						}
+					} else if((dataSource == null || dataSource.isEmpty()) && tbl.getDataSource() == null){
+						return tbl;
+					}
 				}
 			}
 		}
