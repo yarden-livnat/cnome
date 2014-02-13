@@ -61,6 +61,8 @@ public class FlowView extends CyclistViewBase {
 	private int _targetLine = -1;
 	private Label _forward;
 	private Label _backward;
+	ChoiceBox _commodityChoice;
+	ChoiceBox _materialChoice;
 	
 	// variables
 	private Simulation _currentSim = null;
@@ -469,7 +471,7 @@ public class FlowView extends CyclistViewBase {
 		_column[SRC] = new Column(SRC);
 		_column[DEST] = new Column(DEST);
 			
-		// components
+		// == time step
 		_timestepLabel= new Label("time step:");	
 		_timestepField = new NumericField(_timestep);
 		_timestepField.getStyleClass().add("timestep");
@@ -481,9 +483,22 @@ public class FlowView extends CyclistViewBase {
 		_forward.getStyleClass().add("flat-button");
 		_backward.getStyleClass().add("flat-button");
 		
-		HBox header = new HBox();
-		header.getStyleClass().add("infobar");
-		header.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
+		HBox timeBar = new HBox();
+		timeBar.getStyleClass().add("infobar");
+		timeBar.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
+		
+		// == material
+		_commodityChoice = new ChoiceBox();
+		_materialChoice = new ChoiceBox();
+		
+		HBox materialBar = new HBox();
+		materialBar.getStyleClass().add("infobar");
+		materialBar.getChildren().addAll(
+				new Label("Commodity:"),
+				_commodityChoice,
+				new Label("Material:"),
+				new Label("Nuclide:")
+				);
 		
 		_pane = new Pane();
 		_pane.getStyleClass().add("pane");
@@ -495,7 +510,7 @@ public class FlowView extends CyclistViewBase {
 		_pane.setClip(clip);
 		
 		VBox vbox = new VBox();
-		vbox.getChildren().addAll(header, _pane);
+		vbox.getChildren().addAll(timeBar, materialBar, _pane);
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
@@ -769,21 +784,21 @@ public class FlowView extends CyclistViewBase {
 			
 			DoubleBinding px = new DoubleBinding() {
 				{
-					super.bind(controlX1Property(), controlX2Property(), text.boundsInLocalProperty());
+					super.bind(startXProperty(), endXProperty(), text.boundsInLocalProperty());
 				}
 				@Override
 				protected double computeValue() {
-					return (getControlX1()+getControlX2()-text.getBoundsInLocal().getWidth())/2;
+					return (getStartX()+getEndX()-text.getBoundsInLocal().getWidth())/2;
 				}
 			};
 			
 			DoubleBinding py = new DoubleBinding() {
 				{
-					super.bind(controlY1Property(), controlY2Property(), text.boundsInLocalProperty());
+					super.bind(startYProperty(),endYProperty(), text.boundsInLocalProperty());
 				}
 				@Override
 				protected double computeValue() {
-					return (getControlY1()+getControlY2()-text.getBoundsInLocal().getHeight())/2;
+					return (getStartY()+getEndY()-text.getBoundsInLocal().getHeight())/2;
 				}
 			};
 			
@@ -792,11 +807,11 @@ public class FlowView extends CyclistViewBase {
 			
 			DoubleBinding r = new DoubleBinding() {
 				{
-					super.bind(controlX1Property(), controlX2Property(), controlY1Property(), controlY2Property());
+					super.bind(startXProperty(), endXProperty(), startYProperty(), endYProperty());
 				}
 				@Override
 				protected double computeValue() {
-					return Math.atan2(getControlY2()-getControlY1(), getControlX2()-getControlX1()) * 180/Math.PI;
+					return Math.atan2(getEndY()-getStartY(), getEndX()-getStartX()-40) * 180/Math.PI;
 				}
 			};
 			
