@@ -31,6 +31,8 @@ import java.io.Reader;
 import java.net.URI;
 import java.util.Arrays;
 
+import org.mo.closure.v1.Closure;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,6 +43,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
@@ -79,7 +82,10 @@ public class CyclistController {
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
-	private EventHandler<CyclistDropEvent> handleToolDropped;
+	private EventHandler<CyclistDropEvent> _handleToolDropped;
+	private ListChangeListener<String> _handleMainWsSimulationsChanged;
+	private ChangeListener<String> _handleMainWsSelectedSimulationChanged;
+	
 	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
 	
 	/**
@@ -147,7 +153,9 @@ public class CyclistController {
 		_presenter = new WorkspacePresenter(_eventBus);
 		_presenter.setView(workspace);
 		setWorkspaceDragAndDropAction();
-		_screen.getWorkSpace().setOnToolDrop(handleToolDropped);
+		_screen.getWorkSpace().setOnToolDrop(_handleToolDropped);
+		_screen.getWorkSpace().simulations().addListener(_handleMainWsSimulationsChanged);
+		_screen.getWorkSpace().lastChosenSimulation().addListener(_handleMainWsSelectedSimulationChanged);
 		
 		// do something?
 		//selectWorkspace();
@@ -343,6 +351,24 @@ public class CyclistController {
 			}
 		};
 		
+		_handleMainWsSimulationsChanged = new ListChangeListener<String>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends String> newList) {
+				if(newList != null)
+				{
+					_model.getMainWorkspaceSelectedSimulations().clear();
+					_model.getMainWorkspaceSelectedSimulations().addAll(newList.getList());
+				}
+			}
+		};
+		
+		_handleMainWsSelectedSimulationChanged = new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String prev, String selected) {
+				_model.setlastWslSelectedSimulation(selected);
+			}
+		};
+		
 		for (MenuItem item : _screen.getViewMenu().getItems()) {
 			item.setOnAction(viewAction);
 		}
@@ -408,11 +434,7 @@ public class CyclistController {
 		
 		//First save the main workspace
 		IMemento mainWs = memento.createChild("mainWorkSpace");
-//		mainWs.putString("x", Double.toString(_screen.getWorkSpace()));
-//		memento.putString("x", Double.toString(((Node)_tool.getView()).getTranslateX()));
-//		memento.putString("y", Double.toString(((Node)_tool.getView()).getTranslateY()));
-//		memento.putString("width", Double.toString(((Region)_tool.getView()).getPrefWidth()));
-//		memento.putString("height", Double.toString(((Region)_tool.getView()).getPrefHeight()));
+		saveMainWorkspace(mainWs);
 		
 		for(ToolData tool : _model.getTools()){
 				tool.save(mainWs.createChild("Tool"));
@@ -490,6 +512,8 @@ public class CyclistController {
 					
 					//Read the main workspace
 					IMemento mainWs = memento.getChild("mainWorkSpace");
+					loadMainWorkspace(mainWs);
+					
 					IMemento[] tools = mainWs.getChildren("Tool");
 					for(IMemento tool:tools){
 						ToolData toolData = new ToolData();
@@ -572,6 +596,23 @@ public class CyclistController {
 	}
 	
 	/*
+	 * Finds a simulation in the Model simulations list according to it's alias.
+	 * @param : simulationAlias
+	 * @return: Simulation. The simulation instance if found, null otherwise.
+	 */
+	private Simulation findSimulation(String simulationAlias){
+		if(simulationAlias != null && !simulationAlias.isEmpty())
+		{
+			for(Simulation sim:_model.getSimulationIds()){
+				if(sim.getAlias().equals(simulationAlias)){
+						return sim;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/*
 	 * Gets the path of the last chosen work directory.
 	 * If not available - return the default work directory
 	 */
@@ -584,7 +625,7 @@ public class CyclistController {
 	
 	private void setWorkspaceDragAndDropAction(){
 		
-		 handleToolDropped = new EventHandler<CyclistDropEvent>() {
+		 _handleToolDropped = new EventHandler<CyclistDropEvent>() {
 	        
 	        @Override
 	        public void handle(CyclistDropEvent event) {
@@ -594,7 +635,7 @@ public class CyclistController {
 	                									((Region)tool.getView()).getPrefWidth(),((Region)tool.getView()).getPrefHeight());
 	                	_model.getTools().add(toolData);
 	                	if(tool.getClass().equals(WorkspaceTool.class)){
-	                	   ((Workspace)tool.getView()).setOnToolDrop(handleToolDropped);
+	                	   ((Workspace)tool.getView()).setOnToolDrop(_handleToolDropped);
 	                	}
 	                        
 	                }else if(event.getEventType() == CyclistDropEvent.DROP_DATASOURCE){
@@ -619,5 +660,66 @@ public class CyclistController {
 			}
 		}
 	}
+	
+	/*
+	 * Saves the data of the main window:
+	 * 1. size and location
+	 * 2. dropped simulations and the last chosen simulation
+	 * @param IMemento mainWs 
+	 */
+	private void saveMainWorkspace(IMemento mainWs){
+		Stage stage = (Stage)_screen.getParent().getScene().getWindow();
+		mainWs.putString("x", Double.toString(stage.getX()));
+		mainWs.putString("y", Double.toString(stage.getY()));
+		mainWs.putString("width", Double.toString(stage.getWidth()));
+		mainWs.putString("height", Double.toString(stage.getHeight()));
+		mainWs.putString("selectedSim", _model.getlastWslSelectedSimulation());
+		for(String simulation : _model.getMainWorkspaceSelectedSimulations()){
+			IMemento simMemento = mainWs.createChild("WsSimulation");
+			simMemento.putString("alias", simulation);
+		}
+	}
+	
+	/*
+	 * Restores the data of the main window:
+	 * 1. size and location.
+	 * 2. dropped simulations and the last chosen simulation
+	 * @param IMemento mainWs
+	 */
+	private void loadMainWorkspace(IMemento mainWs){
+		double width = Double.parseDouble(mainWs.getString("width"));
+		double height = Double.parseDouble(mainWs.getString("height"));
+		double x = Double.parseDouble(mainWs.getString("x"));
+		double y = Double.parseDouble(mainWs.getString("y"));
+		Stage stage = (Stage)_screen.getParent().getScene().getWindow();
+		stage.setWidth(width);
+		stage.setHeight(height);
+		stage.setX(x);
+		stage.setY(y);
+		
+		Simulation lastActiveSim = null;
+		String lastActiveSimAlias = mainWs.getString("selectedSim");
+		Closure.V1<Simulation> simulationDropAction = _screen.getWorkSpace().getOnSimulationDrop();
+		
+		IMemento[] simulations = mainWs.getChildren("WsSimulation");
+		for(IMemento simulation: simulations){
+			String alias = simulation.getString("alias");
+			Simulation sim = findSimulation(alias);
+			//Add the last active simulation at the end, so it would become the active simulation again.
+			if(sim != null && !alias.equals(lastActiveSimAlias) ){
+				if(simulationDropAction != null){
+					simulationDropAction.call(sim);
+				}
+			}else if(alias.equals(lastActiveSimAlias)){
+				lastActiveSim = sim;
+			}
+		}
+		//Add the last active simulation at the end.
+		if(lastActiveSim != null && simulationDropAction != null){
+			simulationDropAction.call(lastActiveSim);
+		}
+	}
+	
+	
 	
 }

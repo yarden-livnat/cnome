@@ -336,6 +336,15 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		return _filtersArea.getRemoteFilters();
 	}
 	
+	//Notification about changes in the simulations list
+	public ObservableList<String> simulations(){
+		return _simChoice.getItems();
+	}
+	
+	public ObservableValue<String> lastChosenSimulation(){
+		return _simChoice.valueProperty();
+	}
+	
 	/*
 	 * Listeners
 	 */

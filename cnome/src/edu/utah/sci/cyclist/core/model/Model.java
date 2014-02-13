@@ -35,7 +35,9 @@ public class Model {
 	private ObservableList<Simulation> _simulationIds = FXCollections.observableArrayList();
 	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
 	private List<Table> _simulationTablesDef = new ArrayList<>();
-	private Simulation _lastSelectedSimulation = null;
+	private Simulation _lastPanelSelectedSimulation = null;
+	private String _lastWslSelectedSimulation = null;
+	private List<String> _mainWorkspaceSelectedSimulations = new ArrayList<>();
 	
 	/**
 	 * getTables
@@ -94,11 +96,23 @@ public class Model {
 	}
 	
 	public Simulation getLastSelectedSimulation(){
-		return _lastSelectedSimulation;
+		return _lastPanelSelectedSimulation;
 	}
 	
 	public void setLastSelectedSimulation(Simulation simulation){
-		_lastSelectedSimulation = simulation;
+		_lastPanelSelectedSimulation = simulation;
+	}
+	
+	public List<String> getMainWorkspaceSelectedSimulations(){
+		return _mainWorkspaceSelectedSimulations;
+	}
+	
+	public void setlastWslSelectedSimulation(String simulation) {
+		_lastWslSelectedSimulation = simulation;
+	}
+	
+	public String getlastWslSelectedSimulation() {
+		return _lastWslSelectedSimulation;
 	}
 	
 }
