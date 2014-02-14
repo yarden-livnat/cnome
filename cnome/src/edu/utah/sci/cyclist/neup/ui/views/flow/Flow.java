@@ -50,6 +50,7 @@ public class Flow extends CyclistViewBase {
 	
 	public static final int Y_OFFSET_TOP = 30;
 	public static final int Y_OFFSET_BOTTOM = 20;
+	public static final int X_CHART_OFFSET = 10;
 	
 	public static final String NATURAL_U = "natl_u";
 	public static final String ENRICHED_U = "enriched_u";
@@ -65,8 +66,6 @@ public class Flow extends CyclistViewBase {
 	private List<Connector> _connectors = new ArrayList<>();
 
 	private Predicate<Transaction> _noopSelection = t->true;
-//	private Predicate<Transaction> _commoditySelection;
-//	private Predicate<Transaction> _nuclideSelection;
 	
 	private ObjectProperty<Predicate<Transaction>> _commoditySelectionProperty = new SimpleObjectProperty<>(_noopSelection);
 

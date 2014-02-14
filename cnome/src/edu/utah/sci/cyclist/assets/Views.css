@@ -217,6 +217,11 @@
 	-fx-border-color: black;
 	-fx-padding: 1px;
 }
+
+.flow .fchart {
+	/*-fx-background-color: lightgreen;*/
+}
+
 /*
  * flow view
  */

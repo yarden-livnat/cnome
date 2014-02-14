@@ -1,11 +1,15 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
@@ -16,15 +20,19 @@ public class FlowLine extends Region {
 	public final int Y0 = 40;
 	public final int GAP = 5;
 	public final int BOTTOM_OFFSET = 10;
+	public final int CHART_OFFSET = 150;
 
 	private int _direction;
 	private List<FacilityNode> _nodes = new ArrayList<>();
+	private Map<FacilityNode, FlowChart> _charts = new HashMap<>();
 	
 	private Line _line;
 	private ChoiceBox<String> _choiceBox;
+	private DoubleProperty _chartOffset = new SimpleDoubleProperty();
 
 	public FlowLine(int direction) {
 		_direction = direction;
+		_chartOffset.set(direction==Flow.SRC ? -CHART_OFFSET : CHART_OFFSET);
 		build();
 	}
 
@@ -45,6 +53,12 @@ public class FlowLine extends Region {
 		addListeners(node);
 		_nodes.add(node);
 		getChildren().add(node);
+		
+		FlowChart chart = new FlowChart(node);
+		chart.translateXProperty().bind(_line.translateXProperty().add(_chartOffset));
+		chart.translateYProperty().bind(node.translateYProperty());
+		_charts.put(node, chart);
+		getChildren().add(chart);
 	}
 
 	public void removeNode(FacilityNode node) {
@@ -54,6 +68,8 @@ public class FlowLine extends Region {
 		if (_nodes.size() == 0) {
 			setKind(null);
 		}
+		
+		getChildren().remove(_charts.remove(node));
 	}
 
 	public List<FacilityNode> getNodes() {

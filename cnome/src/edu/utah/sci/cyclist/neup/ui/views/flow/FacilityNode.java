@@ -185,6 +185,9 @@ class FacilityNode extends Pane {
 	
 		getChildren().add(_vbox);
 		
+		/*
+		 * add listeners
+		 */
 		_vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
