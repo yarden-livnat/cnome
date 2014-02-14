@@ -36,6 +36,7 @@ public class ToolsLibrary {
 	public static final ToolFactory[] factories = {
 		new GenericToolFactory<TableTool>(TableTool.class, TableTool.TOOL_NAME, TableTool.ICON),
 		new GenericToolFactory<ChartTool>(ChartTool.class, ChartTool.TOOL_NAME, ChartTool.ICON),
+		new GenericToolFactory<FlowViewTool>(FlowViewTool.class, FlowViewTool.TOOL_NAME, FlowViewTool.ICON),
 		new GenericToolFactory<FlowTool>(FlowTool.class, FlowTool.TOOL_NAME, FlowTool.ICON),
 		new GenericToolFactory<WorkspaceTool>(WorkspaceTool.class, WorkspaceTool.TOOL_NAME, WorkspaceTool.ICON),
 		new CycicToolFactory(),

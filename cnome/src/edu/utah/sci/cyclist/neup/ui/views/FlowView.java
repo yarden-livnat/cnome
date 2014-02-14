@@ -917,7 +917,7 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 
-	class Node extends Pane {
+	public class Node extends Pane {
 		public int direction;
 		public Object value;
 		public String type;
