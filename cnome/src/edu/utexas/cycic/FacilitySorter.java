@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;

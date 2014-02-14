@@ -11,7 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 
 /**
  * View for building recipies inside of cyclus.

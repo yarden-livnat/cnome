@@ -9,14 +9,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
 <<<<<<< HEAD
-<<<<<<< HEAD
-	<classpathentry kind="lib" path="lib/controlsfx-8.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/RangeSlider.jar"/>
-=======
+	<classpathentry kind="lib" path="lib/controlsfx-8.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/controlsfx-8.0.2-developer-preview-2.jar"/>
->>>>>>> 000913116c1c6bc46009daf6cdb2b1d193d5d41c
 =======
-	<classpathentry kind="lib" path="lib/controlsfx-8.0.2-developer-preview-2.jar"/>
->>>>>>> cyclus-master
+	<classpathentry kind="lib" path="lib/controlsfx-8.0.4-dev.jar"/>
+>>>>>>> 20d93dc1d02864497f44ff207b8b298fe92b5073
 	<classpathentry kind="output" path="bin"/>
 </classpath>

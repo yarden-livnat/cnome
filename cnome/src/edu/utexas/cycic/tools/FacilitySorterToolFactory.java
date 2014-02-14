@@ -1,7 +1,8 @@
 package edu.utexas.cycic.tools;
 
-import edu.utah.sci.cyclist.ui.tools.Tool;
-import edu.utah.sci.cyclist.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 
 public class FacilitySorterToolFactory implements ToolFactory {
 
@@ -11,8 +12,8 @@ public class FacilitySorterToolFactory implements ToolFactory {
 	}
 
 	@Override
-	public String getIconName() {
-		return FacilitySorterTool.ICON_NAME;
+	public AwesomeIcon getIcon() {
+		return FacilitySorterTool.ICON;
 	}
 	
 	@Override
