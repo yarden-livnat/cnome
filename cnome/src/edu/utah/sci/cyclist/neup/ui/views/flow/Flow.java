@@ -18,7 +18,9 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
@@ -155,7 +157,29 @@ public class Flow extends CyclistViewBase {
 	}
 	
 	private void timeChanged(int time) {
-		System.out.println("implement timeChanged");
+		// connect explicit nodes
+		List<FacilityNode> list = new ArrayList<>();
+		for (FacilityNode node : _line[SRC].getNodes()) {
+			if (node.getExplicit())
+				list.add(node);
+		}
+		
+		for (FacilityNode node : _line[DEST].getNodes()) {
+			if (node.getExplicit())
+				list.add(node);
+		}
+		
+		queryMaterialFlow(list);	
+	}
+	
+	private void removeAllConnectors() {
+		for (Connector c : _connectors) {
+			c.release();
+			c.getFrom().removeConnector(c);
+			c.getTo().removeConnector(c);
+			_pane.getChildren().remove(c);
+		}
+		_connectors.clear();
 	}
 	
 	private FacilityNode createNode(String kind, Object value, int direction, boolean explicit) {
@@ -205,7 +229,6 @@ public class Flow extends CyclistViewBase {
 	} 
 	
 	private void closeNode(FacilityNode node) {
-		System.out.println("implement removeNode");
 		Iterator<Connector> i = node.getConnectors().iterator();
 		while (i.hasNext()) {
 			Connector c = i.next();
@@ -235,7 +258,6 @@ public class Flow extends CyclistViewBase {
 	private void queryMaterialFlow(final FacilityNode node) {
 		final int timestep = getTime();
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
-
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
 				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.is(SRC));
@@ -248,7 +270,39 @@ public class Flow extends CyclistViewBase {
 				}
 		});
 
+		Thread thread = new Thread(task);
+		thread.setDaemon(true);
+		thread.start();
 		
+		setCurrentTask(task);
+	}
+	
+	private void queryMaterialFlow(final List<FacilityNode> list) {
+		final int timestep = getTime();
+	
+		Task<ObservableMap<FacilityNode, ObservableList<Transaction>>> task = new Task<ObservableMap<FacilityNode, ObservableList<Transaction>>>() {
+			@Override
+			protected ObservableMap<FacilityNode,ObservableList<Transaction>> call() throws Exception {
+				Map<FacilityNode, ObservableList<Transaction>> map = new HashMap<>();
+				for (FacilityNode node : list) {
+					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.is(SRC));
+					map.put(node, list);
+				}
+				
+				return FXCollections.observableMap(map);
+			}	
+		};
+		
+		task.valueProperty().addListener((o, p, n)->{
+			if (n != null) {
+				removeAllConnectors();
+				for (FacilityNode node : n.keySet()) {
+					addRelatedNodes(node, n.get(node), timestep);
+				}			
+				removeEmptyImplicitNodes();
+			}
+		});
+
 		Thread thread = new Thread(task);
 		thread.setDaemon(true);
 		thread.start();
@@ -260,6 +314,27 @@ public class Flow extends CyclistViewBase {
 		if (time == getTime()) {
 			node.setTransactions(list);
 		}
+	}
+	
+	private void removeEmptyImplicitNodes() {
+		// remove empty implicit nodes
+		for(Iterator<FacilityNode> i = _line[SRC].getNodes().iterator(); i.hasNext();) {
+			FacilityNode node = i.next();
+			if (!node.getExplicit() && node.getConnectors().isEmpty()) {
+				i.remove();
+				_line[SRC].removeNode(node);
+			}
+		}
+		
+		for(Iterator<FacilityNode> i = _line[DEST].getNodes().iterator(); i.hasNext();) {
+			FacilityNode node = i.next();
+			if (!node.getExplicit() && node.getConnectors().isEmpty()) {
+				i.remove();
+				_line[DEST].removeNode(node);
+
+			}
+		}
+		
 	}
 	
 	private void transactionsChanged(FacilityNode node) {		
@@ -405,12 +480,8 @@ public class Flow extends CyclistViewBase {
 		InvalidationListener listener = new InvalidationListener() {	
 			@Override
 			public void invalidated(Observable observable) {
-				for (Connector c : _connectors) {
-					c.release();
-					_pane.getChildren().remove(c);
-				}
-				_connectors.clear();
-				
+				removeAllConnectors();
+
 				final boolean n = naturalU.isSelected();
 				final boolean e = enrichedU.isSelected();
 				final boolean w = waste.isSelected();

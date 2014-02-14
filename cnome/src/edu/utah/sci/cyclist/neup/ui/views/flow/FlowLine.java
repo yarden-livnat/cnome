@@ -3,15 +3,12 @@ package edu.utah.sci.cyclist.neup.ui.views.flow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
-import edu.utah.sci.cyclist.neup.ui.views.FlowView.Node;
 
 public class FlowLine extends Region {
 
@@ -59,6 +56,10 @@ public class FlowLine extends Region {
 		}
 	}
 
+	public List<FacilityNode> getNodes() {
+		return _nodes;
+	}
+	
 	public FacilityNode findNode(Object value) {
 		for (FacilityNode node : _nodes) {
 			if (node.getValue().equals(value))
