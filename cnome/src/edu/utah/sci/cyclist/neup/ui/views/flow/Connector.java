@@ -20,7 +20,18 @@ public class Connector extends Group {
 
 	private CubicCurve _curve;
 	private Text _text;
-
+	
+	/*
+	 * Listeners
+	 */
+	private InvalidationListener listener = new InvalidationListener() {		
+		@Override
+		public void invalidated(Observable observable) {
+			setVisible(_transactions.size() > 0);
+			computeAmount();
+		}
+	};
+	
 	public Connector(FacilityNode from, FacilityNode to, ObservableList<Transaction> transactions) {
 		super();
 		getStyleClass().add("connector");
@@ -42,13 +53,25 @@ public class Connector extends Group {
 		return _to;
 	}
 	
+	public void release() {
+		_curve.startXProperty().unbind();
+		_curve.startYProperty().unbind();
+		_curve.endXProperty().unbind();
+		_curve.endYProperty().unbind();
+		_transactions.removeListener(listener);
+	}
+	
 	private void build() {
 		setStyle("-fx-backgound-cool: lightred");
 		_curve = new CubicCurve();
 		_curve.getStyleClass().add("connector");
 		
-		_curve.startXProperty().bind(_from.anchorXProperty().add(_from.getParent().translateXProperty()));
-		_curve.startYProperty().bind(_from.anchorYProperty().add(_from.getParent().translateYProperty()));
+		FacilityNode src = _from.is(Flow.SRC) ? _from : _to;
+		FacilityNode dest = _from.is(Flow.SRC) ? _to : _from;
+		
+		
+		_curve.startXProperty().bind(src.anchorXProperty().add(src.getParent().translateXProperty()));
+		_curve.startYProperty().bind(src.anchorYProperty().add(src.getParent().translateYProperty()));
 
 		_curve.controlX1Property().bind(_curve.startXProperty().add(CTRL_OFFSET));
 		_curve.controlY1Property().bind(_curve.startYProperty());
@@ -56,8 +79,8 @@ public class Connector extends Group {
 		_curve.controlX2Property().bind(_curve.endXProperty().subtract(CTRL_OFFSET));
 		_curve.controlY2Property().bind(_curve.endYProperty());
 
-		_curve.endXProperty().bind(_to.anchorXProperty().add(_to.getParent().translateXProperty()));
-		_curve.endYProperty().bind(_to.anchorYProperty().add(_to.getParent().translateYProperty()));	
+		_curve.endXProperty().bind(dest.anchorXProperty().add(dest.getParent().translateXProperty()));
+		_curve.endYProperty().bind(dest.anchorYProperty().add(dest.getParent().translateYProperty()));	
 		
 		// text
 		_text = new Text();
@@ -103,22 +126,19 @@ public class Connector extends Group {
 	}
 	
 	private void computeAmount() {
+		if (_transactions.isEmpty()) return;
+		
 		double total = 0;
 		for (Transaction t : _transactions) {
 			total += t.quantity*t.fraction;
 		}
 		_text.setText(String.format("%.2e%s", total, _units));
-		System.out.println("connector: len:"+_transactions.size()+"   text:"+_text.getText());
+//		System.out.println("connector: len:"+_transactions.size()+"   text:"+_text.getText());
 	}
 	
+	
 	private void addListeners() {
-		_transactions.addListener(new InvalidationListener() {		
-			@Override
-			public void invalidated(Observable observable) {
-				setVisible(_transactions.size() > 0);
-				computeAmount();
-			}
-		});
+		_transactions.addListener(listener);
 	}
 
 	

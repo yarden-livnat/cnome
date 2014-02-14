@@ -3,10 +3,12 @@ package edu.utah.sci.cyclist.neup.ui.views.flow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
 import edu.utah.sci.cyclist.neup.ui.views.FlowView.Node;
@@ -43,11 +45,13 @@ public class FlowLine extends Region {
 		node.translateXProperty().bind(widthProperty().subtract(node.widthProperty()).divide(2));
 		node.setTranslateY(y);
 		
+		addListeners(node);
 		_nodes.add(node);
 		getChildren().add(node);
 	}
 
-	public void removeNode(Node node) {
+	public void removeNode(FacilityNode node) {
+		removeListeners(node);
 		_nodes.remove(node);
 		getChildren().remove(node);
 		if (_nodes.size() == 0) {
@@ -86,6 +90,25 @@ public class FlowLine extends Region {
 	
 	public ReadOnlyDoubleProperty widthPropery() {
 		return _choiceBox.widthProperty();
+	}
+		
+	private double _my;
+	
+	private void addListeners(FacilityNode node) {
+		node.setOnMousePressed(e->{
+			_my = e.getSceneY() - node.getTranslateY();
+		});
+		
+		node.setOnMouseDragged(e->{
+			double py = e.getSceneY()-_my;
+			if (py >= _line.getStartY() && py <= _line.getEndY()-node.getHeight())
+				node.setTranslateY(py);
+		});
+	}
+	
+	private void removeListeners(FacilityNode node) {
+		node.setOnMousePressed(null);
+		node.setOnMouseDragged(null);
 	}
 	
 	private void build() {

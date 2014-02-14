@@ -1,17 +1,12 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -35,13 +30,8 @@ class FacilityNode extends Pane {
 	private String _type;
 	private boolean _explicit;
 	
-//	private ListProperty<Transaction> _transactionsProperty = new SimpleListProperty<Transaction>();
-//	private ListProperty<Transaction> _activeTransactionsProperty = new SimpleListProperty<Transaction>();
-	
 	private ObservableList<Transaction> _transactions = FXCollections.observableArrayList();
 	private FilteredList<Transaction> _activeTransactions = new FilteredList<>(_transactions);
-
-	private ListProperty<Connector> _connectorsProperty = new SimpleListProperty<Connector>();
 	
 	private DoubleProperty _anchorXProperty = new SimpleDoubleProperty();
 	private DoubleProperty _anchorYProperty = new SimpleDoubleProperty();
@@ -49,47 +39,17 @@ class FacilityNode extends Pane {
 	private Consumer<FacilityNode> _onOpen;
 	private Consumer<FacilityNode> _onClose;
 	
+	private List<Connector> _connectors = new ArrayList<>();
+	
 	private VBox _vbox;
 	private Label _button;
 	
 	/*
 	 * Properties 
 	 */
-//	
-//	public ListProperty<Transaction> transactionsProperty() {
-//		return _transactionsProperty;
-//	}
-//	
-//	public ObservableList<Transaction> getTransactions() {
-//		return transactionsProperty().get();
-//	}
-//	
-//	public void setTransactions(ObservableList<Transaction> list) {
-//		transactionsProperty().set(list);
-//	}
-//	
-//	public ListProperty<Transaction> activeTransactionsProperty() {
-//		return _activeTransactionsProperty;
-//	}
-//	
-//	public ObservableList<Transaction> getActiveTransactions() {
-//		return activeTransactionsProperty().get();
-//	}
-	
+
 	public FilteredList<Transaction> getActiveTransactions() {
 		return _activeTransactions;
-	}
-	
-	public ListProperty<Connector> connectorsProperty() {
-		return _connectorsProperty;
-	}
-		
-	public ObservableList<Connector> getConnectors() {
-		return connectorsProperty().get();
-	}
-	
-	public void setConnectors(ObservableList<Connector> list) {
-		connectorsProperty().set(list);
 	}
 	
 	public ReadOnlyDoubleProperty anchorXProperty() {
@@ -171,6 +131,21 @@ class FacilityNode extends Pane {
 	
 	public void setTransactions(List<Transaction> list) {
 		_transactions.setAll(list);
+	}
+	
+	public void addConnector(Connector c) {
+		_connectors.add(c);
+	}
+	
+	public void removeConnector(Connector c) {
+		_connectors.remove(c);
+	}
+	
+	public List<Connector> getConnectors() {
+		return _connectors;
+	}
+	
+	public void release() {	
 	}
 	
 	private void build(String label) {
