@@ -1,7 +1,11 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -13,28 +17,20 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
@@ -43,6 +39,7 @@ import edu.utah.sci.cyclist.core.ui.components.NumericField;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Facility;
+import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
 
 public class Flow extends CyclistViewBase {
@@ -59,8 +56,11 @@ public class Flow extends CyclistViewBase {
 	public static final int SRC = 0;
 	public static final int DEST = 1;
 	
+	private FlowLine _line[]; 
+	
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
+	private List<Connector> _connectors = new ArrayList<>();
 
 	private Predicate<Transaction> _noopSelection = t->true;
 //	private Predicate<Transaction> _commoditySelection;
@@ -98,6 +98,10 @@ public class Flow extends CyclistViewBase {
 		}
 		
 		update();
+	}
+	
+	private int getTime() {
+		return _timestepField.getValue();
 	}
 	
 	private void init() {
@@ -158,9 +162,20 @@ public class Flow extends CyclistViewBase {
 		FacilityNode node = new FacilityNode(kind, value, direction, explicit);
 		node.setOnOpen(n->openNode(n));
 		node.setOnClose(n->closeNode(n));
+		node.getActiveTransactions().predicateProperty().bind(_commoditySelectionProperty);
+		node.getActiveTransactions().addListener(new InvalidationListener() {
+			
+			@Override
+			public void invalidated(Observable observable) {
+				transactionsChanged(node);				
+			}
+		});
+
+		
 		return node;
 	}
 	
+
 	private void addNode(Field field, Object value, int direction, double y, boolean explicit) {	
 		FlowLine line = _line[direction];
 		
@@ -191,6 +206,7 @@ public class Flow extends CyclistViewBase {
 	
 	private void removeNode(FacilityNode node) {
 		System.out.println("implement removeNode");
+
 	}
 	
 	private void openNode(FacilityNode node) {
@@ -202,9 +218,78 @@ public class Flow extends CyclistViewBase {
 		System.out.println("implement closeNode");
 	}
 	
-	private void queryMaterialFlow(FacilityNode node) {
-		System.out.println("implement queryMaterialFlo");
+	private void queryMaterialFlow(final FacilityNode node) {
+		final int timestep = getTime();
+		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
+
+			@Override
+			protected ObservableList<Transaction> call() throws Exception {
+				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.is(SRC));
+			}	
+		};
+		
+		task.valueProperty().addListener((o, p, n)->{
+				if (n != null) {
+					addRelatedNodes(node, n, timestep);
+				}
+		});
+
+		
+		Thread thread = new Thread(task);
+		thread.setDaemon(true);
+		thread.start();
+		
+		setCurrentTask(task);
 	}
+	
+	private void addRelatedNodes(FacilityNode node, ObservableList<Transaction> list, int time) {
+		if (time == getTime()) {
+			node.setTransactions(list);
+		}
+	}
+	
+	private void transactionsChanged(FacilityNode node) {		
+		int from = node.getDirection();
+		int to = 1-from;
+		
+		FlowLine line = _line[to];
+		
+		if (line.getKind() == null) {
+			line.setKind(_line[from].getKind());			
+		}
+		
+		Set<Object> set = groupSet(node.getActiveTransactions(), node.is(SRC) ? t->t.receiver : t->t.sender, kindFactory.get(line.getKind()));
+		
+		for (final Object value : set) {
+			FacilityNode target = line.findNode(value);
+			if (target == null) {
+				target = createNode(line.getKind(), value, to, false);
+				line.addNode(target);
+			}
+			
+			final Function<Facility, Object> f = kindFactory.get(line.getKind());
+
+			Connector c;
+			if (node.is(SRC)) 
+				c= new Connector(node, target, node.getActiveTransactions().filtered(t->f.apply(_facilities.get(t.receiver)) == value));
+			else
+				c= new Connector(target, node, node.getActiveTransactions().filtered(t->f.apply(_facilities.get(t.sender)) == value));
+			_connectors.add(c);
+			_pane.getChildren().add(c);
+		}
+
+	}
+	
+	private Set<Object> groupSet(ObservableList<Transaction> transactions, Function<Transaction, Integer> targetFunc, Function<Facility, Object> func) {
+		Set<Object> set = new HashSet<>();
+		for (Transaction t : transactions) {
+			Facility f = _facilities.get(targetFunc.apply(t));
+			set.add(func.apply(f));
+		}
+		return set;
+	}
+	
+	
 	
 	private void build() {
 		setTitle(TITLE);
@@ -307,13 +392,20 @@ public class Flow extends CyclistViewBase {
 		InvalidationListener listener = new InvalidationListener() {	
 			@Override
 			public void invalidated(Observable observable) {
+				for (Connector c : _connectors) {
+					_pane.getChildren().remove(c);
+				}
+				_connectors.clear();
+				
 				final boolean n = naturalU.isSelected();
 				final boolean e = enrichedU.isSelected();
 				final boolean w = waste.isSelected();
 
-				_commoditySelectionProperty.set( t->(!n || t.commodity.equals(NATURAL_U))
-						&& (!e || t.commodity.equals(ENRICHED_U))
-						&& (!w || t.commodity.equals(WASTE)));
+				System.out.println("change commodity selection:"+n+","+e+","+w);
+				_commoditySelectionProperty.set( t->
+						(n || t.commodity.equals(NATURAL_U))
+						&& (e || t.commodity.equals(ENRICHED_U))
+						&& (w || t.commodity.equals(WASTE)));
 			}
 		};
 		
@@ -352,8 +444,7 @@ public class Flow extends CyclistViewBase {
 		
 		return vbox;
 	}
-	
-	private FlowLine _line[]; 
+
 	
 	private Node buildMainArea() {
 		_line = new FlowLine[2];

@@ -75,7 +75,7 @@ public class SimulationProxy {
 		return FXCollections.observableList(list);
 	}
 	
-	public ObservableList<Transaction> getTransactions(String type, String value, int timestep, boolean forward, int isotope) {
+	public ObservableList<Transaction> getTransactions(String type, String value, int timestep, boolean forward) {
 		List<Transaction> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {

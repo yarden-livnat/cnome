@@ -1,7 +1,5 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
-import java.util.List;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
@@ -10,13 +8,12 @@ import javafx.scene.Group;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.text.Text;
 import edu.utah.sci.cyclist.neup.model.Transaction;
-import edu.utah.sci.cyclist.neup.ui.views.FlowView.Node;
 
 public class Connector extends Group {
 	public static final int CTRL_OFFSET = 40;
 	
-	private Node _from;
-	private Node _to;
+	private FacilityNode _from;
+	private FacilityNode _to;
 	private ObservableList<Transaction> _transactions;
 
 	private String _units = "kg"; 
@@ -24,7 +21,7 @@ public class Connector extends Group {
 	private CubicCurve _curve;
 	private Text _text;
 
-	public Connector(Node from, Node to, ObservableList<Transaction> transactions) {
+	public Connector(FacilityNode from, FacilityNode to, ObservableList<Transaction> transactions) {
 		super();
 		getStyleClass().add("connector");
 		
@@ -37,19 +34,21 @@ public class Connector extends Group {
 		addListeners();
 	}
 	
-	public Node getFrom() {
+	public FacilityNode getFrom() {
 		return _from;
 	}
 	
-	public Node getTo() {
+	public FacilityNode getTo() {
 		return _to;
 	}
 	
 	private void build() {
+		setStyle("-fx-backgound-cool: lightred");
 		_curve = new CubicCurve();
+		_curve.getStyleClass().add("connector");
 		
-		_curve.startXProperty().bind(_from.anchorXProperty);
-		_curve.startYProperty().bind(_from.anchorYProperty);
+		_curve.startXProperty().bind(_from.anchorXProperty().add(_from.getParent().translateXProperty()));
+		_curve.startYProperty().bind(_from.anchorYProperty().add(_from.getParent().translateYProperty()));
 
 		_curve.controlX1Property().bind(_curve.startXProperty().add(CTRL_OFFSET));
 		_curve.controlY1Property().bind(_curve.startYProperty());
@@ -57,8 +56,8 @@ public class Connector extends Group {
 		_curve.controlX2Property().bind(_curve.endXProperty().subtract(CTRL_OFFSET));
 		_curve.controlY2Property().bind(_curve.endYProperty());
 
-		_curve.endXProperty().bind(_to.anchorXProperty);
-		_curve.endYProperty().bind(_to.anchorYProperty);	
+		_curve.endXProperty().bind(_to.anchorXProperty().add(_to.getParent().translateXProperty()));
+		_curve.endYProperty().bind(_to.anchorYProperty().add(_to.getParent().translateYProperty()));	
 		
 		// text
 		_text = new Text();
@@ -99,17 +98,25 @@ public class Connector extends Group {
 		_text.rotateProperty().bind(r);
 		
 		getChildren().addAll(_curve, _text);
+		
+		computeAmount();
+	}
+	
+	private void computeAmount() {
+		double total = 0;
+		for (Transaction t : _transactions) {
+			total += t.quantity*t.fraction;
+		}
+		_text.setText(String.format("%.2e%s", total, _units));
+		System.out.println("connector: len:"+_transactions.size()+"   text:"+_text.getText());
 	}
 	
 	private void addListeners() {
 		_transactions.addListener(new InvalidationListener() {		
 			@Override
 			public void invalidated(Observable observable) {
-				double total = 0;
-				for (Transaction t : _transactions) {
-					total += t.quantity*t.fraction;
-				}
-				_text.setText(String.format("%.2e%s", total, _units));
+				setVisible(_transactions.size() > 0);
+				computeAmount();
 			}
 		});
 	}

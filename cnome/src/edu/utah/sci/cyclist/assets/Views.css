@@ -199,7 +199,17 @@
  	-fx-font-size: 8px;	
  }
  
- 
+ .flow .connector {
+	-fx-stroke: #a0a0a0;
+	-fx-fill: transparent;
+ 	-fx-stroke-width: 1px;
+ 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+ 	
+}
+
+.flow .connector-text {
+	-fx-font-size: 10px;		
+}
 /*
  * flow view
  */

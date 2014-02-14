@@ -395,7 +395,7 @@ public class FlowView extends CyclistViewBase {
 
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
-				return _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC, isotope);
+				return _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC);
 			}
 			
 		};
@@ -434,7 +434,7 @@ public class FlowView extends CyclistViewBase {
 			protected ObservableMap<Node,ObservableList<Transaction>> call() throws Exception {
 				Map<Node, ObservableList<Transaction>> map = new HashMap<>();
 				for (Node node : nodes) {
-					ObservableList<Transaction> list = _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC, isotope);
+					ObservableList<Transaction> list = _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC);
 					map.put(node, list);
 				}
 				
