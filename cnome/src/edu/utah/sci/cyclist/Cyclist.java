@@ -54,7 +54,12 @@ public class Cyclist extends Application {
 		glass.setStyle("-fx-background-color: rgba(0, 100, 100, 0)");
 		glass.setMouseTransparent(true);
 		
-	 	MainScreen root = new MainScreen(primaryStage);
+		Scene scene = new Scene(stack, 800, 600);
+		
+		primaryStage.setTitle(TITLE);
+        primaryStage.setScene(scene);
+        
+		MainScreen root = new MainScreen(primaryStage);
         
 	 	stack.getChildren().addAll(root, glass);
 	 	
@@ -64,14 +69,14 @@ public class Cyclist extends Application {
 		CyclistController controller = new CyclistController(eventBus);
 		controller.setScreen(root);
 		
-        Scene scene = new Scene(stack, 800, 600);
+//        Scene scene = new Scene(stack, 800, 600);
         
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Views.css").toExternalForm());
        // scene.getStylesheets().add(Cyclist.class.getResource("assets/Wizards.css").toExternalForm());
         
-        primaryStage.setTitle(TITLE);
-        primaryStage.setScene(scene);
+//        primaryStage.setTitle(TITLE);
+//        primaryStage.setScene(scene);
         primaryStage.show();
 	}
 
