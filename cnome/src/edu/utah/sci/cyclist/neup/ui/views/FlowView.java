@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -15,15 +16,21 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -32,6 +39,9 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+import org.controlsfx.control.CheckComboBox;
+
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
@@ -61,8 +71,13 @@ public class FlowView extends CyclistViewBase {
 	private int _targetLine = -1;
 	private Label _forward;
 	private Label _backward;
-	ChoiceBox _commodityChoice;
+	CheckComboBox<String> _commodityChoice;
 	ChoiceBox _materialChoice;
+	
+	Predicate<Transaction> _transactionsSelection;
+	Predicate<Transaction> _commodityPredicate;
+	
+	Predicate<Transaction> _noopPredicate;
 	
 	// variables
 	private Simulation _currentSim = null;
@@ -146,9 +161,32 @@ public class FlowView extends CyclistViewBase {
 		kindFactory.put("ID", f->f.id);
 		kindFactory.put("InstitutionID", f->f.intitution);
 		kindFactory.put("RegionID", f->f.region);
-	}
-
-	
+		
+		_transactionsSelection = new Predicate<Transaction>() {
+			@Override
+			public boolean test(Transaction t) {
+				return _commodityPredicate.test(t);
+			}
+		};
+		
+		_noopPredicate = new Predicate<Transaction>() {
+			@Override
+			public boolean test(Transaction t) {
+				return true;
+			}
+		};
+		
+		_commodityPredicate = new Predicate<Transaction>() {
+			@Override
+			public boolean test(Transaction t) {
+				for (String s : _commodityChoice.getCheckModel().getSelectedItems()) {
+					System.out.println("c pred:"+t.commodity+" "+s+"  eq:"+t.commodity.equals(s));
+					if (t.commodity.equals(s)) return true;
+				}
+				return false;
+			}
+		};
+	}	
 	
 	private Node createNode(String kind, Object value, int direction, boolean explicit) {
 		Node node = new Node(kind, value, direction, explicit);
@@ -214,7 +252,7 @@ public class FlowView extends CyclistViewBase {
 		node.setExplicit(true);
 	}
 	
-	private void addRelatedNodes(Node node, List<Transaction> transactions,  int timestep) {
+	private void addRelatedNodes(Node node, ObservableList<Transaction> transactions,  int timestep) {
 		node.setQuering(false);
 		
 		if (timestep != _timestep) {
@@ -223,7 +261,41 @@ public class FlowView extends CyclistViewBase {
 		}
 		
 		node.transactions = transactions;
+		node.filteredTransactions = new FilteredList<Transaction>(transactions, _transactionsSelection);		
+		connectNode(node);
+	}
+	
+	private void reconnectNodes() {
+		System.out.println("reconnect nodes");
+		for (Node node : _column[SRC].nodes) {
+			for (Connector c : node.connectors) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+			}
+			node.connectors.clear();
+			
+		}
 		
+		for (Node node : _column[DEST].nodes) {
+			for (Connector c : node.connectors) {
+				_pane.getChildren().remove(c);
+				_pane.getChildren().remove(c.text);
+			}
+			node.connectors.clear();
+		}
+
+		for (Node node : _column[SRC].nodes) {
+			node.filteredTransactions = node.transactions.filtered(_transactionsSelection);
+			connectNode(node);
+		}
+		
+		for (Node node : _column[DEST].nodes) {
+			node.filteredTransactions = node.transactions.filtered(_transactionsSelection);
+			connectNode(node);
+		}
+	}
+	
+	private void connectNode(Node node) {
 		int from = node.direction;
 		int to = 1-from;
 		
@@ -231,7 +303,7 @@ public class FlowView extends CyclistViewBase {
 			_column[to].setKind(_column[from].getKind());			
 		}
 
-		Map<Object, List<Transaction>> groups = groupTransactions(transactions, 
+		Map<Object, List<Transaction>> groups = groupTransactions(node.filteredTransactions, 
 				node.direction == SRC ? t->t.receiver : t->t.sender,
 						_column[to].kindFunc);
 
@@ -356,13 +428,13 @@ public class FlowView extends CyclistViewBase {
 		final int timestep = _timestep;
 		final int isotope = 0; 
 		nodes.stream().forEach(n->n.setQuering(true));
-		Task<ObservableMap<Node, List<Transaction>>> task = new Task<ObservableMap<Node, List<Transaction>>>() {
+		Task<ObservableMap<Node, ObservableList<Transaction>>> task = new Task<ObservableMap<Node, ObservableList<Transaction>>>() {
 
 			@Override
-			protected ObservableMap<Node,List<Transaction>> call() throws Exception {
-				Map<Node, List<Transaction>> map = new HashMap<>();
+			protected ObservableMap<Node,ObservableList<Transaction>> call() throws Exception {
+				Map<Node, ObservableList<Transaction>> map = new HashMap<>();
 				for (Node node : nodes) {
-					List<Transaction> list = _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC, isotope);
+					ObservableList<Transaction> list = _simProxy.getTransactions(node.type, node.value.toString(), timestep, node.direction == SRC, isotope);
 					map.put(node, list);
 				}
 				
@@ -371,13 +443,12 @@ public class FlowView extends CyclistViewBase {
 			
 		};
 		
-		task.valueProperty().addListener(new ChangeListener<ObservableMap<Node, List<Transaction>>>() {
-
+		task.valueProperty().addListener(new ChangeListener<ObservableMap<Node, ObservableList<Transaction>>>() {
 			@Override
 			public void changed(
-					ObservableValue<? extends ObservableMap<Node, List<Transaction>>> observable,
-					ObservableMap<Node, List<Transaction>> oldValue,
-					ObservableMap<Node, List<Transaction>> map) 
+					ObservableValue<? extends ObservableMap<Node, ObservableList<Transaction>>> observable,
+					ObservableMap<Node, ObservableList<Transaction>> oldValue,
+					ObservableMap<Node, ObservableList<Transaction>> map) 
 			{
 				if (map != null) {
 					for (Node node : map.keySet())
@@ -407,10 +478,11 @@ public class FlowView extends CyclistViewBase {
 		thread.start();
 		
 		setCurrentTask(task);
-		
-		
 	}
 	
+	private void updateConnectors() {
+		
+	}
 	/*
 	 * DnD interactions
 	 */
@@ -487,18 +559,36 @@ public class FlowView extends CyclistViewBase {
 		timeBar.getStyleClass().add("infobar");
 		timeBar.getChildren().addAll(_timestepLabel, _timestepField, _backward, _forward);
 		
-		// == material
-		_commodityChoice = new ChoiceBox();
-		_materialChoice = new ChoiceBox();
+		// == material filtering
 		
-		HBox materialBar = new HBox();
-		materialBar.getStyleClass().add("infobar");
-		materialBar.getChildren().addAll(
-				new Label("Commodity:"),
-				_commodityChoice,
-				new Label("Material:"),
-				new Label("Nuclide:")
-				);
+		GridPane grid = new GridPane();
+		grid.getStyleClass().add("material-grid");
+		
+		Text cl = new Text("Commodity");
+		_commodityChoice = new CheckComboBox<>();
+		_commodityChoice.getItems().addAll("enriched_u", "natl_u", "waste");
+		_commodityChoice.getCheckModel().selectAll();
+		GridPane.setConstraints(cl, 0, 0);
+		GridPane.setConstraints(_commodityChoice, 0, 1);
+		
+		Text ml = new Text("Material");
+		_materialChoice = new ChoiceBox();
+		GridPane.setConstraints(ml, 1, 0);
+		GridPane.setConstraints(_materialChoice, 1, 1);
+		
+		Text nl = new Text("Nuclide");
+		TextField tf = new TextField();
+		GridPane.setConstraints(nl, 2, 0);
+		GridPane.setConstraints(tf, 2, 1);
+		
+		grid.getChildren().addAll(cl, ml, nl, _commodityChoice, _materialChoice, tf);
+		HBox.setHgrow(grid, Priority.ALWAYS);
+		
+		HBox info = new HBox();
+		info.setSpacing(20);
+		info.setAlignment(Pos.BOTTOM_LEFT);
+		
+		info.getChildren().addAll(timeBar/*, new Separator(Orientation.VERTICAL)*/, grid);
 		
 		_pane = new Pane();
 		_pane.getStyleClass().add("pane");
@@ -510,7 +600,8 @@ public class FlowView extends CyclistViewBase {
 		_pane.setClip(clip);
 		
 		VBox vbox = new VBox();
-		vbox.getChildren().addAll(timeBar, materialBar, _pane);
+		vbox.setSpacing(3);
+		vbox.getChildren().addAll(info,new Separator(), _pane);
 		
 		VBox.setVgrow(_pane, Priority.ALWAYS);
 	
@@ -661,6 +752,12 @@ public class FlowView extends CyclistViewBase {
 			@Override
 			public void handle(MouseEvent event) {
 				_timestepField.setValue(_timestepField.getValue()-1);			
+			}
+		});
+		
+		_commodityChoice.getCheckModel().getSelectedItems().addListener(new ListChangeListener<String>() {
+		     public void onChanged(ListChangeListener.Change<? extends String> c) {
+				reconnectNodes();
 			}
 		});
 	}
@@ -826,7 +923,9 @@ public class FlowView extends CyclistViewBase {
 		public String type;
 		private boolean _explicit;
 		public boolean quering = false;
-		public List<Transaction> transactions = new ArrayList<>();
+		public ObservableList<Transaction> transactions = FXCollections.observableList(new ArrayList<>());
+		public FilteredList<Transaction> filteredTransactions = new FilteredList<Transaction>(transactions);
+		
 		public List<Connector> connectors = new ArrayList<>();
 		public DoubleProperty anchorXProperty = new SimpleDoubleProperty();
 		public DoubleProperty anchorYProperty = new SimpleDoubleProperty();
