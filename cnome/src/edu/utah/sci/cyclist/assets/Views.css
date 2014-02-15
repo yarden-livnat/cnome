@@ -140,8 +140,9 @@
 
 .flow .nuclide {
 	-fx-border-width: 0;
+	-fx-pref-height: 18px;
 	-fx-max-width: 50px;
-	-fx-max-height: 18px;
+	/*-fx-max-height: 18px;*/
 	-fx-padding: 0;
  	-fx-alignment:baseline-right;
 }
@@ -250,6 +251,7 @@
 .flow .fchart .chart-line-symbol {
 	
 }
+
 /*
  * flow view
  */

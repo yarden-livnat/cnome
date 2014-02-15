@@ -100,7 +100,6 @@ public class FlowLine extends Region {
 	}
 
 	public void removeNodes(Predicate<FlowNode> pred) {
-		// must be carefull as we iterate over the same list we
 		_nodes.stream()
 			.filter(pred)
 			.collect(Collectors.toList()).stream()

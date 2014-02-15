@@ -43,7 +43,7 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
-import edu.utah.sci.cyclist.core.ui.components.NumericField;
+import edu.utah.sci.cyclist.core.ui.components.IntegerField;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Facility;
@@ -83,16 +83,22 @@ public class Flow extends CyclistViewBase {
 	/*
 	 * Properties
 	 */
-	private ObjectProperty<Predicate<Transaction>> _commoditySelectionProperty = new SimpleObjectProperty<>(_noopSelection);
+//	private ObjectProperty<Predicate<Transaction>> _commoditySelectionProperty = new SimpleObjectProperty<>(_noopSelection);
+//	private ObjectProperty<Predicate<Transaction>> _isoSelectionProperty = new SimpleObjectProperty<>(_noopSelection);
+	private ObjectProperty<Predicate<Transaction>> _transactionsPredicateProperty = new SimpleObjectProperty<>(t->true);
 	
 	private ObjectProperty<Function<Transaction, Object>> _aggregateFuncProperty = new SimpleObjectProperty<>();
 	private IntegerProperty _chartModeProperty = new SimpleIntegerProperty(0);
+	
+	
+	private Predicate<Transaction> _commodityPredicate = t->true;
+	private Predicate<Transaction> _isoPredicate = t->true;
 	
 	private int _targetLine = -1;
 	
 	// UI Components
 	private Pane _pane;
-	private NumericField _timestepField;	
+	private IntegerField _timestepField;	
 
 	
 	public Flow() {
@@ -102,6 +108,7 @@ public class Flow extends CyclistViewBase {
 		init();
 		build();
 	}
+	
 	
 	@Override
 	public void selectSimulation(Simulation sim, boolean active) {
@@ -174,6 +181,10 @@ public class Flow extends CyclistViewBase {
 		th.start();
 	}
 	
+	private void updateTransactionsPredicate() {
+		_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
+	}
+	
 	private void timeChanged(int time) {
 		// connect explicit nodes
 		List<FlowNode> list = new ArrayList<>();
@@ -205,7 +216,7 @@ public class Flow extends CyclistViewBase {
 		node.setOnOpen(n->openNode(n));
 		node.setOnClose(n->closeNode(n));
 		node.setOnSelect(n->selectNode(n));
-		node.getActiveTransactions().predicateProperty().bind(_commoditySelectionProperty);
+		node.getActiveTransactions().predicateProperty().bind(_transactionsPredicateProperty);
 		node.getActiveTransactions().addListener((Observable o)->{transactionsChanged(node);});
 		
 		return node;
@@ -437,6 +448,21 @@ public class Flow extends CyclistViewBase {
 		return set;
 	}
 	
+	private void isoFilterChanged(String value) {
+		if (value == null || value.equals("")) {
+			_isoPredicate = t->true;
+		} else {
+			final int n = Integer.parseInt(value);
+			
+			_isoPredicate =  
+				n< 1000 ? 
+					t->Math.floorDiv(t.iso, 1000) == n:
+					t->t.iso == n  ;
+		}
+		
+		updateTransactionsPredicate();
+	}
+	
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("flow");
@@ -481,7 +507,7 @@ public class Flow extends CyclistViewBase {
 		Label title = new Label("Time");
 		title.getStyleClass().add("title");
 
-		_timestepField = new NumericField(INIT_TIMESTEP);
+		_timestepField = new IntegerField(INIT_TIMESTEP);
 		_timestepField.getStyleClass().add("timestep");
 		_timestepField.setMinValue(MIN_TIMESTEP);	
 				
@@ -541,20 +567,19 @@ public class Flow extends CyclistViewBase {
 		CheckBox enrichedU = new CheckBox("Enriched U");
 		CheckBox waste = new CheckBox("Waste");
 		
-		InvalidationListener listener = new InvalidationListener() {	
-			@Override
-			public void invalidated(Observable observable) {
-				removeAllConnectors();
+		InvalidationListener listener = o->{
+			removeAllConnectors();
 
-				final boolean n = naturalU.isSelected();
-				final boolean e = enrichedU.isSelected();
-				final boolean w = waste.isSelected();
+			final boolean n = naturalU.isSelected();
+			final boolean e = enrichedU.isSelected();
+			final boolean w = waste.isSelected();
 
-				_commoditySelectionProperty.set( t->
-						(n && t.commodity.equals(NATURAL_U))
-						|| (e && t.commodity.equals(ENRICHED_U))
-						|| (w && t.commodity.equals(WASTE)));
-			}
+			_commodityPredicate = t->
+					(n && t.commodity.equals(NATURAL_U))
+					|| (e && t.commodity.equals(ENRICHED_U))
+					|| (w && t.commodity.equals(WASTE));
+					
+			updateTransactionsPredicate();
 		};
 		
 		naturalU.selectedProperty().addListener(listener);
@@ -584,12 +609,14 @@ public class Flow extends CyclistViewBase {
 		
 		TextField entry = new TextField();
 		entry.getStyleClass().add("nuclide");
-		
+
 		vbox.getChildren().addAll(
 			title,
 			entry
 		);
 		
+		
+		entry.setOnAction(e->isoFilterChanged(entry.getText()));
 		return vbox;
 	}
 

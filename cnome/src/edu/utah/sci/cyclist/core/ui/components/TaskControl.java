@@ -70,6 +70,7 @@ public class TaskControl extends HBox {
 	private void build() {
 		getStyleClass().add("actions-area");
 		_indicator = new ProgressBar(-1);
+		_indicator.setSkin(GlyphRegistry.get(AwesomeIcon.RANDOM).getSkin());
 		_indicator.setPrefSize(50, 14);
 		_indicator.setVisible(false);
 		_status = new Button();
