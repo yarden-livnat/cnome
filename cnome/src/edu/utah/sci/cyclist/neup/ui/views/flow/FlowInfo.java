@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 
 public class FlowInfo extends Pane {
 
-	private FacilityNode _node;
+	private FlowNode _node;
 	private VBox _vbox;
 	private Function<Transaction, Object> _typeFunc = t->t.iso;
 	
@@ -20,7 +20,7 @@ public class FlowInfo extends Pane {
 		refresh();
 	};
 	
-	public FlowInfo(FacilityNode node) {
+	public FlowInfo(FlowNode node) {
 		_node = node;
 		
 		build();

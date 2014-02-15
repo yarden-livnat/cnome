@@ -12,8 +12,8 @@ import edu.utah.sci.cyclist.neup.model.Transaction;
 public class Connector extends Group {
 	public static final int CTRL_OFFSET = 40;
 	
-	private FacilityNode _from;
-	private FacilityNode _to;
+	private FlowNode _from;
+	private FlowNode _to;
 	private ObservableList<Transaction> _transactions;
 
 	private String _units = "kg"; 
@@ -32,7 +32,7 @@ public class Connector extends Group {
 		}
 	};
 	
-	public Connector(FacilityNode from, FacilityNode to, ObservableList<Transaction> transactions) {
+	public Connector(FlowNode from, FlowNode to, ObservableList<Transaction> transactions) {
 		super();
 		getStyleClass().add("connector");
 		
@@ -45,11 +45,11 @@ public class Connector extends Group {
 		addListeners();
 	}
 	
-	public FacilityNode getFrom() {
+	public FlowNode getFrom() {
 		return _from;
 	}
 	
-	public FacilityNode getTo() {
+	public FlowNode getTo() {
 		return _to;
 	}
 	
@@ -66,8 +66,8 @@ public class Connector extends Group {
 		_curve = new CubicCurve();
 		_curve.getStyleClass().add("connector");
 		
-		FacilityNode src = _from.isSRC() ? _from : _to;
-		FacilityNode dest = _from.isSRC() ? _to : _from;
+		FlowNode src = _from.isSRC() ? _from : _to;
+		FlowNode dest = _from.isSRC() ? _to : _from;
 		
 		
 		_curve.startXProperty().bind(src.anchorXProperty().add(src.getParent().translateXProperty()));

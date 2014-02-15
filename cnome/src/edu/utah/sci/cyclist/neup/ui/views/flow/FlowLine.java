@@ -33,8 +33,8 @@ public class FlowLine extends Region {
 	public final int INFO_OFFSET = 150;
 
 	private int _direction;
-	private List<FacilityNode> _nodes = new ArrayList<>();
-	private Map<FacilityNode, FlowInfo> _infos = new HashMap<>();
+	private List<FlowNode> _nodes = new ArrayList<>();
+	private Map<FlowNode, FlowInfo> _infos = new HashMap<>();
 	
 	private Line _line;
 	private ChoiceBox<String> _choiceBox;
@@ -70,10 +70,10 @@ public class FlowLine extends Region {
 		return _direction;
 	}
 	
-	public void addNode(final FacilityNode node) {
+	public void addNode(final FlowNode node) {
 		double y = Y0;
 		if (_nodes.size() > 0) {
-			FacilityNode last = _nodes.get(_nodes.size()-1);
+			FlowNode last = _nodes.get(_nodes.size()-1);
 			y = last.getTranslateY()+last.getHeight()+SPACING;
 		}
 		
@@ -91,7 +91,7 @@ public class FlowLine extends Region {
 		getChildren().add(info);
 	}
 
-	public void removeNode(FacilityNode node) {
+	public void removeNode(FlowNode node) {
 		removeListeners(node);
 		_nodes.remove(node);
 		getChildren().remove(node);
@@ -99,7 +99,7 @@ public class FlowLine extends Region {
 		getChildren().remove(_infos.remove(node));
 	}
 
-	public void removeNodes(Predicate<FacilityNode> pred) {
+	public void removeNodes(Predicate<FlowNode> pred) {
 		// must be carefull as we iterate over the same list we
 		_nodes.stream()
 			.filter(pred)
@@ -107,12 +107,12 @@ public class FlowLine extends Region {
 				.forEach(n->removeNode(n));
 	}
 	
-	public List<FacilityNode> getNodes() {
+	public List<FlowNode> getNodes() {
 		return _nodes;
 	}
 	
-	public FacilityNode findNode(Object value) {
-		for (FacilityNode node : _nodes) {
+	public FlowNode findNode(Object value) {
+		for (FlowNode node : _nodes) {
 			if (node.getValue().equals(value))
 				return node;
 		}
@@ -146,7 +146,7 @@ public class FlowLine extends Region {
 		
 	private double _my;
 	
-	private void addListeners(FacilityNode node) {
+	private void addListeners(FlowNode node) {
 		node.setOnMousePressed(e->{
 			_my = e.getSceneY() - node.getTranslateY();
 		});
@@ -158,7 +158,7 @@ public class FlowLine extends Region {
 		});
 	}
 	
-	private void removeListeners(FacilityNode node) {
+	private void removeListeners(FlowNode node) {
 		node.setOnMousePressed(null);
 		node.setOnMouseDragged(null);
 	}

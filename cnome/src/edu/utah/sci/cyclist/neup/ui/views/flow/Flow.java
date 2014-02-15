@@ -74,7 +74,7 @@ public class Flow extends CyclistViewBase {
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private List<Connector> _connectors = new ArrayList<>();
-	private FacilityNode _selectedNode = null;
+	private FlowNode _selectedNode = null;
 
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;	
@@ -176,13 +176,13 @@ public class Flow extends CyclistViewBase {
 	
 	private void timeChanged(int time) {
 		// connect explicit nodes
-		List<FacilityNode> list = new ArrayList<>();
-		for (FacilityNode node : _line[SRC].getNodes()) {
+		List<FlowNode> list = new ArrayList<>();
+		for (FlowNode node : _line[SRC].getNodes()) {
 			if (node.isExplicit())
 				list.add(node);
 		}
 		
-		for (FacilityNode node : _line[DEST].getNodes()) {
+		for (FlowNode node : _line[DEST].getNodes()) {
 			if (node.isExplicit())
 				list.add(node);
 		}
@@ -200,8 +200,8 @@ public class Flow extends CyclistViewBase {
 		_connectors.clear();
 	}
 	
-	private FacilityNode createNode(String kind, Object value, int direction, boolean explicit) {
-		FacilityNode node = new FacilityNode(kind, value, direction, explicit);
+	private FlowNode createNode(String kind, Object value, int direction, boolean explicit) {
+		FlowNode node = new FlowNode(kind, value, direction, explicit);
 		node.setOnOpen(n->openNode(n));
 		node.setOnClose(n->closeNode(n));
 		node.setOnSelect(n->selectNode(n));
@@ -222,7 +222,7 @@ public class Flow extends CyclistViewBase {
 			return;
 		}
 		
-		FacilityNode node = line.findNode(value);
+		FlowNode node = line.findNode(value);
 		if (node == null) {
 			node = createNode(field.getName(), value, direction, explicit);
 			line.addNode(node);
@@ -240,11 +240,11 @@ public class Flow extends CyclistViewBase {
 		}
 	} 
 	
-	private void closeNode(FacilityNode node) {
+	private void closeNode(FlowNode node) {
 		Iterator<Connector> i = node.getConnectors().iterator();
 		while (i.hasNext()) {
 			Connector c = i.next();
-			FacilityNode other = c.getFrom() == node ? c.getTo() : c.getFrom();
+			FlowNode other = c.getFrom() == node ? c.getTo() : c.getFrom();
 			if (other.isImplicit()) {
 				c.release();
 				other.removeConnector(c);
@@ -262,19 +262,19 @@ public class Flow extends CyclistViewBase {
 			node.setExplicit(false);
 	}
 	
-	private void openNode(FacilityNode node) {
+	private void openNode(FlowNode node) {
 		queryMaterialFlow(node);
 		node.setExplicit(true);
 	}
 	
-	private void selectNode(FacilityNode node) {
+	private void selectNode(FlowNode node) {
 		if (node == _selectedNode) return;
 		
 		_selectedNode = node;
 		queryCommulativeFlow(node);
 	}
 	
-	private void queryCommulativeFlow(FacilityNode node) {
+	private void queryCommulativeFlow(FlowNode node) {
 		Task<ObservableList<Pair<Double, Double>>> task = new Task<ObservableList<Pair<Double, Double>>>() {
 			@Override
 			protected ObservableList<Pair<Double, Double>> call() throws Exception {
@@ -298,7 +298,7 @@ public class Flow extends CyclistViewBase {
 		setCurrentTask(task);
 	}
 	
-	private void queryMaterialFlow(final FacilityNode node) {
+	private void queryMaterialFlow(final FlowNode node) {
 		final int timestep = getTime();
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
 			@Override
@@ -320,14 +320,14 @@ public class Flow extends CyclistViewBase {
 		setCurrentTask(task);
 	}
 	
-	private void queryMaterialFlow(final List<FacilityNode> list) {
+	private void queryMaterialFlow(final List<FlowNode> list) {
 		final int timestep = getTime();
 	
-		Task<ObservableMap<FacilityNode, ObservableList<Transaction>>> task = new Task<ObservableMap<FacilityNode, ObservableList<Transaction>>>() {
+		Task<ObservableMap<FlowNode, ObservableList<Transaction>>> task = new Task<ObservableMap<FlowNode, ObservableList<Transaction>>>() {
 			@Override
-			protected ObservableMap<FacilityNode,ObservableList<Transaction>> call() throws Exception {
-				Map<FacilityNode, ObservableList<Transaction>> map = new HashMap<>();
-				for (FacilityNode node : list) {
+			protected ObservableMap<FlowNode,ObservableList<Transaction>> call() throws Exception {
+				Map<FlowNode, ObservableList<Transaction>> map = new HashMap<>();
+				for (FlowNode node : list) {
 					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
 					map.put(node, list);
 				}
@@ -339,7 +339,7 @@ public class Flow extends CyclistViewBase {
 		task.valueProperty().addListener((o, p, n)->{
 			if (n != null) {
 				removeAllConnectors();
-				for (FacilityNode node : n.keySet()) {
+				for (FlowNode node : n.keySet()) {
 					addRelatedNodes(node, n.get(node), timestep);
 				}			
 				removeEmptyImplicitNodes();
@@ -353,7 +353,7 @@ public class Flow extends CyclistViewBase {
 		setCurrentTask(task);
 	}
 	
-	private void addRelatedNodes(FacilityNode node, ObservableList<Transaction> list, int time) {
+	private void addRelatedNodes(FlowNode node, ObservableList<Transaction> list, int time) {
 		if (time == getTime()) {
 			node.setTransactions(list);
 		}
@@ -361,16 +361,16 @@ public class Flow extends CyclistViewBase {
 	
 	private void removeEmptyImplicitNodes() {
 		// remove empty implicit nodes
-		for(Iterator<FacilityNode> i = _line[SRC].getNodes().iterator(); i.hasNext();) {
-			FacilityNode node = i.next();
+		for(Iterator<FlowNode> i = _line[SRC].getNodes().iterator(); i.hasNext();) {
+			FlowNode node = i.next();
 			if (node.isImplicit() && node.getConnectors().isEmpty()) {
 				i.remove();
 				_line[SRC].removeNode(node);
 			}
 		}
 		
-		for(Iterator<FacilityNode> i = _line[DEST].getNodes().iterator(); i.hasNext();) {
-			FacilityNode node = i.next();
+		for(Iterator<FlowNode> i = _line[DEST].getNodes().iterator(); i.hasNext();) {
+			FlowNode node = i.next();
 			if (node.isImplicit() && node.getConnectors().isEmpty()) {
 				i.remove();
 				_line[DEST].removeNode(node);
@@ -397,7 +397,7 @@ public class Flow extends CyclistViewBase {
 			.forEach(n->transactionsChanged(n));
 	}
 	
-	private void transactionsChanged(FacilityNode node) {		
+	private void transactionsChanged(FlowNode node) {		
 		int from = node.getDirection();
 		int to = 1-from;
 		
@@ -410,7 +410,7 @@ public class Flow extends CyclistViewBase {
 		Set<Object> set = groupSet(node.getActiveTransactions(), node.isSRC() ? t->t.receiver : t->t.sender, kindFactory.get(line.getKind()));
 		
 		for (final Object value : set) {
-			FacilityNode target = line.findNode(value);
+			FlowNode target = line.findNode(value);
 			if (target == null) {
 				target = createNode(line.getKind(), value, to, false);
 				line.addNode(target);

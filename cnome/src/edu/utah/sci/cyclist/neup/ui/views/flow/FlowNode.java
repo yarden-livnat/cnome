@@ -24,7 +24,7 @@ import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.neup.ui.views.FlowView;
 
 
-class FacilityNode extends Pane {
+class FlowNode extends Pane {
 	private int _direction;
 	private Object _value;
 	private String _type;
@@ -36,9 +36,9 @@ class FacilityNode extends Pane {
 	private DoubleProperty _anchorXProperty = new SimpleDoubleProperty();
 	private DoubleProperty _anchorYProperty = new SimpleDoubleProperty();
 	
-	private Consumer<FacilityNode> _onOpen;
-	private Consumer<FacilityNode> _onClose;
-	private Consumer<FacilityNode> _onSelect;
+	private Consumer<FlowNode> _onOpen;
+	private Consumer<FlowNode> _onClose;
+	private Consumer<FlowNode> _onSelect;
 	
 	private List<Connector> _connectors = new ArrayList<>();
 	
@@ -69,15 +69,15 @@ class FacilityNode extends Pane {
 		return anchorYProperty().get();
 	}
 
-	public void setOnOpen(Consumer<FacilityNode> func) {
+	public void setOnOpen(Consumer<FlowNode> func) {
 		_onOpen = func;
 	}
 	
-	public void setOnClose(Consumer<FacilityNode> func) {
+	public void setOnClose(Consumer<FlowNode> func) {
 		_onClose = func;
 	}
 	
-	public void setOnSelect(Consumer<FacilityNode> func) {
+	public void setOnSelect(Consumer<FlowNode> func) {
 		_onSelect = func;
 	}
 	
@@ -88,7 +88,7 @@ class FacilityNode extends Pane {
 	 * @param direction
 	 * @param explicit
 	 */
-	public FacilityNode(String type, Object value, int direction, boolean explicit) {
+	public FlowNode(String type, Object value, int direction, boolean explicit) {
 		super();
 		
 		_type = type;
@@ -184,9 +184,9 @@ class FacilityNode extends Pane {
 			@Override
 			public void handle(MouseEvent event) {
 				if (isExplicit()) {
-					if (_onClose != null) _onClose.accept(FacilityNode.this);
+					if (_onClose != null) _onClose.accept(FlowNode.this);
 				} else {
-					if (_onOpen != null) _onOpen.accept(FacilityNode.this);
+					if (_onOpen != null) _onOpen.accept(FlowNode.this);
 				}
 			}
 		});
