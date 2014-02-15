@@ -13,8 +13,10 @@ import java.util.function.Predicate;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -25,7 +27,10 @@ import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -33,6 +38,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
@@ -59,27 +65,39 @@ public class Flow extends CyclistViewBase {
 	public static final int SRC = 0;
 	public static final int DEST = 1;
 	
+	public static final int INIT_TIMESTEP = 1;
+	public static final int MIN_TIMESTEP = 1;
+	
 	private FlowLine _line[]; 
+	private FlowChart _chart;
 	
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private List<Connector> _connectors = new ArrayList<>();
+	private FacilityNode _selectedNode = null;
 
+	private Simulation _currentSim = null;
+	private SimulationProxy _simProxy = null;	
 	private Predicate<Transaction> _noopSelection = t->true;
 	
+	/*
+	 * Properties
+	 */
 	private ObjectProperty<Predicate<Transaction>> _commoditySelectionProperty = new SimpleObjectProperty<>(_noopSelection);
-
+	
+	private ObjectProperty<Function<Transaction, Object>> _aggregateFuncProperty = new SimpleObjectProperty<>();
+	private IntegerProperty _chartModeProperty = new SimpleIntegerProperty(0);
+	
 	private int _targetLine = -1;
 	
 	// UI Components
 	private Pane _pane;
-	
-	private Simulation _currentSim = null;
-	private SimulationProxy _simProxy = null;
+	private NumericField _timestepField;	
+
 	
 	public Flow() {
 		super();
-		setSupportsTables(false);
+		
 		
 		init();
 		build();
@@ -106,15 +124,16 @@ public class Flow extends CyclistViewBase {
 	}
 	
 	private void init() {
+		setSupportsTables(false);
+		
 		kindFactory.put("ModelType", f->f.model);
 		kindFactory.put("Prototype", f->f.prototype);
 		kindFactory.put("ID", f->f.id);
 		kindFactory.put("InstitutionID", f->f.intitution);
-		kindFactory.put("RegionID", f->f.region);
 	}
 	
 	private void update() {
-			if (_currentSim == null) {
+		if (_currentSim == null) {
 			_simProxy = null;
 			return;
 		}
@@ -159,12 +178,12 @@ public class Flow extends CyclistViewBase {
 		// connect explicit nodes
 		List<FacilityNode> list = new ArrayList<>();
 		for (FacilityNode node : _line[SRC].getNodes()) {
-			if (node.getExplicit())
+			if (node.isExplicit())
 				list.add(node);
 		}
 		
 		for (FacilityNode node : _line[DEST].getNodes()) {
-			if (node.getExplicit())
+			if (node.isExplicit())
 				list.add(node);
 		}
 		
@@ -185,15 +204,9 @@ public class Flow extends CyclistViewBase {
 		FacilityNode node = new FacilityNode(kind, value, direction, explicit);
 		node.setOnOpen(n->openNode(n));
 		node.setOnClose(n->closeNode(n));
+		node.setOnSelect(n->selectNode(n));
 		node.getActiveTransactions().predicateProperty().bind(_commoditySelectionProperty);
-		node.getActiveTransactions().addListener(new InvalidationListener() {
-			
-			@Override
-			public void invalidated(Observable observable) {
-				transactionsChanged(node);				
-			}
-		});
-
+		node.getActiveTransactions().addListener((Observable o)->{transactionsChanged(node);});
 		
 		return node;
 	}
@@ -214,7 +227,7 @@ public class Flow extends CyclistViewBase {
 			node = createNode(field.getName(), value, direction, explicit);
 			line.addNode(node);
 		} else {
-			if (node.getExplicit() || !explicit) {
+			if (node.isExplicit() || !explicit) {
 				// nothing to do here
 				return;
 			}
@@ -232,10 +245,10 @@ public class Flow extends CyclistViewBase {
 		while (i.hasNext()) {
 			Connector c = i.next();
 			FacilityNode other = c.getFrom() == node ? c.getTo() : c.getFrom();
-			if (!other.getExplicit()) {
+			if (other.isImplicit()) {
 				c.release();
 				other.removeConnector(c);
-				if (!other.getExplicit() && other.getConnectors().isEmpty()) {
+				if (other.isImplicit() && other.getConnectors().isEmpty()) {
 					closeNode(other);
 				}
 				i.remove();
@@ -254,12 +267,43 @@ public class Flow extends CyclistViewBase {
 		node.setExplicit(true);
 	}
 	
+	private void selectNode(FacilityNode node) {
+		if (node == _selectedNode) return;
+		
+		_selectedNode = node;
+		queryCommulativeFlow(node);
+	}
+	
+	private void queryCommulativeFlow(FacilityNode node) {
+		Task<ObservableList<Pair<Double, Double>>> task = new Task<ObservableList<Pair<Double, Double>>>() {
+			@Override
+			protected ObservableList<Pair<Double, Double>> call() throws Exception {
+				ObservableList<Pair<Double, Double>> list = _simProxy.getFlow(node.getType(), node.getValue().toString(), node.isSRC());
+				double sum = 0;
+				for (Pair<Double, Double> p : list) {
+					sum += p.v2;
+					p.v2 = sum;
+				}
+				
+				return list;
+			}	
+		};
+		
+		_chart.items().bind(task.valueProperty());
+
+		Thread thread = new Thread(task);
+		thread.setDaemon(true);
+		thread.start();
+		
+		setCurrentTask(task);
+	}
+	
 	private void queryMaterialFlow(final FacilityNode node) {
 		final int timestep = getTime();
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
-				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.is(SRC));
+				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
 			}	
 		};
 		
@@ -284,7 +328,7 @@ public class Flow extends CyclistViewBase {
 			protected ObservableMap<FacilityNode,ObservableList<Transaction>> call() throws Exception {
 				Map<FacilityNode, ObservableList<Transaction>> map = new HashMap<>();
 				for (FacilityNode node : list) {
-					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.is(SRC));
+					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
 					map.put(node, list);
 				}
 				
@@ -319,7 +363,7 @@ public class Flow extends CyclistViewBase {
 		// remove empty implicit nodes
 		for(Iterator<FacilityNode> i = _line[SRC].getNodes().iterator(); i.hasNext();) {
 			FacilityNode node = i.next();
-			if (!node.getExplicit() && node.getConnectors().isEmpty()) {
+			if (node.isImplicit() && node.getConnectors().isEmpty()) {
 				i.remove();
 				_line[SRC].removeNode(node);
 			}
@@ -327,13 +371,30 @@ public class Flow extends CyclistViewBase {
 		
 		for(Iterator<FacilityNode> i = _line[DEST].getNodes().iterator(); i.hasNext();) {
 			FacilityNode node = i.next();
-			if (!node.getExplicit() && node.getConnectors().isEmpty()) {
+			if (node.isImplicit() && node.getConnectors().isEmpty()) {
 				i.remove();
 				_line[DEST].removeNode(node);
 
 			}
 		}
 		
+	}
+	
+	private void lineKindChanged(int direction) {
+		FlowLine changed = _line[direction];
+		FlowLine src = _line[1-direction];
+		
+		removeAllConnectors();
+		
+		changed.removeNodes(n->true);
+		
+		// remove implicit nodes
+		src.removeNodes(n->n.isImplicit());
+		
+		// update remaining nodes
+		src.getNodes()
+			.stream()
+			.forEach(n->transactionsChanged(n));
 	}
 	
 	private void transactionsChanged(FacilityNode node) {		
@@ -346,7 +407,7 @@ public class Flow extends CyclistViewBase {
 			line.setKind(_line[from].getKind());			
 		}
 		
-		Set<Object> set = groupSet(node.getActiveTransactions(), node.is(SRC) ? t->t.receiver : t->t.sender, kindFactory.get(line.getKind()));
+		Set<Object> set = groupSet(node.getActiveTransactions(), node.isSRC() ? t->t.receiver : t->t.sender, kindFactory.get(line.getKind()));
 		
 		for (final Object value : set) {
 			FacilityNode target = line.findNode(value);
@@ -356,7 +417,7 @@ public class Flow extends CyclistViewBase {
 			}
 			
 			final Function<Facility, Object> kind = kindFactory.get(line.getKind());
-			Function<Transaction, Facility> f = node.is(SRC) ? t->_facilities.get(t.receiver) : t->_facilities.get(t.sender);
+			Function<Transaction, Facility> f = node.isSRC() ? t->_facilities.get(t.receiver) : t->_facilities.get(t.sender);
 			
 			Connector c = new Connector(node, target, node.getActiveTransactions().filtered(t->kind.apply(f.apply(t)) == value));		
 			node.addConnector(c);
@@ -376,8 +437,6 @@ public class Flow extends CyclistViewBase {
 		return set;
 	}
 	
-	
-	
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("flow");
@@ -387,15 +446,18 @@ public class Flow extends CyclistViewBase {
 		BorderPane pane = new BorderPane();
 		pane.setLeft(buildControlls());
 		pane.setCenter(buildMainArea());
+		pane.setBottom(buildFacilityFlow());
 	
+		_line[SRC].charModeProperty().bind(_chartModeProperty);
+		_line[SRC].aggregationFunProperty().bind(_aggregateFuncProperty);
+		_line[DEST].charModeProperty().bind(_chartModeProperty);
+		_line[DEST].aggregationFunProperty().bind(_aggregateFuncProperty);
+		
+		_aggregateFuncProperty.set(t->t.commodity);
+		
 		setContent(pane);
 	}
-	
-	public static final int INIT_TIMESTEP = 1;
-	public static final int MIN_TIMESTEP = 1;
-	
-	private NumericField _timestepField;
-	
+
 	private Node buildControlls() {
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("ctrl");
@@ -403,7 +465,10 @@ public class Flow extends CyclistViewBase {
 		vbox.getChildren().addAll(
 			buildTimestepCtrl(),
 			buildSelectionCtrl(),
-			buildNuclideCtrl()
+			buildNuclideCtrl(),
+			new Separator(),
+//			buildChartMode(),
+			buildChartAggr()
 		);
 		
 		return vbox;
@@ -528,6 +593,74 @@ public class Flow extends CyclistViewBase {
 		return vbox;
 	}
 
+	private Node buildChartMode() {
+		VBox vbox = new VBox();
+		vbox.getStyleClass().add("infobar");
+
+		Text title = new Text("Chart");
+		title.getStyleClass().add("title");
+		
+		ToggleGroup group = new ToggleGroup();
+		RadioButton listMode= new RadioButton("List");
+		listMode.setToggleGroup(group);
+		
+		RadioButton chartMode = new RadioButton("Chart");
+		chartMode.setToggleGroup(group);
+		
+		vbox.getChildren().addAll(
+			title,
+			listMode,
+			chartMode
+		);
+		
+		listMode.setOnAction(e->_chartModeProperty.set(0));
+		chartMode.setOnAction(e->_chartModeProperty.set(1));
+		listMode.setSelected(true);
+		
+		return vbox;
+	}
+	
+	private Node buildChartAggr() {
+		VBox vbox = new VBox();
+		vbox.getStyleClass().add("infobar");
+
+		Text title = new Text("Info");
+		title.getStyleClass().add("title");
+		
+		ToggleGroup group = new ToggleGroup();
+		
+		RadioButton commodity= new RadioButton("Commodity");
+		commodity.getStyleClass().add("flat-button");
+		commodity.setToggleGroup(group);
+		
+		RadioButton elem = new RadioButton("Element");
+		elem.getStyleClass().add("flat-button");
+		elem.setToggleGroup(group);
+
+		RadioButton iso = new RadioButton("Iso");
+		iso.getStyleClass().add("flat-button");
+		iso.setToggleGroup(group);
+		
+		vbox.getChildren().addAll(
+			title,
+			commodity,
+			elem,
+			iso
+		);
+		
+		commodity.setOnAction(e->_aggregateFuncProperty.set(t->t.commodity));
+		elem.setOnAction(e->_aggregateFuncProperty.set(t->Math.floorDiv(t.iso, 1000)));
+		iso.setOnAction(e->_aggregateFuncProperty.set(t->t.iso));
+		
+		commodity.setSelected(true);
+
+		return vbox;
+	}
+	
+	private Node buildFacilityFlow() {
+		_chart = new FlowChart();
+		return _chart;
+	}
 	
 	private Node buildMainArea() {
 		_line = new FlowLine[2];
@@ -611,6 +744,16 @@ public class Flow extends CyclistViewBase {
 			
 			e.setDropCompleted(true);
 			e.consume();
+		});
+		
+		_line[SRC].kindProperty().addListener((o, p, n)->{
+			if (p != null)
+				lineKindChanged(SRC);
+		});
+		
+		_line[DEST].kindProperty().addListener((o, p, n)->{
+			if (p != null)
+				lineKindChanged(DEST);
 		});
 	}
 }

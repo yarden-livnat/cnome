@@ -243,7 +243,7 @@ public class ChartView extends CyclistViewBase {
 				}
 
 				// is there at least one valid x field? 
-						if (n == 0) return;
+				if (n == 0) return;
 
 				n=0;
 				for (Field field : _yArea.getFields()) {
@@ -257,7 +257,7 @@ public class ChartView extends CyclistViewBase {
 				}
 
 				// is there at least one valid y field?
-						if (n == 0) return;
+				if (n == 0) return;
 
 				for (Field field : _lodArea.getFields()) {
 					if (table.hasField(field)) {
@@ -283,11 +283,11 @@ public class ChartView extends CyclistViewBase {
 
 				// build the query
 				QueryBuilder builder = 
-				getCurrentTable().queryBuilder()
-				.fields(fields)
-				.aggregates(aggregators)
-				.grouping(grouping)
-				.filters(filtersList);
+						getCurrentTable().queryBuilder()
+						.fields(fields)
+						.aggregates(aggregators)
+						.grouping(grouping)
+						.filters(filtersList);
 				System.out.println("Query: "+builder.toString());
 
 				List<Field> order = builder.getOrder();
@@ -462,8 +462,8 @@ public class ChartView extends CyclistViewBase {
 
 		//                Axis<?> axis = getChart().getYAxis();
 		//                if (axis instanceof NumberAxis) {
-			//                        NumberAxis y = (NumberAxis) axis;
-			//                         SeriesData sd = getFirst(sublists.get(0));
+		//                        NumberAxis y = (NumberAxis) axis;
+		//                         SeriesData sd = getFirst(sublists.get(0));
 		//                         double min =  ((Number) sd.points.get(0).y).doubleValue();
 		//                         for (SeriesDataPoint p : sd.points) {
 		//                                 double v = ((Number) p.y).doubleValue();
@@ -915,7 +915,7 @@ public class ChartView extends CyclistViewBase {
 	private void setupActions() {
 		final Button options = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		options.getStyleClass().add("flat-button");
-		
+
 		// create menu
 		final ContextMenu contextMenu = new ContextMenu();
 

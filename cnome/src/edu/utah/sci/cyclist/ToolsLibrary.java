@@ -20,8 +20,14 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.core.ui.tools;
+package edu.utah.sci.cyclist;
 
+import edu.utah.sci.cyclist.core.ui.tools.ChartTool;
+import edu.utah.sci.cyclist.core.ui.tools.FlowTool;
+import edu.utah.sci.cyclist.core.ui.tools.GenericToolFactory;
+import edu.utah.sci.cyclist.core.ui.tools.TableTool;
+import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.ui.tools.WorkspaceTool;
 import edu.utexas.cycic.tools.CommoditiesViewToolFactory;
 import edu.utexas.cycic.tools.CycicToolFactory;
 import edu.utexas.cycic.tools.FormBuilderToolFactory;
@@ -36,7 +42,6 @@ public class ToolsLibrary {
 	public static final ToolFactory[] factories = {
 		new GenericToolFactory<TableTool>(TableTool.class, TableTool.TOOL_NAME, TableTool.ICON),
 		new GenericToolFactory<ChartTool>(ChartTool.class, ChartTool.TOOL_NAME, ChartTool.ICON),
-		new GenericToolFactory<FlowViewTool>(FlowViewTool.class, FlowViewTool.TOOL_NAME, FlowViewTool.ICON),
 		new GenericToolFactory<FlowTool>(FlowTool.class, FlowTool.TOOL_NAME, FlowTool.ICON),
 		new GenericToolFactory<WorkspaceTool>(WorkspaceTool.class, WorkspaceTool.TOOL_NAME, WorkspaceTool.ICON),
 		new CycicToolFactory(),

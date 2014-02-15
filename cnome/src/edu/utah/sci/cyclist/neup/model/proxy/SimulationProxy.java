@@ -9,6 +9,7 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Transaction;
@@ -21,7 +22,8 @@ public class SimulationProxy {
 			"SELECT ID, ModelType, Prototype, InstitutionID, RegionID FROM Facilities where SimID=?";
 	
 	public static final String SELECT_TRANSACTIONS =
-			 "SELECT * FROM MaterialFlow, Facilities "
+			 "SELECT * "
+			+ " FROM MaterialFlow, Facilities "
 			+ " WHERE" 
 			+ "     MaterialFlow.SimID = ?"
 			+ " and Time = ? "
@@ -29,16 +31,16 @@ public class SimulationProxy {
 			+ " and %s = Facilities.ID "
 			+"  and Facilities.%s = ?";
 	
-	public static final String SELECT_TRANSACTIONS_1 =
-			 "SELECT * FROM MaterialFlow LEFT JOIN Facilities "
-			+ " on (MaterialFlow.SimID = Facilities.SimID)"
+	public static final String SELECT_FLOW =
+			"SELECT time, sum(quantity*fraction) as amount"
+			+ " FROM MaterialFlow, Facilities "
 			+ " WHERE" 
 			+ "     MaterialFlow.SimID = ?"
-			+ " and Time = ? "
+			+ " and MaterialFlow.SimID = Facilities.SimID"
 			+ " and %s = Facilities.ID "
-			+"  and Facilities.%s = ?";
-
-	
+			+ " and Facilities.%s = ?"
+			+ " GROUP BY time "
+			+ " ORDER BY time";
 	
 	public SimulationProxy(Simulation sim) {
 		_sim = sim;
@@ -111,5 +113,35 @@ public class SimulationProxy {
 		
 		System.out.println("retrieived "+list.size()+" transactions");
 		return  FXCollections.observableList(list);
+	}
+	
+	public ObservableList<Pair<Double, Double>> getFlow(String type, String value, boolean forward) {
+		List<Pair<Double, Double>> list = new ArrayList<>();
+		
+		String query = String.format(SELECT_FLOW, forward? "SenderID" : "ReceiverID", type);
+		System.out.println(query+"  ["+type+", "+value+"]");
+		try (Connection conn = _sim.getDataSource().getConnection()) {
+			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setString(1, _sim.getSimulationId());
+				stmt.setString(2, value);
+				
+				ResultSet rs = stmt.executeQuery();
+				double sum = 0;
+				while (rs.next()) {
+					Pair<Double, Double> p = new Pair<>();
+					p.v1 = rs.getDouble(1);
+					sum += rs.getDouble(2);
+					p.v2 = sum;
+					list.add(p);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			_sim.getDataSource().releaseConnection();
+		}
+		
+		return FXCollections.observableArrayList(list);
 	}
 }

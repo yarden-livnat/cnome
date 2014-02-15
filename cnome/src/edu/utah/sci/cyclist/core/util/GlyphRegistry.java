@@ -5,12 +5,10 @@ import javafx.scene.text.Font;
 import edu.utah.sci.cyclist.Cyclist;
 
 public class GlyphRegistry {
-//	static private GlyphFont font = GlyphFontRegistry.font("FontAwesome").fontSize(16);;
 	public final static String FONT_AWESOME_TTF_PATH = "assets/fontawesome-webfont.ttf";
     public final static String DEFAULT_ICON_SIZE = "14.0";
     public final static String DEFAULT_FONT_SIZE = "1em";
 
-//    public final static AwesomeIcon.ICON_OK
     static {
     	Font.loadFont(Cyclist.class.getResource(FONT_AWESOME_TTF_PATH).toExternalForm(), 10.0);
     }

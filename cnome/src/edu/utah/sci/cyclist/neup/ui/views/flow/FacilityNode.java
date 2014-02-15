@@ -38,6 +38,7 @@ class FacilityNode extends Pane {
 	
 	private Consumer<FacilityNode> _onOpen;
 	private Consumer<FacilityNode> _onClose;
+	private Consumer<FacilityNode> _onSelect;
 	
 	private List<Connector> _connectors = new ArrayList<>();
 	
@@ -76,7 +77,20 @@ class FacilityNode extends Pane {
 		_onClose = func;
 	}
 	
+	public void setOnSelect(Consumer<FacilityNode> func) {
+		_onSelect = func;
+	}
+	
+	/**
+	 * Constructor
+	 * @param type
+	 * @param value
+	 * @param direction
+	 * @param explicit
+	 */
 	public FacilityNode(String type, Object value, int direction, boolean explicit) {
+		super();
+		
 		_type = type;
 		_value = value;
 		_direction = direction;
@@ -101,8 +115,12 @@ class FacilityNode extends Pane {
 		return _value;
 	}
 	
-	public boolean getExplicit() {
+	public boolean isExplicit() {
 		return _explicit;
+	}
+	
+	public boolean isImplicit() {
+		return !_explicit;
 	}
 	
 	public void setExplicit(boolean value) {
@@ -121,8 +139,9 @@ class FacilityNode extends Pane {
 		return _direction;
 	}
 	
-	public boolean is(int value) {
-		return _direction == value;
+	
+	public boolean isSRC() {
+		return _direction == Flow.SRC;
 	}
 	
 	public String getType() {
@@ -164,7 +183,7 @@ class FacilityNode extends Pane {
 		_button.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (getExplicit()) {
+				if (isExplicit()) {
 					if (_onClose != null) _onClose.accept(FacilityNode.this);
 				} else {
 					if (_onOpen != null) _onOpen.accept(FacilityNode.this);
@@ -188,18 +207,13 @@ class FacilityNode extends Pane {
 		/*
 		 * add listeners
 		 */
-		_vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				_button.setVisible(true);
-			}
-		});
+		_vbox.setOnMouseEntered(e->_button.setVisible(true));
 		
-		_vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				_button.setVisible(false);
-			}
-		});
+		_vbox.setOnMouseExited(e->_button.setVisible(false));
+		
+		_vbox.setOnMouseClicked(e->{
+			if (_onSelect != null) 
+				_onSelect.accept(this);
+			});
 	}
 }

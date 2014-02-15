@@ -218,10 +218,38 @@
 	-fx-padding: 1px;
 }
 
-.flow .fchart {
+.flow .finfo {
 	/*-fx-background-color: lightgreen;*/
 }
 
+.flow .radio-button .radio {
+	-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+	/*-fx-border-width: 1px;
+	-fx-border-color: black;*/
+	-fx-padding: 1px;
+}
+
+.flow .fchart {
+	/*-fx-background-color: lightgreen;*/
+	-fx-max-height: 100px;
+}
+
+.flow .fchart .chart {
+	-fx-background-color:  transparent;
+   	-fx-alternative-row-fill-visible: false;
+	-fx-vertical-grid-lines-visible: false;   	   	
+	-fx-horizontal-grid-lines-visible: false;  
+	-fx-vertical-zero-line-visible: false;
+	-fx-horizontal-zero-line-visible: false;
+}
+
+.flow .fchart .chart-series-line {
+	-fx-stroke-width: 1px;
+} 
+
+.flow .fchart .chart-line-symbol {
+	
+}
 /*
  * flow view
  */

@@ -2,17 +2,27 @@ package edu.utah.sci.cyclist.neup.ui.views.flow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
+import edu.utah.sci.cyclist.neup.model.Transaction;
 
 public class FlowLine extends Region {
 
@@ -20,20 +30,40 @@ public class FlowLine extends Region {
 	public final int Y0 = 40;
 	public final int GAP = 5;
 	public final int BOTTOM_OFFSET = 10;
-	public final int CHART_OFFSET = 150;
+	public final int INFO_OFFSET = 150;
 
 	private int _direction;
 	private List<FacilityNode> _nodes = new ArrayList<>();
-	private Map<FacilityNode, FlowChart> _charts = new HashMap<>();
+	private Map<FacilityNode, FlowInfo> _infos = new HashMap<>();
 	
 	private Line _line;
 	private ChoiceBox<String> _choiceBox;
-	private DoubleProperty _chartOffset = new SimpleDoubleProperty();
-
+	private DoubleProperty _infoOffset = new SimpleDoubleProperty();
+	
+	private IntegerProperty _infoMode = new SimpleIntegerProperty();
+	private ObjectProperty<Function<Transaction, Object>> _aggregateFuncProperty = new SimpleObjectProperty<>();
+	
+	/*
+	 * Properties
+	 */
+	
+	public IntegerProperty charModeProperty() {
+		return _infoMode;
+	}
+	
+	public ObjectProperty<Function<Transaction, Object>> aggregationFunProperty() {
+		return _aggregateFuncProperty;
+	}
+	
+	/**
+	 * Constructor
+	 * @param direction 
+	 */
 	public FlowLine(int direction) {
 		_direction = direction;
-		_chartOffset.set(direction==Flow.SRC ? -CHART_OFFSET : CHART_OFFSET);
+		_infoOffset.set(direction==Flow.SRC ? -INFO_OFFSET : INFO_OFFSET);
 		build();
+		init();
 	}
 
 	public int getDirection() {
@@ -54,24 +84,29 @@ public class FlowLine extends Region {
 		_nodes.add(node);
 		getChildren().add(node);
 		
-		FlowChart chart = new FlowChart(node);
-		chart.translateXProperty().bind(_line.translateXProperty().add(_chartOffset));
-		chart.translateYProperty().bind(node.translateYProperty());
-		_charts.put(node, chart);
-		getChildren().add(chart);
+		FlowInfo info = new FlowInfo(node);
+		info.translateXProperty().bind(_line.translateXProperty().add(_infoOffset));
+		info.translateYProperty().bind(node.translateYProperty());
+		_infos.put(node, info);
+		getChildren().add(info);
 	}
 
 	public void removeNode(FacilityNode node) {
 		removeListeners(node);
 		_nodes.remove(node);
 		getChildren().remove(node);
-		if (_nodes.size() == 0) {
-			setKind(null);
-		}
 		
-		getChildren().remove(_charts.remove(node));
+		getChildren().remove(_infos.remove(node));
 	}
 
+	public void removeNodes(Predicate<FacilityNode> pred) {
+		// must be carefull as we iterate over the same list we
+		_nodes.stream()
+			.filter(pred)
+			.collect(Collectors.toList()).stream()
+				.forEach(n->removeNode(n));
+	}
+	
 	public List<FacilityNode> getNodes() {
 		return _nodes;
 	}
@@ -85,20 +120,20 @@ public class FlowLine extends Region {
 		return null;
 	}
 	
-	public String getKind() {
-		return _choiceBox.getValue();
-	}
-
-	public void setKind(String value) {
-		_choiceBox.setValue(value);
-	}
-	
 	public double getCenter() {
 		return localToParent(_line.getStartX(), 0).getX();
 	}
 
 	public ObjectProperty<String> kindProperty() {
 		return _choiceBox.valueProperty();
+	}
+	
+	public String getKind() {
+		return _choiceBox.getValue();
+	}
+
+	public void setKind(String value) {
+		_choiceBox.setValue(value);
 	}
 	
 	public void setKindItems(Set<String> items) {
@@ -126,6 +161,32 @@ public class FlowLine extends Region {
 	private void removeListeners(FacilityNode node) {
 		node.setOnMousePressed(null);
 		node.setOnMouseDragged(null);
+	}
+	
+	
+	private void init() {
+		_infoMode.addListener(new ChangeListener<Number>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue) {
+				for (FlowInfo info : _infos.values()) {
+					info.setMode(_infoMode.get());
+				}
+			}
+		});
+		
+		_aggregateFuncProperty.addListener(new ChangeListener<Function<Transaction, Object>>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Function<Transaction, Object>> observable,
+					Function<Transaction, Object> oldValue, Function<Transaction, Object> newValue) {
+				for (FlowInfo info : _infos.values()) {
+					info.setType(_aggregateFuncProperty.get());
+				}
+			}
+		});
+		
 	}
 	
 	private void build() {

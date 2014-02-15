@@ -11,8 +11,8 @@ public class FlowTool implements Tool {
 
 	public static final String ID 			= "edu.utah.sci.cyclist.FlowTool";
 	public static final String TOOL_NAME 	= "Flow";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.CODE_FORK; //"FontAwesome|CODE_FORK";
-
+	public static final AwesomeIcon ICON 	= AwesomeIcon.RANDOM; 
+	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
 

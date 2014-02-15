@@ -1,65 +1,106 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
-import edu.utah.sci.cyclist.neup.model.Transaction;
-import javafx.beans.InvalidationListener;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.Separator;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import edu.utah.sci.cyclist.core.event.Pair;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
-public class FlowChart extends Pane {
-
-	private FacilityNode _node;
-	private VBox _vbox;
-	private Function<Transaction, Object> _typeFunc = t->t.iso;
+public class FlowChart extends VBox {
+	public static final String CUMMULATIVE = "Cummulative Flow";
 	
-	private InvalidationListener _listener = o->{
-		refresh();
-	};
+	private Label _title;
+	private LineChart<Number, Number> _chart;
+	private NumberAxis _xAxis;
+	private NumberAxis _yAxis;
+	private boolean _open = true;
+		
+	private ListProperty<Pair<Double, Double>> _itemsProperty = new SimpleListProperty<>();
 	
-	public FlowChart(FacilityNode node) {
-		_node = node;
+	/*
+	 * Properties
+	 */
+	
+	public ListProperty<Pair<Double, Double>> items() { 
+		return _itemsProperty;
+	}
+	
+	public ObservableList<Pair<Double, Double>> getItems() {
+		return items().get();
+	}
+	
+	public FlowChart() {
+		super();
 		
 		build();
-		init();
 	}
 	
-	public void setType(Function<Transaction, Object> func) {
-		_typeFunc = func; 
-		refresh();
-	}
-	
-	private void refresh() {
-		_vbox.getChildren().clear();
-		
-		Map<Object, Double> map = new HashMap<>();
-		for (Transaction t : _node.getActiveTransactions()) {
-			Object type = _typeFunc.apply(t);
-			Double sum = map.get(type);
-			if (sum == null) 
-				sum = new Double(0);
-			map.put(type, sum+t.quantity*t.fraction );
+	public void open(boolean value) {
+		_open = value;
+		if (_open) {
+			_title.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		} else {
+			_title.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_RIGHT));			
 		}
-		
-		for (Object type : map.keySet()) {
-			Label l = new Label(String.format("%s: %.2e kg", type.toString(), map.get(type)));
-			_vbox.getChildren().add(l);
-		}
+		_chart.setVisible(_open);
+		_chart.setManaged(_open);
 	}
 	
-	private void init() {
-		_node.getActiveTransactions().addListener(_listener);
+	private void plotData() {
+		XYChart.Series<Number, Number> series = new XYChart.Series<>();
+	
+		for (Pair<Double, Double> item : getItems()) {
+			series.getData().add(new XYChart.Data<Number, Number>(item.v1, item.v2));
+		}
+		_chart.getData().clear();
+		_chart.getData().add(series);
 	}
 	
 	private void build() {
 		getStyleClass().add("fchart");
-		setWidth(50);
-		setHeight(30);	
 		
-		_vbox = new VBox();
-		getChildren().add(_vbox);
+		_title = new Label(CUMMULATIVE, GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		buildChart();
+	
+		getChildren().addAll(
+			new Separator(),
+			_title,
+			_chart
+		);
+		
+		addListeners();
 	}
+	
+	private void buildChart() {
+		_xAxis = new NumberAxis();
+		_xAxis.setLabel("time");
+		
+		_yAxis = new NumberAxis();
+		_yAxis.setLabel("Cummulative");
+		
+		_chart = new LineChart<>(_xAxis, _yAxis);
+		_chart.getStyleClass().add("chart");
+		_chart.setCreateSymbols(false);
+		
+		VBox.setVgrow(_chart, Priority.ALWAYS);
+	}
+	
+	private void addListeners() {
+		_title.setOnMouseClicked(e->open(!_open));
+		_itemsProperty.addListener(
+				(o, p, n)->{
+					if (n != null) plotData();
+				});
+	}
+	
+	
+	
 }

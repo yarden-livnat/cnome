@@ -66,8 +66,8 @@ public class Connector extends Group {
 		_curve = new CubicCurve();
 		_curve.getStyleClass().add("connector");
 		
-		FacilityNode src = _from.is(Flow.SRC) ? _from : _to;
-		FacilityNode dest = _from.is(Flow.SRC) ? _to : _from;
+		FacilityNode src = _from.isSRC() ? _from : _to;
+		FacilityNode dest = _from.isSRC() ? _to : _from;
 		
 		
 		_curve.startXProperty().bind(src.anchorXProperty().add(src.getParent().translateXProperty()));
