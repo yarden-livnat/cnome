@@ -29,7 +29,7 @@ public class FlowLine extends Region {
 	public final int Y0 = 40;
 	public final int GAP = 5;
 	public final int BOTTOM_OFFSET = 10;
-	public final int INFO_OFFSET = 100;
+	public final int INFO_OFFSET = 120;
 
 	private int _direction;
 	private ObservableList<FlowNode> _nodes = FXCollections.observableArrayList();

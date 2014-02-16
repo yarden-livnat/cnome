@@ -129,6 +129,7 @@
 	-fx-max-height: 18px;
 	-fx-padding: 0;
  	-fx-alignment:baseline-right;
+ 	-fx-background-color: lightgreen;
 }
 
 .flow .timestep:focused {
@@ -195,7 +196,6 @@
  	/*-fx-background-color: #0fddff ;*/ /*derive(#99FF99, -20%);*/
  }
 
- 
  .flow .fnode .header {
  	-fx-font-size: 8px;	
  }
@@ -231,8 +231,7 @@
 }
 
 .flow .fchart {
-	/*-fx-background-color: lightgreen;*/
-	-fx-max-height: 100px;
+	-fx-pref-height: 100px;
 }
 
 .flow .fchart .chart {
@@ -252,6 +251,12 @@
 	
 }
 
+.flow .choice {
+	-fx-background-color: lightgray; 
+ 	-fx-border-color: gray;
+ 	-fx-border-width: 1;
+ 	-fx-border-radius: 3;
+}
 .flow .total {
 	-fx-font-size: 14px;
 	-fx-font-weight: bold;

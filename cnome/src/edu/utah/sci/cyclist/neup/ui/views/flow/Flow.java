@@ -763,6 +763,7 @@ public class Flow extends CyclistViewBase {
 		Label caret = new Label("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		
 		ChoiceBox<String> type = new ChoiceBox<>();
+		type.getStyleClass().add("choice");
 		type.getItems().addAll(COMMULATIVE_CHART_LABEL, NET_CHART_LABEL);
 		
 		Text title = new Text();

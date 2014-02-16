@@ -31,7 +31,7 @@ public class SimulationProxy {
 			+ " and %s = Facilities.ID "
 			+"  and Facilities.%s = ?";
 	
-	public static final String FLOW_QUERY =
+	public static final String COMULATIVE_FLOW_QUERY =
 			"SELECT time, sum(quantity*fraction) as amount"
 			+ " FROM MaterialFlow, Facilities "
 			+ " WHERE" 
@@ -143,7 +143,7 @@ public class SimulationProxy {
 	public ObservableList<Pair<Integer, Double>> getFlow(String type, String value, boolean forward) {
 		List<Pair<Integer, Double>> list = new ArrayList<>();
 		
-		String query = String.format(FLOW_QUERY, forward? "SenderID" : "ReceiverID", type);
+		String query = String.format(COMULATIVE_FLOW_QUERY, forward? "SenderID" : "ReceiverID", type);
 		System.out.println(query+"  ["+type+", "+value+"]");
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
