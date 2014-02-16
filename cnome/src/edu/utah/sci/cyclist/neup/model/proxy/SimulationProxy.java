@@ -18,10 +18,10 @@ public class SimulationProxy {
 	private Simulation _sim;
 	private ObservableList<Facility> _facilities;
 	
-	public static final String SELECT_FACILITIES =
+	public static final String FACILITIES_QUERY =
 			"SELECT ID, ModelType, Prototype, InstitutionID, RegionID FROM Facilities where SimID=?";
 	
-	public static final String SELECT_TRANSACTIONS =
+	public static final String TRANSACTIONS_QUERY =
 			 "SELECT * "
 			+ " FROM MaterialFlow, Facilities "
 			+ " WHERE" 
@@ -31,7 +31,7 @@ public class SimulationProxy {
 			+ " and %s = Facilities.ID "
 			+"  and Facilities.%s = ?";
 	
-	public static final String SELECT_FLOW =
+	public static final String FLOW_QUERY =
 			"SELECT time, sum(quantity*fraction) as amount"
 			+ " FROM MaterialFlow, Facilities "
 			+ " WHERE" 
@@ -42,6 +42,31 @@ public class SimulationProxy {
 			+ " GROUP BY time "
 			+ " ORDER BY time";
 	
+	public static final String NET_FLOW_QUERY = 
+		"SELECT Times.Time as time, ifnull(r.v,0)-ifnull(s.v,0) as vol "
+		+ " FROM Times"
+		+ "      left join "
+		+ "			(SELECT Time, sum(Quantity*Fraction) as v "
+		+ "   	   	   FROM MaterialFlow, Facilities "
+		+ "            WHERE "
+		+ "                MaterialFlow.SimID = ?"
+		+ " 		   and MaterialFlow.SimID = Facilities.SimID"
+		+ "            and SenderID = Facilities.ID "
+		+ "            and Facilities.%s = ?"
+		+ "		   	  GROUP BY Time) as s "
+		+ "		on (Times.Time = s.Time) "
+		+ "		left join "
+		+ "		 	(SELECT Time, sum(Quantity*Fraction) as v "
+		+ "   	   	   FROM MaterialFlow, Facilities "
+		+ "            WHERE "
+		+ "                MaterialFlow.SimID = ?"
+		+ " 		   and MaterialFlow.SimID = Facilities.SimID"
+		+ "            and ReceiverID = Facilities.ID "
+		+ "            and Facilities.%s = ?"
+		+ "		      GROUP BY Time) as r"
+		+ "		on Times.Time = r.Time";
+
+
 	public SimulationProxy(Simulation sim) {
 		_sim = sim;
 	}
@@ -57,7 +82,7 @@ public class SimulationProxy {
 		List<Facility> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
-			try (PreparedStatement stmt = conn.prepareStatement(SELECT_FACILITIES)) {
+			try (PreparedStatement stmt = conn.prepareStatement(FACILITIES_QUERY)) {
 				stmt.setString(1, _sim.getSimulationId());
 				
 				ResultSet rs = stmt.executeQuery();
@@ -81,7 +106,7 @@ public class SimulationProxy {
 		List<Transaction> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
-			String query = String.format(SELECT_TRANSACTIONS, forward? "SenderID" : "ReceiverID", type);
+			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderID" : "ReceiverID", type);
 			System.out.println("query: ["+query+"]");
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());
@@ -115,10 +140,10 @@ public class SimulationProxy {
 		return  FXCollections.observableList(list);
 	}
 	
-	public ObservableList<Pair<Double, Double>> getFlow(String type, String value, boolean forward) {
-		List<Pair<Double, Double>> list = new ArrayList<>();
+	public ObservableList<Pair<Integer, Double>> getFlow(String type, String value, boolean forward) {
+		List<Pair<Integer, Double>> list = new ArrayList<>();
 		
-		String query = String.format(SELECT_FLOW, forward? "SenderID" : "ReceiverID", type);
+		String query = String.format(FLOW_QUERY, forward? "SenderID" : "ReceiverID", type);
 		System.out.println(query+"  ["+type+", "+value+"]");
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -128,10 +153,40 @@ public class SimulationProxy {
 				ResultSet rs = stmt.executeQuery();
 				double sum = 0;
 				while (rs.next()) {
-					Pair<Double, Double> p = new Pair<>();
-					p.v1 = rs.getDouble(1);
+					Pair<Integer, Double> p = new Pair<>();
+					p.v1 = rs.getInt(1);
 					sum += rs.getDouble(2);
 					p.v2 = sum;
+					list.add(p);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			_sim.getDataSource().releaseConnection();
+		}
+		
+		return FXCollections.observableArrayList(list);
+	}
+	
+	public ObservableList<Pair<Integer, Double>> getNetFlow(String type, String value) {
+		List<Pair<Integer, Double>> list = new ArrayList<>();
+		
+		String query = String.format(NET_FLOW_QUERY, type, type);
+		System.out.println(query+"  ["+type+", "+value+"]");
+		try (Connection conn = _sim.getDataSource().getConnection()) {
+			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setString(1, _sim.getSimulationId());
+				stmt.setString(2, value);
+				stmt.setString(3, _sim.getSimulationId());
+				stmt.setString(4, value);				
+
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next()) {
+					Pair<Integer, Double> p = new Pair<>();
+					p.v1 = rs.getInt(1);
+					p.v2 = rs.getDouble(2);
 					list.add(p);
 				}
 			}

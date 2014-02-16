@@ -241,7 +241,7 @@
 	-fx-vertical-grid-lines-visible: false;   	   	
 	-fx-horizontal-grid-lines-visible: false;  
 	-fx-vertical-zero-line-visible: false;
-	-fx-horizontal-zero-line-visible: false;
+	-fx-horizontal-zero-line-visible: true;
 }
 
 .flow .fchart .chart-series-line {
@@ -341,6 +341,11 @@
  
  .flow-node:hover {
  	-fx-border-width: 2;
+ }
+ 
+ .flow-node .select {
+ 	-fx-padding: 0;  
+ 	/*-fx-padding: 0.333333em 0.666667em 0.333333em 0.666667em;*/ /* 4 8 4 8 */
  }
  
  .node-explicit {

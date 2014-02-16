@@ -46,7 +46,7 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
-import edu.utah.sci.cyclist.core.ui.components.NumericField;
+import edu.utah.sci.cyclist.core.ui.components.IntegerField;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -67,7 +67,7 @@ public class FlowView extends CyclistViewBase {
 	// UI components
 	private Pane _pane;
 	private Label _timestepLabel;
-	private NumericField _timestepField;
+	private IntegerField _timestepField;
 	private int _targetLine = -1;
 	private Label _forward;
 	private Label _backward;
@@ -545,7 +545,7 @@ public class FlowView extends CyclistViewBase {
 			
 		// == time step
 		_timestepLabel= new Label("time step:");	
-		_timestepField = new NumericField(_timestep);
+		_timestepField = new IntegerField(_timestep);
 		_timestepField.getStyleClass().add("timestep");
 		_timestepField.setMinValue(0);	
 				

@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
+import java.util.OptionalDouble;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ObservableList;
@@ -23,17 +25,17 @@ public class FlowChart extends VBox {
 	private NumberAxis _yAxis;
 	private boolean _open = true;
 		
-	private ListProperty<Pair<Double, Double>> _itemsProperty = new SimpleListProperty<>();
+	private ListProperty<Pair<Integer, Double>> _itemsProperty = new SimpleListProperty<>();
 	
 	/*
 	 * Properties
 	 */
 	
-	public ListProperty<Pair<Double, Double>> items() { 
+	public ListProperty<Pair<Integer, Double>> items() { 
 		return _itemsProperty;
 	}
 	
-	public ObservableList<Pair<Double, Double>> getItems() {
+	public ObservableList<Pair<Integer, Double>> getItems() {
 		return items().get();
 	}
 	
@@ -54,12 +56,28 @@ public class FlowChart extends VBox {
 		_chart.setManaged(_open);
 	}
 	
+	public void setTitle(String title) {
+		_chart.setTitle(title);
+	}
+	
 	private void plotData() {
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
 	
-		for (Pair<Double, Double> item : getItems()) {
-			series.getData().add(new XYChart.Data<Number, Number>(item.v1, item.v2));
+		Double min = getItems().stream()
+			.mapToDouble(i->i.v2)
+			.min()
+			.orElse(0);
+		
+		if (min < 0) min = -min;
+		double f = Math.pow(10, 3*Math.floor(Math.log10(min)/3));
+		
+		System.out.println(String.format("min: %.2e  %e", min, f));
+		for (Pair<Integer, Double> item : getItems()) {
+			series.getData().add(new XYChart.Data<Number, Number>(item.v1, item.v2/f));
 		}
+		String label = f == 1 ? "kg" : String.format("x %.0e kg", f);
+		_yAxis.setLabel(label);
+		
 		_chart.getData().clear();
 		_chart.getData().add(series);
 	}
@@ -67,12 +85,12 @@ public class FlowChart extends VBox {
 	private void build() {
 		getStyleClass().add("fchart");
 		
-		_title = new Label(CUMMULATIVE, GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+//		_title = new Label(CUMMULATIVE, GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		buildChart();
 	
 		getChildren().addAll(
-			new Separator(),
-			_title,
+//			new Separator(),
+//			_title,
 			_chart
 		);
 		
@@ -94,7 +112,6 @@ public class FlowChart extends VBox {
 	}
 	
 	private void addListeners() {
-		_title.setOnMouseClicked(e->open(!_open));
 		_itemsProperty.addListener(
 				(o, p, n)->{
 					if (n != null) plotData();

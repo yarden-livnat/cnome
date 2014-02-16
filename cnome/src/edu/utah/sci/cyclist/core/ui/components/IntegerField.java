@@ -16,7 +16,7 @@ public class IntegerField extends TextField {
 	
 	public IntegerField(int value) {
 		super();
-		setOnAction(e->valueProperty().set(Integer.parseInt(getText())));
+		setOnAction(e->parseValue());
 		setValue(value);
 	}
 	
@@ -58,6 +58,16 @@ public class IntegerField extends TextField {
         if (!text.matches("[0-9]")) {
             super.replaceSelection(text);
         }
+    }
+    
+    private void parseValue() {
+    	try {
+    		int n = Integer.parseInt(getText());
+    		valueProperty().set(n);
+    	} catch (Exception e) {
+    		System.out.println("** Do something about an Illegle number");
+    	}
+    	
     }
 	
 }

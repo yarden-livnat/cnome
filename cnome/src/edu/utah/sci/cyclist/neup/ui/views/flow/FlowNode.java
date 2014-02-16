@@ -12,11 +12,13 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import edu.utah.sci.cyclist.core.ui.components.CycistToggleButton;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -174,25 +176,16 @@ class FlowNode extends Pane {
 		// header
 		HBox header = new HBox();
 		header.getStyleClass().add("node-header");
-				
-		Text text = new Text(label+":");
-		text.getStyleClass().add("node-kind");
-					
+		
+		Label _select = new Label("", GlyphRegistry.get(AwesomeIcon.BAR_CHART_ALT, "10px"));
+		_select.setVisible(false);
+		
 		_button = new Label();
 		_button.setVisible(false);
-		_button.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (isExplicit()) {
-					if (_onClose != null) _onClose.accept(FlowNode.this);
-				} else {
-					if (_onOpen != null) _onOpen.accept(FlowNode.this);
-				}
-			}
-		});
 			
 		header.getChildren().addAll(
-				text, 
+//				text,
+				_select,
 				new Spring(),
 				_button);
 		
@@ -207,13 +200,27 @@ class FlowNode extends Pane {
 		/*
 		 * add listeners
 		 */
-		_vbox.setOnMouseEntered(e->_button.setVisible(true));
-		
-		_vbox.setOnMouseExited(e->_button.setVisible(false));
-		
-		_vbox.setOnMouseClicked(e->{
+		_select.setOnMouseClicked(e->{
 			if (_onSelect != null) 
 				_onSelect.accept(this);
 			});
+		
+		_button.setOnMouseClicked(e->{
+				if (isExplicit()) {
+					if (_onClose != null) _onClose.accept(FlowNode.this);
+				} else {
+					if (_onOpen != null) _onOpen.accept(FlowNode.this);
+				}
+			});
+		
+		_vbox.setOnMouseEntered(e->{
+			_select.setVisible(true);
+			_button.setVisible(true);
+		});
+		
+		_vbox.setOnMouseExited(e->{
+			_select.setVisible(false);
+			_button.setVisible(false);
+		});
 	}
 }
