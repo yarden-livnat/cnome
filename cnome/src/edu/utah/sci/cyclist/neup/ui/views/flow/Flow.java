@@ -42,7 +42,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
@@ -89,7 +92,7 @@ public class Flow extends CyclistViewBase {
 	private FlowNode _selectedNode = null;
 
 	private Simulation _currentSim = null;
-	private SimulationProxy _simProxy = null;	
+	private SimulationProxy _simProxy = null;
 	
 	/*
 	 * Properties
@@ -110,7 +113,11 @@ public class Flow extends CyclistViewBase {
 	// UI Components
 	private Pane _pane;
 	private IntegerField _timestepField;	
-
+	private Text _total;
+	
+	/**
+	 * Constructor
+	 */
 	
 	public Flow() {
 		super();
@@ -193,6 +200,26 @@ public class Flow extends CyclistViewBase {
 	
 	private void updateTransactionsPredicate() {
 		_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
+		
+		updateTotal();
+	}
+	
+	private void updateTotal() {
+		if (_line == null || _line[SRC] == null) return;
+		
+		double total = 0;
+		for (FlowNode node : _line[SRC].getNodes()) {
+			for (Transaction t : node.getActiveTransactions()) {
+				total += t.quantity*t.fraction;
+			}
+		}
+		
+
+		if (total == 0) {
+			_total.setText("");
+		} else {
+			_total.setText(String.format("%.2e kg", total));
+		}
 	}
 	
 	private void timeChanged(int time) {
@@ -774,11 +801,17 @@ public class Flow extends CyclistViewBase {
 	
 	private Node buildMainArea() {
 		_line = new FlowLine[2];
-		_line[0] = new FlowLine(SRC);
-		_line[0].setKindItems(kindFactory.keySet());
+		_line[SRC] = new FlowLine(SRC);
+		_line[SRC].setKindItems(kindFactory.keySet());
 		
-		_line[1] = new FlowLine(DEST);
-		_line[1].setKindItems(kindFactory.keySet());
+		_line[DEST] = new FlowLine(DEST);
+		_line[DEST].setKindItems(kindFactory.keySet());
+
+		Text totalLabel = new Text("Total: ");
+		totalLabel.getStyleClass().add("total");
+		_total = new Text();
+		TextFlow totalLine = new TextFlow();
+		totalLine.getChildren().addAll(totalLabel, _total);
 		
 		_pane = new Pane();
 		_pane.getStyleClass().add("pane");
@@ -788,19 +821,21 @@ public class Flow extends CyclistViewBase {
 		clip.heightProperty().bind(_pane.heightProperty());
 		_pane.setClip(clip);
 	    
-		_pane.getChildren().addAll( _line[0], _line[1]);
+		_pane.getChildren().addAll( _line[0], _line[1], totalLine);
 		
 		DoubleProperty w = new SimpleDoubleProperty();
 		w.bind((_pane.widthProperty().subtract(_line[0].widthProperty()).subtract(_line[1].widthProperty())).divide(3));
 		
-		_line[0].translateXProperty().bind(w);
-		_line[0].setTranslateY(Y_OFFSET_TOP);
-		_line[0].prefHeightProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
+		_line[SRC].translateXProperty().bind(w);
+		_line[SRC].setTranslateY(Y_OFFSET_TOP);
+		_line[SRC].prefHeightProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
 
-		_line[1].translateXProperty().bind(_pane.widthProperty().subtract(w).subtract(_line[1].widthProperty()));
-		_line[1].setTranslateY(Y_OFFSET_TOP);
-		_line[1].prefHeightProperty().bind(_line[0].heightProperty());
+		_line[DEST].translateXProperty().bind(_pane.widthProperty().subtract(w).subtract(_line[1].widthProperty()));
+		_line[DEST].setTranslateY(Y_OFFSET_TOP);
+		_line[DEST].prefHeightProperty().bind(_line[0].heightProperty());
 
+		totalLine.translateXProperty().bind((_pane.widthProperty().subtract(totalLine.widthProperty()).divide(2)));
+		totalLine.setTranslateY(Y_OFFSET_TOP/2);
 		setPaneListeners();
 		
 		return _pane;
@@ -856,6 +891,10 @@ public class Flow extends CyclistViewBase {
 			e.consume();
 		});
 		
+		_line[SRC].getNodes().addListener((Observable o)-> {
+			updateTotal();
+		});
+		
 		_line[SRC].kindProperty().addListener((o, p, n)->{
 			if (p != null)
 				lineKindChanged(SRC);
@@ -863,6 +902,7 @@ public class Flow extends CyclistViewBase {
 		
 		_line[DEST].kindProperty().addListener((o, p, n)->{
 			if (p != null)
+				
 				lineKindChanged(DEST);
 		});
 	}

@@ -184,7 +184,6 @@ class FlowNode extends Pane {
 		_button.setVisible(false);
 			
 		header.getChildren().addAll(
-//				text,
 				_select,
 				new Spring(),
 				_button);

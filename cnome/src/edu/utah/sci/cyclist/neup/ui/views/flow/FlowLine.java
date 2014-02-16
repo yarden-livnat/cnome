@@ -1,9 +1,6 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -19,6 +16,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
@@ -30,10 +29,10 @@ public class FlowLine extends Region {
 	public final int Y0 = 40;
 	public final int GAP = 5;
 	public final int BOTTOM_OFFSET = 10;
-	public final int INFO_OFFSET = 150;
+	public final int INFO_OFFSET = 100;
 
 	private int _direction;
-	private List<FlowNode> _nodes = new ArrayList<>();
+	private ObservableList<FlowNode> _nodes = FXCollections.observableArrayList();
 	private Map<FlowNode, FlowInfo> _infos = new HashMap<>();
 	
 	private Line _line;
@@ -43,6 +42,8 @@ public class FlowLine extends Region {
 	private IntegerProperty _infoMode = new SimpleIntegerProperty();
 	private ObjectProperty<Function<Transaction, Object>> _aggregateFuncProperty = new SimpleObjectProperty<>();
 	
+	private DoubleProperty _centerX = new SimpleDoubleProperty();
+
 	/*
 	 * Properties
 	 */
@@ -53,6 +54,10 @@ public class FlowLine extends Region {
 	
 	public ObjectProperty<Function<Transaction, Object>> aggregationFunProperty() {
 		return _aggregateFuncProperty;
+	}
+	
+	public DoubleProperty centerXProperty() {
+		return _centerX;
 	}
 	
 	/**
@@ -106,7 +111,7 @@ public class FlowLine extends Region {
 				.forEach(n->removeNode(n));
 	}
 	
-	public List<FlowNode> getNodes() {
+	public ObservableList<FlowNode> getNodes() {
 		return _nodes;
 	}
 	

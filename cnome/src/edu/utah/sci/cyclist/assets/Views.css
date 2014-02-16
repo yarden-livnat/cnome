@@ -252,6 +252,11 @@
 	
 }
 
+.flow .total {
+	-fx-font-size: 14px;
+	-fx-font-weight: bold;
+}
+
 /*
  * flow view
  */
