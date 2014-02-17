@@ -66,8 +66,10 @@ public class Cycic extends ViewBase{
 		}
 		
 		VBox cycicBox = new VBox();
+		cycicBox.autosize();
+		Cycic.pane.autosize();
 		Cycic.pane.setId("cycicPane");
-		Cycic.pane.setPrefSize(800, 600);
+		Cycic.pane.setPrefSize(1000, 600);
 		Cycic.pane.setStyle("-fx-background-color: white;");
 		
 		// Temp Toolbar //
@@ -77,7 +79,7 @@ public class Cycic extends ViewBase{
 		grid.setVgap(5);
 		
 		// Adding a new Facility //
-		Text scenetitle1 = new Text("Add Facility");
+		Text scenetitle1 = new Text("Facility");
 		scenetitle1.setFont(new Font(20));
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
@@ -97,7 +99,7 @@ public class Cycic extends ViewBase{
 		});
 		grid.add(structureCB, 3, 0);
 		//Submit Button
-		Button submit1 = new Button("Submit");
+		Button submit1 = new Button("Add");
 		submit1.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent event){
@@ -120,7 +122,7 @@ public class Cycic extends ViewBase{
 		grid.add(submit1, 4, 0);
 		
 		// Adding a new Market
-		Text scenetitle2 = new Text("Add Market");
+		Text scenetitle2 = new Text("Market");
 		scenetitle2.setFont(new Font(20));
 		grid.add(scenetitle2, 0, 1);
 		Label markName = new Label("Name");
@@ -128,7 +130,7 @@ public class Cycic extends ViewBase{
 		// Name Field
 		final TextField markNameField = new TextField();
 		grid.add(markNameField, 2, 1);
-		Button submit2 = new Button("Submit");
+		Button submit2 = new Button("Add");
 		submit2.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent event){
