@@ -28,9 +28,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
-import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utexas.cycic.tools.RegionViewTool;
 
 public class RegionCorralView extends ViewBase {

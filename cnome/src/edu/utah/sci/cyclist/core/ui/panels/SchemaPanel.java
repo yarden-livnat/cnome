@@ -140,21 +140,18 @@ public class SchemaPanel extends TitledPanel {
 							return null;
 						}
 
-						@Override
 						public Comparator<Field> thenComparingInt(
 								ToIntFunction<? super Field> keyExtractor) {
 							// TODO Auto-generated method stub
 							return null;
 						}
 
-						@Override
 						public Comparator<Field> thenComparingLong(
 								ToLongFunction<? super Field> keyExtractor) {
 							// TODO Auto-generated method stub
 							return null;
 						}
 
-						@Override
 						public Comparator<Field> thenComparingDouble(
 								ToDoubleFunction<? super Field> keyExtractor) {
 							// TODO Auto-generated method stub

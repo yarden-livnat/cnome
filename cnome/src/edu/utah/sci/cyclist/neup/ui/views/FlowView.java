@@ -7,6 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.Field;
+import edu.utah.sci.cyclist.core.model.Simulation;
+import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
+import edu.utah.sci.cyclist.core.ui.components.NumericField;
+import edu.utah.sci.cyclist.core.ui.components.Spring;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.neup.model.Facility;
+import edu.utah.sci.cyclist.neup.model.Transaction;
+import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
@@ -32,17 +43,7 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.model.Field;
-import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
-import edu.utah.sci.cyclist.core.ui.components.NumericField;
-import edu.utah.sci.cyclist.core.ui.components.Spring;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
-import edu.utah.sci.cyclist.neup.model.Facility;
-import edu.utah.sci.cyclist.neup.model.Transaction;
-import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
+
 
 public class FlowView extends CyclistViewBase {
 	public static final String ID = "flow-view";

@@ -1,7 +1,8 @@
 package edu.utexas.cycic.tools;
 
-import edu.utah.sci.cyclist.ui.tools.Tool;
-import edu.utah.sci.cyclist.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 
 public class RegionCorralViewToolFactory implements ToolFactory {
 
@@ -9,17 +10,14 @@ public class RegionCorralViewToolFactory implements ToolFactory {
 	public String getToolName() {
 		return RegionCorralViewTool.TOOL_NAME;
 	}
-
-	@Override
-	public String getIconName() {
-		return RegionCorralViewTool.ICON_NAME;
-	}
 	
 	@Override
 	public Tool create() {
 		return new RegionCorralViewTool();
 	}
 
-
-
+	@Override
+	public AwesomeIcon getIcon() {
+		return RegionCorralViewTool.ICON;
+	}
 }

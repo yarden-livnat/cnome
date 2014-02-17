@@ -41,7 +41,6 @@ public class ToolsLibrary {
 		new GenericToolFactory<FlowTool>(FlowTool.class, FlowTool.TOOL_NAME, FlowTool.ICON),
 		new GenericToolFactory<WorkspaceTool>(WorkspaceTool.class, WorkspaceTool.TOOL_NAME, WorkspaceTool.ICON),
 		new CycicToolFactory(),
-		new CommoditiesViewToolFactory(),
 		new InstitutionViewToolFactory(),
 		new RecipeFormToolFactory(),
 		new SimulationInfoToolFactory(),
