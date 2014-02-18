@@ -260,6 +260,7 @@ public class FlowChart extends VBox {
 		_line.startYProperty().bind(_yAxis.layoutYProperty().add(10));
 		_line.endYProperty().bind(_line.startYProperty().add(_yAxis.heightProperty()));
 		_line.setVisible(false);
+	
 		
 		_popup = new Label();
 		_popup.getStyleClass().add("popup");
