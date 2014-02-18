@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.core.ui.tools;
 
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utexas.cycic.tools.CycicTool;
 
 public class GenericToolFactory<ToolImpl extends Tool> implements ToolFactory {
 

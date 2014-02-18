@@ -5,7 +5,7 @@ import edu.utah.sci.cyclist.core.presenter.FlowPresenter;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utah.sci.cyclist.neup.ui.views.flow.Flow;
+import edu.utah.sci.cyclist.neup.ui.views.flow.FlowView;
 
 public class FlowTool implements Tool {
 
@@ -29,7 +29,7 @@ public class FlowTool implements Tool {
 	@Override
 	public View getView() {
 		if (_view == null) 
-			_view = new Flow();
+			_view = new FlowView();
 		return _view;
 	}
 

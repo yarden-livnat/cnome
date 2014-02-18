@@ -4,22 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.EventHandler;
+import javafx.concurrent.Task;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import edu.utah.sci.cyclist.core.ui.components.CycistToggleButton;
+import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
+import edu.utah.sci.cyclist.core.ui.components.TaskControl;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Transaction;
@@ -31,6 +34,10 @@ class FlowNode extends Pane {
 	private Object _value;
 	private String _type;
 	private boolean _explicit;
+	private Color _color;
+	private BooleanProperty _selected = new SimpleBooleanProperty(false);
+	private BooleanProperty _hover = new SimpleBooleanProperty(false);
+
 	
 	private ObservableList<Transaction> _transactions = FXCollections.observableArrayList();
 	private FilteredList<Transaction> _activeTransactions = new FilteredList<>(_transactions);
@@ -46,6 +53,8 @@ class FlowNode extends Pane {
 	
 	private VBox _vbox;
 	private Label _button;
+	private TaskControl _ctrl;
+	private Label _graphIcon;
 	
 	/*
 	 * Properties 
@@ -97,7 +106,7 @@ class FlowNode extends Pane {
 		_value = value;
 		_direction = direction;
 		
-		build(type);
+		build(type, value);
 		
 		if (direction == FlowView.SRC) 
 			_anchorXProperty.bind( translateXProperty().add(widthProperty()));
@@ -143,11 +152,15 @@ class FlowNode extends Pane {
 	
 	
 	public boolean isSRC() {
-		return _direction == Flow.SRC;
+		return _direction == FlowView.SRC;
 	}
 	
 	public String getType() {
 		return _type;
+	}
+	
+	public Color getColor() {
+		return _color;
 	}
 	
 	public void setTransactions(List<Transaction> list) {
@@ -166,29 +179,57 @@ class FlowNode extends Pane {
 		return _connectors;
 	}
 	
+	public void setTask(Task<?> task) {
+		_ctrl.setTask(task);
+	}
+	
 	public void release() {	
 	}
 	
-	private void build(String label) {
+	public void setSelected(boolean value) {
+		if (_selected.get() != value) {
+			_selected.set(value);
+			String color = value ? _color.toString().replace("0x", "#") : "transparent";
+			_graphIcon.setStyle("-fx-background-color:"+color);
+		}
+	}
+	
+	public boolean isSelected() {
+		return _selected.get();
+	}
+	
+	private void build(String type, Object value) {
+		String label = value.toString();
+		if (!(value instanceof String))
+				label = type+":"+label;
+		
+		_color = Configuration.getInstance().getColor(label);
+		
 		_vbox = new VBox();
 		_vbox.getStyleClass().add("flow-node");
 		
 		// header
 		HBox header = new HBox();
 		header.getStyleClass().add("node-header");
+		header.setPrefWidth(70);
 		
-		Label _select = new Label("", GlyphRegistry.get(AwesomeIcon.BAR_CHART_ALT, "10px"));
-		_select.setVisible(false);
-		
+		_graphIcon = new Label("", GlyphRegistry.get(AwesomeIcon.BAR_CHART_ALT, "10px"));
+		_graphIcon.setStyle("-fx-padding: 1px");
+		_graphIcon.visibleProperty().bind(_selected.or(_hover));
+		_graphIcon.setMinWidth(15);
 		_button = new Label();
 		_button.setVisible(false);
 			
+		_ctrl = new TaskControl();
+		_ctrl.setPrefWidth(40);
+
 		header.getChildren().addAll(
-				_select,
-				new Spring(),
+				_graphIcon,
+				_ctrl,
 				_button);
 		
 		_vbox.getChildren().add(header);
+
 			
 		Text body = new Text(_value.toString());
 		body.getStyleClass().add("node-body");
@@ -199,26 +240,26 @@ class FlowNode extends Pane {
 		/*
 		 * add listeners
 		 */
-		_select.setOnMouseClicked(e->{
+		_graphIcon.setOnMouseClicked(e->{
 			if (_onSelect != null) 
 				_onSelect.accept(this);
-			});
+		});
 		
 		_button.setOnMouseClicked(e->{
-				if (isExplicit()) {
-					if (_onClose != null) _onClose.accept(FlowNode.this);
-				} else {
-					if (_onOpen != null) _onOpen.accept(FlowNode.this);
-				}
-			});
+			if (isExplicit()) {
+				if (_onClose != null) _onClose.accept(FlowNode.this);
+			} else {
+				if (_onOpen != null) _onOpen.accept(FlowNode.this);
+			}
+		});
 		
 		_vbox.setOnMouseEntered(e->{
-			_select.setVisible(true);
+			_hover.set(true);
 			_button.setVisible(true);
 		});
 		
 		_vbox.setOnMouseExited(e->{
-			_select.setVisible(false);
+			_hover.set(false);
 			_button.setVisible(false);
 		});
 	}

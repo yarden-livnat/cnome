@@ -36,6 +36,7 @@ public class TaskControl extends HBox {
 		
 		_task = task;
 		_status.setVisible(false);
+		_status.setManaged(false);
 		
 		if (_task == null) {
 			_indicator.visibleProperty().unbind();
@@ -48,6 +49,7 @@ public class TaskControl extends HBox {
 				@Override
 				public void handle(WorkerStateEvent event) {
 					_status.setVisible(true);
+					_status.setManaged(true);
 				}
 			});
 					
@@ -65,19 +67,22 @@ public class TaskControl extends HBox {
 	
 	public void clear() {
 		_status.setVisible(false);
+		_status.setManaged(false);
 	}
 	
 	private void build() {
 		getStyleClass().add("actions-area");
 		_indicator = new ProgressBar(-1);
-		_indicator.setSkin(GlyphRegistry.get(AwesomeIcon.RANDOM).getSkin());
-		_indicator.setPrefSize(50, 14);
+		_indicator.setPrefSize(50, 12);
 		_indicator.setVisible(false);
 		_status = new Button();
 		_status.getStyleClass().add("flat-button");
-		_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));
+		_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING, "12px"));
 		getChildren().addAll(_indicator, _status);
 				
 		_status.setVisible(false);
+		_status.setManaged(false);
+		
+		Tooltip.install(_status, _msg);
 	}
 }

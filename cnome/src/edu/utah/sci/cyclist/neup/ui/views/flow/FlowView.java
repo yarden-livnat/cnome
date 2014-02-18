@@ -12,16 +12,13 @@ import java.util.function.Predicate;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -30,7 +27,6 @@ import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
@@ -42,8 +38,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import edu.utah.sci.cyclist.core.event.Pair;
@@ -58,7 +52,7 @@ import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
 
-public class Flow extends CyclistViewBase {
+public class FlowView extends CyclistViewBase {
 	public static final String ID = "flow-view";
 	public static final String TITLE = "Material Flow";
 	
@@ -75,13 +69,7 @@ public class Flow extends CyclistViewBase {
 	
 	public static final int INIT_TIMESTEP = 1;
 	public static final int MIN_TIMESTEP = 1;
-	
-	private static final String NET_CHART_LABEL = "Net Flow";
-	private static final String COMMULATIVE_CHART_LABEL = "Commulative Flow";
-	private static final int COMMULATIVE_CHART_TYPE = 0;
-	private static final int NET_CHART_TYPE = 1;
-	
-	private int _chartType = COMMULATIVE_CHART_TYPE;
+
 	
 	private FlowLine _line[]; 
 	private FlowChart _chart;
@@ -89,10 +77,12 @@ public class Flow extends CyclistViewBase {
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private List<Connector> _connectors = new ArrayList<>();
-	private FlowNode _selectedNode = null;
+	private Map<FlowNode, ObservableList<Pair<Integer, Double>>> _selectedNodes = new HashMap<>();
 
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
+	private int _targetLine = -1;
+	private boolean _isChangingKind = false;
 	
 	/*
 	 * Properties
@@ -101,14 +91,10 @@ public class Flow extends CyclistViewBase {
 	
 	private ObjectProperty<Function<Transaction, Object>> _aggregateFuncProperty = new SimpleObjectProperty<>();
 	private IntegerProperty _chartModeProperty = new SimpleIntegerProperty(0);
-	
-	private BooleanProperty _chartOpened = new SimpleBooleanProperty(true);
-	private StringProperty _chartTitle = new SimpleStringProperty();
-	
+		
 	private Predicate<Transaction> _commodityPredicate = t->true;
 	private Predicate<Transaction> _isoPredicate = t->true;
-	
-	private int _targetLine = -1;
+
 	
 	// UI Components
 	private Pane _pane;
@@ -119,7 +105,7 @@ public class Flow extends CyclistViewBase {
 	 * Constructor
 	 */
 	
-	public Flow() {
+	public FlowView() {
 		super();
 		
 		init();
@@ -159,7 +145,6 @@ public class Flow extends CyclistViewBase {
 	private void update() {
 		if (_currentSim == null) {
 			_simProxy = null;
-			return;
 		}
 		_simProxy = new SimulationProxy(_currentSim);
 		
@@ -235,7 +220,7 @@ public class Flow extends CyclistViewBase {
 				list.add(node);
 		}
 		
-		queryMaterialFlow(list);	
+		queryTransactions(list);	
 	}
 	
 	private void removeAllConnectors() {
@@ -289,6 +274,8 @@ public class Flow extends CyclistViewBase {
 	} 
 	
 	private void closeNode(FlowNode node) {
+		List<FlowNode> closeNodes = new ArrayList<>();
+		
 		Iterator<Connector> i = node.getConnectors().iterator();
 		while (i.hasNext()) {
 			Connector c = i.next();
@@ -297,7 +284,7 @@ public class Flow extends CyclistViewBase {
 				c.release();
 				other.removeConnector(c);
 				if (other.isImplicit() && other.getConnectors().isEmpty()) {
-					closeNode(other);
+					closeNodes.add(other);
 				}
 				i.remove();
 				_pane.getChildren().remove(c);
@@ -305,9 +292,23 @@ public class Flow extends CyclistViewBase {
 		}
 		
 		if (node.getConnectors().isEmpty()) {
-			_line[node.getDirection()].removeNode(node);
+			removeNode(node);
 		} else
 			node.setExplicit(false);
+		
+		for (FlowNode n : closeNodes) {
+			closeNode(n);
+		}
+	}
+	
+	private void removeNode(FlowNode node) {
+		_line[node.getDirection()].removeNode(node);
+	}
+	
+	public void removeNodes(List<FlowNode> nodes) {
+		for (FlowNode node : nodes) {
+			removeNode(node);
+		}
 	}
 	
 	private void openNode(FlowNode node) {
@@ -315,64 +316,103 @@ public class Flow extends CyclistViewBase {
 		node.setExplicit(true);
 	}
 	
-	private void selectNode(FlowNode node) {
-		if (node == null) {
-			_chartTitle.set("");
-			return;
+	@SuppressWarnings("unchecked")
+	private void selectNode(final FlowNode node) {
+		if (node.isSelected()) {
+			node.setSelected(false);
+			_chart.remove(node);
+		} else {
+			node.setSelected(true);
+			ObservableList<Pair<Integer, Double>> values = _selectedNodes.get(node);
+			if (values == null) {
+				queryInventory(node).addListener((Observable o)->{
+					ObjectProperty<ObservableList<Pair<Integer, Double>>> p = (ObjectProperty<ObservableList<Pair<Integer, Double>>>) o;
+
+					_selectedNodes.put(node, p.get());
+					addToChart(node, p.get());
+				});
+				
+			} else {
+				addToChart(node, values);
+			}
 		}
-		
-		_selectedNode = node;
-		switch (_chartType) {
-		case COMMULATIVE_CHART_TYPE:
-			queryCommulativeFlow(node);
-			break;
-		case NET_CHART_TYPE:
-			queryNetFlow(node);
-			break;
-		}
-		_chartTitle.set(node.getType()+" = "+node.getValue().toString());
 	}
 	
-	private void queryCommulativeFlow(FlowNode node) {
+	private void addToChart(FlowNode node, ObservableList<Pair<Integer, Double>> values) {
+		String title;
+		if (node.getValue() instanceof String) {
+			title = node.getValue().toString();
+		}
+		else {
+			title = node.getType()+" = "+node.getValue().toString();
+		}
+		_chart.add(node, title, values);
+	}
+	
+	private ReadOnlyObjectProperty<ObservableList<Pair<Integer, Double>>> queryInventory(FlowNode node) {
 		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
 			@Override
 			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
-				ObservableList<Pair<Integer, Double>> list = _simProxy.getFlow(node.getType(), node.getValue().toString(), node.isSRC());
-				double sum = 0;
-				for (Pair<Integer, Double> p : list) {
-					sum += p.v2;
-					p.v2 = sum;
-				}
+				ObservableList<Pair<Integer, Double>> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
 				return list;
 			}	
 		};
 		
-		_chart.items().bind(task.valueProperty());
-
 		Thread thread = new Thread(task);
 		thread.setDaemon(true);
 		thread.start();
 		
-		setCurrentTask(task);
+		node.setTask(task);
+		
+		return task.valueProperty();
 	}
 	
-	private void queryNetFlow(FlowNode node) {
-		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
-			@Override
-			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
-				ObservableList<Pair<Integer, Double>> list = _simProxy.getNetFlow(node.getType(), node.getValue().toString());
-				return list;
-			}	
-		};
-		
-		_chart.items().bind(task.valueProperty());
-
-		Thread thread = new Thread(task);
-		thread.setDaemon(true);
-		thread.start();
-		
-		setCurrentTask(task);
-	}
+//	private ReadOnlyObjectProperty<ObservableList<Pair<Integer, Double>>> queryCommulativeInventory(FlowNode node) {
+//		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
+//			@Override
+//			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
+//				ObservableList<Pair<Integer, Double>> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
+//				double sum = 0;
+//				for (Pair<Integer, Double> p : list) {
+//					sum += p.v2;
+//					p.v2 = sum;
+//				}
+//				return list;
+//			}	
+//		};
+//		
+//		Thread thread = new Thread(task);
+//		thread.setDaemon(true);
+//		thread.start();
+//		
+//		setCurrentTask(task);
+//		
+//		return task.valueProperty();
+//	}
+	
+//	private void queryNetInventory(FlowNode node) {
+//		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
+//			@Override
+//			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
+//				ObservableList<Pair<Integer, Double>> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
+//				double prev = 0;
+//				for (Pair<Integer, Double> p : list) {
+//					double current = p.v2;
+//					p.v2 -= prev;
+//					prev = current;
+//				}
+//				return list;
+//			}	
+//		};
+//		
+//		_chart.items().bind(task.valueProperty());
+//
+//		Thread thread = new Thread(task);
+//		thread.setDaemon(true);
+//		thread.start();
+//		
+//		setCurrentTask(task);
+//	}
 	private void queryMaterialFlow(final FlowNode node) {
 		final int timestep = getTime();
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
@@ -395,7 +435,7 @@ public class Flow extends CyclistViewBase {
 		setCurrentTask(task);
 	}
 	
-	private void queryMaterialFlow(final List<FlowNode> list) {
+	private void queryTransactions(final List<FlowNode> list) {
 		final int timestep = getTime();
 	
 		Task<ObservableMap<FlowNode, ObservableList<Transaction>>> task = new Task<ObservableMap<FlowNode, ObservableList<Transaction>>>() {
@@ -440,7 +480,7 @@ public class Flow extends CyclistViewBase {
 			FlowNode node = i.next();
 			if (node.isImplicit() && node.getConnectors().isEmpty()) {
 				i.remove();
-				_line[SRC].removeNode(node);
+				removeNode(node);
 			}
 		}
 		
@@ -448,8 +488,7 @@ public class Flow extends CyclistViewBase {
 			FlowNode node = i.next();
 			if (node.isImplicit() && node.getConnectors().isEmpty()) {
 				i.remove();
-				_line[DEST].removeNode(node);
-
+				removeNode(node);
 			}
 		}
 		
@@ -459,12 +498,15 @@ public class Flow extends CyclistViewBase {
 		FlowLine changed = _line[direction];
 		FlowLine src = _line[1-direction];
 		
+
 		removeAllConnectors();
 		
-		changed.removeNodes(n->true);
+		String kind = changed.getKind();
+		removeNodes(changed.selectNodes(n->true));
+		changed.setKind(kind);
 		
 		// remove implicit nodes
-		src.removeNodes(n->n.isImplicit());
+		removeNodes(src.selectNodes(n->n.isImplicit()));
 		
 		// update remaining nodes
 		src.getNodes()
@@ -530,11 +572,6 @@ public class Flow extends CyclistViewBase {
 		}
 	}
 	
-	private void selectChartType(String type) {
-		_chartType = NET_CHART_LABEL.equals(type) ? NET_CHART_TYPE : COMMULATIVE_CHART_TYPE;
-		selectNode(_selectedNode);
-	}
-	
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("flow");
@@ -544,7 +581,7 @@ public class Flow extends CyclistViewBase {
 		BorderPane pane = new BorderPane();
 		pane.setLeft(buildControlls());
 		pane.setCenter(buildMainArea());
-		pane.setBottom(buildFacilityFlow());
+		pane.setBottom(buildInventoryChart());
 	
 		_line[SRC].charModeProperty().bind(_chartModeProperty);
 		_line[SRC].aggregationFunProperty().bind(_aggregateFuncProperty);
@@ -692,32 +729,32 @@ public class Flow extends CyclistViewBase {
 		return vbox;
 	}
 
-	private Node buildChartMode() {
-		VBox vbox = new VBox();
-		vbox.getStyleClass().add("infobar");
-
-		Text title = new Text("Chart");
-		title.getStyleClass().add("title");
-		
-		ToggleGroup group = new ToggleGroup();
-		RadioButton listMode= new RadioButton("List");
-		listMode.setToggleGroup(group);
-		
-		RadioButton chartMode = new RadioButton("Chart");
-		chartMode.setToggleGroup(group);
-		
-		vbox.getChildren().addAll(
-			title,
-			listMode,
-			chartMode
-		);
-		
-		listMode.setOnAction(e->_chartModeProperty.set(0));
-		chartMode.setOnAction(e->_chartModeProperty.set(1));
-		listMode.setSelected(true);
-		
-		return vbox;
-	}
+//	private Node buildChartMode() {
+//		VBox vbox = new VBox();
+//		vbox.getStyleClass().add("infobar");
+//
+//		Text title = new Text("Chart");
+//		title.getStyleClass().add("title");
+//		
+//		ToggleGroup group = new ToggleGroup();
+//		RadioButton listMode= new RadioButton("List");
+//		listMode.setToggleGroup(group);
+//		
+//		RadioButton chartMode = new RadioButton("Chart");
+//		chartMode.setToggleGroup(group);
+//		
+//		vbox.getChildren().addAll(
+//			title,
+//			listMode,
+//			chartMode
+//		);
+//		
+//		listMode.setOnAction(e->_chartModeProperty.set(0));
+//		chartMode.setOnAction(e->_chartModeProperty.set(1));
+//		listMode.setSelected(true);
+//		
+//		return vbox;
+//	}
 	
 	private Node buildChartAggr() {
 		VBox vbox = new VBox();
@@ -756,56 +793,33 @@ public class Flow extends CyclistViewBase {
 		return vbox;
 	}
 	
-	private Node buildFacilityFlow() {
+	private Node buildInventoryChart() {
 		VBox vbox = new VBox();
-		vbox.getStyleClass().add("infobar");
-	
-		Label caret = new Label("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
-		
-		ChoiceBox<String> type = new ChoiceBox<>();
-		type.getStyleClass().add("choice");
-		type.getItems().addAll(COMMULATIVE_CHART_LABEL, NET_CHART_LABEL);
-		
-		Text title = new Text();
-		title.textProperty().bind(_chartTitle);
-		HBox hbox = new HBox();
-		hbox.setStyle("-fx-padding: 0");
-		hbox.getStyleClass().add("infobar");
-		hbox.getChildren().addAll(caret, type, title);
-				
 		_chart = new FlowChart();
-		_chart.visibleProperty().bind(_chartOpened);
-		_chart.managedProperty().bind(_chartOpened);
+		
+		_timestepField.valueProperty().bindBidirectional(_chart.timeProperty());
 		
 		vbox.getChildren().addAll(
 			new Separator(),
-			hbox,
 			_chart
 		);
-			
-		caret.setOnMouseClicked(e->{
-			_chartOpened.set(_chartOpened.get());
-			if (_chartOpened.get()) {
-				caret.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
-			} else {
-				caret.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_RIGHT));			
-			}
-		});
-		
-		type.valueProperty().addListener(e->{
-			selectChartType(type.getValue());
-		});
-		
-		type.setValue(COMMULATIVE_CHART_LABEL);
 		return vbox;
 	}
 	
 	private Node buildMainArea() {
+		_pane = new Pane();
+		_pane.getStyleClass().add("pane");
+		
+		Rectangle clip = new Rectangle(0, 0, 100, 100);
+		clip.widthProperty().bind(_pane.widthProperty());
+		clip.heightProperty().bind(_pane.heightProperty());
+		_pane.setClip(clip);
+		
 		_line = new FlowLine[2];
-		_line[SRC] = new FlowLine(SRC);
+		_line[SRC] = new FlowLine(SRC, _pane);
 		_line[SRC].setKindItems(kindFactory.keySet());
 		
-		_line[DEST] = new FlowLine(DEST);
+		_line[DEST] = new FlowLine(DEST, _pane);
 		_line[DEST].setKindItems(kindFactory.keySet());
 
 		Text totalLabel = new Text("Total: ");
@@ -814,26 +828,22 @@ public class Flow extends CyclistViewBase {
 		TextFlow totalLine = new TextFlow();
 		totalLine.getChildren().addAll(totalLabel, _total);
 		
-		_pane = new Pane();
-		_pane.getStyleClass().add("pane");
-		
-		Rectangle clip = new Rectangle(0, 0, 100, 100);
-		clip.widthProperty().bind(_pane.widthProperty());
-		clip.heightProperty().bind(_pane.heightProperty());
-		_pane.setClip(clip);
-	    
-		_pane.getChildren().addAll( _line[0], _line[1], totalLine);
+		_pane.getChildren().addAll(/* _line[0], _line[1],*/ totalLine);		
 		
 		DoubleProperty w = new SimpleDoubleProperty();
-		w.bind((_pane.widthProperty().subtract(_line[0].widthProperty()).subtract(_line[1].widthProperty())).divide(3));
+		w.bind(_pane.widthProperty().divide(3)); 
 		
-		_line[SRC].translateXProperty().bind(w);
-		_line[SRC].setTranslateY(Y_OFFSET_TOP);
-		_line[SRC].prefHeightProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
-
-		_line[DEST].translateXProperty().bind(_pane.widthProperty().subtract(w).subtract(_line[1].widthProperty()));
-		_line[DEST].setTranslateY(Y_OFFSET_TOP);
-		_line[DEST].prefHeightProperty().bind(_line[0].heightProperty());
+		_line[SRC].centerXProperty().bind(w);
+		_line[SRC].infoXProperty().set(10);
+		_line[SRC].startYProperty().bind(_pane.translateYProperty().add(Y_OFFSET_TOP));
+		_line[SRC].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
+		
+		_line[DEST].centerXProperty().bind(w.multiply(2));
+		_line[DEST].infoXProperty().bind(
+				_line[DEST].centerXProperty().add(
+						(_line[DEST].widthProperty().divide(2)).add(10)));
+		_line[DEST].startYProperty().bind(_pane.translateYProperty().add(Y_OFFSET_TOP));
+		_line[DEST].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
 
 		totalLine.translateXProperty().bind((_pane.widthProperty().subtract(totalLine.widthProperty()).divide(2)));
 		totalLine.setTranslateY(Y_OFFSET_TOP/2);
@@ -897,14 +907,19 @@ public class Flow extends CyclistViewBase {
 		});
 		
 		_line[SRC].kindProperty().addListener((o, p, n)->{
-			if (p != null)
+			if (p != null && !_isChangingKind)	{
+				_isChangingKind = true;
 				lineKindChanged(SRC);
+				_isChangingKind = false;
+			}
 		});
 		
 		_line[DEST].kindProperty().addListener((o, p, n)->{
-			if (p != null)
-				
+			if (p != null && !_isChangingKind)	{
+				_isChangingKind = true;
 				lineKindChanged(DEST);
+				_isChangingKind = false;
+			}
 		});
 	}
 }

@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -14,16 +13,14 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 
-public class FlowLine extends Region {
+public class FlowLine  {
 
 	public final int SPACING = 10;
 	public final int Y0 = 40;
@@ -31,9 +28,10 @@ public class FlowLine extends Region {
 	public final int BOTTOM_OFFSET = 10;
 	public final int INFO_OFFSET = 120;
 
+	private Pane _parent;
 	private int _direction;
 	private ObservableList<FlowNode> _nodes = FXCollections.observableArrayList();
-	private Map<FlowNode, FlowInfo> _infos = new HashMap<>();
+//	private Map<FlowNode, FlowInfo> _infos = new HashMap<>();
 	
 	private Line _line;
 	private ChoiceBox<String> _choiceBox;
@@ -43,6 +41,9 @@ public class FlowLine extends Region {
 	private ObjectProperty<Function<Transaction, Object>> _aggregateFuncProperty = new SimpleObjectProperty<>();
 	
 	private DoubleProperty _centerX = new SimpleDoubleProperty();
+	private DoubleProperty _startY = new SimpleDoubleProperty();
+	private DoubleProperty _endY = new SimpleDoubleProperty();
+	private DoubleProperty _infoX = new SimpleDoubleProperty();
 
 	/*
 	 * Properties
@@ -60,13 +61,30 @@ public class FlowLine extends Region {
 		return _centerX;
 	}
 	
+	public DoubleProperty startYProperty() {
+		return _startY;
+	}
+		
+	public DoubleProperty endYProperty() {
+		return _endY;
+	}
+	
+	public DoubleProperty infoXProperty() {
+		return _infoX;
+	}
+	
+	public ReadOnlyDoubleProperty widthProperty() {
+		return _choiceBox.widthProperty();
+	}
+	
 	/**
 	 * Constructor
 	 * @param direction 
 	 */
-	public FlowLine(int direction) {
+	public FlowLine(int direction, Pane parent) {
 		_direction = direction;
-		_infoOffset.set(direction==Flow.SRC ? -INFO_OFFSET : INFO_OFFSET);
+		_parent = parent;
+		_infoOffset.set(direction==FlowView.SRC ? -INFO_OFFSET : INFO_OFFSET);
 		build();
 		init();
 	}
@@ -76,43 +94,50 @@ public class FlowLine extends Region {
 	}
 	
 	public void addNode(final FlowNode node) {
-		double y = Y0;
+		double y = _line.getStartY();
 		if (_nodes.size() > 0) {
 			FlowNode last = _nodes.get(_nodes.size()-1);
 			y = last.getTranslateY()+last.getHeight()+SPACING;
 		}
 		
-		node.translateXProperty().bind(widthProperty().subtract(node.widthProperty()).divide(2));
+		node.translateXProperty().bind(centerXProperty().subtract(node.widthProperty().divide(2)));
 		node.setTranslateY(y);
 		
 		addListeners(node);
 		_nodes.add(node);
-		getChildren().add(node);
+		_parent.getChildren().add(node);
 		
-		FlowInfo info = new FlowInfo(node);
-		info.translateXProperty().bind(_line.translateXProperty().add(_infoOffset));
-		info.translateYProperty().bind(node.translateYProperty());
-		_infos.put(node, info);
-		getChildren().add(info);
+//		FlowInfo info = new FlowInfo(node);
+//		info.translateXProperty().bind(infoXProperty());
+//		info.translateYProperty().bind(node.translateYProperty());
+//		_infos.put(node, info);
+//		_parent.getChildren().add(info);
 	}
 
 	public void removeNode(FlowNode node) {
 		removeListeners(node);
 		_nodes.remove(node);
-		getChildren().remove(node);
+		_parent.getChildren().remove(node);
 		
-		getChildren().remove(_infos.remove(node));
+		if (_nodes.isEmpty())
+			_choiceBox.setValue(null);
 	}
 
-	public void removeNodes(Predicate<FlowNode> pred) {
-		_nodes.stream()
-			.filter(pred)
-			.collect(Collectors.toList()).stream()
-				.forEach(n->removeNode(n));
-	}
+//	public void removeNodes(Predicate<FlowNode> pred) {
+//		_nodes.stream()
+//			.filter(pred)
+//			.collect(Collectors.toList()).stream()
+//				.forEach(n->removeNode(n));
+//	}
 	
 	public ObservableList<FlowNode> getNodes() {
 		return _nodes;
+	}
+	
+	public List<FlowNode> selectNodes(Predicate<FlowNode> pred) {
+		return _nodes.stream()
+				.filter(pred)
+				.collect(Collectors.toList());
 	}
 	
 	public FlowNode findNode(Object value) {
@@ -125,7 +150,7 @@ public class FlowLine extends Region {
 	}
 	
 	public double getCenter() {
-		return localToParent(_line.getStartX(), 0).getX();
+		return centerXProperty().doubleValue();
 	}
 
 	public ObjectProperty<String> kindProperty() {
@@ -169,45 +194,45 @@ public class FlowLine extends Region {
 	
 	
 	private void init() {
-		_infoMode.addListener(new ChangeListener<Number>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Number> observable,
-					Number oldValue, Number newValue) {
-				for (FlowInfo info : _infos.values()) {
-					info.setMode(_infoMode.get());
-				}
-			}
-		});
+//		_infoMode.addListener(new ChangeListener<Number>() {
+//
+//			@Override
+//			public void changed(ObservableValue<? extends Number> observable,
+//					Number oldValue, Number newValue) {
+//				for (FlowInfo info : _infos.values()) {
+//					info.setMode(_infoMode.get());
+//				}
+//			}
+//		});
 		
-		_aggregateFuncProperty.addListener(new ChangeListener<Function<Transaction, Object>>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Function<Transaction, Object>> observable,
-					Function<Transaction, Object> oldValue, Function<Transaction, Object> newValue) {
-				for (FlowInfo info : _infos.values()) {
-					info.setType(_aggregateFuncProperty.get());
-				}
-			}
-		});
+//		_aggregateFuncProperty.addListener(new ChangeListener<Function<Transaction, Object>>() {
+//
+//			@Override
+//			public void changed(ObservableValue<? extends Function<Transaction, Object>> observable,
+//					Function<Transaction, Object> oldValue, Function<Transaction, Object> newValue) {
+//				for (FlowInfo info : _infos.values()) {
+//					info.setType(_aggregateFuncProperty.get());
+//				}
+//			}
+//		});
 		
 	}
 	
 	private void build() {
-		getStyleClass().add("flow-line");
-
 		_choiceBox = new ChoiceBox<>();
 		_choiceBox.getStyleClass().add("choice");
+		_choiceBox.translateXProperty().bind(centerXProperty().subtract(_choiceBox.widthProperty().divide(2)));
+		_choiceBox.translateYProperty().bind(startYProperty());
 		
 		_line = new Line();
 		_line.getStyleClass().add("line");
-		_line.startXProperty().bind(widthProperty().multiply(0.5));
+		_line.startXProperty().bind(centerXProperty());
 		_line.endXProperty().bind(_line.startXProperty());
 		
 		_line.startYProperty().bind(_choiceBox.translateYProperty().add(_choiceBox.heightProperty().add(GAP)));
-		_line.endYProperty().bind(heightProperty());
+		_line.endYProperty().bind(endYProperty());
 
-		getChildren().addAll(_choiceBox, _line);
+		_parent.getChildren().addAll(_choiceBox, _line);
 		
 	}
 	

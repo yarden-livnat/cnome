@@ -10,6 +10,8 @@ public class IntegerField extends TextField {
 	private int _minValue = Integer.MIN_VALUE;
 	private int _maxValue = Integer.MAX_VALUE;
 	
+	private boolean _active = false;
+	
 	public IntegerField() {
 		this(0);
 	}
@@ -18,6 +20,11 @@ public class IntegerField extends TextField {
 		super();
 		setOnAction(e->parseValue());
 		setValue(value);
+		
+		_valueProperty.addListener(o->{
+			setText(Integer.toString(getValue()));
+			setActive(false);
+		});
 	}
 	
 	public void setMinValue(int value) {
@@ -43,13 +50,13 @@ public class IntegerField extends TextField {
 	public void setValue(int value) {
 		value = Math.max(_minValue, Math.min(value, _maxValue));
 		valueProperty().set(value);
-		setText(Integer.toString(value));
 	}
 	
 	@Override
     public void replaceText(int start, int end, String text) {
         if (text.matches("[0-9]")) {
-            super.replaceText(start, end, text);                     
+            super.replaceText(start, end, text);  
+            setActive(true);
         }
     }
 
@@ -57,17 +64,29 @@ public class IntegerField extends TextField {
     public void replaceSelection(String text) {
         if (!text.matches("[0-9]")) {
             super.replaceSelection(text);
+            setActive(true);
         }
     }
     
     private void parseValue() {
     	try {
     		int n = Integer.parseInt(getText());
-    		valueProperty().set(n);
+//    		valueProperty().set(n);
+    		setValue(n);
     	} catch (Exception e) {
     		System.out.println("** Do something about an Illegle number");
     	}
     	
+    }
+    
+    private void setActive(boolean value) {
+    	if (value == _active) return;
+    	
+    	_active = value;
+    	if (_active) 
+    		setStyle("-fx-background:lightgray");
+    	else
+    		setStyle("-fx-background:white");
     }
 	
 }

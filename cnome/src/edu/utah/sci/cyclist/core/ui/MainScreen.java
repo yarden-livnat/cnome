@@ -294,12 +294,6 @@ public class MainScreen extends VBox {
 		return menu;
 	}
 	
-	private Menu createPanelMenu() {
-		
-		Menu menu = new Menu("Panel");
-		return menu;
-	}
-	
 	private Menu createPerspectiveMenu() {
 		Menu menu = new Menu("Perspectives");
 		

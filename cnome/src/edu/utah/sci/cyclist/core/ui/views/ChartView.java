@@ -1324,30 +1324,30 @@ public class ChartView extends CyclistViewBase {
 		return area;
 	}
 
-	private DropArea createIndicatorArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy, DropArea.AcceptedRoles acceptedRoles) {
-		Text text = new Text(title);
-		text.getStyleClass().add("input-area-header");
-
-		DropArea area = new DropArea(policy, acceptedRoles);
-		area.tableProperty().bind(_currentTableProperty);
-		area.addListener(_areaListener);
-
-		Button addButton = new Button("+");
-		addButton.getStyleClass().add("flat-button");
-		addButton.setOnAction(new EventHandler<ActionEvent>() {
-
-			@Override
-			public void handle(ActionEvent arg0) {
-				createIndicator();
-			}
-		});
-
-		grid.add(text, col, row);
-		grid.add(area, col+1, row);
-		grid.add(addButton, col+2, row);
-
-		return area;
-	}
+//	private DropArea createIndicatorArea(GridPane grid, String title, int  row, int col, DropArea.Policy policy, DropArea.AcceptedRoles acceptedRoles) {
+//		Text text = new Text(title);
+//		text.getStyleClass().add("input-area-header");
+//
+//		DropArea area = new DropArea(policy, acceptedRoles);
+//		area.tableProperty().bind(_currentTableProperty);
+//		area.addListener(_areaListener);
+//
+//		Button addButton = new Button("+");
+//		addButton.getStyleClass().add("flat-button");
+//		addButton.setOnAction(new EventHandler<ActionEvent>() {
+//
+//			@Override
+//			public void handle(ActionEvent arg0) {
+//				createIndicator();
+//			}
+//		});
+//
+//		grid.add(text, col, row);
+//		grid.add(area, col+1, row);
+//		grid.add(addButton, col+2, row);
+//
+//		return area;
+//	}
 
 	private void setupGlassPaneListeners() {
 		_glassPane.setOnDragOver(new EventHandler<DragEvent>() {

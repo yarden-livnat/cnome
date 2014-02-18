@@ -66,7 +66,15 @@ public class SimulationProxy {
 		+ "		      GROUP BY Time) as r"
 		+ "		on Times.Time = r.Time";
 
-
+	public static final String INVENTORY_QUERY = 
+			"SELECT time, sum(totalQuantity)"
+			+ " FROM Resources_Inventories"
+			+ " WHERE"
+			+ "     SimID = ?"
+			+ " and %s = ?"
+			+ " GROUP BY time"
+			+ " ORDER BY time";
+	
 	public SimulationProxy(Simulation sim) {
 		_sim = sim;
 	}
@@ -140,6 +148,100 @@ public class SimulationProxy {
 		return  FXCollections.observableList(list);
 	}
 	
+	public ObservableList<Pair<Integer, Double>> getInventory(String type, String value) {
+		List<Pair<Integer, Double>> list = new ArrayList<>();
+		
+		String query = String.format(INVENTORY_QUERY, type);
+		System.out.println(query+"  ["+type+", "+value+"]");
+		try (Connection conn = _sim.getDataSource().getConnection()) {
+			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setString(1, _sim.getSimulationId());
+				stmt.setString(2, value);				
+
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next()) {
+					Pair<Integer, Double> p = new Pair<>();
+					p.v1 = rs.getInt(1);
+					p.v2 = rs.getDouble(2);
+					list.add(p);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			_sim.getDataSource().releaseConnection();
+		}
+		
+		return FXCollections.observableArrayList(list);
+	}
+	
+	public ObservableList<Pair<Integer, Double>> getComulativeInventory(String type, String value) {
+		List<Pair<Integer, Double>> list = new ArrayList<>();
+		
+		String query = String.format(INVENTORY_QUERY, type);
+		System.out.println(query+"  ["+type+", "+value+"]");
+		try (Connection conn = _sim.getDataSource().getConnection()) {
+			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setString(1, _sim.getSimulationId());
+				stmt.setString(2, value);				
+
+				ResultSet rs = stmt.executeQuery();
+				double totalInventory = 0;
+				while (rs.next()) {
+					Pair<Integer, Double> p = new Pair<>();
+					p.v1 = rs.getInt(1);
+					totalInventory += rs.getDouble(2);
+					p.v2 = totalInventory;
+					list.add(p);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			_sim.getDataSource().releaseConnection();
+		}
+		
+		return FXCollections.observableArrayList(list);
+	}
+
+	public ObservableList<Pair<Integer, Double>> getNetInventory(String type, String value) {
+		List<Pair<Integer, Double>> list = new ArrayList<>();
+		
+		String query = String.format(INVENTORY_QUERY, type);
+		System.out.println(query.replace("  +", " ")+"  ["+type+", "+value+"]");
+		try (Connection conn = _sim.getDataSource().getConnection()) {
+			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setString(1, _sim.getSimulationId());
+				stmt.setString(2, value);				
+
+				ResultSet rs = stmt.executeQuery();
+				double prevInventory = 0;
+				while (rs.next()) {
+					Pair<Integer, Double> p = new Pair<>();
+					p.v1 = rs.getInt(1);
+					double currentInventory = rs.getDouble(2);
+					p.v2 = currentInventory - prevInventory;
+					prevInventory = currentInventory;
+					list.add(p);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			_sim.getDataSource().releaseConnection();
+		}
+		
+		return FXCollections.observableArrayList(list);
+	}
+
+	
+	/*
+	 * ============= PREVIOUS QUERIES ================
+	 */
+	
 	public ObservableList<Pair<Integer, Double>> getFlow(String type, String value, boolean forward) {
 		List<Pair<Integer, Double>> list = new ArrayList<>();
 		
@@ -199,4 +301,5 @@ public class SimulationProxy {
 		
 		return FXCollections.observableArrayList(list);
 	}
+
 }
