@@ -47,4 +47,6 @@ public class CyclistNotifications {
 	public static final String SIMULATION_REMOVE 		= "simulation_remove";
 	public static final String SIMULATION_SELECTED 		= "simulation_selected";
 	public static final String SIMULATION_UNSELECTED 	= "simulation_unselected";
+	
+	public static final String ADD_TOOL					= "add_tool";
 }
