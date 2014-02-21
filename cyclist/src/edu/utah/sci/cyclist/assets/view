@@ -1,0 +1,29 @@
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `cyclist`@`%` 
+    SQL SECURITY DEFINER
+VIEW `MaterialFlow` AS
+    select 
+        `Transactions`.`SimID` AS `SimID`,
+        `Transactions`.`SenderID` AS `SenderID`,
+        `Transactions`.`ReceiverID` AS `ReceiverID`,
+        `Transactions`.`MarketID` AS `MarketID`,
+        `Transactions`.`Commodity` AS `Commodity`,
+        `Transactions`.`Price` AS `Price`,
+        `Transactions`.`Time` AS `Time`,
+        `Resources`.`Quantity` AS `Quantity`,
+        `Resources`.`units` AS `Units`,
+        `Compositions`.`IsoID` AS `IsoID`,
+        `Compositions`.`Quantity` AS `Fraction`
+    from
+        (`Transactions`
+        left join ((`TransactedResources`
+        join `Resources`)
+        join `Compositions`) ON (((`TransactedResources`.`SimID` = `Transactions`.`SimID`)
+            and (`Transactions`.`ID` = `TransactedResources`.`TransactionID`)
+            and (`Resources`.`SimID` = `Transactions`.`SimID`)
+            and (`Resources`.`ID` = `TransactedResources`.`ResourceID`)
+            and (`Compositions`.`SimID` = `Transactions`.`SimID`)
+            and (`Compositions`.`ID` = `Resources`.`StateId`))))
+    where
+        (`Resources`.`Type` = 'Material')
