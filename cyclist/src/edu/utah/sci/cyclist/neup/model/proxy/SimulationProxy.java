@@ -20,28 +20,18 @@ public class SimulationProxy {
 	private ObservableList<Facility> _facilities;
 	
 	public static final String FACILITIES_QUERY =
-			"SELECT ID, ModelType, Prototype, InstitutionID, RegionID FROM Facilities where SimID=?";
+			"SELECT AgentID, Implementation, Prototype, InstitutionID, RegionID FROM Facilities where SimId=?";
 	
 	public static final String TRANSACTIONS_QUERY =
-			 "SELECT * "
-			+ " FROM MaterialFlow, Facilities "
+			 "SELECT  SenderId, ReceiverId, Commodity, NucId, Quantity*MassFrac as Amount, Units"
+			+ " FROM Transactions "
+			+ "      JOIN Facilities on (Transactions.SimId = Facilities.SimId and Transactions.%s = Facilities.AgentID) "
+			+ "      JOIN Resources on (Transactions.SimId = Resources.SimId and Transactions.ResourceId = Resources.ResourceId)"
+			+ "      JOIN Compositions on (Transactions.SimId = Compositions.SimId and Compositions.StateId = Resources.StateId)"
 			+ " WHERE" 
-			+ "     MaterialFlow.SimID = ?"
+			+ "     Transactions.SimId = ?"
 			+ " and Time = ? "
-			+ " and MaterialFlow.SimID = Facilities.SimID"
-			+ " and %s = Facilities.ID "
 			+"  and Facilities.%s = ?";
-	
-	public static final String COMULATIVE_FLOW_QUERY =
-			"SELECT time, sum(quantity*fraction) as amount"
-			+ " FROM MaterialFlow, Facilities "
-			+ " WHERE" 
-			+ "     MaterialFlow.SimID = ?"
-			+ " and MaterialFlow.SimID = Facilities.SimID"
-			+ " and %s = Facilities.ID "
-			+ " and Facilities.%s = ?"
-			+ " GROUP BY time "
-			+ " ORDER BY time";
 
 	public static final String INVENTORY_QUERY_1 = 
 			"SELECT time, sum(totalQuantity)"
@@ -56,7 +46,7 @@ public class SimulationProxy {
 	public static final String INVENTORY_QUERY = 
 			"SELECT tl.Time as time, cmp.NucId as nucid, SUM(inv.Quantity*cmp.MassFrac) as amount"
 			+ "	FROM "
-			+ "		Timelist AS tl"
+			+ "		TimeList AS tl"
 			+ "			INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
 			+ "			INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
 			+ "			INNER JOIN Compositions AS cmp ON cmp.StateId = inv.StateId "
@@ -86,7 +76,7 @@ public class SimulationProxy {
 				
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
-					Facility f = new Facility(rs.getInt("ID"), rs.getString("ModelType"), rs.getString("Prototype"),
+					Facility f = new Facility(rs.getInt("AgentID"), rs.getString("Implementation"), rs.getString("Prototype"),
 							rs.getInt("InstitutionID"), rs.getInt("RegionID"));
 					list.add(f);
 				}
@@ -105,7 +95,7 @@ public class SimulationProxy {
 		List<Transaction> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
-			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderID" : "ReceiverID", type);
+			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderId" : "ReceiverId", type);
 			System.out.println("query: ["+query+"]");
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());
@@ -115,14 +105,11 @@ public class SimulationProxy {
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
 					Transaction tr = new Transaction();
-					tr.sender = rs.getInt("SenderID");
-					tr.receiver = rs.getInt("ReceiverID");
-					tr.market = rs.getInt("MarketID");
+					tr.sender = rs.getInt("SenderId");
+					tr.receiver = rs.getInt("ReceiverId");
 					tr.commodity = rs.getString("Commodity");
-					tr.price = rs.getDouble("Price");
-					tr.iso = rs.getInt("IsoID");
-					tr.quantity = rs.getDouble("Quantity");
-					tr.fraction = rs.getDouble("Fraction");
+					tr.nucid = rs.getInt("NucId");
+					tr.amount = rs.getDouble("Amount");
 					tr.units = rs.getString("Units");
 					
 					list.add(tr);
@@ -201,7 +188,7 @@ public class SimulationProxy {
 	public ObservableList<Pair<Integer, Double>> getNetInventory(String type, String value) {
 		List<Pair<Integer, Double>> list = new ArrayList<>();
 		
-		String query = String.format(INVENTORY_QUERY, type);
+		String query = String.format(INVENTORY_QUERY_1, type);
 		System.out.println(query.replace("  +", " ")+"  ["+type+", "+value+"]");
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -228,70 +215,4 @@ public class SimulationProxy {
 		
 		return FXCollections.observableArrayList(list);
 	}
-
-	
-	/*
-	 * ============= PREVIOUS QUERIES ================
-	 */
-	
-	public ObservableList<Pair<Integer, Double>> getFlow(String type, String value, boolean forward) {
-		List<Pair<Integer, Double>> list = new ArrayList<>();
-		
-		String query = String.format(COMULATIVE_FLOW_QUERY, forward? "SenderID" : "ReceiverID", type);
-		System.out.println(query+"  ["+type+", "+value+"]");
-		try (Connection conn = _sim.getDataSource().getConnection()) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
-				stmt.setString(1, _sim.getSimulationId());
-				stmt.setString(2, value);
-				
-				ResultSet rs = stmt.executeQuery();
-				double sum = 0;
-				while (rs.next()) {
-					Pair<Integer, Double> p = new Pair<>();
-					p.v1 = rs.getInt(1);
-					sum += rs.getDouble(2);
-					p.v2 = sum;
-					list.add(p);
-				}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			_sim.getDataSource().releaseConnection();
-		}
-		
-		return FXCollections.observableArrayList(list);
-	}
-	
-	public ObservableList<Pair<Integer, Double>> getNetFlow(String type, String value) {
-		List<Pair<Integer, Double>> list = new ArrayList<>();
-		
-		String query = String.format(NET_FLOW_QUERY, type, type);
-		System.out.println(query+"  ["+type+", "+value+"]");
-		try (Connection conn = _sim.getDataSource().getConnection()) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
-				stmt.setString(1, _sim.getSimulationId());
-				stmt.setString(2, value);
-				stmt.setString(3, _sim.getSimulationId());
-				stmt.setString(4, value);				
-
-				ResultSet rs = stmt.executeQuery();
-				while (rs.next()) {
-					Pair<Integer, Double> p = new Pair<>();
-					p.v1 = rs.getInt(1);
-					p.v2 = rs.getDouble(2);
-					list.add(p);
-				}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			_sim.getDataSource().releaseConnection();
-		}
-		
-		return FXCollections.observableArrayList(list);
-	}
-
 }

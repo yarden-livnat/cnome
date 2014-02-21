@@ -1,5 +1,6 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class FlowChart extends VBox {
 	
 	public class ChartInfo {
 		public Label title;
-		public ObservableList<Pair<Integer, Double>> values;
+		public Collection<Pair<Integer, Double>> values;
 		public XYChart.Series<Number, Number> series;
 		public double scale;
 		public int last;
@@ -76,10 +77,13 @@ public class FlowChart extends VBox {
 		updateAll();
 	}
 	
-	public void add(FlowNode node, String title, ObservableList<Pair<Integer, Double>> values) {
+	public void add(FlowNode node, String title, Collection<Pair<Integer, Double>> values) {
 		if (values.size() == 0) return;
 		
-		int last = values.get(values.size()-1).v1;
+		int last = 0;
+		for (Pair<Integer, Double> p : values) {
+			last = Math.max(last, p.v1);
+		}
 		if (last > _upperBound) {
 			_upperBound = last;
 		}
@@ -155,7 +159,7 @@ public class FlowChart extends VBox {
 	}
 
 	
-	private double computeScale(ObservableList<Pair<Integer, Double>> values) {
+	private double computeScale(Collection<Pair<Integer, Double>> values) {
 		double max = 0;
 		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
 			double sum = 0;
@@ -175,7 +179,7 @@ public class FlowChart extends VBox {
 		return s;
 	}
 	
-	private void updateSeries(XYChart.Series<Number, Number> series, ObservableList<Pair<Integer, Double>> values) {
+	private void updateSeries(XYChart.Series<Number, Number> series, Collection<Pair<Integer, Double>> values) {
 		series.getData().clear();
 
 		if (_type.equals(COMMULATIVE_CHART_LABEL)) {

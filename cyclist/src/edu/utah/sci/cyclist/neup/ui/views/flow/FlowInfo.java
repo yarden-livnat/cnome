@@ -22,7 +22,7 @@ public class FlowInfo extends Pane {
 	
 	private FlowNode _node;
 
-	private Function<Transaction, Object> _typeFunc = t->t.iso;
+	private Function<Transaction, Object> _typeFunc = t->t.nucid;
 	
 	private VBox _vbox;
 	private CategoryAxis _xAxis;
@@ -60,7 +60,7 @@ public class FlowInfo extends Pane {
 			Double sum = map.get(type);
 			if (sum == null) 
 				sum = new Double(0);
-			map.put(type, sum+t.quantity*t.fraction );
+			map.put(type, sum+t.amount );
 		}
 		
 		XYChart.Series<String, Number> series = new XYChart.Series<>();

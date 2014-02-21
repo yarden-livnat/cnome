@@ -68,8 +68,8 @@ public class FlowView extends CyclistViewBase {
 	public static final int SRC = 0;
 	public static final int DEST = 1;
 	
-	public static final int INIT_TIMESTEP = 1;
-	public static final int MIN_TIMESTEP = 1;
+	public static final int INIT_TIMESTEP = 0;
+	public static final int MIN_TIMESTEP = 0;
 
 	
 	private FlowLine _line[]; 
@@ -133,9 +133,9 @@ public class FlowView extends CyclistViewBase {
 	private void init() {
 		setSupportsTables(false);
 		
-		kindFactory.put("ModelType", f->f.model);
+		kindFactory.put("Implementation", f->f.implementation);
 		kindFactory.put("Prototype", f->f.prototype);
-		kindFactory.put("ID", f->f.id);
+		kindFactory.put("AgentID", f->f.id);
 		kindFactory.put("InstitutionID", f->f.intitution);
 	}
 	
@@ -192,7 +192,7 @@ public class FlowView extends CyclistViewBase {
 		double total = 0;
 		for (FlowNode node : _line[SRC].getNodes()) {
 			for (Transaction t : node.getActiveTransactions()) {
-				total += t.quantity*t.fraction;
+				total += t.amount;
 			}
 		}
 		
@@ -336,7 +336,18 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void addToChart(FlowNode node, ObservableList<Inventory> values) {
-		_chart.add(node, node.getName(), values);
+		Map<Integer, Pair<Integer, Double>> map = new HashMap<>();
+		for (Inventory i : values) {
+			Pair<Integer, Double> p = map.get(i.time);
+			if (p == null) {
+				p = new Pair<Integer, Double>();
+				p.v1 = i.time;
+				p.v2 = 0.0;
+				map.put(i.time, p);
+			}
+			p.v2 += i.amount;
+		}
+		_chart.add(node, node.getName(), map.values());
 	}
 	
 	private ReadOnlyObjectProperty<ObservableList<Inventory>> queryInventory(FlowNode node) {
@@ -357,52 +368,6 @@ public class FlowView extends CyclistViewBase {
 		return task.valueProperty();
 	}
 	
-//	private ReadOnlyObjectProperty<ObservableList<Pair<Integer, Double>>> queryCommulativeInventory(FlowNode node) {
-//		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
-//			@Override
-//			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
-//				ObservableList<Pair<Integer, Double>> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
-//				double sum = 0;
-//				for (Pair<Integer, Double> p : list) {
-//					sum += p.v2;
-//					p.v2 = sum;
-//				}
-//				return list;
-//			}	
-//		};
-//		
-//		Thread thread = new Thread(task);
-//		thread.setDaemon(true);
-//		thread.start();
-//		
-//		setCurrentTask(task);
-//		
-//		return task.valueProperty();
-//	}
-	
-//	private void queryNetInventory(FlowNode node) {
-//		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
-//			@Override
-//			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
-//				ObservableList<Pair<Integer, Double>> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
-//				double prev = 0;
-//				for (Pair<Integer, Double> p : list) {
-//					double current = p.v2;
-//					p.v2 -= prev;
-//					prev = current;
-//				}
-//				return list;
-//			}	
-//		};
-//		
-//		_chart.items().bind(task.valueProperty());
-//
-//		Thread thread = new Thread(task);
-//		thread.setDaemon(true);
-//		thread.start();
-//		
-//		setCurrentTask(task);
-//	}
 	private void queryMaterialFlow(final FlowNode node) {
 		final int timestep = getTime();
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
@@ -552,9 +517,11 @@ public class FlowView extends CyclistViewBase {
 			try {
 				final int n = Integer.parseInt(value);	
 				_isoPredicate =  
-					n< 1000 ? 
-						t->Math.floorDiv(t.iso, 1000) == n:
-						t->t.iso == n  ;
+					n< 200 ? 
+						t->Math.floorDiv(t.nucid, 1000*10000) == n:
+					n < 200000 ?
+						t->Math.floorDiv(t.nucid, 10000) == n:
+						t->t.nucid == n  ;
 				updateTransactionsPredicate();
 			} catch (Exception e)  {
 				System.out.println("*** TODO: Indicate to user iso was invalid number");
@@ -636,7 +603,7 @@ public class FlowView extends CyclistViewBase {
 			
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
-				if (field.getName().equals("EnterDate") || field.getName().equals("DeathDate")) {
+				if (field.getName().equals("EnterTime") || field.getName().equals("ExitTime")) {
 					e.acceptTransferModes(TransferMode.COPY);
 					e.consume();
 				}
@@ -775,8 +742,8 @@ public class FlowView extends CyclistViewBase {
 		);
 		
 		commodity.setOnAction(e->_aggregateFuncProperty.set(t->t.commodity));
-		elem.setOnAction(e->_aggregateFuncProperty.set(t->Math.floorDiv(t.iso, 1000)));
-		iso.setOnAction(e->_aggregateFuncProperty.set(t->t.iso));
+		elem.setOnAction(e->_aggregateFuncProperty.set(t->Math.floorDiv(t.nucid, 1000)));
+		iso.setOnAction(e->_aggregateFuncProperty.set(t->t.nucid));
 		
 		commodity.setSelected(true);
 
@@ -821,14 +788,14 @@ public class FlowView extends CyclistViewBase {
 		_pane.getChildren().addAll(/* _line[0], _line[1],*/ totalLine);		
 		
 		DoubleProperty w = new SimpleDoubleProperty();
-		w.bind(_pane.widthProperty().divide(3)); 
+		w.bind(_pane.widthProperty().divide(5)); 
 		
 		_line[SRC].centerXProperty().bind(w);
 		_line[SRC].infoXProperty().set(10);
 		_line[SRC].startYProperty().bind(_pane.translateYProperty().add(Y_OFFSET_TOP));
 		_line[SRC].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
 		
-		_line[DEST].centerXProperty().bind(w.multiply(2));
+		_line[DEST].centerXProperty().bind(w.multiply(4));
 		_line[DEST].infoXProperty().bind(
 				_line[DEST].centerXProperty().add(
 						(_line[DEST].widthProperty().divide(2)).add(10)));

@@ -5,13 +5,13 @@
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="ID">
+			<field name="AgentID">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="AgentType">
+			<field name="Kind">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="ModelType">
+			<field name="Implemenation">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Prototype">
@@ -20,36 +20,26 @@
 			<field name="ParentID">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="EnterDate">
+			<field name="EnterTime">
 				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>		
+			</field>	
+			<field name="ExitTime">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>	
 		</Schema>
 	</Table>
-	<Table name="AgentDeaths">
+		<Table name="Compositions">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="AgentID">
+			<field name="StateId">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="DeathDate">
+			<field name="NucId" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-		</Schema>
-	</Table>
-	<Table name="Compositions">
-		<Schema>
-			<field name="SimID">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="ID">
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-			<field name="IsoID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-			<field name="Quantity">
+			<field name="MassFrac">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 		</Schema>
@@ -81,19 +71,19 @@
 			<field name="SimID" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="ID" >
+			<field name="AgentID" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="ModelType" >
+			<field name="Implementation" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="EnterDate" >
+			<field name="EnterTime" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="DeathDate" >
+			<field name="ExitTIme" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="InstitutionID" >
@@ -109,10 +99,10 @@
 			<field name="SimID" >
 			<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="ResID" >
+			<field name="ResourceId" >
 			<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="AgentID" >
+			<field name="AgentId" >
 			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="StartTime" >
