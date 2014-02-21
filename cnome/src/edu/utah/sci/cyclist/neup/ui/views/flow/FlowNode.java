@@ -195,6 +195,13 @@ class FlowNode extends Pane {
 		return _selected.get();
 	}
 	
+	public String getName() {
+		return _value instanceof String ?
+			_value.toString()
+			:
+			_type+" = "+_value.toString();
+	}
+	
 	private void build(String type, Object value) {
 		String label = value.toString();
 		if (!(value instanceof String))

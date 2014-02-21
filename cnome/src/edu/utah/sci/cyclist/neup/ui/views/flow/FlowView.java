@@ -78,7 +78,7 @@ public class FlowView extends CyclistViewBase {
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private List<Connector> _connectors = new ArrayList<>();
-	private Map<FlowNode, ObservableList<Pair<Integer, Double>>> _selectedNodes = new HashMap<>();
+	private Map<FlowNode, ObservableList<Inventory>> _selectedNodes = new HashMap<>();
 
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
@@ -320,10 +320,10 @@ public class FlowView extends CyclistViewBase {
 			_chart.remove(node);
 		} else {
 			node.setSelected(true);
-			ObservableList<Pair<Integer, Double>> values = _selectedNodes.get(node);
+			ObservableList<Inventory> values = _selectedNodes.get(node);
 			if (values == null) {
 				queryInventory(node).addListener((Observable o)->{
-					ObjectProperty<ObservableList<Pair<Integer, Double>>> p = (ObjectProperty<ObservableList<Pair<Integer, Double>>>) o;
+					ObjectProperty<ObservableList<Inventory>> p = (ObjectProperty<ObservableList<Inventory>>) o;
 
 					_selectedNodes.put(node, p.get());
 					addToChart(node, p.get());
@@ -335,15 +335,8 @@ public class FlowView extends CyclistViewBase {
 		}
 	}
 	
-	private void addToChart(FlowNode node, ObservableList<Pair<Integer, Double>> values) {
-		String title;
-		if (node.getValue() instanceof String) {
-			title = node.getValue().toString();
-		}
-		else {
-			title = node.getType()+" = "+node.getValue().toString();
-		}
-		_chart.add(node, title, values);
+	private void addToChart(FlowNode node, ObservableList<Inventory> values) {
+		_chart.add(node, node.getName(), values);
 	}
 	
 	private ReadOnlyObjectProperty<ObservableList<Inventory>> queryInventory(FlowNode node) {
