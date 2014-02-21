@@ -49,6 +49,7 @@ import edu.utah.sci.cyclist.core.ui.components.IntegerField;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Facility;
+import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
 
@@ -120,12 +121,8 @@ public class FlowView extends CyclistViewBase {
 		if (!active && sim != _currentSim) {
 			return; // ignore
 		}
-		if (active) {
-			_currentSim = sim;
-		} else {
-			_currentSim = null;
-		}
 		
+		_currentSim = active? sim : null;
 		update();
 	}
 	
@@ -349,11 +346,11 @@ public class FlowView extends CyclistViewBase {
 		_chart.add(node, title, values);
 	}
 	
-	private ReadOnlyObjectProperty<ObservableList<Pair<Integer, Double>>> queryInventory(FlowNode node) {
-		Task<ObservableList<Pair<Integer, Double>>> task = new Task<ObservableList<Pair<Integer, Double>>>() {
+	private ReadOnlyObjectProperty<ObservableList<Inventory>> queryInventory(FlowNode node) {
+		Task<ObservableList<Inventory>> task = new Task<ObservableList<Inventory>>() {
 			@Override
-			protected ObservableList<Pair<Integer, Double>> call() throws Exception {
-				ObservableList<Pair<Integer, Double>> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
+			protected ObservableList<Inventory> call() throws Exception {
+				ObservableList<Inventory> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
 				return list;
 			}	
 		};

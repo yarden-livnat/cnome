@@ -71,7 +71,6 @@ public class IntegerField extends TextField {
     private void parseValue() {
     	try {
     		int n = Integer.parseInt(getText());
-//    		valueProperty().set(n);
     		setValue(n);
     	} catch (Exception e) {
     		System.out.println("** Do something about an Illegle number");
@@ -80,13 +79,14 @@ public class IntegerField extends TextField {
     }
     
     private void setActive(boolean value) {
+    	System.out.println("set active:"+value);
     	if (value == _active) return;
     	
     	_active = value;
     	if (_active) 
-    		setStyle("-fx-background:lightgray");
+    		setStyle("-fx-background-color:lightgray");
     	else
-    		setStyle("-fx-background:white");
+    		setStyle("-fx-background-color: -fx-control-inner-background");
     }
 	
 }

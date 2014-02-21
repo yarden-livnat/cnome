@@ -16,17 +16,14 @@ import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import edu.utah.sci.cyclist.core.model.Configuration;
-import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.components.TaskControl;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Transaction;
-import edu.utah.sci.cyclist.neup.ui.views.FlowView;
 
 
 class FlowNode extends Pane {

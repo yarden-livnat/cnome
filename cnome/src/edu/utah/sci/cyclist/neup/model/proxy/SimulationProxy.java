@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.neup.model.Facility;
+import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 
 public class SimulationProxy {
@@ -41,32 +42,8 @@ public class SimulationProxy {
 			+ " and Facilities.%s = ?"
 			+ " GROUP BY time "
 			+ " ORDER BY time";
-	
-	public static final String NET_FLOW_QUERY = 
-		"SELECT Times.Time as time, ifnull(r.v,0)-ifnull(s.v,0) as vol "
-		+ " FROM Times"
-		+ "      left join "
-		+ "			(SELECT Time, sum(Quantity*Fraction) as v "
-		+ "   	   	   FROM MaterialFlow, Facilities "
-		+ "            WHERE "
-		+ "                MaterialFlow.SimID = ?"
-		+ " 		   and MaterialFlow.SimID = Facilities.SimID"
-		+ "            and SenderID = Facilities.ID "
-		+ "            and Facilities.%s = ?"
-		+ "		   	  GROUP BY Time) as s "
-		+ "		on (Times.Time = s.Time) "
-		+ "		left join "
-		+ "		 	(SELECT Time, sum(Quantity*Fraction) as v "
-		+ "   	   	   FROM MaterialFlow, Facilities "
-		+ "            WHERE "
-		+ "                MaterialFlow.SimID = ?"
-		+ " 		   and MaterialFlow.SimID = Facilities.SimID"
-		+ "            and ReceiverID = Facilities.ID "
-		+ "            and Facilities.%s = ?"
-		+ "		      GROUP BY Time) as r"
-		+ "		on Times.Time = r.Time";
 
-	public static final String INVENTORY_QUERY = 
+	public static final String INVENTORY_QUERY_1 = 
 			"SELECT time, sum(totalQuantity)"
 			+ " FROM Resources_Inventories"
 			+ " WHERE"
@@ -74,6 +51,20 @@ public class SimulationProxy {
 			+ " and %s = ?"
 			+ " GROUP BY time"
 			+ " ORDER BY time";
+	
+	
+	public static final String INVENTORY_QUERY = 
+			"SELECT tl.Time as time, cmp.NucId as nucid, SUM(inv.Quantity*cmp.MassFrac) as amount"
+			+ "	FROM "
+			+ "		Timelist AS tl"
+			+ "			INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
+			+ "			INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
+			+ "			INNER JOIN Compositions AS cmp ON cmp.StateId = inv.StateId "
+			+ "	WHERE"
+			+ "		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId"
+			+ "		AND inv.SimId = ?"
+			+ "		AND ag.%s = ?"
+			+ "	GROUP BY tl.Time,cmp.NucId";
 	
 	public SimulationProxy(Simulation sim) {
 		_sim = sim;
@@ -148,8 +139,8 @@ public class SimulationProxy {
 		return  FXCollections.observableList(list);
 	}
 	
-	public ObservableList<Pair<Integer, Double>> getInventory(String type, String value) {
-		List<Pair<Integer, Double>> list = new ArrayList<>();
+	public ObservableList<Inventory> getInventory(String type, String value) {
+		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
 		System.out.println(query+"  ["+type+", "+value+"]");
@@ -160,10 +151,11 @@ public class SimulationProxy {
 
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
-					Pair<Integer, Double> p = new Pair<>();
-					p.v1 = rs.getInt(1);
-					p.v2 = rs.getDouble(2);
-					list.add(p);
+					Inventory i = new Inventory();
+					i.time = rs.getInt(1);
+					i.nucid = rs.getInt(2);
+					i.amount = rs.getDouble(2);
+					list.add(i);
 				}
 			}
 		} catch (SQLException e) {
