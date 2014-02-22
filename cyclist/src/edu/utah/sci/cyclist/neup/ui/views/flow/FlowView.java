@@ -68,8 +68,8 @@ public class FlowView extends CyclistViewBase {
 	public static final int SRC = 0;
 	public static final int DEST = 1;
 	
-	public static final int INIT_TIMESTEP = 0;
-	public static final int MIN_TIMESTEP = 0;
+	public static final int INIT_TIMESTEP = 1;
+	public static final int MIN_TIMESTEP = 1;
 
 	
 	private FlowLine _line[]; 
@@ -675,6 +675,7 @@ public class FlowView extends CyclistViewBase {
 		
 		TextField entry = new TextField();
 		entry.getStyleClass().add("nuclide");
+		entry.setPromptText("filter");
 
 		vbox.getChildren().addAll(
 			title,
@@ -754,7 +755,7 @@ public class FlowView extends CyclistViewBase {
 		VBox vbox = new VBox();
 		_chart = new FlowChart();
 		
-		_timestepField.valueProperty().bindBidirectional(_chart.timeProperty());
+		_chart.timeProperty().bindBidirectional(_timestepField.valueProperty());
 		
 		vbox.getChildren().addAll(
 			new Separator(),

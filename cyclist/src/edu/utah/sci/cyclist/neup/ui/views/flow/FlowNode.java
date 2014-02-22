@@ -16,10 +16,12 @@ import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import edu.utah.sci.cyclist.core.model.Configuration;
+import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.components.TaskControl;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -220,18 +222,18 @@ class FlowNode extends Pane {
 		_graphIcon = new Label("", GlyphRegistry.get(AwesomeIcon.BAR_CHART_ALT, "10px"));
 		_graphIcon.setStyle("-fx-padding: 1px");
 		_graphIcon.visibleProperty().bind(_selected.or(_hover));
-		_graphIcon.setMinWidth(15);
+		_graphIcon.setPrefWidth(20);
 		_button = new Label();
 		_button.setVisible(false);
+		_button.setPrefWidth(15);
 			
 		_ctrl = new TaskControl();
-		_ctrl.setPrefWidth(40);
 
 		header.getChildren().addAll(
 				_graphIcon,
 				_ctrl,
 				_button);
-		
+		HBox.setHgrow(_ctrl,  Priority.SOMETIMES);
 		_vbox.getChildren().add(header);
 
 			
