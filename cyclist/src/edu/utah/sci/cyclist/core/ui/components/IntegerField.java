@@ -6,7 +6,7 @@ import javafx.scene.control.TextField;
 
 public class IntegerField extends TextField {
 
-	private IntegerProperty _valueProperty = new SimpleIntegerProperty();
+	private IntegerProperty _valueProperty = new SimpleIntegerProperty(Integer.MIN_VALUE);
 	private int _minValue = Integer.MIN_VALUE;
 	private int _maxValue = Integer.MAX_VALUE;
 	
@@ -19,12 +19,13 @@ public class IntegerField extends TextField {
 	public IntegerField(int value) {
 		super();
 		setOnAction(e->parseValue());
-		setValue(value);
 		
 		_valueProperty.addListener(o->{
 			setText(Integer.toString(getValue()));
 			setActive(false);
 		});
+		
+		setValue(value);
 	}
 	
 	public void setMinValue(int value) {
@@ -54,7 +55,7 @@ public class IntegerField extends TextField {
 	
 	@Override
     public void replaceText(int start, int end, String text) {
-        if (text.matches("[0-9]")) {
+        if (text == "" || text.matches("[0-9 ]")) {
             super.replaceText(start, end, text);  
             setActive(true);
         }
@@ -62,7 +63,7 @@ public class IntegerField extends TextField {
 
     @Override
     public void replaceSelection(String text) {
-        if (!text.matches("[0-9]")) {
+        if (text == "" || text.matches("[0-9 ]")) {
             super.replaceSelection(text);
             setActive(true);
         }
@@ -79,14 +80,13 @@ public class IntegerField extends TextField {
     }
     
     private void setActive(boolean value) {
-    	System.out.println("set active:"+value);
     	if (value == _active) return;
     	
     	_active = value;
     	if (_active) 
-    		setStyle("-fx-background-color:lightgray");
+    		getStyleClass().add("changing");
     	else
-    		setStyle("-fx-background-color: -fx-control-inner-background");
+    		getStyleClass().remove("changing");
     }
 	
 }
