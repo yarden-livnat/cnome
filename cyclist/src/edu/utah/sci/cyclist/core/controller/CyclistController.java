@@ -78,7 +78,7 @@ public class CyclistController {
 	private MainScreen _screen;
 	private WorkspacePresenter _presenter;
 	private Model _model = new Model();
-	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
+	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cyclist/";
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;

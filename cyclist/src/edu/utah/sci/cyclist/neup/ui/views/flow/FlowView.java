@@ -46,10 +46,13 @@ import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.IntegerField;
+import edu.utah.sci.cyclist.core.ui.components.RangeField;
+import edu.utah.sci.cyclist.core.ui.components.RangeField;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Inventory;
+import edu.utah.sci.cyclist.neup.model.Range;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
 
@@ -70,7 +73,6 @@ public class FlowView extends CyclistViewBase {
 	
 	public static final int INIT_TIMESTEP = 1;
 	public static final int MIN_TIMESTEP = 1;
-
 	
 	private FlowLine _line[]; 
 	private FlowChart _chart;
@@ -78,7 +80,7 @@ public class FlowView extends CyclistViewBase {
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private List<Connector> _connectors = new ArrayList<>();
-	private Map<FlowNode, ObservableList<Inventory>> _selectedNodes = new HashMap<>();
+	private Map<String, FlowEntry> _selectedNodes = new HashMap<>();
 
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
@@ -99,7 +101,7 @@ public class FlowView extends CyclistViewBase {
 	
 	// UI Components
 	private Pane _pane;
-	private IntegerField _timestepField;	
+	private RangeField _rangeField;
 	private Text _total;
 	
 	/**
@@ -126,8 +128,12 @@ public class FlowView extends CyclistViewBase {
 		update();
 	}
 	
-	private int getTime() {
-		return _timestepField.getValue();
+//	private int getTime() {
+//		return _rangeField.getFrom();
+//	}
+	
+	private Range<Integer> getTimeRange() {
+		return _rangeField.getRange();
 	}
 	
 	private void init() {
@@ -204,7 +210,7 @@ public class FlowView extends CyclistViewBase {
 		}
 	}
 	
-	private void timeChanged(int time) {
+	private void timeChanged(Range<Integer> range) {
 		// connect explicit nodes
 		List<FlowNode> list = new ArrayList<>();
 		for (FlowNode node : _line[SRC].getNodes()) {
@@ -237,6 +243,15 @@ public class FlowView extends CyclistViewBase {
 		node.setOnSelect(n->selectNode(n));
 		node.getActiveTransactions().predicateProperty().bind(_transactionsPredicateProperty);
 		node.getActiveTransactions().addListener((Observable o)->{transactionsChanged(node);});
+		
+		FlowEntry entry = _selectedNodes.get(node.getName());
+		if (entry == null) {
+			entry = new FlowEntry(node.getName());
+			_selectedNodes.put(entry.getName(), entry);
+		}
+		
+		node.setColor(entry.getColor());
+		entry.add(node);
 		
 		return node;
 	}
@@ -300,6 +315,10 @@ public class FlowView extends CyclistViewBase {
 	
 	private void removeNode(FlowNode node) {
 		_line[node.getDirection()].removeNode(node);
+		FlowEntry entry = _selectedNodes.get(node.getName());
+		entry.remove(node);
+		if (entry.isEmpty())
+			_chart.remove(entry);
 	}
 	
 	public void removeNodes(List<FlowNode> nodes) {
@@ -315,27 +334,28 @@ public class FlowView extends CyclistViewBase {
 	
 	@SuppressWarnings("unchecked")
 	private void selectNode(final FlowNode node) {
-		if (node.isSelected()) {
-			node.setSelected(false);
-			_chart.remove(node);
-		} else {
-			node.setSelected(true);
-			ObservableList<Inventory> values = _selectedNodes.get(node);
-			if (values == null) {
+		FlowEntry entry = _selectedNodes.get(node.getName());
+		if (entry.isSelected()) {
+			entry.select(false);
+			_chart.remove(entry);
+		}
+		else {
+			entry.select(true);
+			ObservableList<Inventory> inventory = entry.getInventory();
+			if (inventory == null) {
 				queryInventory(node).addListener((Observable o)->{
 					ObjectProperty<ObservableList<Inventory>> p = (ObjectProperty<ObservableList<Inventory>>) o;
-
-					_selectedNodes.put(node, p.get());
-					addToChart(node, p.get());
+					entry.setInventory(p.get());
+					addToChart(entry, p.get());
 				});
 				
 			} else {
-				addToChart(node, values);
+				addToChart(entry, inventory);
 			}
 		}
 	}
 	
-	private void addToChart(FlowNode node, ObservableList<Inventory> values) {
+	private void addToChart(FlowEntry entry, ObservableList<Inventory> values) {
 		Map<Integer, Pair<Integer, Double>> map = new HashMap<>();
 		for (Inventory i : values) {
 			Pair<Integer, Double> p = map.get(i.time);
@@ -347,7 +367,7 @@ public class FlowView extends CyclistViewBase {
 			}
 			p.v2 += i.amount;
 		}
-		_chart.add(node, node.getName(), map.values());
+		_chart.add(entry, entry.getName(), map.values());
 	}
 	
 	private ReadOnlyObjectProperty<ObservableList<Inventory>> queryInventory(FlowNode node) {
@@ -369,7 +389,7 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void queryMaterialFlow(final FlowNode node) {
-		final int timestep = getTime();
+		final int timestep = getTimeRange().from;
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
@@ -391,7 +411,7 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void queryTransactions(final List<FlowNode> list) {
-		final int timestep = getTime();
+		final int timestep = getTimeRange().from;
 	
 		Task<ObservableMap<FlowNode, ObservableList<Transaction>>> task = new Task<ObservableMap<FlowNode, ObservableList<Transaction>>>() {
 			@Override
@@ -406,13 +426,17 @@ public class FlowView extends CyclistViewBase {
 			}	
 		};
 		
+//		final ChangeListener<? super ObservableMap<FlowNode, ObservableList<Transaction>>> listener =;
+		
 		task.valueProperty().addListener((o, p, n)->{
 			if (n != null) {
-				removeAllConnectors();
-				for (FlowNode node : n.keySet()) {
-					addRelatedNodes(node, n.get(node), timestep);
-				}			
-				removeEmptyImplicitNodes();
+				if (getTimeRange().from == timestep) {
+					removeAllConnectors();
+					for (FlowNode node : n.keySet()) {
+						addRelatedNodes(node, n.get(node), timestep);
+					}			
+					removeEmptyImplicitNodes();
+				}
 			}
 		});
 
@@ -424,7 +448,7 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void addRelatedNodes(FlowNode node, ObservableList<Transaction> list, int time) {
-		if (time == getTime()) {
+		if (time == getTimeRange().from) {
 			node.setTransactions(list);
 		}
 	}
@@ -572,33 +596,34 @@ public class FlowView extends CyclistViewBase {
 		
 		Label title = new Label("Time");
 		title.getStyleClass().add("title");
-
-		_timestepField = new IntegerField(INIT_TIMESTEP);
-		_timestepField.getStyleClass().add("timestep");
-		_timestepField.setMinValue(MIN_TIMESTEP);	
+		
+		_rangeField = new RangeField();
 				
 		Label forward = GlyphRegistry.get(AwesomeIcon.CARET_RIGHT, "16px");
 		Label backward = GlyphRegistry.get(AwesomeIcon.CARET_LEFT, "16px");
 
 		forward.getStyleClass().add("flat-button");
-		backward.getStyleClass().add("flat-button");
-		
-		forward.setOnMouseClicked(e->_timestepField.setValue(_timestepField.getValue()+1));			
-		backward.setOnMouseClicked(e->_timestepField.setValue(_timestepField.getValue()-1));			
+		backward.getStyleClass().add("flat-button");			
+
+		forward.setOnMouseClicked(e->_rangeField.inc());			
+		backward.setOnMouseClicked(e->_rangeField.dec());
 		
 		HBox hbox = new HBox();
 		hbox.setStyle("-fx-padding: 0");
 		hbox.getStyleClass().add("infobar");
-		hbox.getChildren().addAll( _timestepField, backward, forward);
+		hbox.getChildren().addAll( _rangeField, backward, forward);
+		
+		
 		
 		vbox.getChildren().addAll(
 			title,
 			hbox
 		);
 		
-		_timestepField.valueProperty().addListener(o->timeChanged(_timestepField.getValue()));
-		
-		_timestepField.setOnDragOver(e->{
+//		_rangeField.fromProperty().addListener(o->timeChanged(_rangeField.getFrom()));
+		_rangeField.rangeProperty().addListener(o->timeChanged(_rangeField.getRange()));
+				
+		_rangeField.setOnDragOver(e->{
 			DnD.LocalClipboard clipboard = getLocalClipboard();
 			
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
@@ -610,11 +635,12 @@ public class FlowView extends CyclistViewBase {
 			}
 		});
 		
-		_timestepField.setOnDragDropped(e-> {
+		_rangeField.setOnDragDropped(e-> {
 			DnD.LocalClipboard clipboard = getLocalClipboard();	
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
-				Integer i = clipboard.get(DnD.VALUE_FORMAT, Integer.class);					
-				_timestepField.setValue(i);
+				Integer i = clipboard.get(DnD.VALUE_FORMAT, Integer.class);	
+				System.out.println("IMPLEMENT DnD");
+//				_rangeField.setFrom(i);
 				e.consume();
 			}
 		});
@@ -755,7 +781,9 @@ public class FlowView extends CyclistViewBase {
 		VBox vbox = new VBox();
 		_chart = new FlowChart();
 		
-		_chart.timeProperty().bindBidirectional(_timestepField.valueProperty());
+//		_chart.fromTimeProperty().bindBidirectional(_rangeField.fromProperty());
+//		_chart.toTimeProperty().bindBidirectional(_rangeField.toProperty());
+		_chart.timeRangeProperty().bindBidirectional(_rangeField.rangeProperty());
 		
 		vbox.getChildren().addAll(
 			new Separator(),

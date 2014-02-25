@@ -54,7 +54,7 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class TablesPanel extends TitledPanel  {
-	public static final String ID 		= "cnome-panel";
+	public static final String ID 		= "cyclist-panel";
 	public static final String TITLE	= "Tables";
 	
 	public static final String SELECTED_STYLE = "-fx-background-color: #99ccff";

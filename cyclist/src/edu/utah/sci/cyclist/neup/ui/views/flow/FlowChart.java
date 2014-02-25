@@ -4,9 +4,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -21,9 +23,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.neup.model.Range;
 
 public class FlowChart extends VBox {
 	private static final String NET_CHART_LABEL = "Net Flow";
@@ -31,8 +35,10 @@ public class FlowChart extends VBox {
 	
 	private HBox _header;
 	private Pane _glass;
-	private Line _line;
-	private Label _popup;
+//	private Line _fromLine;
+//	private Line _toLine;
+//	private Label _popup;
+	private Rectangle _rec;
 	
 	private LineChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
@@ -40,12 +46,15 @@ public class FlowChart extends VBox {
 	private double _scale = 1;
 	private boolean _opened = true;
 	private String _type;
-	private int _movingTime;
+//	private int _movingTime;
 	private int _upperBound;
+	private boolean _updating = false;
 	
-	private Map<FlowNode, ChartInfo> _info = new HashMap<>();
+	private Map<FlowEntry, ChartInfo> _info = new HashMap<>();
 	
-	private IntegerProperty _timeProperty = new SimpleIntegerProperty();
+//	private IntegerProperty _fromTimeProperty = new SimpleIntegerProperty();
+//	private IntegerProperty _toTimeProperty = new SimpleIntegerProperty();
+	private ObjectProperty<Range<Integer>> _timeRangeProperty = new SimpleObjectProperty<>();
 	
 	public class ChartInfo {
 		public Label title;
@@ -60,8 +69,15 @@ public class FlowChart extends VBox {
 		build();
 	}
 	
-	public IntegerProperty timeProperty() {
-		return _timeProperty;
+//	public IntegerProperty fromTimeProperty() {
+//		return _fromTimeProperty;
+//	}
+//	public IntegerProperty toTimeProperty() {
+//		return _toTimeProperty;
+//	}
+	
+	public ObjectProperty<Range<Integer>> timeRangeProperty() {
+		return _timeRangeProperty;
 	}
 	
 	private void selectChartType(String value) {
@@ -77,7 +93,7 @@ public class FlowChart extends VBox {
 		updateAll();
 	}
 	
-	public void add(FlowNode node, String title, Collection<Pair<Integer, Double>> values) {
+	public void add(FlowEntry entry, String title, Collection<Pair<Integer, Double>> values) {
 		if (values.size() == 0) return;
 		
 		int last = 0;
@@ -88,7 +104,7 @@ public class FlowChart extends VBox {
 			_upperBound = last;
 		}
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
-		Color c = node.getColor();
+		Color c = entry.getColor();
 		String style = c.toString().replace("0x", "#");
 		series.nodeProperty().addListener(o->{
 			series.getNode().setStyle("-fx-stroke:"+style);
@@ -109,17 +125,19 @@ public class FlowChart extends VBox {
 		info.series = series;
 		info.scale = scale;
 		info.last = last;
-		_info.put(node, info);
+		_info.put(entry, info);
 		
 		_header.getChildren().add(info.title);
 		_chart.getData().add(series);
-		_line.setVisible(true);
+//		_fromLine.setVisible(true);
+		_rec.setVisible(true);
 	}
 	
-	public void remove(FlowNode node) {
-		ChartInfo info = _info.remove(node);
+	public void remove(FlowEntry entry) {
+		ChartInfo info = _info.remove(entry);
 		if (info == null) {
-			_line.setVisible(false);
+//			_fromLine.setVisible(false);
+			_rec.setVisible(false);
 			return;
 		}
 				
@@ -127,13 +145,16 @@ public class FlowChart extends VBox {
 		_chart.getData().remove(info.series);
 		double s = 1;
 		_upperBound = 0;
-		for (ChartInfo entry : _info.values()) {
-			s = Math.max(entry.scale, s);
-			_upperBound = Math.max(_upperBound, entry.last);
+		for (ChartInfo ci : _info.values()) {
+			s = Math.max(ci.scale, s);
+			_upperBound = Math.max(_upperBound, ci.last);
 		}
 		if (s != _scale) {
 			updateScale(s);
 			updateYAxis();
+		}
+		if (_info.isEmpty()) {
+			_rec.setVisible(false);
 		}
 	}
 	
@@ -247,32 +268,55 @@ public class FlowChart extends VBox {
 	private Node buildChart() {
 		_xAxis = new NumberAxis();
 		_xAxis.setLabel("time");
+		_xAxis.setAnimated(false);
 		
 		_yAxis = new NumberAxis();
 		_yAxis.setLabel("Cummulative");
+		_yAxis.setAnimated(false);
 		
 		_chart = new LineChart<>(_xAxis, _yAxis);
 		_chart.getStyleClass().add("chart");
 		_chart.setCreateSymbols(false);
 		
-		_line = new Line();
-		_line.getStyleClass().add("timeline");
-		_line.endXProperty().bind(_line.startXProperty());
-		_line.startYProperty().bind(_yAxis.layoutYProperty().add(10));
-		_line.endYProperty().bind(_line.startYProperty().add(_yAxis.heightProperty()));
-		_line.setVisible(false);
-	
+//		_fromLine = new Line();
+//		_fromLine.getStyleClass().add("timeline");
+//		_fromLine.endXProperty().bind(_fromLine.startXProperty());
+//		_fromLine.startYProperty().bind(_yAxis.layoutYProperty().add(10));
+//		_fromLine.endYProperty().bind(_fromLine.startYProperty().add(_yAxis.heightProperty()));
+//		_fromLine.setVisible(false);
+//	
+//		_toLine = new Line();
+//		_toLine.getStyleClass().add("timeline");
+//		_toLine.endXProperty().bind(_toLine.startXProperty());
+//		_toLine.startYProperty().bind(_yAxis.layoutYProperty().add(10));
+//		_toLine.endYProperty().bind(_toLine.startYProperty().add(_yAxis.heightProperty()));
+//		_toLine.setVisible(false);
 		
-		_popup = new Label();
-		_popup.getStyleClass().add("popup");
-		_popup.setVisible(false);
-		_popup.layoutXProperty().bind(_line.startXProperty().add(10));
+		_rec = new Rectangle();
+		_rec.getStyleClass().add("range");
+		_rec.yProperty().bind(_yAxis.layoutYProperty().add(5));
+		_rec.heightProperty().bind(_yAxis.heightProperty());
+		_rec.setVisible(false);
+		
+//		_popup = new Label();
+//		_popup.getStyleClass().add("popup");
+//		_popup.setVisible(false);
+//		_popup.layoutXProperty().bind(_fromLine.startXProperty().add(10));
 		_glass = new Pane();
-		_glass.getChildren().addAll(_line, _popup);
+		_glass.getChildren().addAll(/*_fromLine*/_rec/*, _popup*/);
 		
 		_xAxis.layoutBoundsProperty().addListener(e->{
-			updateLine();
+			updateRangeLater();		
 		});
+		
+		_xAxis.lowerBoundProperty().addListener(o->{
+			updateRangeLater();				
+		});
+		
+		_xAxis.upperBoundProperty().addListener(o->{
+			updateRangeLater();		
+		});
+		
 		StackPane stack = new StackPane();
 		stack.getChildren().addAll( _chart, _glass);
 		
@@ -280,43 +324,103 @@ public class FlowChart extends VBox {
 		return stack;
 	}
 	
-	private void updateLine() {
-		double time = _timeProperty.get();
-		double x = _xAxis.getDisplayPosition(time);
-		Point2D p = _glass.sceneToLocal(_xAxis.localToScene(x, 0));
-		_line.setStartX(p.getX());
+	private void updateRangeLater() {
+		Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+            	updateRange();
+            }
+		});
 	}
+	
+//	private void updateLine() {
+//		double time = _fromTimeProperty.get();
+//		double x = _xAxis.getDisplayPosition(time);
+//		Point2D p = _glass.sceneToLocal(_xAxis.localToScene(x, 0));
+//		_fromLine.setStartX(p.getX());
+//	}
+	
+	private void updateRange() {
+		Range<Integer> r = timeRangeProperty().get();
+		double t1 = r.from;
+		double t2 = r.to+1;
+		
+		double x1 = _xAxis.getDisplayPosition(t1);
+		double x2 = _xAxis.getDisplayPosition(t2);
+		
+		Point2D p1 = _glass.sceneToLocal(_xAxis.localToScene(x1, 0));
+		Point2D p2 = _glass.sceneToLocal(_xAxis.localToScene(x2, 0));
+		
+		_rec.setX(p1.getX());
+		_rec.setWidth(p2.getX() - p1.getX());
+//		System.out.println("rec: "+_rec.getX()+", "+_rec.getY()+"  "+_rec.getWidth()+"x"+_rec.getHeight());
+	}
+	
+	double _mx;
+	double _offset;
+	
 	private void addListeners() {
-		_timeProperty.addListener(o->{
-			updateLine();
+		_timeRangeProperty.addListener(o->{
+			if (_updating) return;
+			updateRange();
 		});
 		
-		_line.setOnMousePressed(e->{
-			_popup.setText(Integer.toString(_timeProperty.get()));
-			_popup.setLayoutY(e.getY()-10);
-			_popup.setVisible(true);
-			_movingTime = _timeProperty.get();
+		_rec.setOnMousePressed(e->{
+			_mx = e.getX();
+			_offset = _xAxis.getDisplayPosition(_timeRangeProperty.get().from);
 		});
 		
-		
-		
-		_line.setOnMouseDragged(e->{
-			
-			_popup.setLayoutY(e.getY()-10);
-			Point2D p = new Point2D(e.getSceneX(), e.getSceneY());
-			Number v = _xAxis.getValueForDisplay(_xAxis.sceneToLocal(p).getX());
+		_rec.setOnMouseDragged(e->{
+			double dx = e.getX() - _mx;
+			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX()+dx, 0));
+			Number v = _xAxis.getValueForDisplay(p.getX());
 			int i = v.intValue();
-			i = Math.max(0, Math.min(_upperBound, i));
-			if (i>0 && i <= _upperBound) {
-				_line.setStartX(e.getX());
-				_popup.setText(Integer.toString(i));
-				_movingTime = i;
-			}
+			_rec.setX(_rec.getX()+dx);
+			_mx = e.getX(); 
 		});
 		
-		_line.setOnMouseReleased(e->{
-			_popup.setVisible(false);
-			_timeProperty.set(_movingTime);
+		_rec.setOnMouseReleased(e->{
+			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX(), 0));
+			Number v = _xAxis.getValueForDisplay(p.getX());
+			int i = v.intValue();
+//			i = Math.max(0, Math.min(_upperBound, i));
+			// nudge rectangle to an integer boundry
+			double xi = _xAxis.getDisplayPosition(i);
+			Point2D p1 = _xAxis.localToScene(xi,0);
+			Point2D p2 = _glass.sceneToLocal(p1);
+			_rec.setX(p2.getX());
+			
+			Range<Integer> r = _timeRangeProperty.get();
+			Range<Integer> nr = new Range<>(i, i+r.to-r.from);
+			_updating = true;
+			_timeRangeProperty.set(nr);
+			_updating = false;
 		});
+		
+//		_fromLine.setOnMousePressed(e->{
+//			_popup.setText(Integer.toString(_fromTimeProperty.get()));
+//			_popup.setLayoutY(e.getY()-10);
+//			_popup.setVisible(true);
+//			_movingTime = _fromTimeProperty.get();
+//		});
+//		
+//		_fromLine.setOnMouseDragged(e->{
+//			
+//			_popup.setLayoutY(e.getY()-10);
+//			Point2D p = new Point2D(e.getSceneX(), e.getSceneY());
+//			Number v = _xAxis.getValueForDisplay(_xAxis.sceneToLocal(p).getX());
+//			int i = v.intValue();
+//			i = Math.max(0, Math.min(_upperBound, i));
+//			if (i>0 && i <= _upperBound) {
+//				_fromLine.setStartX(e.getX());
+//				_popup.setText(Integer.toString(i));
+//				_movingTime = i;
+//			}
+//		});
+//		
+//		_fromLine.setOnMouseReleased(e->{
+//			_popup.setVisible(false);
+//			_fromTimeProperty.set(_movingTime);
+//		});
 	}
 }

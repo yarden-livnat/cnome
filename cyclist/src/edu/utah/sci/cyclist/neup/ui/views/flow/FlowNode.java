@@ -20,8 +20,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import edu.utah.sci.cyclist.core.model.Configuration;
-import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.components.TaskControl;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -33,7 +31,7 @@ class FlowNode extends Pane {
 	private Object _value;
 	private String _type;
 	private boolean _explicit;
-	private Color _color;
+	private String _color;
 	private BooleanProperty _selected = new SimpleBooleanProperty(false);
 	private BooleanProperty _hover = new SimpleBooleanProperty(false);
 
@@ -51,7 +49,7 @@ class FlowNode extends Pane {
 	private List<Connector> _connectors = new ArrayList<>();
 	
 	private VBox _vbox;
-	private Label _button;
+	private ToggleIcon _button;
 	private TaskControl _ctrl;
 	private Label _graphIcon;
 	
@@ -121,6 +119,10 @@ class FlowNode extends Pane {
 	 * 
 	 */
 	
+	public void setColor(Color color) {
+		_color = color.toString().replace("0x", "#"); 
+	}
+	
 	public Object getValue() {
 		return _value;
 	}
@@ -135,13 +137,12 @@ class FlowNode extends Pane {
 	
 	public void setExplicit(boolean value) {
 		_explicit = value;
+		_button.select(value);
 		if (value) {
 			_vbox.getStyleClass().add("node-explicit");
-			_button.setGraphic(GlyphRegistry.get(AwesomeIcon.TIMES, "10px"));
 		}
 		else {
 			_vbox.getStyleClass().remove("node-explicit");
-			_button.setGraphic(GlyphRegistry.get(AwesomeIcon.EXTERNAL_LINK, "10px"));
 		}
 	}
 	
@@ -156,10 +157,6 @@ class FlowNode extends Pane {
 	
 	public String getType() {
 		return _type;
-	}
-	
-	public Color getColor() {
-		return _color;
 	}
 	
 	public void setTransactions(List<Transaction> list) {
@@ -188,8 +185,7 @@ class FlowNode extends Pane {
 	public void setSelected(boolean value) {
 		if (_selected.get() != value) {
 			_selected.set(value);
-			String color = value ? _color.toString().replace("0x", "#") : "transparent";
-			_graphIcon.setStyle("-fx-background-color:"+color);
+			_graphIcon.setStyle("-fx-background-color:"+(value?_color: "transparent"));
 		}
 	}
 	
@@ -205,11 +201,11 @@ class FlowNode extends Pane {
 	}
 	
 	private void build(String type, Object value) {
-		String label = value.toString();
-		if (!(value instanceof String))
-				label = type+":"+label;
-		
-		_color = Configuration.getInstance().getColor(label);
+//		String label = value.toString();
+//		if (!(value instanceof String))
+//				label = type+":"+label;
+//		
+//		_color = Configuration.getInstance().getColor(label);
 		
 		_vbox = new VBox();
 		_vbox.getStyleClass().add("flow-node");
@@ -217,15 +213,15 @@ class FlowNode extends Pane {
 		// header
 		HBox header = new HBox();
 		header.getStyleClass().add("node-header");
-		header.setPrefWidth(70);
+		header.setPrefWidth(75);
 		
-		_graphIcon = new Label("", GlyphRegistry.get(AwesomeIcon.BAR_CHART_ALT, "10px"));
+		Label icon = GlyphRegistry.get(AwesomeIcon.BAR_CHART_ALT, "10px");
+		_graphIcon = new Label("", icon);
 		_graphIcon.setStyle("-fx-padding: 1px");
 		_graphIcon.visibleProperty().bind(_selected.or(_hover));
 		_graphIcon.setPrefWidth(20);
-		_button = new Label();
+		_button = new ToggleIcon(GlyphRegistry.get(AwesomeIcon.EXTERNAL_LINK, "10px"), GlyphRegistry.get(AwesomeIcon.TIMES, "10px"));
 		_button.setVisible(false);
-		_button.setPrefWidth(15);
 			
 		_ctrl = new TaskControl();
 
@@ -233,6 +229,7 @@ class FlowNode extends Pane {
 				_graphIcon,
 				_ctrl,
 				_button);
+		header.setSpacing(2);
 		HBox.setHgrow(_ctrl,  Priority.SOMETIMES);
 		_vbox.getChildren().add(header);
 

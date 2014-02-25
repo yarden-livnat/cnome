@@ -80,18 +80,19 @@
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="EnterTime" >
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-			<field name="ExitTIme" >
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
 			<field name="InstitutionID" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="RegionID" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
+			<field name="EnterTime" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="ExitTime" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			
 		</Schema>
 	</Table>
 	<Table name="Inventories">

@@ -282,6 +282,10 @@
 .flow .fchart .chart-line-symbol {
 }
 
+.flow .fchart .range {
+	-fx-fill: #a0a0a0a0;
+}
+
 .flow .fchart .timeline {
 	-fx-stroke-width: 2px;
 	-fx-stroke: gray;
@@ -302,6 +306,27 @@
 .flow .total {
 	-fx-font-size: 14px;
 	-fx-font-weight: bold;
+}
+
+.range-field {
+	-fx-padding: 2px;
+	-fx-max-width: 50px;
+	-fx-max-height: 18px;
+	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;
+  	-fx-background-insets: 1, 2;
+    -fx-background-radius: 2, 2;	
+}
+
+.range-field.changing {
+	-fx-background-color: -fx-text-box-border, #f0f0f0;
+  	-fx-background-insets: 1, 2;
+    -fx-background-radius: 2, 2;
+}
+
+ .range-field:focused {
+	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;	
+    -fx-background-insets: 1, 2;
+    -fx-background-radius: 2, 2;
 }
 
 /*

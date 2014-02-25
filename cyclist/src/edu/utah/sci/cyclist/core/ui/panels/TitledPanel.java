@@ -18,7 +18,7 @@ public class TitledPanel extends VBox {
 	}
 	
 	private void build(String title, Node glyph) {
-		getStyleClass().add("cnome-panel");
+		getStyleClass().add("cyclist-panel");
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
