@@ -59,8 +59,9 @@ public class MainScreen extends VBox {
 	private SplitPane _sp;
 	private SplitPane _toolsPane;
 	private TablesPanel _datasourcesPanel;
-	private SchemaPanel _dimensionsPanel;
-	private SchemaPanel _measuresPanel;
+//	private SchemaPanel _dimensionsPanel;
+//	private SchemaPanel _measuresPanel;
+	private SchemaPanel _fieldsPanel;
 	private ToolsPanel _toolsPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
@@ -98,12 +99,18 @@ public class MainScreen extends VBox {
 		return _datasourcesPanel;
 	}
 	
-	public SchemaPanel getDimensionPanel() {
-		return _dimensionsPanel;
-	}
+//	public SchemaPanel getDimensionPanel() {
+////		return _dimensionsPanel;
+//		return _fieldsPanel;
+//	}
+//	
+//	public SchemaPanel getMeauresPanel() {
+////		return _measuresPanel;
+//		return _fieldsPanel;
+//	}
 	
-	public SchemaPanel getMeauresPanel() {
-		return _measuresPanel;
+	public SchemaPanel getFieldsPanel(){
+		return _fieldsPanel;
 	}
 	
 	public ToolsPanel getToolsPanel() {
@@ -126,7 +133,8 @@ public class MainScreen extends VBox {
 	private double toolsWidth = 120; 
 	private void build(Stage stage){
 		getStyleClass().add("main-screen");
-		double[] div = {0.2, 0.4, 0.6,0.8, 1.0};
+//		double[] div = {0.2, 0.4, 0.6,0.8, 1.0};
+		double[] div = {0.2, 0.4, 0.8, 1.0};
 		
 		double [] mainDividers = {toolsWidth/600.0};
 		
@@ -147,8 +155,10 @@ public class MainScreen extends VBox {
 		_toolsPane.getItems().addAll(
 				_simulationPanel = new SimulationsPanel(),
 				_datasourcesPanel = new TablesPanel(),
-				_dimensionsPanel = new SchemaPanel("Category"),
-				_measuresPanel = new SchemaPanel("Measure"),
+//				_dimensionsPanel = new SchemaPanel("Category"),
+//				_measuresPanel = new SchemaPanel("Measure"),
+				_fieldsPanel = new SchemaPanel("Fields"),
+				
 				_toolsPanel = new ToolsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);

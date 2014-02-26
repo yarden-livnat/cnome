@@ -431,6 +431,16 @@
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
 
+/*
+ * .fields-wizard
+ */
+ 
+.fields-wizard .choice {
+ 	-fx-border-color: gray;
+ 	-fx-border-width: 1;
+ 	-fx-border-radius: 3;
+}
+
 .titled-pane:collapsed > .title > .arrow-button .arrow {
     -fx-rotate: -90;
 }

@@ -30,13 +30,17 @@ public class DataType {
 		SIMPLE, COMPLEX, HIERARCHICAL
 	}
 	
+	public enum FilterType{
+		RANGE, LIST
+	}
+	
 	private Role _role;
 	private Type _type;
 	private Interpretation _interp;
 	private Classification _classification;
 	private StructureType  _structureType;
 	private FieldStructure _structure;
-	private ObjectProperty<Boolean> _forceNumericFilterProperty = new SimpleObjectProperty<>();
+	private FilterType _filterType;
 	
 	public DataType(Type type) {
 		_type = type;
@@ -57,7 +61,7 @@ public class DataType {
 			break;
 		}
 		
-		_forceNumericFilterProperty.set(false);
+		setDefaultFilterType();
 		
 		update();
 	}
@@ -67,7 +71,7 @@ public class DataType {
 		_type = type;
 		_interp = interp;
 		_classification = classification;
-		_forceNumericFilterProperty.set(false);
+		setDefaultFilterType();
 	}
 	
 	public DataType(DataType copy) {
@@ -75,7 +79,7 @@ public class DataType {
 		_type = copy._type;
 		_interp = copy._interp;
 		_classification = copy._classification;
-		_forceNumericFilterProperty = copy._forceNumericFilterProperty;
+		_filterType = copy._filterType;
 	}
 	
 	/**
@@ -166,17 +170,21 @@ public class DataType {
 	public FieldStructure getStructure() {
 		return _structure;
 	}
-	
-	public ObjectProperty<Boolean> forceNumericFilterProperty() {
-        return _forceNumericFilterProperty;
+
+    public FilterType getFilterType() {
+        return _filterType;
     }
 
-    public Boolean getForceNumericFilter() {
-        return _forceNumericFilterProperty.get();
+    public void setFilterType(FilterType value) {
+    	_filterType = value;
     }
-
-    public void setForceNumericFilter(Boolean value) {
-    	_forceNumericFilterProperty.set(value);
+    
+    private void setDefaultFilterType(){
+    	if(_interp == Interpretation.CONTINUOUS){
+			_filterType = FilterType.RANGE;
+		}else{
+			_filterType= FilterType.LIST;
+		}
     }
 	
 	private void update() {

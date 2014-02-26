@@ -12,16 +12,15 @@ import java.util.function.ToLongFunction;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -30,13 +29,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Window;
 
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.DataType;
-import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.Field;
+import edu.utah.sci.cyclist.core.ui.wizards.FieldPropertiesEditorWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
@@ -46,6 +46,8 @@ public class SchemaPanel extends TitledPanel {
         private ObservableList<Field> _fields;
         private List<Entry> _entries;
         private Closure.V1<Field> _onFieldDropAction = null;
+        
+        final SchemaPanel _panel = this;
         
         
         public SchemaPanel(String title) {
@@ -74,26 +76,31 @@ public class SchemaPanel extends TitledPanel {
         /**
          * Sets the menu for forcing numeric filter visible. 
          * On mouse right click the user can choose if the filter is numeric or a distinct text.
-         * This option is only for entries with field classification of "Qi", and should be called only for the "dimentions panel".
+         * This option is only for entries with field classification of "Qi", and should be called only for the "dimensions panel".
          */
         
-        public void addForceNumericFilterMenu(){
+        public void addChangePropertiesMenu(){
 			 for(final Entry entry : _entries){
-				 if(entry.field.getClassification() == Classification.Qi && entry.label.getOnMouseClicked() == null){
-					 final ContextMenu contextMenu = new ContextMenu();
-						MenuItem changeFilter = new MenuItem("Numeric filter", GlyphRegistry.get(AwesomeIcon.CHECK)); 
-						changeFilter.getGraphic().visibleProperty().bind(entry.field.getDataType().forceNumericFilterProperty());
-						changeFilter.setOnAction(new EventHandler<ActionEvent>() {
-							public void handle(ActionEvent e) { 
-								entry.field.getDataType().setForceNumericFilter(!entry.field.getDataType().getForceNumericFilter());
-							}
-						});
-						contextMenu.getItems().add(changeFilter);
+				 if(entry.label.getOnMouseClicked() == null){
 						entry.label.setOnMouseClicked(new EventHandler<MouseEvent>(){
 							@Override
 				             public void handle(MouseEvent event) {
 								 if (event.getButton() == MouseButton.SECONDARY){      
-									 contextMenu.show(entry.label, Side.BOTTOM, 0, 0);
+									 Window window = _panel.getParent().getScene().getWindow();
+									 Field field = entry.field;
+									 FieldPropertiesEditorWizard wizard = new FieldPropertiesEditorWizard(field);
+									 ObjectProperty<DataType> dataType = wizard.show(window);
+									 dataType.addListener(new ChangeListener<DataType>(){
+									 @Override
+									 	public void changed(ObservableValue<? extends DataType> arg0, DataType oldVal,DataType newVal) {
+											if(newVal.getRole() != field.getDataType().getRole()){
+												field.getDataType().setRole(newVal.getRole());
+											}
+											if(newVal.getFilterType() != field.getDataType().getFilterType()){
+												field.getDataType().setFilterType(newVal.getFilterType());
+											}
+										}	
+									});
 								 }
 				             }
 						});

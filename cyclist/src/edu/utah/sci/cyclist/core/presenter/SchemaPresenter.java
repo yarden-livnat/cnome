@@ -39,11 +39,13 @@ import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 
 
 public class SchemaPresenter  extends PresenterBase {
-	private SchemaPanel _dimensionsPanel;
-	private SchemaPanel _measuresPanel;
+//	private SchemaPanel _dimensionsPanel;
+//	private SchemaPanel _measuresPanel;
+	private SchemaPanel _fieldsPanel;
 	private Schema _schema;
-	private ObservableList<Field> _dimensions;
-	private ObservableList<Field> _measures;
+//	private ObservableList<Field> _dimensions;
+//	private ObservableList<Field> _measures;
+	private ObservableList<Field> _fields;
 	
 	public SchemaPresenter(EventBus bus) {
 		super(bus);
@@ -51,33 +53,37 @@ public class SchemaPresenter  extends PresenterBase {
 		
 	}
 	
-	public void setPanels(SchemaPanel dimensions, SchemaPanel measures) {
-		_dimensionsPanel = dimensions;
-		_measuresPanel = measures;
-		
-		_dimensionsPanel.setOnFieldDropAction(new Closure.V1<Field>() {
-
-			@Override
-			public void call(Field field) {
-				_measures.remove(field);
-				_dimensions.add(field);	
-				field.setRole(DataType.Role.DIMENSION);
-				_dimensionsPanel.addForceNumericFilterMenu();
-			}
-			
-		});
-		
-		_measuresPanel.setOnFieldDropAction(new Closure.V1<Field>() {
-
-			@Override
-			public void call(Field field) {
-				_dimensions.remove(field);	
-				_measures.add(field);
-				field.setRole(DataType.Role.MEASURE);
-			}
-			
-		});
+	public void setPanel(SchemaPanel fields){
+		_fieldsPanel = fields;
 	}
+	
+//	public void setPanels(SchemaPanel dimensions, SchemaPanel measures) {
+//		_dimensionsPanel = dimensions;
+//		_measuresPanel = measures;
+//		
+//		_dimensionsPanel.setOnFieldDropAction(new Closure.V1<Field>() {
+//
+//			@Override
+//			public void call(Field field) {
+//				_measures.remove(field);
+//				_dimensions.add(field);	
+//				field.setRole(DataType.Role.DIMENSION);
+//				_dimensionsPanel.addForceNumericFilterMenu();
+//			}
+//			
+//		});
+//		
+//		_measuresPanel.setOnFieldDropAction(new Closure.V1<Field>() {
+//
+//			@Override
+//			public void call(Field field) {
+//				_dimensions.remove(field);	
+//				_measures.add(field);
+//				field.setRole(DataType.Role.MEASURE);
+//			}
+//			
+//		});
+//	}
 	
 	private void addNotificationListeners() {
 		addNotificationHandler(CyclistNotifications.DATASOURCE_FOCUS, new CyclistNotificationHandler() {
@@ -90,28 +96,33 @@ public class SchemaPresenter  extends PresenterBase {
 
 				_schema = table.getSchema();
 				
-				_dimensions = FXCollections.observableArrayList();
-				_measures = FXCollections.observableArrayList();
+//				_dimensions = FXCollections.observableArrayList();
+//				_measures = FXCollections.observableArrayList();
+				_fields = FXCollections.observableArrayList();
 				
 				for (int f=0; f < _schema.size(); f++) {
 					Field field = _schema.getField(f);
-					DataType.Role role = field.getRole();
-					if(role != null)
-					{
-						switch (role) {
-						case DIMENSION:
-							_dimensions.add(field);
-							break;
-						case MEASURE:
-							_measures.add(field);
-							break;
-						}
-					}
+					_fields.add(field);
+//					DataType.Role role = field.getRole();
+					
+//					if(role != null)
+//					{
+//						switch (role) {
+//						case DIMENSION:
+//							_dimensions.add(field);
+//							break;
+//						case MEASURE:
+//							_measures.add(field);
+//							break;
+//						}
+//					}
 				}
 				
-				_dimensionsPanel.setFields(_dimensions);
-				_dimensionsPanel.addForceNumericFilterMenu();
-				_measuresPanel.setFields(_measures);
+//				_dimensionsPanel.setFields(_dimensions);
+//				_dimensionsPanel.addForceNumericFilterMenu();
+//				_measuresPanel.setFields(_measures);
+				_fieldsPanel.setFields(_fields);
+				_fieldsPanel.addChangePropertiesMenu();
 			}
 
 		});

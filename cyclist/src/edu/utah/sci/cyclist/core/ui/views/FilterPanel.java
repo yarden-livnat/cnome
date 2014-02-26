@@ -37,6 +37,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.FieldProperties;
 import edu.utah.sci.cyclist.core.model.Filter;
@@ -209,7 +210,7 @@ public class FilterPanel extends TitledPanel {
 			createRange();
 			break;
 		case Qi:
-			if(_filter.getForceNumericFilter()){
+			if(_filter.getFilterType() == FilterType.RANGE){
 				createRange();
 			}else{
 				createList();
