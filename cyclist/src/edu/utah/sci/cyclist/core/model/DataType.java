@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public class DataType {
 
 	public static enum Role {
-		MEASURE, DIMENSION;
+		MEASURE, DIMENSION, INT_TIME;
 	}
 
 	public enum Type {
@@ -114,7 +114,7 @@ public class DataType {
 	public void setRole(Role role) {
 		_role = role;
 		if (_type == Type.NUMERIC) {
-			if (role == Role.DIMENSION)
+			if (role == Role.DIMENSION || role == Role.INT_TIME)
 				_interp = Interpretation.DISCRETE;
 			else
 				_interp = Interpretation.CONTINUOUS;
@@ -179,6 +179,9 @@ public class DataType {
     	_filterType = value;
     }
     
+    /*
+     * Sets initial value for the filter type, depending on the field Interpretation.
+     */
     private void setDefaultFilterType(){
     	if(_interp == Interpretation.CONTINUOUS){
 			_filterType = FilterType.RANGE;
@@ -189,7 +192,7 @@ public class DataType {
 	
 	private void update() {
 		if (_interp == Interpretation.DISCRETE) {
-			if (_type == Type.DATE || _type == Type.DATETIME) 
+			if (_type == Type.DATE || _type == Type.DATETIME || _role== Role.INT_TIME) 
 				_classification = Classification.Cdate;
 			else if (_type == Type.TEXT)
 				_classification = Classification.C;

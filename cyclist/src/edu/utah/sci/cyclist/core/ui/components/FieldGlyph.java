@@ -81,7 +81,7 @@ public class FieldGlyph extends HBox {
         
         public String getTitle() {
                 String title = null;
-                if (_field.getRole() == Role.DIMENSION) {
+                if (_field.getRole() == Role.DIMENSION || _field.getRole() == Role.INT_TIME) {
                         title = _field.getName();
                 } else {
                         String funcName = _field.get(FieldProperties.AGGREGATION_FUNC, String.class);

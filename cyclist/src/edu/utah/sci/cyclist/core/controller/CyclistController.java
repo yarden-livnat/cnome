@@ -132,7 +132,6 @@ public class CyclistController {
 		
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
-//		sp.setPanels(screen.getDimensionPanel(), screen.getMeauresPanel());
 		sp.setPanel(screen.getFieldsPanel());
 		
 		//Simulation panel
@@ -186,8 +185,6 @@ public class CyclistController {
 						
 						//Set all the views to match the new tables.
 						ObservableList<Field> emptyList = FXCollections.observableArrayList();
-//						_screen.getDimensionPanel().setFields(emptyList);
-//						_screen.getMeauresPanel().setFields(emptyList);
 						_screen.getFieldsPanel().setFields(emptyList);
 						
 //						//Set the workspace to display the new path at the title.

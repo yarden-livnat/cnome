@@ -84,7 +84,9 @@ public class FieldPropertiesEditorWizard extends VBox {
 			ChoiceBox<String> role = new ChoiceBox<>();
 			role.getStyleClass().add("choice");
 			role.setMaxWidth(Double.MAX_VALUE);
-			role.getItems().addAll(DataType.Role.DIMENSION.name(), DataType.Role.MEASURE.name());
+			for(DataType.Role value: DataType.Role.values()){
+				role.getItems().add(value.name());
+			}
 			
 			roleHbox.getChildren().addAll(roleLbl,role);
 			HBox.setHgrow(role, Priority.ALWAYS);

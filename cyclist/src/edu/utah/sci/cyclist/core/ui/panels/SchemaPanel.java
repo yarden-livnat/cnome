@@ -74,9 +74,9 @@ public class SchemaPanel extends TitledPanel {
         }
         
         /**
-         * Sets the menu for forcing numeric filter visible. 
-         * On mouse right click the user can choose if the filter is numeric or a distinct text.
-         * This option is only for entries with field classification of "Qi", and should be called only for the "dimensions panel".
+         * Sets the menu for changing the fields properties. 
+         * On mouse right click the user can choose the field role and its filter type.
+         * For text fields - all the options are disabled.
          */
         
         public void addChangePropertiesMenu(){

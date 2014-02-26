@@ -32,6 +32,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart.Data;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
@@ -234,7 +235,7 @@ public class ChartView extends CyclistViewBase {
 				int n = 0;
 				for (Field field : _xArea.getFields()) {
 					if (table.hasField(field)) {
-						if (field.getRole() == Role.DIMENSION)
+						if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
 							fields.add(field);
 						else
 							aggregators.add(field);
@@ -573,8 +574,10 @@ public class ChartView extends CyclistViewBase {
 			}
 			break;
 		case Cdate:
-			for (SeriesDataPoint p : data.points) {
-				p.x = ((Date)p.x).getTime();
+			if(data.points.get(0) != null && data.points.get(0).x.getClass() == Date.class){
+				for (SeriesDataPoint p : data.points) {
+						p.x = ((Date)p.x).getTime();
+				}
 			}
 			break;
 		case Qi:
@@ -594,8 +597,10 @@ public class ChartView extends CyclistViewBase {
 			}
 			break;
 		case Cdate:
-			for (SeriesDataPoint p : data.points) {
-				p.y = ((Date)p.y).getTime();
+			if(data.points.get(0) != null && data.points.get(0).y.getClass() == Date.class){
+				for (SeriesDataPoint p : data.points) {
+						p.y = ((Date)p.y).getTime();
+				}
 			}
 			break;
 		case Qi:
@@ -743,14 +748,17 @@ public class ChartView extends CyclistViewBase {
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
 			cd.forceZeroInRangeProperty().bind(forceZeroProperty());
-			NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
-				TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
-				@Override
-				public String toString(Number n) {
-					return converter.toString(new Date(n.longValue()));
-				}
-			};
-			cd.setTickLabelFormatter(f);
+			if(field.getRole() != Role.INT_TIME)
+			{
+				NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
+					TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
+					@Override
+					public String toString(Number n) {
+						return converter.toString(new Date(n.longValue()));
+					}
+				};
+				cd.setTickLabelFormatter(f);
+			}
 			axis = cd;
 			break;
 		case Qd:
