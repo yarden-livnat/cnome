@@ -111,10 +111,9 @@ public class QueryBuilder {
 		StringBuilder builder = new StringBuilder("Select ");
 		
 		// dims
-		if (_fields.isEmpty()) 
-			builder.append("*");
-		else 
+		if (!_fields.isEmpty()) {
 			first = append(builder, first, _fields);
+		}
 			
 		// aggregates
 		for (Field field : _aggregates) {
@@ -128,6 +127,11 @@ public class QueryBuilder {
 		}
 		
 		append(builder, first, _grouping);
+		
+		if (first) {
+			// no projection -> use '*'
+			builder.append("*");
+		}
 		
 		// table
 		builder.append(" from ").append(_table.getName());
