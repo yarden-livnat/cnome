@@ -11,7 +11,7 @@ import edu.utexas.cycic.presenter.SimulationInfoPresenter;
 public class SimulationInfoTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.SimulationInfoTool";
-	public static final String TOOL_NAME 	= "Simualtion Information";
+	public static final String TOOL_NAME 	= "Simulation Information";
 	public static final AwesomeIcon ICON 	= AwesomeIcon.QUESTION_CIRCLE;
 	
 	private View _view = null;

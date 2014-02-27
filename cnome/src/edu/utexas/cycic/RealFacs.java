@@ -33,7 +33,7 @@ public class RealFacs {
 		ReactorInrecipe.add(null);
 		ReactorInrecipe.add(null);
 		ReactorInrecipe.add(0);
-		ReactorInrecipe.add("the input recipe (isotopic");
+		ReactorInrecipe.add("the input recipe isotopic");
 		ReactorInrecipe.add(null);
 		FuelPairSub.add(ReactorIncommodity);
 		FuelPairSub.add(ReactorInrecipe);

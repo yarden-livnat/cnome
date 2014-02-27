@@ -2,7 +2,10 @@ package edu.utexas.cycic;
 
 import java.io.File;
 
+import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -51,10 +54,11 @@ public class Cycic extends ViewBase{
 	static boolean marketHideBool = true;
 	static Window window;
 	
+	
 	/**
 	 * Initiates the Pane and GridPane.
 	 */
-	private void init(){
+	private void init(){	
 		setTitle(TITLE);
 		setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
@@ -97,6 +101,8 @@ public class Cycic extends ViewBase{
 				structureCB.setValue(newValue);
 			}
 		});
+		structureCB.setPromptText("TESTING");
+		structureCB.promptTextProperty().set("TESTING");
 		grid.add(structureCB, 3, 0);
 		//Submit Button
 		Button submit1 = new Button("Add");

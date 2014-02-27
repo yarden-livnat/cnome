@@ -16,6 +16,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 /**
  * View for the Simulation Control Information
  * @author Robert
@@ -27,24 +29,40 @@ public class SimulationInfo extends ViewBase{
 	 */
 	public SimulationInfo(){
 		super();
-		
-		simInfo.setHgap(4);
-		simInfo.setVgap(4);
-		simInfo.setPadding(new Insets(10, 10, 10, 10));
-		
-		months();
+		if (monthList.size() == 0){
+			months();
+		}
 		init();
 	}
 	
 	public static final String TITLE = "Simulation Details";
-	GridPane simInfo = new GridPane();
 	HashMap<String, String> months = new HashMap<String, String>();
 	ArrayList<String> monthList = new ArrayList<String>();
-	static GridPane commodGrid = new GridPane(){
+	
+	/**
+	 * 
+	 */
+	static GridPane simInfo = new GridPane(){
 		{
-			
+			setHgap(4);
+			setVgap(4);
+			setPadding(new Insets(10, 10, 10, 10));			
 		}
 	};
+	
+	/**
+	 * 
+	 */
+	static GridPane commodGrid = new GridPane(){
+		{
+			setVgap(5);
+			setHgap(5);
+		}
+	};
+	
+	/**
+	 * 
+	 */
 	static Button addNewCommod = new Button(){
 		{
 			setOnAction(new EventHandler<ActionEvent>(){
@@ -52,9 +70,48 @@ public class SimulationInfo extends ViewBase{
 					addNewCommodity();
 				}
 			});
-			setText("Add New Commodity");
+			setText("+");
+			setStyle("-fx-font-size: 9;");
 		}
 	};
+	
+	/**
+	 * 
+	 */
+	static VBox simDetailBox = new VBox(){
+		{
+			getChildren().add(simInfo);
+		}
+	};
+	
+	/**
+	 * 
+	 */
+	static VBox commodBox = new VBox(){
+		{
+			getChildren().add(new HBox(){
+				{
+					getChildren().add(new Label("Simulation Commodities"));
+					getChildren().add(addNewCommod);
+					setSpacing(5);
+				}
+			});
+			getChildren().add(commodGrid);
+			setPadding(new Insets(10, 10, 10, 10));
+			setSpacing(5);
+		}
+	};
+
+	/**
+	 * 
+	 */
+	static VBox simControlBox = new VBox(){
+		{
+			setStyle("-fx-font-size: 12;");
+			getChildren().addAll(simDetailBox, commodBox);
+		}
+	};
+
 	
 	/**
 	 * Adds the GridPane and input nodes to the simulationInfo view.
@@ -62,6 +119,7 @@ public class SimulationInfo extends ViewBase{
 	public void init(){
 		setTitle(TITLE);
 		TextField duration = VisFunctions.numberField();
+		duration.setPromptText("Length of Simulation");
 		duration.setText(CycicScenarios.workingCycicScenario.simulationData.duration);
 		duration.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -83,6 +141,7 @@ public class SimulationInfo extends ViewBase{
 				CycicScenarios.workingCycicScenario.simulationData.startMonth = months.get(newValue);
 			}
 		});
+		startMonth.setPromptText("Select Month");
 		simInfo.add(new Label("Start Month"), 0, 1);
 		simInfo.add(startMonth, 1, 1);
 		
@@ -93,6 +152,7 @@ public class SimulationInfo extends ViewBase{
 				CycicScenarios.workingCycicScenario.simulationData.startYear = newValue;
 			}
 		});
+		startYear.setPromptText("Starting Year");
 		simInfo.add(new Label("Start Year"), 0, 2);
 		simInfo.add(startYear, 1, 2);
 		
@@ -103,6 +163,7 @@ public class SimulationInfo extends ViewBase{
 				CycicScenarios.workingCycicScenario.simulationData.simStart = newValue;
 			}
 		});
+		simStart.setPromptText("The start month");
 		simInfo.add(new Label("Simulation Start"), 0 ,3);
 		simInfo.add(simStart, 1, 3);
 		
@@ -113,14 +174,14 @@ public class SimulationInfo extends ViewBase{
 				CycicScenarios.workingCycicScenario.simulationData.decay = newValue;
 			}
 		});
+		decay.setPromptText("Simulation Decay Mode");
 		simInfo.add(new Label("Decay Flag"), 0, 4);
 		simInfo.add(decay, 1, 4);
-		simInfo.add(new Label(""), 0 , 5);
-		simInfo.add(new Label("Simulation Commodities"), 0, 6);
-		simInfo.add(commodGrid, 0, 7);
 		buildCommodPane();
-		setContent(simInfo);
+		
+		setContent(simControlBox);
 	}
+	
 	/**
 	 * 
 	 */
@@ -131,13 +192,14 @@ public class SimulationInfo extends ViewBase{
 			commodity.setText(CycicScenarios.workingCycicScenario.CommoditiesList.get(i).getText());
 			commodGrid.add(commodity, 0, i );
 			final int index = i;
+			commodity.setPromptText("Enter Commodity Name");
 			commodity.textProperty().addListener(new ChangeListener<String>(){
 				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 					CycicScenarios.workingCycicScenario.CommoditiesList.get(index).setText(newValue);
 				}
 			});
 			Button removeCommod = new Button();
-			removeCommod.setText("Delete Commodity");
+			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
 			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent e){
 					CycicScenarios.workingCycicScenario.CommoditiesList.remove(index);
@@ -146,7 +208,6 @@ public class SimulationInfo extends ViewBase{
 			});	
 			commodGrid.add(removeCommod, 1, index);
 		}
-		commodGrid.add(addNewCommod, 0, CycicScenarios.workingCycicScenario.CommoditiesList.size());
 	}
 	
 	/**
@@ -158,7 +219,7 @@ public class SimulationInfo extends ViewBase{
 		commodity.setText("");
 		CycicScenarios.workingCycicScenario.CommoditiesList.add(commodity);
 		TextField newCommod = new TextField();
-		newCommod.setText(CycicScenarios.workingCycicScenario.CommoditiesList.get(CycicScenarios.workingCycicScenario.CommoditiesList.size()-1).getText());
+		newCommod.setPromptText("Enter Commodity Name");
 		newCommod.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				CycicScenarios.workingCycicScenario.CommoditiesList.get(CycicScenarios.workingCycicScenario.CommoditiesList.size()-1).setText(newValue);

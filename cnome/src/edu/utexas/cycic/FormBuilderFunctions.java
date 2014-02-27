@@ -71,11 +71,11 @@ public class FormBuilderFunctions {
 	 * @param array The ArrayList<Object> used to store the information in the TextField. 
 	 * @return A TextField tied via a listener to the value of this input field.
 	 */
-	static TextField textFieldBuilder(final ArrayList<Object> defaultValue){
+	static TextField textFieldBuilder(final ArrayList<Object> facArray, final ArrayList<Object> defaultValue){
 		
 		TextField textField = new TextField();
 		textField.setText(defaultValue.get(0).toString());
-		
+		textField.setPromptText(facArray.get(2).toString());
 		textField.textProperty().addListener(new ChangeListener<Object>(){         
 			public void changed(ObservableValue<?> observable, Object oldValue, Object newValue){
 				defaultValue.set(0, newValue);
@@ -247,6 +247,7 @@ public class FormBuilderFunctions {
 		for(String value : string.split(",")){
 			cb.getItems().add(value.trim());
 		}
+		cb.setPromptText("Select value");
 		cb.setValue(defaultValue.get(0).toString());
 		
 		cb.valueProperty().addListener(new ChangeListener<String>(){
@@ -295,10 +296,7 @@ public class FormBuilderFunctions {
 				}
 			}
 		});
-		
-
-		
-		
+		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
@@ -439,7 +437,7 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-
+		cb.setPromptText("Select a commodity");
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();

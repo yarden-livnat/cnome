@@ -1,8 +1,14 @@
 package edu.utexas.cycic;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
+import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utexas.cycic.tools.FormBuilderTool;
+import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CustomMenuItem;
@@ -33,6 +39,9 @@ public class CycicCircles{
 	protected static double x;
 	protected static double y;
 	
+
+
+	
 	/**
 	 * Function to build a prototype facility node. This node will contain
 	 * the facilities available to institutions and regions. All children 
@@ -40,6 +49,7 @@ public class CycicCircles{
 	 * @param name Name of the new prototype facility.
 	 */
 	static FacilityCircle addNode(String name, final facilityNode parent) {
+
 		final FacilityCircle circle = parent.cycicCircle;
 		circle.setRadius(45);
 		circle.setCenterX(60);
@@ -84,6 +94,18 @@ public class CycicCircles{
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
 		MenuItem facForm = new MenuItem("Facility Form");
+		/*facForm.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				ToolFactory factory = new FormBuilderToolFactory();
+				try {
+					Cycic._presenter.addTool(factory.create());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		});*/
+		
+		
 		MenuItem delete = new MenuItem("Delete");
 		
 		delete.setOnAction(new EventHandler<ActionEvent>(){
