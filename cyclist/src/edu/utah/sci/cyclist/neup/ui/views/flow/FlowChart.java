@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.application.Platform;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -22,7 +20,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -34,9 +31,8 @@ public class FlowChart extends VBox {
 	private static final String COMMULATIVE_CHART_LABEL = "Commulative Flow";
 	
 	private HBox _header;
+	private StackPane _stack;
 	private Pane _glass;
-//	private Line _fromLine;
-//	private Line _toLine;
 //	private Label _popup;
 	private Rectangle _rec;
 	
@@ -46,14 +42,10 @@ public class FlowChart extends VBox {
 	private double _scale = 1;
 	private boolean _opened = true;
 	private String _type;
-//	private int _movingTime;
 	private int _upperBound;
 	private boolean _updating = false;
 	
 	private Map<FlowEntry, ChartInfo> _info = new HashMap<>();
-	
-//	private IntegerProperty _fromTimeProperty = new SimpleIntegerProperty();
-//	private IntegerProperty _toTimeProperty = new SimpleIntegerProperty();
 	private ObjectProperty<Range<Integer>> _timeRangeProperty = new SimpleObjectProperty<>();
 	
 	public class ChartInfo {
@@ -68,13 +60,6 @@ public class FlowChart extends VBox {
 		super();
 		build();
 	}
-	
-//	public IntegerProperty fromTimeProperty() {
-//		return _fromTimeProperty;
-//	}
-//	public IntegerProperty toTimeProperty() {
-//		return _toTimeProperty;
-//	}
 	
 	public ObjectProperty<Range<Integer>> timeRangeProperty() {
 		return _timeRangeProperty;
@@ -129,14 +114,12 @@ public class FlowChart extends VBox {
 		
 		_header.getChildren().add(info.title);
 		_chart.getData().add(series);
-//		_fromLine.setVisible(true);
 		_rec.setVisible(true);
 	}
 	
 	public void remove(FlowEntry entry) {
 		ChartInfo info = _info.remove(entry);
 		if (info == null) {
-//			_fromLine.setVisible(false);
 			_rec.setVisible(false);
 			return;
 		}
@@ -236,8 +219,7 @@ public class FlowChart extends VBox {
 	private void buildHeader() {
 		_header = new HBox();
 		_header.getStyleClass().add("infobar");
-		_header.setStyle("-fx-padding: 0, 0, 0, 2px");
-		
+
 		Label caret = new Label("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		
 		ChoiceBox<String> type = new ChoiceBox<>();
@@ -253,8 +235,8 @@ public class FlowChart extends VBox {
 			} else {
 				caret.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_RIGHT));			
 			}
-			_chart.setVisible(_opened);
-			_chart.setManaged(_opened);
+			_stack.setVisible(_opened);
+			_stack.setManaged(_opened);
 		});
 		
 		type.valueProperty().addListener(e->{
@@ -277,20 +259,6 @@ public class FlowChart extends VBox {
 		_chart = new LineChart<>(_xAxis, _yAxis);
 		_chart.getStyleClass().add("chart");
 		_chart.setCreateSymbols(false);
-		
-//		_fromLine = new Line();
-//		_fromLine.getStyleClass().add("timeline");
-//		_fromLine.endXProperty().bind(_fromLine.startXProperty());
-//		_fromLine.startYProperty().bind(_yAxis.layoutYProperty().add(10));
-//		_fromLine.endYProperty().bind(_fromLine.startYProperty().add(_yAxis.heightProperty()));
-//		_fromLine.setVisible(false);
-//	
-//		_toLine = new Line();
-//		_toLine.getStyleClass().add("timeline");
-//		_toLine.endXProperty().bind(_toLine.startXProperty());
-//		_toLine.startYProperty().bind(_yAxis.layoutYProperty().add(10));
-//		_toLine.endYProperty().bind(_toLine.startYProperty().add(_yAxis.heightProperty()));
-//		_toLine.setVisible(false);
 		
 		_rec = new Rectangle();
 		_rec.getStyleClass().add("range");
@@ -317,11 +285,12 @@ public class FlowChart extends VBox {
 			updateRangeLater();		
 		});
 		
-		StackPane stack = new StackPane();
-		stack.getChildren().addAll( _chart, _glass);
+		_stack = new StackPane();
+		_stack.getChildren().addAll( _chart, _glass);
+		_stack.setStyle("-fx-pref-height: 100px");
 		
-		VBox.setVgrow(stack, Priority.ALWAYS);
-		return stack;
+//		VBox.setVgrow(_stack, Priority.ALWAYS);
+		return _stack;
 	}
 	
 	private void updateRangeLater() {
@@ -332,13 +301,6 @@ public class FlowChart extends VBox {
             }
 		});
 	}
-	
-//	private void updateLine() {
-//		double time = _fromTimeProperty.get();
-//		double x = _xAxis.getDisplayPosition(time);
-//		Point2D p = _glass.sceneToLocal(_xAxis.localToScene(x, 0));
-//		_fromLine.setStartX(p.getX());
-//	}
 	
 	private void updateRange() {
 		Range<Integer> r = timeRangeProperty().get();

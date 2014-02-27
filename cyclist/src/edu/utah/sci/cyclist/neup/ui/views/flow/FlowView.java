@@ -45,8 +45,6 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
-import edu.utah.sci.cyclist.core.ui.components.IntegerField;
-import edu.utah.sci.cyclist.core.ui.components.RangeField;
 import edu.utah.sci.cyclist.core.ui.components.RangeField;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -62,7 +60,6 @@ public class FlowView extends CyclistViewBase {
 	
 	public static final int Y_OFFSET_TOP = 30;
 	public static final int Y_OFFSET_BOTTOM = 20;
-	public static final int X_CHART_OFFSET = 10;
 	
 	public static final String NATURAL_U = "natl_u";
 	public static final String ENRICHED_U = "enriched_u";
@@ -127,10 +124,6 @@ public class FlowView extends CyclistViewBase {
 		_currentSim = active? sim : null;
 		update();
 	}
-	
-//	private int getTime() {
-//		return _rangeField.getFrom();
-//	}
 	
 	private Range<Integer> getTimeRange() {
 		return _rangeField.getRange();

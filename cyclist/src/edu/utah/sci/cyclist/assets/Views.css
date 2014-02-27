@@ -257,7 +257,7 @@
 }
 
 .flow .fchart {
-	-fx-pref-height: 100px;
+	/*-fx-pref-height: 100px;*/
 }
 
 .flow .fchart .chart {
