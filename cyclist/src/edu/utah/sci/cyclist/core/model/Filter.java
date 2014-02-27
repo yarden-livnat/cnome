@@ -15,6 +15,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
+import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.DataType.Type;
 import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
@@ -107,8 +108,8 @@ public class Filter implements Observable {
 		return _dataType.getClassification();
 	}
 	
-	public Boolean getForceNumericFilter(){
-		return _dataType.getForceNumericFilter();
+	public FilterType getFilterType(){
+		return _dataType.getFilterType();
 	}
 	
 	public Type getType() {
