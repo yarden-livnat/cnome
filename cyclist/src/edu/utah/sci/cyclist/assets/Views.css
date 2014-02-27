@@ -276,7 +276,7 @@
 }
 
 .flow .fchart .chart-series-line {
-	-fx-stroke-width: 2px;
+	-fx-stroke-width: 1px;
 } 
 
 .flow .fchart .chart-line-symbol {

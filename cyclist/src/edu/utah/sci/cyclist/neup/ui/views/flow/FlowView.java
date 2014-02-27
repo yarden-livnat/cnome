@@ -349,18 +349,28 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void addToChart(FlowEntry entry, ObservableList<Inventory> values) {
-		Map<Integer, Pair<Integer, Double>> map = new HashMap<>();
+		// assume the data is sorted based on time
+		// multiple items per timestep
+		// TODO: apply filters
+		List<Pair<Integer, Double>> series = new ArrayList<>();
+		Pair<Integer, Double> current =  null;
 		for (Inventory i : values) {
-			Pair<Integer, Double> p = map.get(i.time);
-			if (p == null) {
-				p = new Pair<Integer, Double>();
-				p.v1 = i.time;
-				p.v2 = 0.0;
-				map.put(i.time, p);
+			if (current == null || current.v1 != i.time) {
+				if (current != null) {
+					series.add(current);
+				}
+				current = new Pair<>();
+				current.v1 = i.time;
+				current.v2 = i.amount;
+			} else {
+				current.v2 += i.amount;
 			}
-			p.v2 += i.amount;
 		}
-		_chart.add(entry, entry.getName(), map.values());
+		if (current != null) {
+			series.add(current);
+		}
+
+		_chart.add(entry, entry.getName(), series);
 	}
 	
 	private ReadOnlyObjectProperty<ObservableList<Inventory>> queryInventory(FlowNode node) {
@@ -418,9 +428,7 @@ public class FlowView extends CyclistViewBase {
 				return FXCollections.observableMap(map);
 			}	
 		};
-		
-//		final ChangeListener<? super ObservableMap<FlowNode, ObservableList<Transaction>>> listener =;
-		
+				
 		task.valueProperty().addListener((o, p, n)->{
 			if (n != null) {
 				if (getTimeRange().from == timestep) {
@@ -613,7 +621,6 @@ public class FlowView extends CyclistViewBase {
 			hbox
 		);
 		
-//		_rangeField.fromProperty().addListener(o->timeChanged(_rangeField.getFrom()));
 		_rangeField.rangeProperty().addListener(o->timeChanged(_rangeField.getRange()));
 				
 		_rangeField.setOnDragOver(e->{
@@ -632,8 +639,8 @@ public class FlowView extends CyclistViewBase {
 			DnD.LocalClipboard clipboard = getLocalClipboard();	
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
 				Integer i = clipboard.get(DnD.VALUE_FORMAT, Integer.class);	
+				// TODO:
 				System.out.println("IMPLEMENT DnD");
-//				_rangeField.setFrom(i);
 				e.consume();
 			}
 		});
@@ -705,33 +712,6 @@ public class FlowView extends CyclistViewBase {
 		entry.setOnAction(e->isoFilterChanged(entry.getText()));
 		return vbox;
 	}
-
-//	private Node buildChartMode() {
-//		VBox vbox = new VBox();
-//		vbox.getStyleClass().add("infobar");
-//
-//		Text title = new Text("Chart");
-//		title.getStyleClass().add("title");
-//		
-//		ToggleGroup group = new ToggleGroup();
-//		RadioButton listMode= new RadioButton("List");
-//		listMode.setToggleGroup(group);
-//		
-//		RadioButton chartMode = new RadioButton("Chart");
-//		chartMode.setToggleGroup(group);
-//		
-//		vbox.getChildren().addAll(
-//			title,
-//			listMode,
-//			chartMode
-//		);
-//		
-//		listMode.setOnAction(e->_chartModeProperty.set(0));
-//		chartMode.setOnAction(e->_chartModeProperty.set(1));
-//		listMode.setSelected(true);
-//		
-//		return vbox;
-//	}
 	
 	private Node buildChartAggr() {
 		VBox vbox = new VBox();
@@ -773,9 +753,6 @@ public class FlowView extends CyclistViewBase {
 	private Node buildInventoryChart() {
 		VBox vbox = new VBox();
 		_chart = new FlowChart();
-		
-//		_chart.fromTimeProperty().bindBidirectional(_rangeField.fromProperty());
-//		_chart.toTimeProperty().bindBidirectional(_rangeField.toProperty());
 		_chart.timeRangeProperty().bindBidirectional(_rangeField.rangeProperty());
 		
 		vbox.getChildren().addAll(
