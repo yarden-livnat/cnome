@@ -20,39 +20,39 @@
 		<mkdir dir="externalLibs" />
 		
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cyclist\lib">
+			<fileset dir="${basedir}\..\lib">
 				<filename name="mysql-connector-java-5.1.18-bin.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cyclist\lib">
+			<fileset dir="${basedir}\..\lib">
 				<filename name="commons-collections-3.2.1.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cyclist\lib">
+			<fileset dir="${basedir}\..\lib">
 				<filename name="commons-logging.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cyclist\lib">
+			<fileset dir="${basedir}\..\lib">
 				<filename name="sqlite-jdbc-3.7.2.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cyclist\lib">
+			<fileset dir="${basedir}\..\lib">
 				<filename name="controlsfx-8.0.4-dev.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cyclist\lib">
+			<fileset dir="${basedir}\..\lib">
 				<filename name="log4j-1.2.16.jar"/>	
 			</fileset>
 		</copy>
 		
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="${basedir}\..\cyclist\">
+			<fileset dir="${basedir}\..\">
 				<include name="src/**" />
 			</fileset>
 		</copy>
