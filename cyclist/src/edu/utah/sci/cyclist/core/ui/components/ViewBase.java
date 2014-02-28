@@ -282,9 +282,11 @@ public class ViewBase extends BorderPane implements View {
 		_header.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				delta.x = getTranslateX() - event.getSceneX();
-				delta.y = getTranslateY() - event.getSceneY();
-				select();
+//				delta.x = getTranslateX() - event.getSceneX();
+//				delta.y = getTranslateY() - event.getSceneY();
+				delta.x = getLayoutX() - event.getSceneX();
+				delta.y = getLayoutY() - event.getSceneY();
+				select();select();
 				event.consume();
 			}
 		});
@@ -302,9 +304,9 @@ public class ViewBase extends BorderPane implements View {
 //				System.out.println("x: "+Math.min(Math.max(0, delta.x + event.getSceneX()), maxX)+"  y:"+Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
 //				setTranslateX(Math.min(Math.max(0, delta.x+event.getSceneX()), maxX)) ;
 //				setTranslateY(Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
-				
-				setTranslateX(delta.x+event.getSceneX()) ;
-				setTranslateY(delta.y+event.getSceneY());
+
+				setLayoutX(delta.x+event.getSceneX()) ;
+				setLayoutY(delta.y+event.getSceneY());
 				event.consume();
 			}
 			

@@ -34,9 +34,13 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
@@ -50,6 +54,7 @@ import edu.utah.sci.cyclist.core.model.ToolData;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
+import edu.utah.sci.cyclist.core.ui.components.InfinitPane;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
@@ -61,7 +66,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
+	private InfinitPane _ipane;
+	
 	private WorkspacePanelArea _filtersPane;
+	ScrollBar _wb;
+	ScrollBar _hb;
 //	private Pane _statusPane;
 	private double _savedDivider = 0.9;
 	
@@ -105,29 +114,24 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	}
 	
 	private void build() {
-		getStyleClass().add("workspace");
+//		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
-		setPrefSize(600, 300);
-
-//		TilePane tp = new TilePane();
-//		tp.setHgap(5);
-////		tp.setPrefColumns(1);
-//		FlowPane fp = new FlowPane();
-//		fp.setVgap(8);
-//		fp.setHgap(4);
+//		setPrefSize(800, 600);
+		setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+		
 		_pane = new Pane();
+		_ipane = new InfinitPane();
+		_ipane.setContent(_pane);
 		
 		_filtersPane = new WorkspacePanelArea();
 		
 		final SplitPane splitPane = new SplitPane();
 		splitPane.setId("hiddenSplitter");
 		splitPane.setOrientation(Orientation.HORIZONTAL);
-		splitPane.getItems().addAll(_pane, _filtersPane);
+		splitPane.getItems().addAll(_ipane, _filtersPane);
 		splitPane.setDividerPosition(0, 1);
-		
-		SplitPane.setResizableWithParent(_filtersPane, false);
-		
+			
 		_filtersPane.visibleProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
@@ -153,20 +157,22 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 //		borderPane.setBottom(_statusPane);
 //		borderPane.setCenter(_pane);
 		
-		Rectangle clip = new Rectangle(0, 0, 100, 100);
-		clip.widthProperty().bind(_pane.widthProperty());
-		clip.heightProperty().bind(_pane.heightProperty());
-		_pane.setClip(clip);
+//		Rectangle clip = new Rectangle(0, 0, 100, 100);
+//		clip.widthProperty().bind(_pane.widthProperty());
+//		clip.heightProperty().bind(_pane.heightProperty());
+//		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
 		
 		//setContent(borderPane, true /* allowMove */);
+
+		
 		setContent(splitPane);
 			
 //		enableDragging(false);
 		
 		setOnDragOver(new EventHandler<DragEvent>() {
 			public void handle(DragEvent event) {
-				if (event.getTarget() == _pane) {
+				if (event.getTarget() == _ipane) {
 					DnD.LocalClipboard clipboard = getLocalClipboard();
 					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
 					{
@@ -295,9 +301,9 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 					
 			}
 		});
-		
 	}
 	
+
 	/**
 	 * will be called by the workspace presenter
 	 * @param view
