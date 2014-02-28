@@ -32,15 +32,17 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -51,10 +53,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Window;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.ui.wizards.SimulationEditorWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
@@ -67,6 +67,7 @@ public class SimulationsPanel extends TitledPanel  {
 	public static final long ALIAS_EDIT_WAIT_TIME = 2000;
 	
 	
+	private ContextMenu _menu = new ContextMenu();
 	private Timer _timer = null;
 	VBox _vbox = null;
 	Boolean _entryEdit = false;
@@ -87,6 +88,7 @@ public class SimulationsPanel extends TitledPanel  {
 	public SimulationsPanel() {
 		super(TITLE, GlyphRegistry.get(AwesomeIcon.COGS));
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		createMenu();
 	}
 	
 //	@Override
@@ -259,8 +261,6 @@ public class SimulationsPanel extends TitledPanel  {
 		entry.simulation = simulation;
 		entry.title = new Label(simulation.getAlias());
 		
-		final SimulationsPanel _panel = this;
-		
 		//When mouse pressed, start a timer, when timer expires- start a task to make the pressed entry editable. 
 		entry.title.setOnMousePressed(new EventHandler<Event>(){
 			@Override
@@ -315,19 +315,8 @@ public class SimulationsPanel extends TitledPanel  {
 				select(entry);
 				//Right click loads the "delete" simulation dialog box.
 				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
-					Window window = _panel.getParent().getScene().getWindow();
-					SimulationEditorWizard wizard = new SimulationEditorWizard(entry.simulation);
-					ObjectProperty<Simulation> selection = wizard.show(window);
+					_menu.show(entry.title, Side.BOTTOM, 0, 0);
 					
-					selection.addListener(new ChangeListener<Simulation>(){
-						@Override
-						public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
-							if(newVal.getSimulationId().equals("delete")){
-								removeSimulation(entry);
-								setEditSimulation(true);
-							}
-						}	
-					});
 				}  else if( mouseEvent.getButton()   == MouseButton.PRIMARY){
 					//Left click on the mouse - loads the simulation tables.
 					_simulationProperty.set(entry.simulation);
@@ -363,6 +352,17 @@ public class SimulationsPanel extends TitledPanel  {
 		
 	public void removeSimulation(Entry entry) {
 		_items.remove(entry.simulation);
+	}
+	
+	private void createMenu(){
+				 MenuItem deleteSimulation = new MenuItem("Delete simulation");
+				 deleteSimulation.setOnAction(new EventHandler<ActionEvent>() {
+				 							public void handle(ActionEvent e) { 
+				 								removeSimulation(_selected);
+				 								setEditSimulation(true);
+				 							}
+				 });
+				 _menu.getItems().add(deleteSimulation);
 	}
 	
 	class Entry {
