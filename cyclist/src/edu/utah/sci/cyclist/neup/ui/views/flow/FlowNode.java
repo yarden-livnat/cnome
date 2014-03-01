@@ -136,6 +136,8 @@ class FlowNode extends Pane {
 	}
 	
 	public void setExplicit(boolean value) {
+		if (_explicit == value) return;
+		
 		_explicit = value;
 		_button.select(value);
 		if (value) {

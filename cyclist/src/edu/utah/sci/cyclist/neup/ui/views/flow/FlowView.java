@@ -192,17 +192,15 @@ public class FlowView extends CyclistViewBase {
 		
 		double total = 0;
 		int n = 0;
-		for (FlowNode node : _line[SRC].getNodes()) {
-			n += node.getActiveTransactions().size();
-			for (Transaction t : node.getActiveTransactions()) {
-				total += t.amount;
-			}
+		for (Connector c : _connectors) {
+			total += c.getTotal();
+			n += c.getTransactions().size();
 		}
-	
+
 		if (total == 0) {
 			_total.setText("");
 		} else {
-			_total.setText(String.format("(%d) %.2e kg", n, total));
+			_total.setText(String.format("%.2e kg [%d]", total, n));
 		}
 	}
 	
@@ -310,6 +308,18 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void removeNode(FlowNode node) {
+		node.setTask(null);
+		Iterator<Connector> i = _connectors.iterator();
+		while (i.hasNext()) {
+			Connector c = i.next();
+			if (c.getFrom() == node || c.getTo() == node) {
+				c.release();
+				c.getFrom().removeConnector(c);
+				c.getTo().removeConnector(c);
+				_pane.getChildren().remove(c);
+				i.remove();
+			}
+		}
 		_line[node.getDirection()].removeNode(node);
 		FlowEntry entry = _selectedNodes.get(node.getName());
 		entry.remove(node);
@@ -518,14 +528,25 @@ public class FlowView extends CyclistViewBase {
 				line.addNode(target);
 			}
 			
-			final Function<Facility, Object> kind = kindFactory.get(line.getKind());
-			Function<Transaction, Facility> f = node.isSRC() ? t->_facilities.get(t.receiver) : t->_facilities.get(t.sender);
-			
-			Connector c = new Connector(node, target, node.getActiveTransactions().filtered(t->kind.apply(f.apply(t)) == value));		
-			node.addConnector(c);
-			target.addConnector(c);
-			_connectors.add(c);
-			_pane.getChildren().add(c);
+			boolean found = false;
+			for (Connector c: _connectors) {
+				if ((c.getFrom() == node && c.getTo() == target)
+						|| (c.getFrom() == target && c.getTo() == node)) 
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				final Function<Facility, Object> kind = kindFactory.get(line.getKind());
+				Function<Transaction, Facility> f = node.isSRC() ? t->_facilities.get(t.receiver) : t->_facilities.get(t.sender);
+				
+				Connector c = new Connector(node, target, node.getActiveTransactions().filtered(t->kind.apply(f.apply(t)) == value));		
+				node.addConnector(c);
+				target.addConnector(c);
+				_connectors.add(c);
+				_pane.getChildren().add(c);
+			}
 		}
 
 	}
