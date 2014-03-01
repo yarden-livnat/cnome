@@ -9,7 +9,6 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Inventory;
@@ -87,7 +86,6 @@ public class SimulationProxy {
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderId" : "ReceiverId", type);
-//			System.out.println("query: ["+query+"]");
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());
 				stmt.setInt(2, timestep);
@@ -121,7 +119,6 @@ public class SimulationProxy {
 		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
-//		System.out.println(query+"  ["+type+", "+value+"]");
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());

@@ -3,12 +3,10 @@ package edu.utah.sci.cyclist.core.ui.components;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.utah.sci.cyclist.neup.model.Range;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TextField;
+import edu.utah.sci.cyclist.neup.model.Range;
 
 public class RangeField extends TextField {
 	
@@ -21,8 +19,6 @@ public class RangeField extends TextField {
 	private boolean _changing = false;
 	private Mode _mode;
 	
-	private IntegerProperty _fromProperty = new SimpleIntegerProperty(1);
-	private IntegerProperty _toProperty = new SimpleIntegerProperty(1);
 	private ObjectProperty<Range<Integer>> _rangeProperty = new SimpleObjectProperty<>();
 	
 	public ObjectProperty<Range<Integer>> rangeProperty() {
@@ -37,59 +33,6 @@ public class RangeField extends TextField {
 		rangeProperty().set(range);
 		update();
 	}
-	
-//	public IntegerProperty fromProperty() {
-//		return _fromProperty;
-//	}
-//	
-//	public void setFrom(int value) {
-//		fromProperty().set(value);
-//		System.out.println("from: "+value);
-//		if (_mode == Mode.SINGLE) {
-//			setTo(value);
-//			setDuration(0);
-//		}
-//		update();
-//	}
-//	
-//	public int getFrom() {
-//		return fromProperty().get();
-//	}
-//	
-//	public IntegerProperty toProperty() {
-//		return _toProperty;
-//	}
-//	
-//	public void setTo(int value) {
-//		toProperty().set(value);
-//		System.out.println("to: "+value);
-//		if (_mode == Mode.TO) {
-//			setDuration(getTo() - getFrom() +1);
-//			update();
-//		}
-//	}
-//	
-//	public int getTo() {
-//		return toProperty().get();
-//	}
-//	
-//	public IntegerProperty durationProperty() {
-//		return _durationProperty;
-//	}
-//	
-//	public void setDuration(int value) {
-//		durationProperty().set(value);
-//		System.out.println("duration: "+value);
-//		if (_mode == Mode.DURATION) {
-//			setTo(getFrom()+getDuration()-1);
-//			update();
-//		}
-//	}
-//	
-//	public int getDuration() {
-//		return durationProperty().get();
-//	}
-	
 	
 	/**
 	 * Constructor
