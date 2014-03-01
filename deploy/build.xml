@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-	<project name="Cyclist" default="do-deploy" basedir="."  xmlns:fx="javafx:com.sun.javafx.tools.ant">
+	<project name="cyclist" default="do-deploy" basedir="."  xmlns:fx="javafx:com.sun.javafx.tools.ant">
 	<target name="init-fx-tasks">
-		<echo message="JAVA_HOME is set to = ${java.home}" />
 		<path id="fxant">
 			<filelist>
 				<file name="${java.home}\..\lib\ant-javafx.jar"/>
@@ -11,7 +10,7 @@
 	
 		<taskdef resource="com/sun/javafx/tools/ant/antlib.xml"      
 			uri="javafx:com.sun.javafx.tools.ant"
-			classpathref="fxant" />
+			classpathref="fxant"/>
 	</target>
 	<target name="setup-staging-area">
 		<delete dir="externalLibs" />
@@ -21,39 +20,39 @@
 		<mkdir dir="externalLibs" />
 		
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cnome\lib">
-				<filename name="controlsfx-8.0.2-developer-preview-2.jar"/>	
-			</fileset>
-		</copy>
-		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cnome\lib">
-				<filename name="log4j-1.2.16.jar"/>	
-			</fileset>
-		</copy>
-		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cnome\lib">
+			<fileset dir="${basedir}\..\cyclist\lib">
 				<filename name="mysql-connector-java-5.1.18-bin.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cnome\lib">
+			<fileset dir="${basedir}\..\cyclist\lib">
 				<filename name="commons-collections-3.2.1.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cnome\lib">
+			<fileset dir="${basedir}\..\cyclist\lib">
+				<filename name="commons-logging.jar"/>	
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="${basedir}\..\cyclist\lib">
 				<filename name="sqlite-jdbc-3.7.2.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="${basedir}\..\cnome\lib">
-				<filename name="commons-logging.jar"/>	
+			<fileset dir="${basedir}\..\cyclist\lib">
+				<filename name="controlsfx-8.0.4-dev.jar"/>	
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="${basedir}\..\cyclist\lib">
+				<filename name="log4j-1.2.16.jar"/>	
 			</fileset>
 		</copy>
 		
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="${basedir}\..\cnome\">
+			<fileset dir="${basedir}\..\cyclist\">
 				<include name="src/**" />
 			</fileset>
 		</copy>
@@ -69,11 +68,11 @@
 		<!-- Copy project-libs references -->
 		<copy todir="build/libs">
 			<fileset dir="externalLibs">
-				<include name="log4j-1.2.16.jar"/>
-				<include name="controlsfx-8.0.2-developer-preview-2.jar"/>
-				<include name="commons-collections-3.2.1.jar"/>
 				<include name="commons-logging.jar"/>
+				<include name="controlsfx-8.0.4-dev.jar"/>
+				<include name="log4j-1.2.16.jar"/>
 				<include name="mysql-connector-java-5.1.18-bin.jar"/>
+				<include name="commons-collections-3.2.1.jar"/>
 				<include name="sqlite-jdbc-3.7.2.jar"/>
 			</fileset>
 		</copy>
@@ -87,7 +86,7 @@
 			</fileset>
 		</copy>
 	
-		<javac includeantruntime="false" source="1.7" target="1.7" srcdir="build/src" destdir="build/classes" encoding="Cp1252">
+		<javac includeantruntime="false" source="1.8" target="1.8" srcdir="build/src" destdir="build/classes" encoding="Cp1252">
 			<classpath>
 				<fileset dir="build/libs">
 					<include name="*"/>
@@ -119,49 +118,49 @@
 		
 		
 		<fx:resources id="appRes">
-			<fx:fileset dir="dist" includes="Cyclist.jar"/>
+			<fx:fileset dir="dist" includes="cyclist.jar"/>
 			<fx:fileset dir="dist" includes="libs/*"/>
 		</fx:resources> 
 		
 		<fx:application id="fxApplication"
 			name="Cyclist"
 			mainClass="edu.utah.sci.cyclist.Cyclist"
+			toolkit="fx"
 		/>
 	
 		<mkdir dir="build/classes/META-INF" />
 		
 		
-		<fx:jar destfile="dist/Cyclist.jar">
+		
+		<fx:jar destfile="dist/cyclist.jar">
 			<fx:application refid="fxApplication"/>
 			<fileset dir="build/classes">
 			</fileset>
 			<fx:resources refid="appRes"/>
 			
 			<manifest>
-				<attribute name="Implementation-Vendor" value="edu.utah.sci"/>
-				<attribute name="Implementation-Title" value=""/>
-				<attribute name="Implementation-Version" value="0.1"/>
+				<attribute name="Implementation-Vendor" value="SCI Institute"/>
+				<attribute name="Implementation-Title" value="Cyclist"/>
+				<attribute name="Implementation-Version" value="0.3"/>
+				<attribute name="JavaFX-Feature-Proxy" value="None"/>
 			</manifest>
 		</fx:jar>
 		
+	
 		<mkdir dir="deploy" />
-		
-
 		<!-- Need to use ${basedir} because somehow the ant task is calculating the directory differently -->
 		<fx:deploy
 			embedJNLP="false"
 			extension="false"
 			includeDT="false"
 			offlineAllowed="true"
-			nativeBundles="all"
 			outdir="${basedir}/deploy"
-			outfile="Cyclist"
+			outfile="cyclist" nativeBundles="all"
 			updatemode="background" >
-
-			<fx:resources refid="appRes"/>
-			<fx:info title="Cyclist" vendor="edu.utah.sci"/>
+	
+			<fx:info title="cyclist" vendor="SCI Institute"/>
 			<fx:application refId="fxApplication"/>
-			
+			<fx:resources refid="appRes"/>
 		</fx:deploy>
 		
 		
