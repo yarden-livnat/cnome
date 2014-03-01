@@ -47,6 +47,10 @@ public class RangeField extends TextField {
 		setRange(new Range<Integer>(1, 1));
 	}
 	
+	public Mode getMode() {
+		return _mode;
+	}
+	
 	public void inc() {
 		Range<Integer> r = getRange();
 		Range<Integer> nr = new Range<>();

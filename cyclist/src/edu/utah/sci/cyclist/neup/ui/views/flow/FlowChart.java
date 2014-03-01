@@ -312,8 +312,7 @@ public class FlowChart extends VBox {
 		Point2D p2 = _glass.sceneToLocal(_xAxis.localToScene(x2, 0));
 		
 		_rec.setX(p1.getX());
-		_rec.setWidth(p2.getX() - p1.getX());
-//		System.out.println("rec: "+_rec.getX()+", "+_rec.getY()+"  "+_rec.getWidth()+"x"+_rec.getHeight());
+		_rec.setWidth(Math.max(2, p2.getX() - p1.getX()));
 	}
 	
 	double _mx;
@@ -332,9 +331,9 @@ public class FlowChart extends VBox {
 		
 		_rec.setOnMouseDragged(e->{
 			double dx = e.getX() - _mx;
-			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX()+dx, 0));
-			Number v = _xAxis.getValueForDisplay(p.getX());
-			int i = v.intValue();
+//			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX()+dx, 0));
+//			Number v = _xAxis.getValueForDisplay(p.getX());
+//			int i = v.intValue();
 			_rec.setX(_rec.getX()+dx);
 			_mx = e.getX(); 
 		});
@@ -356,31 +355,6 @@ public class FlowChart extends VBox {
 			_timeRangeProperty.set(nr);
 			_updating = false;
 		});
-		
-//		_fromLine.setOnMousePressed(e->{
-//			_popup.setText(Integer.toString(_fromTimeProperty.get()));
-//			_popup.setLayoutY(e.getY()-10);
-//			_popup.setVisible(true);
-//			_movingTime = _fromTimeProperty.get();
-//		});
-//		
-//		_fromLine.setOnMouseDragged(e->{
-//			
-//			_popup.setLayoutY(e.getY()-10);
-//			Point2D p = new Point2D(e.getSceneX(), e.getSceneY());
-//			Number v = _xAxis.getValueForDisplay(_xAxis.sceneToLocal(p).getX());
-//			int i = v.intValue();
-//			i = Math.max(0, Math.min(_upperBound, i));
-//			if (i>0 && i <= _upperBound) {
-//				_fromLine.setStartX(e.getX());
-//				_popup.setText(Integer.toString(i));
-//				_movingTime = i;
-//			}
-//		});
-//		
-//		_fromLine.setOnMouseReleased(e->{
-//			_popup.setVisible(false);
-//			_fromTimeProperty.set(_movingTime);
-//		});
+	
 	}
 }

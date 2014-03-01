@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
@@ -189,17 +191,18 @@ public class FlowView extends CyclistViewBase {
 		if (_line == null || _line[SRC] == null) return;
 		
 		double total = 0;
+		int n = 0;
 		for (FlowNode node : _line[SRC].getNodes()) {
+			n += node.getActiveTransactions().size();
 			for (Transaction t : node.getActiveTransactions()) {
 				total += t.amount;
 			}
 		}
-		
-
+	
 		if (total == 0) {
 			_total.setText("");
 		} else {
-			_total.setText(String.format("%.2e kg", total));
+			_total.setText(String.format("(%d) %.2e kg", n, total));
 		}
 	}
 	
@@ -396,13 +399,14 @@ public class FlowView extends CyclistViewBase {
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
-				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
+				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 			}	
 		};
 		
 		task.valueProperty().addListener((o, p, n)->{
 				if (n != null) {
 					addRelatedNodes(node, n, timestep);
+					updateTotal();
 				}
 		});
 
@@ -421,7 +425,7 @@ public class FlowView extends CyclistViewBase {
 			protected ObservableMap<FlowNode,ObservableList<Transaction>> call() throws Exception {
 				Map<FlowNode, ObservableList<Transaction>> map = new HashMap<>();
 				for (FlowNode node : list) {
-					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
+					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 					map.put(node, list);
 				}
 				
@@ -437,6 +441,7 @@ public class FlowView extends CyclistViewBase {
 						addRelatedNodes(node, n.get(node), timestep);
 					}			
 					removeEmptyImplicitNodes();
+					updateTotal();
 				}
 			}
 		});
@@ -639,8 +644,12 @@ public class FlowView extends CyclistViewBase {
 			DnD.LocalClipboard clipboard = getLocalClipboard();	
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
 				Integer i = clipboard.get(DnD.VALUE_FORMAT, Integer.class);	
-				// TODO:
-				System.out.println("IMPLEMENT DnD");
+				Range<Integer> r = _rangeField.getRange();
+				if (_rangeField.getMode() == RangeField.Mode.DURATION) {
+					_rangeField.setRange(new Range<>(i, i+r.to-r.from));
+				} else {
+					_rangeField.setRange(new Range<>(i, i));
+				}
 				e.consume();
 			}
 		});

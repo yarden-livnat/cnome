@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javafx.animation.RotateTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -21,7 +20,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 import edu.utah.sci.cyclist.core.ui.components.TaskControl;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;

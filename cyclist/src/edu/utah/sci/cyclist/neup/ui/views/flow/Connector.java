@@ -62,7 +62,6 @@ public class Connector extends Group {
 	}
 	
 	private void build() {
-		setStyle("-fx-backgound-cool: lightred");
 		_curve = new CubicCurve();
 		_curve.getStyleClass().add("connector");
 		
@@ -132,8 +131,7 @@ public class Connector extends Group {
 		for (Transaction t : _transactions) {
 			total += t.amount;
 		}
-		_text.setText(String.format("%.2e%s", total, _units));
-//		System.out.println("connector: len:"+_transactions.size()+"   text:"+_text.getText());
+		_text.setText(String.format("(%d) %.2e%s", _transactions.size(), total, _units));
 	}
 	
 	
