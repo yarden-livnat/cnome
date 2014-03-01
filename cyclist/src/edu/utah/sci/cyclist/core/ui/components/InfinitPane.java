@@ -1,150 +1,114 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
+import java.util.function.Function;
+
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.DoubleProperty;
+import javafx.beans.WeakInvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.shape.Rectangle;
 
 public class InfinitPane extends BorderPane {
 
 	private ScrollBar _hbar;
 	private ScrollBar _vbar;
-	
+	private Pane _pane;
+
 	public InfinitPane() {
 		super();
-		
+
 		build();
 	}
 
-	public void setContent(final Pane node) {
-		setCenter(node);
-		
-		node.getChildren().addListener(new ListChangeListener<Node>() {
-
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends Node> c) {
-				while (c.next()) {
-					if (c.wasAdded()) {
-						for (Node node : c.getAddedSubList()) {
-							addListeners(node);
-						}
-					} else if (c.wasRemoved()) {
-						for (Node node : c.getAddedSubList())
-							removeListeners(node);
-					}
-				}	
-			}
-			
-		});
-		
-		node.widthProperty().addListener(e->{
-			double w = node.getWidth();
-			if (w > _hbar.getMax()) _hbar.setMax(w);
-			_hbar.setVisibleAmount(w);
-		});
-		
-		node.heightProperty().addListener(e->{
-			double h = node.getHeight();
-			if (h > _vbar.getMax()) _vbar.setMax(h);
-			_vbar.setVisibleAmount(h);
-		});
+	public Pane getPane() {
+		return _pane;
 	}
-	
+
 	private void build() {
-		setStyle("-fx-background-color: lightblue");
 		_hbar = new ScrollBar();
+		_hbar.setMin(0);
+		_hbar.setMax(0);
 		setBottom(_hbar);
-		
+
 		_vbar = new ScrollBar();
 		_vbar.setOrientation(Orientation.VERTICAL);
+		_vbar.setMin(0);
+		_vbar.setMax(0);
 		setRight(_vbar);
-		
-		Pane p = new Pane();
-		setCenter(p);
-		
-		getChildren().addListener(new ListChangeListener<Node>() {
 
+		_pane = new Pane();
+		setCenter(_pane);
+
+		Rectangle clip = new Rectangle(0, 0, 100, 100);
+		clip.widthProperty().bind(_pane.widthProperty());
+		clip.heightProperty().bind(_pane.heightProperty());
+		_pane.setClip(clip);
+
+		addListeners();
+	}
+
+	private void addListeners() {
+		_pane.getChildren().addListener(new ListChangeListener<Node>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Node> c) {
 				while (c.next()) {
 					if (c.wasAdded()) {
 						for (Node node : c.getAddedSubList()) {
-							addListeners(node);
+							addListeners((Region)node);
+							// force update
+							adjust(r->r.getLayoutX(), r->r.getWidth(), _hbar);
+							adjust(r->r.getLayoutY(), r->r.getHeight(), _vbar);
 						}
-					} else if (c.wasRemoved()) {
-						for (Node node : c.getAddedSubList())
-							removeListeners(node);
-					}
+					} 
 				}	
-			}
-			
+			}		
 		});
-		
-		p.widthProperty().addListener(e->{
-			double w = p.getWidth();
-			if (w > _hbar.getMax()) _hbar.setMax(w);
-			_hbar.setVisibleAmount(w);
-		});
-		
-		p.heightProperty().addListener(e->{
-			double h = p.getHeight();
-			if (h > _vbar.getMax()) _vbar.setMax(h);
-			_vbar.setVisibleAmount(h);
-		});
-		
-//		Rectangle clip = new Rectangle(0, 0, 100, 100);
-//		clip.widthProperty().bind(widthProperty().subtract(_vbar.widthProperty()));
-//		clip.heightProperty().bind(heightProperty().subtract(_hbar.heightProperty()));
-//		_pane.setClip(clip);
-		addListeners();
-	}
-	
-	private void addListeners() {
+
 		_hbar.valueProperty().addListener(e->{
-			System.out.println("h:"+_hbar.getValue());
-			getCenter().setTranslateX(_hbar.getValue());
+			for (Node node : _pane.getChildren()) {
+				node.setTranslateX(-_hbar.getValue());
+			}
 		});
-		
+
 		_vbar.valueProperty().addListener(e->{
-			System.out.println("v:"+_vbar.getValue());
-			getCenter().setTranslateY(_vbar.getValue());
+			for (Node node : _pane.getChildren()) {
+				node.setTranslateY(-_vbar.getValue());
+			}
 		});
-	}
-	
-	
-	private InvalidationListener hResizeListener = new InvalidationListener() {
-		@Override
-		public void invalidated(Observable observable) {
-			DoubleProperty p = (DoubleProperty) observable;
-			double x = p.getValue();
-			if (x < _hbar.getMin()) _hbar.setMin(x);
-			else if (x > _hbar.getMax()) _hbar.setMax(x);
-		}
-	};
-	
-	private InvalidationListener vResizeListener = new InvalidationListener() {
-		@Override
-		public void invalidated(Observable observable) {
-			DoubleProperty p = (DoubleProperty) observable;
-			double y = p.getValue();
-			if (y < _vbar.getMin()) _vbar.setMin(y);
-			else if (y > _vbar.getMax()) _vbar.setMax(y);
-		}
-	};
-	
-	private void addListeners(Node node) {
-		node.layoutXProperty().addListener(hResizeListener);
-		node.layoutYProperty().addListener(hResizeListener);
-	}
-	
-	private void removeListeners(Node node) {
-		node.layoutXProperty().removeListener(vResizeListener);
-		node.layoutYProperty().removeListener(vResizeListener);
 	}
 
+	private void addListeners(final Node node) {
+		node.layoutXProperty().addListener(new WeakInvalidationListener(hListener));
+		node.layoutYProperty().addListener(new WeakInvalidationListener(vListener));
+	}
+
+	private InvalidationListener hListener = o->adjust(r->r.getLayoutX(), r->r.getWidth(), _hbar);
+	private InvalidationListener vListener = o->adjust(r->r.getLayoutY(), r->r.getHeight(), _vbar);
+
+
+	private void adjust(Function<Region, Double> pos, Function<Region, Double> len, ScrollBar sbar) {
+		double w = len.apply(_pane);
+		double min = 0;
+		double max = 0;
+		for (Node n : _pane.getChildren()) {
+			Region r = (Region) n;
+			double p = pos.apply(r);
+			double l = len.apply(r);
+			if (p < min) min = p;
+			else if (p+l > w) max = p+l-w;
+		}
+
+		boolean change = min != sbar.getMin() || max != sbar.getMax();
+		if (change) {
+			if (min != sbar.getMin()) sbar.setMin(min);
+			if (max != sbar.getMax()) sbar.setMax(max);
+
+			sbar.setVisibleAmount( (sbar.getMax()-sbar.getMin()) * w/(w+sbar.getMax()-sbar.getMin()));
+		}
+	}
 }
