@@ -136,6 +136,8 @@ class FlowNode extends Pane {
 	}
 	
 	public void setExplicit(boolean value) {
+		if (_explicit == value) return;
+		
 		_explicit = value;
 		_button.select(value);
 		if (value) {
@@ -187,6 +189,12 @@ class FlowNode extends Pane {
 			_selected.set(value);
 			_graphIcon.setStyle("-fx-background-color:"+(value?_color: "transparent"));
 		}
+//		if (value) {
+//			RotateTransition rt = new RotateTransition(Duration.millis(3000),_graphIcon);
+//			rt.setByAngle(360);
+//			rt.setCycleCount(4);
+//			rt.play();
+//		}
 	}
 	
 	public boolean isSelected() {

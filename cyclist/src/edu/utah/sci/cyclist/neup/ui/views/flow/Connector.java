@@ -53,6 +53,18 @@ public class Connector extends Group {
 		return _to;
 	}
 	
+	public ObservableList<Transaction> getTransactions() {
+		return _transactions;
+	}
+	
+	public double getTotal() {
+		double total = 0;
+		for (Transaction t : _transactions) {
+			total += t.amount;
+		}
+		return total;
+	}
+	
 	public void release() {
 		_curve.startXProperty().unbind();
 		_curve.startYProperty().unbind();
@@ -62,7 +74,6 @@ public class Connector extends Group {
 	}
 	
 	private void build() {
-		setStyle("-fx-backgound-cool: lightred");
 		_curve = new CubicCurve();
 		_curve.getStyleClass().add("connector");
 		
@@ -128,12 +139,7 @@ public class Connector extends Group {
 	private void computeAmount() {
 		if (_transactions.isEmpty()) return;
 		
-		double total = 0;
-		for (Transaction t : _transactions) {
-			total += t.amount;
-		}
-		_text.setText(String.format("%.2e%s", total, _units));
-//		System.out.println("connector: len:"+_transactions.size()+"   text:"+_text.getText());
+		_text.setText(String.format("%.2e%s [%d]", getTotal(), _units, _transactions.size()));
 	}
 	
 	

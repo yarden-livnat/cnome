@@ -9,10 +9,10 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Inventory;
+import edu.utah.sci.cyclist.neup.model.Range;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 
 public class SimulationProxy {
@@ -30,7 +30,7 @@ public class SimulationProxy {
 			+ "      JOIN Compositions on (Transactions.SimId = Compositions.SimId and Compositions.StateId = Resources.StateId)"
 			+ " WHERE" 
 			+ "     Transactions.SimId = ?"
-			+ " and Time = ? "
+			+ " and Time >= ? and Time <= ? "
 			+"  and Facilities.%s = ?";
 	
 	public static final String INVENTORY_QUERY = 
@@ -82,16 +82,16 @@ public class SimulationProxy {
 		return FXCollections.observableList(list);
 	}
 	
-	public ObservableList<Transaction> getTransactions(String type, String value, int timestep, boolean forward) {
+	public ObservableList<Transaction> getTransactions(String type, String value, Range<Integer> timerange, boolean forward) {
 		List<Transaction> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderId" : "ReceiverId", type);
-//			System.out.println("query: ["+query+"]");
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());
-				stmt.setInt(2, timestep);
-				stmt.setString(3, value);
+				stmt.setInt(2, timerange.from);
+				stmt.setInt(3, timerange.to);
+				stmt.setString(4, value);
 				
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
@@ -121,7 +121,6 @@ public class SimulationProxy {
 		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
-//		System.out.println(query+"  ["+type+", "+value+"]");
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());

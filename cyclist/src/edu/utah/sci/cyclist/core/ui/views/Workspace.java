@@ -24,8 +24,6 @@ package edu.utah.sci.cyclist.core.ui.views;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -34,7 +32,6 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -60,7 +57,6 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
-	private InfinitPane _ipane;
 	
 	private WorkspacePanelArea _filtersPane;
 	ScrollBar _wb;
@@ -112,29 +108,26 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
 		
-		_ipane = new InfinitPane();
-		_pane = _ipane.getPane();
+		InfinitPane ipane = new InfinitPane();
+		_pane = ipane.getPane();
 		
 		_filtersPane = new WorkspacePanelArea();
 		
 		final SplitPane splitPane = new SplitPane();
 		splitPane.setId("hiddenSplitter");
 		splitPane.setOrientation(Orientation.HORIZONTAL);
-		splitPane.getItems().addAll(_ipane, _filtersPane);
+		splitPane.getItems().addAll(ipane, _filtersPane);
 		splitPane.setDividerPosition(0, 1);
-			
-		_filtersPane.visibleProperty().addListener(new ChangeListener<Boolean>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> arg0,
-					Boolean arg1, Boolean visible) {
-				if (visible) {
-					splitPane.setDividerPosition(0, _savedDivider);
-				} else {
-					_savedDivider = splitPane.getDividerPositions()[0];
-					splitPane.setDividerPosition(0, 1);
-				}
-				
+		SplitPane.setResizableWithParent(ipane, true);
+		SplitPane.setResizableWithParent(_filtersPane, false);
+		
+		_filtersPane.visibleProperty().addListener((o, p, visible)->{
+			System.out.println("filtersPane visibility:"+visible);
+			if (visible) {
+				splitPane.setDividerPosition(0, _savedDivider);
+			} else {
+				_savedDivider = splitPane.getDividerPositions()[0];
+				splitPane.setDividerPosition(0, 1);
 			}
 		});
 		
@@ -142,79 +135,63 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		
 //		BorderPane borderPane = new BorderPane();
 
-//		_statusPane = new HBox();
-//		
+//		_statusPane = new HBox();	
 //		borderPane.setRight(_filtersPane);
 //		borderPane.setBottom(_statusPane);
 //		borderPane.setCenter(_pane);
 		
-//		Rectangle clip = new Rectangle(0, 0, 100, 100);
-//		clip.widthProperty().bind(_pane.widthProperty());
-//		clip.heightProperty().bind(_pane.heightProperty());
-//		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
-		
-		//setContent(borderPane, true /* allowMove */);
-
-		
 		setContent(splitPane);
-			
-//		enableDragging(false);
 		
-		setOnDragOver(new EventHandler<DragEvent>() {
-			public void handle(DragEvent event) {
-				if (event.getTarget() == _pane) {
-					DnD.LocalClipboard clipboard = getLocalClipboard();
-					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
-					{
-						event.acceptTransferModes(TransferMode.COPY);
-						event.consume();
-					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
-						event.acceptTransferModes(TransferMode.MOVE);
-						event.consume();
-					}
+		setOnDragOver(event->{
+			if (event.getTarget() == _pane) {
+				DnD.LocalClipboard clipboard = getLocalClipboard();
+				if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
+				{
+					event.acceptTransferModes(TransferMode.COPY);
+					event.consume();
+				} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
+					event.acceptTransferModes(TransferMode.MOVE);
+					event.consume();
 				}
 			}
 		});	
 		
-		setOnDragDropped(new EventHandler<DragEvent>() {
-			public void handle(DragEvent event) {
-				
-				boolean status = false;
-				DnD.LocalClipboard clipboard = getLocalClipboard();
-				if (event.getGestureSource() != this) {
-					if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
-						Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
-						if (_onToolDrop != null) {
-							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
-							_onToolDrop.call(tool, p.getX(), p.getY());
+		setOnDragDropped(event->{
+			boolean status = false;
+			DnD.LocalClipboard clipboard = getLocalClipboard();
+			if (event.getGestureSource() != this) {
+				if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
+					Tool tool =  clipboard.get(DnD.TOOL_FORMAT, Tool.class);
+					if (_onToolDrop != null) {
+						Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
+						_onToolDrop.call(tool, p.getX(), p.getY());
+					if(getOnToolDrop() != null){
+							getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP, tool, null, p.getX(),p.getY()));
+						}
+					}
+					status = true;
+				} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
+					Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
+					TableTool tool = new TableTool();
+					if (_onShowTable != null) {
+						Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
+						_onShowTable.call(tool, table, p.getX(), p.getY());
 						if(getOnToolDrop() != null){
-								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP, tool, null, p.getX(),p.getY()));
-							}
+							getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
 						}
-						status = true;
-					} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
-						Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
-						TableTool tool = new TableTool();
-						if (_onShowTable != null) {
-							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
-							_onShowTable.call(tool, table, p.getX(), p.getY());
-							if(getOnToolDrop() != null){
-								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
-							}
-						}
-						status = true;
-					} 
+					}
+					status = true;
+				} 
 //					else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
-//						// accept but don't do anything. 
+//						// HACK: accept but don't do anything. 
 //						// This allows fields to be remove from other places without causing the DnD to fail
 //						status = true;
 //					}
-				}
-				if (status) {
-					event.setDropCompleted(status);
-					event.consume();
-				}
+			}
+			if (status) {
+				event.setDropCompleted(status);
+				event.consume();
 			}
 		});
 	}
@@ -235,8 +212,6 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	 */
 	public void addView(final ViewBase view) {
 		_pane.getChildren().add(view);
-//		TilePane tp = (TilePane) _pane;
-//		tp.setPrefColumns((int)Math.floor(Math.sqrt(_pane.getChildren().size())));
 		
 		view.setOnSelect(new EventHandler<ActionEvent>() {
 			@Override
@@ -254,8 +229,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 					view.setPrefSize(_viewPos.width, _viewPos.height);
 					
 					view.setMaximized(false);
-					_maximizedView = null;
-					
+					_maximizedView = null;					
 				} else {
 					_viewPos.x = view.getLayoutX();
 					_viewPos.y = view.getLayoutY();
@@ -274,7 +248,6 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 					
 					view.select();
 				}
-					
 			}
 		});
 	}

@@ -82,7 +82,7 @@ public class FlowView extends CyclistViewBase {
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
 	private int _targetLine = -1;
-	private boolean _isChangingKind = false;
+	private boolean _changingKid = false;
 	
 	/*
 	 * Properties
@@ -157,7 +157,6 @@ public class FlowView extends CyclistViewBase {
 		};
 		
 		task.valueProperty().addListener( new ChangeListener<ObservableList<Facility>>() {
-
 			@Override
 			public void changed(
 					ObservableValue<? extends ObservableList<Facility>> observable,
@@ -181,7 +180,6 @@ public class FlowView extends CyclistViewBase {
 	
 	private void updateTransactionsPredicate() {
 		_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
-		
 		updateTotal();
 	}
 	
@@ -189,17 +187,16 @@ public class FlowView extends CyclistViewBase {
 		if (_line == null || _line[SRC] == null) return;
 		
 		double total = 0;
-		for (FlowNode node : _line[SRC].getNodes()) {
-			for (Transaction t : node.getActiveTransactions()) {
-				total += t.amount;
-			}
+		int n = 0;
+		for (Connector c : _connectors) {
+			total += c.getTotal();
+			n += c.getTransactions().size();
 		}
-		
 
 		if (total == 0) {
 			_total.setText("");
 		} else {
-			_total.setText(String.format("%.2e kg", total));
+			_total.setText(String.format("%.2e kg [%d]", total, n));
 		}
 	}
 	
@@ -307,6 +304,18 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void removeNode(FlowNode node) {
+		node.setTask(null);
+		Iterator<Connector> i = _connectors.iterator();
+		while (i.hasNext()) {
+			Connector c = i.next();
+			if (c.getFrom() == node || c.getTo() == node) {
+				c.release();
+				c.getFrom().removeConnector(c);
+				c.getTo().removeConnector(c);
+				_pane.getChildren().remove(c);
+				i.remove();
+			}
+		}
 		_line[node.getDirection()].removeNode(node);
 		FlowEntry entry = _selectedNodes.get(node.getName());
 		entry.remove(node);
@@ -396,13 +405,14 @@ public class FlowView extends CyclistViewBase {
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
-				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
+				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 			}	
 		};
 		
 		task.valueProperty().addListener((o, p, n)->{
 				if (n != null) {
 					addRelatedNodes(node, n, timestep);
+					updateTotal();
 				}
 		});
 
@@ -421,7 +431,7 @@ public class FlowView extends CyclistViewBase {
 			protected ObservableMap<FlowNode,ObservableList<Transaction>> call() throws Exception {
 				Map<FlowNode, ObservableList<Transaction>> map = new HashMap<>();
 				for (FlowNode node : list) {
-					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), timestep, node.isSRC());
+					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 					map.put(node, list);
 				}
 				
@@ -437,6 +447,7 @@ public class FlowView extends CyclistViewBase {
 						addRelatedNodes(node, n.get(node), timestep);
 					}			
 					removeEmptyImplicitNodes();
+					updateTotal();
 				}
 			}
 		});
@@ -513,14 +524,25 @@ public class FlowView extends CyclistViewBase {
 				line.addNode(target);
 			}
 			
-			final Function<Facility, Object> kind = kindFactory.get(line.getKind());
-			Function<Transaction, Facility> f = node.isSRC() ? t->_facilities.get(t.receiver) : t->_facilities.get(t.sender);
-			
-			Connector c = new Connector(node, target, node.getActiveTransactions().filtered(t->kind.apply(f.apply(t)) == value));		
-			node.addConnector(c);
-			target.addConnector(c);
-			_connectors.add(c);
-			_pane.getChildren().add(c);
+			boolean found = false;
+			for (Connector c: _connectors) {
+				if ((c.getFrom() == node && c.getTo() == target)
+						|| (c.getFrom() == target && c.getTo() == node)) 
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				final Function<Facility, Object> kind = kindFactory.get(line.getKind());
+				Function<Transaction, Facility> f = node.isSRC() ? t->_facilities.get(t.receiver) : t->_facilities.get(t.sender);
+				
+				Connector c = new Connector(node, target, node.getActiveTransactions().filtered(t->kind.apply(f.apply(t)) == value));		
+				node.addConnector(c);
+				target.addConnector(c);
+				_connectors.add(c);
+				_pane.getChildren().add(c);
+			}
 		}
 
 	}
@@ -557,8 +579,6 @@ public class FlowView extends CyclistViewBase {
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("flow");
-		this.setPrefWidth(400);
-		this.setPrefHeight(300);
 		
 		BorderPane pane = new BorderPane();
 		pane.setLeft(buildControlls());
@@ -639,8 +659,12 @@ public class FlowView extends CyclistViewBase {
 			DnD.LocalClipboard clipboard = getLocalClipboard();	
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
 				Integer i = clipboard.get(DnD.VALUE_FORMAT, Integer.class);	
-				// TODO:
-				System.out.println("IMPLEMENT DnD");
+				Range<Integer> r = _rangeField.getRange();
+				if (_rangeField.getMode() == RangeField.Mode.DURATION) {
+					_rangeField.setRange(new Range<>(i, i+r.to-r.from));
+				} else {
+					_rangeField.setRange(new Range<>(i, i));
+				}
 				e.consume();
 			}
 		});
@@ -863,18 +887,18 @@ public class FlowView extends CyclistViewBase {
 		});
 		
 		_line[SRC].kindProperty().addListener((o, p, n)->{
-			if (p != null && !_isChangingKind)	{
-				_isChangingKind = true;
+			if (p != null && !_changingKid)	{
+				_changingKid = true;
 				lineKindChanged(SRC);
-				_isChangingKind = false;
+				_changingKid = false;
 			}
 		});
 		
 		_line[DEST].kindProperty().addListener((o, p, n)->{
-			if (p != null && !_isChangingKind)	{
-				_isChangingKind = true;
+			if (p != null && !_changingKid)	{
+				_changingKid = true;
 				lineKindChanged(DEST);
-				_isChangingKind = false;
+				_changingKid = false;
 			}
 		});
 	}

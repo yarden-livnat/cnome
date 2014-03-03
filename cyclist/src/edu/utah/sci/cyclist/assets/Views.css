@@ -221,7 +221,7 @@
 }
 
 .flow .connector-text {
-	-fx-font-size: 8px;		
+	-fx-font-size: 10px;		
 }
 
 .flow .check-box .box {
@@ -388,24 +388,6 @@
     -fx-background-radius: 3, 2, 2;
 }
 
-.connector {
-	-fx-stroke: #a0a0a0;
-	-fx-fill: transparent;
- 	-fx-stroke-width: 1px;
- 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
- 	
-}
- 
- /* 
- .flow-view  *> .pane .choice-box {
- 	-fx-background-color: white; 
- 	-fx-border-color: blue;
- 	-fx-border-width: 1, 2, 3, 4;
- 	-fx-border-radius: 7;
- }
- *
- */
- 
  
 .flow-node {
  	-fx-padding: 5;
@@ -442,7 +424,7 @@
  
 
 .connector-text {
-	-fx-font-size: 10px;		
+	-fx-font-size: 12px;		
 }
 /*
  * Line Charts
