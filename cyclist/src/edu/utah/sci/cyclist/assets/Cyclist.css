@@ -465,6 +465,16 @@
    /*  -fx-background-color: white;*/
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * context-menu																   *
+ *																			   *
+ * Definitions have been copied from modena.css due to Javafx bug.  		   *
+ * JavaFx loses from time to time the definitions of "-fx-color" for           *
+ * the context-menu. To solve it - copied the context-menu definitions and     *
+ * replaced "-fx-color" with the explicit colors names.                        *
+ *                                                                             *
+ ******************************************************************************/
 .context-menu{
 	-fx-background-color:
         linear-gradient(to bottom,
@@ -472,8 +482,49 @@
             derive(#ececec,-30%)
         ),
         derive(#ececec,80%);
+        -fx-background-insets: 0, 1;
+    	-fx-padding: 0.333333em 0.083333em 0.333333em 0.083333em; /* 4 1 8 1 */
+    	-fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 12, 0.0 , 0 , 8 );
 }
+
+.context-menu .separator:horizontal .line {
+    -fx-border-color: -fx-box-border transparent transparent transparent;
+    -fx-border-insets: 1 0 0 0;
+}
+.context-menu > .scroll-arrow {
+    -fx-padding: 0.416667em 0.416667em 0.416667em 0.416667em; /* 5 */
+    -fx-background-color: transparent;
+}
+.context-menu > .scroll-arrow:hover {
+    -fx-background: -fx-selection-bar;
+    -fx-background-color: -fx-background;
+    -fx-text-fill: -fx-text-background-color;
+}
+.context-menu:show-mnemonics > .mnemonic-underline {
+    -fx-stroke: -fx-text-fill;
+} 
     
+ /*******************************************************************************
+ *                                                                             *
+ * menu-item																   *
+ *																			   *
+ * Definitions have been copied from modena.css due to Javafx bug.  		   *
+ * JavaFx loses from time to time the definitions of "-fx-text-base-color"     *
+ * for the menu-item. To solve it - copied the menu-item definitions and       *
+ * replaced "-fx-text-base-color" with the explicit colors names.              *
+ *                                                                             *
+ ******************************************************************************/
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 0.333333em 0.41777em 0.333333em 0.41777em;  /* 4 5 4 5 */
+}
+.menu-item > .left-container {
+    -fx-padding: 0.458em 0.791em 0.458em 0.458em;
+}
+.menu-item > .graphic-container {
+    -fx-padding: 0em 0.333em 0em 0em;
+    
+    }
 .menu-item >.label {
     -fx-padding: 0em 0.5em 0em 0em;
     -fx-text-fill: ladder(
@@ -485,6 +536,40 @@
     );
 }
 
+.menu-item:focused {
+     -fx-background: -fx-selection-bar;
+     -fx-background-color: -fx-background;
+     -fx-text-fill:  -fx-text-background-color;
+}
 .menu-item:focused > .label {
     -fx-text-fill: white;
+}
+.menu-item > .right-container {
+    -fx-padding: 0em 0em 0em 0.5em;
+}
+.menu-item:show-mnemonics > .mnemonic-underline {
+    -fx-stroke: -fx-text-fill;
+} 
+
+/*******************************************************************************
+ *                                                                             *
+ * menu-up-arrow & menu-down-arrow											   *
+ *																			   *
+ * Definitions have been copied from modena.css due to Javafx bug.  		   *
+ * JavaFx loses from time to time the definitions of "-fx-color"               *
+ * for the menu arrows. To solve it - copied the menu-arrows definitions and   *
+ * replaced "-fx-color" with the explicit colors names.                        *
+ *                                                                             *
+ ******************************************************************************/
+.menu-up-arrow {
+    -fx-padding: 0.666667em 0.416667em 0.0em 0.416667em;  /* 8 5 0 5 */
+    -fx-background-color: derive(#ececec,-2%);
+    -fx-shape: "M0 1 L1 1 L.5 0 Z";
+    -fx-effect: innershadow( two-pass-box , rgba(0,0,0,0.6) , 4, 0.0 , 0 , 1 );
+}
+.menu-down-arrow {
+    -fx-background-color: derive(#ececec,-2%);
+    -fx-padding: 0.666667em 0.416667em 0.0em 0.416667em;  /* 8 5 0 5 */
+    -fx-shape: "M0 0 L1 0 L.5 1 Z";
+    -fx-effect: innershadow( two-pass-box , rgba(0,0,0,0.6) , 4, 0.0 , 0 , 1 );
 }
