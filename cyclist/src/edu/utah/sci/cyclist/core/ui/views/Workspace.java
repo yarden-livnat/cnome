@@ -118,8 +118,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		splitPane.setOrientation(Orientation.HORIZONTAL);
 		splitPane.getItems().addAll(ipane, _filtersPane);
 		splitPane.setDividerPosition(0, 1);
-			
+		SplitPane.setResizableWithParent(ipane, true);
+		SplitPane.setResizableWithParent(_filtersPane, false);
+		
 		_filtersPane.visibleProperty().addListener((o, p, visible)->{
+			System.out.println("filtersPane visibility:"+visible);
 			if (visible) {
 				splitPane.setDividerPosition(0, _savedDivider);
 			} else {
