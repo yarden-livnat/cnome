@@ -222,13 +222,16 @@ public class SimulationsPanel extends TitledPanel  {
 				Entry entry = createEntry(simulation);
 				_entries.add(entry);
 				_vbox.getChildren().add(entry.title);
+				
 			}
 		}
 	}
 		
 	private void select(Entry entry) {
-		if (_selected != null) 
+		if (_selected != null) {
 			_selected.title.setStyle(UNSELECTED_STYLE);
+		}
+		
 		_selected = entry;
 		_selected.title.setStyle(SELECTED_STYLE);
 	}
@@ -257,6 +260,7 @@ public class SimulationsPanel extends TitledPanel  {
 	}
 	
 	private Entry createEntry(Simulation simulation) {
+		
 		final Entry entry = new Entry();
 		entry.simulation = simulation;
 		entry.title = new Label(simulation.getAlias());
@@ -315,7 +319,7 @@ public class SimulationsPanel extends TitledPanel  {
 				select(entry);
 				//Right click loads the "delete" simulation dialog box.
 				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
-					_menu.show(entry.title, Side.BOTTOM, 0, 0);
+						_menu.show(entry.title, Side.BOTTOM, 0, 0);
 					
 				}  else if( mouseEvent.getButton()   == MouseButton.PRIMARY){
 					//Left click on the mouse - loads the simulation tables.
@@ -355,14 +359,15 @@ public class SimulationsPanel extends TitledPanel  {
 	}
 	
 	private void createMenu(){
-				 MenuItem deleteSimulation = new MenuItem("Delete simulation");
-				 deleteSimulation.setOnAction(new EventHandler<ActionEvent>() {
-				 							public void handle(ActionEvent e) { 
-				 								removeSimulation(_selected);
-				 								setEditSimulation(true);
-				 							}
-				 });
-				 _menu.getItems().add(deleteSimulation);
+		 MenuItem deleteSimulation = new MenuItem("Delete simulation");
+		 deleteSimulation.setOnAction(new EventHandler<ActionEvent>() {
+		 							public void handle(ActionEvent e) { 
+		 								removeSimulation(_selected);
+		 								setEditSimulation(true);
+		 								_selected = null;
+		 							}
+		 });
+		 _menu.getItems().add(deleteSimulation);
 	}
 	
 	class Entry {
