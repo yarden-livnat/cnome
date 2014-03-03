@@ -317,6 +317,8 @@ public class FlowChart extends VBox {
 	
 	double _mx;
 	double _offset;
+	double _right;
+	double _left;
 	
 	private void addListeners() {
 		_timeRangeProperty.addListener(o->{
@@ -327,6 +329,8 @@ public class FlowChart extends VBox {
 		_rec.setOnMousePressed(e->{
 			_mx = e.getX();
 			_offset = _xAxis.getDisplayPosition(_timeRangeProperty.get().from);
+			_left = _glass.sceneToLocal(_xAxis.localToScene(_xAxis.getDisplayPosition(0), 0)).getX();
+			_right = _glass.sceneToLocal(_xAxis.localToScene(_xAxis.getDisplayPosition(_upperBound), 0)).getX();
 		});
 		
 		_rec.setOnMouseDragged(e->{
@@ -334,22 +338,30 @@ public class FlowChart extends VBox {
 //			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX()+dx, 0));
 //			Number v = _xAxis.getValueForDisplay(p.getX());
 //			int i = v.intValue();
-			_rec.setX(_rec.getX()+dx);
+			double p = _rec.getX()+dx;
+			if (p < _left) 
+				p = _left;
+			else if (p+_rec.getWidth() > _right)
+				p = _right - _rec.getWidth();
+		
+			_rec.setX(p);
 			_mx = e.getX(); 
 		});
 		
 		_rec.setOnMouseReleased(e->{
+			Range<Integer> r = _timeRangeProperty.get();
+			int dt = r.to - r.from+1;
 			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX(), 0));
 			Number v = _xAxis.getValueForDisplay(p.getX());
 			int i = v.intValue();
-//			i = Math.max(0, Math.min(_upperBound, i));
+			i = Math.max(0, Math.min(_upperBound-dt, i));
 			// nudge rectangle to an integer boundry
 			double xi = _xAxis.getDisplayPosition(i);
 			Point2D p1 = _xAxis.localToScene(xi,0);
 			Point2D p2 = _glass.sceneToLocal(p1);
 			_rec.setX(p2.getX());
 			
-			Range<Integer> r = _timeRangeProperty.get();
+//			Range<Integer> r = _timeRangeProperty.get();
 			Range<Integer> nr = new Range<>(i, i+r.to-r.from);
 			_updating = true;
 			_timeRangeProperty.set(nr);
