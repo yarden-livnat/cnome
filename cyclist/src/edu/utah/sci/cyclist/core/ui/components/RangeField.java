@@ -78,26 +78,30 @@ public class RangeField extends TextField {
 	}
 	
 	public void setMinValue(int value) {
-		if (_minValue == value) return;
-		
+		if (_minValue == value) return;	
 		_minValue = value;
 		Range<Integer> r = getRange();
 		if (r.from < _minValue) { 
 			Range<Integer> nr = new Range<>(_minValue, r.to);
 			if (_mode == Mode.DURATION)
-				nr.to = _minValue+r.from-r.to;
+				nr.to = _minValue+r.to-r.from;
 			setRange(nr);
 		}
 	}
 	
-//	public void setMaxValue(int value) {
-//		if (_maxValue == value) return;
-//		_maxValue = value;
-//		
-//		if (getTo() > value) {
-//			setTo(value);
-//		}
-//	}
+	public void setMaxValue(int value) {
+		if (_maxValue == value) return;
+		_maxValue = value;
+		
+		Range<Integer> r = getRange();
+		if (r.to > _maxValue) {
+			Range<Integer> nr = new Range<>(r.from, _maxValue);
+			if (_mode == Mode.DURATION)
+				nr.from = _maxValue - (r.to - r.from);
+			setRange(nr);
+		}
+
+	}
 	
 	@Override
     public void replaceText(int start, int end, String text) {

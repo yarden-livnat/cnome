@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
@@ -84,7 +82,7 @@ public class FlowView extends CyclistViewBase {
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
 	private int _targetLine = -1;
-	private boolean _isChangingKind = false;
+	private boolean _changingKid = false;
 	
 	/*
 	 * Properties
@@ -159,7 +157,6 @@ public class FlowView extends CyclistViewBase {
 		};
 		
 		task.valueProperty().addListener( new ChangeListener<ObservableList<Facility>>() {
-
 			@Override
 			public void changed(
 					ObservableValue<? extends ObservableList<Facility>> observable,
@@ -183,7 +180,6 @@ public class FlowView extends CyclistViewBase {
 	
 	private void updateTransactionsPredicate() {
 		_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
-		
 		updateTotal();
 	}
 	
@@ -583,8 +579,6 @@ public class FlowView extends CyclistViewBase {
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("flow");
-		this.setPrefWidth(400);
-		this.setPrefHeight(300);
 		
 		BorderPane pane = new BorderPane();
 		pane.setLeft(buildControlls());
@@ -893,18 +887,18 @@ public class FlowView extends CyclistViewBase {
 		});
 		
 		_line[SRC].kindProperty().addListener((o, p, n)->{
-			if (p != null && !_isChangingKind)	{
-				_isChangingKind = true;
+			if (p != null && !_changingKid)	{
+				_changingKid = true;
 				lineKindChanged(SRC);
-				_isChangingKind = false;
+				_changingKid = false;
 			}
 		});
 		
 		_line[DEST].kindProperty().addListener((o, p, n)->{
-			if (p != null && !_isChangingKind)	{
-				_isChangingKind = true;
+			if (p != null && !_changingKid)	{
+				_changingKid = true;
 				lineKindChanged(DEST);
-				_isChangingKind = false;
+				_changingKid = false;
 			}
 		});
 	}

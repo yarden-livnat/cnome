@@ -33,12 +33,14 @@ public class InfinitPane extends BorderPane {
 		_hbar = new ScrollBar();
 		_hbar.setMin(0);
 		_hbar.setMax(0);
+		_hbar.setVisible(false);
 		setBottom(_hbar);
 
 		_vbar = new ScrollBar();
 		_vbar.setOrientation(Orientation.VERTICAL);
 		_vbar.setMin(0);
 		_vbar.setMax(0);
+		_vbar.setVisible(false);
 		setRight(_vbar);
 
 		_pane = new Pane();
@@ -110,5 +112,8 @@ public class InfinitPane extends BorderPane {
 
 			sbar.setVisibleAmount( (sbar.getMax()-sbar.getMin()) * w/(w+sbar.getMax()-sbar.getMin()));
 		}
+		boolean show = min < 0 || max > 0;
+		sbar.setVisible(show);
+		sbar.setManaged(show);
 	}
 }
