@@ -12,15 +12,17 @@ import java.util.function.ToLongFunction;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -29,14 +31,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Window;
-
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.DataType;
+import edu.utah.sci.cyclist.core.model.DataType.Type;
 import edu.utah.sci.cyclist.core.model.Field;
-import edu.utah.sci.cyclist.core.ui.wizards.FieldPropertiesEditorWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
@@ -72,42 +72,7 @@ public class SchemaPanel extends TitledPanel {
                 
                 resetContent();
         }
-        
-        /**
-         * Sets the menu for changing the fields properties. 
-         * On mouse right click the user can choose the field role and its filter type.
-         * For text fields - all the options are disabled.
-         */
-        
-        public void addChangePropertiesMenu(){
-			 for(final Entry entry : _entries){
-				 if(entry.label.getOnMouseClicked() == null){
-						entry.label.setOnMouseClicked(new EventHandler<MouseEvent>(){
-							@Override
-				             public void handle(MouseEvent event) {
-								 if (event.getButton() == MouseButton.SECONDARY){      
-									 Window window = _panel.getParent().getScene().getWindow();
-									 Field field = entry.field;
-									 FieldPropertiesEditorWizard wizard = new FieldPropertiesEditorWizard(field);
-									 ObjectProperty<DataType> dataType = wizard.show(window);
-									 dataType.addListener(new ChangeListener<DataType>(){
-									 @Override
-									 	public void changed(ObservableValue<? extends DataType> arg0, DataType oldVal,DataType newVal) {
-											if(newVal.getRole() != field.getDataType().getRole()){
-												field.getDataType().setRole(newVal.getRole());
-											}
-											if(newVal.getFilterType() != field.getDataType().getFilterType()){
-												field.getDataType().setFilterType(newVal.getFilterType());
-											}
-										}	
-									});
-								 }
-				             }
-						});
-				 }
-			 }
-        }
-        
+            
         private void resetContent() {
                 VBox vbox = (VBox) getContent();
                 vbox.getChildren().clear();
@@ -211,7 +176,17 @@ public class SchemaPanel extends TitledPanel {
 			}
 		});
 		
+		entry.label.setOnMouseClicked(new EventHandler<MouseEvent>(){
+			@Override
+			public void handle(MouseEvent event) {	
+				if (event.getButton() == MouseButton.SECONDARY){ 
+					entry.menu.show(entry.label, Side.BOTTOM, 0, 0);
+				}
+			}
+		});
+		
 		entry.label.getStyleClass().add("entry");
+		createContextMenu(entry);
 		return entry;
 	}
 
@@ -265,9 +240,102 @@ public class SchemaPanel extends TitledPanel {
                 return DnD.getInstance().getLocalClipboard();
         }
         
+        /*
+         * Changes a string which contains only upper case letters to a string
+         * with first upper case letter and all the rest are lower case
+         * @param - String: the string to change.
+         * @return - String - the result string with only first upper case letter   
+         */
+        private String toFirstUpper(String str){
+        	if(str.isEmpty() || str.length() <=1){
+        		return str;
+        	}       		
+        	String[] tokens = str.split("_");
+        	String changedStr = "";
+        	for(String token:tokens){
+        		changedStr +=  "_" + token.substring(0,1) + token.substring(1).toLowerCase();
+        	}
+        	return changedStr.substring(1);
+        }
+        
+       /*
+        * Set the graphics to show the check mark only for the menu items which
+        * match the current field status.
+        * @param - entry : the entry which it's menu is updated.
+        */
+        private void updateMenuGraphics(Entry entry){
+        	for(MenuItem item : entry.menu.getItems()){
+        		if(item.getText() != null){
+	        		if(item.getText().toUpperCase().equals(entry.field.getRole().name()) || 
+	        		   item.getText().toUpperCase().equals(entry.field.getDataType().getFilterType().name())){
+	        			item.getGraphic().setVisible(true);
+	        		}else{
+	        			item.getGraphic().setVisible(false);
+	        		}
+        		}
+        	}
+        }
+        
+        /*
+         * For a text field - all the menu items should be disabled.
+         * (There are no properties to update)
+         * @param - entry : the entry which it's menu is updated.
+         */
+        private void disableTextMenu(Entry entry){
+        	for(MenuItem item : entry.menu.getItems()){
+        		item.setDisable(true);
+        	}
+        }
+        
+        /**
+         * Sets the menu for changing the fields properties. 
+         * user can choose the field role and its filter type.
+         * For text fields - all the options are disabled.
+         */
+        private void createContextMenu(Entry entry){
+        	entry.menu = new ContextMenu();
+
+        	//Items for changing the field role. (Measure/Dimentions/Int_TIme)
+        	for(DataType.Role role : DataType.Role.values() ){
+        		MenuItem item = new MenuItem(toFirstUpper(role.name()), GlyphRegistry.get(AwesomeIcon.CHECK));
+        		item.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent e) {
+                    		if(!item.getText().toUpperCase().equals(entry.field.getDataType().getRole().name())){
+                    			entry.field.getDataType().setRole(DataType.Role.valueOf(item.getText().toUpperCase()));
+                    			updateMenuGraphics(entry);
+                    		}
+                    }
+        		});
+        		
+        		entry.menu.getItems().add(item);
+        	}
+         	
+        	entry.menu.getItems().add(new SeparatorMenuItem());
+        	
+        	//Items for changing the field filter type.
+        	for(DataType.FilterType filter : DataType.FilterType.values() ){
+        		MenuItem item = new MenuItem(toFirstUpper(filter.name()), GlyphRegistry.get(AwesomeIcon.CHECK));
+        		item.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent e) {
+                    		if(!item.getText().toUpperCase().equals(entry.field.getDataType().getFilterType().name())){
+                    			entry.field.getDataType().setFilterType(DataType.FilterType.valueOf(item.getText().toUpperCase()));
+                    			updateMenuGraphics(entry);
+                    		}
+                    }
+        		});
+        		
+        		entry.menu.getItems().add(item);
+        	}
+        	updateMenuGraphics(entry);
+        	if(entry.field.getDataType().getType() == Type.TEXT){
+        		disableTextMenu(entry);
+        	}
+        }
+        
         class Entry {
                 Label label;
                 Field field;
+                ContextMenu menu;
         }
         
         private static Map<DataType.Type, AwesomeIcon> _type2Icon = new HashMap<>();

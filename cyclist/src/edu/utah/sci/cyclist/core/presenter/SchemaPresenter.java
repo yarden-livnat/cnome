@@ -22,8 +22,6 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.presenter;
 
-import org.mo.closure.v1.Closure;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
@@ -31,7 +29,6 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.model.DataType;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Schema;
 import edu.utah.sci.cyclist.core.model.Table;
@@ -73,7 +70,6 @@ public class SchemaPresenter  extends PresenterBase {
 				}
 				
 				_fieldsPanel.setFields(_fields);
-				_fieldsPanel.addChangePropertiesMenu();
 			}
 
 		});
