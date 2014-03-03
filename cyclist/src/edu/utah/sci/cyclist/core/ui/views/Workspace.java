@@ -22,8 +22,6 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui.views;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -34,12 +32,12 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.shape.Rectangle;
 
 import org.mo.closure.v1.Closure;
 
@@ -50,6 +48,7 @@ import edu.utah.sci.cyclist.core.model.ToolData;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
+import edu.utah.sci.cyclist.core.ui.components.InfinitPane;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
@@ -61,7 +60,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	public static final String WORKSPACE_ID = "workspace";
 	
 	private Pane _pane;
+	private InfinitPane _ipane;
+	
 	private WorkspacePanelArea _filtersPane;
+	ScrollBar _wb;
+	ScrollBar _hb;
 //	private Pane _statusPane;
 	private double _savedDivider = 0.9;
 	
@@ -108,26 +111,18 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
-		setPrefSize(600, 300);
-
-//		TilePane tp = new TilePane();
-//		tp.setHgap(5);
-////		tp.setPrefColumns(1);
-//		FlowPane fp = new FlowPane();
-//		fp.setVgap(8);
-//		fp.setHgap(4);
-		_pane = new Pane();
+		
+		_ipane = new InfinitPane();
+		_pane = _ipane.getPane();
 		
 		_filtersPane = new WorkspacePanelArea();
 		
 		final SplitPane splitPane = new SplitPane();
 		splitPane.setId("hiddenSplitter");
 		splitPane.setOrientation(Orientation.HORIZONTAL);
-		splitPane.getItems().addAll(_pane, _filtersPane);
+		splitPane.getItems().addAll(_ipane, _filtersPane);
 		splitPane.setDividerPosition(0, 1);
-		
-		SplitPane.setResizableWithParent(_filtersPane, false);
-		
+			
 		_filtersPane.visibleProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
@@ -153,13 +148,15 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 //		borderPane.setBottom(_statusPane);
 //		borderPane.setCenter(_pane);
 		
-		Rectangle clip = new Rectangle(0, 0, 100, 100);
-		clip.widthProperty().bind(_pane.widthProperty());
-		clip.heightProperty().bind(_pane.heightProperty());
-		_pane.setClip(clip);
+//		Rectangle clip = new Rectangle(0, 0, 100, 100);
+//		clip.widthProperty().bind(_pane.widthProperty());
+//		clip.heightProperty().bind(_pane.heightProperty());
+//		_pane.setClip(clip);
 		_pane.getStyleClass().add("workspace-pane");
 		
 		//setContent(borderPane, true /* allowMove */);
+
+		
 		setContent(splitPane);
 			
 //		enableDragging(false);
@@ -220,23 +217,8 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 				}
 			}
 		});
-		
-		heightProperty().addListener(_resizedHandler);
-		widthProperty().addListener(_resizedHandler);
 	}
 	
-	
-	private InvalidationListener _resizedHandler = new InvalidationListener() {
-		
-		@Override
-		public void invalidated(Observable observable) {
-			if (_maximizedView != null) {
-				Bounds b = _pane.getLayoutBounds();
-				_maximizedView.setPrefSize(b.getWidth(), b.getHeight());
-			}
-			
-		}
-	};
 	
 	@Override
 	public void setTitle(String title) {
@@ -267,21 +249,21 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 			@Override
 			public void handle(ActionEvent event) {
 				if (view.isMaximized()) {
-					view.setTranslateX(_viewPos.x);
-					view.setTranslateY(_viewPos.y);
+					view.setLayoutX(_viewPos.x);
+					view.setLayoutY(_viewPos.y);
 					view.setPrefSize(_viewPos.width, _viewPos.height);
 					
 					view.setMaximized(false);
 					_maximizedView = null;
 					
 				} else {
-					_viewPos.x = view.getTranslateX();
-					_viewPos.y = view.getTranslateY();
+					_viewPos.x = view.getLayoutX();
+					_viewPos.y = view.getLayoutY();
 					_viewPos.width = view.getWidth();
 					_viewPos.height = view.getHeight();
 		
-					view.setTranslateX(0);
-					view.setTranslateY(0);
+					view.setLayoutX(0);
+					view.setLayoutY(0);
 					Bounds b = _pane.getLayoutBounds();
 					view.setPrefSize(b.getWidth(), b.getHeight());
 					
@@ -295,9 +277,9 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 					
 			}
 		});
-		
 	}
 	
+
 	/**
 	 * will be called by the workspace presenter
 	 * @param view

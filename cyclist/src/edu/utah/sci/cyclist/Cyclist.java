@@ -68,15 +68,11 @@ public class Cyclist extends Application {
 		EventBus eventBus = new SimpleEventBus();
 		CyclistController controller = new CyclistController(eventBus);
 		controller.setScreen(root);
-		
-//        Scene scene = new Scene(stack, 800, 600);
         
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Views.css").toExternalForm());
        // scene.getStylesheets().add(Cyclist.class.getResource("assets/Wizards.css").toExternalForm());
-        
-//        primaryStage.setTitle(TITLE);
-//        primaryStage.setScene(scene);
+      
         primaryStage.show();
 	}
 
