@@ -31,8 +31,8 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
-import edu.utah.sci.cyclist.core.ui.tools.TableTool;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.tools.TableTool;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;

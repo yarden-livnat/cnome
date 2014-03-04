@@ -43,6 +43,8 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.ToolData;
+import edu.utah.sci.cyclist.core.tools.TableTool;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
@@ -50,8 +52,6 @@ import edu.utah.sci.cyclist.core.ui.components.InfinitPane;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
-import edu.utah.sci.cyclist.core.ui.tools.TableTool;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
 
 public class Workspace extends CyclistViewBase implements CyclistView {
 

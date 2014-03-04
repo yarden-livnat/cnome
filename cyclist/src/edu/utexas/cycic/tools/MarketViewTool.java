@@ -2,8 +2,8 @@ package edu.utexas.cycic.tools;
 
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.View;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utexas.cycic.MarketView;
 import edu.utexas.cycic.presenter.MarketViewPresenter;

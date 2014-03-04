@@ -23,8 +23,8 @@
 package edu.utah.sci.cyclist.core.event.ui;
 
 import edu.utah.sci.cyclist.core.model.Table;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import javafx.event.Event;
 import javafx.event.EventType;
 

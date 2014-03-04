@@ -22,9 +22,9 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist;
 
-import edu.utah.sci.cyclist.core.ui.tools.SimpleToolFactory;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
-import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.tools.SimpleToolFactory;
+import edu.utah.sci.cyclist.core.tools.Tool;
+import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utexas.cycic.tools.CommoditiesViewToolFactory;
 import edu.utexas.cycic.tools.CycicToolFactory;

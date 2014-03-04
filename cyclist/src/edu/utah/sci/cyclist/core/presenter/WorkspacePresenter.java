@@ -42,11 +42,11 @@ import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
+import edu.utah.sci.cyclist.core.tools.TableTool;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.tools.TableTool;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.views.FilterPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 
