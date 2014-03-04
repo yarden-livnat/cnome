@@ -808,7 +808,7 @@ public class FlowView extends CyclistViewBase {
 		TextFlow totalLine = new TextFlow();
 		totalLine.getChildren().addAll(totalLabel, _total);
 		
-		_pane.getChildren().addAll(/* _line[0], _line[1],*/ totalLine);		
+		_pane.getChildren().addAll(totalLine);		
 		
 		DoubleProperty w = new SimpleDoubleProperty();
 		w.bind(_pane.widthProperty().divide(5)); 
