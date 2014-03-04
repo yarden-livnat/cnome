@@ -3,6 +3,7 @@ package edu.utah.sci.cyclist.core.ui.components;
 import java.util.function.Function;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
+import edu.utah.sci.cyclist.core.controller.Persistent;
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
 import javafx.collections.ListChangeListener;
@@ -14,7 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 
-public class InfinitPane extends BorderPane {
+public class InfinitPane extends BorderPane implements Persistent {
 
 	private ScrollBar _hbar;
 	private ScrollBar _vbar;
