@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.core.presenter;
+package edu.utah.sci.cyclist.neup.presenter;
 
 import org.mo.closure.v1.Closure;
 
@@ -9,6 +9,8 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
+import edu.utah.sci.cyclist.core.presenter.CyclistViewPresenter;
+import edu.utah.sci.cyclist.core.presenter.SingleSelection;
 import edu.utah.sci.cyclist.core.ui.View;
 
 public class FlowPresenter extends CyclistViewPresenter {

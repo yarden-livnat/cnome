@@ -138,8 +138,9 @@ public class ToolsPanel extends TitledPanel {
 
 						db.setContent(content);
 
-					} catch (InstantiationException | IllegalAccessException e) {
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 						// TODO: report an error
+						e.printStackTrace();
 					}					
 
 					//					DnDIcon.getInstance().show(icon, title);

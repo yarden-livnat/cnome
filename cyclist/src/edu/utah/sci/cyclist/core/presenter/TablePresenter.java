@@ -121,7 +121,4 @@ public class TablePresenter extends CyclistViewPresenter {
 			}
 		});
 	}
-	
-	
-	
 }

@@ -6,5 +6,5 @@ public interface ToolFactory {
 	String getToolName();
 	AwesomeIcon getIcon();
 	
-	Tool create() throws InstantiationException, IllegalAccessException;
+	Tool create() throws InstantiationException, IllegalAccessException, ClassNotFoundException;
 }
