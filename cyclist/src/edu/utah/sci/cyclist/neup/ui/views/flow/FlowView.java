@@ -77,7 +77,7 @@ public class FlowView extends CyclistViewBase {
 	private Map<String, Function<Facility, Object>> kindFactory = new HashMap<>();
 	private Map<Integer, Facility> _facilities = new HashMap<>();
 	private List<Connector> _connectors = new ArrayList<>();
-	private Map<String, FlowEntry> _selectedNodes = new HashMap<>();
+	private Map<String, InventoryEntry> _selectedNodes = new HashMap<>();
 
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
@@ -234,9 +234,9 @@ public class FlowView extends CyclistViewBase {
 		node.getActiveTransactions().predicateProperty().bind(_transactionsPredicateProperty);
 		node.getActiveTransactions().addListener((Observable o)->{transactionsChanged(node);});
 		
-		FlowEntry entry = _selectedNodes.get(node.getName());
+		InventoryEntry entry = _selectedNodes.get(node.getName());
 		if (entry == null) {
-			entry = new FlowEntry(node.getName());
+			entry = new InventoryEntry(node.getName());
 			_selectedNodes.put(entry.getName(), entry);
 		}
 		
@@ -317,7 +317,7 @@ public class FlowView extends CyclistViewBase {
 			}
 		}
 		_line[node.getDirection()].removeNode(node);
-		FlowEntry entry = _selectedNodes.get(node.getName());
+		InventoryEntry entry = _selectedNodes.get(node.getName());
 		entry.remove(node);
 		if (entry.isEmpty())
 			_chart.remove(entry);
@@ -336,7 +336,7 @@ public class FlowView extends CyclistViewBase {
 	
 	@SuppressWarnings("unchecked")
 	private void selectNode(final FlowNode node) {
-		FlowEntry entry = _selectedNodes.get(node.getName());
+		InventoryEntry entry = _selectedNodes.get(node.getName());
 		if (entry.isSelected()) {
 			entry.select(false);
 			_chart.remove(entry);
@@ -357,7 +357,7 @@ public class FlowView extends CyclistViewBase {
 		}
 	}
 	
-	private void addToChart(FlowEntry entry, ObservableList<Inventory> values) {
+	private void addToChart(InventoryEntry entry, ObservableList<Inventory> values) {
 		// assume the data is sorted based on time
 		// multiple items per timestep
 		// TODO: apply filters

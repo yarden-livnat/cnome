@@ -95,6 +95,19 @@
 	-fx-padding: 0;
 }
 
+.inventory {
+}
+
+.inventory .chart {
+	-fx-background-color:  transparent;
+   	-fx-alternative-row-fill-visible: false;
+	-fx-vertical-grid-lines-visible: false;   	   	
+	-fx-horizontal-grid-lines-visible: false;  
+	-fx-vertical-zero-line-visible: false;
+	-fx-horizontal-zero-line-visible: true;
+}
+
+
 /*
  * flow
  */

@@ -54,7 +54,7 @@ public class ToolsLibrary {
 				"presenter.FlowPresenter"),	
 		
 		new SimpleToolFactory("edu.utah.sci.cyclist", 
-				"Inventory", AwesomeIcon.RANDOM, 
+				"Inventory", AwesomeIcon.BOOK, 
 				"neup.ui.views.inventory.InventoryView", 
 				"core.presenter.CyclistViewPresenter"),
 		

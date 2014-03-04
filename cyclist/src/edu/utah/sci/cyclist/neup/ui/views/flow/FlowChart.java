@@ -44,7 +44,7 @@ public class FlowChart extends VBox {
 	private int _upperBound;
 	private boolean _updating = false;
 	
-	private Map<FlowEntry, ChartInfo> _info = new HashMap<>();
+	private Map<InventoryEntry, ChartInfo> _info = new HashMap<>();
 	private ObjectProperty<Range<Integer>> _timeRangeProperty = new SimpleObjectProperty<>();
 	
 	public class ChartInfo {
@@ -77,7 +77,7 @@ public class FlowChart extends VBox {
 		updateAll();
 	}
 	
-	public void add(FlowEntry entry, String title, Collection<Pair<Integer, Double>> values) {
+	public void add(InventoryEntry entry, String title, Collection<Pair<Integer, Double>> values) {
 		if (values.size() == 0) return;
 		
 		int last = 0;
@@ -116,7 +116,7 @@ public class FlowChart extends VBox {
 		_rec.setVisible(true);
 	}
 	
-	public void remove(FlowEntry entry) {
+	public void remove(InventoryEntry entry) {
 		ChartInfo info = _info.remove(entry);
 		if (info == null) {
 			return;
