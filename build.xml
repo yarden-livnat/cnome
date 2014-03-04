@@ -19,39 +19,39 @@
 		<mkdir dir="deploy/externalLibs" />
 		
 		<copy todir="deploy/externalLibs">
-			<fileset dir="${basedir}\lib">
+			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="mysql-connector-java-5.1.18-bin.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
-			<fileset dir="${basedir}\lib">
+			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="commons-collections-3.2.1.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
-			<fileset dir="${basedir}\lib">
+			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="commons-logging.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
-			<fileset dir="${basedir}\lib">
+			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="sqlite-jdbc-3.7.2.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
-			<fileset dir="${basedir}\lib">
+			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="controlsfx-8.0.4-dev.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
-			<fileset dir="${basedir}\lib">
+			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="log4j-1.2.16.jar"/>	
 			</fileset>
 		</copy>
 		
 		<mkdir dir="deploy/project" />
 		<copy todir="deploy/project">
-			<fileset dir="${basedir}">
+			<fileset dir="${basedir}\cyclist">
 				<include name="src/**" />
 			</fileset>
 		</copy>
@@ -155,7 +155,7 @@
 			width="1200" height="800" 
 			includeDT="false"
 			offlineAllowed="true"
-			outdir="${basedir}/deploy"
+			outdir="deploy"
 			outfile="cyclist" nativeBundles="all"
 			updatemode="background" >
 	
