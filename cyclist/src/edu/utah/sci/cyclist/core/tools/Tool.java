@@ -20,46 +20,16 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.core.ui.tools;
+package edu.utah.sci.cyclist.core.tools;
 
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.presenter.TablePresenter;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.ui.View;
-import edu.utah.sci.cyclist.core.ui.views.SimpleTableView;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 
-public class TableTool implements Tool {
+public interface Tool {
 
-	public static final String ID 			= "edu.utah.sci.cyclist.TableTool";
-	public static final String TOOL_NAME 	= "Table";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.LIST_ALT; 
-	
-	private View _view = null;
-	private ViewPresenter _presenter = null;
-	
-	@Override
-	public String getId() {
-		return ID;
-	}
-
-	@Override
-	public String getName() {
-		return TOOL_NAME;
-	}
-
-	@Override
-	public View getView() {
-		if (_view == null) 
-			_view = new SimpleTableView();
-		return _view;
-	}
-
-	@Override
-	public ViewPresenter getPresenter(EventBus bus) {
-		if (_presenter == null)
-			_presenter = new TablePresenter(bus);
-		return _presenter;
-	}
-
+	String getId();
+	String getName();
+	View getView();
+	ViewPresenter getPresenter(EventBus bus);
 }

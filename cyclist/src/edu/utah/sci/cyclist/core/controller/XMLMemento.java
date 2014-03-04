@@ -282,6 +282,25 @@ public final class XMLMemento implements IMemento {
         }
     }
 
+    /* (non-Javadoc)
+     * Method declared in IMemento.
+     * Cyclist addition
+     */
+    public Double getDouble(String key) {
+        Attr attr = element.getAttributeNode(key);
+        if (attr == null) {
+			return null;
+		}
+        String strValue = attr.getValue();
+        try {
+            return new Double(strValue);
+        } catch (NumberFormatException e) {
+           // WorkbenchPlugin.log("Memento problem - Invalid float for key: " //$NON-NLS-1$
+               //     + key + " value: " + strValue, e); //$NON-NLS-1$
+            return null;
+        }
+    }
+
 	/**
 	 * @since 3.4
 	 */
@@ -422,6 +441,14 @@ public final class XMLMemento implements IMemento {
         element.setAttribute(key, String.valueOf(f));
     }
 
+    /* (non-Javadoc)
+     * Method declared in IMemento.
+     * Cyclist addition
+     */
+    public void putDouble(String key, double f) {
+        element.setAttribute(key, String.valueOf(f));
+    }
+    
     /* (non-Javadoc)
      * Method declared in IMemento.
      */

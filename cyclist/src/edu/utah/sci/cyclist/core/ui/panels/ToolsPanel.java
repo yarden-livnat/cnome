@@ -36,8 +36,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
-import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.tools.Tool;
+import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
@@ -138,8 +138,9 @@ public class ToolsPanel extends TitledPanel {
 
 						db.setContent(content);
 
-					} catch (InstantiationException | IllegalAccessException e) {
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 						// TODO: report an error
+						e.printStackTrace();
 					}					
 
 					//					DnDIcon.getInstance().show(icon, title);

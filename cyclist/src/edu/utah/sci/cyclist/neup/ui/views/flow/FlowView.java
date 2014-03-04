@@ -59,7 +59,7 @@ public class FlowView extends CyclistViewBase {
 	public static final String TITLE = "Material Flow";
 	
 	public static final int Y_OFFSET_TOP = 30;
-	public static final int Y_OFFSET_BOTTOM = 20;
+	public static final int Y_OFFSET_BOTTOM = 10;
 	
 	public static final String NATURAL_U = "natl_u";
 	public static final String ENRICHED_U = "enriched_u";
@@ -602,10 +602,10 @@ public class FlowView extends CyclistViewBase {
 		vbox.getChildren().addAll(
 			buildTimestepCtrl(),
 			buildSelectionCtrl(),
-			buildNuclideCtrl(),
-			new Separator(),
+			buildNuclideCtrl()
+//			new Separator(),
 //			buildChartMode(),
-			buildChartAggr()
+//			buildChartAggr()
 		);
 		
 		return vbox;
@@ -808,7 +808,7 @@ public class FlowView extends CyclistViewBase {
 		TextFlow totalLine = new TextFlow();
 		totalLine.getChildren().addAll(totalLabel, _total);
 		
-		_pane.getChildren().addAll(/* _line[0], _line[1],*/ totalLine);		
+		_pane.getChildren().addAll(totalLine);		
 		
 		DoubleProperty w = new SimpleDoubleProperty();
 		w.bind(_pane.widthProperty().divide(5)); 
@@ -816,15 +816,25 @@ public class FlowView extends CyclistViewBase {
 		_line[SRC].centerXProperty().bind(w);
 		_line[SRC].infoXProperty().set(10);
 		_line[SRC].startYProperty().bind(_pane.translateYProperty().add(Y_OFFSET_TOP));
-		_line[SRC].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
+		_line[SRC].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_BOTTOM));
 		
 		_line[DEST].centerXProperty().bind(w.multiply(4));
 		_line[DEST].infoXProperty().bind(
 				_line[DEST].centerXProperty().add(
 						(_line[DEST].widthProperty().divide(2)).add(10)));
 		_line[DEST].startYProperty().bind(_pane.translateYProperty().add(Y_OFFSET_TOP));
-		_line[DEST].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_TOP+Y_OFFSET_BOTTOM));
+		_line[DEST].endYProperty().bind(_pane.heightProperty().subtract(Y_OFFSET_BOTTOM));
 
+		Label sender = new Label("Sender");
+		sender.layoutXProperty().bind(w.subtract(sender.widthProperty().divide(2)));
+		sender.layoutYProperty().set(Y_OFFSET_TOP/2);
+		
+		Label receiver = new Label("Receiver");
+		receiver.layoutXProperty().bind(w.multiply(4).subtract(sender.widthProperty().divide(2)));
+		receiver.layoutYProperty().set(Y_OFFSET_TOP/2);
+		
+		_pane.getChildren().addAll(sender, receiver);
+		
 		totalLine.translateXProperty().bind((_pane.widthProperty().subtract(totalLine.widthProperty()).divide(2)));
 		totalLine.setTranslateY(Y_OFFSET_TOP/2);
 		setPaneListeners();

@@ -291,6 +291,9 @@ public class FlowChart extends VBox {
 		return _stack;
 	}
 	
+	// HACK? : 
+	// The info regarding the x and y Axes does not seem to be correct when their layout just changed.
+	// Need to wait until it is updated.
 	private void updateRangeLater() {
 		Platform.runLater(new Runnable() {
             @Override
@@ -335,9 +338,6 @@ public class FlowChart extends VBox {
 		
 		_rec.setOnMouseDragged(e->{
 			double dx = e.getX() - _mx;
-//			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX()+dx, 0));
-//			Number v = _xAxis.getValueForDisplay(p.getX());
-//			int i = v.intValue();
 			double p = _rec.getX()+dx;
 			if (p < _left) 
 				p = _left;
@@ -361,7 +361,6 @@ public class FlowChart extends VBox {
 			Point2D p2 = _glass.sceneToLocal(p1);
 			_rec.setX(p2.getX());
 			
-//			Range<Integer> r = _timeRangeProperty.get();
 			Range<Integer> nr = new Range<>(i, i+r.to-r.from);
 			_updating = true;
 			_timeRangeProperty.set(nr);

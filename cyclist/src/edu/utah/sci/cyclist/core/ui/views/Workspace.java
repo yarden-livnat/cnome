@@ -38,10 +38,13 @@ import javafx.scene.layout.Region;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.ToolData;
+import edu.utah.sci.cyclist.core.tools.TableTool;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
@@ -49,8 +52,6 @@ import edu.utah.sci.cyclist.core.ui.components.InfinitPane;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
-import edu.utah.sci.cyclist.core.ui.tools.TableTool;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
 
 public class Workspace extends CyclistViewBase implements CyclistView {
 
@@ -67,13 +68,13 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	private ViewBase _maximizedView = null;
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
-	private Closure.V4<TableTool, Table, Double, Double> _onShowTable = null;
+	private Closure.V4<Tool, Table, Double, Double> _onShowTable = null;
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
 		_onToolDrop = action;
 	}
 	
-	public void setOnShowTable(Closure.V4<TableTool, Table, Double, Double> action) {
+	public void setOnShowTable(Closure.V4<Tool, Table, Double, Double> action) {
 		_onShowTable = action;
 	}
 	
@@ -97,6 +98,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	/**
 	 * Constructor
 	 */
+	
+	public Workspace() {
+		this(false);
+	}
+	
 	public Workspace(boolean toplevel) {
 		super(toplevel);
 		build();
@@ -173,15 +179,22 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 					status = true;
 				} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
 					Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
-					TableTool tool = new TableTool();
-					if (_onShowTable != null) {
-						Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
-						_onShowTable.call(tool, table, p.getX(), p.getY());
-						if(getOnToolDrop() != null){
-							getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
+					Tool tool;
+					try {
+						tool = ToolsLibrary.createTool("Table");
+						if (_onShowTable != null) {
+							Point2D p = _pane.sceneToLocal(event.getSceneX(), event.getSceneY());
+							_onShowTable.call(tool, table, p.getX(), p.getY());
+							if(getOnToolDrop() != null){
+								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
+							}
+							status = true;
 						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					status = true;
+					
 				} 
 //					else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
 //						// HACK: accept but don't do anything. 

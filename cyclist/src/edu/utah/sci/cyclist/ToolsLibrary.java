@@ -22,12 +22,10 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist;
 
-import edu.utah.sci.cyclist.core.ui.tools.ChartTool;
-import edu.utah.sci.cyclist.core.ui.tools.FlowTool;
-import edu.utah.sci.cyclist.core.ui.tools.GenericToolFactory;
-import edu.utah.sci.cyclist.core.ui.tools.TableTool;
-import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
-import edu.utah.sci.cyclist.core.ui.tools.WorkspaceTool;
+import edu.utah.sci.cyclist.core.tools.SimpleToolFactory;
+import edu.utah.sci.cyclist.core.tools.Tool;
+import edu.utah.sci.cyclist.core.tools.ToolFactory;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utexas.cycic.tools.CommoditiesViewToolFactory;
 import edu.utexas.cycic.tools.CycicToolFactory;
 import edu.utexas.cycic.tools.FormBuilderToolFactory;
@@ -40,10 +38,31 @@ import edu.utexas.cycic.tools.SimulationInfoToolFactory;
 public class ToolsLibrary {
 
 	public static final ToolFactory[] factories = {
-		new GenericToolFactory<TableTool>(TableTool.class, TableTool.TOOL_NAME, TableTool.ICON),
-		new GenericToolFactory<ChartTool>(ChartTool.class, ChartTool.TOOL_NAME, ChartTool.ICON),
-		new GenericToolFactory<FlowTool>(FlowTool.class, FlowTool.TOOL_NAME, FlowTool.ICON),
-		new GenericToolFactory<WorkspaceTool>(WorkspaceTool.class, WorkspaceTool.TOOL_NAME, WorkspaceTool.ICON),
+		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
+				"Table", AwesomeIcon.LIST_ALT, 
+				"ui.views.SimpleTableView", 
+				"presenter.TablePresenter"),
+		
+		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
+				"Chart", AwesomeIcon.BAR_CHART_ALT, 
+				"ui.views.ChartView", 
+				"presenter.ChartPresenter"),
+		
+		new SimpleToolFactory("edu.utah.sci.cyclist.neup", 
+				"Flow", AwesomeIcon.RANDOM, 
+				"ui.views.flow.FlowView", 
+				"presenter.FlowPresenter"),	
+		
+		new SimpleToolFactory("edu.utah.sci.cyclist", 
+				"Inventory", AwesomeIcon.RANDOM, 
+				"neup.ui.views.inventory.InventoryView", 
+				"core.presenter.CyclistViewPresenter"),
+		
+		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
+				"Workspace", AwesomeIcon.DESKTOP, 
+				"ui.views.Workspace", 
+				"presenter.WorkspacePresenter"),
+		
 		new CycicToolFactory(),
 		new CommoditiesViewToolFactory(),
 		new FormBuilderToolFactory(),
@@ -53,4 +72,21 @@ public class ToolsLibrary {
 		new RegionViewToolFactory(),
 		new SimulationInfoToolFactory()
 	};
-}
+	
+	public static ToolFactory findFactory(String name) {
+		for (int i=0; i<factories.length; i++) {
+			if (factories[i].getToolName().equals(name))
+				return factories[i];
+		}
+		return null;
+	}
+	
+	public static Tool createTool(String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		Tool tool = null;
+		ToolFactory factory = findFactory(name);
+		if (factory != null)
+			tool = factory.create();
+		return tool;
+	}
+	
+} 

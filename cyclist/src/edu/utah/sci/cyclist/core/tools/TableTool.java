@@ -20,16 +20,14 @@
  * Contributors:
  *     Yarden Livnat  
  *******************************************************************************/
-package edu.utah.sci.cyclist.core.ui.tools;
+package edu.utah.sci.cyclist.core.tools;
 
-import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
-import edu.utah.sci.cyclist.core.ui.View;
+public class TableTool extends GenericTool implements Tool {
 
-public interface Tool {
-
-	String getId();
-	String getName();
-	View getView();
-	ViewPresenter getPresenter(EventBus bus);
+	public TableTool() {
+		super("edu.utah.sci.cyclist.core.Table",
+				"Table", 
+				"edu.utah.sci.cyclist.core.ui.views.SimpleTableView", 
+				"edu.utah.sci.cyclist.core.presenter.TablePresenter");
+	}
 }

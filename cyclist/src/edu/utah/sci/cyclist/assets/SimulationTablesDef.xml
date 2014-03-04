@@ -6,7 +6,7 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="AgentID">
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Kind">
 				<datatype role="DIMENSION" type="TEXT"/>
@@ -18,13 +18,13 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ParentID">
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="EnterTime">
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>	
 			<field name="ExitTime">
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>	
 		</Schema>
 	</Table>
@@ -34,10 +34,10 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="StateId">
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="NucId" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="MassFrac">
 				<datatype role="MEASURE" type="NUMERIC"/>
@@ -50,13 +50,13 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ENTRY" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Time" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Natural_Uranium" >
 				<datatype role="MEASURE" type="NUMERIC"/>
@@ -72,7 +72,7 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="AgentID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Implementation" >
 				<datatype role="DIMENSION" type="TEXT"/>
@@ -81,16 +81,16 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="InstitutionID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="RegionID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="EnterTime" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ExitTime" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			
 		</Schema>
@@ -101,16 +101,16 @@
 			<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ResourceId" >
-			<datatype role="MEASURE" type="NUMERIC"/>
+			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="AgentId" >
 			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="StartTime" >
-			<datatype role="MEASURE" type="NUMERIC"/>
+			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="EndTime" >
-			<datatype role="MEASURE" type="NUMERIC"/>
+			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
@@ -120,7 +120,7 @@
 			<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ResID" >
-			<datatype role="MEASURE" type="NUMERIC"/>
+			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ModelID" >
 			<datatype role="DIMENSION" type="NUMERIC"/>
@@ -133,13 +133,13 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Type" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="TimeCreated" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
@@ -148,13 +148,13 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="StateId" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Parent1" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Parent2" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
@@ -167,13 +167,13 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="InitialYear" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="InitialMonth" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="SimulationStart" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Duration" >
 				<datatype role="MEASURE" type="NUMERIC"/>
@@ -186,13 +186,13 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="TransactionID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Position" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ResourceID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
@@ -202,16 +202,16 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="SenderID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ReceiverID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="MarketID" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Commodity" >
 				<datatype role="DIMENSION" type="TEXT"/>
@@ -220,7 +220,7 @@
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Time" >
-				<datatype role="MEASURE" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
