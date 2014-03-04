@@ -102,10 +102,10 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				}
 			});
 
-			workspace.setOnShowTable(new Closure.V4<TableTool, Table, Double, Double>() {
+			workspace.setOnShowTable(new Closure.V4<Tool, Table, Double, Double>() {
 
 				@Override
-				public void call(TableTool tool, Table table, Double x, Double y) {
+				public void call(Tool tool, Table table, Double x, Double y) {
 					TablePresenter presenter = (TablePresenter) addTool(tool, x, y);
 					presenter.addTable(table, false /* remote */, true /* active */, false /* remoteActive */);
 				}
