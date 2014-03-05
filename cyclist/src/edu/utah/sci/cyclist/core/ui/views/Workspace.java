@@ -149,6 +149,18 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		_pane.getStyleClass().add("workspace-pane");
 		setContent(splitPane);
 		
+		_pane.widthProperty().addListener(e->{
+			if (_maximizedView != null) {
+				_maximizedView.setPrefWidth(_pane.getWidth());
+			}
+		});
+		
+		_pane.heightProperty().addListener(e->{
+			if (_maximizedView != null) {
+				_maximizedView.setPrefHeight(_pane.getHeight());
+			}
+		});
+		
 		setOnDragOver(event->{
 			if (event.getTarget() == _pane) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
