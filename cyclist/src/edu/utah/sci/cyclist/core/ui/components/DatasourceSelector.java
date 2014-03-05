@@ -2,12 +2,10 @@ package edu.utah.sci.cyclist.core.ui.components;
 
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextBuilder;
+import javafx.scene.text.Text;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.Table.SourceLocation;
 
@@ -29,46 +27,46 @@ public class DatasourceSelector extends VBox{
 	private void buildGUI(Table table) {
 		
 		// Create the local field
-		_localField = TextFieldBuilder.create()
-               .prefWidth(150)
-               	.minHeight(20)
-               .text(new Integer(table.getDataSubset()).toString())
-               .build();
+		_localField = new TextField(new Integer(table.getDataSubset()).toString());
+		_localField.prefWidth(150);
+		_localField.minHeight(20);
+
 
 		// Create the alias field
-		_aliasField = TextFieldBuilder.create()
-				.prefWidth(150)
-				.minHeight(20)
-				.text(table.getAlias()).build();
+		_aliasField = new TextField(table.getAlias());
+		_aliasField.prefWidth(150);
+		_aliasField.minHeight(20);
 
 		// --- Alias Box
-		HBox aliasBox = HBoxBuilder.create()
-					.spacing(5)
-					.children(TextBuilder.create().text("Alias:").build(),
-							_aliasField)
-					.build();
+		HBox aliasBox = new HBox();
+		aliasBox.setSpacing(5);
+		aliasBox.getChildren().add(new Text("Alias:"));
 		
 		// --- Remote box
-		HBox remoteBox = HBoxBuilder.create()
-				.spacing(5)
-				.children(_remoteRadio = new RadioButton(),
-						TextBuilder.create().text("Remote").build())
-				.build();
+		HBox remoteBox = new HBox();
+		remoteBox.setSpacing(5);
+		remoteBox.getChildren().addAll(
+			_remoteRadio = new RadioButton(),
+			new Text("Remote")
+		);
+		
 		
 		// --- Local box
-		HBox localBox = HBoxBuilder.create()
-				.spacing(5)
-				.children(_localAllRadio = new RadioButton(),
-						TextBuilder.create().text("Local (all)").build())
-				.build();
+		HBox localBox = new HBox();
+		localBox.setSpacing(5);;
+		localBox.getChildren().addAll(
+			_localAllRadio = new RadioButton(),
+			new Text("Local (all)")
+		);
 
 		// --- Local subset box
-		HBox subsetBox =  HBoxBuilder.create()
-				.spacing(5)
-				.children(_localSubsetRadio = new RadioButton(),
-						TextBuilder.create().text("Local (subset):").build(),
-						_localField)
-				.build();
+		HBox subsetBox =  new HBox();
+		subsetBox.setSpacing(5);
+		subsetBox.getChildren().addAll(
+			_localSubsetRadio = new RadioButton(),
+			new Text("Local (subset):"),
+			_localField
+		);
 		
 		// --- Toggle group
 		_remoteLocalGroup = new ToggleGroup();
@@ -92,7 +90,12 @@ public class DatasourceSelector extends VBox{
 		}	
 		
 		// --- Layout
-		this.getChildren().addAll(aliasBox, TextBuilder.create().text("Data Location:").build(), remoteBox, localBox, subsetBox);	
+		this.getChildren().addAll(
+				aliasBox, 
+				new Text("Data Location:"),
+				remoteBox, 
+				localBox, 
+				subsetBox);	
 	}
 
 	// Get the alias text

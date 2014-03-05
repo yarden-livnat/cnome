@@ -24,6 +24,9 @@ package edu.utah.sci.cyclist.core.tools;
 
 public class TableTool extends GenericTool implements Tool {
 
+	/*
+	 * convenience class 
+	 */
 	public TableTool() {
 		super("edu.utah.sci.cyclist.core.Table",
 				"Table", 
