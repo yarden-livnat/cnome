@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.core.ui.tools;
+package edu.utah.sci.cyclist.core.tools;
 
 import java.lang.reflect.InvocationTargetException;
 

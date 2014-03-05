@@ -100,6 +100,16 @@ public interface IMemento {
    public Float getFloat(String key);
 
    /**
+    * Returns a double value of the given key.
+    * Cyclist addition
+    *
+    * @param key the key
+    * @return the value, or <code>null</code> if the key was not found or was found
+    *   but was not a floating point number
+    */
+   public Double getDouble(String key);
+   
+   /**
 	 * Returns the type for this memento.
 	 * 
 	 * @return the memento type
@@ -170,6 +180,14 @@ public interface IMemento {
     */
    public void putFloat(String key, float value);
 
+   /**
+    * Sets the value of the given key to the given a double.
+    *
+    * @param key the key
+    * @param value the value
+    */
+   public void putDouble(String key, double value);
+   
    /**
     * Sets the value of the given key to the given integer.
     *

@@ -2,6 +2,8 @@ package edu.utah.sci.cyclist.core.ui.components;
 
 import java.util.function.Function;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
+import edu.utah.sci.cyclist.core.controller.Persistent;
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
 import javafx.collections.ListChangeListener;
@@ -13,7 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 
-public class InfinitPane extends BorderPane {
+public class InfinitPane extends BorderPane implements Persistent {
 
 	private ScrollBar _hbar;
 	private ScrollBar _vbar;
@@ -29,6 +31,18 @@ public class InfinitPane extends BorderPane {
 		return _pane;
 	}
 
+	
+	public void save(IMemento memento) {
+		memento.putDouble("hbar", _hbar.getValue());
+		memento.putDouble("vbar", _vbar.getValue());
+		
+	}
+	
+	public void restore(IMemento memento) {
+		_hbar.setValue(memento.getDouble("hbar"));
+		_vbar.setValue(memento.getDouble("vbar"));
+	}
+	
 	private void build() {
 		_hbar = new ScrollBar();
 		_hbar.setMin(0);
