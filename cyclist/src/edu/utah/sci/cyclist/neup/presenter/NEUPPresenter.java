@@ -13,9 +13,9 @@ import edu.utah.sci.cyclist.core.presenter.CyclistViewPresenter;
 import edu.utah.sci.cyclist.core.presenter.SingleSelection;
 import edu.utah.sci.cyclist.core.ui.View;
 
-public class FlowPresenter extends CyclistViewPresenter {
+public class NEUPPresenter extends CyclistViewPresenter {
 
-	public FlowPresenter(EventBus bus) {
+	public NEUPPresenter(EventBus bus) {
 		super(bus);
 		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
 		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();

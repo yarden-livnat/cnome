@@ -121,7 +121,6 @@ public class InfinitPane extends BorderPane implements Persistent {
 			else if (p+l-w > max) max = p+l-w;
 		}
 
-		System.out.println("min:"+min+"  max:"+max);
 		boolean change = min != sbar.getMin() || max != sbar.getMax();
 		if (change) {
 			if (min != sbar.getMin()) sbar.setMin(min);

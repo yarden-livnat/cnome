@@ -10,20 +10,17 @@ public class GenericTool implements Tool {
 	
 	private String _id;
 	private String _name;
-	private String _viewName;
-	private String _presenterName;
-	
-//	private Class<View> _viewClass;
-//	private Class<ViewPresenter> _presenterClass;
+	private String _viewClass;
+	private String _presenterClass;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
 	
-	public GenericTool(String id, String name, String viewName, String presenterName) {
+	public GenericTool(String id, String name, String viewClass, String presenterClass) {
 		_id = id;
 		_name = name;
-		_viewName = viewName;
-		_presenterName = presenterName;
+		_viewClass = viewClass;
+		_presenterClass = presenterClass;
 	}
 	
 	@Override
@@ -40,7 +37,7 @@ public class GenericTool implements Tool {
 	public View getView() {
 		if (_view == null) {
 			try {
-				_view = (View)Class.forName(_viewName).newInstance();
+				_view = (View)Class.forName(_viewClass).newInstance();
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -52,7 +49,7 @@ public class GenericTool implements Tool {
 	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null) {
 			try {
-				_presenter = (ViewPresenter) Class.forName(_presenterName).getConstructor(EventBus.class).newInstance(bus);;
+				_presenter = (ViewPresenter) Class.forName(_presenterClass).getConstructor(EventBus.class).newInstance(bus);;
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}

@@ -42,7 +42,6 @@ import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.tools.TableTool;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
@@ -178,11 +177,16 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 
 	private Presenter addTool(Tool tool, double x, double y) {
 		ViewBase view = (ViewBase) tool.getView();
+		ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
+		
+		return addTool(view, presenter, x, y);
+	}
+	
+	private Presenter addTool(ViewBase view, ViewPresenter presenter, double x, double y) {
 		view.setLayoutX(x);
 		view.setLayoutY(y);
 		getWorkspace().addView(view);
 
-		ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
 		if (presenter != null) {        
 			_presenters.add(presenter);
 			presenter.setView(view);   

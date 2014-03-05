@@ -20,12 +20,11 @@ public class FiltersListPanel extends TitledPanel {
 	public static final String TITLE	= "Filters";
 	
 	public FiltersListPanel() {
-		super(TITLE, GlyphRegistry.get(AwesomeIcon.FILTER)); //"FontAwesome|FILTER"));
-		
-		configure();
+		super(TITLE, GlyphRegistry.get(AwesomeIcon.FILTER)); 
+		build();
 	}
 	
-	private void configure() {
+	private void build() {
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		
 		getPane().setOnDragEntered(new EventHandler<DragEvent>() {
