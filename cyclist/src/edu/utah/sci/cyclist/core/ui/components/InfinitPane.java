@@ -129,6 +129,7 @@ public class InfinitPane extends BorderPane implements Persistent {
 
 			sbar.setVisibleAmount( (sbar.getMax()-sbar.getMin()) * w/(w+sbar.getMax()-sbar.getMin()));
 		}
+		boolean show = min < 0 || max > 0;
 		sbar.setVisible(show);
 		sbar.setManaged(show);
 	}
