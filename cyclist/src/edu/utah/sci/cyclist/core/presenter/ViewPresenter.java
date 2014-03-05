@@ -24,6 +24,7 @@ package edu.utah.sci.cyclist.core.presenter;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.core.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
@@ -68,4 +69,11 @@ public class ViewPresenter extends PresenterBase{
 	public void onViewSelected(View view) {
 		broadcast(new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view));	
 	}
+	
+	public void save(IMemento memento) {	
+	}
+	
+	public void restore(IMemento memento) {	
+	}
+	
 }

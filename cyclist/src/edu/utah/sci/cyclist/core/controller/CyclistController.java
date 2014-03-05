@@ -427,6 +427,8 @@ public class CyclistController {
 			simulation.save(memento.createChild("Simulation"));
 		}
 		
+		_presenter.save(memento.createChild("Tools"));
+		
 		//First save the main workspace
 		IMemento mainWs = memento.createChild("mainWorkSpace");
 		saveMainWorkspace(mainWs);
@@ -434,6 +436,8 @@ public class CyclistController {
 		for(ToolData tool : _model.getTools()){
 			tool.save(mainWs.createChild("Tool"));
 		}
+		
+		
 			
 		
 		try {

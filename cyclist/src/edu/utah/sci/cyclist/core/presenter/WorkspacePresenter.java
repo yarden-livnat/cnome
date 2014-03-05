@@ -26,9 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.layout.Region;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
@@ -42,7 +46,6 @@ import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.tools.TableTool;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
@@ -174,6 +177,35 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	 */
 	public void addTool(Tool tool) {
 		addTool(tool, 100, 100);
+	}
+	
+	@Override
+	public void save(IMemento memento) {
+		super.save(memento);
+		for (Node node :getWorkspace().getPane().getChildren()){
+			IMemento toolMemento = memento.createChild("Tool");
+			toolMemento.putString("class", node.getClass().getName());
+			toolMemento.putString("x", Double.toString(node.getTranslateX()));
+			toolMemento.putString("y", Double.toString(node.getTranslateY()));
+			toolMemento.putString("width", Double.toString(((Region)node).getPrefWidth()));
+			toolMemento.putString("height", Double.toString(((Region)node).getPrefHeight()));
+		}
+	}
+	
+	@Override
+	public void restore(IMemento memento) {	
+		super.restore(memento);
+			
+			//Get the location
+			Double x = Double.parseDouble(memento.getString("x"));
+			Double y = Double.parseDouble(memento.getString("y"));
+			
+			Point2D point = new Point2D(x,y);
+			
+			double width = Double.parseDouble(memento.getString("width"));
+			double height = Double.parseDouble(memento.getString("height"));
+			
+			String className = memento.getString("class");
 	}
 
 	private Presenter addTool(Tool tool, double x, double y) {

@@ -304,6 +304,10 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		((Region)toolData.getTool().getView()).setPrefSize(toolData.getWidth(), toolData.getHeight());
 	}
 	
+	public Pane getPane(){
+		return _pane;
+	}
+	
 	private ViewPos _viewPos = new ViewPos();
 }
 

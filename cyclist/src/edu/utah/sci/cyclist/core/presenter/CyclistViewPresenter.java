@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
@@ -158,6 +159,16 @@ public class CyclistViewPresenter extends ViewPresenter {
 			
 			});
 		}
+	}
+	
+	@Override
+	public void save(IMemento memento) {
+		super.save(memento);
+	}
+	
+	@Override
+	public void restore(IMemento memento) {	
+		super.restore(memento);
 	}
 	
 	/*
