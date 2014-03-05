@@ -98,9 +98,11 @@ public class InfinitPane extends BorderPane implements Persistent {
 		});
 	}
 
-	private void addListeners(final Node node) {
+	private void addListeners(final Region node) {
 		node.layoutXProperty().addListener(new WeakInvalidationListener(hListener));
 		node.layoutYProperty().addListener(new WeakInvalidationListener(vListener));
+		node.widthProperty().addListener(new WeakInvalidationListener(hListener));
+		node.heightProperty().addListener(new WeakInvalidationListener(vListener));	
 	}
 
 	private InvalidationListener hListener = o->adjust(r->r.getLayoutX(), r->r.getWidth(), _hbar);
@@ -116,9 +118,10 @@ public class InfinitPane extends BorderPane implements Persistent {
 			double p = pos.apply(r);
 			double l = len.apply(r);
 			if (p < min) min = p;
-			else if (p+l > w) max = p+l-w;
+			else if (p+l-w > max) max = p+l-w;
 		}
 
+		System.out.println("min:"+min+"  max:"+max);
 		boolean change = min != sbar.getMin() || max != sbar.getMax();
 		if (change) {
 			if (min != sbar.getMin()) sbar.setMin(min);
@@ -126,7 +129,6 @@ public class InfinitPane extends BorderPane implements Persistent {
 
 			sbar.setVisibleAmount( (sbar.getMax()-sbar.getMin()) * w/(w+sbar.getMax()-sbar.getMin()));
 		}
-		boolean show = min < 0 || max > 0;
 		sbar.setVisible(show);
 		sbar.setManaged(show);
 	}
