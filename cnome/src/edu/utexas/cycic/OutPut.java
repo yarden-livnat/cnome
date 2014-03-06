@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 import javafx.scene.control.Label;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,6 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 /**
  * Output class for the CYCIC GUI.
  * @author Robert
@@ -25,7 +27,7 @@ public class OutPut {
 	 * Function to convert the information stored in the CYCIC
 	 * simulation into a cylcus input file. 
 	 */
-	public static void output(){
+	public static void output(File file){
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
@@ -55,7 +57,7 @@ public class OutPut {
 			// Facilities
 			for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
 				Element facID = doc.createElement("facility");
-				facilityBuilder(doc, facID, facility.facilityStructure, facility.facilityData, facility.facilityType);
+				facilityBuilder(doc, facID, facility);
 				rootElement.appendChild(facID);
 			}
 			
@@ -108,11 +110,13 @@ public class OutPut {
 				recipeBuilder(doc, rootElement, recipe);
 			}
 			
+			saveFile(doc, rootElement);
+			
 			// Writing out the xml file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/file.xml"));
+			StreamResult result = new StreamResult(file);
 			
 			transformer.transform(source, result);
 			
@@ -121,7 +125,6 @@ public class OutPut {
 		} catch (TransformerException tfe) {
 			tfe.printStackTrace();
 		}
-		saveFile();
 	}
 	/**
 	 * Sets up the control information for the simulation.
@@ -217,8 +220,14 @@ public class OutPut {
 	 * @param facType A string that indicates the type of the facility. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static void facilityBuilder(Document doc, Element rootElement, ArrayList<Object> facArray, ArrayList<Object> dataArray, String facType){
-		rootElement.appendChild(facilityNameElement(doc, (ArrayList<Object>)dataArray.get(0)));
+	public static void facilityBuilder(Document doc, Element rootElement, facilityNode facility){
+		String facType = facility.facilityType;
+		ArrayList<Object> facArray = facility.facilityStructure;
+		ArrayList<Object> dataArray = facility.facilityData;
+		
+		Element name = doc.createElement("name");
+		
+		rootElement.appendChild(name);
 		
 		Element model = doc.createElement("model");
 		rootElement.appendChild(model);
@@ -357,46 +366,169 @@ public class OutPut {
 		rootElement.appendChild(marketModel);	
 	}
 	
-	
-	public static void saveFile(){
-		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
-			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("CycicSimulation");
-			doc.appendChild(rootElement);
+	public static void saveFile(Document doc, Element rootElement){
+			Element cycicElement = doc.createElement("CycicSimulation");
+			rootElement.appendChild(cycicElement);
 			
-			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
-				Element facElement = doc.createElement("facility");
-				// Name
-				Element facName = doc.createElement("name");
-				facName.appendChild(doc.createTextNode((String) facility.name));
-				facElement.appendChild(facName);
-				// X position
-				Element xPosition = doc.createElement("xPosition");
-				xPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterX())));
-				facElement.appendChild(xPosition);
-				// Y position
-				Element yPosition = doc.createElement("yPosition");
-				yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
-				facElement.appendChild(yPosition);
-				
-				rootElement.appendChild(facElement);
+			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){				
+				cycicElement.appendChild(outputFacility(doc, facility));
 			}
 			
+			for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
+				cycicElement.appendChild(outputMarket(doc, market));
+			}
+	}
+	
+	public static void loadFile(File file){
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(file);
 			
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File("/home/robert/Desktop/CycicTests/savefile.xml"));
+			doc.getDocumentElement().getNodeName();
+			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
+			NodeList facList = doc.getElementsByTagName("facilityNode");
 			
-			transformer.transform(source, result);
+			for (int i = 0; i < facList.getLength(); i++){
+				org.w3c.dom.Node facNode = facList.item(i);
+				
+				facilityNode tempNode = new facilityNode();
+				Element element = (Element) facNode;
+				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
+				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
+				double radius = Double.parseDouble(element.getElementsByTagName("radius").item(0).getTextContent());
+				double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
+				tempNode.cycicCircle.setCenterX(xPosition);
+				tempNode.cycicCircle.text.setLayoutX(xPosition-radius*0.6);
+				tempNode.cycicCircle.menu.setLayoutX(xPosition);
+				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
+				tempNode.cycicCircle.setCenterY(yPosition);
+				tempNode.cycicCircle.text.setLayoutY(yPosition-radius*0.6);
+				tempNode.cycicCircle.menu.setLayoutY(yPosition);
+			}
 			
-		} catch (ParserConfigurationException pce){
-			pce.printStackTrace();
-		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
+			NodeList marketList = doc.getElementsByTagName("marketNode");
+			
+			for (int i = 0; i < marketList.getLength(); i++){
+				org.w3c.dom.Node marketNode = marketList.item(i);
+				
+				Element element = (Element) marketNode;
+				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
+				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
+				tempNode.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
+				tempNode.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
+			}		
+			VisFunctions.reloadPane();
+		} catch (Exception e){
+			e.printStackTrace();
 		}
 	}
+	
+	static Element outputFacility(Document doc, facilityNode facility){
+		Element facElement = doc.createElement("facilityNode");
+		// Name
+		Element facName = doc.createElement("name");
+		facName.appendChild(doc.createTextNode((String) facility.name));
+		facElement.appendChild(facName);
+		// X position
+		Element xPosition = doc.createElement("xPosition");
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterX())));
+		facElement.appendChild(xPosition);
+		// Y position
+		Element yPosition = doc.createElement("yPosition");
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
+		facElement.appendChild(yPosition);
+		// radius
+		Element radius = doc.createElement("radius");
+		radius.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getRadius())));
+		facElement.appendChild(radius);
+		
+		for (String commodity: facility.cycicCircle.incommods){
+			Element commodityObj = doc.createElement("inCommod");
+			commodityObj.appendChild(doc.createTextNode(commodity));
+			facElement.appendChild(commodityObj);
+		}
+		for (String commodity: facility.cycicCircle.outcommods){
+			Element commodityObj = doc.createElement("outCommod");
+			commodityObj.appendChild(doc.createTextNode(commodity));
+			facElement.appendChild(commodityObj);
+		}
+		
+		return facElement;
+	}
+	
+	static Element outputMarket(Document doc, MarketCircle market){
+		Element markElement = doc.createElement("marketNode");
+		Element marketName = doc.createElement("name");
+		marketName.appendChild(doc.createTextNode((String) market.name));
+		markElement.appendChild(marketName);
+		// X position
+		Element xPosition = doc.createElement("xPosition");
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterX())));
+		markElement.appendChild(xPosition);
+		// Y position
+		Element yPosition = doc.createElement("yPosition");
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterY())));
+		markElement.appendChild(yPosition);
+		
+		Element commodityObj = doc.createElement("inCommod");
+		commodityObj.appendChild(doc.createTextNode(market.commodity));
+		markElement.appendChild(commodityObj);
+		return markElement;
+	}
+	
+	static Element outputRegion(Document doc, regionNode region){
+		Element regionElement = doc.createElement("regionNode");
+		Element regionName = doc.createElement("name");
+		regionName.appendChild(doc.createTextNode((String) region.name));
+		regionElement.appendChild(regionName);
+		// X position
+		Element xPosition = doc.createElement("xPosition");
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterX())));
+		regionElement.appendChild(xPosition);
+		// Y position
+		Element yPosition = doc.createElement("yPosition");
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterY())));
+		
+		regionElement.appendChild(yPosition);
+		
+		
+		return regionElement;
+	}
+
+	public static void loadNewFile(File file){
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(file);
+			
+			doc.getDocumentElement().getNodeName();
+			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
+			NodeList facList = doc.getElementsByTagName("facility");
+			
+			for (int i = 0; i < facList.getLength(); i++){
+				org.w3c.dom.Node facNode = facList.item(i);
+				
+				facilityNode tempNode = new facilityNode();
+				Element element = (Element) facNode;
+				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
+				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
+			}
+			
+			NodeList marketList = doc.getElementsByTagName("market");
+			
+			for (int i = 0; i < marketList.getLength(); i++){
+				org.w3c.dom.Node marketNode = marketList.item(i);
+				
+				Element element = (Element) marketNode;
+				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
+				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
+			}		
+			VisFunctions.reloadPane();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 }
 

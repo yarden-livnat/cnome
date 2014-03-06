@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import javafx.scene.control.TextField;
 import javafx.scene.effect.Bloom;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Light.Distant;
@@ -14,6 +15,23 @@ import javafx.scene.effect.Lighting;
  *
  */
 public class VisFunctions {
+	
+	public static TextField numberField(){
+		TextField numberField = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
+		return numberField;
+	}
 	/**
 	 * Converts a string to a color.
 	 * @param string String to be converted.
@@ -26,7 +44,7 @@ public class VisFunctions {
 		int green=0;
 		int p=0;
 		ArrayList<Integer> rgbArray = new ArrayList<Integer>();
-		
+
 		hashCode = Integer.toString(Math.abs(string.hashCode()));
 		if(hashCode.length()>(p+3)){
 			red=Integer.parseInt(hashCode.substring(p,p+3));
@@ -46,7 +64,7 @@ public class VisFunctions {
 		}else{
 			red=Integer.parseInt(hashCode);
 		}
-		
+
 		while (red>255) {
 			red-=256;
 		}
@@ -56,13 +74,13 @@ public class VisFunctions {
 		while (blue>255) {
 			blue-=256;
 		}
-		
+
 		rgbArray.add(red);
 		rgbArray.add(green);
 		rgbArray.add(blue);
 		return rgbArray;
 	}
-	
+
 	/**
 	 * Test to determine which font color to use, based on the color
 	 * of the node the text belongs to.
@@ -82,7 +100,7 @@ public class VisFunctions {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Test determines if the a color should be made darker or lighter
 	 * based on the initial color being used.
@@ -96,7 +114,7 @@ public class VisFunctions {
 			return 0.7;
 		}
 	}
-	
+
 	/**
 	 * Adjusts the color of a node when highlighted
 	 */
@@ -106,7 +124,7 @@ public class VisFunctions {
 			setHue(-0.05);
 		}
 	};
-	
+
 	/**
 	 * Depricated
 	 */
@@ -115,7 +133,7 @@ public class VisFunctions {
 			setThreshold(1.0);
 		}
 	};
-	
+
 	// Really cool effect, not ready for testing yet.
 	static Distant light = new Distant(){
 		{
@@ -129,13 +147,13 @@ public class VisFunctions {
 			setSurfaceScale(2);
 		}
 	};
-	
+
 	/**
 	 * Code used to link a facilityCircle and a marketCircle in the CYCIC pane.
 	 * @param source facilityCircle that starts the line.
 	 * @param target marketCircle that ends the line.
 	 */
-	static void linkNodesSimple(FacilityCircle source, MarketCircle target){
+	static void linkFacMarket(FacilityCircle source, MarketCircle target){
 		MarketCircle markIndex = null;
 		nodeLink link = new nodeLink();
 		link.source = source;
@@ -150,11 +168,59 @@ public class VisFunctions {
 				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
 			}
 		}
+		link.line.updatePosition();
+		link.line.text.setText(target.commodity);
 		CycicScenarios.workingCycicScenario.Links.add(link);
-		Cycic.pane.getChildren().addAll(link.line);
+		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
+		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
 		link.line.toBack();
 	}
-	
+
+
+	static void linkMarketFac(MarketCircle source, FacilityCircle target){
+		MarketCircle markIndex = null;
+		nodeLink link = new nodeLink();
+		link.source = source;
+		link.target = target;
+		link.line.setStartX(source.getCenterX());
+		link.line.setStartY(source.getCenterY());
+		link.line.setEndX(target.getCenterX());
+		link.line.setEndY(target.getCenterY());
+
+		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
+			if(CycicScenarios.workingCycicScenario.marketNodes.get(i) == source){
+				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
+			}
+		}
+		link.line.updatePosition();
+		link.line.text.setText(source.commodity);
+		CycicScenarios.workingCycicScenario.Links.add(link);
+		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
+		Cycic.pane.getChildren().addAll( link.line.left1, link.line.right1);
+		link.line.toBack();
+	}
+
+	/**
+	 * 
+	 * @param source
+	 * @param target
+	 */
+	static void linkFacToFac(FacilityCircle source, FacilityCircle target){
+		nodeLink link = new nodeLink();
+		link.source = source;
+		link.target = target;
+		link.line.setStartX(source.getCenterX());
+		link.line.setStartY(source.getCenterY());
+		link.line.setEndX(target.getCenterX());
+		link.line.setEndY(target.getCenterY());
+
+		link.line.updatePosition();
+		CycicScenarios.workingCycicScenario.Links.add(link);
+		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
+		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
+		link.line.toBack();
+	}
+
 	/**
 	 * Reloads the CYCIC pane when changes have been made to it's contents.
 	 */
@@ -181,12 +247,27 @@ public class VisFunctions {
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).menu);
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).text);			
 		}
-		for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
-			CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
+		CycicScenarios.workingCycicScenario.Links.clear();
+		for (facilityNode outFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
+			for (int i = 0; i < outFac.cycicCircle.outcommods.size(); i++) {
+				for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes) {
+					if (outFac.cycicCircle.outcommods.get(i) == market.commodity){
+						linkFacMarket(outFac.cycicCircle, market);
+					}
+				}
+			}
+		}
+		for (facilityNode inFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
+			for (int i = 0; i < inFac.cycicCircle.incommods.size(); i++) {
+				for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes) {
+					if (inFac.cycicCircle.incommods.get(i) == market.commodity){
+						linkMarketFac(market, inFac.cycicCircle);
+					}
+				}
+			}
 		}
 	}
-	
+
 	/**
 	 * Reloads the CYCIC pane without Markets.
 	 */
@@ -208,12 +289,17 @@ public class VisFunctions {
 				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line.toBack();
 			}
 		}
-		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i));		
-		}
-		for(int n = 0; n < CycicScenarios.workingCycicScenario.Links.size(); n++){
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.Links.get(n).line);
-			CycicScenarios.workingCycicScenario.Links.get(n).line.toBack();
+		CycicScenarios.workingCycicScenario.Links.clear();
+		for (facilityNode outFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
+			for (int i = 0; i < outFac.cycicCircle.outcommods.size(); i++) {
+				for (facilityNode inFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
+					for (int j = 0; j < inFac.cycicCircle.incommods.size(); j++) {
+						if (outFac.cycicCircle.outcommods.get(i) == inFac.cycicCircle.incommods.get(j)){
+							linkFacToFac(outFac.cycicCircle, inFac.cycicCircle);
+						}
+					}
+				}
+			}
 		}
 	}
 }

@@ -1,19 +1,18 @@
 package edu.utexas.cycic.tools;
 
-import javafx.scene.image.Image;
-import edu.utah.sci.cyclist.Resources;
-import edu.utah.sci.cyclist.event.notification.EventBus;
-import edu.utah.sci.cyclist.presenter.ViewPresenter;
-import edu.utah.sci.cyclist.ui.View;
-import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
+import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utexas.cycic.SimulationInfo;
 import edu.utexas.cycic.presenter.SimulationInfoPresenter;
 
 public class SimulationInfoTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.SimulationInfoTool";
-	public static final String TOOL_NAME 	= "Simualtion Information";
-	public static final String ICON_NAME 	= "CycIC";
+	public static final String TOOL_NAME 	= "Simulation Information";
+	public static final AwesomeIcon ICON 	= AwesomeIcon.QUESTION_CIRCLE;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
@@ -23,11 +22,6 @@ public class SimulationInfoTool implements Tool {
 		return ID;
 	}
 	
-	@Override
-	public Image getIcon() {
-		return Resources.getIcon(ICON_NAME, 16, 16);	
-	}
-
 	@Override
 	public String getName() {
 		return TOOL_NAME;

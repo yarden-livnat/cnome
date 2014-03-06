@@ -34,8 +34,15 @@ public class DataArrays{
 	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 
 	static simInfo simulationData = new simInfo();
+	static ArrayList<facilityStructure> simFacilities = new ArrayList<facilityStructure>();
+	
 }
 
+
+class facilityStructure {
+	String facilityName;
+	ArrayList<Object> facStruct = new ArrayList<Object>();
+}
 /**
  * Class used to build the recipes for cyclus.
  * @author Robert
@@ -64,9 +71,9 @@ class isotopeData {
  *
  */
 class nodeLink {
-	FacilityCircle source;
+	Object source;
 	Object target;
-	Line line = new Line();
+	ConnectorLine line = new ConnectorLine();
 }
 
 /**
@@ -131,7 +138,7 @@ class facilityNode{
 	String facilityType = "";
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
-	ArrayList<Object> facilityStructure = new ArrayList<Object>();
+	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
 	ArrayList<facilityNode> facilityClones = new ArrayList<facilityNode>();
 	int parentIndex;
 	FacilityCircle cycicCircle = new FacilityCircle();

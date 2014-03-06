@@ -2,7 +2,7 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
-import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -74,8 +74,17 @@ public class MarketView extends ViewBase{
 		marketCommod.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				marketCommod.getItems().clear();
+
 				for (Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
-					marketCommod.getItems().add(commod.getText());
+					boolean singularityCheck = false;
+					for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
+						if (market.commodity == commod.getText()){
+							singularityCheck = true;
+						}
+					}
+					if (singularityCheck == false){
+						marketCommod.getItems().add(commod.getText());
+					}
 				}
 				marketCommod.getItems().add("Add New Commodity");
 				marketCommod.setValue(formNode.commodity);
@@ -212,7 +221,7 @@ public class MarketView extends ViewBase{
 							columnEnd = 2 + columnNumber;
 							break;
 						default:
-							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
+							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 							break;
 						}

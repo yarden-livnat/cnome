@@ -1,7 +1,7 @@
 package edu.utexas.cycic;
 
-import edu.utah.sci.cyclist.event.dnd.DnD;
-import edu.utah.sci.cyclist.ui.tools.Tool;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utexas.cycic.tools.FormBuilderTool;
 import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import javafx.event.ActionEvent;
@@ -10,6 +10,7 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.Lighting;
 import javafx.scene.effect.Light.Distant;
 import javafx.scene.image.Image;
@@ -47,9 +48,11 @@ public class SorterCircles{
 		circle.name = name;
 		//Setting up the name and nameing structure of the circle.
 		circle.text.setText(name);
-		circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
-		circle.text.setY(circle.getCenterY());	
-		circle.text.setWrappingWidth(circle.getRadius()*1.6);
+		circle.text.setTooltip(new Tooltip(name));
+		circle.text.setWrapText(true);
+		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+		circle.text.setLayoutY(circle.getCenterY());	
+		circle.text.setMaxWidth(circle.getRadius()*1.6);
 		circle.text.setMouseTransparent(true);
 		
 		// Setting the circle color //
@@ -60,9 +63,9 @@ public class SorterCircles{
 		
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setFill(Color.WHITE);
+			circle.text.setTextFill(Color.WHITE);
 		}else{
-			circle.text.setFill(Color.WHITE);
+			circle.text.setTextFill(Color.WHITE);
 		}
 			
 		// Adding the menu and it's menu items.
@@ -143,8 +146,8 @@ public class SorterCircles{
 				circle.image.setLayoutX(circle.getCenterX()-60);
 				circle.image.setLayoutY(circle.getCenterY()-50);
 				
-				circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
-				circle.text.setY(circle.getCenterY());
+				circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+				circle.text.setLayoutY(circle.getCenterY());
 
 				mousex = event.getX();
 				mousey = event.getY();

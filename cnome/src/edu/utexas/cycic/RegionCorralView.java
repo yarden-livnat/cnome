@@ -1,24 +1,35 @@
 package edu.utexas.cycic;
 
+import java.util.ArrayList;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import edu.utah.sci.cyclist.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utexas.cycic.tools.RegionViewTool;
 
 public class RegionCorralView extends ViewBase {
 
@@ -48,10 +59,6 @@ public class RegionCorralView extends ViewBase {
 	};
 
 	public RegionCorralView() {
-
-		//if (cycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
-		//PracticeRegions.init();
-		//}
 
 		/* Create content for RegionCorralView header */
 
@@ -91,26 +98,51 @@ public class RegionCorralView extends ViewBase {
 			}
 		};
 		
-		final regionNode region1 = new regionNode();
-		region1.regionCircle = RegionShape.addRegion("USA");
-		region1.regionCircle.setRadius(15);
-		hroot.getChildren().add(region1.regionCircle);
-		
-		final regionNode region2 = new regionNode();
-		region1.regionCircle = RegionShape.addRegion("France");
-		region1.regionCircle.setRadius(15);
-		hroot.getChildren().add(region2.regionCircle);
-		
-		final regionNode region3 = new regionNode();
-		region1.regionCircle = RegionShape.addRegion("Canada");
-		region1.regionCircle.setRadius(15);
-		hroot.getChildren().add(region3.regionCircle);
-		
-		final regionNode region4 = new regionNode();
-		region1.regionCircle = RegionShape.addRegion("Germany");
-		region1.regionCircle.setRadius(15);
-		hroot.getChildren().add(region4.regionCircle);
+		final Circle region1 = new Circle();
+		region1.setRadius(15);
+		region1.setStrokeWidth(1);
+		region1.setStroke(Color.DARKGRAY);
+		region1.setFill(Color.BROWN);
 
+		// Allows a shift + (drag and drop) to start a new RegionView for this RegionShape.
+		region1.setOnDragDetected(new EventHandler<MouseEvent>(){
+			@Override
+			public void handle(MouseEvent addEvent){
+				final regionNode region = new regionNode();
+				region.regionStruct = PracticeRegions.growthRegion;
+				region.type = typeOptions.getId();
+				FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
+				regionNode.regionCircle = RegionShape.addRegion("Birdy!", region);
+				
+				DataArrays.regionNodes.add(region);
+
+				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+			}
+		});
+		
+		hroot.getChildren().addAll(region1);	
+		
+		final Circle region2 = new Circle();
+		region2.setRadius(15);
+		region2.setStrokeWidth(1);
+		region2.setStroke(Color.DARKGRAY);
+		region2.setFill(Color.PINK);
+		hroot.getChildren().addAll(region2);
+		
+		final Circle region3 = new Circle();
+		region3.setRadius(15);
+		region3.setStrokeWidth(1);
+		region3.setStroke(Color.DARKGRAY);
+		region3.setFill(Color.GREEN);
+		hroot.getChildren().addAll(region3);
+		
+		final Circle region4 = new Circle();
+		region4.setRadius(15);
+		region4.setStrokeWidth(1);
+		region4.setStroke(Color.DARKGRAY);
+		region4.setFill(Color.BLUE);
+		hroot.getChildren().addAll(region4);
+		
 		hroot.setLayoutX(corralPane.getMaxWidth()-regionLabel.getLayoutX()-regionText.getLayoutX()-typeOptions.getLayoutX()-corralButton.getLayoutX()-regionPrototypeLabel.getLayoutX());
 		root.setContent(hroot);
 		regionCorralGrid.add(root, 5, 0);
@@ -124,22 +156,33 @@ public class RegionCorralView extends ViewBase {
 		};
 		regionCorralGrid.add(unassociatedFacilityTitle, 4, 1);
 		
-		Circle unassociatedCircleFacility = new Circle(10){
+		Circle unassociatedCircleFacility = new Circle(15){
 			{
-				setStroke(Color.BLACK);
 				setFill(Color.BLUE);
+				setStroke(Color.DARKGRAY);
+				setStrokeWidth(1);
 			}
 		};
 		
-		Rectangle unassociatedRectangleFacility = new Rectangle(25, 15){
+		Rectangle unassociatedRectangleFacility = new Rectangle(45, 30){
 			{
-				setStroke(Color.BLACK);
+				setStroke(Color.DARKGRAY);
 				setFill(Color.GREEN);
+				setStrokeWidth(1);
+				
 			}
 		};
+		
+		Circle unassociatedCircleFacility1 = new Circle(15){
+			{
+				setFill(Color.PINK);
+				setStroke(Color.DARKGRAY);
+				setStrokeWidth(1);
+			}
+		};		
 		
 		HBox unassociatedFacilityList = new HBox(10);
-		unassociatedFacilityList.getChildren().addAll(unassociatedCircleFacility, unassociatedRectangleFacility);
+		unassociatedFacilityList.getChildren().addAll(unassociatedCircleFacility, unassociatedRectangleFacility, unassociatedCircleFacility1);
 
 		ScrollPane root2 = new ScrollPane(){
 			{
@@ -161,12 +204,11 @@ public class RegionCorralView extends ViewBase {
 			public void handle(MouseEvent event) {
 				final regionNode region = new regionNode();
 				region.regionStruct = PracticeRegions.growthRegion;
+				region.type = typeOptions.getId();
 				FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
-				regionNode.regionCircle = RegionShape.addRegion(regionText.getText());
-
-				//region.regionStruct = (ArrayList<Object>) cycicScenarios.workingCycicScenario.regionStructs.get(0);
-				//FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
-				//from line 82-83 of RegionView
+				regionNode.regionCircle = RegionShape.addRegion(regionText.getText(), region);
+				
+				DataArrays.regionNodes.add(region);
 
 				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
 

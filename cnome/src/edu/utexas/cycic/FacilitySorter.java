@@ -19,9 +19,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+<<<<<<< HEAD
 import javax.swing.JTable;
 
 import edu.utah.sci.cyclist.ui.components.ViewBase;
+=======
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+>>>>>>> 7b8ae04fe99b228d4a8785378714ce04460f146c
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
