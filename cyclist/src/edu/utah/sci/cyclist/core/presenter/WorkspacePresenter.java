@@ -244,6 +244,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		ViewBase view = (ViewBase) tool.getView();
 		ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
 		
+		_tools.add(tool);
+		
 		return addTool(view, presenter, x, y);
 	}
 	
@@ -263,8 +265,6 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				p.addRemoteFilters(getWorkspace().remoteFilters());
 			}
 		}
-		
-		_tools.add(tool);
 	
 		return presenter;
 	}
