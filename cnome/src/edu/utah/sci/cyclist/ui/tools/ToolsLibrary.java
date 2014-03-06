@@ -32,6 +32,7 @@ import edu.utexas.cycic.tools.RecipeFormToolFactory;
 import edu.utexas.cycic.tools.RegionCorralViewToolFactory;
 import edu.utexas.cycic.tools.RegionViewToolFactory;
 import edu.utexas.cycic.tools.SimulationInfoToolFactory;
+import edu.utexas.cycic.tools.TimelineDisplayToolFactory;
 
 public class ToolsLibrary {
 
@@ -49,6 +50,7 @@ public class ToolsLibrary {
 		new RegionViewToolFactory(),
 		new SimulationInfoToolFactory(),
 		new RegionCorralViewToolFactory(),
-		new FacilitySorterToolFactory()
+		new FacilitySorterToolFactory(),
+		new TimelineDisplayToolFactory()
 	};
 }
