@@ -43,24 +43,19 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.mo.closure.v1.Closure;
-
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.ToolData;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
-import edu.utah.sci.cyclist.core.tools.TableTool;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
@@ -79,9 +74,6 @@ public class CyclistController {
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
-	private EventHandler<CyclistDropEvent> _handleToolDropped;
-	private ListChangeListener<String> _handleMainWsSimulationsChanged;
-	private ChangeListener<String> _handleMainWsSelectedSimulationChanged;
 	
 	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
 	
@@ -133,7 +125,7 @@ public class CyclistController {
 		
 		//Simulation panel
 		SimulationPresenter sip = new SimulationPresenter(_eventBus);
-		sip.setSimIds(_model.getSimulationIds());
+		sip.setSimIds(_model.getSimulations());
 		sip.setSimPanel(screen.getSimulationPanel());
 		
 		
@@ -149,9 +141,6 @@ public class CyclistController {
 		
 		_presenter = new WorkspacePresenter(_eventBus);
 		_presenter.setView(workspace);
-		_screen.getWorkSpace().setOnToolDrop(_handleToolDropped);
-		_screen.getWorkSpace().simulations().addListener(_handleMainWsSimulationsChanged);
-		_screen.getWorkSpace().lastChosenSimulation().addListener(_handleMainWsSelectedSimulationChanged);
 		
 		// do something?
 		//selectWorkspace();
@@ -248,7 +237,7 @@ public class CyclistController {
 							for(Simulation simulation:newList.getList()){
 								if(!_model.simExists(simulation)){
 									Simulation sim = simulation.clone();
-									_model.getSimulationIds().add(sim);
+									_model.getSimulations().add(sim);
 									_dirtyFlag = true;
 								}
 							}
@@ -317,6 +306,7 @@ public class CyclistController {
 					readSimulationsTables();
 				}
 				_model.setLastSelectedSimulation(newVal);
+				_dirtyFlag = true;
 			}
 		});
 		
@@ -346,24 +336,6 @@ public class CyclistController {
 			}
 		};
 		
-		_handleMainWsSimulationsChanged = new ListChangeListener<String>() {
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends String> newList) {
-				if(newList != null)
-				{
-					_model.getMainWorkspaceSelectedSimulations().clear();
-					_model.getMainWorkspaceSelectedSimulations().addAll(newList.getList());
-				}
-			}
-		};
-		
-		_handleMainWsSelectedSimulationChanged = new ChangeListener<String>() {
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String prev, String selected) {
-				_model.setlastWslSelectedSimulation(selected);
-			}
-		};
-		
 		for (MenuItem item : _screen.getViewMenu().getItems()) {
 			item.setOnAction(viewAction);
 		}
@@ -372,7 +344,7 @@ public class CyclistController {
 	
 	private void quit() {
 		// TODO: check is we need to save  
-		if(_dirtyFlag){
+		if(_dirtyFlag || _presenter.getDirtyFlag()){
 			SaveWsWizard wizard = new SaveWsWizard();
 			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
 			selection.addListener(new ChangeListener<Boolean>(){
@@ -418,12 +390,12 @@ public class CyclistController {
 		}
 		
 		//Save the last selected simulation
-		if(_model.getLastSelectedSimulation() != null && _model.getSimulationIds().size() >0){
+		if(_model.getLastSelectedSimulation() != null && _model.getSimulations().size() >0){
 			IMemento selectedSim = memento.createChild("LastSelectedSimulation");
 			selectedSim.putString("simulation-id", _model.getLastSelectedSimulation().getSimulationId());
 		}
 		//Save the Simulations
-		for(Simulation simulation: _model.getSimulationIds()){
+		for(Simulation simulation: _model.getSimulations()){
 			simulation.save(memento.createChild("Simulation"));
 		}
 		
@@ -431,13 +403,7 @@ public class CyclistController {
 		
 		//First save the main workspace
 		IMemento mainWs = memento.createChild("mainWorkSpace");
-		saveMainWorkspace(mainWs);
-		
-		for(ToolData tool : _model.getTools()){
-			tool.save(mainWs.createChild("Tool"));
-		}
-		
-		
+		saveMainScreen(mainWs);
 			
 		
 		try {
@@ -461,7 +427,7 @@ public class CyclistController {
 		//Clear the previous data
 		_model.getSources().clear();
 		_model.getTables().clear();
-		_model.getSimulationIds().clear();
+		_model.getSimulations().clear();
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
@@ -496,7 +462,7 @@ public class CyclistController {
 					for(IMemento simulation:simulations){
 						Simulation sim = new Simulation();
 						sim.restore(simulation,_model.getSources());
-						_model.getSimulationIds().add(sim);
+						_model.getSimulations().add(sim);
 					}
 					
 					//Find if there is last selected simulation
@@ -511,18 +477,11 @@ public class CyclistController {
 					
 					//Read the main workspace
 					IMemento mainWs = memento.getChild("mainWorkSpace");
-					loadMainWorkspace(mainWs);
+					loadMainScreen(mainWs);
 					
-					IMemento[] tools = mainWs.getChildren("Tool");
-					for(IMemento tool:tools){
-						ToolData toolData = new ToolData();
-						toolData.restore(tool);
-						Table table = null;
-						if(toolData.getTool().getClass().equals(TableTool.class)){
-							table = findTable(toolData.getTableName(), toolData.getTableDatasource());
-						}
-						_screen.getWorkSpace().showLoadedTool(toolData, table);
-						_model.getTools().add(toolData);
+					IMemento toolsRoot = memento.getChild("Tools");
+					if(toolsRoot != null){
+						_presenter.restore(toolsRoot,_model);
 					}
 					
 					
@@ -569,48 +528,6 @@ public class CyclistController {
 		}
 	}
 	
-	
-	/*
-	 * Finds a table in the Model tables list according to it's name and data source.
-	 * @param : tableName
-	 * @param:  datasource
-	 * @return: Table. The table instance if found, null otherwise.
-	 */
-	private Table findTable(String tableName, String dataSource){
-		if(tableName != null)
-		{
-			for(Table tbl:_model.getTables()){
-				if(tbl.getName().equals(tableName)){
-					if(dataSource!=null && !dataSource.isEmpty()){
-						if(tbl.getDataSource() != null && tbl.getDataSource().getUID().equals(dataSource)){
-							return tbl;
-						}
-					} else if((dataSource == null || dataSource.isEmpty()) && tbl.getDataSource() == null){
-						return tbl;
-					}
-				}
-			}
-		}
-		return null;
-	}
-	
-	/*
-	 * Finds a simulation in the Model simulations list according to it's alias.
-	 * @param : simulationAlias
-	 * @return: Simulation. The simulation instance if found, null otherwise.
-	 */
-	private Simulation findSimulation(String simulationAlias){
-		if(simulationAlias != null && !simulationAlias.isEmpty())
-		{
-			for(Simulation sim:_model.getSimulationIds()){
-				if(sim.getAlias().equals(simulationAlias)){
-						return sim;
-				}
-			}
-		}
-		return null;
-	}
-	
 	/*
 	 * Gets the path of the last chosen work directory.
 	 * If not available - return the default work directory
@@ -623,31 +540,22 @@ public class CyclistController {
 	}
 	
 	/*
-	 * Saves the data of the main window:
-	 * 1. size and location
-	 * 2. dropped simulations and the last chosen simulation
+	 * Saves the data of the main window: size and location
 	 * @param IMemento mainWs 
 	 */
-	private void saveMainWorkspace(IMemento mainWs){
+	private void saveMainScreen(IMemento mainWs){
 		Stage stage = (Stage)_screen.getParent().getScene().getWindow();
 		mainWs.putString("x", Double.toString(stage.getX()));
 		mainWs.putString("y", Double.toString(stage.getY()));
 		mainWs.putString("width", Double.toString(stage.getWidth()));
 		mainWs.putString("height", Double.toString(stage.getHeight()));
-		mainWs.putString("selectedSim", _model.getlastWslSelectedSimulation());
-		for(String simulation : _model.getMainWorkspaceSelectedSimulations()){
-			IMemento simMemento = mainWs.createChild("WsSimulation");
-			simMemento.putString("alias", simulation);
-		}
 	}
 	
 	/*
-	 * Restores the data of the main window:
-	 * 1. size and location.
-	 * 2. dropped simulations and the last chosen simulation
+	 * Restores the data of the main window:size and location.
 	 * @param IMemento mainWs
 	 */
-	private void loadMainWorkspace(IMemento mainWs){
+	private void loadMainScreen(IMemento mainWs){
 		double width = Double.parseDouble(mainWs.getString("width"));
 		double height = Double.parseDouble(mainWs.getString("height"));
 		double x = Double.parseDouble(mainWs.getString("x"));
@@ -657,28 +565,6 @@ public class CyclistController {
 		stage.setHeight(height);
 		stage.setX(x);
 		stage.setY(y);
-		
-		Simulation lastActiveSim = null;
-		String lastActiveSimAlias = mainWs.getString("selectedSim");
-		Closure.V1<Simulation> simulationDropAction = _screen.getWorkSpace().getOnSimulationDrop();
-		
-		IMemento[] simulations = mainWs.getChildren("WsSimulation");
-		for(IMemento simulation: simulations){
-			String alias = simulation.getString("alias");
-			Simulation sim = findSimulation(alias);
-			//Add the last active simulation at the end, so it would become the active simulation again.
-			if(sim != null && !alias.equals(lastActiveSimAlias) ){
-				if(simulationDropAction != null){
-					simulationDropAction.call(sim);
-				}
-			}else if(alias.equals(lastActiveSimAlias)){
-				lastActiveSim = sim;
-			}
-		}
-		//Add the last active simulation at the end.
-		if(lastActiveSim != null && simulationDropAction != null){
-			simulationDropAction.call(lastActiveSim);
-		}
 	}
 	
 	

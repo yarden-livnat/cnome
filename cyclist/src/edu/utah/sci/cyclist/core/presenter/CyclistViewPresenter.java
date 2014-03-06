@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.core.presenter;
 
 import java.util.List;
-
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
@@ -13,6 +12,7 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistSimulationNotificatio
 import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.model.Filter;
+import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
@@ -21,6 +21,7 @@ import edu.utah.sci.cyclist.core.ui.View;
 public class CyclistViewPresenter extends ViewPresenter {
 	private SelectionModel<Table> _selectionModelTbl = new SelectionModel<Table>();
 	private SelectionModel<Simulation> _selectionModelSim = new SelectionModel<Simulation>();
+	private Boolean _dirtyFlag = false;
 	
 	public CyclistViewPresenter(EventBus bus) {
 		super(bus);
@@ -41,6 +42,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 				@Override
 				public void call(Table table, Boolean active) {
 					getSelectionModelTbl().itemSelected(table, active);
+					_dirtyFlag = true;
 				}
 			});
 			
@@ -49,6 +51,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 				@Override
 				public void call(Simulation simulation, Boolean active) {
 					getSelectionModelSim().itemSelected(simulation, active);
+					_dirtyFlag = true;
 				}
 			});
 			
@@ -78,6 +81,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 					@Override
 					public void call(Simulation simulation) {
 						addLocalSimulation(simulation);
+						_dirtyFlag = true;
 					}
 				});
 			}
@@ -87,6 +91,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 					@Override
 					public void call(Simulation simulation) {
 						getSelectionModelSim().removeItem(simulation);
+						_dirtyFlag = true;
 					}
 				});
 			}
@@ -117,12 +122,14 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
 		getView().addTable(table, remote, false);
 		getSelectionModelTbl().addItem(table, remote, active, remoteActive);
+		_dirtyFlag = true;
 	}
 	
 	
 	public void removeTable(Table table) {
 		getSelectionModelTbl().removeItem(table);
 		getView().removeTable(table);
+		_dirtyFlag = true;
 	}
 	
 	public List<SelectionModel<Table>.Entry> getTableRecords() {
@@ -161,15 +168,121 @@ public class CyclistViewPresenter extends ViewPresenter {
 		}
 	}
 	
+	/**
+	 * Saves the data specific to cyclic view presenter 
+	 * (E.g tables and simulations which have been dropped to the view header)
+	 * And the last selected table and simulation.
+	 */
 	@Override
 	public void save(IMemento memento) {
 		super.save(memento);
+		//Tables
+		for (SelectionModel<Table>.Entry entry : getTableRecords()){
+			//Saves only the local (non-remote) tables
+			if(!entry.remote){
+				Table table = entry.item;
+				IMemento tableMemento = memento.createChild("Table");
+				tableMemento.putString("name", table.getName());
+				String dataSourceUid = table.getDataSource()!=null?table.getDataSource().getUID():"";
+				tableMemento.putString("dataSource", dataSourceUid);
+				//tableMemento.putString("uid", table.getProperty("uid").toString());
+			}
+			if(_selectionModelTbl.getSelected() != null){
+				memento.putString("selectedTable", _selectionModelTbl.getSelected().getName() );
+				String selectedTblDs = 
+						(_selectionModelTbl.getSelected().getDataSource()!=null) ? _selectionModelTbl.getSelected().getDataSource().getUID():"";
+				memento.putString("selectedTblDs", selectedTblDs);
+			}
+		}
+		//Simulations
+		for (SelectionModel<Simulation>.Entry entry : getSimulationRecords()){
+			//Saves only the local (non-remote) tables
+			if(!entry.remote){
+				Simulation simulation = entry.item;
+				IMemento simMemento = memento.createChild("Simulation");
+				simMemento.putString("id", simulation.getSimulationId());
+			}
+			if(_selectionModelSim.getSelected() != null){
+				memento.putString("selectedSim", _selectionModelSim.getSelected().getSimulationId());
+			}
+		}
+		//All the changes are saved - dirty flag should be reset.
+		_dirtyFlag = false;
 	}
 	
+	/**
+	 * Restores the data specific to cyclic view presenter 
+	 * (E.g tables and simulations which have been dropped to the view header)
+	 * And the last selected table and simulation.
+	 */
 	@Override
-	public void restore(IMemento memento) {	
-		super.restore(memento);
+	public void restore(IMemento memento, Model model) {	
+		super.restore(memento, model);
+		
+		//Restore the non-remote tables
+		IMemento[] tables = memento.getChildren("Table");
+		for(IMemento table : tables){
+			String name = table.getString("name");
+			String dataSource = table.getString("dataSource");
+			Table tbl = findTable(name, dataSource, model.getTables());
+			if(tbl != null){
+				addTable(tbl, false, false, false);
+			}
+			
+		}
+		//Retore the selected table.
+		String selectedName = memento.getString("selectedTable");
+		String selectedTblDs = memento.getString("selectedTblDs");
+		for (SelectionModel<Table>.Entry entry : getTableRecords()){
+			Table table = entry.item;
+			if(table.getName().equals(selectedName)){
+				if(table.getDataSource() == null || table.getDataSource().getUID().equals(selectedTblDs)){
+					getSelectionModelTbl().itemSelected(table, true);
+				}
+			}
+		}
+		
+		//Restore the non-remote simulations
+		IMemento[] simulations = memento.getChildren("Simulation");
+		for(IMemento simulation : simulations){
+			String id = simulation.getString("id");
+			Simulation sim = findSimulation(id, model.getSimulations());
+			if(sim != null){
+				getView().addSimulation(sim, false /*remote*/, false /* active */);
+				getSelectionModelSim().addItem(sim, false /*remote*/, false /*active*/, false /*remoteActive*/);
+			}
+		}
+		
+		//Restore the selected simulation.
+		String selectedSim = memento.getString("selectedSim");
+		for (SelectionModel<Simulation>.Entry entry : getSimulationRecords()){
+			Simulation simulation = entry.item;
+			if(simulation.getSimulationId().equals(selectedSim)){
+				getSelectionModelSim().itemSelected(simulation, true);
+			}
+		}
+		
+		//If the dirty flag was set during restore - reset it back to false.
+		_dirtyFlag = false;
 	}
+	
+	/*
+	 * Returns the dirty flag - which signals whether or not there were changes in the view.
+	 * @return Boolean - the flag value.
+	 */
+	@Override
+	public Boolean getDirtyFlag(){
+		return _dirtyFlag;
+	}
+	
+	/*
+	 * Sets the dirty flag - which signals whether or not there were changes in the view.
+	 * @param Boolean - the flag value.
+	 */
+	public void setDirtyFlag(Boolean flag){
+		_dirtyFlag = flag;
+	}
+	
 	
 	/*
 	 * For each view under the workspace - add the remote simulations inherited from the workspace.
@@ -271,5 +384,47 @@ public class CyclistViewPresenter extends ViewPresenter {
 				getSelectionModelSim().selectItem(notification.getSimulation(), false);
 			}
 		});
+	}
+	
+	/*
+	 * Finds a table in a given tables list list which matches the specified name and data source.
+	 * @param: String tableName
+	 * @param: String dataSource
+	 * @param: List<Table> tablesList - the tables list to look for the specified table.
+	 */
+	private Table findTable(String tableName, String dataSource, List<Table> tablesList){
+		if(tableName != null)
+		{
+			for(Table tbl:tablesList){
+				if(tbl.getName().equals(tableName)){
+					if(dataSource!=null && !dataSource.isEmpty()){
+						if(tbl.getDataSource() != null && tbl.getDataSource().getUID().equals(dataSource)){
+							return tbl;
+						}
+					//Find a table without a data source.
+					} else if((dataSource == null || dataSource.isEmpty()) && tbl.getDataSource() == null){
+						return tbl;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	/*
+	 * Finds a simulation in a given simulations list, which matches the specified simulation id.
+	 * @param : simulationAlias
+	 * @return: Simulation. The simulation instance if found, null otherwise.
+	 */
+	private Simulation findSimulation(String simulationId, List<Simulation> simulationsList){
+		if(simulationId != null && !simulationId.isEmpty())
+		{
+			for(Simulation sim: simulationsList){
+				if(sim.getSimulationId().equals(simulationId)){
+						return sim;
+				}
+			}
+		}
+		return null;
 	}
 }

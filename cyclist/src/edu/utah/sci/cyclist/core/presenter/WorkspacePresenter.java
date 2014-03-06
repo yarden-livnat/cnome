@@ -25,13 +25,15 @@ package edu.utah.sci.cyclist.core.presenter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.geometry.Point2D;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
@@ -44,6 +46,7 @@ import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.core.model.Filter;
+import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.tools.Tool;
@@ -57,6 +60,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 
 	private List<ViewPresenter> _presenters = new ArrayList<>();
 	private List<FilterPresenter> _filterPresenters = new ArrayList<>();
+	ObservableList<Tool> _tools = FXCollections.observableArrayList();
 	private EventBus _localBus;
 
 	public WorkspacePresenter(EventBus bus/*, Model model*/) {
@@ -74,6 +78,15 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		super.setView(view);
 
 		if (view instanceof Workspace) {
+			
+			_tools.addListener(new ListChangeListener<Tool>(){
+				@Override
+				public void onChanged(ListChangeListener.Change<? extends Tool> newList) {
+					setDirtyFlag(true);
+				}
+			});
+			
+			
 			Workspace workspace = getWorkspace();
 
 
@@ -182,30 +195,49 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	@Override
 	public void save(IMemento memento) {
 		super.save(memento);
-		for (Node node :getWorkspace().getPane().getChildren()){
+		for (Tool tool : _tools){
 			IMemento toolMemento = memento.createChild("Tool");
-			toolMemento.putString("class", node.getClass().getName());
-			toolMemento.putString("x", Double.toString(node.getTranslateX()));
-			toolMemento.putString("y", Double.toString(node.getTranslateY()));
-			toolMemento.putString("width", Double.toString(((Region)node).getPrefWidth()));
-			toolMemento.putString("height", Double.toString(((Region)node).getPrefHeight()));
+			toolMemento.putString("name", tool.getName());
+			toolMemento.putString("id", tool.getId());
+			toolMemento.putString("x", Double.toString(((Node)tool.getView()).getLayoutX()));
+			toolMemento.putString("y", Double.toString(((Node)tool.getView()).getLayoutY()));
+			toolMemento.putString("width", Double.toString(((Region)tool.getView()).getPrefWidth()));
+			toolMemento.putString("height", Double.toString(((Region)tool.getView()).getPrefHeight()));
+			tool.getPresenter(_localBus).save(toolMemento);
+			//Reset the dirty flag after save.
+			setDirtyFlag(false);
 		}
 	}
 	
 	@Override
-	public void restore(IMemento memento) {	
-		super.restore(memento);
-			
-			//Get the location
-			Double x = Double.parseDouble(memento.getString("x"));
-			Double y = Double.parseDouble(memento.getString("y"));
-			
-			Point2D point = new Point2D(x,y);
-			
-			double width = Double.parseDouble(memento.getString("width"));
-			double height = Double.parseDouble(memento.getString("height"));
-			
-			String className = memento.getString("class");
+	public void restore(IMemento memento, Model model) {	
+		super.restore(memento, model);
+			if(memento != null){
+				IMemento[] tools = memento.getChildren("Tool");
+				for(IMemento toolMemento : tools)
+				{
+					//Get the location
+					Double x = Double.parseDouble(toolMemento.getString("x"));
+					Double y = Double.parseDouble(toolMemento.getString("y"));
+					
+					double width = Double.parseDouble(toolMemento.getString("width"));
+					double height = Double.parseDouble(toolMemento.getString("height"));
+					
+					String toolName = toolMemento.getString("name");
+					
+					try {
+						Tool tool = ToolsLibrary.createTool(toolName);
+						addTool(tool,x,y);
+						((Region)tool.getView()).setPrefSize(width, height);
+						tool.getPresenter(_localBus).restore(toolMemento, model);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}	
+				}
+			}
+			//Reset the dirty flag after restore.
+			setDirtyFlag(false);
 	}
 
 	private Presenter addTool(Tool tool, double x, double y) {
@@ -226,7 +258,9 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				p.addRemoteFilters(getWorkspace().remoteFilters());
 			}
 		}
-
+		
+		_tools.add(tool);
+	
 		return presenter;
 	}
 
@@ -280,6 +314,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 						break;
 					}
 				}
+				removeTool(id);
 
 			}
 		});
@@ -495,6 +530,20 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	 private EventBus getLocalEventBus() {
 		 return _localBus;
 	 }
+	 
+	 /*
+	  * Removes a tool from the tools list according to its presenter id.
+	  * @parameter: String presenterId. 
+	  */
+	 private void removeTool(String presenterId){
+		 for(Tool tool : _tools){
+			 if(tool.getPresenter(_localBus).getId().equals(presenterId)){
+				 _tools.remove(tool);
+				 break;
+				 
+			 }
+		 }
+	 }
 
 	 /* 
 	  * Calls the local event bus to remove all the handlers of the specified target.
@@ -507,5 +556,23 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	 public void addLocalNotificationHandler(String type, CyclistNotificationHandler handler) {
 		 _localBus.addHandler(type, getId(), handler);
 	 }
+	 
+	 /*
+	 * Returns the dirty flag - which signals whether or not there were changes in the view.
+	 * @return Boolean - the flag value.
+	 */
+	 @Override
+	 public Boolean getDirtyFlag(){
+		if(super.getDirtyFlag()){
+			return true;
+		}else{
+			for(Tool tool: _tools){
+				if(tool.getPresenter(_localBus).getDirtyFlag()){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 }

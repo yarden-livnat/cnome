@@ -29,6 +29,7 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.core.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
+import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.ui.View;
 
 public class ViewPresenter extends PresenterBase{
@@ -73,7 +74,14 @@ public class ViewPresenter extends PresenterBase{
 	public void save(IMemento memento) {	
 	}
 	
-	public void restore(IMemento memento) {	
+	public void restore(IMemento memento, Model model) {	
+	}
+	
+	public Boolean getDirtyFlag(){
+		return false;
+	}
+	
+	public void setDirtyFlag(Boolean flag){
 	}
 	
 }

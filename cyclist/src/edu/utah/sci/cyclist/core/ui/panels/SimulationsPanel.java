@@ -346,6 +346,7 @@ public class SimulationsPanel extends TitledPanel  {
 	            content.putImage(entry.title.snapshot(snapParams, null)); 
 				
 				db.setContent(content);
+				_simulationProperty.set(entry.simulation);
 			}
 		});	
 		
