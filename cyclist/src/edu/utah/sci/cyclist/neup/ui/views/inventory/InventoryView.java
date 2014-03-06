@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javafx.application.Platform;
+import javafx.animation.Animation;
+import javafx.animation.RotateTransition;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -24,6 +25,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Configuration;
@@ -116,7 +118,7 @@ public class InventoryView extends CyclistViewBase {
 		vbox.getStyleClass().add("ctrl");
 		
 		vbox.getChildren().addAll(
-			buildChartCtrl(),
+//			buildChartCtrl(),
 			buildAgentCtrl(),
 			buildNuclideCtrl()
 		);
@@ -173,14 +175,9 @@ public class InventoryView extends CyclistViewBase {
 			}
 			AgentInfo info = new AgentInfo(field, value);	
 			AgentEntry entry = new AgentEntry(info);
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					addAgent(entry);	
-				}
-			});
 			
-			
+			addAgent(entry);	
+
 			panel.getContent().getChildren().add(entry);
 //			entry.setOnClose(item->{
 //				_agents.remove(item.info);
@@ -217,45 +214,31 @@ public class InventoryView extends CyclistViewBase {
 
 	private void addAgent(final AgentEntry entry) {
 		_agents.add(entry.info);
-//		entry.info.inventory.addListener((Observable o)->{
-//			ObservableList<Inventory> list = entry.info.inventory.get();
-//			System.out.println("add agent inventory changed:"+list+"  "+(list != null ? list.size() : ""));
-////			if (entry.info.inventory.get() != null)
-////				addToChart(entry.info);
-//		});
+		entry.info.inventory.addListener((Observable o)->{
+			addToChart(entry.info);
+		});
 
-		fetchInventory(entry);
-//		.addListener((Observable o)->{
-//			ObjectProperty<ObservableList<Inventory>> list = (ObjectProperty<ObservableList<Inventory>>) o;
-//			System.out.println("inventory changed:"+list+"  "+(list != null ? list.get().size() : ""));
-//			if (list.get() != null) {
-//				entry.info.inventory.set(list.get());
-//				addToChart(entry.info);
-//			}
-//		});
+		entry.info.inventory.bind(fetchInventory(entry));
 	}
 	
-	
 	private ReadOnlyObjectProperty<ObservableList<Inventory>>  fetchInventory(AgentEntry entry) {
+		final String field = entry.info.field;
+		final String value = entry.info.value;
+		
 		Task<ObservableList<Inventory>> task = new Task<ObservableList<Inventory>>() {
 			@Override
 			protected ObservableList<Inventory> call() throws Exception {
-				System.out.println("running? "+isRunning());
-				ObservableList<Inventory> list = _simProxy.getInventory(entry.info.field, entry.info.value);
-				System.out.println("received "+list.size()+" items");
+				ObservableList<Inventory> list = _simProxy.getInventory(field, value);
 				return list;
 			}	
 		};
-
+		
 		entry.setTask(task);
 		
 		Thread thread = new Thread(task);
 		thread.setDaemon(true);
-		thread.start();
-		
-		
-//		entry.info.inventory.bind(task.valueProperty());
-		
+		thread.start();	
+				
 		return task.valueProperty();
 	}
 	
@@ -341,6 +324,7 @@ public class InventoryView extends CyclistViewBase {
 	class Status extends Pane {
 		private Task<?> _task = null;
 		private Node _icon;
+		private RotateTransition _animation; 
 		
 		
 		public Status() {
@@ -348,24 +332,36 @@ public class InventoryView extends CyclistViewBase {
 			_icon = GlyphRegistry.get(AwesomeIcon.REFRESH, "10px");
 			getChildren().add(_icon);
 			
+			_animation = new RotateTransition(Duration.millis(10000), _icon);
+			_animation.setFromAngle(0);
+			_animation.setByAngle(3600);
+			_animation.setCycleCount(Animation.INDEFINITE);
 			setVisible(false);
-			setOnMouseClicked(e->System.out.println("cancel task: "+_task.cancel()));
+			setOnMouseClicked(e->_task.cancel());
 		}
 		
 		public void setTask(Task<?> task) {
 			if (_task != null) {
 				_task.cancel();
-//				visibleProperty().unbind();
+				_animation.stop();
+				visibleProperty().unbind();
 			}
 			
 			_task = task;
-			if (task != null) {
-				System.out.println("task running="+task.isRunning());
+			if (_task != null) {
 				visibleProperty().bind(task.runningProperty());
-//				setVisible(true);
+				_task.runningProperty().addListener(e->{
+					if (_task.isRunning()) {
+						_animation.play();
+					} else {
+						_animation.stop();
+					}
+				});
+
 				task.setOnFailed(e->{
 					System.out.println("Task failed:"+_task.getMessage());
 					setTask(null);
+
 					// TODO: save the error msg;
 				});
 			}
