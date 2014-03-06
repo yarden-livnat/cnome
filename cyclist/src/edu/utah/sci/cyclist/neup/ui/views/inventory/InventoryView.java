@@ -8,14 +8,15 @@ import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -58,6 +59,7 @@ public class InventoryView extends CyclistViewBase {
 		public String value;
 		public Color color;
 		public ListProperty<Inventory> inventory = new SimpleListProperty<Inventory>();
+		public ObjectProperty<Task<?>> taskProperty = new SimpleObjectProperty<>();
 		
 		public AgentInfo(String field, String value) {
 			this.field = field;
@@ -67,6 +69,14 @@ public class InventoryView extends CyclistViewBase {
 		
 		public String getName() {
 			return field+"="+value;
+		}
+		
+		public void setTask(Task<?> task) {
+			taskProperty.set(task);
+		}
+		
+		public Task<?> getTask() {
+			return taskProperty.get();
 		}
 	}
 	
@@ -92,6 +102,10 @@ public class InventoryView extends CyclistViewBase {
 
 		_simProxy = _currentSim == null ?  null : new SimulationProxy(_currentSim);
 		
+		for (AgentInfo info : _agents) {
+			info.inventory.unbind();
+			info.inventory.bind(fetchInventory(info));
+		}
 		//TODO: re-fetch inventories 
 	}
 	
@@ -145,7 +159,7 @@ public class InventoryView extends CyclistViewBase {
 	
 	public Node buildAgentCtrl() {
 		
-		TitledPanel panel = new TitledPanel("Agents", GlyphRegistry.get(AwesomeIcon.BUILDING));
+		TitledPanel panel = new TitledPanel("Agents");
 		
 		Node pane = panel.getPane();
 		panel.setFillWidth(true);
@@ -175,14 +189,13 @@ public class InventoryView extends CyclistViewBase {
 			}
 			AgentInfo info = new AgentInfo(field, value);	
 			AgentEntry entry = new AgentEntry(info);
-			
-			addAgent(entry);	
-
 			panel.getContent().getChildren().add(entry);
-//			entry.setOnClose(item->{
-//				_agents.remove(item.info);
-//				panel.getContent().getChildren().remove(item);
-//			});
+			entry.setOnClose(item->{
+				_agents.remove(item.info);
+				panel.getContent().getChildren().remove(item);
+			});
+			
+			addAgent(info);	
 			e.setDropCompleted(true);
 			e.consume();
 		});
@@ -212,28 +225,24 @@ public class InventoryView extends CyclistViewBase {
 	}
 	
 
-	private void addAgent(final AgentEntry entry) {
-		_agents.add(entry.info);
-		entry.info.inventory.addListener((Observable o)->{
-			addToChart(entry.info);
-		});
-
-		entry.info.inventory.bind(fetchInventory(entry));
+	private void addAgent(final AgentInfo info) {
+		_agents.add(info);
+		info.inventory.addListener((Observable o)->addToChart(info));
+		info.inventory.bind(fetchInventory(info));
 	}
 	
-	private ReadOnlyObjectProperty<ObservableList<Inventory>>  fetchInventory(AgentEntry entry) {
-		final String field = entry.info.field;
-		final String value = entry.info.value;
+	private ReadOnlyObjectProperty<ObservableList<Inventory>>  fetchInventory(AgentInfo info) {
+		final String field = info.field;
+		final String value = info.value;
 		
 		Task<ObservableList<Inventory>> task = new Task<ObservableList<Inventory>>() {
 			@Override
 			protected ObservableList<Inventory> call() throws Exception {
-				ObservableList<Inventory> list = _simProxy.getInventory(field, value);
-				return list;
+				return _simProxy.getInventory(field, value);
 			}	
 		};
 		
-		entry.setTask(task);
+		info.setTask(task);
 		
 		Thread thread = new Thread(task);
 		thread.setDaemon(true);
@@ -292,6 +301,7 @@ public class InventoryView extends CyclistViewBase {
 			_status = new Status();
 			getChildren().addAll(text, _status, button);
 			
+			info.taskProperty.addListener(o->_status.setTask(info.getTask()));
 			setOnMouseEntered(e->{
 				button.setVisible(true);
 				getStyleClass().add("hover");

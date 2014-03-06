@@ -13,6 +13,10 @@ public class TitledPanel extends VBox {
 	
 	private ScrollPane _pane;
 	
+	public TitledPanel(String title) {
+		this(title, null);
+	}
+	
 	public TitledPanel(String title, Node glyph) {
 		build(title, glyph);
 	}
@@ -23,7 +27,10 @@ public class TitledPanel extends VBox {
 		setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		
 		// header
-		Label label = new Label(title, glyph);
+		Label label = new Label(title);
+		if (glyph != null)
+			label.setGraphic(glyph);
+		
 		label.getStyleClass().add("label");
 		
 		_header = new HBox();
