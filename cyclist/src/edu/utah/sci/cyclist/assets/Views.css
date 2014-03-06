@@ -95,6 +95,59 @@
 	-fx-padding: 0;
 }
 
+.inventory {
+}
+
+.inventory .ctrl {
+	-fx-spacing:8px;
+}
+
+.inventory .title {
+	-fx-font-size: 11px;
+ 	-fx-font-weight: bold;
+ }
+ 
+ .inventory .agent {
+ 	-fx-spacing:3px;
+ }
+ 
+ .inventory .agent.hover {
+ 	-fx-background-color: #e0e0e0;
+ }
+ 
+ 
+.inventory .chart {
+	-fx-background-color:  transparent;
+   	-fx-alternative-row-fill-visible: false;
+	-fx-vertical-grid-lines-visible: false;   	   	
+	-fx-horizontal-grid-lines-visible: false;  
+	-fx-vertical-zero-line-visible: false;
+	-fx-horizontal-zero-line-visible: true;
+}
+
+.inventory .nuclide {
+ 	-fx-alignment:baseline-right;
+	-fx-padding: 2px;
+	-fx-max-width: 50px;
+	-fx-max-height: 18px;
+	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;
+  	-fx-background-insets: 1, 2;
+    -fx-background-radius: 2, 2;	
+}
+
+.inventory .nuclide.changing {
+	-fx-background-color: -fx-text-box-border, #fafafa;
+  	-fx-background-insets: 1, 2;
+    -fx-background-radius: 2, 2;
+}
+
+ .inventory .nuclide:focused {
+	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;	
+    -fx-background-insets: 1, 2;
+    -fx-background-radius: 2, 2;
+}
+
+
 /*
  * flow
  */

@@ -1,13 +1,9 @@
-package edu.utah.sci.cyclist.neup.ui.views.flow;
+package edu.utah.sci.cyclist.neup.ui.views.inventory;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -15,25 +11,16 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.core.event.Pair;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
-import edu.utah.sci.cyclist.neup.model.Range;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
-public class FlowChart extends VBox {
+public class InventoryChart extends VBox {
 	private static final String NET_CHART_LABEL = "Net Flow";
 	private static final String COMMULATIVE_CHART_LABEL = "Commulative Flow";
 	
 	private HBox _header;
-	private StackPane _stack;
-	private Pane _glass;
-//	private Label _popup;
-	private Rectangle _rec;
 	
 	private LineChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
@@ -44,8 +31,7 @@ public class FlowChart extends VBox {
 	private int _upperBound;
 	private boolean _updating = false;
 	
-	private Map<InventoryEntry, ChartInfo> _info = new HashMap<>();
-	private ObjectProperty<Range<Integer>> _timeRangeProperty = new SimpleObjectProperty<>();
+	private Map<AgentInfo, ChartInfo> _info = new HashMap<>();
 	
 	public class ChartInfo {
 		public Label title;
@@ -55,14 +41,11 @@ public class FlowChart extends VBox {
 		public int last;
 	}
 	
-	public FlowChart() {
+	public InventoryChart() {
 		super();
 		build();
 	}
 	
-	public ObjectProperty<Range<Integer>> timeRangeProperty() {
-		return _timeRangeProperty;
-	}
 	
 	private void selectChartType(String value) {
 		_type = value;
@@ -77,7 +60,7 @@ public class FlowChart extends VBox {
 		updateAll();
 	}
 	
-	public void add(InventoryEntry entry, String title, Collection<Pair<Integer, Double>> values) {
+	public void add(AgentInfo entry, String title, Collection<Pair<Integer, Double>> values) {
 		if (values.size() == 0) return;
 		
 		int last = 0;
@@ -88,7 +71,7 @@ public class FlowChart extends VBox {
 			_upperBound = last;
 		}
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
-		Color c = entry.getColor();
+		Color c = entry.color;
 		String style = c.toString().replace("0x", "#");
 		series.nodeProperty().addListener(o->{
 			series.getNode().setStyle("-fx-stroke:"+style);
@@ -113,10 +96,9 @@ public class FlowChart extends VBox {
 		
 		_header.getChildren().add(info.title);
 		_chart.getData().add(series);
-		_rec.setVisible(true);
 	}
 	
-	public void remove(InventoryEntry entry) {
+	public void remove(AgentInfo entry) {
 		ChartInfo info = _info.remove(entry);
 		if (info == null) {
 			return;
@@ -133,9 +115,6 @@ public class FlowChart extends VBox {
 		if (s != _scale) {
 			updateScale(s);
 			updateYAxis();
-		}
-		if (_info.isEmpty()) {
-			_rec.setVisible(false);
 		}
 	}
 	
@@ -210,32 +189,17 @@ public class FlowChart extends VBox {
 			_header,
 			buildChart()
 		);
-		
-		addListeners();
 	}
 	
 	private void buildHeader() {
 		_header = new HBox();
 		_header.getStyleClass().add("infobar");
-
-		Label caret = new Label("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		
 		ChoiceBox<String> type = new ChoiceBox<>();
 		type.getStyleClass().add("choice");
 		type.getItems().addAll(COMMULATIVE_CHART_LABEL, NET_CHART_LABEL);
 	
-		_header.getChildren().addAll(caret, type);
-		
-		caret.setOnMouseClicked(e->{
-			_opened = !_opened;
-			if (_opened) {
-				caret.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
-			} else {
-				caret.setGraphic(GlyphRegistry.get(AwesomeIcon.CARET_RIGHT));			
-			}
-			_stack.setVisible(_opened);
-			_stack.setManaged(_opened);
-		});
+		_header.getChildren().addAll(type);
 		
 		type.valueProperty().addListener(e->{
 			selectChartType(type.getValue());
@@ -257,115 +221,8 @@ public class FlowChart extends VBox {
 		_chart = new LineChart<>(_xAxis, _yAxis);
 		_chart.getStyleClass().add("chart");
 		_chart.setCreateSymbols(false);
-		
-		_rec = new Rectangle();
-		_rec.getStyleClass().add("range");
-		_rec.yProperty().bind(_yAxis.layoutYProperty().add(5));
-		_rec.heightProperty().bind(_yAxis.heightProperty());
-		_rec.setVisible(false);
-		
-//		_popup = new Label();
-//		_popup.getStyleClass().add("popup");
-//		_popup.setVisible(false);
-//		_popup.layoutXProperty().bind(_fromLine.startXProperty().add(10));
-		_glass = new Pane();
-		_glass.getChildren().addAll(/*_fromLine*/_rec/*, _popup*/);
-		
-		_xAxis.layoutBoundsProperty().addListener(e->{
-			updateRangeLater();		
-		});
-		
-		_xAxis.lowerBoundProperty().addListener(o->{
-			updateRangeLater();				
-		});
-		
-		_xAxis.upperBoundProperty().addListener(o->{
-			updateRangeLater();		
-		});
-		
-		_stack = new StackPane();
-		_stack.getChildren().addAll( _chart, _glass);
-		_stack.setStyle("-fx-pref-height: 100px");
-		
-//		VBox.setVgrow(_stack, Priority.ALWAYS);
-		return _stack;
+
+		return _chart;
 	}
 	
-	// HACK? : 
-	// The info regarding the x and y Axes does not seem to be correct when their layout just changed.
-	// Need to wait until it is updated.
-	private void updateRangeLater() {
-		Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-            	updateRange();
-            }
-		});
-	}
-	
-	private void updateRange() {
-		Range<Integer> r = timeRangeProperty().get();
-		double t1 = r.from;
-		double t2 = r.to+1;
-		
-		double x1 = _xAxis.getDisplayPosition(t1);
-		double x2 = _xAxis.getDisplayPosition(t2);
-		
-		Point2D p1 = _glass.sceneToLocal(_xAxis.localToScene(x1, 0));
-		Point2D p2 = _glass.sceneToLocal(_xAxis.localToScene(x2, 0));
-		
-		_rec.setX(p1.getX());
-		_rec.setWidth(Math.max(2, p2.getX() - p1.getX()));
-	}
-	
-	double _mx;
-	double _offset;
-	double _right;
-	double _left;
-	
-	private void addListeners() {
-		_timeRangeProperty.addListener(o->{
-			if (_updating) return;
-			updateRange();
-		});
-		
-		_rec.setOnMousePressed(e->{
-			_mx = e.getX();
-			_offset = _xAxis.getDisplayPosition(_timeRangeProperty.get().from);
-			_left = _glass.sceneToLocal(_xAxis.localToScene(_xAxis.getDisplayPosition(0), 0)).getX();
-			_right = _glass.sceneToLocal(_xAxis.localToScene(_xAxis.getDisplayPosition(_upperBound), 0)).getX();
-		});
-		
-		_rec.setOnMouseDragged(e->{
-			double dx = e.getX() - _mx;
-			double p = _rec.getX()+dx;
-			if (p < _left) 
-				p = _left;
-			else if (p+_rec.getWidth() > _right)
-				p = _right - _rec.getWidth();
-		
-			_rec.setX(p);
-			_mx = e.getX(); 
-		});
-		
-		_rec.setOnMouseReleased(e->{
-			Range<Integer> r = _timeRangeProperty.get();
-			int dt = r.to - r.from+1;
-			Point2D p = _xAxis.sceneToLocal(_glass.localToScene(_rec.getX(), 0));
-			Number v = _xAxis.getValueForDisplay(p.getX());
-			int i = v.intValue();
-			i = Math.max(0, Math.min(_upperBound-dt, i));
-			// nudge rectangle to an integer boundry
-			double xi = _xAxis.getDisplayPosition(i);
-			Point2D p1 = _xAxis.localToScene(xi,0);
-			Point2D p2 = _glass.sceneToLocal(p1);
-			_rec.setX(p2.getX());
-			
-			Range<Integer> nr = new Range<>(i, i+r.to-r.from);
-			_updating = true;
-			_timeRangeProperty.set(nr);
-			_updating = false;
-		});
-	
-	}
 }

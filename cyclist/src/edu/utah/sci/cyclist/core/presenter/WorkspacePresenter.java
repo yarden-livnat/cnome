@@ -242,11 +242,16 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 
 	private Presenter addTool(Tool tool, double x, double y) {
 		ViewBase view = (ViewBase) tool.getView();
+		ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
+		
+		return addTool(view, presenter, x, y);
+	}
+	
+	private Presenter addTool(ViewBase view, ViewPresenter presenter, double x, double y) {
 		view.setLayoutX(x);
 		view.setLayoutY(y);
 		getWorkspace().addView(view);
 
-		ViewPresenter presenter = tool.getPresenter(getLocalEventBus());
 		if (presenter != null) {        
 			_presenters.add(presenter);
 			presenter.setView(view);   

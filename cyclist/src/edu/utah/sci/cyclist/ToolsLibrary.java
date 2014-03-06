@@ -51,12 +51,12 @@ public class ToolsLibrary {
 		new SimpleToolFactory("edu.utah.sci.cyclist.neup", 
 				"Flow", AwesomeIcon.RANDOM, 
 				"ui.views.flow.FlowView", 
-				"presenter.FlowPresenter"),	
+				"presenter.NEUPPresenter"),	
 		
-		new SimpleToolFactory("edu.utah.sci.cyclist", 
-				"Inventory", AwesomeIcon.RANDOM, 
-				"neup.ui.views.inventory.InventoryView", 
-				"core.presenter.CyclistViewPresenter"),
+		new SimpleToolFactory("edu.utah.sci.cyclist.neup", 
+				"Inventory", AwesomeIcon.BOOK, 
+				"ui.views.inventory.InventoryView", 
+				"presenter.NEUPPresenter"),
 		
 		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
 				"Workspace", AwesomeIcon.DESKTOP, 

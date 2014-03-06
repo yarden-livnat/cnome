@@ -121,6 +121,7 @@ public class SimulationProxy {
 		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
+		System.out.println("query: "+query);
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setString(1, _sim.getSimulationId());

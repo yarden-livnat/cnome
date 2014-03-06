@@ -8,14 +8,14 @@ import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.neup.model.Inventory;
 
-class FlowEntry {
+public class InventoryEntry {
 	private String _name;
 	private boolean _selected = false;
 	private ObservableList<Inventory> _inventory;
 	private List<FlowNode> _nodes = new ArrayList<>();
 	private Color _color;
 	
-	public FlowEntry(String name) {
+	public InventoryEntry(String name) {
 		this._name = name;
 		_color = Configuration.getInstance().getColor(name);
 	}
