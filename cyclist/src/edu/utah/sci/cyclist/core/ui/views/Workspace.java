@@ -34,16 +34,12 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.CyclistDropEvent;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.ToolData;
-import edu.utah.sci.cyclist.core.tools.TableTool;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
@@ -301,19 +297,6 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	
 	public void removePanel(TitledPanel panel) {
 		_filtersPane.remove(panel);
-	}
-	
-	/**
-	 * Gets a restored tool data and displays its view in the workspace.
-	 * @param: ToolData.
-	 */
-	public void showLoadedTool(ToolData toolData, Table table){
-		if(toolData.getTool().getClass().equals(TableTool.class) && toolData.getTableName() != null && table != null){
-			_onShowTable.call((TableTool)toolData.getTool(), table, toolData.getPoint().getX(), toolData.getPoint().getY());
-		}else{
-			_onToolDrop.call(toolData.getTool(), toolData.getPoint().getX(), toolData.getPoint().getY());
-		}
-		((Region)toolData.getTool().getView()).setPrefSize(toolData.getWidth(), toolData.getHeight());
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

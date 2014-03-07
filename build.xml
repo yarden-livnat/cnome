@@ -147,7 +147,6 @@
 		
 	<target name = "app" depends="dist">
 		
-		<mkdir dir="deploy" />
 		<!-- Need to use ${basedir} because somehow the ant task is calculating the directory differently -->
 		<fx:deploy
 			embedJNLP="true"

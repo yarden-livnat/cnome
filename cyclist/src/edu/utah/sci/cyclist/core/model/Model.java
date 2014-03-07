@@ -32,13 +32,9 @@ public class Model {
 	private ObservableList<Table> _tables = FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	private CyclistDatasource _currentSource;
-	private ObservableList<Simulation> _simulationIds = FXCollections.observableArrayList();
-	private ObservableList<ToolData> _toolsList = FXCollections.observableArrayList();
+	private ObservableList<Simulation> _simulations = FXCollections.observableArrayList();
 	private List<Table> _simulationTablesDef = new ArrayList<>();
 	private Simulation _lastPanelSelectedSimulation = null;
-	private String _lastWslSelectedSimulation = null;
-	private List<String> _mainWorkspaceSelectedSimulations = new ArrayList<>();
-	
 	/**
 	 * getTables
 	 * @return
@@ -67,12 +63,8 @@ public class Model {
 		_currentSource = source;
 	}
 
-	public ObservableList<Simulation> getSimulationIds() {
-		return _simulationIds;
-	}
-	
-	public ObservableList<ToolData> getTools() {
-		return _toolsList;
+	public ObservableList<Simulation> getSimulations() {
+		return _simulations;
 	}
 	
 	/**
@@ -82,7 +74,7 @@ public class Model {
 	 */
 	public Boolean simExists(Simulation simulation){
 		Boolean response = false;
-		for(Simulation sim: _simulationIds){
+		for(Simulation sim: _simulations){
 			if(sim.getSimulationId().equals(simulation.getSimulationId())){
 				response = true;
 				break;
@@ -101,18 +93,6 @@ public class Model {
 	
 	public void setLastSelectedSimulation(Simulation simulation){
 		_lastPanelSelectedSimulation = simulation;
-	}
-	
-	public List<String> getMainWorkspaceSelectedSimulations(){
-		return _mainWorkspaceSelectedSimulations;
-	}
-	
-	public void setlastWslSelectedSimulation(String simulation) {
-		_lastWslSelectedSimulation = simulation;
-	}
-	
-	public String getlastWslSelectedSimulation() {
-		return _lastWslSelectedSimulation;
 	}
 	
 }
