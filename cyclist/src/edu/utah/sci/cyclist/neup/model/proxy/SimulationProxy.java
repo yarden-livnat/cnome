@@ -137,4 +137,29 @@ public class SimulationProxy {
 		return FXCollections.observableArrayList(list);
 	}
 	
+	public List<Inventory> getInventory2(String type, String value) throws SQLException {
+		List<Inventory> list = new ArrayList<>();
+		
+		String query = String.format(INVENTORY_QUERY, type);
+		System.out.println("query: "+query);
+		try (Connection conn = _sim.getDataSource().getConnection()) {
+			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setString(1, _sim.getSimulationId());
+				stmt.setString(2, value);				
+
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next()) {
+					Inventory i = new Inventory();
+					i.time = rs.getInt(1);
+					i.nucid = rs.getInt(2);
+					i.amount = rs.getDouble(3);
+					list.add(i);
+				}
+			}
+		} finally {
+			_sim.getDataSource().releaseConnection();
+		}
+		
+		return list;
+	}
 }

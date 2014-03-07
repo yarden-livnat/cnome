@@ -117,7 +117,6 @@ public class InventoryChart extends VBox {
 	
 	private void updateScale(double value) {
 		_scale = value;
-		System.out.println("scale: "+_scale);
 		updateYAxis();
 		updateAll();
 	}

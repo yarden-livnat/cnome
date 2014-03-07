@@ -46,7 +46,7 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class CyclistViewBase extends ViewBase implements CyclistView {
-	static final Logger logger = LogManager.getLogger(CyclistViewBase.class.getName());
+	static final Logger log = LogManager.getLogger(CyclistViewBase.class.getName());
 	
 	class Info<T> {
 		public T item;
@@ -101,7 +101,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		super(toplevel);
 		getStyleClass().add("view");
 		
-		logger.info("New View");
 		_taskControl = new TaskControl();
 				
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.
