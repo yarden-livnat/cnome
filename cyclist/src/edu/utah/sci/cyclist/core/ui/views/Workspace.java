@@ -56,7 +56,7 @@ import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 public class Workspace extends CyclistViewBase implements CyclistView {
 	public static final String WORKSPACE_ID = "workspace";
 	
-	static final Logger logger = LogManager.getLogger(Workspace.class.getName());
+	static final Logger log = LogManager.getLogger(Workspace.class.getName());
 	
 	private Pane _pane;
 	
@@ -209,7 +209,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 							accept = true;
 						}
 					} catch (Exception e) {
-						logger.error("Can not create a TableView", e);
+						log.error("Can not create a TableView", e);
 					}
 					
 				} 
