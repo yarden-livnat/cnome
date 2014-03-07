@@ -18,7 +18,7 @@
 }
 
 .cyclist-panel .header {
-	-fx-background-color:  #f0f0f0;
+	-fx-background-color:  #e0e0e0;
 	-fx-font-weight: bold;
 	-fx-font-size:11;
 	-fx-padding: 0;
@@ -26,7 +26,7 @@
 }
 
 .cyclist-panel .pane {
-	-fx-background-color:  #ffffff;
+	/*-fx-background-color:  #ffffff;*/
 	-fx-fit-to-height: true;
 	-fx-border-color: #a0a0a0;
 	-fx-border-radius: 0 0 3 3;
@@ -66,6 +66,7 @@
 	-fx-background-color: #ffffff;
 	-fx-background-radius: 5;
 	/*-fx-effect: dropshadow( one-pass-box , rgba(0.8,0.8,0.8,0.4) , 2, 0.0 , 3 , 3 );*/
+	-fx-effect: dropshadow( gaussian , rgba(0.8,0.8,0.8,0.4) , 8, 0.0 , 3 , 3 );
 	-fx-border-color: #d0d0d0;
 	-fx-border-width: 2px;
 }
@@ -90,7 +91,7 @@
 }
 
 .drop-area {
-	-fx-background-color: e0e0e0;
+	-fx-background-color: #e0e0e0;
 	-fx-spacing: 2;
 	-fx-padding: 0;
 }
@@ -99,12 +100,31 @@
 }
 
 .inventory .ctrl {
+	-fx-padding: 3px;
 	-fx-spacing:8px;
+}
+
+.inventory .choice {
+	-fx-background-color: lightgray; 
+ 	-fx-border-color: gray;
+ 	-fx-border-width: 1;
+ 	-fx-border-radius: 3;
 }
 
 .inventory .title {
 	-fx-font-size: 11px;
  	-fx-font-weight: bold;
+ }
+
+.inventory .agents-panel .header {
+	-fx-background-color: #ffffff;
+ }
+  
+ .inventory .pane .viewport {
+ 	-fx-background-color:  #ffffff;
+ }
+  
+ .inventory .panel-vbox {
  }
  
  .inventory .agent {
@@ -505,6 +525,8 @@
 
 .simple-table-view {
 	-fx-background-color:-fx-control-inner-background;
+	-fx-pref-width: 450px;
+	-fx-pref-height: 200px; 
 }
 
 .simple-table-view:focused {

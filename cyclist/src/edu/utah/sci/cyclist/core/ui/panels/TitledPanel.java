@@ -41,11 +41,10 @@ public class TitledPanel extends VBox {
 		_pane = new ScrollPane();
 		_pane.getStyleClass().add("pane");
 		_pane.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
-		_pane.fitToWidthProperty();
+		_pane.setFitToWidth(true);
 		
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("panel-vbox");
-//		vbox.setPrefWidth(200);
 		vbox.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		vbox.setFillWidth(true);
 		_pane.setContent(vbox);

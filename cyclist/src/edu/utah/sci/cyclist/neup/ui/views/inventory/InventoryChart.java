@@ -8,33 +8,30 @@ import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.event.Pair;
+import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
 public class InventoryChart extends VBox {
-	private static final String NET_CHART_LABEL = "Net Flow";
-	private static final String COMMULATIVE_CHART_LABEL = "Commulative Flow";
-	
-	private HBox _header;
+
+	public enum ChartType {
+		INVENTORY, NET
+	}
 	
 	private LineChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
 	private NumberAxis _yAxis;
 	private double _scale = 1;
-	private boolean _opened = true;
-	private String _type;
+	private ChartType _type = ChartType.INVENTORY;
 	private int _upperBound;
-	private boolean _updating = false;
 	
 	private Map<AgentInfo, ChartInfo> _info = new HashMap<>();
 	
 	public class ChartInfo {
-		public Label title;
 		public Collection<Pair<Integer, Double>> values;
 		public XYChart.Series<Number, Number> series;
 		public double scale;
@@ -47,8 +44,8 @@ public class InventoryChart extends VBox {
 	}
 	
 	
-	private void selectChartType(String value) {
-		_type = value;
+	public void selectChartType(ChartType type) {
+		_type = type;
 		double s = 1;
 		for (ChartInfo info : _info.values()) {
 			s = Math.max(s, computeScale(info.values));
@@ -60,41 +57,36 @@ public class InventoryChart extends VBox {
 		updateAll();
 	}
 	
-	public void add(AgentInfo entry, String title, Collection<Pair<Integer, Double>> values) {
-		if (values.size() == 0) return;
+	public void add(AgentInfo entry) {
+		if (entry.series.size() == 0) return;
 		
 		int last = 0;
-		for (Pair<Integer, Double> p : values) {
+		for (Pair<Integer, Double> p : entry.series) {
 			last = Math.max(last, p.v1);
 		}
 		if (last > _upperBound) {
 			_upperBound = last;
 		}
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
-		Color c = entry.color;
-		String style = c.toString().replace("0x", "#");
+		String style = ColorUtil.toString(entry.color);
 		series.nodeProperty().addListener(o->{
 			series.getNode().setStyle("-fx-stroke:"+style);
 		});
 
-		double scale = computeScale(values); // relative to the current chart type
+		double scale = computeScale(entry.series); // relative to the current chart type
 		
 		if (scale > _scale) {
 			updateScale(scale);
 		}
-		updateSeries(series, values);
+		updateSeries(series, entry.series);
 
 		ChartInfo info = new ChartInfo();
-		info.values = values;
-		info.title = new Label(title);
-		info.title.setStyle("-fx-background-color:"+style);
-		info.title.getStyleClass().add("header");
+		info.values = entry.series;
 		info.series = series;
 		info.scale = scale;
 		info.last = last;
 		_info.put(entry, info);
 		
-		_header.getChildren().add(info.title);
 		_chart.getData().add(series);
 	}
 	
@@ -104,7 +96,6 @@ public class InventoryChart extends VBox {
 			return;
 		}
 				
-		_header.getChildren().remove(info.title);
 		_chart.getData().remove(info.series);
 		double s = 1;
 		_upperBound = 0;
@@ -142,7 +133,7 @@ public class InventoryChart extends VBox {
 	
 	private double computeScale(Collection<Pair<Integer, Double>> values) {
 		double max = 0;
-		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
+		if (_type == ChartType.INVENTORY) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {
 				sum += Math.abs(value.v2);
@@ -163,7 +154,7 @@ public class InventoryChart extends VBox {
 	private void updateSeries(XYChart.Series<Number, Number> series, Collection<Pair<Integer, Double>> values) {
 		series.getData().clear();
 
-		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
+		if (_type == ChartType.INVENTORY) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {
 				sum += value.v2/_scale;
@@ -171,8 +162,13 @@ public class InventoryChart extends VBox {
 			}
 		} else {
 			double prev = 0;
+			boolean first = true;
 			for (Pair<Integer, Double> value : values) {
 				double v = value.v2/_scale;
+				if (first) {
+					prev = v;
+					first = false;
+				}
 				series.getData().add(new XYChart.Data<Number, Number>(value.v1, v-prev));
 				prev = v;
 			}
@@ -182,32 +178,14 @@ public class InventoryChart extends VBox {
 			
 	private void build() {
 		getStyleClass().add("fchart");
-		
-		buildHeader();
-		
-		getChildren().addAll(
-			_header,
+	
+		getChildren().add(
 			buildChart()
 		);
-	}
-	
-	private void buildHeader() {
-		_header = new HBox();
-		_header.getStyleClass().add("infobar");
 		
-		ChoiceBox<String> type = new ChoiceBox<>();
-		type.getStyleClass().add("choice");
-		type.getItems().addAll(COMMULATIVE_CHART_LABEL, NET_CHART_LABEL);
-	
-		_header.getChildren().addAll(type);
-		
-		type.valueProperty().addListener(e->{
-			selectChartType(type.getValue());
-		});
-		
-		type.setValue(COMMULATIVE_CHART_LABEL);
-	}
-	
+		VBox.setVgrow(_chart, Priority.ALWAYS);
+		setFillWidth(true);
+	}	
 
 	private Node buildChart() {
 		_xAxis = new NumberAxis();
@@ -215,12 +193,13 @@ public class InventoryChart extends VBox {
 		_xAxis.setAnimated(false);
 		
 		_yAxis = new NumberAxis();
-		_yAxis.setLabel("Cummulative");
+		_yAxis.setLabel("Amount");
 		_yAxis.setAnimated(false);
 		
 		_chart = new LineChart<>(_xAxis, _yAxis);
 		_chart.getStyleClass().add("chart");
 		_chart.setCreateSymbols(false);
+		_chart.setLegendVisible(false);
 
 		return _chart;
 	}

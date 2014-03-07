@@ -82,7 +82,6 @@ public class SimpleTableView extends CyclistViewBase {
 		
 		_tableView = new TableView<TableRow>();
 		_tableView.getStyleClass().add("simple-table-view");
-		_tableView.setPrefSize(450, 200);
 		_tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		_tableView.getSelectionModel().setCellSelectionEnabled(true);
 		setContent(_tableView);

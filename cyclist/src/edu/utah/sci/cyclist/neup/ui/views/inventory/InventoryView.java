@@ -17,6 +17,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -33,18 +34,18 @@ import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
+import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartType;
 
 public class InventoryView extends CyclistViewBase {
 	public static final String ID = "inventory-view";
 	public static final String TITLE = "Inventory";
-
-	private static final String NET_CHART_LABEL = "Net";
-	private static final String COMMULATIVE_CHART_LABEL = "Commulative";
 	
 	private ObservableList<AgentInfo> _agents = FXCollections.observableArrayList();
 	private List<String> _acceptableFields = new ArrayList<>();
@@ -59,6 +60,7 @@ public class InventoryView extends CyclistViewBase {
 		public String value;
 		public Color color;
 		public ListProperty<Inventory> inventory = new SimpleListProperty<Inventory>();
+		public List<Pair<Integer, Double>> series = null;
 		public ObjectProperty<Task<?>> taskProperty = new SimpleObjectProperty<>();
 		
 		public AgentInfo(String field, String value) {
@@ -86,8 +88,8 @@ public class InventoryView extends CyclistViewBase {
 		build();
 	}
 	
-	private void selectChartType(String value) {
-	
+	private void selectChartType(ChartType type) {
+		_chart.selectChartType(type);
 	}
 	
 	@Override
@@ -121,9 +123,9 @@ public class InventoryView extends CyclistViewBase {
 		getStyleClass().add("inventory");
 	
 		BorderPane pane = new BorderPane();
-		pane.setLeft(buildCtrl());
 		pane.setCenter(buildChart());
-		
+		pane.setLeft(buildCtrl());
+
 		setContent(pane);
 	}
 	
@@ -132,7 +134,7 @@ public class InventoryView extends CyclistViewBase {
 		vbox.getStyleClass().add("ctrl");
 		
 		vbox.getChildren().addAll(
-//			buildChartCtrl(),
+			buildChartCtrl(),
 			buildAgentCtrl(),
 			buildNuclideCtrl()
 		);
@@ -144,14 +146,14 @@ public class InventoryView extends CyclistViewBase {
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("ctrl");
 		
-		ChoiceBox<String> type = new ChoiceBox<>();
+		ChoiceBox<ChartType> type = new ChoiceBox<>();
 		type.getStyleClass().add("choice");
-		type.getItems().addAll(COMMULATIVE_CHART_LABEL, NET_CHART_LABEL);
+		type.getItems().addAll(ChartType.values());
 		type.valueProperty().addListener(e->{
 			selectChartType(type.getValue());
 		});
 		
-		type.setValue(COMMULATIVE_CHART_LABEL);
+		type.setValue(ChartType.INVENTORY);
 		
 		vbox.getChildren().add(type);
 		return vbox;
@@ -160,6 +162,7 @@ public class InventoryView extends CyclistViewBase {
 	public Node buildAgentCtrl() {
 		
 		TitledPanel panel = new TitledPanel("Agents");
+		panel.getStyleClass().add("agents-panel");
 		
 		Node pane = panel.getPane();
 		panel.setFillWidth(true);
@@ -193,6 +196,7 @@ public class InventoryView extends CyclistViewBase {
 			entry.setOnClose(item->{
 				_agents.remove(item.info);
 				panel.getContent().getChildren().remove(item);
+				_chart.remove(item.info);
 			});
 			
 			addAgent(info);	
@@ -272,13 +276,12 @@ public class InventoryView extends CyclistViewBase {
 		if (current != null) {
 			series.add(current);
 		}
-
-		_chart.add(info, info.getName(), series);
+		info.series = series;
+		_chart.add(info);
 	}
 	
 	private Node buildChart() {
-		_chart = new InventoryChart();
-		
+		_chart = new InventoryChart();	
 		return _chart;
 	}
 	
@@ -293,13 +296,14 @@ public class InventoryView extends CyclistViewBase {
 			this.info = info;
 			
 			getStyleClass().add("agent");
-			Text text = new Text(info.value);
+			Label text = new Label(info.value);
+			text.setStyle("-fx-background-color:"+ColorUtil.toString(info.color));
 			
 			Node button = GlyphRegistry.get(AwesomeIcon.TIMES, "10px");
 			button.setVisible(false);
 			
 			_status = new Status();
-			getChildren().addAll(text, _status, button);
+			getChildren().addAll(text, new Spring(), _status, button);
 			
 			info.taskProperty.addListener(o->_status.setTask(info.getTask()));
 			setOnMouseEntered(e->{
@@ -312,13 +316,23 @@ public class InventoryView extends CyclistViewBase {
 				getStyleClass().remove("hover");
 			});
 			
+			setOnMouseClicked(e->{
+				text.setDisable(!text.isDisable());
+				if (text.isDisable()) {
+					_chart.remove(info);
+				} else {
+					_chart.add(info);
+				}
+				
+			});
+			
 			button.setOnMouseClicked(e->{
 				if (_onClose != null) {
 					_onClose.accept(this);
 				}
 			});
 			
-			HBox.setHgrow(this, Priority.ALWAYS);
+			HBox.setHgrow(text, Priority.ALWAYS);
 		}
 		
 		public void setTask(Task<?> task) {
