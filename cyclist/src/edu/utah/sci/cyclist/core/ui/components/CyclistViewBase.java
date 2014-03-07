@@ -26,6 +26,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -44,6 +46,7 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class CyclistViewBase extends ViewBase implements CyclistView {
+	static final Logger logger = LogManager.getLogger(CyclistViewBase.class.getName());
 	
 	class Info<T> {
 		public T item;
@@ -97,7 +100,8 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	public CyclistViewBase(boolean toplevel) {
 		super(toplevel);
 		getStyleClass().add("view");
-
+		
+		logger.info("New View");
 		_taskControl = new TaskControl();
 				
 		//Sets for the drop area all the possible drag and drop sources and their accepted transfer modes.

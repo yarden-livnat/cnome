@@ -2,8 +2,7 @@ package edu.utah.sci.cyclist.core.ui.components;
 
 
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
+import javafx.scene.control.TextArea;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
@@ -11,8 +10,8 @@ import org.apache.log4j.spi.ErrorHandler;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LoggingEvent;
 
-public class Console extends Pane {
-	private Text _text;
+public class Console extends ScrollPane {
+	private TextArea _text;
 	
 	public Console() {
 		super();
@@ -21,17 +20,14 @@ public class Console extends Pane {
 	}
 	
 	private void init() {
-//		LogManager.getLogManager().getLogger(Logger.GLOBAL_LOGGER_NAME).setLevel(Level.FINE);
-//		Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-//		logger.addHandler(new Handler());
 		Logger.getRootLogger().addAppender(new CyclistAppender());
 	}
 	private void build() {
-		_text = new Text("Ready");
-		ScrollPane sp = new ScrollPane(_text);
-		sp.setFitToWidth(true);
-		
-		getChildren().add(sp);
+		getStyleClass().add("console");
+		setFitToWidth(true);
+		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
+		_text = new TextArea();
+		setContent(_text);
 	}
 	
 	class CyclistAppender implements Appender {
@@ -57,7 +53,9 @@ public class Console extends Pane {
 
 		@Override
 		public void doAppend(LoggingEvent event) {
-			_text.setText(_text.getText()+"\n"+event.getMessage());			
+			StringBuilder builder = new StringBuilder();
+			builder.append(_text.getText()).append(event.getMessage()).append("\n");
+			_text.setText(builder.toString());			
 		}
 
 		@Override

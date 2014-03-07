@@ -57,6 +57,10 @@
 	-fx-padding: 5;
 }
 
+.console .viewport {
+ 	-fx-background-color:  #ffffff;
+ }
+ 
 /* 
  * View
  */
@@ -134,7 +138,6 @@
  .inventory .agent.hover {
  	-fx-background-color: #e0e0e0;
  }
- 
  
 .inventory .chart {
 	-fx-background-color:  transparent;

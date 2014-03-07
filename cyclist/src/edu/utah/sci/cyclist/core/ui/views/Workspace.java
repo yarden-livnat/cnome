@@ -34,8 +34,9 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.ToolsLibrary;
@@ -53,15 +54,15 @@ import edu.utah.sci.cyclist.core.ui.components.WorkspacePanelArea;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 
 public class Workspace extends CyclistViewBase implements CyclistView {
-
 	public static final String WORKSPACE_ID = "workspace";
+	
+	static final Logger logger = LogManager.getLogger(Workspace.class.getName());
 	
 	private Pane _pane;
 	
 	private WorkspacePanelArea _filtersPane;
 	ScrollBar _wb;
 	ScrollBar _hb;
-	private Text _statusPane;
 	private double _savedDivider = 0.9;
 	
 	private ViewBase _maximizedView = null;
@@ -115,41 +116,44 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		
 		InfinitPane ipane = new InfinitPane();
 		_pane = ipane.getPane();
+		_pane.getStyleClass().add("workspace-pane");
 		
+		Console console = new Console();
+		
+		// arrange console bellow the infinite workspace
+		SplitPane sp1 = new SplitPane();
+		sp1.setOrientation(Orientation.VERTICAL);
+		sp1.setDividerPosition(0, 0.9);
+		sp1.getItems().addAll(ipane, console);
+
+		SplitPane.setResizableWithParent(ipane, true);
+		SplitPane.setResizableWithParent(console, false);
+
+		// arrange filters to the right
 		_filtersPane = new WorkspacePanelArea();
-		
-		final SplitPane splitPane = new SplitPane();
-		splitPane.setId("hiddenSplitter");
-		splitPane.setOrientation(Orientation.HORIZONTAL);
-		splitPane.getItems().addAll(ipane, _filtersPane);
-		splitPane.setDividerPosition(0, 1);
+	
+		final SplitPane sp2 = new SplitPane();
+		sp2.setId("hiddenSplitter");
+		sp2.setOrientation(Orientation.HORIZONTAL);
+		sp2.getItems().addAll(sp1, _filtersPane);
+		sp2.setDividerPosition(0, 1);
 		SplitPane.setResizableWithParent(ipane, true);
 		SplitPane.setResizableWithParent(_filtersPane, false);
 		
 		_filtersPane.visibleProperty().addListener((o, p, visible)->{
-			System.out.println("filtersPane visibility:"+visible);
 			if (visible) {
-				splitPane.setDividerPosition(0, _savedDivider);
+				sp2.setDividerPosition(0, _savedDivider);
 			} else {
-				_savedDivider = splitPane.getDividerPositions()[0];
-				splitPane.setDividerPosition(0, 1);
+				_savedDivider = sp2.getDividerPositions()[0];
+				sp2.setDividerPosition(0, 1);
 			}
 		});
-		
-//		addBar(_pathLabel);
-		
-//		BorderPane borderPane = new BorderPane();
 
-		Console console = new Console();
-		
-		SplitPane sp2 = new SplitPane();
-		sp2.setOrientation(Orientation.VERTICAL);
-		sp2.getItems().addAll(splitPane, console);
-		SplitPane.setResizableWithParent(splitPane, true);
-		SplitPane.setResizableWithParent(console, false);
-		sp2.setDividerPosition(0, 0.9);
-		_pane.getStyleClass().add("workspace-pane");
 		setContent(sp2);
+		
+		/*
+		 *  set up listeners
+		 */
 		
 		_pane.widthProperty().addListener(e->{
 			if (_maximizedView != null) {
@@ -178,7 +182,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		});	
 		
 		setOnDragDropped(event->{
-			boolean status = false;
+			boolean accept = false;
 			DnD.LocalClipboard clipboard = getLocalClipboard();
 			if (event.getGestureSource() != this) {
 				if ( clipboard.hasContent(DnD.TOOL_FORMAT)) {
@@ -190,7 +194,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 							getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP, tool, null, p.getX(),p.getY()));
 						}
 					}
-					status = true;
+					accept = true;
 				} else if (clipboard.hasContent(DnD.TABLE_FORMAT)) {
 					Table table = clipboard.get(DnD.TABLE_FORMAT, Table.class);
 					Tool tool;
@@ -202,11 +206,10 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 							if(getOnToolDrop() != null){
 								getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.DROP_DATASOURCE, tool, table, p.getX(), p.getY()));
 							}
-							status = true;
+							accept = true;
 						}
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Can not create a TableView", e);
 					}
 					
 				} 
@@ -216,8 +219,8 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 //						status = true;
 //					}
 			}
-			if (status) {
-				event.setDropCompleted(status);
+			if (accept) {
+				event.setDropCompleted(accept);
 				event.consume();
 			}
 		});
