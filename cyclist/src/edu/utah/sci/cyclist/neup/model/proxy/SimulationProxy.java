@@ -51,14 +51,14 @@ public class SimulationProxy {
 		_sim = sim;
 	}
 	
-	public ObservableList<Facility> getFacilities() {
+	public ObservableList<Facility> getFacilities() throws SQLException {
 		if (_facilities == null) {
 			_facilities = fetchFacilities();
 		}
 		return _facilities;
 	}
 	
-	public ObservableList<Facility> fetchFacilities() {
+	public ObservableList<Facility> fetchFacilities() throws SQLException {
 		List<Facility> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
@@ -72,9 +72,6 @@ public class SimulationProxy {
 					list.add(f);
 				}
 			}		
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}
@@ -82,7 +79,7 @@ public class SimulationProxy {
 		return FXCollections.observableList(list);
 	}
 	
-	public ObservableList<Transaction> getTransactions(String type, String value, Range<Integer> timerange, boolean forward) {
+	public ObservableList<Transaction> getTransactions(String type, String value, Range<Integer> timerange, boolean forward) throws SQLException {
 		List<Transaction> list = new ArrayList<>();
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
@@ -106,9 +103,6 @@ public class SimulationProxy {
 					list.add(tr);
 				}
 			}		
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}
@@ -117,7 +111,7 @@ public class SimulationProxy {
 		return  FXCollections.observableList(list);
 	}
 	
-	public ObservableList<Inventory> getInventory(String type, String value) {
+	public ObservableList<Inventory> getInventory(String type, String value) throws SQLException {
 		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
@@ -136,9 +130,6 @@ public class SimulationProxy {
 					list.add(i);
 				}
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}

@@ -21,6 +21,10 @@
     -fx-text-fill: #808080; 
 }
 
+.tooltip {
+	-fx-background-color:#f0f0f0;
+	-fx-text-fill:black;
+}
 
 /*
  * HiddenSpliter

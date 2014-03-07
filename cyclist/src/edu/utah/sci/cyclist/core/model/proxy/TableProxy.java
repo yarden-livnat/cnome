@@ -24,54 +24,49 @@ public class TableProxy {
 		_table = table;
 	}
 	
-	public ObservableList<TableRow> getRows(final int n) {
+	public ObservableList<TableRow> getRows(final int n) throws SQLException {
 		CyclistDatasource ds = _table.getDataSource();
 		return getRows(ds, n);
 	}
 	
-	public ObservableList<TableRow> getRows(CyclistDatasource ds, final int n) {
+	public ObservableList<TableRow> getRows(CyclistDatasource ds, final int n) throws SQLException {
 		return getRows(ds, n, false);
 	}
 	
-	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final int n, boolean force) {
+	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final int n, boolean force) throws SQLException {
 		final CyclistDatasource ds = (!force && _table.getDataSource() != null) ?  _table.getDataSource(): ds1;
 	
 		List<TableRow> rows = new ArrayList<>();
-		try {
-			Connection conn = ds.getConnection();
-			String query = String.format(GET_ROWS_QUERY, _table.getName());
-			PreparedStatement stmt = conn.prepareStatement(query);
-			stmt.setInt(1, n);
-			
-			ResultSet rs = stmt.executeQuery();
-			ResultSetMetaData rmd = rs.getMetaData();
-			
-			int cols = rmd.getColumnCount();
-			while (rs.next()) {
-				TableRow row = new TableRow(cols);
-				for (int i=0; i<cols; i++) {
-					row.value[i] = rs.getObject(i+1);
-				}
-				rows.add(row);
+		Connection conn = ds.getConnection();
+		String query = String.format(GET_ROWS_QUERY, _table.getName());
+		PreparedStatement stmt = conn.prepareStatement(query);
+		stmt.setInt(1, n);
+		
+		ResultSet rs = stmt.executeQuery();
+		ResultSetMetaData rmd = rs.getMetaData();
+		
+		int cols = rmd.getColumnCount();
+		while (rs.next()) {
+			TableRow row = new TableRow(cols);
+			for (int i=0; i<cols; i++) {
+				row.value[i] = rs.getObject(i+1);
 			}
-		}catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			rows.add(row);
 		}
 		
 		return FXCollections.observableList(rows);
 	}
 	
-	public ObservableList<TableRow> getRows(String query, int n) {
+	public ObservableList<TableRow> getRows(String query, int n) throws SQLException {
 		CyclistDatasource ds = _table.getDataSource();
 		return getRows(ds, query, n);
 	}
 	
-	public ObservableList<TableRow> getRows(CyclistDatasource ds, String query, int n) {
+	public ObservableList<TableRow> getRows(CyclistDatasource ds, String query, int n) throws SQLException {
 		return getRows(ds, query, n, false);
 	}
 	
-	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final String query, final int n, boolean force) {
+	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final String query, final int n, boolean force) throws SQLException {
 		final CyclistDatasource ds = (!force && _table.getDataSource() != null) ?  _table.getDataSource(): ds1;
 	
 		List<TableRow> rows = new ArrayList<>();
@@ -88,9 +83,9 @@ public class TableProxy {
 				}
 				rows.add(row);
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		} finally {
 			ds.releaseConnection();
 		}

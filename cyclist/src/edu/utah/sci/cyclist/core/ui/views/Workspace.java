@@ -31,10 +31,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
 import org.mo.closure.v1.Closure;
 
@@ -47,6 +51,7 @@ import edu.utah.sci.cyclist.core.tools.TableTool;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.ui.components.Console;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.InfinitPane;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
@@ -62,7 +67,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	private WorkspacePanelArea _filtersPane;
 	ScrollBar _wb;
 	ScrollBar _hb;
-//	private Pane _statusPane;
+	private Text _statusPane;
 	private double _savedDivider = 0.9;
 	
 	private ViewBase _maximizedView = null;
@@ -141,13 +146,16 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		
 //		BorderPane borderPane = new BorderPane();
 
-//		_statusPane = new HBox();	
-//		borderPane.setRight(_filtersPane);
-//		borderPane.setBottom(_statusPane);
-//		borderPane.setCenter(_pane);
+		Console console = new Console();
 		
+		SplitPane sp2 = new SplitPane();
+		sp2.setOrientation(Orientation.VERTICAL);
+		sp2.getItems().addAll(splitPane, console);
+		SplitPane.setResizableWithParent(splitPane, true);
+		SplitPane.setResizableWithParent(console, false);
+		sp2.setDividerPosition(0, 0.9);
 		_pane.getStyleClass().add("workspace-pane");
-		setContent(splitPane);
+		setContent(sp2);
 		
 		_pane.widthProperty().addListener(e->{
 			if (_maximizedView != null) {
