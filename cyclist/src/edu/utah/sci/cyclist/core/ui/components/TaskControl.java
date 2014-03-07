@@ -1,5 +1,8 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
@@ -14,7 +17,8 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class TaskControl extends HBox {
-
+//	public static Logger logger = Logger.getLogger(TaskControl.class.getName());
+	static final Logger logger = LogManager.getLogger(TaskControl.class.getName());
 	private ObjectProperty<Task<?>> _taskProperty = new SimpleObjectProperty<>();
 	private Task<?> _task;
 	private ProgressBar _indicator;
@@ -50,6 +54,9 @@ public class TaskControl extends HBox {
 				public void handle(WorkerStateEvent event) {
 					_status.setVisible(true);
 					_status.setManaged(true);
+					String error = _task.getException().getLocalizedMessage();	
+					_msg.setText(error.substring(0, error.indexOf("\n")));
+					logger.warn("Error:"+_task.getException().getLocalizedMessage());
 				}
 			});
 					
@@ -60,7 +67,8 @@ public class TaskControl extends HBox {
 				}
 			});
 		
-			_msg.textProperty().bind(_task.messageProperty());
+//			_msg.setText("test");
+//			_msg.textProperty().bind(_task.messageProperty());
 		}
 		
 	}
