@@ -5,6 +5,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 
 import org.apache.log4j.Appender;
+import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.ErrorHandler;
 import org.apache.log4j.spi.Filter;
@@ -22,6 +23,7 @@ public class Console extends ScrollPane {
 	private void init() {
 		Logger.getRootLogger().addAppender(new CyclistAppender());
 	}
+	
 	private void build() {
 		getStyleClass().add("console");
 		setFitToWidth(true);
@@ -36,7 +38,7 @@ public class Console extends ScrollPane {
 		}
 
 		@Override
-		public void addFilter(Filter arg0) {
+		public void addFilter(Filter filter) {
 			System.out.println("addFilter");
 			
 		}
@@ -71,13 +73,13 @@ public class Console extends ScrollPane {
 		}
 
 		@Override
-		public void setErrorHandler(ErrorHandler arg0) {
+		public void setErrorHandler(ErrorHandler handler) {
 			System.out.println("setErrorHandler");
 			
 		}
 
 		@Override
-		public void setLayout(org.apache.log4j.Layout arg0) {
+		public void setLayout(Layout layout) {
 			System.out.println("setLayout");
 			
 		}
@@ -88,13 +90,13 @@ public class Console extends ScrollPane {
 		}
 
 		@Override
-		public org.apache.log4j.spi.Filter getFilter() {
+		public Filter getFilter() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public org.apache.log4j.Layout getLayout() {
+		public Layout getLayout() {
 			// TODO Auto-generated method stub
 			return null;
 		}

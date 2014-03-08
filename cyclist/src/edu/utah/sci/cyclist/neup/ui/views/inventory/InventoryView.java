@@ -10,6 +10,7 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import javafx.animation.Animation;
+import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
@@ -37,8 +38,6 @@ import javafx.util.Duration;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-
-import com.sun.xml.internal.bind.v2.runtime.output.ForkXmlOutput;
 
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -71,53 +70,17 @@ public class InventoryView extends CyclistViewBase {
 	
 	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
-	
-	
+		
 	private InventoryChart _chart;
 	
-	class AgentInfo {
-		public String field;
-		public String value;
-		public Color color;
-		public ListProperty<Inventory> inventory = new SimpleListProperty<>();
-		public FilteredList<Inventory> filteredInventory; 
-		
-		public List<Pair<Integer, Double>> series = null;
-		public ObjectProperty<Task<?>> taskProperty = new SimpleObjectProperty<>();
-		
-		public AgentInfo(String field, String value) {
-			this.field = field;
-			this.value = value;
-			color = Configuration.getInstance().getColor(getName());
-			
-			inventory.set(FXCollections.observableArrayList());
-			filteredInventory= new FilteredList<>(inventory.get());
-			filteredInventory.predicateProperty().bind(_currentNuclideFilterProperty);
-			inventory.addListener((Observable o)->System.out.println("inventory changed"));
-			filteredInventory.addListener((Observable o)->System.out.println("filtered inventory changed"));
-		}
-		
-		public String getName() {
-			return field+"="+value;
-		}
-		
-		public void setTask(Task<?> task) {
-			taskProperty.set(task);
-		}
-		
-		public Task<?> getTask() {
-			return taskProperty.get();
-		}
-	}
 	
+	/**
+	 * Constructor
+	 */
 	public InventoryView() {
 		super();
 		init();
 		build();
-	}
-	
-	private void selectChartType(ChartType type) {
-		_chart.selectChartType(type);
 	}
 	
 	@Override
@@ -129,12 +92,11 @@ public class InventoryView extends CyclistViewBase {
 		}
 		
 		_currentSim = active? sim : null;
-
 		_simProxy = _currentSim == null ?  null : new SimulationProxy(_currentSim);
 		
 		for (AgentInfo info : _agents) {
 			info.inventory.unbind();
-			info.inventory.bind(fetchInventory(info));
+			info.inventory.bind(fetchInventory(info)); 
 		}
 	}
 	
@@ -147,14 +109,18 @@ public class InventoryView extends CyclistViewBase {
 		// default no-op filter
 		_currentNuclideFilterProperty.set(inventory->true);
 		
+		_nuclideFilters.put(" ", i->true);
 		for (Entry<String, IntPredicate> entry :  NuclideFiltersLibrary.getInstance().getFilters().entrySet())  {
 			_nuclideFilters.put(entry.getKey(), entry.getValue());
 			_nuclideFilterNames.add(entry.getKey());
 		}
 	}
 	
+	private void selectChartType(ChartType type) {
+		_chart.selectChartType(type);
+	}
+	
 	private void selectNuclideFilter(String key) {
-		System.out.println("select filter:"+key);
 		IntPredicate p = _nuclideFilters.get(key);
 
 		if (p == null) {
@@ -168,7 +134,10 @@ public class InventoryView extends CyclistViewBase {
 	
 	private IntPredicate createNuclideFilter(String spec) {
 		// TODO: parse spec and create a real filter
-		return  i->i/100000 == 93;
+		
+		return  i->{
+			return i/10000000 == 92;
+		};
 	}
 	
 	
@@ -273,7 +242,7 @@ public class InventoryView extends CyclistViewBase {
 		
 		filters.setPromptText("filter");
 		filters.setEditable(true);
-		filters.getItems().addAll(_nuclideFilters.keySet());
+		filters.setItems(_nuclideFilterNames);
 		
 		filters.valueProperty().addListener(o->selectNuclideFilter(filters.getValue()));
 
@@ -288,9 +257,7 @@ public class InventoryView extends CyclistViewBase {
 
 	private void addAgent(final AgentInfo info) {
 		_agents.add(info);
-		info.inventory.addListener((Observable o)->addToChart(info));
-//		info.inventory.bind(fetchInventory(info));
-		fetchInventory(info.inventory, info);
+		info.inventory.bind(fetchInventory(info));
 	}
 	
 	private ReadOnlyObjectProperty<ObservableList<Inventory>>  fetchInventory(AgentInfo info) {
@@ -301,7 +268,6 @@ public class InventoryView extends CyclistViewBase {
 			@Override
 			protected ObservableList<Inventory> call() throws Exception {
 				ObservableList<Inventory> list = FXCollections.observableArrayList();
-				updateValue(list);
 				list.setAll(_simProxy.getInventory2(field, value));
 				return list;
 			}	
@@ -316,32 +282,11 @@ public class InventoryView extends CyclistViewBase {
 		return task.valueProperty();
 	}
 	
-	 
-	private void  fetchInventory(ObservableList<Inventory> list, AgentInfo info) {
-		final String field = info.field;
-		final String value = info.value;
-		
-		Task<Void> task = new Task<Void>() {
-			@Override
-			protected Void call() throws Exception {
-				list.setAll(_simProxy.getInventory2(field, value));
-				return null;
-			}	
-		};
-		
-		info.setTask(task);
-		
-		Thread thread = new Thread(task);
-		thread.setDaemon(true);
-		thread.start();	
-	}
-	
 	private void addToChart(AgentInfo info) {
 		List<Pair<Integer, Double>> series = new ArrayList<>();
 		Pair<Integer, Double> current =  null;
 		
-		// collect data. TODO: apply filters
-		for (Inventory i : info.inventory) {
+		for (Inventory i : info.filteredInventory) {
 			if (current == null || current.v1 != i.time) {
 				if (current != null) {
 					series.add(current);
@@ -365,6 +310,45 @@ public class InventoryView extends CyclistViewBase {
 		return _chart;
 	}
 	
+	class AgentInfo {
+		public String field;
+		public String value;
+		public Color color;
+		public ListProperty<Inventory> inventory = new SimpleListProperty<>();
+		public FilteredList<Inventory> filteredInventory; 
+		
+		public List<Pair<Integer, Double>> series = null;
+		public ObjectProperty<Task<?>> taskProperty = new SimpleObjectProperty<>();
+		
+		public AgentInfo(String field, String value) {
+			this.field = field;
+			this.value = value;
+			color = Configuration.getInstance().getColor(getName());
+			
+			inventory.addListener((Observable o)->{
+				if (inventory.get() != null) {
+					filteredInventory = new FilteredList<Inventory>(inventory.get());
+					filteredInventory.addListener((Observable e)->{
+						System.out.println("filtered inventory changed");
+						addToChart(this);
+					});
+					filteredInventory.predicateProperty().bind(_currentNuclideFilterProperty);			
+				}
+			});
+		}
+		
+		public String getName() {
+			return field+"="+value;
+		}
+		
+		public void setTask(Task<?> task) {
+			taskProperty.set(task);
+		}
+		
+		public Task<?> getTask() {
+			return taskProperty.get();
+		}
+	}
 	
 	class AgentEntry extends HBox {
 		public AgentInfo info;
@@ -436,10 +420,11 @@ public class InventoryView extends CyclistViewBase {
 			_icon = GlyphRegistry.get(AwesomeIcon.REFRESH, "10px");
 			getChildren().add(_icon);
 			
-			_animation = new RotateTransition(Duration.millis(100000), _icon);
+			_animation = new RotateTransition(Duration.millis(500), _icon);
 			_animation.setFromAngle(0);
-			_animation.setByAngle(36000);
+			_animation.setByAngle(360);
 			_animation.setCycleCount(Animation.INDEFINITE);
+			_animation.setInterpolator(Interpolator.LINEAR);
 			setVisible(false);
 			setOnMouseClicked(e->_task.cancel());
 		}
@@ -461,6 +446,7 @@ public class InventoryView extends CyclistViewBase {
 						log.info("Fetch invetory");
 					} else {
 						_animation.stop();
+						log.info("Fetch invetory completed");
 					}
 				});
 

@@ -29,7 +29,7 @@ public class InventoryChart extends VBox {
 	private ChartType _type = ChartType.INVENTORY;
 	private int _upperBound;
 	
-	private Map<AgentInfo, ChartInfo> _info = new HashMap<>();
+	private Map<AgentInfo, ChartInfo> _items = new HashMap<>();
 	
 	public class ChartInfo {
 		public Collection<Pair<Integer, Double>> values;
@@ -47,7 +47,7 @@ public class InventoryChart extends VBox {
 	public void selectChartType(ChartType type) {
 		_type = type;
 		double s = 1;
-		for (ChartInfo info : _info.values()) {
+		for (ChartInfo info : _items.values()) {
 			s = Math.max(s, computeScale(info.values));
 		}
 		if (s != _scale) {
@@ -58,6 +58,11 @@ public class InventoryChart extends VBox {
 	}
 	
 	public void add(AgentInfo entry) {
+		ChartInfo info = _items.remove(entry);
+		if (info != null) {
+			_chart.getData().remove(info.series);
+		}
+		
 		if (entry.series.size() == 0) return;
 		
 		int last = 0;
@@ -80,18 +85,20 @@ public class InventoryChart extends VBox {
 		}
 		updateSeries(series, entry.series);
 
-		ChartInfo info = new ChartInfo();
+		
+		info = _items.get(entry);
+		info = new ChartInfo();
+		_items.put(entry, info);
 		info.values = entry.series;
 		info.series = series;
 		info.scale = scale;
 		info.last = last;
-		_info.put(entry, info);
 		
 		_chart.getData().add(series);
 	}
 	
 	public void remove(AgentInfo entry) {
-		ChartInfo info = _info.remove(entry);
+		ChartInfo info = _items.remove(entry);
 		if (info == null) {
 			return;
 		}
@@ -99,7 +106,7 @@ public class InventoryChart extends VBox {
 		_chart.getData().remove(info.series);
 		double s = 1;
 		_upperBound = 0;
-		for (ChartInfo ci : _info.values()) {
+		for (ChartInfo ci : _items.values()) {
 			s = Math.max(ci.scale, s);
 			_upperBound = Math.max(_upperBound, ci.last);
 		}
@@ -110,7 +117,7 @@ public class InventoryChart extends VBox {
 	}
 	
 	private void updateAll() {
-		for (ChartInfo info : _info.values()) {
+		for (ChartInfo info : _items.values()) {
 			updateSeries(info.series, info.values);
 		}
 	}
