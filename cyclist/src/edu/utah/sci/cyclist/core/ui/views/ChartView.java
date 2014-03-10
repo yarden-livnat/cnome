@@ -56,11 +56,13 @@ import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Indicator;
+import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
@@ -94,7 +96,8 @@ public class ChartView extends CyclistViewBase {
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
 
 	private Closure.V0 _onDuplicate = null;
-
+	private Simulation _currentSim = null;
+	
 	private MapSpec _spec;
 
 	private BorderPane _pane;
@@ -205,6 +208,18 @@ public class ChartView extends CyclistViewBase {
 		fetchData();
 	}
 
+	@Override
+	public void selectSimulation(Simulation sim, boolean active) {
+		super.selectSimulation(sim, active);
+		
+		if (!active && sim != _currentSim) {
+			return; // ignore
+		}
+		
+		_currentSim = active? sim : null;
+//		update();
+	}
+	
 	private void invalidateChart() {
 		if (_stackPane.getChildren().size() > 1) {
 			_stackPane.getChildren().remove(0);
@@ -303,8 +318,21 @@ public class ChartView extends CyclistViewBase {
 				for (Field field : _lodArea.getFields()) {
 					_spec.lod.add(new FieldInfo(field, order.indexOf(field)));
 				}
-				Task<ObservableList<TableRow>> task = getCurrentTable().getRows(builder.toString());
+				CyclistDatasource ds = _currentSim != null ? _currentSim.getDataSource() : null;
+				
+				Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
+					@Override
+					protected ObservableList<TableRow> call() throws Exception {
+						return getCurrentTable().getRows(ds, builder.toString());
+					}
+				};
+				
 				setCurrentTask(task);
+				
+				Thread th = new Thread(task);
+				th.setDaemon(true);
+				th.start();
+				
 				_items.bind(task.valueProperty());
 			}
 		}

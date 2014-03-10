@@ -17,7 +17,6 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class TaskControl extends HBox {
-//	public static Logger logger = Logger.getLogger(TaskControl.class.getName());
 	static final Logger logger = LogManager.getLogger(TaskControl.class.getName());
 	private ObjectProperty<Task<?>> _taskProperty = new SimpleObjectProperty<>();
 	private Task<?> _task;

@@ -552,77 +552,120 @@ public class Table {
 		return task;
 	}
 	
-	public Task<ObservableList<TableRow>> getRows(final String query) {
-		CyclistDatasource ds = getDataSource();
-		return getRows(ds, query);
+	
+	public ObservableList<TableRow> getRows(final String query) throws SQLException {
+		return getRows(null, query);
 	}
 	
-	public Task<ObservableList<TableRow>> getRows(CyclistDatasource ds, final String query) {
+	public ObservableList<TableRow> getRows(CyclistDatasource ds, final String query) throws SQLException {
 		return getRows(ds, query, false);
 	}
 	
-	public Task<ObservableList<TableRow>> getRows(CyclistDatasource ds1, final String query, boolean force) {
-		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
-		
-		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
-
-			@Override
-			protected ObservableList<TableRow> call() throws Exception {
-				List<TableRow> rows = new ArrayList<>();
-				try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
-					updateMessage("querying");
-					long t1 = System.currentTimeMillis();
-					
-					ResultSet rs = stmt.executeQuery(query);
-					long t2 = System.currentTimeMillis();
-					System.out.println("time: "+(t2-t1)/1000.0);
-					ResultSetMetaData rmd = rs.getMetaData();
-					
-					int cols = rmd.getColumnCount();
-					updateProgress(0, Long.MAX_VALUE);
-					int n=0;
-					while (rs.next()) {
-						if (isCancelled()) {
-							System.out.println("task canceled");
-							stmt.cancel();
-							updateMessage("Canceled");
-							break;
-						}
-						TableRow row = new TableRow(cols);
-						for (int i=0; i<cols; i++) {
-							row.value[i] = rs.getObject(i+1);
-//							System.out.print(row.value[i]+"  ");
-						}
-//						System.out.println();
-						// TODO: This is a hack. It seems that if the statement is '...where false' then a single row of nulls is return.
-						if (row.value[0] == null) row.value[0] = "";
-						rows.add(row);
-						n++;
-						if (n % 1000 == 0) {
-							updateMessage(n+" rows");
-						}
-					}
-					long t3 = System.currentTimeMillis();
-					System.out.println("gathering time: "+(t3-t2)/1000.0);
-				} catch (SQLException e) {
-					System.out.println("task sql exception: "+e.getLocalizedMessage());
-					updateMessage(e.getLocalizedMessage());
-					throw new Exception(e.getMessage(), e);
-				} finally {
-					ds.releaseConnection();
-				}
-				
-				return FXCollections.observableList(rows);
-			}
+	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final String query, boolean force) throws SQLException {
+		CyclistDatasource lds = getDataSource();
+		final CyclistDatasource ds = force ? ( ds1 != null ? ds1 : lds ) : (lds != null ? lds : ds1);//		
+		List<TableRow> rows = new ArrayList<>();
+		try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
+			long t1 = System.currentTimeMillis();
 			
-		};
+			ResultSet rs = stmt.executeQuery(query);
+			long t2 = System.currentTimeMillis();
+			System.out.println("time: "+(t2-t1)/1000.0);
+			ResultSetMetaData rmd = rs.getMetaData();
+			
+			int cols = rmd.getColumnCount();
+			while (rs.next()) {
+				TableRow row = new TableRow(cols);
+				for (int i=0; i<cols; i++) {
+					row.value[i] = rs.getObject(i+1);
+				}
+				// TODO: This is a hack. It seems that if the statement is '...where false' then a single row of nulls is return.
+				if (row.value[0] == null) row.value[0] = "";
+				rows.add(row);
+			}
+			long t3 = System.currentTimeMillis();
+			System.out.println("gathering time: "+(t3-t2)/1000.0);
+		} finally {
+			ds.releaseConnection();
+		}
 		
-		Thread th = new Thread(task);
-		th.setDaemon(true);
-		th.start();
-		
-		return task;
+		return FXCollections.observableList(rows);
 	}
+			
+//	public Task<ObservableList<TableRow>> getRows(final String query) {
+//		return getRows(null, query);
+//	}
+//	
+//	public Task<ObservableList<TableRow>> getRows(CyclistDatasource ds, final String query) {
+//		return getRows(ds, query, false);
+//	}
+//	
+//	public Task<ObservableList<TableRow>> getRows(CyclistDatasource ds1, final String query, boolean force) {
+//		CyclistDatasource lds = getDataSource();
+//		final CyclistDatasource ds = force ? ( ds1 != null ? ds1 : lds ) : (lds != null ? lds : ds1);
+//		
+//		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
+//
+//			@Override
+//			protected ObservableList<TableRow> call() throws Exception {
+//				List<TableRow> rows = new ArrayList<>();
+//				try {
+//					
+//					Connection conn = ds.getConnection(); 
+//					Statement stmt = conn.createStatement();
+////					updateMessage("querying");
+//					long t1 = System.currentTimeMillis();
+//					
+//					ResultSet rs = stmt.executeQuery(query);
+//					long t2 = System.currentTimeMillis();
+//					System.out.println("time: "+(t2-t1)/1000.0);
+//					ResultSetMetaData rmd = rs.getMetaData();
+//					
+//					int cols = rmd.getColumnCount();
+////					updateProgress(0, Long.MAX_VALUE);
+//					int n=0;
+//					while (rs.next()) {
+//						if (isCancelled()) {
+//							System.out.println("task canceled");
+//							stmt.cancel();
+//							updateMessage("Canceled");
+//							break;
+//						}
+//						TableRow row = new TableRow(cols);
+//						for (int i=0; i<cols; i++) {
+//							row.value[i] = rs.getObject(i+1);
+////							System.out.print(row.value[i]+"  ");
+//						}
+////						System.out.println();
+//						// TODO: This is a hack. It seems that if the statement is '...where false' then a single row of nulls is return.
+//						if (row.value[0] == null) row.value[0] = "";
+//						rows.add(row);
+//						n++;
+//						if (n % 1000 == 0) {
+//							updateMessage(n+" rows");
+//						}
+//					}
+//					long t3 = System.currentTimeMillis();
+//					System.out.println("gathering time: "+(t3-t2)/1000.0);
+//				} catch (SQLException e) {
+//					System.out.println("task sql exception: "+e.getLocalizedMessage());
+//					updateMessage(e.getLocalizedMessage());
+//					throw new Exception(e.getMessage(), e);
+//				} finally {
+//					ds.releaseConnection();
+//				}
+//				
+//				return FXCollections.observableList(rows);
+//			}
+//			
+//		};
+//		
+//		Thread th = new Thread(task);
+//		th.setDaemon(true);
+//		th.start();
+//		
+//		return task;
+//	}
 	
 	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows( List<Field> fields,  int limit) {
 		CyclistDatasource ds = getDataSource();
