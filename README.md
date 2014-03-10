@@ -21,7 +21,7 @@ the Java 8 VM.
 Run `ant` in the top directory. This will build cyclist.jar and a library directory in deploy/dist. You can copy the dist 
 directory to any other machine (Mac, Linux, Windows) that has Java 8 installed.
 
-To run Cyclist, you can use `java -jar Cyclist.jar` or double click on the jar. On OSX you can also use 'open cyclist.jar'.
+To run Cyclist, you can use `java -jar Cyclist.jar` or double click on the jar. On OSX you can also use 'open cyclist.jar`.
 
 #### Standalone application
 
