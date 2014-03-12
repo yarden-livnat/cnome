@@ -5,15 +5,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 
 public class FlowInfo extends Pane {
@@ -24,13 +21,10 @@ public class FlowInfo extends Pane {
 
 	private Function<Transaction, Object> _typeFunc = t->t.nucid;
 	
-	private VBox _vbox;
 	private CategoryAxis _xAxis;
 	private NumberAxis _yAxis;
 	private BarChart<String, Number> _chart;
-	
-	private IntegerProperty _modeProperty = new SimpleIntegerProperty();
-	
+		
 	private InvalidationListener _listener = o->{
 		refresh();
 	};

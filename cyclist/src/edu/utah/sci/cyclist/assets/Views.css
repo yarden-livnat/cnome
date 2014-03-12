@@ -164,13 +164,19 @@
 }
 
 .inventory .nuclide {
- 	-fx-alignment:baseline-right;
+    -fx-pref-width: 120px;
+    -fx-font-size: 10px;
+}
+
+/* 
+.inventory .nuclide {
+	-fx-alignment:baseline-right;
 	-fx-padding: 2px;
 	-fx-max-width: 50px;
 	-fx-max-height: 18px;
 	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;
   	-fx-background-insets: 1, 2;
-    -fx-background-radius: 2, 2;	
+    -fx-background-radius: 2, 2;    
 }
 
 .inventory .nuclide.changing {
@@ -184,6 +190,7 @@
     -fx-background-insets: 1, 2;
     -fx-background-radius: 2, 2;
 }
+*/
 
 
 /*
