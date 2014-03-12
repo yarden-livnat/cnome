@@ -34,10 +34,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
+import javafx.geometry.Side;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
@@ -66,6 +71,8 @@ public class TablesPanel extends TitledPanel  {
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>();
 	private Entry _selected = null;
 	private ObjectProperty<Boolean> _editTableProperty = new SimpleObjectProperty<>();
+	private ContextMenu _menu = new ContextMenu();
+	private Entry _selectedForEdit = null;
 	private InvalidationListener _listener = new InvalidationListener() {
 		
 		@Override
@@ -77,6 +84,7 @@ public class TablesPanel extends TitledPanel  {
 	
 	public TablesPanel() {
 		super(TITLE, GlyphRegistry.get(AwesomeIcon.COLUMNS)); 
+		createMenu();
 	}
 	
 //	@Override
@@ -161,7 +169,8 @@ public class TablesPanel extends TitledPanel  {
 			    
 				MouseEvent mouseEvent = (MouseEvent)event;
 				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
-					editTable(entry);
+					_selectedForEdit = entry;
+					_menu.show(entry.title, Side.BOTTOM, 0, 0);
 				}
 				else{
 					if(mouseEvent.getClickCount() == 1){
@@ -169,7 +178,8 @@ public class TablesPanel extends TitledPanel  {
 						select(entry);
 					}
 					else if(mouseEvent.getClickCount() == 2){
-						editTable(entry);
+						_selectedForEdit = entry;
+						_menu.show(entry.title, Side.BOTTOM, 0, 0);
 					}
 				
 				}
@@ -209,18 +219,15 @@ public class TablesPanel extends TitledPanel  {
 		
 	private void editTable(final Entry entry) {
 		TableEditorWizard wizard = new TableEditorWizard(entry.table);
-		
-		ObjectProperty<Table> selection = wizard.show(this.getParent().getScene().getWindow());
+			
+		Bounds bounds = this.localToScene(this.getBoundsInLocal());
+		ObjectProperty<Table> selection = wizard.show(this.getParent().getScene().getWindow(), bounds);
 		
 		selection.addListener(new ChangeListener<Table>(){
 			@Override
 			public void changed(ObservableValue<? extends Table> arg0, Table oldVal,Table newVal) {
-				if(newVal.getName().equals("DELETE_ME"))
-					removeTable(entry);
-				else{
 					entry.table = newVal;
 					entry.title.setText(entry.table.getAlias());
-				}
 					setEditTable(true);
 			}	
 		});
@@ -245,6 +252,30 @@ public class TablesPanel extends TitledPanel  {
 			}
 		}
 		return sortedList;
+	}
+	
+	/*
+	 * Creates a menu to edit or delete a table.
+	 */
+	private void createMenu(){
+		 MenuItem deleteTable = new MenuItem("Delete Table");
+		 deleteTable.setOnAction(new EventHandler<ActionEvent>() {
+		 							public void handle(ActionEvent e) { 
+		 								removeTable(_selectedForEdit);
+		 								setEditTable(true);
+		 								_selectedForEdit = null;
+		 							}
+		 });
+		 _menu.getItems().add(deleteTable);
+
+		 MenuItem editTable = new MenuItem("Edit Table");
+		 editTable.setOnAction(new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) { 
+					editTable(_selectedForEdit);
+					_selectedForEdit = null;
+				}
+		 });
+		 _menu.getItems().add(editTable);
 	}
 	
 	class Entry {
