@@ -634,8 +634,6 @@ public class FlowView extends CyclistViewBase {
 		hbox.getStyleClass().add("infobar");
 		hbox.getChildren().addAll( _rangeField, backward, forward);
 		
-		
-		
 		vbox.getChildren().addAll(
 			title,
 			hbox

@@ -279,7 +279,7 @@ public class InventoryView extends CyclistViewBase {
 		title.getStyleClass().add("title");
 		
 		ComboBox<String> filters = new ComboBox<>();
-		filters.getStyleClass().add("nuclide-filters");
+		filters.getStyleClass().add("nuclide");
 		
 		filters.setPromptText("filter");
 		filters.setEditable(true);
