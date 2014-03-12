@@ -1,5 +1,6 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
+import javafx.geometry.Pos;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
@@ -40,7 +41,10 @@ public class DatasourceSelector extends VBox{
 		// --- Alias Box
 		HBox aliasBox = new HBox();
 		aliasBox.setSpacing(5);
-		aliasBox.getChildren().add(new Text("Alias:"));
+		VBox txtVbox = new VBox();
+		txtVbox.setAlignment(Pos.CENTER);
+		txtVbox.getChildren().add(new Text("Alias:"));
+		aliasBox.getChildren().addAll(txtVbox,_aliasField);
 		
 		// --- Remote box
 		HBox remoteBox = new HBox();
@@ -91,11 +95,11 @@ public class DatasourceSelector extends VBox{
 		
 		// --- Layout
 		this.getChildren().addAll(
-				aliasBox, 
+				aliasBox/*, 
 				new Text("Data Location:"),
 				remoteBox, 
 				localBox, 
-				subsetBox);	
+				subsetBox*/);	
 	}
 
 	// Get the alias text

@@ -7,25 +7,21 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextBuilder;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import edu.utah.sci.cyclist.Cyclist;
@@ -39,8 +35,6 @@ public class TableEditorWizard extends VBox {
 	// GUI elements
 	private Stage                 _dialog;
 	private ObjectProperty<Table> _selection = new SimpleObjectProperty<>();
-	private TextField _aliasField;
-	private TextField _localField;
 	private ListView<Field>    _schemaView; 
 	private DatasourceSelector _selector;
 	
@@ -50,20 +44,24 @@ public class TableEditorWizard extends VBox {
 	}
 
 	// * * * Show the dialog * * * //
-	public ObjectProperty<Table> show(Window window) {
+	public ObjectProperty<Table> show(Window window, Bounds bounds) {
 		_dialog.initOwner	(window);
 		_dialog.show();
-		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
-		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
+//		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
+//		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
+		_dialog.setX(window.getX()+bounds.getMaxX());
+		_dialog.setY(window.getY()+bounds.getMinY());
+		
 		return _selection;
 	}
 		
 	// * * * Create the dialog
 	private void createDialog(Table tableProperty){	
-		_dialog = StageBuilder.create()
-				.title("Edit Data Table")
-				.height(300)
-				.build();
+		
+	    _dialog = new Stage();
+	    _dialog.setTitle("Edit Data Table");
+	    _dialog.setHeight(300);
+	    
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, tableProperty) );	
 	}
@@ -77,23 +75,15 @@ public class TableEditorWizard extends VBox {
 			
 			
 			// * * * Schema Box * * * 
-			VBox schemaBox = VBoxBuilder.create()
-					.spacing(5)
-					.alignment(Pos.CENTER_LEFT)
-					.maxHeight(Double.MAX_VALUE)
-					.children(
-							new Text("Select Fields:"),
-							_schemaView = new ListView<>()
-//							TextBuilder.create().text("Select Fields:").build(),
-//							_schemaView = ListViewBuilder.create(Field.class) // Java 8
-//							_schemaView = ListViewBuilder.<Field>create() // Java 7
-//							.items(FXCollections.observableList(table.getFields()))
-//							.maxHeight(Double.MAX_VALUE)
-//						//	.prefHeight(100)	
-//							.build()							
-					)
-					.build();		
-		
+			VBox schemaBox = new VBox();
+			schemaBox.setSpacing(5);
+			schemaBox.setAlignment(Pos.CENTER_LEFT);
+			schemaBox.maxHeight(Double.MAX_VALUE);
+			
+			_schemaView = new ListView<>();
+			
+			schemaBox.getChildren().addAll(new Text("Select Fields:"),_schemaView);
+			
 			_schemaView.setItems(FXCollections.observableList(table.getFields()));
 			_schemaView.setMaxHeight(Double.MAX_VALUE);
 			VBox.setVgrow(_schemaView, Priority.ALWAYS);
@@ -110,78 +100,52 @@ public class TableEditorWizard extends VBox {
 			 _schemaView.setCellFactory(forListView);
 			
 			// * * *  The ok/cancel buttons * * * 
-			Button ok;
-			HBox buttonsBox = HBoxBuilder.create()
-					.spacing(10)
-					.alignment(Pos.CENTER_RIGHT)
-					.padding(new Insets(5))
-					.children(	
-							
-							// Remove
-							ButtonBuilder.create()
-							.text("Delete")
-							.onAction(new EventHandler<ActionEvent>() {	
-								@Override
-								public void handle(ActionEvent arg0) {
-									Table newTable = new Table("DELETE_ME");								
-									_selection.setValue(newTable);
-									_dialog.hide();
-								};
-							})
-							.build(),
-							
-							//
-							new Spring(),
-							
-							
-						// Cancel
-						ButtonBuilder.create()
-							.text("Cancel")
-							.onAction(new EventHandler<ActionEvent>() {
-								@Override
-								public void handle(ActionEvent arg0) {
-									_dialog.hide();
-								};
-							})
-							.build(),
+			HBox buttonsBox = new HBox();
 
-						// OK
-						ok = ButtonBuilder.create()
-							.text("Ok")
-							.onAction(new EventHandler<ActionEvent>() {	
+
+			buttonsBox.setSpacing(10);
+			buttonsBox.setAlignment(Pos.CENTER_RIGHT);
+			buttonsBox.setPadding(new Insets(5));
+			
+			// Cancel
+			Button cancel = new Button("Cancel");
+			cancel.setOnAction(new EventHandler<ActionEvent>() {
+								@Override
+								public void handle(ActionEvent arg0) {
+									_dialog.hide();
+								};
+			});
+			
+			// OK
+			Button ok = new Button("Ok");
+			ok.setOnAction(new EventHandler<ActionEvent>() {	
 								@Override
 								public void handle(ActionEvent arg0) {
 									updateTable(table);
 									_selection.setValue(table);
 									_dialog.hide();
 								};
-							})
-							.build()	
-					)
-					.build();	
+			});
+			
+			buttonsBox.getChildren().addAll(new Spring(),cancel,ok);	
 			HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
 			
 			// The vertical layout of the whole wizard
-			VBox header = VBoxBuilder.create()
-					.spacing(10)
-					.padding(new Insets(5))
-					.children(TextBuilder.create().text("Name: " + table.getName()).build(),
-							_selector,
-							schemaBox,
-							buttonsBox)
-					.build();
+			VBox header = new VBox();
+			header.setSpacing(10);
+			header.setPadding(new Insets(5));
+			header.getChildren().addAll(new Text("Name: " + table.getName()),_selector, schemaBox, buttonsBox);
 			
 			VBox.setVgrow(schemaBox, Priority.ALWAYS);
 			
 			// Create the scene
-			Scene scene = new Scene(
-					VBoxBuilder.create()
-					.spacing(5)
-					.padding(new Insets(5))
-					.id("datatable-wizard")
-					.children(header)
-					.build()
-					);
+			VBox sceneVbox = new VBox();
+			sceneVbox.setSpacing(5);
+			sceneVbox.setPadding(new Insets(5));
+			sceneVbox.setId("datatable-wizard");
+			sceneVbox.getChildren().add(header);
+			
+			Scene scene = new Scene(sceneVbox);
 
 				
 			VBox.setVgrow(schemaBox, Priority.ALWAYS);
