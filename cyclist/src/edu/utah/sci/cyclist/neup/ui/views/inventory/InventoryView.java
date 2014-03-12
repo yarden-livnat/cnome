@@ -8,6 +8,8 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
@@ -132,14 +134,53 @@ public class InventoryView extends CyclistViewBase {
 		_currentNuclideFilterProperty.set(inventory->predicate.test(inventory.nucid));
 	}
 	
+	Pattern pattern = Pattern.compile("(\\d+)( *- *(\\d+))?");
+	
 	private IntPredicate createNuclideFilter(String spec) {
-		// TODO: parse spec and create a real filter
-		
-		return  i->{
-			return i/10000000 == 92;
-		};
+		IntPredicate predicate = null;
+		String specs[] = spec.split(",");
+		for (int i=0; i<specs.length; i++) {
+			Matcher matcher = pattern.matcher(specs[i]);
+			if (matcher.find()) {
+				if (!valid(matcher.group(1), matcher.group(3))) {
+					// TODO: indicate an error
+					log.error("Illegal filter");
+					return n->true; // ignore the spec;
+				}
+				IntPredicate p;
+				if (matcher.group(3) == null) {
+					p = createPredicate(matcher.group(1));
+				} else {
+					p = createPredicate(matcher.group(1), matcher.group(3));
+				}
+				predicate = predicate == null ? p : predicate.or(p);
+			} 
+		}
+		return  predicate;
 	}
 	
+	private boolean valid(String from, String to) {
+		int l = from.length();
+		return (l == 2 || l==5 || l==9) && (to==null || to.length() == l);
+	}
+	
+	private IntPredicate createPredicate(String str) {
+		int v = Integer.parseInt(str);
+		int l = str.length();
+		return l >7 ? n->n == v :
+			l > 4 ? n->n/1000 == v:
+				n->n/10000000 == v;		
+	}
+	
+	private IntPredicate createPredicate(String from, String to) {
+		int f = Integer.parseInt(from);
+		int t = Integer.parseInt(to);
+		int l = from.length();
+		
+		return l >7 ? n->n>=f && n<=t :
+			l > 4 ? n->n/1000>=f && n/1000<=t:
+				n->n/10000000<=f && n/10000000<=t;		
+	}
 	
 	private void build() {
 		setTitle(TITLE);
