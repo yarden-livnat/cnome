@@ -310,6 +310,14 @@ public class InventoryView extends CyclistViewBase {
 			protected ObservableList<Inventory> call() throws Exception {
 				ObservableList<Inventory> list = FXCollections.observableArrayList();
 				list.setAll(_simProxy.getInventory2(field, value));
+
+				List<Integer> nuclides = new ArrayList<>();
+				for (Inventory i : list) {
+					if (!nuclides.contains(i.nucid))
+						nuclides.add(i.nucid);
+				}
+				for (Integer v : nuclides)
+					System.out.println(v);
 				return list;
 			}	
 		};
