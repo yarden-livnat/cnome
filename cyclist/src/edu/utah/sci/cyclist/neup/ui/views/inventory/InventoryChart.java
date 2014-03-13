@@ -1,12 +1,17 @@
 package edu.utah.sci.cyclist.neup.ui.views.inventory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javafx.scene.Node;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -22,7 +27,7 @@ public class InventoryChart extends VBox {
 		INVENTORY, NET
 	}
 	
-	private LineChart<Number, Number> _chart;
+	private XYChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
 	private NumberAxis _yAxis;
 	private double _scale = 1;
@@ -76,6 +81,7 @@ public class InventoryChart extends VBox {
 		String style = ColorUtil.toString(entry.color);
 		series.nodeProperty().addListener(o->{
 			series.getNode().setStyle("-fx-stroke:"+style);
+			series.getNode().setStyle("-fx-fill:"+style);
 		});
 
 		double scale = computeScale(entry.series); // relative to the current chart type
@@ -158,13 +164,18 @@ public class InventoryChart extends VBox {
 	}
 	
 	private void updateSeries(XYChart.Series<Number, Number> series, Collection<Pair<Integer, Double>> values) {
-		series.getData().clear();
-
+//		boolean updating = _chart.getData().contains(series);
+//		if (updating)
+//			_chart.getData().remove(series);
+		
+//		series.getData().clear();
+		List<XYChart.Data<Number, Number>> list = new ArrayList<>();
+		
 		if (_type == ChartType.INVENTORY) {
 			double sum = 0;
-			for (Pair<Integer, Double> value : values) {
+			for (Pair<Integer, Double> value : values) {;
 				sum += value.v2/_scale;
-				series.getData().add(new XYChart.Data<Number, Number>(value.v1, sum));
+				list.add(new XYChart.Data<Number, Number>(value.v1, sum));
 			}
 		} else {
 			double prev = 0;
@@ -175,10 +186,15 @@ public class InventoryChart extends VBox {
 					prev = v;
 					first = false;
 				}
-				series.getData().add(new XYChart.Data<Number, Number>(value.v1, v-prev));
+				list.add(new XYChart.Data<Number, Number>(value.v1, v-prev));
 				prev = v;
 			}
 		}
+		
+		series.getData().setAll(list);
+//		if (updating) {
+//			_chart.getData().add(series);
+//		}
 	}
 
 			
@@ -202,11 +218,21 @@ public class InventoryChart extends VBox {
 		_yAxis.setLabel("Amount");
 		_yAxis.setAnimated(false);
 		
-		_chart = new LineChart<>(_xAxis, _yAxis);
-		_chart.getStyleClass().add("chart");
-		_chart.setCreateSymbols(false);
-		_chart.setLegendVisible(false);
-
+//		LineChart<Number, Number> lineChart = new LineChart<>(_xAxis, _yAxis);
+//		lineChart.getStyleClass().add("chart");
+//		lineChart.setCreateSymbols(false);
+//		lineChart.setLegendVisible(false);
+//		_chart = lineChart;
+		
+//		AreaChart<Number, Number> areaChart = new AreaChart<>(_xAxis, _yAxis);
+//		areaChart.getStyleClass().add("chart");
+//		_chart = areaChart;
+		
+		StackedAreaChart<Number, Number> stackedAreaChart = new StackedAreaChart<>(_xAxis, _yAxis);
+		stackedAreaChart.getStyleClass().add("chart");
+		stackedAreaChart.setLegendVisible(false);
+		_chart = stackedAreaChart;
+		
 		return _chart;
 	}
 	
