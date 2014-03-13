@@ -240,7 +240,10 @@ public class Table {
 			}
 		} catch (Exception e) {
 			System.out.println("Error while parsing schema: "+e.getMessage());
+		}finally{
+			_datasource.releaseConnection();
 		}
+		
 		_schema.update();
 	}
 	
@@ -470,6 +473,9 @@ public class Table {
 				}catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}
+				finally{
+					ds.releaseConnection();
 				}
 				
 				return FXCollections.observableList(rows);
@@ -960,6 +966,8 @@ public class Table {
 						}
 					}catch(Exception e){
 						e.printStackTrace();
+					}finally {
+						ds.releaseConnection();
 					}
 				}
 				return FXCollections.observableMap(values);
