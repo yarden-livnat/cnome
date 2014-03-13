@@ -363,6 +363,8 @@ public class SimulationWizard extends TilePane {
 		}
 		catch (Exception e) {
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
+		}finally{
+			ds.releaseConnection();
 		}
 	}
 	

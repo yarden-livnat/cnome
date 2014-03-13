@@ -54,6 +54,8 @@ public class TableProxy {
 			rows.add(row);
 		}
 		
+		ds.releaseConnection();
+		
 		return FXCollections.observableList(rows);
 	}
 	

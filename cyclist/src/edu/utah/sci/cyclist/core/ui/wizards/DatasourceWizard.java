@@ -267,7 +267,8 @@ public class DatasourceWizard extends VBox {
 		} catch (Exception e) {
 			//System.out.println("connection failed");
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
-
+		}finally{
+			ds.releaseConnection();
 		}
 	}
 }
