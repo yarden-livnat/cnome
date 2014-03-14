@@ -24,6 +24,7 @@ public class Filter implements Observable {
 	
 	private boolean _valid = true;
 	private String _value = "true";
+	private CyclistDatasource _ds = null;
 	private Field _field;
 	private DataType _dataType;
 	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
@@ -49,39 +50,39 @@ public class Filter implements Observable {
 				_selectedItems.addAll(getValues());
 				_values.set(getValues());
 			}
+			
 			if(_field.getRangeValues() != null){
 				_rangeValues.set(_field.getRangeValues());
 				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
 				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
 			}
-			_field.valuesProperty().addListener(new InvalidationListener() {
-				
-				@Override
-				public void invalidated(Observable arg0) {
-					if (getValues() != null)
-						_selectedItems.addAll(getValues());
-					else
-						_selectedItems.clear();
-					_values.set(getValues());
-				}
+			
+			_field.valuesProperty().addListener((Observable o)-> {
+				if (getValues() != null)
+					_selectedItems.addAll(getValues());
+				else
+					_selectedItems.clear();
+				_values.set(getValues());
 			});
 			
-			_field.rangeValuesProperty().addListener(new InvalidationListener() {
-				
-				@Override
-				public void invalidated(Observable arg0) {
-					if (_field.getRangeValues() != null){	
-						_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-						_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-					}else{
-						_selectedRangeValues.clear();
-					}
-					
-					_rangeValues.set(_field.getRangeValues());
+			_field.rangeValuesProperty().addListener((Observable o)-> {
+				if (_field.getRangeValues() != null){	
+					_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
+					_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
+				}else{
+					_selectedRangeValues.clear();
 				}
+				
+				_rangeValues.set(_field.getRangeValues());
 			});
-			
+
 		}	
+	}
+	
+	public void setDatasource(CyclistDatasource ds) {
+		if (_ds == ds) return;
+		
+		_ds = ds;
 	}
 	
 	public Field getField() {

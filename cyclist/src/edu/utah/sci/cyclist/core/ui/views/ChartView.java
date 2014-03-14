@@ -217,7 +217,19 @@ public class ChartView extends CyclistViewBase {
 		}
 		
 		_currentSim = active? sim : null;
-//		update();
+		
+		updateFilters();
+	}
+	
+	private void updateFilters() {
+		Table currentTable = getCurrentTable();
+		CyclistDatasource ds = currentTable != null ? currentTable.getDataSource() : 
+			_currentSim != null ? _currentSim.getDataSource() : null;
+		
+		if (_currentSim != null)
+		for (Filter filter : filters()) {
+			filter.setDatasource(ds);
+		}
 	}
 	
 	private void invalidateChart() {

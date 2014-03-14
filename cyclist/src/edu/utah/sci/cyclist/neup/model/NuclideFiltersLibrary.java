@@ -5,7 +5,7 @@ import java.util.TreeMap;
 import java.util.function.IntPredicate;
 
 public class NuclideFiltersLibrary {
-	public static int ELEM_FACTOR = 1000000;
+	public static int ELEM_FACTOR = 10000000;
 	public static int ISO_FACTOR = 10000;
 	
 	private static NuclideFiltersLibrary _instance = new NuclideFiltersLibrary();

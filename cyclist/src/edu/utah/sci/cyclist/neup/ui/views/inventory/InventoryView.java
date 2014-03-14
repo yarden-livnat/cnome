@@ -111,7 +111,7 @@ public class InventoryView extends CyclistViewBase {
 		// default no-op filter
 		_currentNuclideFilterProperty.set(inventory->true);
 		
-		_nuclideFilters.put(" ", i->true);
+		_nuclideFilters.put("", i->true);
 		for (Entry<String, IntPredicate> entry :  NuclideFiltersLibrary.getInstance().getFilters().entrySet())  {
 			_nuclideFilters.put(entry.getKey(), entry.getValue());
 			_nuclideFilterNames.add(entry.getKey());
@@ -122,8 +122,8 @@ public class InventoryView extends CyclistViewBase {
 		_chart.selectChartType(type);
 	}
 	
-	private void selectNuclideFilter(String key) {
-		IntPredicate p = _nuclideFilters.get(key);
+	private void selectNuclideFilter(String key) {	
+		IntPredicate p = key.matches(" *") ? n->true : _nuclideFilters.get(key);
 
 		if (p == null) {
 			p = createNuclideFilter(key);
@@ -168,7 +168,7 @@ public class InventoryView extends CyclistViewBase {
 		int v = Integer.parseInt(str);
 		int l = str.length();
 		return l >7 ? n->n == v :
-			l > 4 ? n->n/1000 == v:
+			l > 4 ? n->n/10000 == v:
 				n->n/10000000 == v;		
 	}
 	
@@ -178,7 +178,7 @@ public class InventoryView extends CyclistViewBase {
 		int l = from.length();
 		
 		return l >7 ? n->n>=f && n<=t :
-			l > 4 ? n->n/1000>=f && n/1000<=t:
+			l > 4 ? n->n/10000>=f && n/10000<=t:
 				n->n/10000000<=f && n/10000000<=t;		
 	}
 	
@@ -316,8 +316,6 @@ public class InventoryView extends CyclistViewBase {
 					if (!nuclides.contains(i.nucid))
 						nuclides.add(i.nucid);
 				}
-				for (Integer v : nuclides)
-					System.out.println(v);
 				return list;
 			}	
 		};
@@ -378,7 +376,6 @@ public class InventoryView extends CyclistViewBase {
 				if (inventory.get() != null) {
 					filteredInventory = new FilteredList<Inventory>(inventory.get());
 					filteredInventory.addListener((Observable e)->{
-						System.out.println("filtered inventory changed");
 						addToChart(this);
 					});
 					filteredInventory.predicateProperty().bind(_currentNuclideFilterProperty);			

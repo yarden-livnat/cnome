@@ -20,4 +20,16 @@
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>AUTHORS.rst</name>
+			<type>1</type>
+			<location>/Users/yarden/software/java/git/cyclist/AUTHORS.rst</location>
+		</link>
+		<link>
+			<name>README.md</name>
+			<type>1</type>
+			<location>/Users/yarden/software/java/git/cyclist/README.md</location>
+		</link>
+	</linkedResources>
 </projectDescription>
