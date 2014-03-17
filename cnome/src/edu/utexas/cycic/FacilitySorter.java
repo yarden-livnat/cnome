@@ -1,15 +1,31 @@
 package edu.utexas.cycic;
 
 import javafx.beans.value.ChangeListener;
+
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+<<<<<<< HEAD
+import javax.swing.JTable;
+
+import edu.utah.sci.cyclist.ui.components.ViewBase;
+=======
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+>>>>>>> 7b8ae04fe99b228d4a8785378714ce04460f146c
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -42,8 +58,8 @@ public class FacilitySorter extends ViewBase {
 		setWidth(780);
 		setMaxWidth(900);
 		setMinWidth(780);
-		setHeight(300);
-		setMaxHeight(300);
+		setHeight(600);
+		setMaxHeight(900);
 		init ();
 	}
 
@@ -56,8 +72,49 @@ public class FacilitySorter extends ViewBase {
 	static ArrayList<Object> structure=new ArrayList<>();
 	static Integer facilityIndex;
 	static ArrayList<Object> displayList=new ArrayList<>();
+	static ArrayList <Object> dataArray=new ArrayList<>();
+
+	static ArrayList <Object> tableOutput= new ArrayList<>();
 
 	private void init (){
+/*
+		//table initialization
+		for(int i =0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
+			ArrayList <Object> singleData =new ArrayList<>();
+			ArrayList <Object> singleStructure=new ArrayList<>();
+			TableView singleTable=new TableView();
+			//debug
+			for (int ii=0; ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityClones.size();ii++){
+				singleData.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityClones.get(ii).facilityData);
+			}
+			System.out.println(dataArray);
+			for (int ii = 0; ii < dataArray.size(); ii++ ){
+				arrayUpdate((ArrayList<Object>) singleData.get(ii),
+						CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityClones.get(ii));
+			}
+			System.out.println(dataArray);
+			for (int ii=0;ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityStructure.size();ii++){
+				ArrayList<Object>element=new ArrayList<>();
+				for (int iii=0;iii<CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityClones.size();iii++){
+					element.add(((ArrayList<Object>) dataArray.get(iii)).get(ii));
+				}
+				singleData.add(element);
+			}
+			formSort(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityStructure,singleData,singleStructure);
+			
+			for (int k = 0; k < singleStructure.size();k++){
+				TableColumn column = new TableColumn (singleStructure.get(k).);
+				singleTable.getColumns().add(column);
+			}
+			tableOutput.add(singleTable);
+			//problem need to solved
+		}
+
+
+
+*/
+
+
 		//initialize most variables
 		final Text list=new Text ();
 		HBox topBox= new HBox();
@@ -83,32 +140,8 @@ public class FacilitySorter extends ViewBase {
 		final Label number=new Label();
 		searchBox.getChildren().add(number);
 
+		final Slider numberShowen=new Slider(0,0,0);
 
-		
-		final Slider numberShowen=new Slider(0,0,0){
-			{
-				setShowTickMarks(true);
-				setShowTickLabels(true);
-				setMinorTickCount(0);
-				setValue(getMax());
-				setMajorTickUnit(1);
-				setSnapToTicks(true);
-				setMax(displayList.size());
-			}
-		};
-
-		numberShowen.valueProperty().addListener(new ChangeListener<Number>(){
-			public void changed(ObservableValue<? extends Number> ov,Number old_val, Number new_val) {
-				number.setText("number of nodes shown:" +Integer.toString(new_val.intValue()));
-				display.getChildren().clear();
-				for (int iii=0;iii<new_val.intValue();iii++){
-					Object appear=displayList.get(iii);
-					display.getChildren().add(((facilityNode)appear).sorterCircle);
-					display.getChildren().add(((facilityNode)appear).sorterCircle.text);
-				}
-			}
-		});
-		
 		searchBox.getChildren().add(numberShowen);
 
 		final Label type=new Label();
@@ -161,51 +194,43 @@ public class FacilitySorter extends ViewBase {
 				//find the location of chosen node in the data list
 				criteria.getChildren().clear();
 				structure.clear();
-				display.getChildren().clear();
+				dataArray.clear();
+				//display.getChildren().clear();
 				data.clear();
+				display.getChildren().clear();
 				for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
 					if(newValue == CycicScenarios.workingCycicScenario.FacilityNodes.get(i).name){
 						facilityIndex = i;
 						break;
 					}
 				}
-				//numberShowen.setMax(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size());
-				//update data array
-				for (int i=0;i<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.size();i++){
+
+				for (int ii=0; ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size();ii++){
+					dataArray.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii).facilityData);
+				}
+				System.out.println(dataArray);
+				for (int ii = 0; ii < dataArray.size(); ii++ ){
+					arrayUpdate((ArrayList<Object>) dataArray.get(ii),
+							CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii));
+				}
+				System.out.println(dataArray);
+				for (int ii=0;ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure.size();ii++){
 					ArrayList<Object>element=new ArrayList<>();
-					for (int ii=0;ii<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size();ii++){
-						ArrayList <Object>Subelement=new ArrayList<>();
-						ArrayList <Object> check= (ArrayList )CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii).facilityData.get(i);
-						if (check instanceof ArrayList){
-							for (int iii=0;iii<check.size();iii++){
-								ArrayList <Object>moreThanOneCase=new ArrayList<>();
-								moreThanOneCase.add(check.get(iii));
-								moreThanOneCase.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii));
-								Subelement.add(moreThanOneCase);
-
-							}
-
-						}
-						else {
-							Subelement.add(check);
-							Subelement.add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(ii));
-						}
-						element.add(Subelement);
+					for (int iii=0;iii<CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size();iii++){
+						element.add(((ArrayList<Object>) dataArray.get(iii)).get(ii));
 					}
 					data.add(element);
 				}
-				/*	for (int i=0;i<numberShowen.getMax();i++){
-display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i).sorterCircle);
-display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.get(i).sorterCircle.text);
-}
-				 */
+
+				System.out.println(data);
+
 				number.setVisible(true);
 				number.setText("number of nodes shown:" +Integer.toString(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityClones.size()));
 
 				//update information in searchbox
 				type.setText("Type: "+CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityType);
 
-				formSort(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure,data,structure);
+				//	System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure);
 				//System.out.println(data);
 				//System.out.println(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).facilityStructure);
 				//System.out.println(structure);
@@ -214,6 +239,36 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 				criteria.getChildren().add(addMore);
 				criteria.getChildren().add(start);
 				initialize( displayList);
+				//System.out.println(displayList);
+
+				for (int i = 0; i < displayList.size(); i++){
+					display.getChildren().add(((facilityNode)displayList.get(i)).sorterCircle);
+					display.getChildren().add(((facilityNode)displayList.get(i)).sorterCircle.text);
+				}
+
+				numberShowen.setShowTickMarks(true);
+				numberShowen.setShowTickLabels(true);
+				numberShowen.setMinorTickCount(0);
+				numberShowen.setMajorTickUnit(1);
+				numberShowen.setSnapToTicks(true);
+				numberShowen.setMax(displayList.size());
+				numberShowen.setValue(numberShowen.getMax());
+
+				numberShowen.valueProperty().addListener(new ChangeListener<Number>(){
+					public void changed(ObservableValue<? extends Number> ov,Number old_val, Number new_val) {
+						int outNumber=Math.round(new_val.intValue());
+						//System.out.println(outNumber);
+						number.setText("number of nodes shown:" +outNumber);
+						display.getChildren().clear();
+						for (int iii=0;iii<outNumber;iii++){
+							Object appear=displayList.get(iii);
+							display.getChildren().add(((facilityNode)appear).sorterCircle);
+							display.getChildren().add(((facilityNode)appear).sorterCircle.text);
+						}
+					}
+				});
+				formSort(CycicScenarios.workingCycicScenario.FacilityNodes.get(facilityIndex).facilityStructure,data,structure);
+				System.out.println(structure);
 
 
 			}
@@ -224,7 +279,26 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 
 			public void handle (MouseEvent e){
 				addMore.getChildren().clear();
+				filter.clear();
+
 				initialize (displayList);
+
+				numberShowen.setMax(displayList.size());
+				numberShowen.setValue(numberShowen.getMax());
+
+				numberShowen.valueProperty().addListener(new ChangeListener<Number>(){
+					public void changed(ObservableValue<? extends Number> ov,Number old_val, Number new_val) {
+						int outNumber=Math.round(new_val.intValue());
+						//System.out.println(outNumber);
+						number.setText("number of nodes shown:" +outNumber);
+						display.getChildren().clear();
+						for (int iii=0;iii<outNumber;iii++){
+							Object appear=displayList.get(iii);
+							display.getChildren().add(((facilityNode)appear).sorterCircle);
+							display.getChildren().add(((facilityNode)appear).sorterCircle.text);
+						}
+					}
+				});
 			}
 		});
 
@@ -292,8 +366,8 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 									HBox UB =new HBox();
 									Text lbNum=new Text();
 									Text uBNum=new Text();
-									Button confirm=new Button();
-									confirm.setText("confirm");
+									//Button confirm=new Button();
+									//confirm.setText("confirm");
 									lbNum.setText("LB");
 									uBNum.setText("UB");
 									lB.getChildren().add(lbNum);
@@ -307,17 +381,17 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 									UB.getChildren().add(uBValue);
 									range.getChildren().add(lB);
 									range.getChildren().add(UB);
-									range.getChildren().add(confirm);
-									confirm.setOnAction(new EventHandler<ActionEvent>() {
+									//range.getChildren().add(confirm);
+									/*confirm.setOnAction(new EventHandler<ActionEvent>() {
 										@Override
 										public void handle(ActionEvent e) {
 											if (!(isInteger(lBValue.getText()))){
-												lBValue.setText("PLEASE!!!NUMBERS!!!");
+												lBValue.setText("");
 											} else if (!(isInteger(uBValue.getText()))){
-												uBValue.setText("PLEASE!!!NUMBERS!!!");
+												uBValue.setText("");
 											} else if (Integer.parseInt(lBValue.getText())>Integer.parseInt(uBValue.getText())){
-												lBValue.setText("PLEASE ENTER CORRECTLY");
-												uBValue.setText("PLEASE ENTER CORRECTLY");
+												//lBValue.setText("PLEASE ENTER CORRECTLY");
+												uBValue.setText("");
 											}else {
 												int lowvalue;
 												int upvalue;
@@ -331,6 +405,34 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 											}
 										}
 									});
+									 */
+									if (!(isInteger(lBValue.getText()))){
+										lBValue.setText("");
+									}
+									uBValue.setOnAction(new EventHandler<ActionEvent>() {
+										@Override
+										public void handle(ActionEvent e) {
+											if (!(isInteger(lBValue.getText()))){
+												lBValue.setText("");
+											} else if (!(isInteger(uBValue.getText()))){
+												uBValue.setText("");
+											} else if (Integer.parseInt(lBValue.getText())>Integer.parseInt(uBValue.getText())){
+												//lBValue.setText("PLEASE ENTER CORRECTLY");
+												uBValue.setText("");
+											}else {
+												int lowvalue;
+												int upvalue;
+												lowvalue=Integer.parseInt(lBValue.getText());
+												upvalue=Integer.parseInt(uBValue.getText());
+												ArrayList <Object>Subfilt=new ArrayList<>();
+												Subfilt.add(listOrder);
+												Subfilt.add(lowvalue);
+												Subfilt.add(upvalue);
+												filter.add(Subfilt);
+											}
+										}
+									});
+
 									if (detailBox.getChildren().size()>=1){
 										detailBox.getChildren().remove(1);
 									}
@@ -346,37 +448,59 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 
 					@Override
 					public void handle(MouseEvent event) {
+						System.out.println(filter);
 						for (int i = 0;i < filter.size();i++){
 							ArrayList<Object> fit=new ArrayList<>();
 							if (((ArrayList<Object>) filter.get(i)).size() < 3){
 								ArrayList <Object> choose= listed.get((int) ((ArrayList<Object>) filter.get(i)).get(0));
 								for (int ii = 0; ii < choose.size(); ii++){
-									if (((ArrayList<Object>) choose.get(ii)).get(1).equals(((ArrayList<Object>) filter.get(i)).get(1))){
-										fit.add(((ArrayList<Object>) filter.get(i)).get(0));
+									if (((ArrayList<Object>) ((ArrayList<Object>) choose.get(ii)).get(0)).get(0).equals(((ArrayList<Object>) filter.get(i)).get(1))){
+										fit.add((((ArrayList<Object>) ((ArrayList<Object>) choose.get(ii)).get(0)).get(1)));
 									}
 								}
 							} else {
 								ArrayList <Object> choose= listed.get((int) ((ArrayList<Object>) filter.get(i)).get(0));
 								for (int ii = 0; ii < choose.size(); ii++){
-									int testNumber = Integer.parseInt(((ArrayList<Object>) choose.get(ii)).get(1).toString());
-									int upperBound = Integer.parseInt(((ArrayList<Object>) filter.get(i)).get(2).toString());
-									int lowerBound = Integer.parseInt(((ArrayList<Object>) filter.get(i)).get(1).toString());
-									if (testNumber <=upperBound && testNumber >= lowerBound){
-										fit.add(((ArrayList<Object>) filter.get(i)).get(0));
+									if (((ArrayList<Object>) ((ArrayList<Object>) choose.get(ii)).get(0)).get(0)!= ""){
+										int testNumber = Integer.parseInt((((ArrayList<Object>) ((ArrayList<Object>) choose.get(ii)).get(0)).get(0).toString()));
+										int upperBound = Integer.parseInt(((ArrayList<Object>) filter.get(i)).get(2).toString());
+										int lowerBound = Integer.parseInt(((ArrayList<Object>) filter.get(i)).get(1).toString());
+										if (testNumber <=upperBound && testNumber >= lowerBound){
+											fit.add((((ArrayList<Object>) ((ArrayList<Object>) choose.get(ii)).get(0)).get(1)));
+										}
 									}
 								}
 							}
 							ArrayList<Object> match=new ArrayList<>();
+							System.out.println(displayList);
 							//update the displaylist
 							for (int ii = 0;ii < displayList.size();ii++){
 								if (fit.contains(displayList.get(ii))){
 									match.add(displayList.get(ii));
 								}
 							}
+							System.out.println(match);
 							displayList.clear();
 							for (int ii=0;ii <match.size(); ii++){
 								displayList.add(match.get(ii));
 							}
+							System.out.println(displayList);
+
+							numberShowen.setMax(displayList.size());
+							numberShowen.setValue(numberShowen.getMax());
+							numberShowen.valueProperty().addListener(new ChangeListener<Number>(){
+								public void changed(ObservableValue<? extends Number> ov,Number old_val, Number new_val) {
+									int outNumber=Math.round(new_val.intValue());
+									//System.out.println(outNumber);
+									number.setText("number of nodes shown:" +outNumber);
+									display.getChildren().clear();
+									for (int iii=0;iii<outNumber;iii++){
+										Object appear=displayList.get(iii);
+										display.getChildren().add(((facilityNode)appear).sorterCircle);
+										display.getChildren().add(((facilityNode)appear).sorterCircle.text);
+									}
+								}
+							});
 						}
 					}
 				});
@@ -409,6 +533,21 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 		}
 	}
 
+	protected void arrayUpdate(ArrayList <Object> data, Object facility){
+		for (int i = 0; i < data.size(); i++){
+			if (data.get(i) instanceof ArrayList){
+				arrayUpdate((ArrayList)data.get(i),facility);
+			} else {
+				ArrayList <Object> changeData=new ArrayList<>();
+				changeData.add(data.get(i));
+				changeData.add(facility);
+				//	System.out.println(changeData);
+				data.set(i,changeData);
+			}
+
+		}
+	}
+
 	//need fix the data for this
 	protected void formSort(ArrayList<Object> struc, ArrayList<Object> data,ArrayList<Object> facilitySortArray){
 		for (int i=0;i<struc.size();i++){
@@ -433,12 +572,12 @@ display.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(
 						ArrayList <Object> newData=new ArrayList<>();
 						ArrayList<Object> newStruc=(ArrayList<Object>)struc.get(1);
 						for (int ii=0;ii<newStruc.size();ii++){
-							System.out.println(newStruc.get(i));
+							//System.out.println(newStruc.get(i));
 							ArrayList<Object> element=new ArrayList<>();
 							for (int iii=0;iii<data.size();iii++){
 								ArrayList<Object> subData=(ArrayList<Object>) data.get(iii);
 								ArrayList<Object> dataCol=(ArrayList<Object>)subData.get(0);
-								System.out.println(dataCol);
+								//		System.out.println(dataCol);
 								element.add(dataCol.get(ii));
 							}
 							newData.add(element);
