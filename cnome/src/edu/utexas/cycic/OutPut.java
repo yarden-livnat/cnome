@@ -16,6 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 /**
  * Output class for the CYCIC GUI.
@@ -384,8 +385,11 @@ public class OutPut {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(file);
-			
-			doc.getDocumentElement().getNodeName();
+					
+			loadSimControl(doc);
+			loadCommodities(doc);
+			loadFacilities(doc);
+				
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			NodeList facList = doc.getElementsByTagName("facilityNode");
 			
@@ -415,8 +419,10 @@ public class OutPut {
 				Element element = (Element) marketNode;
 				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
 				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
+				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
 				tempNode.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
 				tempNode.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
+				tempNode.commodity = element.getElementsByTagName("cycicCommodity").item(0).getTextContent();
 			}		
 			VisFunctions.reloadPane();
 		} catch (Exception e){
@@ -444,12 +450,12 @@ public class OutPut {
 		facElement.appendChild(radius);
 		
 		for (String commodity: facility.cycicCircle.incommods){
-			Element commodityObj = doc.createElement("inCommod");
+			Element commodityObj = doc.createElement("cycicInCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
 			facElement.appendChild(commodityObj);
 		}
 		for (String commodity: facility.cycicCircle.outcommods){
-			Element commodityObj = doc.createElement("outCommod");
+			Element commodityObj = doc.createElement("cycicOutCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
 			facElement.appendChild(commodityObj);
 		}
@@ -471,7 +477,7 @@ public class OutPut {
 		yPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterY())));
 		markElement.appendChild(yPosition);
 		
-		Element commodityObj = doc.createElement("inCommod");
+		Element commodityObj = doc.createElement("cycicCommodity");
 		commodityObj.appendChild(doc.createTextNode(market.commodity));
 		markElement.appendChild(commodityObj);
 		return markElement;
@@ -502,7 +508,10 @@ public class OutPut {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(file);
 			
-			doc.getDocumentElement().getNodeName();
+			loadSimControl(doc);
+			loadCommodities(doc);
+			loadFacilities(doc);
+			
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			NodeList facList = doc.getElementsByTagName("facility");
 			
@@ -530,5 +539,47 @@ public class OutPut {
 		}
 	}
 	
+	static public void loadCommodities(Document doc){
+		NodeList commodityList = doc.getElementsByTagName("commodity");
+		for (int i = 0; i < commodityList.getLength(); i++){
+			Node commodity = commodityList.item(i);
+			Cycic.workingScenario.CommoditiesList.add(new Label(commodity.getTextContent()));
+		}		
+	}
+	
+	static public void loadSimControl(Document doc){
+		// Duration
+		String duration = doc.getElementsByTagName("duration").item(0).getTextContent();
+		Cycic.workingScenario.simulationData.duration = duration;
+		
+		// Start Month
+		String startMonth = doc.getElementsByTagName("startmonth").item(0).getTextContent();
+		Cycic.workingScenario.simulationData.startMonth = startMonth;
+		
+		// Start Year
+		String startYear = doc.getElementsByTagName("startyear").item(0).getTextContent();
+		Cycic.workingScenario.simulationData.startYear = startYear;
+		
+		// Sim Start
+		String simStart = doc.getElementsByTagName("simstart").item(0).getTextContent();
+		Cycic.workingScenario.simulationData.simStart = simStart;
+		
+		// Decay
+		String decay = doc.getElementsByTagName("decay").item(0).getTextContent();
+		Cycic.workingScenario.simulationData.decay = decay;
+	}
+	
+	static public void loadFacilities(Document doc){
+		NodeList facList = doc.getElementsByTagName("facility");
+		for (int i = 0; i < facList.getLength(); i++){
+			Element facility = (Element) facList.item(i);
+			System.out.println(facility);
+			Element model = (Element) facility.getChildNodes().item(1).getChildNodes().item(0);
+			for (int j = 0; j < model.getChildNodes().getLength(); j++){
+				System.out.println(model.getChildNodes().item(j).getTextContent());
+			}
+		}
+
+	}
 }
 

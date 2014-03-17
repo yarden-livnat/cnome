@@ -120,10 +120,10 @@ public class SimulationInfo extends ViewBase{
 		setTitle(TITLE);
 		TextField duration = VisFunctions.numberField();
 		duration.setPromptText("Length of Simulation");
-		duration.setText(CycicScenarios.workingCycicScenario.simulationData.duration);
+		duration.setText(Cycic.workingScenario.simulationData.duration);
 		duration.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				CycicScenarios.workingCycicScenario.simulationData.duration = newValue;
+				Cycic.workingScenario.simulationData.duration = newValue;
 			}
 		});
 		simInfo.add(new Label("Duration"), 0, 0);
@@ -132,13 +132,15 @@ public class SimulationInfo extends ViewBase{
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
-		startMonth.setValue(months.get(CycicScenarios.workingCycicScenario.simulationData.startMonth));
+		startMonth.setValue(months.get(Cycic.workingScenario.simulationData.startMonth));
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
+		
+		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)));
 		startMonth.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				CycicScenarios.workingCycicScenario.simulationData.startMonth = months.get(newValue);
+				Cycic.workingScenario.simulationData.startMonth = months.get(newValue);
 			}
 		});
 		startMonth.setPromptText("Select Month");
@@ -146,10 +148,10 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(startMonth, 1, 1);
 		
 		TextField startYear = VisFunctions.numberField();
-		startYear.setText(CycicScenarios.workingCycicScenario.simulationData.startYear);
+		startYear.setText(Cycic.workingScenario.simulationData.startYear);
 		startYear.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				CycicScenarios.workingCycicScenario.simulationData.startYear = newValue;
+				Cycic.workingScenario.simulationData.startYear = newValue;
 			}
 		});
 		startYear.setPromptText("Starting Year");
@@ -157,10 +159,10 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(startYear, 1, 2);
 		
 		TextField simStart = VisFunctions.numberField();
-		simStart.setText(CycicScenarios.workingCycicScenario.simulationData.simStart);
+		simStart.setText(Cycic.workingScenario.simulationData.simStart);
 		simStart.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				CycicScenarios.workingCycicScenario.simulationData.simStart = newValue;
+				Cycic.workingScenario.simulationData.simStart = newValue;
 			}
 		});
 		simStart.setPromptText("The start month");
@@ -168,10 +170,10 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(simStart, 1, 3);
 		
 		TextField decay = VisFunctions.numberField();
-		decay.setText(CycicScenarios.workingCycicScenario.simulationData.decay);
+		decay.setText(Cycic.workingScenario.simulationData.decay);
 		decay.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				CycicScenarios.workingCycicScenario.simulationData.decay = newValue;
+				Cycic.workingScenario.simulationData.decay = newValue;
 			}
 		});
 		decay.setPromptText("Simulation Decay Mode");
@@ -187,22 +189,22 @@ public class SimulationInfo extends ViewBase{
 	 */
 	public static void buildCommodPane(){
 		commodGrid.getChildren().clear();
-		for (int i = 0; i < CycicScenarios.workingCycicScenario.CommoditiesList.size(); i++){
+		for (int i = 0; i < Cycic.workingScenario.CommoditiesList.size(); i++){
 			TextField commodity = new TextField();
-			commodity.setText(CycicScenarios.workingCycicScenario.CommoditiesList.get(i).getText());
+			commodity.setText(Cycic.workingScenario.CommoditiesList.get(i).getText());
 			commodGrid.add(commodity, 0, i );
 			final int index = i;
 			commodity.setPromptText("Enter Commodity Name");
 			commodity.textProperty().addListener(new ChangeListener<String>(){
 				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-					CycicScenarios.workingCycicScenario.CommoditiesList.get(index).setText(newValue);
+					Cycic.workingScenario.CommoditiesList.get(index).setText(newValue);
 				}
 			});
 			Button removeCommod = new Button();
 			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
 			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent e){
-					CycicScenarios.workingCycicScenario.CommoditiesList.remove(index);
+					Cycic.workingScenario.CommoditiesList.remove(index);
 					buildCommodPane();
 				}
 			});	
@@ -217,12 +219,12 @@ public class SimulationInfo extends ViewBase{
 	static public void addNewCommodity(){
 		Label commodity = new Label();
 		commodity.setText("");
-		CycicScenarios.workingCycicScenario.CommoditiesList.add(commodity);
+		Cycic.workingScenario.CommoditiesList.add(commodity);
 		TextField newCommod = new TextField();
 		newCommod.setPromptText("Enter Commodity Name");
 		newCommod.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				CycicScenarios.workingCycicScenario.CommoditiesList.get(CycicScenarios.workingCycicScenario.CommoditiesList.size()-1).setText(newValue);
+				Cycic.workingScenario.CommoditiesList.get(Cycic.workingScenario.CommoditiesList.size()-1).setText(newValue);
 			}
 		});
 		buildCommodPane();
@@ -233,6 +235,9 @@ public class SimulationInfo extends ViewBase{
 	 * i.e. January = 0, Feb = 1, etc...
 	 */
 	public void months(){
+		
+		Cycic.workingScenario.simulationData.startMonth = "0";
+		
 		monthList.add("January");
 		monthList.add("February");
 		monthList.add("March");

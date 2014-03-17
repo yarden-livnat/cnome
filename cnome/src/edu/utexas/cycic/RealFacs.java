@@ -309,7 +309,7 @@ public class RealFacs {
 		
 		//build the OutCommodity Array
 		ArrayList<Object> OutCommodity=new ArrayList<Object>();
-		OutCommodity.add("Outcommodity");
+		OutCommodity.add("outcommodity");
 		OutCommodity.add("String");
 		OutCommodity.add("String");
 		OutCommodity.add(null);

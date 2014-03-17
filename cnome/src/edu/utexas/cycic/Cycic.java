@@ -101,8 +101,7 @@ public class Cycic extends ViewBase{
 				structureCB.setValue(newValue);
 			}
 		});
-		structureCB.setPromptText("TESTING");
-		structureCB.promptTextProperty().set("TESTING");
+		structureCB.setPromptText("Select Facility Type");
 		grid.add(structureCB, 3, 0);
 		//Submit Button
 		Button submit1 = new Button("Add");
