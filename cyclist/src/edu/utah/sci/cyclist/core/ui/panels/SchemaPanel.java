@@ -5,10 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -42,105 +38,55 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class SchemaPanel extends TitledPanel {
                 
-        private String _id;
-        private ObservableList<Field> _fields;
-        private List<Entry> _entries;
-        private Closure.V1<Field> _onFieldDropAction = null;
-        
-        final SchemaPanel _panel = this;
-        
-        
-        public SchemaPanel(String title) {
-                super(title, GlyphRegistry.get(AwesomeIcon.LIST_UL)); 
-                _id = title;
-                addListeners();
-        }
-        
-        public void setOnFieldDropAction(Closure.V1<Field> action) {
-                _onFieldDropAction = action;
-        }
-        
-        public void setFields(ObservableList<Field> fields) {
-                if (_fields != fields) {
-                        if (_fields != null) {
-                                _fields.removeListener(_invalidationListener);
-                        }
-                        
-                        _fields = fields;
-                        _fields.addListener(_invalidationListener);
-                }
-                
-                resetContent();
-        }
+    private String _id;
+    private ObservableList<Field> _fields;
+    private List<Entry> _entries;
+    private Closure.V1<Field> _onFieldDropAction = null;
+    
+    final SchemaPanel _panel = this;
+    
+    
+    public SchemaPanel(String title) {
+            super(title, GlyphRegistry.get(AwesomeIcon.LIST_UL)); 
+            _id = title;
+            addListeners();
+    }
+    
+    public void setOnFieldDropAction(Closure.V1<Field> action) {
+            _onFieldDropAction = action;
+    }
+    
+    public void setFields(ObservableList<Field> fields) {
+            if (_fields != fields) {
+                    if (_fields != null) {
+                            _fields.removeListener(_invalidationListener);
+                    }
+                    
+                    _fields = fields;
+                    _fields.addListener(_invalidationListener);
+            }
             
-        private void resetContent() {
-                VBox vbox = (VBox) getContent();
-                vbox.getChildren().clear();
-                
-                SortedList<Field> sorted = _fields.sorted(new Comparator<Field>() {
-
-                        @Override
-                        public int compare(Field o1, Field o2) {
-                                return o1.getName().compareToIgnoreCase(o2.getName());
-                        }
-
-                        @Override
-                        public Comparator<Field> reversed() {
-                                // TODO Auto-generated method stub
-                                return null;
-                        }
-
-                        @Override
-                        public Comparator<Field> thenComparing(
-                                        Comparator<? super Field> other) {
-                                // TODO Auto-generated method stub
-                                return null;
-                        }
-
-						@Override
-						public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
-								Function<? super Field, ? extends U> keyExtractor,
-								Comparator<? super U> keyComparator) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public <U extends Comparable<? super U>> Comparator<Field> thenComparing(
-								Function<? super Field, ? extends U> keyExtractor) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Comparator<Field> thenComparingInt(
-								ToIntFunction<? super Field> keyExtractor) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Comparator<Field> thenComparingLong(
-								ToLongFunction<? super Field> keyExtractor) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-
-						@Override
-						public Comparator<Field> thenComparingDouble(
-								ToDoubleFunction<? super Field> keyExtractor) {
-							// TODO Auto-generated method stub
-							return null;
-						}
-		});
-		
+            resetContent();
+    }
+        
+    private void resetContent() {
+        VBox vbox = (VBox) getContent();
+        vbox.getChildren().clear();
+        
+        SortedList<Field> sorted = _fields.sorted(new Comparator<Field>() {
+                @Override
+                public int compare(Field o1, Field o2) {
+                        return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+        });
+	
 		_entries = new ArrayList<>();
 		for (Field field : sorted) {
 			Entry entry = createEntry(field);
 			_entries.add(entry);
 			vbox.getChildren().add(entry.label);
 		}
-	}
+    }
 	
 	private Entry createEntry(Field field) {
 		final Entry entry = new Entry();
