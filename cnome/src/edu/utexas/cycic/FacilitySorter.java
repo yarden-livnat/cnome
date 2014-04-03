@@ -446,7 +446,6 @@ public class FacilitySorter extends ViewBase {
 				});
 				start.setOnMouseClicked(new EventHandler <MouseEvent>(){
 
-					@Override
 					public void handle(MouseEvent event) {
 						System.out.println(filter);
 						for (int i = 0;i < filter.size();i++){
