@@ -21,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.animation.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 
@@ -58,7 +59,7 @@ public class TimelineDisplay extends ViewBase {
 			setMaxHeight(500);
 			setMinHeight(200);
 			setHeight(250);
-			setVgap (10);
+			setVgap (1);
 			setHgap (1);
 			
 		}
@@ -142,7 +143,7 @@ public class TimelineDisplay extends ViewBase {
 		panel.getChildren().add(yearRange);
 		panel.getChildren().add(interAction);
 		
-		yearRange.setOnMouseReleased(new EventHandler<MouseEvent>(){
+		yearRange.setOnMouseDragged(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
 				MinRange= Integer.parseInt(minNumber.getText ());
@@ -169,12 +170,22 @@ public class TimelineDisplay extends ViewBase {
 		Text mid = new Text (Integer.toString(midV));
 		Text min = new Text (MinRange.toString());
 		Text max = new Text (MaxRange.toString());
-		outputPanel.add (min,0,20,30,5);
-		outputPanel.add (firstQ, (int)outputPanel.getWidth()/4-15,20,30,5);
-		outputPanel.add (mid, (int)outputPanel.getWidth()/2-15,20, 30, 5);
-		outputPanel.add (thirdQ, (int) ((int)3*outputPanel.getWidth()/4-15),20,30,5);
-		outputPanel.add (max, (int) outputPanel.getWidth()-30, 20,30,5);
+		outputPanel.add (min,0,220,30,5);
+		outputPanel.add (firstQ, (int)outputPanel.getWidth()/4-15,220,30,5);
+		outputPanel.add (mid, (int)outputPanel.getWidth()/2-15,220, 30, 5);
+		outputPanel.add (thirdQ, (int) ((int)3*outputPanel.getWidth()/4-15),220,30,5);
+		outputPanel.add (max, (int) outputPanel.getWidth()-30, 220,30,5);
+		Line xLine= new Line (0,240,(int)outputPanel.getWidth()-1,240);
+		outputPanel.add(xLine, 0, 220,(int)outputPanel.getWidth(),1);
+		for (int ii = 10; ii < outputPanel.getWidth() ; ii=ii+10){
+			Line line = new Line (0,0,0,220);
+			line.getStrokeDashArray().addAll(5d, 15d);
+			outputPanel.add (line,0,0,1,230);
+			
+		}
+		
 		displayNodes ();
+		
 		
 	}
 	
