@@ -194,7 +194,9 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				final DatatableWizard wizard = new DatatableWizard();
 				wizard.setItems(_model.getSources());
-				wizard.setSelectedSource(_model.getSelectedDatasource());
+				if(_model.getSelectedDatasource() != null){
+					wizard.setSelectedSource(_model.getSelectedDatasource());
+				}
 				String currDirectory = getLastChosenWorkDirectory();
 				wizard.setWorkDir(currDirectory);
 				ObjectProperty<Table> selection = wizard.show(_screen.getWindow());
@@ -223,7 +225,9 @@ public class CyclistController {
 				final SimulationWizard wizard = new SimulationWizard();
 				
 				wizard.setItems(_model.getSources());
-				wizard.setSelectedSource(_model.getSelectedDatasource());
+				if(_model.getSelectedDatasource() != null){
+					wizard.setSelectedSource(_model.getSelectedDatasource());
+				}
 				String currDirectory = getLastChosenWorkDirectory();
 				wizard.setWorkDir(currDirectory);
 				ObservableList<Simulation> selection = wizard.show(_screen.getWindow());
@@ -425,9 +429,7 @@ public class CyclistController {
 		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
 		
 		//Clear the previous data
-		_model.getSources().clear();
-		_model.getTables().clear();
-		_model.getSimulations().clear();
+		clearModel();
 			
 		// If we have a save file, read it in
 		if(saveFile.exists()){
@@ -565,6 +567,16 @@ public class CyclistController {
 		stage.setHeight(height);
 		stage.setX(x);
 		stage.setY(y);
+	}
+	
+	/*
+	 * Clears the model from an old data.
+	 */
+	private void clearModel(){
+		_model.getSources().clear();
+		_model.getTables().clear();
+		_model.getSimulations().clear();
+		_model.setSelectedDatasource(null);
 	}
 	
 	

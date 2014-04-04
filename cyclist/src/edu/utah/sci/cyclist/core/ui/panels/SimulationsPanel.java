@@ -217,14 +217,17 @@ public class SimulationsPanel extends TitledPanel  {
 		_vbox.getChildren().clear();
 		
 		_entries = new ArrayList<>();
-		if(_items != null){
+		if(_items != null && _items.size()>0){
 			for (Simulation simulation : _items) {
 				Entry entry = createEntry(simulation);
 				_entries.add(entry);
 				_vbox.getChildren().add(entry.title);
 				
 			}
-		}
+		}else{
+				//If the list has been reset - clean the last selection as well.
+				_simulationProperty.set(null);
+	    }
 	}
 		
 	private void select(Entry entry) {
