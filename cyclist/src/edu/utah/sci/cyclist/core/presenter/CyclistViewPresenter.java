@@ -1,6 +1,8 @@
 package edu.utah.sci.cyclist.core.presenter;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
@@ -219,6 +221,11 @@ public class CyclistViewPresenter extends ViewPresenter {
 	public void restore(IMemento memento, Model model) {	
 		super.restore(memento, model);
 		
+		//Clear the old data 
+		//(If loading data after changing workspace there might be some old data from the previous ws)
+		clearData();
+		
+		
 		//Restore the non-remote tables
 		IMemento[] tables = memento.getChildren("Table");
 		for(IMemento table : tables){
@@ -426,5 +433,28 @@ public class CyclistViewPresenter extends ViewPresenter {
 			}
 		}
 		return null;
+	}
+	
+	/*
+	 * Clears the old data from the tool bar.
+	 * (E.g data that was inserted by another workspace etc.)
+	 */
+	private void clearData(){
+		//Clear old simulations
+		List<SelectionModel<Simulation>.Entry> simEntries = new ArrayList<SelectionModel<Simulation>.Entry>(getSelectionModelSim().getEntries());
+		for(SelectionModel<Simulation>.Entry entry : simEntries){
+			if(!entry.remote){
+				removeSimulation(entry.item);
+			}
+		}
+		
+		//Clear old tables
+		List<SelectionModel<Table>.Entry> tblEntries = new ArrayList<SelectionModel<Table>.Entry>(getSelectionModelTbl().getEntries());
+		for(SelectionModel<Table>.Entry entry : tblEntries){
+			if(!entry.remote){
+				removeTable(entry.item);
+			}
+		}
+		
 	}
 }

@@ -212,32 +212,33 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	@Override
 	public void restore(IMemento memento, Model model) {	
 		super.restore(memento, model);
-			if(memento != null){
-				IMemento[] tools = memento.getChildren("Tool");
-				for(IMemento toolMemento : tools)
-				{
-					//Get the location
-					Double x = Double.parseDouble(toolMemento.getString("x"));
-					Double y = Double.parseDouble(toolMemento.getString("y"));
-					
-					double width = Double.parseDouble(toolMemento.getString("width"));
-					double height = Double.parseDouble(toolMemento.getString("height"));
-					
-					String toolName = toolMemento.getString("name");
-					
-					try {
-						Tool tool = ToolsLibrary.createTool(toolName);
-						addTool(tool,x,y);
-						((Region)tool.getView()).setPrefSize(width, height);
-						tool.getPresenter(_localBus).restore(toolMemento, model);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}	
-				}
+		removeOldViews();
+		if(memento != null){
+			IMemento[] tools = memento.getChildren("Tool");
+			for(IMemento toolMemento : tools)
+			{
+				//Get the location
+				Double x = Double.parseDouble(toolMemento.getString("x"));
+				Double y = Double.parseDouble(toolMemento.getString("y"));
+				
+				double width = Double.parseDouble(toolMemento.getString("width"));
+				double height = Double.parseDouble(toolMemento.getString("height"));
+				
+				String toolName = toolMemento.getString("name");
+				
+				try {
+					Tool tool = ToolsLibrary.createTool(toolName);
+					addTool(tool,x,y);
+					((Region)tool.getView()).setPrefSize(width, height);
+					tool.getPresenter(_localBus).restore(toolMemento, model);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
 			}
-			//Reset the dirty flag after restore.
-			setDirtyFlag(false);
+		}
+		//Reset the dirty flag after restore.
+		setDirtyFlag(false);
 	}
 
 	private Presenter addTool(Tool tool, double x, double y) {
@@ -311,16 +312,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				String id = ((SimpleNotification)event).getMsg();
-				for (ViewPresenter presenter : _presenters) {
-					if (presenter.getId().equals(id)) {
-						_presenters.remove(presenter);
-						getWorkspace().removeView((ViewBase)presenter.getView());
-						removePresenterIdFromEventBus(id);
-						break;
-					}
-				}
-				removeTool(id);
-
+				removeView(id);
 			}
 		});
 
@@ -547,6 +539,34 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				 break;
 				 
 			 }
+		 }
+	 }
+	 
+	 /*
+	  * Removes a view from the workspace.
+	  * @param: String id - the id of the view to be removed.
+	  */
+	 private void removeView(String id){
+		 for (ViewPresenter presenter : _presenters) {
+				if (presenter.getId().equals(id)) {
+					_presenters.remove(presenter);
+					getWorkspace().removeView((ViewBase)presenter.getView());
+					removePresenterIdFromEventBus(id);
+					break;
+				}
+		}
+		removeTool(id);
+	 }
+	 
+	 /*
+	  * Clears old views before restoring the new ones.
+	  * (For example when changing the work directory - 
+	  * have to clear the old work directory tools, before loading the tools of the current one.
+	  */
+	 private void removeOldViews(){
+		 List<ViewPresenter> presenters = new ArrayList<>(_presenters);
+		 for (ViewPresenter presenter : presenters) {
+			 removeView(presenter.getId());
 		 }
 	 }
 
