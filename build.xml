@@ -48,6 +48,11 @@
 				<filename name="log4j-1.2.16.jar"/>	
 			</fileset>
 		</copy>
+		<copy todir="deploy/externalLibs">
+			<fileset dir="${basedir}\cyclist\lib">
+				<filename name="commons-io-2.4.jar"/>
+			</fileset>
+		</copy>
 		
 		<mkdir dir="deploy/project" />
 		<copy todir="deploy/project">
@@ -73,6 +78,7 @@
 				<include name="mysql-connector-java-5.1.18-bin.jar"/>
 				<include name="commons-collections-3.2.1.jar"/>
 				<include name="sqlite-jdbc-3.7.2.jar"/>
+				<include name="commons-io-2.4.jar"/>
 			</fileset>
 		</copy>
 	

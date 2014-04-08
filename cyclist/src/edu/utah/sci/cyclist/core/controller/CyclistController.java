@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.URI;
@@ -42,7 +43,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
@@ -62,6 +62,7 @@ import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
+import edu.utah.sci.cyclist.core.util.StreamUtils;
 
 
 public class CyclistController {
@@ -256,10 +257,25 @@ public class CyclistController {
 
 			@Override
 			public void handle(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				selectWorkspace();
+				
+				//If need to save the current workspace data - ask the user whether to save it or not
+				
+				if(_dirtyFlag || _presenter.getDirtyFlag()){
+					SaveWsWizard wizard = new SaveWsWizard();
+					ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
+					selection.addListener(new ChangeListener<Boolean>(){
+						@Override
+						public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+							if(newVal){
+								save();
+							}
+							selectWorkspace();
+						}
+					});
+				}else{
+					selectWorkspace();
+				}
 			}
-			
 		});
 		
 		_screen.onSave().set(new EventHandler<ActionEvent>() {
@@ -506,8 +522,8 @@ public class CyclistController {
 	 */
 	private void readSimulationsTables(){
 		try {
-			URI uri = Cyclist.class.getResource(SIMULATIONS_TABLES_FILE).toURI();
-			File simulationsFile = new File(uri);
+			InputStream in = Cyclist.class.getResourceAsStream(SIMULATIONS_TABLES_FILE);
+			File simulationsFile = StreamUtils.stream2file(in);
 			if(simulationsFile.exists()){
 				
 				Reader reader = new FileReader(simulationsFile);
