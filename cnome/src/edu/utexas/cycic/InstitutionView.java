@@ -23,14 +23,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 /**
- * A view used to build and develope instutitions for the simulation 
+ * A view used to build and develop institutions for the simulation 
  * currently being built. 
  * @author Robert
  *
  */
 public class InstitutionView extends ViewBase{
 	/**
-	 * Initiates a new window for building and modifying instutitions. 
+	 * Initiates a new window for building and modifying institutions. 
 	 */
 	public InstitutionView(){
 		super();

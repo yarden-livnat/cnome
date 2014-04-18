@@ -2,10 +2,7 @@ package edu.utexas.cycic;
 
 import java.io.File;
 
-import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
