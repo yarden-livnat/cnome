@@ -96,7 +96,6 @@ public class ChartView extends CyclistViewBase {
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
 
 	private Closure.V0 _onDuplicate = null;
-	private Simulation _currentSim = null;
 	
 	private MapSpec _spec;
 
@@ -210,23 +209,15 @@ public class ChartView extends CyclistViewBase {
 
 	@Override
 	public void selectSimulation(Simulation sim, boolean active) {
-		super.selectSimulation(sim, active);
-		
-		if (!active && sim != _currentSim) {
-			return; // ignore
-		}
-		
-		_currentSim = active? sim : null;
-		
+		super.selectSimulation(sim, active);	
 		updateFilters();
 	}
 	
 	private void updateFilters() {
-		Table currentTable = getCurrentTable();
-		CyclistDatasource ds = currentTable != null ? currentTable.getDataSource() : 
-			_currentSim != null ? _currentSim.getDataSource() : null;
 		
-		if (_currentSim != null)
+		CyclistDatasource ds = getAvailableDatasource();
+		
+		if (ds != null)
 		for (Filter filter : filters()) {
 			filter.setDatasource(ds);
 		}
@@ -330,7 +321,8 @@ public class ChartView extends CyclistViewBase {
 				for (Field field : _lodArea.getFields()) {
 					_spec.lod.add(new FieldInfo(field, order.indexOf(field)));
 				}
-				CyclistDatasource ds = _currentSim != null ? _currentSim.getDataSource() : null;
+	            Simulation currentSim = getCurrentSimulation();
+				CyclistDatasource ds = currentSim != null ? currentSim.getDataSource() : null;
 				
 				Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 					@Override
@@ -905,12 +897,18 @@ public class ChartView extends CyclistViewBase {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
 				boolean update = false;
+				
+				CyclistDatasource ds = getAvailableDatasource();
+				
 				while (change.next()) {
 					for (Filter f : change.getRemoved()) {
 						update = update || f.isActive();
 						f.removeListener(_filterListener);
 					}
 					for (Filter f : change.getAddedSubList()) {
+						//For a new filter - add the current data source as its data source.
+						f.setDatasource(ds);
+							
 						update = update || f.isActive();
 						f.addListener(_filterListener);
 					}
@@ -1414,6 +1412,21 @@ public class ChartView extends CyclistViewBase {
 				_indicators.add(indicator);
 			}
 		});
+	}
+	
+	/*
+	 * Tries to find an available data source either from the current table or the current simulation.
+	 * @return CyclistDatasource - the data source which has been found.
+	 */
+	private CyclistDatasource getAvailableDatasource(){
+		Table currentTable = getCurrentTable();
+		Simulation currentSim = getCurrentSimulation();
+		
+		CyclistDatasource ds = (currentTable != null && currentTable.getDataSource()!= null) ? 
+				currentTable.getDataSource() : 
+				currentSim != null ? currentSim.getDataSource() : null;
+		return ds;
+				
 	}
 
 	/*Name: removeFilterFromDropArea

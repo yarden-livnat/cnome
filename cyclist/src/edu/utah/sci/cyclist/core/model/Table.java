@@ -501,7 +501,7 @@ public class Table {
 	}
 	
 	public Task<ObservableList<Object>> getFieldValues(CyclistDatasource ds1, final Field field, boolean force) {
-		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
+		final CyclistDatasource ds = getAvailableDataSource(ds1,force);
 			
 		Task<ObservableList<Object>> task = new Task<ObservableList<Object>>() {
 			@Override
@@ -568,8 +568,7 @@ public class Table {
 	}
 	
 	public ObservableList<TableRow> getRows(CyclistDatasource ds1, final String query, boolean force) throws SQLException {
-		CyclistDatasource lds = getDataSource();
-		final CyclistDatasource ds = force ? ( ds1 != null ? ds1 : lds ) : (lds != null ? lds : ds1);//		
+		final CyclistDatasource ds = getAvailableDataSource(ds1,force);	
 		List<TableRow> rows = new ArrayList<>();
 		try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
 			long t1 = System.currentTimeMillis();
@@ -591,11 +590,16 @@ public class Table {
 			}
 			long t3 = System.currentTimeMillis();
 			System.out.println("gathering time: "+(t3-t2)/1000.0);
-		} finally {
-			ds.releaseConnection();
+			return FXCollections.observableList(rows);
+		} catch(Exception ex){
+			System.out.println("Getting rows failed");
+			ex.printStackTrace(); //Cannot use "log.warn()" here since it is not a javafx thread, so it will throw an exception. 
+			return FXCollections.observableList(rows);
+		}finally {
+			if(ds != null){
+				ds.releaseConnection();
+			}
 		}
-		
-		return FXCollections.observableList(rows);
 	}
 			
 //	public Task<ObservableList<TableRow>> getRows(final String query) {
@@ -683,7 +687,7 @@ public class Table {
 	}
 	
 	public ReadOnlyObjectProperty<ObservableList<TableRow>> getRows(CyclistDatasource ds1,  final List<Field> fields, final int limit, boolean force) {
-		final CyclistDatasource ds = (!force || ds1 == null) ?  getDataSource(): ds1;
+		final CyclistDatasource ds = getAvailableDataSource(ds1,force);
 
 		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 
@@ -717,7 +721,9 @@ public class Table {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} finally {
-					ds.releaseConnection();
+					if(ds != null){
+						ds.releaseConnection();
+					}
 				}
 				
 				return FXCollections.observableList(rows);
@@ -891,13 +897,37 @@ public class Table {
 		}
 	}
 	
+	/*
+	 * Returns the currently available data source.
+	 * 
+	 * @param CyclistDatasource externalDs - suggested data source other than the table's data source.
+	 * @param boolean force - whether the external data source must be applied 
+	 * 		  (even it the table has its own data source), or not.
+	 * @return CyclistDatasource
+	 */
+	private CyclistDatasource getAvailableDataSource(CyclistDatasource externalDs, boolean force){
+		CyclistDatasource lds = getDataSource();
+		CyclistDatasource ds = force ? ( externalDs != null ? externalDs : lds ) : (lds != null ? lds : externalDs);
+		return ds;
+	}
+	
+	
+	public Task<ObservableMap<Object,Object>> getFieldRange(final Field field) {
+		CyclistDatasource ds = getDataSource();
+		return getFieldRange(ds, field);
+	}
+	
+	public Task<ObservableMap<Object,Object>> getFieldRange(CyclistDatasource ds, final Field field)
+	{
+		return getFieldRange(ds, field, false);
+	}
 	
 	/* Name: getFieldRange
 	 * For a numeric field filter - gets the minimum and maximum values within its possible range, for any possible grouping.
 	 * It checks for the field SQL function and finds the values accordingly. 
 	 */
-	public Task<ObservableMap<Object, Object>> getFieldRange(final Field field) {
-		final CyclistDatasource ds = getDataSource();
+	public Task<ObservableMap<Object, Object>> getFieldRange(CyclistDatasource externalDs, final Field field, boolean force) {
+		final CyclistDatasource ds = getAvailableDataSource(externalDs, force);
 		
 		Task<ObservableMap<Object, Object>> task = new Task<ObservableMap<Object, Object>>() {
 			

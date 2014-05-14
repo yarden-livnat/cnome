@@ -85,6 +85,10 @@ public class Filter implements Observable {
 		_ds = ds;
 	}
 	
+	public CyclistDatasource getDatasource(){
+		return _ds;
+	}
+	
 	public Field getField() {
 		return _field;
 	}
