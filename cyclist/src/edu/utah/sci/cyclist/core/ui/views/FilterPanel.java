@@ -194,6 +194,8 @@ public class FilterPanel extends TitledPanel {
 			}
 		});
 		
+		_filter.setOnDSUpdated((Void)->configure());
+		
 		
 		configure();
 	}

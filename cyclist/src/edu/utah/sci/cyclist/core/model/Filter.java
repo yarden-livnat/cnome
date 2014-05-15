@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -23,7 +24,7 @@ import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 public class Filter implements Observable {
 	
 	private boolean _valid = true;
-	private String _value = "true";
+	private String _value = "1=1";  //Sqlite doesn't accept "where true" but accepts "where 1=1".
 	private CyclistDatasource _ds = null;
 	private Field _field;
 	private DataType _dataType;
@@ -32,6 +33,8 @@ public class Filter implements Observable {
 	private List<InvalidationListener> _listeners = new ArrayList<>();
 	private MapProperty<Object, Object> _rangeValues = new SimpleMapProperty<>();
 	private Map<Object,Object> _selectedRangeValues = new HashMap<>();
+	private  Consumer<Void> _onDSUpdated = null;
+	private Boolean _dsChanged = true;
 	
 	public Filter(Field field) {
 		this(field, true);
@@ -79,10 +82,18 @@ public class Filter implements Observable {
 		}	
 	}
 	
+	public void setOnDSUpdated(Consumer<Void> action){
+		_onDSUpdated = action;
+	}
+	
 	public void setDatasource(CyclistDatasource ds) {
 		if (_ds == ds) return;
 		
 		_ds = ds;
+		_dsChanged = true;
+		if(_onDSUpdated != null){
+			_onDSUpdated.accept(null);
+		}
 	}
 	
 	public CyclistDatasource getDatasource(){
@@ -122,11 +133,15 @@ public class Filter implements Observable {
 	}
 	
 	public boolean isValid() {
-		return getValues() != null;
+		Boolean reply = getValues() != null && !_dsChanged;
+		_dsChanged = false;
+		return reply;
 	}
 	
 	public boolean isRangeValid() {
-		return _field.getRangeValues() != null;
+		Boolean reply =  _field.getRangeValues() != null && !_dsChanged;
+		_dsChanged = false;
+		return reply;
 	}
 	
 	public ObservableList<Object> getValues() {

@@ -508,7 +508,7 @@ public class Table {
 			protected ObservableList<Object> call() throws Exception {
 				List<Object> values = new ArrayList<>();
 				if (ds != null) {
-					values = readFieldValuesFromFile(field.getName());
+					values = readFieldValuesFromFile(field.getName(),ds);
 					if(values.size() == 0)
 					{
 						try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
@@ -537,7 +537,7 @@ public class Table {
 						
 							long t3 = System.currentTimeMillis();
 							System.out.println("gathering time: "+(t3-t2)/1000.0);
-							writeFieldValuesToFile(field.getName(), values);
+							writeFieldValuesToFile(field.getName(), ds, values);
 						} catch (SQLException e) {
 							System.out.println("task sql exception: "+e.getLocalizedMessage());
 							updateMessage(e.getLocalizedMessage());
@@ -760,13 +760,13 @@ public class Table {
 	/* Saves the values of a chosen filter into a file 
 	 * Creates an xml file with the table name, and writes the filter's field name and its values
 	 * If the field already exist in the file - do nothing. */
-	private void writeFieldValuesToFile(String fieldName, List<Object> values){
+	private void writeFieldValuesToFile(String fieldName, CyclistDatasource ds, List<Object> values){
 		if(_saveDir == ""){
 			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
 		}
 		
 		// If the save directory does not exist, create it
-		File saveDir = new File(_saveDir+ "/" + getDataSource()+"/");
+		File saveDir = new File(_saveDir+ "/" + ds.getUID() +"/");
 		if (!saveDir.exists()){
 			saveDir.mkdir();
 		}
@@ -867,7 +867,7 @@ public class Table {
 	/* Reads distinct values from a file 
 	 * For a given field in a given table- 
 	 * if the table xml file exists and it contains the field values - read the values from the file */
-	private List<Object> readFieldValuesFromFile(String fieldName){
+	private List<Object> readFieldValuesFromFile(String fieldName, CyclistDatasource ds){
 		
 		List<Object> values = new ArrayList<>();
 		if(_saveDir == ""){
@@ -875,7 +875,7 @@ public class Table {
 		}
 		
 		// If the save file does not exist - return an empty list.
-		File saveFile = new File(_saveDir+ "/" + getDataSource() +"/"+ getName() + ".xml");
+		File saveFile = new File(_saveDir+ "/" + ds.getUID() +"/"+ getName() + ".xml");
 		if (!saveFile.exists()){
 			return values;
 		} else{
