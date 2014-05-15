@@ -29,8 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.net.URI;
 import java.util.Arrays;
+
+import org.apache.log4j.Logger;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -58,6 +59,7 @@ import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
+import edu.utah.sci.cyclist.core.ui.components.SQLitePage;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
@@ -521,11 +523,11 @@ public class CyclistController {
 	 * The tables are added to the model tables list.
 	 */
 	private void readSimulationsTables(){
+		Logger log = Logger.getLogger(SQLitePage.class);
 		try {
 			InputStream in = Cyclist.class.getResourceAsStream(SIMULATIONS_TABLES_FILE);
 			File simulationsFile = StreamUtils.stream2file(in);
 			if(simulationsFile.exists()){
-				
 				Reader reader = new FileReader(simulationsFile);
 				// Create the root memento
 				XMLMemento memento = XMLMemento.createReadRoot(reader);
@@ -542,7 +544,8 @@ public class CyclistController {
 				}
 			}
 		} catch (Exception e) {
-				e.printStackTrace();
+			log.info("Exception " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	

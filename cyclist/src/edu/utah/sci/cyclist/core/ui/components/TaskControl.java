@@ -54,7 +54,8 @@ public class TaskControl extends HBox {
 					_status.setVisible(true);
 					_status.setManaged(true);
 					String error = _task.getException().getLocalizedMessage();	
-					_msg.setText(error.substring(0, error.indexOf("\n")));
+					int n = error.indexOf("\n");
+					_msg.setText(n > 0 ? error.substring(0,n) : error);
 					logger.warn("Error:"+_task.getException().getLocalizedMessage());
 				}
 			});
