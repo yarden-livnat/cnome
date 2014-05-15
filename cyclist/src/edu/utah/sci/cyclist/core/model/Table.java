@@ -87,6 +87,10 @@ public class Table {
 	private int _dataSubset;
 	private String _saveDir = "";
 	private Boolean _isStandardSimulation = false;
+	//Holds the list of values of a field in the current table in a specified data source.
+	//First key - the data source.
+	//Then inside the specified data source it maps between a field and a list of values. 
+	private Map<String,Map<String,List<Object>>> _cachedFieldsValues = new HashMap<>();
 	
 	public Table() {
 		this("");
@@ -508,7 +512,11 @@ public class Table {
 			protected ObservableList<Object> call() throws Exception {
 				List<Object> values = new ArrayList<>();
 				if (ds != null) {
-					values = readFieldValuesFromFile(field.getName(),ds);
+					values = readFieldValuesFromCache(field.getName(), ds);
+					//If couldn't find in the cache - try from the file.
+					if(values.size() == 0){
+						values = readFieldValuesFromFile(field.getName(),ds);
+					}
 					if(values.size() == 0)
 					{
 						try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
@@ -537,6 +545,7 @@ public class Table {
 						
 							long t3 = System.currentTimeMillis();
 							System.out.println("gathering time: "+(t3-t2)/1000.0);
+							writeFieldValuesToCache(field.getName(), ds, values);
 							writeFieldValuesToFile(field.getName(), ds, values);
 						} catch (SQLException e) {
 							System.out.println("task sql exception: "+e.getLocalizedMessage());
@@ -864,6 +873,49 @@ public class Table {
 		 FieldNode.putTextData(sb.toString());
 	}
 	
+	/* Saves a distinct values list to the cache.
+	 * For a given field in the current table in the specified data source - 
+	 * write the list values to the cache, where the keys are the field and the data source.
+	 * 
+	 * @param String fieldName - the field to use as a key in the map.
+	 * @param  CyclistDatasource ds - the data source to to use as a key in the map.
+	 * @param List<Object> - the list of values to write in the cache for the specified keys.  */
+	private void writeFieldValuesToCache(String fieldName, CyclistDatasource ds, List<Object> values){
+		
+		Map<String,List<Object>> fieldValues = _cachedFieldsValues.get(ds.getUID());
+		
+		if(fieldValues == null){
+			fieldValues = new HashMap<String,List<Object>>();
+			fieldValues.put(fieldName, values);
+			_cachedFieldsValues.put(ds.getUID(), fieldValues);
+			
+		} else{
+			fieldValues.put(fieldName, values);
+		}
+		
+		System.out.println("Just for test");
+	}
+	
+	/* Reads distinct values from the cache.
+	 * For a given field in the current table in the specified data source - 
+	 * if the data source key and the field key exist in the cache - read its values from the cache.
+	 * 
+	 * @param String fieldName - the field to look for in the map.
+	 * @param  CyclistDatasource ds - the data source to look for in the map   
+	 * @return List<Object> - the list of values found for the given data source and field.
+	 *                        (returns an empty list if not found)  */
+	
+	private List<Object> readFieldValuesFromCache(String fieldName, CyclistDatasource ds){
+		List<Object> values = new ArrayList<>();
+		Map<String,List<Object>> fieldValues = _cachedFieldsValues.get(ds.getUID());
+		if(fieldValues != null){
+			if(fieldValues.get(fieldName) != null){
+				values = fieldValues.get(fieldName);
+			}
+		}
+		return values;
+	}
+	
 	/* Reads distinct values from a file 
 	 * For a given field in a given table- 
 	 * if the table xml file exists and it contains the field values - read the values from the file */
@@ -889,6 +941,11 @@ public class Table {
 					 for(String value: tmpValues){
 						 values.add(value);
 					 }
+				 }
+				 //If reading from file - it means the values weren't found in the cache.
+				 //Save them in the cache for the next time.
+				 if(values.size() >0){
+					 writeFieldValuesToCache(fieldName, ds, values);
 				 }
 				 return values;
 			 }catch(Exception e){
