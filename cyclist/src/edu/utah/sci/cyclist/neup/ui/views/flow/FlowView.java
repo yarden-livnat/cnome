@@ -79,7 +79,6 @@ public class FlowView extends CyclistViewBase {
 	private List<Connector> _connectors = new ArrayList<>();
 	private Map<String, InventoryEntry> _selectedNodes = new HashMap<>();
 
-	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
 	private int _targetLine = -1;
 	private boolean _changingKid = false;
@@ -116,12 +115,6 @@ public class FlowView extends CyclistViewBase {
 	@Override
 	public void selectSimulation(Simulation sim, boolean active) {
 		super.selectSimulation(sim, active);
-		
-		if (!active && sim != _currentSim) {
-			return; // ignore
-		}
-		
-		_currentSim = active? sim : null;
 		update();
 	}
 	
@@ -139,10 +132,11 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private void update() {
-		if (_currentSim == null) {
+		Simulation currentSim = getCurrentSimulation();
+		if (currentSim == null) {
 			_simProxy = null;
 		}
-		_simProxy = new SimulationProxy(_currentSim);
+		_simProxy = new SimulationProxy(currentSim);
 		
 		fetchFacilities();
 	}

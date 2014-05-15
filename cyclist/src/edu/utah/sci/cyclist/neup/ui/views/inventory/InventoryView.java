@@ -70,7 +70,6 @@ public class InventoryView extends CyclistViewBase {
 	private ObservableList<String> _nuclideFilterNames = FXCollections.observableArrayList();
 	private ObjectProperty<Predicate<Inventory>> _currentNuclideFilterProperty = new SimpleObjectProperty<>();
 	
-	private Simulation _currentSim = null;
 	private SimulationProxy _simProxy = null;
 		
 	private InventoryChart _chart;
@@ -89,12 +88,8 @@ public class InventoryView extends CyclistViewBase {
 	public void selectSimulation(Simulation sim, boolean active) {
 		super.selectSimulation(sim, active);
 		
-		if (!active && sim != _currentSim) {
-			return; // ignore
-		}
-		
-		_currentSim = active? sim : null;
-		_simProxy = _currentSim == null ?  null : new SimulationProxy(_currentSim);
+		Simulation currentSim = getCurrentSimulation();
+		_simProxy = currentSim == null ?  null : new SimulationProxy(currentSim);
 		
 		for (AgentInfo info : _agents) {
 			info.inventory.unbind();

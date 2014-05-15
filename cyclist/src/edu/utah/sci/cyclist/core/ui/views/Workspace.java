@@ -24,6 +24,7 @@ package edu.utah.sci.cyclist.core.ui.views;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -42,6 +43,9 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.CyclistDropEvent;
+import edu.utah.sci.cyclist.core.model.CyclistDatasource;
+import edu.utah.sci.cyclist.core.model.Filter;
+import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
@@ -69,6 +73,8 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
 	private Closure.V4<Tool, Table, Double, Double> _onShowTable = null;
+	
+	private Table _currentTable = null;
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
 		_onToolDrop = action;
@@ -224,7 +230,38 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 				event.consume();
 			}
 		});
+		filters().addListener(new ListChangeListener<Filter>() {
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+				Simulation currentSim = getCurrentSimulation();
+				CyclistDatasource ds = (_currentTable != null && _currentTable.getDataSource()!= null) ? 
+										_currentTable.getDataSource() : 
+										currentSim != null ? currentSim.getDataSource() : null;
+				while (change.next()) {
+					for (Filter f : change.getAddedSubList()) {
+						//For a new filter - add the current simulation data source as its data source.
+						if(currentSim != null){
+							f.setDatasource(ds);
+						}
+					}
+				}
+			}
+		});
 	}
+	
+	@Override
+	public void selectSimulation(Simulation sim, boolean active) {
+		super.selectSimulation(sim, active);
+		updateFilters();
+	}
+	
+	@Override 
+	public void selectTable(Table table, boolean active){
+		if(active && table != _currentTable){
+			_currentTable = table;
+		}
+	};
 	
 	
 	@Override
@@ -306,6 +343,21 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	
 	public void removePanel(TitledPanel panel) {
 		_filtersPane.remove(panel);
+	}
+	
+	/*
+	 * For each filter - update the current data source.
+	 */
+	private void updateFilters() {
+		Simulation currentSim = getCurrentSimulation();
+		CyclistDatasource ds = (_currentTable != null &&  _currentTable.getDataSource()!= null) ? 
+								_currentTable.getDataSource() : 
+							    currentSim != null ? currentSim.getDataSource() : null;
+		
+		if (currentSim != null)
+		for (Filter filter : filters()) {
+			filter.setDatasource(ds);
+		}
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

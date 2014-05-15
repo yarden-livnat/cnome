@@ -74,6 +74,8 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private boolean _supportsFiltering = true;
 	private boolean _supportsTables = true;
 	
+	private Simulation _currentSim = null;
+	
 	// Actions
 	private Closure.V1<Table> _onTableDrop = null;
 	private Closure.V1<Table> _onTableRemoved = null;
@@ -317,18 +319,27 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	 * @param boolean value : whether to select or deselect the button.
 	 */
 	@Override
-	public void selectSimulation(Simulation simulation, boolean value) {
-		if (value)
+	public void selectSimulation(Simulation simulation, boolean active) {
+		if (active)
 			_simChoice.setValue(simulation.getAlias());
 		else if (simulation.getAlias().equals(_simChoice.getValue())) {
 			_simChoice.setValue(null);
 		}
+		if (!active && simulation != _currentSim) {
+			return; // ignore
+		}
+		
+		_currentSim = active? simulation : null;
 	}
-	
 	
 	//Let the sub classes have access to the filters area
 	protected FilterArea getFiltersArea(){
 		return _filtersArea;
+	}
+	
+	//Let the sub classes have access to the current simulation.
+	protected Simulation getCurrentSimulation(){
+		return _currentSim;
 	}
 	
 	public ObservableList<Filter> filters() {

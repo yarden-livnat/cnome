@@ -240,7 +240,7 @@ public class FilterPanel extends TitledPanel {
 			Field field = _filter.getField();
 			Table table = field.getTable();
 			
-			Task<ObservableList<Object>> task = table.getFieldValues(field);		
+			Task<ObservableList<Object>> task = table.getFieldValues(_filter.getDatasource(),field);
 			setTask(task);
 
 			field.valuesProperty().bind(task.valueProperty());
@@ -320,7 +320,7 @@ public class FilterPanel extends TitledPanel {
 			Field field = _filter.getField();
 			Table table = field.getTable();
 			
-			Task<ObservableMap<Object,Object>> task = table.getFieldRange(field);
+			Task<ObservableMap<Object,Object>> task = table.getFieldRange( _filter.getDatasource(), field);
 			setTask(task);
 			field.rangeValuesProperty().bind(task.valueProperty());
 		}

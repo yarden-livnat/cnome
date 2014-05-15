@@ -67,7 +67,6 @@ public class SimpleTableView extends CyclistViewBase {
 	
 	private TableView<TableRow> _tableView;
 	private Table _currentTable = null;
-	private Simulation _currentSim = null;
 	private Field _simField; 
 	private Filter _simFilter; 
 	
@@ -124,20 +123,8 @@ public class SimpleTableView extends CyclistViewBase {
 	public void selectSimulation(Simulation sim, boolean active) {
 		super.selectSimulation(sim, active);
 		
-		if (!active && sim != _currentSim) {
-			// ignore
-			return;
-		}
-		
-		
-		if (active) {
-			_currentSim = sim;				
-		} else {
-			_currentSim = null;
-		}
-		
 		_simFilter = null;
-		if (_currentSim != null) {
+		if (getCurrentSimulation() != null) {
 			if (_simField != null) {
 				_simField.getValues().removeAll();
 				_simField.getValues().add(sim.getSimulationId());
@@ -202,8 +189,9 @@ public class SimpleTableView extends CyclistViewBase {
 	}
 	
 	private void fetchRows() {	
+		Simulation currentSim = getCurrentSimulation();
 		if (_currentTable == null 
-				|| (_currentTable.getDataSource() == null && _currentSim == null)) 
+				|| (_currentTable.getDataSource() == null && currentSim == null)) 
 		{
 			return;
 		}
@@ -215,7 +203,7 @@ public class SimpleTableView extends CyclistViewBase {
 			@Override
 			protected ObservableList<TableRow> call() throws Exception {
 				TableProxy proxy = new TableProxy(_currentTable);
-				CyclistDatasource ds = _currentSim != null? _currentSim.getDataSource() : null;
+				CyclistDatasource ds = currentSim != null? currentSim.getDataSource() : null;
 				
 				return proxy.getRows(ds, query, 10000);
 			}
