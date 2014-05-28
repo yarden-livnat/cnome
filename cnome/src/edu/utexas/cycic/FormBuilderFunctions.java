@@ -167,7 +167,6 @@ public class FormBuilderFunctions {
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
-
 			}
 		});
 		return textField;
