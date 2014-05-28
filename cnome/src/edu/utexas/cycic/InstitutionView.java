@@ -124,9 +124,7 @@ public class InstitutionView extends ViewBase{
 			public void handle(MouseEvent e){
 				addNewProtoBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (facilityNode child: node.facilityClones) {
-						addNewProtoBox.getItems().add((String)child.name);
-					}
+					addNewProtoBox.getItems().add((String)node.name);
 				}
 			}
 		});
@@ -141,7 +139,6 @@ public class InstitutionView extends ViewBase{
 				for (String facility: workingInstit.availPrototypes){
 					prototypeList.getItems().add(facility);
 				}
-
 			}
 		});
 		
@@ -151,9 +148,7 @@ public class InstitutionView extends ViewBase{
 			public void handle(MouseEvent e){
 				addNewFacBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (facilityNode child: node.facilityClones) {
-						addNewFacBox.getItems().add((String)child.name);
-					}
+						addNewFacBox.getItems().add((String)node.name);
 				}
 			}
 		});
@@ -220,8 +215,8 @@ public class InstitutionView extends ViewBase{
 		topGrid.add(addAvailFac, 2, 3);
 		topGrid.setHgap(10);
 		
-		topGrid.add(new Label("Name"), 0, 4);
-		topGrid.add(FormBuilderFunctions.institNameBuilder(workingInstit), 1, 4);
+/*		topGrid.add(new Label("Name"), 0, 4);
+		topGrid.add(FormBuilderFunctions.institNameBuilder(workingInstit), 1, 4);*/
 		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);

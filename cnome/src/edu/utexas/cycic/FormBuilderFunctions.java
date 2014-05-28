@@ -160,16 +160,20 @@ public class FormBuilderFunctions {
 		return textField;
 	}
 	
-
+	/**
+	 * 
+	 * @param node
+	 * @return
+	 */
 	static TextField institNameBuilder(final instituteNode node){
-		TextField textField = new TextField();
+		TextField textName = new TextField();
 		
-		textField.textProperty().addListener(new ChangeListener<String>(){         
+		textName.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				node.name = (String) newValue;
+				node.name = newValue;
 			}
 		});
-		return textField;
+		return textName;
 	}
 	/**
 	 * This function builds the slider for continuous ranges given a minimum and maximum. 
