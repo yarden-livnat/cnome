@@ -168,6 +168,11 @@ public class Field {
 		return getName().equals(field.getName()) && getType() == field.getType();
 	}
 	
+	public boolean similarWithTable(Field field) {
+		return getName().equals(field.getName()) && getType() == field.getType() && getTable() == field.getTable();
+	}
+	
+	
 	// Save this field
 	public void save(IMemento memento) {
 	

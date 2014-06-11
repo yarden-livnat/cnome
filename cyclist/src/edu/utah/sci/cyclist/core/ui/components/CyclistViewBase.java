@@ -475,11 +475,12 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 				// check if a field
 				else if (getLocalClipboard().hasContent(DnD.FIELD_FORMAT) ) {
 					if (_supportsFiltering) {
-	                    Field field = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
-	                    if (field != null) {
+	                    Field oldField = getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class);
+	                    if(oldField != null){
+	                    	Field field = new Field(getLocalClipboard().get(DnD.FIELD_FORMAT, Field.class));
 	                        boolean found = false;
 	                    	for (Filter f : _filtersArea.getFilters()) {
-	                    		if (f.getField() == field) {
+	                    		if (f.getField().similarWithTable(field)) {
 	                    			// already have a filter for this field
 	                    			found = true;
 	                    			break;
