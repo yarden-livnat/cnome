@@ -163,7 +163,13 @@ public class CyclistViewPresenter extends ViewPresenter {
 			_selectionModelSim.setOnSelectItemAction(new Closure.V2<Simulation, Boolean>() {
 				@Override
 				public void call(Simulation simulation, Boolean value) {
-					getView().selectSimulation(simulation, value);			
+					getView().selectSimulation(simulation, value);
+					//If simulation becomes active
+					if(value){
+						updateSimulationData();
+					}else{
+						removeSimulationData();
+					}
 				}
 			
 			});
@@ -316,6 +322,20 @@ public class CyclistViewPresenter extends ViewPresenter {
 	protected void addLocalSimulation(Simulation simulation){
 		getView().addSimulation(simulation, false /*remote*/, true /* active */);
 		getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
+	}
+	
+	/*
+	 * Update the view data after a new simulation has been selected.
+	 * Mainly for the different views to implement, depending on the data the specific view consumes.
+	 */
+	protected void updateSimulationData(){	
+	}
+	
+	/*
+	 * Update the view data after a simulation has been removed.
+	 * Mainly for the different views to implement, depending on the data the specific view consumes.
+	 */
+	protected void removeSimulationData(){	
 	}
 	
 	/*

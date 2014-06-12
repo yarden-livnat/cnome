@@ -188,6 +188,14 @@ public class ChartView extends CyclistViewBase {
 	public void setForceZero(Boolean value) {
 		_forceZeroProperty.set(value);
 	}
+	
+	public void updateSimulationData(){
+		fetchData();
+	}
+	
+	public void removeSimulationData(){
+		invalidateChart();
+	}
 
 	@Override
 	public void selectTable(Table table, boolean active) {

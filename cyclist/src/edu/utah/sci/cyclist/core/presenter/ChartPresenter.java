@@ -61,6 +61,16 @@ public class ChartPresenter extends CyclistViewPresenter {
 		return (ChartView) super.getView();
 	}
 	
+	@Override
+	public void updateSimulationData(){
+		getView().updateSimulationData();
+	}
+	
+	@Override
+	public void removeSimulationData(){
+		getView().removeSimulationData();
+	}
+	
 	/**
 	 * setView
 	 * @param view
