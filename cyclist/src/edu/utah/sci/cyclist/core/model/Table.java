@@ -601,8 +601,8 @@ public class Table {
 			System.out.println("gathering time: "+(t3-t2)/1000.0);
 			return FXCollections.observableList(rows);
 		} catch(Exception ex){
-			System.out.println("Getting rows failed");
-			ex.printStackTrace(); //Cannot use "log.warn()" here since it is not a javafx thread, so it will throw an exception. 
+			System.out.println("Getting rows failed - No data source");
+//			ex.printStackTrace(); //Cannot use "log.warn()" here since it is not a javafx thread, so it will throw an exception. 
 			return FXCollections.observableList(rows);
 		}finally {
 			if(ds != null){
@@ -892,8 +892,6 @@ public class Table {
 		} else{
 			fieldValues.put(fieldName, values);
 		}
-		
-		System.out.println("Just for test");
 	}
 	
 	/* Reads distinct values from the cache.

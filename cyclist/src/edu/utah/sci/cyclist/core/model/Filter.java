@@ -61,19 +61,23 @@ public class Filter implements Observable {
 			}
 			
 			_field.valuesProperty().addListener((Observable o)-> {
-				if (getValues() != null)
+				_selectedItems.clear();  //TBD - should clear the previous values???
+				if (getValues() != null){
 					_selectedItems.addAll(getValues());
-				else
-					_selectedItems.clear();
+				}
+				else{
+					resetFilterValues();
+				}
 				_values.set(getValues());
 			});
 			
 			_field.rangeValuesProperty().addListener((Observable o)-> {
+				_selectedRangeValues.clear();
 				if (_field.getRangeValues() != null){	
 					_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
 					_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
 				}else{
-					_selectedRangeValues.clear();
+					resetFilterValues();
 				}
 				
 				_rangeValues.set(_field.getRangeValues());
@@ -208,6 +212,18 @@ public class Filter implements Observable {
 			for (InvalidationListener listener : _listeners) {
 				listener.invalidated(this);
 			}
+		}
+	}
+	
+	/*
+	 * Reset the filter to include all the values.
+	 * (As when it is first created)
+	 * Is used when a new simulation brings new set of values to the filter, so the old selected values have to be removed.
+	 * ===  TBD - Might change depending on the request of what to do if the data source of the filter has been changed. ===  
+	 */
+	private void resetFilterValues(){
+		if (_valid) {
+			_value = "1=1";
 		}
 	}
 	
