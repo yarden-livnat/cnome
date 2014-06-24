@@ -58,6 +58,10 @@
  	-fx-padding:2;
  }
  
+ .sim-box {
+ 	-fx-padding: 0;
+ }
+ 
 /* 
  * Flat Button
  */
@@ -110,6 +114,25 @@
 	-fx-background-insets: 0, 1, 1 1 1 1;
 }
 
+.flat-menu-button {
+	-fx-background-color:transparent;
+	-fx-text-fill: black;
+	-fx-padding: 0;
+	-fx-alignment: bottom-left;
+	-fx-max-height: 3px;
+}
+
+.sim-cell:filled:selected,.sim-cell:filled:selected:hover, .sim-cell:filled:selected:focused
+{
+	-fx-background-color: transparent;
+	-fx-text-fill: -fx-text-base-color;
+}
+
+ .combo-box-popup .list-view .list-cell:filled:selected:hover
+{
+	-fx-background-color: -fx-selection-bar;
+	-fx-text-fill: -fx-text-base-color;
+}
 
 .entry:hover{
 	-fx-background-color:#e0e0e0;

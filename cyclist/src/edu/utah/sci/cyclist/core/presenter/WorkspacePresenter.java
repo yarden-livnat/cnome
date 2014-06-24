@@ -157,9 +157,13 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				}                                
 			});
 
+			final Closure.V1<Filter> onShowFunc = workspace.getOnShowFilter();;
 			workspace.setOnShowFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
+					if(onShowFunc != null){
+						onShowFunc.call(filter);
+					}
 					broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
 			});

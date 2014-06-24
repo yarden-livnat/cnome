@@ -6,6 +6,7 @@ import java.util.List;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
@@ -13,6 +14,7 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.core.event.notification.CyclistSimulationNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
@@ -66,6 +68,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 			getView().setOnShowFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
+					_dirtyFlag = true;
 					broadcast(new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
 			});
@@ -73,6 +76,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 			getView().setOnRemoveFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
+					_dirtyFlag = true;
 					broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_FILTER, filter));
 				}
 			});
@@ -214,6 +218,16 @@ public class CyclistViewPresenter extends ViewPresenter {
 				memento.putString("selectedSim", _selectionModelSim.getSelected().getSimulationId());
 			}
 		}
+		//Filters
+		for(Filter filter :getView().filters() ){
+			IMemento filterMemento = memento.createChild("Filter");
+			filterMemento.putString("field", filter.getField().getName());
+			Table tbl = filter.getField().getTable();
+			filterMemento.putString("table", tbl.getName());
+			String tblDs = (tbl.getDataSource()!=null) ? tbl.getDataSource().getUID():"";
+			memento.putString("tblDs", tblDs);
+		}
+		
 		//All the changes are saved - dirty flag should be reset.
 		_dirtyFlag = false;
 	}
@@ -273,6 +287,20 @@ public class CyclistViewPresenter extends ViewPresenter {
 			if(simulation.getSimulationId().equals(selectedSim)){
 				getSelectionModelSim().itemSelected(simulation, true);
 			}
+		}
+		
+		//restore local filters
+		IMemento[] filters = memento.getChildren("Filter");
+		for(IMemento filterData : filters){
+			String fieldName = filterData.getString("field");
+			String tableName = filterData.getString("table");
+			String tblDs = filterData.getString("tblDs");
+			Table table = findTable(tableName, tblDs, model.getTables());
+			Field field = table.getSchema().getField(fieldName);
+			
+			Field fieldCopy = new Field(field);
+		    Filter filter = new Filter(fieldCopy);
+		    getView().addFilter(filter);   
 		}
 		
 		//If the dirty flag was set during restore - reset it back to false.
