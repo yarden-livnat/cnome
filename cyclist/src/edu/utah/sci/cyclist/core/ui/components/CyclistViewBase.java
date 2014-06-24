@@ -346,6 +346,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	public void removeSimulation(Simulation simulation) {
 		_sims.remove(simulation.getAlias());
 		_simCombo.getItems().remove(simulation.getAlias());
+		_simChoice.getItems().remove(simulation.getAlias());
 		_simCombo.setVisibleRowCount(_sims.size());
 		
 		boolean visible = _sims.size()> 1 || (_sims.size() == 1 && !_sims.get(_simCombo.getItems().get(0)).remote);
@@ -365,7 +366,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			_simCombo.setValue(simulation.getAlias());
 			_simChoice.setValue(simulation.getAlias());
 		}
-		else if (simulation.getAlias().equals(_simCombo.getValue())) {
+		else if (simulation.getAlias().equals(_simChoice.getValue())) {
 			_simCombo.setValue(null);
 			_simChoice.setValue(null);
 		}
@@ -396,11 +397,11 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	
 	//Notification about changes in the simulations list
 	public ObservableList<String> simulations(){
-		return _simCombo.getItems();
+		return _simChoice.getItems();
 	}
 	
 	public ObservableValue<String> lastChosenSimulation(){
-		return _simCombo.valueProperty();
+		return _simChoice.valueProperty();
 	}
 	
 	/*
