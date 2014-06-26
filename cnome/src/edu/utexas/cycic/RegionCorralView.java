@@ -86,7 +86,6 @@ public class RegionCorralView extends ViewBase {
 				setMaxHeight(50);
 			}
 		};
-
 		HBox hroot = new HBox(){
 			{
 				setLayoutY(50);
