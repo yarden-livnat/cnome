@@ -86,16 +86,19 @@ public class MarketView extends ViewBase{
 						marketCommod.getItems().add(commod.getText());
 					}
 				}
+				marketCommod.getItems().add("Clear");
 				marketCommod.getItems().add("Add New Commodity");
 				marketCommod.setValue(formNode.commodity);
 			}
 		});
 		marketCommod.valueProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if (marketCommod.getValue() != "Add New Commodity"){
-					formNode.commodity = (String) newValue;
+				if (marketCommod.getValue() == "Add New Commodity"){
+					
+				} else if (marketCommod.getValue() == "Clear"){
+					formNode.commodity = "";
 				} else {
-					// maybe some stufff //
+					formNode.commodity = (String) newValue;
 				}
 			}
 		});

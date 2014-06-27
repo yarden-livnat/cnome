@@ -123,6 +123,7 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
 				node.text.setText(newValue);
+				node.tooltip.setText(newValue);
 			}
 		});
 		
@@ -151,9 +152,9 @@ public class FormBuilderFunctions {
 				node.regionCircle.setFill(Color.rgb(node.regionCircle.rgbColor.get(0), node.regionCircle.rgbColor.get(1), node.regionCircle.rgbColor.get(2)));
 				// Setting font color for visibility //
 				if(VisFunctions.colorTest(node.regionCircle.rgbColor) == true){
-					node.regionCircle.text.setFill(Color.BLACK);
+					node.regionCircle.text.setTextFill(Color.BLACK);
 				}else{
-					node.regionCircle.text.setFill(Color.WHITE);
+					node.regionCircle.text.setTextFill(Color.WHITE);
 				}
 			}
 		});

@@ -7,6 +7,7 @@ import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utexas.cycic.tools.RegionViewTool;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -18,6 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -30,7 +32,7 @@ import javafx.scene.text.Text;
  *
  */
 
-public class RegionShape extends Circle {
+public class RegionShape extends Rectangle {
 
 	protected static double mousey;
 	protected static double mousex;
@@ -39,7 +41,7 @@ public class RegionShape extends Circle {
 	protected static double deltax;
 	protected static double deltay;
 	Object name;
-	Text text;
+	Label text = new Label("");
 	MenuBar menuBar = new MenuBar();
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
 	ListView<String> facilityList = new ListView<String>();
@@ -56,19 +58,22 @@ public class RegionShape extends Circle {
 		// Set properties of regionNode
 		region.name = name;
 		
-		circle.setRadius(40);
-		circle.setCenterX(50);
-		circle.setCenterY(50);
+		circle.setWidth(80);
+		circle.setHeight(80);
+		circle.setX(50);
+		circle.setY(50);
 		circle.setStroke(Color.DARKGRAY);
 		circle.setStrokeWidth(5);
 		
 		circle.name = name;
-		circle.text = new Text(name);
-		circle.text.setX(circle.getCenterX()-circle.getRadius()*0.7);
-		circle.text.setY(circle.getCenterY());	
-		circle.text.setWrappingWidth(circle.getRadius()*1.6);
+		circle.text.setText(name);
+		circle.text.setLayoutX(circle.getX()+circle.getHeight()*0.2);
+		circle.text.setLayoutY(circle.getY()+circle.getHeight()*0.2);	
+		circle.text.setMaxWidth(circle.getWidth()*0.8);
+		circle.text.setMaxHeight(circle.getHeight()*0.8);
 		circle.text.setMouseTransparent(true);
 		circle.text.setFont(new Font(14));
+		circle.text.setWrapText(true);
 		
 		// Set circle color
 		circle.rgbColor=VisFunctions.stringToColor((String)circle.name);
@@ -76,9 +81,9 @@ public class RegionShape extends Circle {
 
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setFill(Color.BLACK);
+			circle.text.setTextFill(Color.BLACK);
 		}else{
-			circle.text.setFill(Color.WHITE);
+			circle.text.setTextFill(Color.WHITE);
 		}
 		
 		circle.setEffect(VisFunctions.lighting);
@@ -107,8 +112,8 @@ public class RegionShape extends Circle {
 		menu.getItems().addAll(regionForm, delete, exit);		
 
 		circle.menuBar.getMenus().add(menu);
-		circle.menuBar.setLayoutX(circle.getCenterX());
-		circle.menuBar.setLayoutY(circle.getCenterY());
+		circle.menuBar.setLayoutX(circle.getX());
+		circle.menuBar.setLayoutY(circle.getY());
 		circle.menuBar.setVisible(false);
 
 		circle.onMouseClickedProperty().set(new EventHandler <MouseEvent>(){
@@ -116,8 +121,8 @@ public class RegionShape extends Circle {
 			public void handle(MouseEvent menuEvent){
 				if(menuEvent.getButton().equals(MouseButton.SECONDARY)){
 					circle.menuBar.setVisible(true);
-					circle.menuBar.setLayoutX(circle.getCenterX());
-					circle.menuBar.setLayoutY(circle.getCenterY());
+					circle.menuBar.setLayoutX(circle.getX());
+					circle.menuBar.setLayoutY(circle.getY());
 				}
 				
 				for(int i = 0; i < RegionCorralView.corralPane.getChildren().size(); i++){
@@ -168,8 +173,8 @@ public class RegionShape extends Circle {
 		onMousePressedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				x = getCenterX() - event.getX();
-				y = getCenterY() - event.getY();
+				x = getX() - event.getX();
+				y = getY() - event.getY();
 				mousex = event.getX();
 				mousey = event.getY();
 			}
@@ -180,27 +185,27 @@ public class RegionShape extends Circle {
 			@Override
 			public void handle(MouseEvent event){
 
-				setCenterX(x+event.getX());
-				setCenterY(y+event.getY());
+				setX(x+event.getX());
+				setY(y+event.getY());
 
-				if(getCenterX() <= RegionCorralView.corralPane.getLayoutBounds().getMinX()+getRadius()){
-					setCenterX(RegionCorralView.corralPane.getLayoutBounds().getMinX()+getRadius());
+				if(getX() <= RegionCorralView.corralPane.getLayoutBounds().getMinX()){
+					setX(RegionCorralView.corralPane.getLayoutBounds().getMinX());
 				}
-				if(getCenterY() <= RegionCorralView.corralPane.getLayoutBounds().getMinY()+getRadius()){
-					setCenterY(RegionCorralView.corralPane.getLayoutBounds().getMinY()+getRadius());
+				if(getY() <= RegionCorralView.corralPane.getLayoutBounds().getMinY()){
+					setY(RegionCorralView.corralPane.getLayoutBounds().getMinY());
 				}
-				if(getCenterY() >= RegionCorralView.corralPane.getLayoutBounds().getMaxY()-getRadius()){
-					setCenterY(RegionCorralView.corralPane.getLayoutBounds().getMaxY()-getRadius());
+				if(getY() >= RegionCorralView.corralPane.getLayoutBounds().getMaxY()-getHeight()){
+					setY(RegionCorralView.corralPane.getLayoutBounds().getMaxY()-getHeight());
 				}
-				if(getCenterX() >= RegionCorralView.corralPane.getLayoutBounds().getMaxX()-getRadius()){
-					setCenterX(RegionCorralView.corralPane.getLayoutBounds().getMaxX()-getRadius());
+				if(getX() >= RegionCorralView.corralPane.getLayoutBounds().getMaxX()-getWidth()){
+					setX(RegionCorralView.corralPane.getLayoutBounds().getMaxX()-getWidth());
 				}
 
-				text.setX(getCenterX()-getRadius()*0.6);
-				text.setY(getCenterY());
+				text.setLayoutX(getX()+getHeight()*0.2);
+				text.setLayoutY(getY()+getHeight()*0.2);	
 
-				menuBar.setLayoutX(getCenterX());
-				menuBar.setLayoutY(getCenterY());
+				menuBar.setLayoutX(getX()+getHeight()*0.2);
+				menuBar.setLayoutY(getY()+getHeight()*0.2);
 
 			}
 		});

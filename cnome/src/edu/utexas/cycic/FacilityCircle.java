@@ -27,7 +27,7 @@ public class FacilityCircle extends Circle {
 	ArrayList<String> incommods = new ArrayList<String>();
 	ArrayList<String> outcommods = new ArrayList<String>();
 	MenuBar menu = new MenuBar();
-	Label text = new Label();
+	Label text = new Label("");
 	ImageView image = new ImageView();
 	String type = new String();
 	String parent = new String();

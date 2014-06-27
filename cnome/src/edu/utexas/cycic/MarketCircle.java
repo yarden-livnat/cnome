@@ -2,7 +2,9 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Text;
 
@@ -19,7 +21,8 @@ public class MarketCircle extends Ellipse {
 	ArrayList<Object> marketData = new ArrayList<Object>();
 	ArrayList<Object> marketStruct = new ArrayList<Object>();
 	MenuBar menu = new MenuBar();
-	Text text = new Text();
+	Label text = new Label();
+	Tooltip tooltip = new Tooltip();
 	String commodity;
 	{
 		setId("cycicNode");

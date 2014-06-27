@@ -108,9 +108,7 @@ public class RegionView extends ViewBase{
 			public void handle(MouseEvent e){
 				addNewFacilityBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (facilityNode child: node.facilityClones) {
-						addNewFacilityBox.getItems().add((String)child.name);
-					}
+					addNewFacilityBox.getItems().add((String)node.name);
 				}
 			}
 		});

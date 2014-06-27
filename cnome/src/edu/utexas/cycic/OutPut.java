@@ -76,7 +76,7 @@ public class OutPut {
 					regionID.appendChild(allowedFac);
 				}
 				
-				regionBuilder(doc, regionID, region.regionStruct, region.regionData, "GrowthRegion");
+				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, "GrowthRegion");
 				// Building the institutions within regions.
 				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 					for (String instit: region.institutions){
@@ -100,7 +100,7 @@ public class OutPut {
 								initFacList.appendChild(entry);
 							}
 							institID.appendChild(initFacList);
-							regionBuilder(doc, institID, institution.institStruct, institution.institData, "DeployInstit");
+							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, "DeployInstit");
 						}
 					}
 				}
@@ -258,9 +258,9 @@ public class OutPut {
 	 * @return Element added to the facility rootElement.
 	 */
 	
-	public static Element facilityNameElement(Document doc, ArrayList<Object> dataArray){
+	public static Element facilityNameElement(Document doc, String name){
 		Element nameElement = doc.createElement("name");
-		nameElement.appendChild(doc.createTextNode((String) dataArray.get(0)));
+		nameElement.appendChild(doc.createTextNode(name));
 		return nameElement;
 	}
 	
@@ -325,15 +325,15 @@ public class OutPut {
 	 * the type of the node. 
 	 */
 	@SuppressWarnings("unchecked")
-	public static void regionBuilder(Document doc, Element rootElement, ArrayList<Object> structArray, ArrayList<Object> dataArray, String nodeType){
-		rootElement.appendChild(facilityNameElement(doc, (ArrayList<Object>)dataArray.get(0)));
+	public static void regionBuilder(Document doc, Element rootElement, String name, ArrayList<Object> structArray, ArrayList<Object> dataArray, String nodeType){
+		rootElement.appendChild(facilityNameElement(doc, name));
 		Element model = doc.createElement("model");
 		rootElement.appendChild(model);
 		
 		Element modelType = doc.createElement(nodeType.replace(" ", "").toString());
 		model.appendChild(modelType);
 		
-		for(int i = 1; i < dataArray.size(); i++){
+		for(int i = 0; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
 				facilityDataElement(doc, modelType, (ArrayList<Object>) structArray.get(i), (ArrayList<Object>) dataArray.get(i));
 			} else {
@@ -490,11 +490,11 @@ public class OutPut {
 		regionElement.appendChild(regionName);
 		// X position
 		Element xPosition = doc.createElement("xPosition");
-		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterX())));
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getX())));
 		regionElement.appendChild(xPosition);
 		// Y position
 		Element yPosition = doc.createElement("yPosition");
-		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getCenterY())));
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getY())));
 		
 		regionElement.appendChild(yPosition);
 		

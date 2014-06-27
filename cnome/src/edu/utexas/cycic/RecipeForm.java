@@ -4,6 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -31,6 +32,8 @@ public class RecipeForm extends ViewBase{
 		topRecipeGrid.setHgap(5);
 		topRecipeGrid.setVgap(8);
 		VBox recipeBox = new VBox();
+		recipeBox.setPadding(new Insets(5,5,5,5));
+		recipeBox.setSpacing(10);
 		recipeBox.getChildren().addAll(topRecipeGrid, recipeGrid);
 		setContent(recipeBox);
 	}
@@ -117,7 +120,7 @@ public class RecipeForm extends ViewBase{
 		
 		Label basis = new Label("Basis");
 		recipeGrid.add(basis, 0, 1);
-		
+		basisBox.getItems().clear();
 		basisBox.getItems().add("Atom");
 		basisBox.getItems().add("Mass");
 		basisBox.valueProperty().addListener(new ChangeListener<String>(){

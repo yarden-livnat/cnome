@@ -14,7 +14,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -82,7 +81,7 @@ public class InstitutionView extends ViewBase{
 					
 				} else if(newValue == "New Institution"){
 					grid.getChildren().clear();
-					rowNumber = 0;
+					rowNumber = 1;
 					CycicScenarios.workingCycicScenario.institNodes.add(new instituteNode());
 					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(CycicScenarios.workingCycicScenario.institNodes.size()-1);
 					workingInstit.type = "deployInst";
@@ -91,9 +90,13 @@ public class InstitutionView extends ViewBase{
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
+					Label institutionName = new Label("Name");
+					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+					grid.add(institutionName, 0, 0);
+					grid.add(nameTextField, 1, 0);
 				} else {
 					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
-					rowNumber = 0;
+					rowNumber = 1;
 					grid.getChildren().clear();
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
@@ -104,6 +107,10 @@ public class InstitutionView extends ViewBase{
 						prototypeList.getItems().add(prototype.name);
 					}
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
+					Label institutionName = new Label("Name");
+					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+					grid.add(institutionName, 0, 0);
+					grid.add(nameTextField, 1, 0);
 				}
 			}
 		});
@@ -118,6 +125,7 @@ public class InstitutionView extends ViewBase{
 		topGrid.add(structureCB, 0, 0);
 		topGrid.add(button, 2, 0);
 		
+				
 		// ComboBox to add facilities to the prototype ListView
 		final ComboBox<String> addNewProtoBox = new ComboBox<String>();
 		addNewProtoBox.setOnMousePressed(new EventHandler<MouseEvent>(){
@@ -256,7 +264,7 @@ public class InstitutionView extends ViewBase{
 	private GridPane grid = new GridPane();
 	private GridPane topGrid = new GridPane();
 	private FacilityCircle formNode = null;
-	private int rowNumber = 0;
+	private int rowNumber = 1;
 	private int columnNumber = 0;
 	private int columnEnd = 0;
 	private int userLevel = 0;
@@ -264,7 +272,7 @@ public class InstitutionView extends ViewBase{
 
 	/**
 	 * This function takes a constructed data array and it's corresponding 
-	 * institution structure array and creates a form in for the structure 
+	 * institution structure array and creates a form for the structure 
 	 * and data arrays.
 	 * @param facArray This is the structure of the data array. Included 
 	 * in this array should be all of the information needed to fully 
@@ -392,7 +400,7 @@ public class InstitutionView extends ViewBase{
 			public void handle(ActionEvent e){
  				FormBuilderFunctions.formArrayBuilder(facArray, (ArrayList<Object>) dataArray);
 				grid.getChildren().clear();
-				rowNumber = 0;
+				rowNumber = 1;
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 			}
 		});
@@ -415,7 +423,7 @@ public class InstitutionView extends ViewBase{
 			public void handle(ActionEvent e) {
 				dataArray.remove(dataArrayNumber);
 				grid.getChildren().clear();
-				rowNumber = 0;
+				rowNumber = 1;
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 			}
 		});

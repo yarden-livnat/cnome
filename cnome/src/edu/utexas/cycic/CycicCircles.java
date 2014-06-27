@@ -11,6 +11,7 @@ import edu.utexas.cycic.tools.FormBuilderTool;
 import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.VPos;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -26,6 +27,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 /**
  * The class used to build a new Prototype Facility node.
@@ -64,6 +66,7 @@ public class CycicCircles{
 		circle.text.setWrapText(true);
 		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
 		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+		circle.text.setTextAlignment(TextAlignment.CENTER);
 		circle.text.setMaxWidth(circle.getRadius()*1.4);
 		circle.text.setMouseTransparent(true);
 		circle.text.setFont(new Font("ComicSans", 14));

@@ -15,7 +15,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 /**
  * This class builds the marketCircles used to represent markets in the 
@@ -42,17 +42,22 @@ public class MarketNodes{
 		circle.setCenterY(60);
 		
 		// Adding the text to the circle.
-		circle.text = new Text(name);
 		circle.name = name;
-		circle.text.setX(circle.getCenterX()-circle.text.getBoundsInLocal().getWidth()/2);
-		circle.text.setY(circle.getCenterY());
-		circle.text.setWrappingWidth(circle.getRadiusX()*1.5);
+		circle.text.setText(name);
+		
+		circle.text.setLayoutX(circle.getCenterX() - circle.getRadiusX()*0.6);
+		circle.text.setLayoutY(circle.getCenterY() - circle.getRadiusY()*0.6);
+		
+		circle.text.setTextAlignment(TextAlignment.CENTER);
+		circle.text.setWrapText(true);
+		circle.text.setMaxWidth(circle.getRadiusX()*1.4);
 		circle.text.setMouseTransparent(true);
+		circle.text.setMaxHeight(circle.getRadiusY()*1.2);
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.setFill(Color.rgb(100, 150, 200));
-		circle.text.setFill(Color.WHITE);
+		circle.text.setTextFill(Color.WHITE);
 		circle.text.setFont(new Font(14));
 		
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
@@ -130,8 +135,8 @@ public class MarketNodes{
 				circle.menu.setLayoutX(circle.getCenterX());
 				circle.menu.setLayoutY(circle.getCenterY());
 				
-				circle.text.setX(circle.getCenterX()-circle.text.getBoundsInLocal().getWidth()/2);
-				circle.text.setY(circle.getCenterY());
+				circle.text.setLayoutX(circle.getCenterX() - circle.getRadiusX()*0.6);
+				circle.text.setLayoutY(circle.getCenterY() - circle.getRadiusY()*0.6);
 				
 				for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 					if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
