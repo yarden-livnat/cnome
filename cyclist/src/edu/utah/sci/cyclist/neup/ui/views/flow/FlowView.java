@@ -1,6 +1,7 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -99,6 +100,7 @@ public class FlowView extends CyclistViewBase {
 	private Pane _pane;
 	private RangeField _rangeField;
 	private Text _total;
+	private VBox _commodityVBox;
 	
 	/**
 	 * Constructor
@@ -125,7 +127,7 @@ public class FlowView extends CyclistViewBase {
 	private void init() {
 		setSupportsTables(false);
 		
-		kindFactory.put("Implementation", f->f.implementation);
+		kindFactory.put("Spec", f->f.spec);
 		kindFactory.put("Prototype", f->f.prototype);
 		kindFactory.put("AgentID", f->f.id);
 		kindFactory.put("InstitutionID", f->f.intitution);
@@ -139,6 +141,7 @@ public class FlowView extends CyclistViewBase {
 		_simProxy = new SimulationProxy(currentSim);
 		
 		fetchFacilities();
+		fetchFilterValues();
 	}
 	
 	private void fetchFacilities() {
@@ -172,6 +175,36 @@ public class FlowView extends CyclistViewBase {
 		th.start();
 	}
 	
+	private void fetchFilterValues() {
+		// fetch facilities from the simulation
+		Task<ObservableList<String>> task = new Task<ObservableList<String>>() {
+			@Override
+			protected ObservableList<String> call() throws Exception { 
+				return _simProxy.getCommodities();
+//				ObservableList<String> list =  FXCollections.observableArrayList();
+//				list.add("uranium");
+//				return list;
+			}
+		};
+		
+		task.valueProperty().addListener( new ChangeListener<ObservableList<String>>() {
+			@Override
+			public void changed(
+					ObservableValue<? extends ObservableList<String>> observable,
+					ObservableList<String> oldList,
+					ObservableList<String> newList) 
+			{
+				if (newList != null) {
+					System.out.println("Flow: received filter values: "+newList.size());
+					updateSelectionCtrl(newList);
+				}
+			}
+		});
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+	}
 	private void updateTransactionsPredicate() {
 		_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
 		updateTotal();
@@ -665,48 +698,84 @@ public class FlowView extends CyclistViewBase {
 	}
 	
 	private Node buildSelectionCtrl() {
-		VBox vbox = new VBox();
-		vbox.getStyleClass().add("infobar");
+		_commodityVBox = new VBox();
+		_commodityVBox.getStyleClass().add("infobar");
 		
 		Text title = new Text("Commodity");
 		title.getStyleClass().add("title");
 		
-		CheckBox naturalU = new CheckBox("Natual U");
-		CheckBox enrichedU = new CheckBox("Enriched U");
-		CheckBox waste = new CheckBox("Waste");
 		
-		InvalidationListener listener = o->{
-			removeAllConnectors();
-
-			final boolean n = naturalU.isSelected();
-			final boolean e = enrichedU.isSelected();
-			final boolean w = waste.isSelected();
-
-			_commodityPredicate = t->
-					(n && t.commodity.equals(NATURAL_U))
-					|| (e && t.commodity.equals(ENRICHED_U))
-					|| (w && t.commodity.equals(WASTE));
-					
-			updateTransactionsPredicate();
-		};
-		
-		naturalU.selectedProperty().addListener(listener);
-		enrichedU.selectedProperty().addListener(listener);
-		waste.selectedProperty().addListener(listener);
-
-		naturalU.setSelected(true);
-		enrichedU.setSelected(true);
-		waste.setSelected(true);
-
-		vbox.getChildren().addAll(
-			title,
-			naturalU,
-			enrichedU,
-			waste
+		_commodityVBox.getChildren().addAll(
+			title
 		);
-		
-		return vbox;	
+			
+		return _commodityVBox;
 	}
+	
+	private void updateSelectionCtrl(List<String> values) {
+		List<CheckBox> list = new ArrayList<CheckBox>();
+		
+		// save title child
+		Node title = _commodityVBox.getChildren().get(0);
+		
+		// update state of each existing checkbox
+		int n = _commodityVBox.getChildren().size();
+		for (int i=1; i<n; i++) {
+			CheckBox checkbox = (CheckBox) _commodityVBox.getChildren().get(i);
+			if (values.contains(checkbox.getText())) {
+				checkbox.setDisable(false);
+				values.remove(checkbox.getText());
+			} else {
+				checkbox.setDisable(true);
+			}
+			list.add(checkbox);
+		}
+		
+		// create new checkboxes
+		for (String value : values) {
+			CheckBox checkbox = new CheckBox(value);
+			checkbox.selectedProperty().addListener(_commodityListener);
+			checkbox.setSelected(true);
+			list.add(checkbox);
+		}
+		
+		list.sort(new Comparator<CheckBox>() {
+
+			@Override
+			public int compare(CheckBox cb1, CheckBox cb2) {
+				return cb1.getText().compareTo(cb2.getText());
+			}
+		});
+			
+		_commodityVBox.getChildren().clear();
+		_commodityVBox.getChildren().add(title);
+		_commodityVBox.getChildren().addAll(list);
+		
+		for (CheckBox c : list)
+			System.out.println("cb:"+c.getText());
+	}
+	
+	private InvalidationListener _commodityListener = o->{
+		removeAllConnectors();
+
+		final ArrayList<String> values = new ArrayList<String>();
+		
+		boolean skip = true; // ignore the first child (Text)
+		for (Node node : _commodityVBox.getChildren()) {
+			if (skip) {
+				skip = false;
+			} else {
+				CheckBox cb = (CheckBox) node;
+				if (!cb.isDisabled() && cb.isSelected()) {
+					values.add(cb.getText());
+				}
+			}
+		}
+		
+		_commodityPredicate = t->values.contains(t.commodity);
+		
+		updateTransactionsPredicate();
+	};
 	
 	private Node buildNuclideCtrl() {
 		VBox vbox = new VBox();

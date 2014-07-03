@@ -80,7 +80,7 @@ public class SimulationWizard extends TilePane {
 	// DataType elements
 	private CyclistDatasource     _current;
 	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
-	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID FROM SimulationTimeInfo order by SimID";
+	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID FROM Info order by SimID";
 	
 	// * * * Constructor creates a new stage * * * //
 	public SimulationWizard() {

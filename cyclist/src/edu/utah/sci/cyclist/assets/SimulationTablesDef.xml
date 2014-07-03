@@ -11,13 +11,16 @@
 			<field name="Kind">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="Implementation">
+			<field name="Spec">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Prototype">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ParentID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Lifetime">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="EnterTime">
@@ -33,10 +36,10 @@
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="StateId">
+			<field name="QualID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="NucId" >
+			<field name="NucID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="MassFrac">
@@ -44,6 +47,7 @@
 			</field>
 		</Schema>
 	</Table>
+	<!-- 
 	<Table name="Enrichments">
 		<Schema>
 			<field name="SimID">
@@ -66,6 +70,7 @@
 			</field>
 		</Schema>
 	</Table>
+	-->
 	<Table name="Facilities">
 		<Schema>
 			<field name="SimID" >
@@ -74,7 +79,7 @@
 			<field name="AgentID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="Implementation" >
+			<field name="Spec" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Prototype" >
@@ -90,6 +95,9 @@
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ExitTime" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Lifetime">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			
@@ -112,8 +120,15 @@
 			<field name="EndTime" >
 			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
+			<field name="QualID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Quantity">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
 		</Schema>
 	</Table>
+	<!-- 
 	<Table name="ResCreators">
 		<Schema>
 			<field name="SimID" >
@@ -127,12 +142,16 @@
 			</field>
 		</Schema>
 	</Table>
+	-->
 	<Table name="Resources">
 		<Schema>
 			<field name="SimID" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="ID" >
+			<field name="ResourceID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="ObjID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Type" >
@@ -144,10 +163,10 @@
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="units" >
+			<field name="Units" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="StateId" >
+			<field name="QualId" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Parent1" >
@@ -158,12 +177,12 @@
 			</field>
 		</Schema>
 	</Table>
-	<Table name="SimulationTimeInfo">
+	<Table name="Info">
 		<Schema>
 			<field name="SimID" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="SimHandle" >
+			<field name="Handle" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="InitialYear" >
@@ -172,14 +191,42 @@
 			<field name="InitialMonth" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="SimulationStart" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
 			<field name="Duration" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
+			<field name="ParentSimID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="ParentType" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="BranchTime" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="CyclusVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="CyclusVersionDescribe" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="SqliteVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Hdf5Version" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="BoostVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="LibXML2Version" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="CoinCBCVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
 		</Schema>
 	</Table>
+	<!-- 
 	<Table name="TransactedResources">
 		<Schema>
 			<field name="SimID" >
@@ -196,12 +243,13 @@
 			</field>
 		</Schema>
 	</Table>
+	-->
 	<Table name="Transactions">
 		<Schema>
 			<field name="SimID" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="ID" >
+			<field name="TransactionID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="SenderID" >
@@ -210,14 +258,11 @@
 			<field name="ReceiverID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="MarketID" >
+			<field name="ResourceID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Commodity" >
 				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Price" >
-				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Time" >
 				<datatype role="DIMENSION" type="NUMERIC"/>

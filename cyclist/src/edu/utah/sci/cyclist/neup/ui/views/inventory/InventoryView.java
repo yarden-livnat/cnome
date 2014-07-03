@@ -98,7 +98,7 @@ public class InventoryView extends CyclistViewBase {
 	}
 	
 	private void init() {
-		_acceptableFields.add("Implementation");
+		_acceptableFields.add("Spec");
 		_acceptableFields.add("Prototype");
 		_acceptableFields.add("AgentID");
 		_acceptableFields.add("InstitutionID");
