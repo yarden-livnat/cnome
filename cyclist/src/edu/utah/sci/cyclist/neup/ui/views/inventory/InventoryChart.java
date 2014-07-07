@@ -73,12 +73,13 @@ public class InventoryChart extends VBox {
 			_upperBound = last;
 		}
 		XYChart.Series<Number, Number> series = new XYChart.Series<>();
-		String style = ColorUtil.toString(entry.color);
+		final String style = ColorUtil.toString(entry.color);
 		series.nodeProperty().addListener(o->{
 			series.getNode().setStyle("-fx-stroke:"+style);
 			series.getNode().setStyle("-fx-fill:"+style);
 		});
 
+		System.out.println("add entry ["+entry.field+":"+entry.value+"] color:"+entry.color+"  style:"+style);
 		double scale = computeScale(entry.series); // relative to the current chart type
 		
 		if (scale > _scale) {
