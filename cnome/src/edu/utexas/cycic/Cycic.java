@@ -30,6 +30,7 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
+		XMLReader.readSchema(XMLReader.test);
 		if (CycicScenarios.cycicScenarios.size() < 1){
 			DataArrays scenario = new DataArrays();
 			workingScenario = scenario;
