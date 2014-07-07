@@ -181,9 +181,6 @@ public class FlowView extends CyclistViewBase {
 			@Override
 			protected ObservableList<String> call() throws Exception { 
 				return _simProxy.getCommodities();
-//				ObservableList<String> list =  FXCollections.observableArrayList();
-//				list.add("uranium");
-//				return list;
 			}
 		};
 		
@@ -195,7 +192,6 @@ public class FlowView extends CyclistViewBase {
 					ObservableList<String> newList) 
 			{
 				if (newList != null) {
-					System.out.println("Flow: received filter values: "+newList.size());
 					updateSelectionCtrl(newList);
 				}
 			}
@@ -205,6 +201,7 @@ public class FlowView extends CyclistViewBase {
 		th.setDaemon(true);
 		th.start();
 	}
+	
 	private void updateTransactionsPredicate() {
 		_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
 		updateTotal();
@@ -740,7 +737,6 @@ public class FlowView extends CyclistViewBase {
 		}
 		
 		list.sort(new Comparator<CheckBox>() {
-
 			@Override
 			public int compare(CheckBox cb1, CheckBox cb2) {
 				return cb1.getText().compareTo(cb2.getText());
@@ -753,9 +749,15 @@ public class FlowView extends CyclistViewBase {
 		
 		for (CheckBox c : list)
 			System.out.println("cb:"+c.getText());
+		
+		updateCommodityFilter();
 	}
 	
 	private InvalidationListener _commodityListener = o->{
+		updateCommodityFilter();
+	};
+	
+	private void updateCommodityFilter() {
 		removeAllConnectors();
 
 		final ArrayList<String> values = new ArrayList<String>();
