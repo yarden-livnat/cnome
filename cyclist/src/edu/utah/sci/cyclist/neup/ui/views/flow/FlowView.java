@@ -275,15 +275,15 @@ public class FlowView extends CyclistViewBase {
 		FlowLine line = _line[direction];
 		
 		if (line.getKind() == null) {
-			line.setKind(field.getName());
-		} else if (!line.getKind().equals(field.getName())) {
+			line.setKind(field.getSemantic());
+		} else if (!line.getKind().equals(field.getSemantic())) {
 			System.out.println("Error: REJECT node of this kind");
 			return;
 		}
 		
 		FlowNode node = line.findNode(value);
 		if (node == null) {
-			node = createNode(field.getName(), value, direction, explicit);
+			node = createNode(field.getSemantic(), value, direction, explicit);
 			line.addNode(node);
 		} else {
 			if (node.isExplicit() || !explicit) {
@@ -912,19 +912,19 @@ public class FlowView extends CyclistViewBase {
 			
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
 				Field field = clipboard.get(DnD.FIELD_FORMAT, Field.class);
-				if (kindFactory.containsKey(field.getName())) {
+				if (kindFactory.containsKey(field.getSemantic())) {
 					// accept if it near one of the lines
 					double x = e.getX();
 					if (Math.abs(x - _line[SRC].getCenter()) < 10) {
 						if (_line[SRC].getKind() == null 
-								|| _line[SRC].getKind().equals(field.getName())) 
+								|| _line[SRC].getKind().equals(field.getSemantic())) 
 						{
 							_targetLine = SRC;
 							accept = true;
 						}
 					} else if (Math.abs(x - _line[DEST].getCenter()) < 10) {
 						if (_line[DEST].getKind() == null 
-								|| _line[DEST].getKind().equals(field.getName())) 
+								|| _line[DEST].getKind().equals(field.getSemantic())) 
 						{
 							_targetLine = DEST;
 							accept = true;

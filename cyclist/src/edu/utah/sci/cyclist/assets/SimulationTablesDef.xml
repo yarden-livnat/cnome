@@ -252,10 +252,10 @@
 			<field name="TransactionID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="SenderID" >
+			<field name="SenderID" semantic="AgentID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="ReceiverID" >
+			<field name="ReceiverID" semantic="AgentID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="ResourceID" >
