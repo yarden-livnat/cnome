@@ -6,12 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
@@ -21,6 +25,10 @@ public class InventoryChart extends VBox {
 	public enum ChartType {
 		INVENTORY, NET
 	}
+	
+	private static int _id = 0;
+	
+	private static String _cssId = "InventoryChart-"+(_id++);
 	
 	private XYChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
@@ -36,6 +44,7 @@ public class InventoryChart extends VBox {
 		public XYChart.Series<Number, Number> series;
 		public double scale;
 		public int last;
+		public String style;
 	}
 	
 	public InventoryChart() {
@@ -72,14 +81,18 @@ public class InventoryChart extends VBox {
 		if (last > _upperBound) {
 			_upperBound = last;
 		}
-		XYChart.Series<Number, Number> series = new XYChart.Series<>();
-		final String style = ColorUtil.toString(entry.color);
+		final XYChart.Series<Number, Number> series = new XYChart.Series<>();
+		final String style = ColorUtil.toString(entry.color).substring(0, 7)+"55";
 		series.nodeProperty().addListener(o->{
-			series.getNode().setStyle("-fx-stroke:"+style);
-			series.getNode().setStyle("-fx-fill:"+style);
+			Group g = (Group) series.getNode();
+			// Note: based on StackedAreaChart.java in JavaFX
+			// unfortunately there isn't any official ways to do this
+			Path fillPath = (Path)g.getChildren().get(0);
+			Path linePath = (Path)g.getChildren().get(1);
+			linePath.setStyle("-fx-stroke: "+style);
+			fillPath.setStyle("-fx-fill: "+style);
 		});
 
-		System.out.println("add entry ["+entry.field+":"+entry.value+"] color:"+entry.color+"  style:"+style);
 		double scale = computeScale(entry.series); // relative to the current chart type
 		
 		if (scale > _scale) {
@@ -87,14 +100,13 @@ public class InventoryChart extends VBox {
 		}
 		updateSeries(series, entry.series);
 
-		
-		info = _items.get(entry);
 		info = new ChartInfo();
-		_items.put(entry, info);
 		info.values = entry.series;
 		info.series = series;
 		info.scale = scale;
 		info.last = last;
+		info.style = style;
+		_items.put(entry, info);
 		
 		_chart.getData().add(series);
 	}
@@ -138,6 +150,18 @@ public class InventoryChart extends VBox {
 		_yAxis.setLabel(label);
 	}
 
+	private void updateColors() {
+		_chart.applyCss();
+		for (ChartInfo info : _items.values()) {
+			Group g = (Group) info.series.getNode();
+			// Note: based on StackedAreaChart.java in JavaFX
+			// unfortunately there isn't any official ways to do this
+			Path fillPath = (Path)g.getChildren().get(0);
+			Path linePath = (Path)g.getChildren().get(1);
+			linePath.setStyle("-fx-stroke: "+info.style);
+			fillPath.setStyle("-fx-fill: "+info.style);
+		}
+	}
 	
 	private double computeScale(Collection<Pair<Integer, Double>> values) {
 		double max = 0;
@@ -170,7 +194,8 @@ public class InventoryChart extends VBox {
 		if (_type == ChartType.INVENTORY) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {;
-				sum += value.v2/_scale;
+//				sum += value.v2/_scale;
+				sum = value.v2/_scale;
 				list.add(new XYChart.Data<Number, Number>(value.v1, sum));
 			}
 		} else {
@@ -187,6 +212,9 @@ public class InventoryChart extends VBox {
 			}
 		}
 		
+		System.out.println("==values==");
+		for (XYChart.Data<Number, Number> i : list)
+			System.out.println(i.getXValue()+", "+i.getYValue());
 		series.getData().setAll(list);
 //		if (updating) {
 //			_chart.getData().add(series);
@@ -227,6 +255,7 @@ public class InventoryChart extends VBox {
 		StackedAreaChart<Number, Number> stackedAreaChart = new StackedAreaChart<>(_xAxis, _yAxis);
 		stackedAreaChart.getStyleClass().add("chart");
 		stackedAreaChart.setLegendVisible(false);
+		stackedAreaChart.setAnimated(false);
 		_chart = stackedAreaChart;
 		
 		return _chart;
