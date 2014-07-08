@@ -212,9 +212,9 @@ public class InventoryChart extends VBox {
 			}
 		}
 		
-		System.out.println("==values==");
-		for (XYChart.Data<Number, Number> i : list)
-			System.out.println(i.getXValue()+", "+i.getYValue());
+//		System.out.println("==values==");
+//		for (XYChart.Data<Number, Number> i : list)
+//			System.out.println(i.getXValue()+", "+i.getYValue());
 		series.getData().setAll(list);
 //		if (updating) {
 //			_chart.getData().add(series);
