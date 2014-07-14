@@ -46,7 +46,7 @@ public class XMLReader {
 			for(int i = 0; i < top.getLength(); i++){
 				schema = nodeListener(top.item(i), schema);
 			}
-			System.out.println(schema);
+			//System.out.println(schema);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -59,10 +59,38 @@ public class XMLReader {
 		JsonReader jsonReader = Json.createReader(schema);
 		JsonObject jsonObject = jsonReader.readObject();
 		jsonReader.close();
-		
-		System.out.println(jsonObject.get("capacity"));
+		JsonObject vars = jsonObject.getJsonObject("vars");
+		ArrayList<Object> xmlschema = readSchema(test);
+		for(int i = 0; i < xmlschema.size(); i++){
+			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
+		}
 	}
 	
+	static void combiner(ArrayList<Object> dataArray, JsonObject json){
+		System.out.println(dataArray);
+		System.out.println(json);
+		if(dataArray.get(0) instanceof ArrayList){
+			combiner((ArrayList<Object>)dataArray.get(0), json);
+		} else if(dataArray.get(1) instanceof ArrayList){
+			while(dataArray.size() < 9){
+				dataArray.add(null);
+			}
+			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			combiner((ArrayList<Object>)dataArray.get(1), json);
+			dataArray.set(8, json_pass.get("doc"));
+		} else {
+			while(dataArray.size() < 9){
+				dataArray.add(null);
+			}
+			if(){
+				
+			}
+			System.out.println(json.get("doc"));
+			dataArray.add(8, json.get("doc"));
+		}
+		System.out.println(dataArray);
+		return;
+	}
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++){
