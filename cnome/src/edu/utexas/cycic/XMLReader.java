@@ -80,7 +80,7 @@ public class XMLReader {
 			dataArray.set(4, json_pass.get("range"));
 			dataArray.set(5, json_pass.get("default"));
 			if(json_pass.get("default") != null){
-				
+				dataArray.set(6, 1);
 			}
 			dataArray.set(6, json_pass.get("userlevel"));
 			dataArray.set(7, json_pass.get("tooltip"));
