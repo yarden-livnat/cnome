@@ -64,11 +64,10 @@ public class XMLReader {
 		for(int i = 0; i < xmlschema.size(); i++){
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}
+		System.out.println(xmlschema);
 	}
 	
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
-		System.out.println(dataArray);
-		System.out.println(json);
 		if(dataArray.get(0) instanceof ArrayList){
 			combiner((ArrayList<Object>)dataArray.get(0), json);
 		} else if(dataArray.get(1) instanceof ArrayList){
@@ -77,18 +76,32 @@ public class XMLReader {
 			}
 			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
 			combiner((ArrayList<Object>)dataArray.get(1), json);
+			dataArray.set(3, json_pass.get("units"));
+			dataArray.set(4, json_pass.get("range"));
+			dataArray.set(5, json_pass.get("default"));
+			if(json_pass.get("default") != null){
+				
+			}
+			dataArray.set(6, json_pass.get("userlevel"));
+			dataArray.set(7, json_pass.get("tooltip"));
 			dataArray.set(8, json_pass.get("doc"));
 		} else {
 			while(dataArray.size() < 9){
 				dataArray.add(null);
 			}
-			if(){
+			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			try{
+				//dataArray.set(2, json_pass.get("type"));
+				dataArray.set(3, json_pass.get("units"));
+				dataArray.set(4, json_pass.get("range"));
+				dataArray.set(5, json_pass.get("default"));
+				dataArray.set(6, json_pass.get("userlevel"));
+				dataArray.set(7, json_pass.get("tooltip"));
+				dataArray.set(8, json_pass.get("doc"));
+			} catch (Exception ex) {
 				
-			}
-			System.out.println(json.get("doc"));
-			dataArray.add(8, json.get("doc"));
+			}	
 		}
-		System.out.println(dataArray);
 		return;
 	}
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
