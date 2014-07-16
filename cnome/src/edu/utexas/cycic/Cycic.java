@@ -7,9 +7,12 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -18,6 +21,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -190,9 +195,7 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(hideMarkets, 0, 3);
-		
 		//grid.add(toggle, 0, 3);
-		
 		Button load = new Button();
 		load.setText("Load");
 		load.setOnAction(new EventHandler<ActionEvent>(){
@@ -204,7 +207,21 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(load, 2, 2);
-		cycicBox.getChildren().addAll(grid, pane);
+		
+		ScrollPane scroll = new ScrollPane();
+		GridPane grid2 = new GridPane();
+		grid2.setHgap(15);
+		grid2.setPadding(new Insets(10, 0, 0, 0));
+		for(int i = 0; i < 20; i++){
+			Circle circle = new Circle();
+			circle.setRadius(40);
+			circle.setFill(Color.RED);
+			grid2.add(circle, i, 0);
+		}
+		scroll.setContent(grid2);
+		scroll.autosize();
+		
+		cycicBox.getChildren().addAll(grid, scroll, pane);
 		setContent(cycicBox);
 	}
 }
