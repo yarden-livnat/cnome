@@ -326,6 +326,7 @@ public class CyclistController {
 				
 				if(oldVal==null && newVal!=null){
 					readSimulationsTables();
+					_presenter.addFirstSelectedSimulation(newVal);
 				}
 				_model.setLastSelectedSimulation(newVal);
 				_dirtyFlag = true;

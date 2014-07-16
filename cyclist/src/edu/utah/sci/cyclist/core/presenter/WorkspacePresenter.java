@@ -244,6 +244,16 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		//Reset the dirty flag after restore.
 		setDirtyFlag(false);
 	}
+	
+	/** Handles the special case when the first simulation is selected in the simulation panel.
+	 * Add the simulation automatically to the workspace bar, and make it the current selected simulation.
+	 * Also broadcast the selected simulation to all the views under the workSpace.
+	 * @param Simulation sim - the selected simulation.
+	 **/
+	public void addFirstSelectedSimulation(Simulation sim){
+		addLocalSimulation(sim);
+		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, sim));
+	}
 
 	private Presenter addTool(Tool tool, double x, double y) {
 		ViewBase view = (ViewBase) tool.getView();
