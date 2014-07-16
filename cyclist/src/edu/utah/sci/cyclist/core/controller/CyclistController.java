@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -362,6 +363,17 @@ public class CyclistController {
 		for (MenuItem item : _screen.getViewMenu().getItems()) {
 			item.setOnAction(viewAction);
 		}
+		
+		_model.getSimulations().addListener(new ListChangeListener<Simulation>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Simulation> listChange) {
+				while (listChange.next()) {
+					for(Simulation sim : listChange.getRemoved()){
+						_presenter.removeSimulation(sim);
+					}
+				}
+			}
+		});
 		
 	}
 	

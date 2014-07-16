@@ -254,6 +254,16 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		addLocalSimulation(sim);
 		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, sim));
 	}
+	
+	/**
+	 * Removes the simulation from the tool bar and also broadcast it to all the views under the workspace.
+	 * @param 
+	 */
+	@Override
+	public void removeSimulation(Simulation sim){
+		super.removeSimulation(sim);
+		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_REMOVE, sim));
+	}
 
 	private Presenter addTool(Tool tool, double x, double y) {
 		ViewBase view = (ViewBase) tool.getView();
