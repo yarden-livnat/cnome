@@ -98,7 +98,7 @@ public class InventoryView extends CyclistViewBase {
 	}
 	
 	private void init() {
-		_acceptableFields.add("Implementation");
+		_acceptableFields.add("Spec");
 		_acceptableFields.add("Prototype");
 		_acceptableFields.add("AgentID");
 		_acceptableFields.add("InstitutionID");
@@ -425,16 +425,20 @@ public class InventoryView extends CyclistViewBase {
 				text.setDisable(!text.isDisable());
 				if (text.isDisable()) {
 					_chart.remove(info);
+					System.out.println("remove");
 				} else {
 					_chart.add(info);
+					System.out.println("add");
 				}
 				
 			});
 			
 			button.setOnMouseClicked(e->{
+				System.out.println("delete");
 				if (_onClose != null) {
 					_onClose.accept(this);
 				}
+				e.consume();
 			});
 			
 			HBox.setHgrow(text, Priority.ALWAYS);

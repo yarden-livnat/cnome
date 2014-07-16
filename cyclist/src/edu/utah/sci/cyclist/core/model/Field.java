@@ -43,6 +43,7 @@ import edu.utah.sci.cyclist.core.util.SQL;
 public class Field {
 	
 	private String _name;
+	private String _semantic;
 	private DataType _dataType;
 	private BooleanProperty _selected;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
@@ -55,7 +56,7 @@ public class Field {
 	}
 
 	public Field(Field other) {
-		this(other._name);
+		this(other._name, other._semantic);
 		_dataType = new DataType(other._dataType);
 		_selected = other._selected;
 		setTable(other.getTable()); 
@@ -65,7 +66,12 @@ public class Field {
 	}
 	
 	public Field(String name) {
+		this(name, name);
+	}
+	
+	public Field(String name, String semantic) {
 		this._name = name;
+		this._semantic = semantic;
 		_selected = new SimpleBooleanProperty();
 		_selected.set(true);
 	}
@@ -98,6 +104,10 @@ public class Field {
 		return _name;
 	}
 
+	public String getSemantic() {
+		return _semantic;
+	}
+	
 	public ObjectProperty<Table> tableProperty() {
 		return _tableProperty;
 	}
@@ -273,6 +283,8 @@ public class Field {
 	 */
 	public void restoreSimulated(IMemento memento) {
 			_name = memento.getString("name");
+			_semantic = memento.getString("semantic");
+			if (_semantic == null) _semantic = _name;
 			IMemento dataTypeMemento = memento.getChild("datatype");
 			
 			DataType.Type type = DataType.Type.valueOf(dataTypeMemento.getString("type"));

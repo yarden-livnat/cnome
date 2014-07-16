@@ -80,7 +80,7 @@ public class SimulationWizard extends TilePane {
 	// DataType elements
 	private CyclistDatasource     _current;
 	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
-	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID FROM SimulationTimeInfo order by SimID";
+	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID FROM Info order by SimID";
 	
 	// * * * Constructor creates a new stage * * * //
 	public SimulationWizard() {
@@ -350,13 +350,6 @@ public class SimulationWizard extends TilePane {
 				 String simulationId = rs.getString("SimID");
 				 _simulationsView.getItems().add(simulationId);
 			}
-			
-			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
-			_simulationsView.getItems().add("first demo simulation");
-			_simulationsView.getItems().add("second demo simulation");
-			_simulationsView.getItems().add("third demo simulation");
-			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
-			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimID doesn't exist");
 		}

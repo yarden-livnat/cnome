@@ -49,15 +49,9 @@
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
-<<<<<<< HEAD
 			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="commons-io-2.4.jar"/>
 			</fileset>
-=======
-					<fileset dir="${basedir}\cyclist\lib">
-						<filename name="commons-io-2.4.jar"/>	
-					</fileset>
->>>>>>> 4c447528c2081c0459c68f7935eb4991b896b318
 		</copy>
 		
 		<mkdir dir="deploy/project" />
