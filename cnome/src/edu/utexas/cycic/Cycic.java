@@ -1,6 +1,10 @@
 package edu.utexas.cycic;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.stream.Stream;
 
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
@@ -35,8 +39,34 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
-		XMLReader.readSchema(XMLReader.test);
-		XMLReader.annotationReader(XMLReader.jsonTest);
+		StringBuilder sb = new StringBuilder();
+		StringBuilder sb1 = new StringBuilder();
+		try {
+			//String string;
+			//String string1;
+			Process readproc = Runtime.getRuntime().exec("cyclus -a");
+			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+			while(schema.readLine() != null){
+				System.out.println(schema.readLine());
+				//Process proc = Runtime.getRuntime().exec("echo cyclus");
+				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+string1);
+				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				while((string = read.readLine()) != null){
+					sb.append(string);
+				}
+				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+string1);
+				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+				while((string = read1.readLine()) != null){
+					sb1.append(string);
+				}*/
+			}
+			//System.out.println(sb.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//XMLReader.readSchema(sb.toString());
+		//XMLReader.annotationReader(sb1.toString());
 		if (CycicScenarios.cycicScenarios.size() < 1){
 			DataArrays scenario = new DataArrays();
 			workingScenario = scenario;
@@ -98,6 +128,7 @@ public class Cycic extends ViewBase{
 		grid.add(facName, 1, 0);
 		// Name Field
 		final TextField facNameField = new TextField();
+
 		grid.add(facNameField, 2, 0);
 		// Facility Type
 		final ComboBox<String> structureCB = new ComboBox<String>();
@@ -133,6 +164,9 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(submit1, 4, 0);
+		//Text text_sting = new Text();
+		//text_sting.setText(System.getenv("PATH").toString());
+		//grid.add(text_sting, 5, 0);
 		
 		// Adding a new Market
 		Text scenetitle2 = new Text("Market");
@@ -214,10 +248,15 @@ public class Cycic extends ViewBase{
 		GridPane grid2 = new GridPane();
 		grid2.setHgap(15);
 		grid2.setPadding(new Insets(10, 0, 0, 0));
-		for(int i = 0; i < 20; i++){
+		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
 			Circle circle = new Circle();
 			circle.setRadius(40);
 			circle.setFill(Color.RED);
+			circle.setOnDragDetected(new EventHandler<MouseEvent>(){
+				public void handle(MouseEvent e){
+					
+				}
+			});
 			grid2.add(circle, i, 0);
 		}
 		scroll.setContent(grid2);
