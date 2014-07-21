@@ -18,6 +18,17 @@ import org.xml.sax.InputSource;
 
 
 public class XMLReader {
+	static ArrayList<String> test_string = new ArrayList<String>(){
+		{
+			add(":Brightlite:ReactorFacility");
+			add(":Brightlite:FuelfabFacility");
+			add(":agents:Sink");
+			add(":agents:Source");
+			add(":agents:KFacility");
+			add(":agents:Prey");
+			add(":agents:Predator");
+		}
+	};
 	static String test = "<interleave><element name=\"in_commods\"><oneOrMore><element name=\"val\">" +  
 			"<data type=\"token\" /></element></oneOrMore></element><element name=\"capacity\">"+
 			"<data type=\"double\" /></element><optional><element name=\"max_inv_size\"><data type=\"double\" />"+
@@ -54,13 +65,12 @@ public class XMLReader {
 		return schema;
 	}
 	
-	static void annotationReader(String jsonSchema){
+	static void annotationReader(String jsonSchema, ArrayList<Object> xmlschema){
 		Reader schema = new StringReader(jsonSchema);
 		JsonReader jsonReader = Json.createReader(schema);
 		JsonObject jsonObject = jsonReader.readObject();
 		jsonReader.close();
 		JsonObject vars = jsonObject.getJsonObject("vars");
-		ArrayList<Object> xmlschema = readSchema(test);
 		for(int i = 0; i < xmlschema.size(); i++){
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}

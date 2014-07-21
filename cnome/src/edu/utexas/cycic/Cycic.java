@@ -39,13 +39,35 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
-		StringBuilder sb = new StringBuilder();
-		StringBuilder sb1 = new StringBuilder();
-		try {
+		String string;
+		for(int i = 0; i < XMLReader.test_string.size(); i++){
+			StringBuilder sb = new StringBuilder();
+			StringBuilder sb1 = new StringBuilder();
+			Process proc;
+			try {
+				proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.test_string.get(i)); 
+				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				while((string = read.readLine()) != null){
+					sb.append(string);
+				}
+				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.test_string.get(i));
+				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+				while((string = read1.readLine()) != null){
+					sb1.append(string);
+				}
+				System.out.println(sb);
+				//XMLReader.readSchema(sb.toString());
+				XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		/*try {
 			//String string;
 			//String string1;
-			Process readproc = Runtime.getRuntime().exec("cyclus -a");
-			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+			//Process readproc = Runtime.getRuntime().exec("cyclus -a");
+			//BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
 			while(schema.readLine() != null){
 				System.out.println(schema.readLine());
 				//Process proc = Runtime.getRuntime().exec("echo cyclus");
@@ -58,15 +80,13 @@ public class Cycic extends ViewBase{
 				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
 				while((string = read1.readLine()) != null){
 					sb1.append(string);
-				}*/
+				}
 			}
 			//System.out.println(sb.toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		//XMLReader.readSchema(sb.toString());
-		//XMLReader.annotationReader(sb1.toString());
+		}*/
 		if (CycicScenarios.cycicScenarios.size() < 1){
 			DataArrays scenario = new DataArrays();
 			workingScenario = scenario;
@@ -164,9 +184,9 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(submit1, 4, 0);
-		//Text text_sting = new Text();
-		//text_sting.setText(System.getenv("PATH").toString());
-		//grid.add(text_sting, 5, 0);
+		Text text_sting = new Text();
+		text_sting.setText(System.getenv("PATH").toString());
+		grid.add(text_sting, 5, 0);
 		
 		// Adding a new Market
 		Text scenetitle2 = new Text("Market");
