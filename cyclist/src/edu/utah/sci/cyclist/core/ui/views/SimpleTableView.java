@@ -29,6 +29,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -63,7 +64,7 @@ public class SimpleTableView extends CyclistViewBase {
 	public static final String ID = "table-view";
 	public static final String TITLE = "Table";
 	
-	public static final String SIMULATION_FIELD_NAME = "SimulationID";
+	public static final String SIMULATION_FIELD_NAME = "SimID";
 	
 	private TableView<TableRow> _tableView;
 	private Table _currentTable = null;
@@ -126,9 +127,16 @@ public class SimpleTableView extends CyclistViewBase {
 		_simFilter = null;
 		if (getCurrentSimulation() != null) {
 			if (_simField != null) {
-				_simField.getValues().removeAll();
-				_simField.getValues().add(sim.getSimulationId());
-
+				if(_simField.getValues() == null){
+					List<Object> simList = new ArrayList<>();
+					simList.add(sim.getSimulationId());
+					_simField.setValues(FXCollections.observableList(simList));
+				}else{
+					_simField.getValues().removeAll();
+					_simField.getValues().add(sim.getSimulationId());
+				}
+					
+				
 				_simFilter = new Filter(_simField, false);
 			}
 		}
