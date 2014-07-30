@@ -62,6 +62,7 @@ public class Filter implements Observable {
 			
 			_field.valuesProperty().addListener((Observable o)-> {
 				_selectedItems.clear();  //TBD - should clear the previous values???
+				
 				if (getValues() != null){
 					_selectedItems.addAll(getValues());
 				}
@@ -227,6 +228,10 @@ public class Filter implements Observable {
 		}
 	}
 	
+	private Boolean isBlob(String item){
+		return (item.indexOf("X'") == 0 && item.lastIndexOf("'")== item.length()-1);
+	}
+	
 	public boolean isActive() {
 		boolean active = true;
 		if (getValues() == null || _selectedItems.size() == getValues().size()) {
@@ -263,12 +268,13 @@ public class Filter implements Observable {
 						if (first) first = false;
 						else builder.append(", ");
 			
-						if (item instanceof String) {
+						if (item instanceof String && !isBlob(item.toString())) {
 							builder.append("'").append(item.toString()).append("'");
 						} else
 							builder.append(item.toString());
 					}
 					builder.append(")");
+					
 				} else {
 					builder.append("1=0");
 				}

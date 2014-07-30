@@ -29,7 +29,6 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -56,6 +55,7 @@ import edu.utah.sci.cyclist.core.model.Schema;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
+import edu.utah.sci.cyclist.core.model.ValueFilter;
 import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
@@ -120,6 +120,12 @@ public class SimpleTableView extends CyclistViewBase {
 		loadTable();
 	}
 	
+	/**
+	 * Creates a new filter which keeps only the rows with simulation id that matches the selected simulation id.
+	 * @param Simulation sim - the selected simulation.
+	 * @param boolean active
+	 * 
+	 */
 	@Override
 	public void selectSimulation(Simulation sim, boolean active) {
 		super.selectSimulation(sim, active);
@@ -127,17 +133,18 @@ public class SimpleTableView extends CyclistViewBase {
 		_simFilter = null;
 		if (getCurrentSimulation() != null) {
 			if (_simField != null) {
-				if(_simField.getValues() == null){
-					List<Object> simList = new ArrayList<>();
-					simList.add(sim.getSimulationId());
-					_simField.setValues(FXCollections.observableList(simList));
-				}else{
-					_simField.getValues().removeAll();
-					_simField.getValues().add(sim.getSimulationId());
-				}
-					
 				
-				_simFilter = new Filter(_simField, false);
+//				List<Object> simList = new ArrayList<>();
+//				simList.add(sim.getSimulationId());
+//				_simField.setValues(FXCollections.observableList(simList));
+				
+//				_simField.getValues().removeAll();
+//				_simField.getValues().add(sim.getSimulationId());
+						
+//				_simFilter = new Filter(_simField, false);
+//				_simFilter.selectValue(sim.getSimulationId(), true);
+				
+				_simFilter = new ValueFilter(_simField, sim.getSimulationId());
 			}
 		}
 				

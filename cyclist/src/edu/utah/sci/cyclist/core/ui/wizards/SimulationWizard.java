@@ -25,6 +25,7 @@ package edu.utah.sci.cyclist.core.ui.wizards;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.List;
@@ -80,7 +81,12 @@ public class SimulationWizard extends TilePane {
 	// DataType elements
 	private CyclistDatasource     _current;
 	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
-	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID FROM Info order by SimID";
+	private static final String SIMULATION_ID_FIELD_NAME = "SimID";
+	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT " + SIMULATION_ID_FIELD_NAME  +" FROM Info order by SimID";
+	// Gets the simulation in a string format, in case it is stored in a field of BLOB type.
+	private static final String SIMULATION_ID_BLOB_QUERY = "SELECT DISTINCT quote(" + SIMULATION_ID_FIELD_NAME  +") AS SimID FROM Info order by SimID";
+	//Gets the information of all the fields and their types in the Info table.
+	private static final String INFO_TABLE_DATA = "PRAGMA table_info(Info)";
 	
 	// * * * Constructor creates a new stage * * * //
 	public SimulationWizard() {
@@ -308,7 +314,7 @@ public class SimulationWizard extends TilePane {
 		wizardVbox.setSpacing(5);
 		wizardVbox.setPadding(new Insets(5));
 		wizardVbox.setPrefHeight(300);
-		wizardVbox.setId("datatable-wizard");
+		wizardVbox.setId("simulation-wizard");
 		Scene scene = new Scene(wizardVbox);
 		wizardVbox.getChildren().addAll(connectionBox,simulationBox,buttonsBox);
 		
@@ -343,13 +349,30 @@ public class SimulationWizard extends TilePane {
 		}
 		
 		try (Connection conn = ds.getConnection()) {
+			//Check the SimID field type
+			Boolean _isBlob = false;
+			if(ds.isSQLite()){
+				_isBlob = isBlob(conn);
+			}
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(SIMULATION_ID_QUERY);
+			ResultSet rs = null;
+			if(_isBlob){
+				//If the field is a BLOB - fetch it in a string format.
+				rs = stmt.executeQuery(SIMULATION_ID_BLOB_QUERY);
+			}else{
+				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
+			}
 			while (rs.next()) {
-				 String simulationId = rs.getString("SimID");
+				 String simulationId = rs.getString(SIMULATION_ID_FIELD_NAME);
 				 _simulationsView.getItems().add(simulationId);
 			}
+			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
+						_simulationsView.getItems().add("first demo simulation");
+						_simulationsView.getItems().add("second demo simulation");
+						_simulationsView.getItems().add("third demo simulation");
+			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
+			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimID doesn't exist");
 		}
@@ -357,6 +380,30 @@ public class SimulationWizard extends TilePane {
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
 		}finally{
 			ds.releaseConnection();
+		}
+	}
+	
+	/*
+	 * Checks if the simID field type is BLOB.
+	 * @param - Connection conn: the connection to the database.
+	 * @return Boolean - true if BLOB, false if another type.
+	 */
+	private Boolean isBlob(Connection conn){
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(INFO_TABLE_DATA);
+			while (rs.next()) {
+				String fieldName = rs.getString("name");
+				if(fieldName.toLowerCase().equals(SIMULATION_ID_FIELD_NAME.toLowerCase())){
+					return( rs.getString("type").equals("BLOB"));
+				}
+			}
+			return false;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
 		}
 	}
 	
