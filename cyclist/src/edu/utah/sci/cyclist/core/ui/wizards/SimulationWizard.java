@@ -367,11 +367,6 @@ public class SimulationWizard extends TilePane {
 				 String simulationId = rs.getString(SIMULATION_ID_FIELD_NAME);
 				 _simulationsView.getItems().add(simulationId);
 			}
-			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
-						_simulationsView.getItems().add("first demo simulation");
-						_simulationsView.getItems().add("second demo simulation");
-						_simulationsView.getItems().add("third demo simulation");
-			/* ****************JUST FOR TESTING - WE BE DELETED AFTER TESTING!!! ************* */
 			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimID doesn't exist");
