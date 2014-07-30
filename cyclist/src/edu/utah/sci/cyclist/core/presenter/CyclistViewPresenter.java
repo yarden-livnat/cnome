@@ -225,7 +225,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 			Table tbl = filter.getField().getTable();
 			filterMemento.putString("table", tbl.getName());
 			String tblDs = (tbl.getDataSource()!=null) ? tbl.getDataSource().getUID():"";
-			memento.putString("tblDs", tblDs);
+			filterMemento.putString("tblDs", tblDs);
 		}
 		
 		//All the changes are saved - dirty flag should be reset.
