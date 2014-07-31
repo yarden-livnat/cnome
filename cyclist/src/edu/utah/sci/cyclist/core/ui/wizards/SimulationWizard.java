@@ -137,8 +137,9 @@ public class SimulationWizard extends TilePane {
 		
 		// Add, edit, or remove connection box
 		HBox dataSrcHbox = new HBox();
-		dataSrcHbox.setSpacing(5);
+		dataSrcHbox.setSpacing(10);
 		dataSrcHbox.setAlignment(Pos.CENTER_LEFT);
+		dataSrcHbox.setPadding(new Insets(5));
 		
 		HBox conHBox = new HBox();
 		conHBox.setSpacing(10);
@@ -165,10 +166,15 @@ public class SimulationWizard extends TilePane {
 		Text txt = new Text("Data Sources");
 		_sourcesView = new ListView<CyclistDatasource>();
 		
+		HBox.setHgrow(srcVbox, Priority.ALWAYS);
+		HBox.setHgrow(_sourcesView, Priority.ALWAYS);
+		
+		
 		srcVbox.getChildren().addAll(txt,_sourcesView);
 		
 		Button addButton = new Button("Add");
 		addButton.setMinWidth(75);
+//		addButton.getStyleClass().add("flat-button");
 		
 		Button editButton = new Button("Edit");
 		editButton.setMinWidth(75);
@@ -189,7 +195,7 @@ public class SimulationWizard extends TilePane {
 		conHBox.getChildren().addAll(selectionButton, _status/*_statusDisplay*/);
 		
 		_sourcesView.setId("datasources-list");
-		_sourcesView.setMaxSize(100, 100);
+		_sourcesView.setMinSize(100, 100);
 
 		// Keep track of the currently selected data source
 		_sourcesView.getSelectionModel().selectedItemProperty().addListener(
@@ -268,6 +274,7 @@ public class SimulationWizard extends TilePane {
 		simulationBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
 		VBox.setVgrow(_simulationsView,  Priority.ALWAYS);
 		VBox.setVgrow(aliasHbox,  Priority.ALWAYS);
+		VBox.setVgrow(srcVbox, Priority.ALWAYS);
 		
 		_simulationsView.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			@Override
