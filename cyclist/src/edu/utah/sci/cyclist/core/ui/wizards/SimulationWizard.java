@@ -28,9 +28,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -44,8 +46,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
@@ -61,6 +66,7 @@ import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
+
 /*
  * Class to allow the user to create or edit a data table.
  * Also controls the creation/editing of data sources.
@@ -70,12 +76,11 @@ public class SimulationWizard extends TilePane {
 	// GUI elements
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
-	private List<String> 				_simulationsIds;
+//	private List<String> 				_simulationsIds;
 //	private ImageView                   _statusDisplay;
 	private Label						_status;
-	private ListView<String>            _simulationsView;
-	private TextField                   _aliasField;
-	
+	private TableView<SimInfo>		    _simulationsTbl;
+	private ObservableList<SimInfo> 	_simData =FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	
 	// DataType elements
@@ -195,7 +200,7 @@ public class SimulationWizard extends TilePane {
 		conHBox.getChildren().addAll(selectionButton, _status/*_statusDisplay*/);
 		
 		_sourcesView.setId("datasources-list");
-		_sourcesView.setMinSize(100, 100);
+		_sourcesView.setMinSize(100, 50);
 
 		// Keep track of the currently selected data source
 		_sourcesView.getSelectionModel().selectedItemProperty().addListener(
@@ -247,46 +252,40 @@ public class SimulationWizard extends TilePane {
 		simLbl.setAlignment(Pos.CENTER);
 		simLbl.setFont(new Font(12));
 		simLbl.setPadding(new Insets(3,0,0,0));
-		_simulationsView = new ListView<>();
-		_simulationsView.setPrefWidth(250);
-		_simulationsView.setDisable(true);
-		_simulationsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		_simulationsView.setMaxHeight(Double.MAX_VALUE);
 		
-		final HBox aliasHbox = new HBox();
-		aliasHbox.setSpacing(10);
-		aliasHbox.setAlignment(Pos.CENTER_LEFT);
-		aliasHbox.setPadding(new Insets(5));
+		_simulationsTbl = new TableView<SimInfo>();
+		_simulationsTbl.setEditable(true);
+		_simulationsTbl.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		_simulationsTbl.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		TableColumn<SimInfo, String> simIdCol = new TableColumn<SimInfo, String>("Simulation Id");
+		simIdCol.setCellValueFactory(new PropertyValueFactory<SimInfo, String>("simId"));
+		simIdCol.setEditable(false);
 		
-		Label aliasLbl =  new Label("Alias:");
-		aliasLbl.setAlignment(Pos.CENTER);
-		aliasLbl.setFont(new Font(12));
-		aliasLbl.setPadding(new Insets(3,0,0,0));
+		TableColumn<SimInfo, String> simAliasCol = new TableColumn<SimInfo, String>("Alias");
 		
-		_aliasField = new TextField();
-		_aliasField.setPrefWidth(210);
-		_aliasField.setMinHeight(20);
+//		simAliasCol.setCellFactory(CustomizedTableColumn(new DefaultStringConverter()));
+		simAliasCol.setCellFactory(TextFieldTableCell.forTableColumn());
 		
-		aliasHbox.getChildren().addAll(aliasLbl, _aliasField);
-		aliasHbox.setDisable(true);
+		simAliasCol.setCellValueFactory(new PropertyValueFactory<SimInfo, String>("alias"));
+		simAliasCol.setEditable(true);
+		_simulationsTbl.setItems(_simData);
+		_simulationsTbl.getColumns().addAll(Arrays.asList(simIdCol, simAliasCol));
+		
+		simAliasCol.setOnEditCommit(
+	            new EventHandler<CellEditEvent<SimInfo, String>>() {
+	                @Override
+	                public void handle(CellEditEvent<SimInfo, String> t) {
+	                	((SimInfo) t.getTableView().getItems().get(
+	                            t.getTablePosition().getRow())
+	                            ).setAlias(t.getNewValue());
+	                }
+	            }
+	        );
 			
-		simulationBox.getChildren().addAll(simLbl,_simulationsView, aliasHbox);
+		simulationBox.getChildren().addAll(simLbl, _simulationsTbl);
 		simulationBox.disableProperty().bind(_sourcesView.getSelectionModel().selectedItemProperty().isNull());
-		VBox.setVgrow(_simulationsView,  Priority.ALWAYS);
-		VBox.setVgrow(aliasHbox,  Priority.ALWAYS);
 		VBox.setVgrow(srcVbox, Priority.ALWAYS);
-		
-		_simulationsView.setOnMouseClicked(new EventHandler<MouseEvent>(){
-			@Override
-			public void handle(MouseEvent e) {
-				if(_simulationsView.getSelectionModel().getSelectedItems().size() >1 || _simulationsView.getSelectionModel().getSelectedItems().size()==0 ){
-					aliasHbox.setDisable(true);
-				} else{
-					aliasHbox.setDisable(false);
-				}
-			}
-		});
-		
+		VBox.setVgrow(simulationBox,  Priority.ALWAYS);
 		
 		// The ok/cancel buttons
 		HBox buttonsBox = new HBox();
@@ -313,14 +312,14 @@ public class SimulationWizard extends TilePane {
 		buttonsBox.getChildren().addAll(btnCancel,btnOk);	
 		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
 		
-		btnOk.disableProperty().bind(_simulationsView.getSelectionModel().selectedItemProperty().isNull());
+		btnOk.disableProperty().bind(_simulationsTbl.getSelectionModel().selectedItemProperty().isNull());
 	
 		
 		// Create the scene
 		VBox wizardVbox = new VBox();
 		wizardVbox.setSpacing(5);
 		wizardVbox.setPadding(new Insets(5));
-		wizardVbox.setPrefHeight(300);
+		wizardVbox.setPrefHeight(400);
 		wizardVbox.setId("simulation-wizard");
 		Scene scene = new Scene(wizardVbox);
 		wizardVbox.getChildren().addAll(connectionBox,simulationBox,buttonsBox);
@@ -350,10 +349,8 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	private void selectConnection(CyclistDatasource ds) {
-		_simulationsView.getItems().clear();
-		if(_simulationsView.isDisabled()){
-			_simulationsView.setDisable(false);
-		}
+		
+		_simData.clear();
 		
 		try (Connection conn = ds.getConnection()) {
 			//Check the SimID field type
@@ -372,8 +369,10 @@ public class SimulationWizard extends TilePane {
 			}
 			while (rs.next()) {
 				 String simulationId = rs.getString(SIMULATION_ID_FIELD_NAME);
-				 _simulationsView.getItems().add(simulationId);
+				 _simData.add(new SimInfo(simulationId, ""));
 			}
+			
+			_simulationsTbl.setItems(_simData);
 			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimID doesn't exist");
@@ -384,7 +383,6 @@ public class SimulationWizard extends TilePane {
 			ds.releaseConnection();
 		}
 	}
-	
 	/*
 	 * Checks if the simID field type is BLOB.
 	 * @param - Connection conn: the connection to the database.
@@ -410,22 +408,51 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	private void updateSimulation() {
-		_simulationsIds = (List<String>)_simulationsView.getSelectionModel().getSelectedItems();
+		List<SimInfo> simulations = _simulationsTbl.getSelectionModel().getSelectedItems();
 		_selection.clear();
-		for(String simId:_simulationsIds){
-			Simulation simulation = new Simulation(simId);
-			simulation.setDataSource(_current);
-			String alias =_aliasField.getText();
-			if(alias == null){
-				alias = "null";
-			}else if(alias.isEmpty()){
-				alias = "emtpy";
+		if(simulations.size()>0){
+//			_simulationsIds = new ArrayList<String>();
+			for(SimInfo simInfo:simulations){
+				String simId = simInfo.getSimId();
+//				_simulationsIds.add(simId);
+				Simulation simulation = new Simulation(simId);
+				simulation.setDataSource(_current);
+				String alias = simInfo.getAlias();
+				if(alias == null || alias.isEmpty()){
+					alias = simId;
+				}
+				simulation.setAlias(alias);
+				_selection.add(simulation);
 			}
-			simulation.setAlias(_aliasField.getText().isEmpty()?simId:_aliasField.getText());
-			_selection.add(simulation);
 		}
 	}
-
+	
+	
+//	 public static <S,T> Callback<TableColumn<SimInfo,String>, TableCell<SimInfo,String>> CustomizedTableColumn(final StringConverter<String> converter) {
+//				         return new Callback<TableColumn<SimInfo,String>, TableCell<SimInfo,String>>() {
+//				             @Override 
+//				             public TableCell<SimInfo,String> call(TableColumn<SimInfo,String> list) {
+//				                 return new MyTextFieldTableCell<SimInfo,String>(converter){
+//				                
+//					                 @Override
+//					 				 public void updateItem(String item, boolean empty) {
+//					 	                super.updateItem(item, empty);
+//					 	                if (!empty) {
+//					 	                    // Use a SimpleDateFormat or similar in the format method
+//					 	                    setText(item);
+//					 	                }else{
+//					 	                	setText(null);
+//					 	                }
+//					 	            }
+//					                 
+//				                 };
+//				             }
+//				         };
+//		}
+		
+		
+		
+	
 	public CyclistDatasource getSelectedSource() {
 		return _current;
 	}
@@ -438,4 +465,28 @@ public class SimulationWizard extends TilePane {
 	public void setWorkDir(String workDir){
 	}
 	
+	public static class SimInfo {
+		private final SimpleStringProperty simId;
+		private final SimpleStringProperty alias;
+		
+		private SimInfo(String simId, String alias){
+			this.simId = new SimpleStringProperty(simId);
+			this.alias = new SimpleStringProperty(alias);
+		}
+		
+		public String getSimId() {
+            return simId.get();
+        }
+        
+		public void setSimId(String simId) {
+        	this.simId.set(simId);
+        }
+		
+		public String getAlias() {
+            return alias.get();
+        }
+        public void setAlias(String alias) {
+            this.alias.set(alias);
+        }
+	}
 }
