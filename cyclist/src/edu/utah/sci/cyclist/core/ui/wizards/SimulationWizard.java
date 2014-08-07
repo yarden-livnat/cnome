@@ -76,7 +76,6 @@ public class SimulationWizard extends TilePane {
 	// GUI elements
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
-//	private List<String> 				_simulationsIds;
 //	private ImageView                   _statusDisplay;
 	private Label						_status;
 	private TableView<SimInfo>		    _simulationsTbl;
@@ -411,10 +410,8 @@ public class SimulationWizard extends TilePane {
 		List<SimInfo> simulations = _simulationsTbl.getSelectionModel().getSelectedItems();
 		_selection.clear();
 		if(simulations.size()>0){
-//			_simulationsIds = new ArrayList<String>();
 			for(SimInfo simInfo:simulations){
 				String simId = simInfo.getSimId();
-//				_simulationsIds.add(simId);
 				Simulation simulation = new Simulation(simId);
 				simulation.setDataSource(_current);
 				String alias = simInfo.getAlias();
