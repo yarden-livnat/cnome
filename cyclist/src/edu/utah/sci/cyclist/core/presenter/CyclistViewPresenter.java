@@ -296,11 +296,13 @@ public class CyclistViewPresenter extends ViewPresenter {
 			String tableName = filterData.getString("table");
 			String tblDs = filterData.getString("tblDs");
 			Table table = findTable(tableName, tblDs, model.getTables());
-			Field field = table.getSchema().getField(fieldName);
+			if(table != null){
+				Field field = table.getSchema().getField(fieldName);
 			
-			Field fieldCopy = new Field(field);
-		    Filter filter = new Filter(fieldCopy);
-		    getView().addFilter(filter);   
+				Field fieldCopy = new Field(field);
+				Filter filter = new Filter(fieldCopy);
+				getView().addFilter(filter);
+			}
 		}
 		
 		//If the dirty flag was set during restore - reset it back to false.

@@ -23,6 +23,11 @@ package edu.utah.sci.cyclist.core.ui.wizards;
  *     Kristi Potter
  *******************************************************************************/
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,6 +35,8 @@ import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -91,6 +98,20 @@ public class SimulationWizard extends TilePane {
 	private static final String SIMULATION_ID_BLOB_QUERY = "SELECT DISTINCT quote(" + SIMULATION_ID_FIELD_NAME  +") AS SimID FROM Info order by SimID";
 	//Gets the information of all the fields and their types in the Info table.
 	private static final String INFO_TABLE_DATA = "PRAGMA table_info(Info)";
+	
+	//Calling external applications for post processing of sqlite database.
+	private static final String  EXTERNAL_APPS = "externalApps";
+	private static final String WIN_POST_PROCESSING_APP = "cycpost-windows-amd64.exe";
+	private static final String LINUX_POST_PROCESSING_APP = "cycpost-linux-amd64";
+	
+	private static final String FIX_AGENTS_TABLE_PHASE1 = "UPDATE Agents set ExitTime = EnterTime+(select Duration from Info where Agents.SimId=Info.SimId ) "+
+														  "where ExitTime is null and Lifetime = -1";
+	
+	private static final String FIX_AGENTS_TABLE_PHASE2 = "update Agents set ExitTime=(EnterTime+Lifetime) where ExitTime is null and  Lifetime != -1;";
+	private static final String FACILITIES_TABLE_CREATE = "create table Facilities as " +
+														  "select cast(quote(f.SimId) as CHAR(32)) as SimId, f.AgentId as AgentId, f.Spec, f.Prototype, i.AgentId as InstitutionId, cast(-1 as INTEGER) as RegionId, " +
+														  "f.EnterTime, f.ExitTime, f.Lifetime from Agents as f, Agents as i where f.Kind = 'Facility' and i.Kind = 'Inst' and f.ParentId = i.AgentId;";
+	private static final String FACILITIES_TABLE_INDEX = "create index Facilities_idx on Facilities (SimId ASC, AgentId ASC);";
 	
 	// * * * Constructor creates a new stage * * * //
 	public SimulationWizard() {
@@ -356,6 +377,11 @@ public class SimulationWizard extends TilePane {
 			Boolean _isBlob = false;
 			if(ds.isSQLite()){
 				_isBlob = isBlob(conn);
+				Boolean processDb = updateSqliteSimTables(ds);
+				//If new tables have been created by the external applications, add also the internal tables needed for the simulation database.
+				if(processDb){
+					createFacilitiesTable(conn,ds);
+				}
 			}
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			Statement stmt = conn.createStatement();
@@ -422,6 +448,63 @@ public class SimulationWizard extends TilePane {
 				_selection.add(simulation);
 			}
 		}
+	}
+	
+	private Boolean updateSqliteSimTables(CyclistDatasource ds){
+		Logger log = Logger.getLogger(SimulationWizard.class);
+		String os = System.getProperty("os.name").toLowerCase();
+		String dsPath = ds.getProperties().getProperty("path");
+		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
+		log.warn("wizard path =" + currPath + "\n" );
+		
+		Process process = null;
+		
+		try {	
+			if(os.indexOf("windows")>=0){
+				currPath += "\\" + WIN_POST_PROCESSING_APP;
+				process = new ProcessBuilder(currPath,dsPath).start();
+			} else{
+				currPath += "/" + LINUX_POST_PROCESSING_APP;
+				process = new ProcessBuilder(currPath,dsPath).start();
+			}
+				
+			InputStream is = process.getInputStream();
+		    InputStreamReader isr = new InputStreamReader(is);
+		    BufferedReader br = new BufferedReader(isr);
+		    String line;
+		    //Indication whether or not the new tables have been produced.
+		    Boolean isAlreadyProcessed = false;
+		    
+		    while ((line = br.readLine()) != null) {
+		      System.out.println(line);
+		      //Tables already exist - no need to reproduce additional tables.
+		      if(line.indexOf("post processed") > -1){
+		    	  isAlreadyProcessed = true;
+		      }
+		    }
+		    System.out.println("Program terminated!");
+		    return !isAlreadyProcessed;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		
+	}
+	
+	private void  createFacilitiesTable(Connection conn, CyclistDatasource ds) throws Exception{
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			stmt.executeUpdate(FIX_AGENTS_TABLE_PHASE1);
+			stmt.executeUpdate(FIX_AGENTS_TABLE_PHASE2);
+		    stmt.executeUpdate(FACILITIES_TABLE_CREATE);
+		    stmt.executeUpdate(FACILITIES_TABLE_INDEX);
+		} catch (SQLException e) {
+			System.out.println("Create Facilities table failed");
+			throw e;
+		}
+		
 	}
 	
 	
