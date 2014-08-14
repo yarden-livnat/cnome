@@ -23,6 +23,7 @@
 package edu.utah.sci.cyclist.core;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,6 +76,11 @@ public class Resources1 {
 			_icons.put(fullname, image);
 		}
 		return image;
+	}
+	
+	public static URL getCurrentUrl(){
+		URL tmp = Resources1.class.getResource("");
+		return tmp;
 	}
 	
 }

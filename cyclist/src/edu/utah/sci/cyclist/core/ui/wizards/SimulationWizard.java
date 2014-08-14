@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -463,12 +461,12 @@ public class SimulationWizard extends TilePane {
 		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
 		log.warn("wizard path =" + currPath + "\n" );
 		
-		Path path = Paths.get(".");
-		if(path != null){
-			String newPath = path.toAbsolutePath().normalize().toString();
-			log.warn("path= " + newPath);
+		URL url = Resources1.getCurrentUrl();
+		if(url != null){
+			String path = url.getPath();
+			log.warn(path);
 		}else{
-			log.warn("path is null");
+			log.warn("tmp is empty");
 		}
 		
 		Process process = null;
