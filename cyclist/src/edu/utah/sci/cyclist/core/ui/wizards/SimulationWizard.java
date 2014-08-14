@@ -482,7 +482,7 @@ public class SimulationWizard extends TilePane {
 					File file = new File(currPath);
 					file.setExecutable(true);
 					
-					currPath += "./" + LINUX_POST_PROCESSING_APP;
+					currPath = "./" + currPath + LINUX_POST_PROCESSING_APP;
 				}
 			}
 			
