@@ -453,6 +453,7 @@ public class SimulationWizard extends TilePane {
 	private Boolean updateSqliteSimTables(CyclistDatasource ds){
 		Logger log = Logger.getLogger(SimulationWizard.class);
 		String os = System.getProperty("os.name").toLowerCase();
+		log.warn("os= " + os);
 		String dsPath = ds.getProperties().getProperty("path");
 		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
 		log.warn("wizard path =" + currPath + "\n" );
