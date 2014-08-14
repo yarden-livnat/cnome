@@ -22,6 +22,7 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -78,9 +79,17 @@ public class Resources1 {
 		return image;
 	}
 	
-	public static URL getCurrentUrl(){
-		URL tmp = Resources1.class.getResource("");
-		return tmp;
-	}
-	
+	public static String getCurrentPath(){
+		String path = "";
+		URL url = Resources1.class.getResource("");
+		if(url != null){
+			path = url.getPath();
+			String relativePath = Resources1.class.getPackage().getName().replace(".", "/");
+			int lastIndex = path.lastIndexOf(relativePath);
+			if(lastIndex >= 0){
+				path = path.substring(0,lastIndex-1);
+			}
+		}
+		return path;
+	}	
 }

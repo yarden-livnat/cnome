@@ -461,13 +461,8 @@ public class SimulationWizard extends TilePane {
 		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
 		log.warn("wizard path =" + currPath + "\n" );
 		
-		URL url = Resources1.getCurrentUrl();
-		if(url != null){
-			String path = url.getPath();
-			log.warn(path);
-		}else{
-			log.warn("tmp is empty");
-		}
+		String path = Resources1.getCurrentPath();
+		log.warn("path= " + path);
 		
 		Process process = null;
 		
