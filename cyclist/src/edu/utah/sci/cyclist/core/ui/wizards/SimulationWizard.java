@@ -473,21 +473,30 @@ public class SimulationWizard extends TilePane {
 		}
 		
 		Process process = null;
+		int ecode;
 		
 		try {	
 			if(os.indexOf("windows")>=0){
 				currPath += "/" + WIN_POST_PROCESSING_APP;
+//				process = new ProcessBuilder(currPath,dsPath).start();
+//				process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
+//				ecode =  process.waitFor();
 			} else if(os.indexOf("linux")>=0){
 				if(osArch.indexOf("amd64")>=0){
 					File file = new File(currPath);
 					file.setExecutable(true);
 					
-					currPath = "./" + currPath + LINUX_POST_PROCESSING_APP;
+//					currPath = "./" + currPath + LINUX_POST_PROCESSING_APP;
+					currPath += "/"+LINUX_POST_PROCESSING_APP;
+//					process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
+//					ecode = process.waitFor();
 				}
 			}
 			
 			log.warn("path= " + currPath);
-			process = new ProcessBuilder(currPath,dsPath).start();
+			
+			process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
+			ecode = process.waitFor();
 				
 			InputStream is = process.getInputStream();
 		    InputStreamReader isr = new InputStreamReader(is);
@@ -506,7 +515,7 @@ public class SimulationWizard extends TilePane {
 		    }
 		    System.out.println("Program terminated!");
 		    return !isAlreadyProcessed;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
