@@ -28,6 +28,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,6 +71,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -458,8 +462,14 @@ public class SimulationWizard extends TilePane {
 		String dsPath = ds.getProperties().getProperty("path");
 		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
 		log.warn("wizard path =" + currPath + "\n" );
-		String workingDir = System.getProperty("user.dir");
-		log.warn("working dir =" + workingDir + "\n" );
+		
+		Path path = Paths.get(".");
+		if(path != null){
+			String newPath = path.toAbsolutePath().normalize().toString();
+			log.warn("path= " + newPath);
+		}else{
+			log.warn("path is null");
+		}
 		
 		Process process = null;
 		
