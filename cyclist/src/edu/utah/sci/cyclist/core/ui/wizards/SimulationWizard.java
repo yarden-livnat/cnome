@@ -497,6 +497,7 @@ public class SimulationWizard extends TilePane {
 			
 			process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
 			ecode = process.waitFor();
+			log.warn("ecode =" + ecode);
 				
 			InputStream is = process.getInputStream();
 		    InputStreamReader isr = new InputStreamReader(is);
@@ -518,6 +519,7 @@ public class SimulationWizard extends TilePane {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.warn("process exception");
 			return false;
 		}
 		
