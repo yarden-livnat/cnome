@@ -22,7 +22,6 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -79,15 +78,29 @@ public class Resources1 {
 		return image;
 	}
 	
+	/**
+	 * Gets the full path in which the application is running.
+	 * @return String of the full path.
+	 */
 	public static String getCurrentPath(){
 		String path = "";
 		URL url = Resources1.class.getResource("");
 		if(url != null){
+			//The full path of the current class (e.g "path/edu/utah/sci/cyclist/core" - since that's the location of the Resources1 class)
 			path = url.getPath();
+			
+			//The specific part of the current class location has to be removed.
+			//Get if from the package name (e.g "edu.utah.sci.cyclist.core")
 			String relativePath = Resources1.class.getPackage().getName().replace(".", "/");
 			int lastIndex = path.lastIndexOf(relativePath);
 			if(lastIndex >= 0){
 				path = path.substring(0,lastIndex-1);
+			}
+			
+			//There is always a leading "/" that should be removed. (When running from a jar it appears as a leading "file:/"
+			int index = path.indexOf("/");
+			if(index >=0){
+				path = path.substring(index+1,path.length());
 			}
 		}
 		return path;

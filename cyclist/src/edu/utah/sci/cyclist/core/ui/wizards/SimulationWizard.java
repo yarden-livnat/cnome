@@ -458,22 +458,31 @@ public class SimulationWizard extends TilePane {
 		String osArch = System.getProperty("os.arch").toLowerCase();
 		log.warn("os= " + os + " arch= " + osArch);
 		String dsPath = ds.getProperties().getProperty("path");
-		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
-		log.warn("wizard path =" + currPath + "\n" );
 		
-		String path = Resources1.getCurrentPath();
-		log.warn("path= " + path);
+		String currPath = Resources1.getCurrentPath();
+		
+		//Path always contains one directory below the main directory
+		//e.g bin/ or the jar 
+		//Go one directory up to be in the main level.
+		//Then go to the external applications directory.
+		int lastIndex = currPath.lastIndexOf("/");
+		if(lastIndex >= 0){
+			currPath = currPath.substring(0,lastIndex)+"/"+EXTERNAL_APPS;
+		}
 		
 		Process process = null;
 		
 		try {	
 			if(os.indexOf("windows")>=0){
-				currPath += "\\" + WIN_POST_PROCESSING_APP;
-				process = new ProcessBuilder(currPath,dsPath).start();
+				currPath += "/" + WIN_POST_PROCESSING_APP;
 			} else if(os.indexOf("linux")>=0){
-				currPath += "/" + LINUX_POST_PROCESSING_APP;
-				process = new ProcessBuilder(currPath,dsPath).start();
+				if(osArch.indexOf("64")>=0){
+					currPath += "/" + LINUX_POST_PROCESSING_APP;
+				}
 			}
+			
+			log.warn("path= " + currPath);
+			process = new ProcessBuilder(currPath,dsPath).start();
 				
 			InputStream is = process.getInputStream();
 		    InputStreamReader isr = new InputStreamReader(is);
@@ -483,7 +492,8 @@ public class SimulationWizard extends TilePane {
 		    Boolean isAlreadyProcessed = false;
 		    
 		    while ((line = br.readLine()) != null) {
-		      System.out.println(line);
+//		      System.out.println(line);
+		    	log.warn(line);
 		      //Tables already exist - no need to reproduce additional tables.
 		      if(line.indexOf("post processed") > -1){
 		    	  isAlreadyProcessed = true;
