@@ -453,10 +453,13 @@ public class SimulationWizard extends TilePane {
 	private Boolean updateSqliteSimTables(CyclistDatasource ds){
 		Logger log = Logger.getLogger(SimulationWizard.class);
 		String os = System.getProperty("os.name").toLowerCase();
-		log.warn("os= " + os);
+		String osArch = System.getProperty("os.arch").toLowerCase();
+		log.warn("os= " + os + " arch= " + osArch);
 		String dsPath = ds.getProperties().getProperty("path");
 		String currPath = new File(EXTERNAL_APPS).getAbsolutePath();
 		log.warn("wizard path =" + currPath + "\n" );
+		String workingDir = System.getProperty("user.dir");
+		log.warn("working dir =" + workingDir + "\n" );
 		
 		Process process = null;
 		
@@ -464,7 +467,7 @@ public class SimulationWizard extends TilePane {
 			if(os.indexOf("windows")>=0){
 				currPath += "\\" + WIN_POST_PROCESSING_APP;
 				process = new ProcessBuilder(currPath,dsPath).start();
-			} else{
+			} else if(os.indexOf("linux")>=0){
 				currPath += "/" + LINUX_POST_PROCESSING_APP;
 				process = new ProcessBuilder(currPath,dsPath).start();
 			}
