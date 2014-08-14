@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.attribute.PosixFilePermission;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +37,7 @@ import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -476,8 +478,11 @@ public class SimulationWizard extends TilePane {
 			if(os.indexOf("windows")>=0){
 				currPath += "/" + WIN_POST_PROCESSING_APP;
 			} else if(os.indexOf("linux")>=0){
-				if(osArch.indexOf("64")>=0){
-					currPath += "/" + LINUX_POST_PROCESSING_APP;
+				if(osArch.indexOf("amd64")>=0){
+					File file = new File(currPath);
+					file.setExecutable(true);
+					
+					currPath += "./" + LINUX_POST_PROCESSING_APP;
 				}
 			}
 			
@@ -523,7 +528,6 @@ public class SimulationWizard extends TilePane {
 		}
 		
 	}
-	
 	
 //	 public static <S,T> Callback<TableColumn<SimInfo,String>, TableCell<SimInfo,String>> CustomizedTableColumn(final StringConverter<String> converter) {
 //				         return new Callback<TableColumn<SimInfo,String>, TableCell<SimInfo,String>>() {
