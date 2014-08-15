@@ -224,7 +224,7 @@ public class VisFunctions {
 	/**
 	 * Reloads the CYCIC pane when changes have been made to it's contents.
 	 */
-	static void reloadPane(){
+	/*static void reloadPane(){
 		Cycic.pane.getChildren().remove(0, Cycic.pane.getChildren().size());
 		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
 			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle);
@@ -266,7 +266,7 @@ public class VisFunctions {
 				}
 			}
 		}
-	}
+	}*/
 
 	/**
 	 * Reloads the CYCIC pane without Markets.

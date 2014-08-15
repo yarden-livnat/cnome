@@ -39,7 +39,7 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
-		String string;
+		/*String string;
 		for(int i = 0; i < XMLReader.test_string.size(); i++){
 			StringBuilder sb = new StringBuilder();
 			StringBuilder sb1 = new StringBuilder();
@@ -55,9 +55,12 @@ public class Cycic extends ViewBase{
 				while((string = read1.readLine()) != null){
 					sb1.append(string);
 				}
-				System.out.println(sb);
+				//System.out.println(sb);
 				//XMLReader.readSchema(sb.toString());
-				XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+				facilityStructure test = new facilityStructure();
+				test.facilityName = XMLReader.test_string.get(i);
+				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+				DataArrays.simFacilities.add(test);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -141,7 +144,7 @@ public class Cycic extends ViewBase{
 		grid.setVgap(5);
 		
 		// Adding a new Facility //
-		Text scenetitle1 = new Text("Facility");
+		Text scenetitle1 = new Text("Add Facility");
 		scenetitle1.setFont(new Font(20));
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
@@ -184,12 +187,12 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(submit1, 4, 0);
-		Text text_sting = new Text();
+		/*Text text_sting = new Text();
 		text_sting.setText(System.getenv("PATH").toString());
-		grid.add(text_sting, 5, 0);
+		grid.add(text_sting, 5, 0);*/
 		
 		// Adding a new Market
-		Text scenetitle2 = new Text("Market");
+		/*Text scenetitle2 = new Text("Market");
 		scenetitle2.setFont(new Font(20));
 		grid.add(scenetitle2, 0, 1);
 		Label markName = new Label("Name");
@@ -217,27 +220,10 @@ public class Cycic extends ViewBase{
 					}
 				}			
 			}
-		});
+		});*/
 		
-		// Prints the Cyclus input associated with this simulator. 
-		Button output = new Button();
-		output.setText("Generate Cyclus Input");
-		output.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent event){
-	              FileChooser fileChooser = new FileChooser();
-	              
-	              //Set extension filter
-	              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-	              fileChooser.getExtensionFilters().add(extFilter);
-	              
-	              //Show save file dialog
-	              File file = fileChooser.showSaveDialog(window);
-				OutPut.output(file);
-			}
-		});
-		grid.add(output, 0, 2);
 		
-		Button hideMarkets = new Button();
+		/*Button hideMarkets = new Button();
 		hideMarkets.setText("Hide Markets");
 		hideMarkets.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
@@ -250,21 +236,11 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		grid.add(hideMarkets, 0, 3);
+		grid.add(hideMarkets, 0, 3);*/
 		//grid.add(toggle, 0, 3);
-		Button load = new Button();
-		load.setText("Load");
-		load.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent event){
-				FileChooser fc = new FileChooser();
-				fc.setTitle("Choose a saved scenario");
-				File file = fc.showOpenDialog(window);
-				OutPut.loadFile(file);
-			}
-		});
-		grid.add(load, 2, 2);
 		
-		ScrollPane scroll = new ScrollPane();
+		
+		/*ScrollPane scroll = new ScrollPane();
 		GridPane grid2 = new GridPane();
 		grid2.setHgap(15);
 		grid2.setPadding(new Insets(10, 0, 0, 0));
@@ -282,7 +258,8 @@ public class Cycic extends ViewBase{
 		scroll.setContent(grid2);
 		scroll.autosize();
 		
-		cycicBox.getChildren().addAll(grid, scroll, pane);
+		cycicBox.getChildren().addAll(grid, scroll, pane);*/
+		cycicBox.getChildren().addAll(grid, pane);
 		setContent(cycicBox);
 	}
 }

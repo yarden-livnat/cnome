@@ -253,10 +253,10 @@ public class CycicCircles{
 				if (event.getClickCount() >= 2){
 					if(circle.childrenShow == true){
 						circle.childrenShow = false;
-						VisFunctions.reloadPane();
+						VisFunctions.marketHide();
 					}else{
 						circle.childrenShow = true;
-						VisFunctions.reloadPane();
+						VisFunctions.marketHide();
 					}
 				}
 				if(Cycic.group.getSelectedToggle() == Cycic.toggle){
@@ -330,7 +330,7 @@ public class CycicCircles{
 				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).parentIndex = i;
 			}
 		}
-		VisFunctions.reloadPane();
+		VisFunctions.marketHide();
 
 	}
 }

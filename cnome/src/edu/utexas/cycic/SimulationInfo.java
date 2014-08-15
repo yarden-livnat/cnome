@@ -1,5 +1,6 @@
 package edu.utexas.cycic;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -15,6 +16,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -38,7 +41,7 @@ public class SimulationInfo extends ViewBase{
 	public static final String TITLE = "Simulation Details";
 	HashMap<String, String> months = new HashMap<String, String>();
 	ArrayList<String> monthList = new ArrayList<String>();
-	
+	static Window window;
 	/**
 	 * 
 	 */
@@ -158,28 +161,38 @@ public class SimulationInfo extends ViewBase{
 		simInfo.add(new Label("Start Year"), 0, 2);
 		simInfo.add(startYear, 1, 2);
 		
-		TextField simStart = VisFunctions.numberField();
-		simStart.setText(Cycic.workingScenario.simulationData.simStart);
-		simStart.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				Cycic.workingScenario.simulationData.simStart = newValue;
+	
+		// Prints the Cyclus input associated with this simulator. 
+		Button output = new Button();
+		output.setText("Generate Cyclus Input");
+		output.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent event){
+	              FileChooser fileChooser = new FileChooser();
+	              
+	              //Set extension filter
+	              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+	              fileChooser.getExtensionFilters().add(extFilter);
+	              fileChooser.setTitle("Please save as Cyclus input file.");
+	              
+	              //Show save file dialog
+	              File file = fileChooser.showSaveDialog(window);
+				OutPut.output(file);
 			}
 		});
-		simStart.setPromptText("The start month");
-		simInfo.add(new Label("Simulation Start"), 0 ,3);
-		simInfo.add(simStart, 1, 3);
-		
-		TextField decay = VisFunctions.numberField();
-		decay.setText(Cycic.workingScenario.simulationData.decay);
-		decay.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				Cycic.workingScenario.simulationData.decay = newValue;
+		simInfo.add(output, 0, 5);
+		Button load = new Button();
+		load.setText("Load");
+		load.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent event){
+				FileChooser fc = new FileChooser();
+				fc.setTitle("Please choose a saved scenario.");
+				File file = fc.showOpenDialog(window);
+				OutPut.loadFile(file);
 			}
 		});
-		decay.setPromptText("Simulation Decay Mode");
-		simInfo.add(new Label("Decay Flag"), 0, 4);
-		simInfo.add(decay, 1, 4);
+		simInfo.add(load, 1, 5);
 		buildCommodPane();
+		
 		
 		setContent(simControlBox);
 	}

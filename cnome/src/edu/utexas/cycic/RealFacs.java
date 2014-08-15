@@ -17,7 +17,7 @@ public class RealFacs {
 		ArrayList<Object> ReactorIncommodity=new ArrayList<Object>();
 		ReactorIncommodity.add("incommodity");
 		ReactorIncommodity.add("String");
-		ReactorIncommodity.add("String");
+		ReactorIncommodity.add("incommodity");
 		ReactorIncommodity.add(null);
 		ReactorIncommodity.add(null);
 		ReactorIncommodity.add(null);
@@ -53,7 +53,7 @@ public class RealFacs {
 		ArrayList<Object> ReactorOutCommodity=new ArrayList<Object>();
 		ReactorOutCommodity.add("outcommodity");
 		ReactorOutCommodity.add("String");
-		ReactorOutCommodity.add("String");
+		ReactorOutCommodity.add("outcommodity");
 		ReactorOutCommodity.add(null);
 		ReactorOutCommodity.add(null);
 		ReactorOutCommodity.add(null);
@@ -64,7 +64,7 @@ public class RealFacs {
 		ArrayList<Object> ReactorOutRecipe=new ArrayList<Object>();
 		ReactorOutRecipe.add("outrecipe");
 		ReactorOutRecipe.add("String");
-		ReactorOutRecipe.add("String");
+		ReactorOutRecipe.add("outrecipe");
 		ReactorOutRecipe.add(null);
 		ReactorOutRecipe.add(null);
 		ReactorOutRecipe.add(null);
@@ -211,7 +211,7 @@ public class RealFacs {
 		ArrayList<Object>EnrichIncommodity=new ArrayList<Object>();
 		EnrichIncommodity.add("Incommodity");
 		EnrichIncommodity.add("String");
-		EnrichIncommodity.add("String");
+		EnrichIncommodity.add("incommodity");
 		EnrichIncommodity.add(null);
 		EnrichIncommodity.add(null);
 		EnrichIncommodity.add(null);
@@ -222,7 +222,7 @@ public class RealFacs {
 		ArrayList<Object>Inrecipe = new ArrayList<Object>();
 		Inrecipe.add("Inrecipe");
 		Inrecipe.add("String");
-		Inrecipe.add("String");
+		Inrecipe.add("inrecipe");
 		Inrecipe.add(null);
 		Inrecipe.add(null);
 		Inrecipe.add(null);
@@ -266,7 +266,7 @@ public class RealFacs {
 		ArrayList<Object> EnrichOutcommodity=new ArrayList<Object>();
 		EnrichOutcommodity.add("Outcommodity");
 		EnrichOutcommodity.add("String");
-		EnrichOutcommodity.add("String");
+		EnrichOutcommodity.add("outcommodity");
 		EnrichOutcommodity.add(null);
 		EnrichOutcommodity.add(null);
 		EnrichOutcommodity.add(null);
@@ -311,7 +311,7 @@ public class RealFacs {
 		ArrayList<Object> OutCommodity=new ArrayList<Object>();
 		OutCommodity.add("outcommodity");
 		OutCommodity.add("String");
-		OutCommodity.add("String");
+		OutCommodity.add("outcommodity");
 		OutCommodity.add(null);
 		OutCommodity.add(null);
 		OutCommodity.add(null);
@@ -385,7 +385,7 @@ public class RealFacs {
 		ArrayList<Object>Incommodity=new ArrayList<Object>();
 		Incommodity.add("Incommodity");
 		Incommodity.add("String");
-		Incommodity.add("String");
+		Incommodity.add("incommodity");
 		Incommodity.add(null);
 		Incommodity.add(null);
 		Incommodity.add(null);

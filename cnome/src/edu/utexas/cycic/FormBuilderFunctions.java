@@ -75,7 +75,9 @@ public class FormBuilderFunctions {
 		
 		TextField textField = new TextField();
 		textField.setText(defaultValue.get(0).toString());
-		textField.setPromptText(facArray.get(2).toString());
+		if(facArray.get(1) != null){
+			textField.setPromptText(facArray.get(1).toString());
+		}
 		textField.textProperty().addListener(new ChangeListener<Object>(){         
 			public void changed(ObservableValue<?> observable, Object oldValue, Object newValue){
 				defaultValue.set(0, newValue);
@@ -85,7 +87,7 @@ public class FormBuilderFunctions {
 		return textField;
 	}
 	
-	/**
+	 /**
 	 * Special function used for the name flag in a facility.
 	 * @param node The facility node that is currently being worked on
 	 * @param dataArray The ArrayList<Object> that contains the name field data for the facility.
@@ -285,12 +287,12 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-		
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-					cb.getItems().add(circle.commodity);
+
+				for (Label label: CycicScenarios.workingCycicScenario.CommoditiesList){
+					cb.getItems().add(label.getText());
 				}
 				cb.getItems().add("New Commodity");
 				
@@ -299,6 +301,9 @@ public class FormBuilderFunctions {
 				}
 			}
 		});
+		if ( defaultValue.get(0) != "") {
+			cb.setValue((String) defaultValue.get(0));
+		}
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -307,7 +312,7 @@ public class FormBuilderFunctions {
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
-					for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
+					/*for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
 						if (newValue == circle.commodity){
 							marketCircle = circle;
 						}
@@ -326,8 +331,16 @@ public class FormBuilderFunctions {
 							System.out.println(facNode.cycicCircle.incommods.get(i));
 						}
 						VisFunctions.reloadPane();
+					}*/
+					facNode.cycicCircle.incommods.add(newValue);
+					defaultValue.set(0, newValue);
+					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
+							facNode.cycicCircle.incommods.remove(i);
+							i--;
+						}
 					}
-					
+					VisFunctions.marketHide();
 				}
 			}
 		});
@@ -346,54 +359,60 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-		
+				
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-					cb.getItems().add(circle.commodity);
+				for (Label label: CycicScenarios.workingCycicScenario.CommoditiesList){
+					cb.getItems().add(label.getText());
 				}
 				cb.getItems().add("New Commodity");
 				
-				if ( defaultValue.get(0) != "") {
+				if (defaultValue.get(0) != "") {
 					cb.setValue((String) defaultValue.get(0));
 				}
 			}
 		});
-		
-		if ( defaultValue.get(0) != "") {
+		if (defaultValue.get(0) != "") {
 			cb.setValue((String) defaultValue.get(0));
 		}
-		
+		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				MarketCircle marketCircle = null;
 
 				if (newValue == "New Commodity"){
-					//
+					// Tell Commodity Window to add a new commodity 
 				} else {
-					for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
+					/*for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
 						if (newValue == circle.commodity){
 							marketCircle = circle;
 						}
-
 					}
 					if (marketCircle != null){
-						VisFunctions.linkFacMarket(facNode.cycicCircle, marketCircle);
-						facNode.cycicCircle.outcommods.add(newValue);
-						for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
-							if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
-								facNode.cycicCircle.outcommods.remove(i);
+						VisFunctions.linkMarketFac(marketCircle, facNode.cycicCircle);
+						defaultValue.set(0, newValue);
+						facNode.cycicCircle.incommods.add(newValue);
+						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+							if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
+								facNode.cycicCircle.incommods.remove(i);
 								i--;
 							}
 						}
-						/*for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
-							System.out.println(facNode.cycicCircle.outcommods.get(i));
-						}*/
-						defaultValue.set(0, newValue);
+						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+							System.out.println(facNode.cycicCircle.incommods.get(i));
+						}
 						VisFunctions.reloadPane();
+					}*/
+					facNode.cycicCircle.outcommods.add(newValue);
+					defaultValue.set(0, newValue);
+					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
+						if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
+							facNode.cycicCircle.outcommods.remove(i);
+							i--;
+						}
 					}
-					
+					VisFunctions.marketHide();
 				}
 			}
 		});
