@@ -25,11 +25,8 @@ package edu.utah.sci.cyclist.core.ui.wizards;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.file.attribute.PosixFilePermission;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,8 +34,6 @@ import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 
 import javafx.beans.property.ObjectProperty;
@@ -479,17 +474,15 @@ public class SimulationWizard extends TilePane {
 			if(os.indexOf("windows")>=0){
 				currPath += "/" + WIN_POST_PROCESSING_APP;
 //				process = new ProcessBuilder(currPath,dsPath).start();
-//				process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
-//				ecode =  process.waitFor();
 			} else if(os.indexOf("linux")>=0){
 				if(osArch.indexOf("amd64")>=0){
-					File file = new File(currPath);
-					file.setExecutable(true);
 					
-//					currPath = "./" + currPath + LINUX_POST_PROCESSING_APP;
-					currPath += "/"+LINUX_POST_PROCESSING_APP;
-//					process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
-//					ecode = process.waitFor();
+					currPath ="/"+ currPath+ "/"+LINUX_POST_PROCESSING_APP;
+					
+					File file = new File(currPath);
+					file.setExecutable(true, false);
+			        file.setReadable(true, false);
+			        file.setWritable(true, false);
 				}
 			}
 			
@@ -497,7 +490,9 @@ public class SimulationWizard extends TilePane {
 			
 			process = Runtime.getRuntime().exec(new String[]{currPath,dsPath});
 			ecode = process.waitFor();
-			log.warn("ecode =" + ecode);
+			if(ecode != 0){
+				log.warn("ecode =" + ecode);
+			}
 				
 			InputStream is = process.getInputStream();
 		    InputStreamReader isr = new InputStreamReader(is);
@@ -507,8 +502,7 @@ public class SimulationWizard extends TilePane {
 		    Boolean isAlreadyProcessed = false;
 		    
 		    while ((line = br.readLine()) != null) {
-//		      System.out.println(line);
-		    	log.warn(line);
+		      log.warn(line);
 		      //Tables already exist - no need to reproduce additional tables.
 		      if(line.indexOf("post processed") > -1){
 		    	  isAlreadyProcessed = true;
@@ -517,9 +511,7 @@ public class SimulationWizard extends TilePane {
 		    System.out.println("Program terminated!");
 		    return !isAlreadyProcessed;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			log.warn("process exception");
+			log.warn("process exception = " + e.toString());
 			return false;
 		}
 		
