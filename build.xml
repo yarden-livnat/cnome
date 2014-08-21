@@ -137,6 +137,7 @@
 		<fx:resources id="appRes">
 			<fx:fileset dir="deploy/dist" includes="cyclist.jar"/>
 			<fx:fileset dir="deploy/dist" includes="libs/*"/>
+			<fx:fileset dir="deploy/dist" includes="externalApps/*"/>
 		</fx:resources> 
 		
 		<fx:application id="fxApplication"
