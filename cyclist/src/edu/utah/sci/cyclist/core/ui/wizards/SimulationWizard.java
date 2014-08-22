@@ -65,7 +65,7 @@ import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
-import edu.utah.sci.cyclist.core.util.SimulationTablesBuilder;
+import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
 
 
 /*
@@ -357,7 +357,7 @@ public class SimulationWizard extends TilePane {
 			Boolean _isBlob = false;
 			if(ds.isSQLite()){
 				_isBlob = isBlob(conn);
-				SimulationTablesBuilder.updateSqliteSimTables(conn,ds);
+				SimulationTablesPostProcessor.process(conn,ds);
 			}
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			Statement stmt = conn.createStatement();

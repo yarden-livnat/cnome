@@ -6,8 +6,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.DatatypeConverter;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -82,6 +85,11 @@ public class TableProxy {
 				TableRow row = new TableRow(cols);
 				for (int i=0; i<cols; i++) {
 					row.value[i] = rs.getObject(i+1);
+					
+					int columnType = rmd.getColumnType(i+1);
+					if(columnType == Types.BLOB){	
+						row.value[i] = "X'"+DatatypeConverter.printHexBinary((byte[]) row.value[i])+"'";
+					}
 				}
 				rows.add(row);
 			}
@@ -94,5 +102,4 @@ public class TableProxy {
 		
 		return FXCollections.observableList(rows);
 	}
-		
 }

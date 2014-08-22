@@ -56,6 +56,7 @@ import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.components.DatasourceSelector;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
 
 /*
  * Class to allow the user to create or edit a data table.
@@ -329,6 +330,11 @@ public class DatatableWizard extends TilePane {
 		
 		try (Connection conn = ds.getConnection()) {
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
+			
+			if(ds.isSQLite()){
+				SimulationTablesPostProcessor.process(conn, ds);
+			}
+			
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, "%", null);
 			while (rs.next()) {
