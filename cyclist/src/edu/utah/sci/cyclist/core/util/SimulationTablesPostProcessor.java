@@ -31,7 +31,7 @@ public class SimulationTablesPostProcessor {
 	private static final String DARWIN_OS = "darwin";
 	private static final String MAC_OS = "mac";
 	
-	private static final String ARCHITECTURE_64 = "amd64";
+	private static final String ARCHITECTURE_64 = "64";
 	private static final String ARCHITECTURE_386 = "386";
 	private static final String ARCHITECTURE_ARM = "arm";
 	
