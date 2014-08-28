@@ -320,7 +320,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		Info<Simulation> info = new Info<>(simulation, remote);
 		_sims.put(simulation.getAlias(), info);
 		_simChoice.getItems().add(simulation.getAlias()); 
-		System.out.println("Add simulation:" + simulation.getAlias());
 		
 		_simCombo.getItems().add(simulation.getAlias());
 		_simCombo.setVisibleRowCount(_sims.size());

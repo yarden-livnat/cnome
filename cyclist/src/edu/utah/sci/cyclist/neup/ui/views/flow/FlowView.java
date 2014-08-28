@@ -165,7 +165,7 @@ public class FlowView extends CyclistViewBase {
 					for (Facility f : newValue) {
 						_facilities.put(f.getId(), f);
 					}
-					System.out.println("Flow: received facilities: "+newValue.size());
+					System.out.println("Flow: received "+newValue.size()+" facilities");
 				}
 			}
 		});
@@ -697,6 +697,7 @@ public class FlowView extends CyclistViewBase {
 	private Node buildSelectionCtrl() {
 		_commodityVBox = new VBox();
 		_commodityVBox.getStyleClass().add("infobar");
+		_commodityVBox.setMaxHeight(200);
 		
 		Text title = new Text("Commodity");
 		title.getStyleClass().add("title");
@@ -746,9 +747,6 @@ public class FlowView extends CyclistViewBase {
 		_commodityVBox.getChildren().clear();
 		_commodityVBox.getChildren().add(title);
 		_commodityVBox.getChildren().addAll(list);
-		
-		for (CheckBox c : list)
-			System.out.println("cb:"+c.getText());
 		
 		updateCommodityFilter();
 	}

@@ -1,4 +1,4 @@
-package edu.utah.sci.cyclist.core.presenter;
+	package edu.utah.sci.cyclist.core.presenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -212,10 +212,10 @@ public class CyclistViewPresenter extends ViewPresenter {
 			if(!entry.remote){
 				Simulation simulation = entry.item;
 				IMemento simMemento = memento.createChild("Simulation");
-				simMemento.putString("id", simulation.getSimulationId());
+				simMemento.putString("id", simulation.getSimulationId().toString());
 			}
 			if(_selectionModelSim.getSelected() != null){
-				memento.putString("selectedSim", _selectionModelSim.getSelected().getSimulationId());
+				memento.putString("selectedSim", _selectionModelSim.getSelected().getSimulationId().toString());
 			}
 		}
 		//Filters

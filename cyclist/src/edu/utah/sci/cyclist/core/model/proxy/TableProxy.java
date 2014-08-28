@@ -9,11 +9,13 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import javax.xml.bind.DatatypeConverter;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
@@ -84,12 +86,8 @@ public class TableProxy {
 			while (rs.next()) {
 				TableRow row = new TableRow(cols);
 				for (int i=0; i<cols; i++) {
-					row.value[i] = rs.getObject(i+1);
-					
 					int columnType = rmd.getColumnType(i+1);
-					if(columnType == Types.BLOB){	
-						row.value[i] = "X'"+DatatypeConverter.printHexBinary((byte[]) row.value[i])+"'";
-					}
+					row.value[i] = columnType == Types.BLOB ? new Blob((byte[]) rs.getObject(i+1)) : rs.getObject(i+1);
 				}
 				rows.add(row);
 			}

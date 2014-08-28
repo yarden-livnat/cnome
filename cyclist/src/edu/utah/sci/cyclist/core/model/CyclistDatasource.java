@@ -210,16 +210,14 @@ public class CyclistDatasource implements DataSource {
 	
 	public void releaseConnection() {
 		if (isSQLite()) {
-			System.out.println("sqlite: release")
+//			System.out.println("sqlite: release")
 ;			_SQLiteSemaphore.release();
 		}
 	}
 	
 	private Connection getSQLiteConnection() throws SQLException {
 		try {
-			System.out.println("sqlite lock: try acquire");
 			_SQLiteSemaphore.acquire();
-			System.out.println("sqlite lock: acquired");
 //			if (_SQLiteConnection == null) 
 				_SQLiteConnection =  DriverManager.getConnection(_url, _properties);
 		} catch (InterruptedException e) {

@@ -21,35 +21,35 @@ public class SimulationProxy {
 	private ObservableList<Facility> _facilities;
 	
 	public static final String FACILITIES_QUERY =
-			"SELECT AgentID, Spec, Prototype, InstitutionID, RegionID FROM Facilities where SimID=?";
+			"SELECT AgentId, Spec, Prototype, InstitutionId, RegionId FROM Facilities where SimId=?";
 	
 	public static final String COMMODITY_QUERY = 
-			"SELECT distinct(Commodity) FROM Transactions where SimID=?";
+			"SELECT distinct(Commodity) FROM Transactions where SimId=?";
 	
 	public static final String TRANSACTIONS_QUERY =
-			 "SELECT  SenderID, ReceiverID, Commodity, NucID, Quantity*MassFrac as Amount, Units"
+			 "SELECT  SenderId, ReceiverId, Commodity, NucId, Quantity*MassFrac as Amount, Units"
 			+ " FROM Transactions "
-			+ "      JOIN Facilities on (Transactions.SimID = Facilities.SimID and Transactions.%s = Facilities.AgentID) "
-			+ "      JOIN Resources on (Transactions.SimID = Resources.SimID and Transactions.ResourceID = Resources.ResourceID)"
-			+ "      JOIN Compositions on (Transactions.SimID = Compositions.SimID and Compositions.QualID = Resources.QualID)"
+			+ "      JOIN Facilities on (Transactions.SimId = Facilities.SimId and Transactions.%s = Facilities.AgentId) "
+			+ "      JOIN Resources on (Transactions.SimId = Resources.SimId and Transactions.ResourceId = Resources.ResourceId)"
+			+ "      JOIN Compositions on (Transactions.SimId = Compositions.SimId and Compositions.QualId = Resources.QualId)"
 			+ " WHERE" 
-			+ "     Transactions.SimID = ?"
+			+ "     Transactions.SimId = ?"
 			+ " and Time >= ? and Time <= ? "
 			+"  and Facilities.%s = ?";
 	
 	public static final String INVENTORY_QUERY = 
-			"SELECT tl.Time as time, cmp.NucID as nucid, SUM(inv.Quantity*cmp.MassFrac) as amount"
+			"SELECT tl.Time as time, cmp.NucId as nucId, SUM(inv.Quantity*cmp.MassFrac) as amount"
 			+ "	FROM "
 			+ "		TimeList AS tl"
 			+ "			INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
-			+ "			INNER JOIN Agents AS ag ON ag.AgentID = inv.AgentID "
-			+ "			INNER JOIN Compositions AS cmp ON cmp.QualID = inv.QualID "
+			+ "			INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
+			+ "			INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId "
 			+ "	WHERE"
-			+ "		inv.SimID = cmp.SimID AND inv.SimID = ag.SimID"
-			+ "		AND inv.SimID = ?"
+			+ "		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId"
+			+ "		AND inv.SimId = ?"
 			+ "		AND ag.%s = ?"
 			+ "     AND tl.Time > 0 "
-			+ "	GROUP BY tl.Time,cmp.NucID";
+			+ "	GROUP BY tl.Time,cmp.NucId";
 	
 	public SimulationProxy(Simulation sim) {
 		_sim = sim;
@@ -67,12 +67,12 @@ public class SimulationProxy {
 		
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(FACILITIES_QUERY)) {
-				stmt.setString(1, _sim.getSimulationId());
+				stmt.setBytes(1, _sim.getSimulationId().getData());
 				
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
 					Facility f = new Facility(rs.getInt("AgentId"), rs.getString("Spec"), rs.getString("Prototype"),
-							rs.getInt("InstitutionID"), rs.getInt("RegionID"));
+							rs.getInt("InstitutionId"), rs.getInt("RegionId"));
 					list.add(f);
 				}
 			}		
@@ -87,7 +87,8 @@ public class SimulationProxy {
 		List<String> list = new ArrayList<String>();
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(COMMODITY_QUERY)) {
-				stmt.setString(1,  _sim.getSimulationId());
+				stmt.setBytes(1, _sim.getSimulationId().getData());
+
 			
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
@@ -103,9 +104,10 @@ public class SimulationProxy {
 	public ObservableList<Transaction> getTransactions(String type, String value, Range<Integer> timerange, boolean forward) throws SQLException {
 		List<Transaction> list = new ArrayList<>();
 		try (Connection conn = _sim.getDataSource().getConnection()) {
-			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderID" : "ReceiverID", type);
+			String query = String.format(TRANSACTIONS_QUERY, forward? "SenderId" : "ReceiverId", type);
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
-				stmt.setString(1, _sim.getSimulationId());
+				stmt.setBytes(1, _sim.getSimulationId().getData());
+
 				stmt.setInt(2, timerange.from);
 				stmt.setInt(3, timerange.to);
 				stmt.setString(4, value);
@@ -113,8 +115,8 @@ public class SimulationProxy {
 				ResultSet rs = stmt.executeQuery();
 				while (rs.next()) {
 					Transaction tr = new Transaction();
-					tr.sender = rs.getInt("SenderID");
-					tr.receiver = rs.getInt("ReceiverID");
+					tr.sender = rs.getInt("SenderId");
+					tr.receiver = rs.getInt("ReceiverId");
 					tr.commodity = rs.getString("Commodity");
 					tr.nucid = rs.getInt("NucId");
 					tr.amount = rs.getDouble("Amount");
@@ -138,7 +140,7 @@ public class SimulationProxy {
 		System.out.println("query: "+query);
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
-				stmt.setString(1, _sim.getSimulationId());
+				stmt.setBytes(1, _sim.getSimulationId().getData());
 				stmt.setString(2, value);				
 
 				ResultSet rs = stmt.executeQuery();
@@ -164,7 +166,8 @@ public class SimulationProxy {
 		System.out.println("query: "+query);
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
-				stmt.setString(1, _sim.getSimulationId());
+//				stmt.setString(1, _sim.getSimulationId());
+				stmt.setBytes(1, _sim.getSimulationId().getData());
 				stmt.setString(2, value);				
 
 				ResultSet rs = stmt.executeQuery();

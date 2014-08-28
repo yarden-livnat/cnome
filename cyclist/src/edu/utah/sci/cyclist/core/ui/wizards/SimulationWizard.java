@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -61,6 +62,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -362,21 +364,22 @@ public class SimulationWizard extends TilePane {
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			Statement stmt = conn.createStatement();
 			ResultSet rs = null;
-			if(_isBlob){
-				//If the field is a BLOB - fetch it in a string format.
-				rs = stmt.executeQuery(SIMULATION_ID_BLOB_QUERY);
-			}else{
-				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
-			}
+//			if(_isBlob){
+//				//If the field is a BLOB - fetch it in a string format.
+//				rs = stmt.executeQuery(SIMULATION_ID_BLOB_QUERY);
+//			}else{
+//				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
+//			}
+			rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 			while (rs.next()) {
-				 String simulationId = rs.getString(SIMULATION_ID_FIELD_NAME);
+				 Blob simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
 				 _simData.add(new SimInfo(simulationId, ""));
 			}
 			
 			_simulationsTbl.setItems(_simData);
 			
 		}catch(SQLSyntaxErrorException e){
-			System.out.println("Table for SimID doesn't exist");
+			System.out.println("Table for SimId doesn't exist");
 		}
 		catch (Exception e) {
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
@@ -413,12 +416,12 @@ public class SimulationWizard extends TilePane {
 		_selection.clear();
 		if(simulations.size()>0){
 			for(SimInfo simInfo:simulations){
-				String simId = simInfo.getSimId();
+				Blob simId = simInfo.getSimId();
 				Simulation simulation = new Simulation(simId);
 				simulation.setDataSource(_current);
 				String alias = simInfo.getAlias();
 				if(alias == null || alias.isEmpty()){
-					alias = simId;
+					alias = simId.toString();
 				}
 				simulation.setAlias(alias);
 				_selection.add(simulation);
@@ -439,19 +442,19 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	public static class SimInfo {
-		private final SimpleStringProperty simId;
+		private final SimpleObjectProperty<Blob> simId;
 		private final SimpleStringProperty alias;
 		
-		private SimInfo(String simId, String alias){
-			this.simId = new SimpleStringProperty(simId);
+		private SimInfo(Blob simId, String alias){
+			this.simId = new SimpleObjectProperty<Blob>(simId);
 			this.alias = new SimpleStringProperty(alias);
 		}
 		
-		public String getSimId() {
+		public Blob getSimId() {
             return simId.get();
         }
         
-		public void setSimId(String simId) {
+		public void setSimId(Blob simId) {
         	this.simId.set(simId);
         }
 		

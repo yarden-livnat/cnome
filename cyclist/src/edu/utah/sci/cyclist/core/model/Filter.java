@@ -268,7 +268,7 @@ public class Filter implements Observable {
 						if (first) first = false;
 						else builder.append(", ");
 			
-						if (item instanceof String && !isBlob(item.toString())) {
+						if (item instanceof String) {
 							builder.append("'").append(item.toString()).append("'");
 						} else
 							builder.append(item.toString());

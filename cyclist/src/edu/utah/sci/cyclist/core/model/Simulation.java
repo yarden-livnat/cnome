@@ -37,19 +37,19 @@ public class Simulation {
 
 	static Logger log = Logger.getLogger(Simulation.class);
 	
-	private String _simulationId;
+	private Blob _simulationId;
 	
 	private CyclistDatasource _datasource;
 	private String _alias;
 	private Map<String, Object> _properties = new HashMap<>();
 	
 	public Simulation() {
-		this("");
+//		this(null);
 	}
 	
-	public Simulation(String simulationId) {
+	public Simulation(Blob simulationId) {
 		_simulationId = simulationId;
-		_alias = _simulationId;
+		_alias = _simulationId.toString();
 	}
 	
 	public Simulation clone(){
@@ -63,7 +63,7 @@ public class Simulation {
 	public void save(IMemento memento) {
 
 		// Set the name
-		memento.putString("simulation-id", getSimulationId());
+		memento.putString("simulation-id", getSimulationId().toString());
 		
 		// Save the uid of the data source
 		memento.putString("datasource-uid", _datasource.getUID());
@@ -89,17 +89,21 @@ public class Simulation {
 		setAlias(memento.getString("alias"));
 	}
 	
-	public String getSimulationId(){
+	public Blob getSimulationId(){
 		return _simulationId;
 	}
 	
-	public void setSimulationId(String simulationId){
+	public void setSimulationId(Blob simulationId){
 		_simulationId = simulationId;
+	}
+	
+	public void setSimulationId(String id) {
+		setSimulationId(new Blob(id));
 	}
 	
 	@Override
     public String toString() {
-        return getSimulationId();
+        return getSimulationId().toString();
     }
 	
 	public void setProperty(String property, Object value) {

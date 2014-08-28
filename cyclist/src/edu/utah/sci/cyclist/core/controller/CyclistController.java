@@ -427,7 +427,7 @@ public class CyclistController {
 		//Save the last selected simulation
 		if(_model.getLastSelectedSimulation() != null && _model.getSimulations().size() >0){
 			IMemento selectedSim = memento.createChild("LastSelectedSimulation");
-			selectedSim.putString("simulation-id", _model.getLastSelectedSimulation().getSimulationId());
+			selectedSim.putString("simulation-id", _model.getLastSelectedSimulation().getSimulationId().toString());
 		}
 		//Save the Simulations
 		for(Simulation simulation: _model.getSimulations()){
