@@ -327,13 +327,12 @@ public class DatatableWizard extends TilePane {
 	private void selectConnection(CyclistDatasource ds) {
 		
 		_tablesView.getItems().clear();
+		if(ds.isSQLite()){
+			SimulationTablesPostProcessor.process(ds);
+		}
 		
 		try (Connection conn = ds.getConnection()) {
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
-			
-			if(ds.isSQLite()){
-				SimulationTablesPostProcessor.process(conn, ds);
-			}
 			
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, "%", null);

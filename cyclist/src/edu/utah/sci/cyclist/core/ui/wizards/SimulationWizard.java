@@ -351,13 +351,16 @@ public class SimulationWizard extends TilePane {
 	private void selectConnection(CyclistDatasource ds) {
 		
 		_simData.clear();
+		if(ds.isSQLite()){
+			SimulationTablesPostProcessor.process(ds);
+		}
+		
 		
 		try (Connection conn = ds.getConnection()) {
 			//Check the SimID field type
 			Boolean _isBlob = false;
 			if(ds.isSQLite()){
 				_isBlob = isBlob(conn);
-				SimulationTablesPostProcessor.process(conn,ds);
 			}
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 			Statement stmt = conn.createStatement();
