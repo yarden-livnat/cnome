@@ -53,7 +53,7 @@ public class SQLUtil {
 		_sql2Field.put(java.sql.Types.TIMESTAMP, 	DataType.Type.DATETIME);
 		
 		_sql2Field.put(java.sql.Types.BIT,	 		DataType.Type.NA);
-		_sql2Field.put(java.sql.Types.BLOB, 		DataType.Type.NA);
+		_sql2Field.put(java.sql.Types.BLOB, 		DataType.Type.TEXT);
 		_sql2Field.put(java.sql.Types.DISTINCT, 	DataType.Type.NA);
 		_sql2Field.put(java.sql.Types.DATALINK, 	DataType.Type.NA);
 		_sql2Field.put(java.sql.Types.JAVA_OBJECT, 	DataType.Type.NA);
@@ -96,7 +96,7 @@ public class SQLUtil {
 		_name2Field.put("DATETIME", 		DataType.Type.DATETIME);      // sqlite return field type name as 'DATETIME'. 
 		
 		_name2Field.put("BIT",	 			DataType.Type.NA);
-		_name2Field.put("BLOB", 			DataType.Type.NA);
+		_name2Field.put("BLOB", 			DataType.Type.TEXT);
 		_name2Field.put("DISTINCT", 		DataType.Type.NA);
 		_name2Field.put("DATALINK", 		DataType.Type.NA);
 		_name2Field.put("JAVA_OBJECT", 		DataType.Type.NA);
