@@ -14,6 +14,7 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.core.event.notification.CyclistSimulationNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Model;
@@ -284,7 +285,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 		String selectedSim = memento.getString("selectedSim");
 		for (SelectionModel<Simulation>.Entry entry : getSimulationRecords()){
 			Simulation simulation = entry.item;
-			if(simulation.getSimulationId().equals(selectedSim)){
+			if(simulation.getSimulationId().toString().equals(selectedSim)){
 				getSelectionModelSim().itemSelected(simulation, true);
 			}
 		}
@@ -477,7 +478,7 @@ public class CyclistViewPresenter extends ViewPresenter {
 		if(simulationId != null && !simulationId.isEmpty())
 		{
 			for(Simulation sim: simulationsList){
-				if(sim.getSimulationId().equals(simulationId)){
+				if(sim.getSimulationId().toString().equals(simulationId)){
 						return sim;
 				}
 			}

@@ -254,7 +254,7 @@ public class SimulationsPanel extends TitledPanel  {
 	 */
 	public void selectSimulation(String simulationId){
 		for(Entry entry : _entries){
-			if(entry.simulation.getSimulationId().equals(simulationId)){
+			if(entry.simulation.getSimulationId().toString().equals(simulationId)){
 				select(entry);
 				_simulationProperty.set(entry.simulation);
 				break;

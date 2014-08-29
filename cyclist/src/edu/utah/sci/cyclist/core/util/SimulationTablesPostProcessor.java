@@ -30,6 +30,9 @@ public class SimulationTablesPostProcessor {
 			  "where ExitTime is null and Lifetime = -1";
 
 	private static final String FIX_AGENTS_TABLE_PHASE2 = "update Agents set ExitTime=(EnterTime+Lifetime) where ExitTime is null and  Lifetime != -1;";
+	
+	//Must create the Facilities table in 2 steps, 
+	//otherwise, if it just copies a BLOB column from another table, without explicitly creating it as a BLOB, the column is created without any type at all.
 	private static final String FACILITIES_TABLE_CREATE = "create table Facilities (SimID BLOB,"+
 																					"AgentId INTEGER,"+
 																					"Spec TEXT,"+
