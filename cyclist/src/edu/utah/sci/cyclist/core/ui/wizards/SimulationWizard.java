@@ -353,41 +353,48 @@ public class SimulationWizard extends TilePane {
 	private void selectConnection(CyclistDatasource ds) {
 		
 		_simData.clear();
+		Boolean dsIsValid = true;
+		
 		if(ds.isSQLite()){
-			SimulationTablesPostProcessor.process(ds);
+			dsIsValid = SimulationTablesPostProcessor.process(ds);
 		}
 		
+		if(!dsIsValid){
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));
+		}else{
 		
-		try (Connection conn = ds.getConnection()) {
-			//Check the SimID field type
-			Boolean _isBlob = false;
-			if(ds.isSQLite()){
-				_isBlob = isBlob(conn);
+		
+			try (Connection conn = ds.getConnection()) {
+				//Check the SimID field type
+//				Boolean _isBlob = false;
+//				if(ds.isSQLite()){
+//					_isBlob = isBlob(conn);
+//				}
+				_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
+				Statement stmt = conn.createStatement();
+				ResultSet rs = null;
+	//			if(_isBlob){
+	//				//If the field is a BLOB - fetch it in a string format.
+	//				rs = stmt.executeQuery(SIMULATION_ID_BLOB_QUERY);
+	//			}else{
+	//				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
+	//			}
+				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
+				while (rs.next()) {
+					 Blob simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
+					 _simData.add(new SimInfo(simulationId, ""));
+				}
+				
+				_simulationsTbl.setItems(_simData);
+				
+			}catch(SQLSyntaxErrorException e){
+				System.out.println("Table for SimId doesn't exist");
 			}
-			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
-			Statement stmt = conn.createStatement();
-			ResultSet rs = null;
-//			if(_isBlob){
-//				//If the field is a BLOB - fetch it in a string format.
-//				rs = stmt.executeQuery(SIMULATION_ID_BLOB_QUERY);
-//			}else{
-//				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
-//			}
-			rs = stmt.executeQuery(SIMULATION_ID_QUERY);
-			while (rs.next()) {
-				 Blob simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
-				 _simData.add(new SimInfo(simulationId, ""));
+			catch (Exception e) {
+				_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
+			}finally{
+				ds.releaseConnection();
 			}
-			
-			_simulationsTbl.setItems(_simData);
-			
-		}catch(SQLSyntaxErrorException e){
-			System.out.println("Table for SimId doesn't exist");
-		}
-		catch (Exception e) {
-			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
-		}finally{
-			ds.releaseConnection();
 		}
 	}
 	/*

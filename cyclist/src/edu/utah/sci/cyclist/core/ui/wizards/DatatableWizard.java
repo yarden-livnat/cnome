@@ -326,25 +326,32 @@ public class DatatableWizard extends TilePane {
 	
 	private void selectConnection(CyclistDatasource ds) {
 		
+		Boolean dsIsValid = true;
 		_tablesView.getItems().clear();
 		if(ds.isSQLite()){
-			SimulationTablesPostProcessor.process(ds);
+			dsIsValid = SimulationTablesPostProcessor.process(ds);
 		}
 		
-		try (Connection conn = ds.getConnection()) {
-			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
-			
-			DatabaseMetaData md = conn.getMetaData();
-			ResultSet rs = md.getTables(null, null, "%", null);
-			while (rs.next()) {
-				_tablesView.getItems().add(rs.getString(3));
+		//If database has to be updated but the update process has failed.
+		if(!dsIsValid){
+			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));
+		}else{
+		
+			try (Connection conn = ds.getConnection()) {
+				_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
+				
+				DatabaseMetaData md = conn.getMetaData();
+				ResultSet rs = md.getTables(null, null, "%", null);
+				while (rs.next()) {
+					_tablesView.getItems().add(rs.getString(3));
+				}
+				
+			} catch (Exception e) {
+				_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
+	
+			}finally {
+				ds.releaseConnection();
 			}
-			
-		} catch (Exception e) {
-			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
-
-		}finally {
-			ds.releaseConnection();
 		}
 	}
 	

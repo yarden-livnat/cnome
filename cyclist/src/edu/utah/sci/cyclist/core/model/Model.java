@@ -75,7 +75,7 @@ public class Model {
 	public Boolean simExists(Simulation simulation){
 		Boolean response = false;
 		for(Simulation sim: _simulations){
-			if(sim.getSimulationId().equals(simulation.getSimulationId())){
+			if(sim.getSimulationId().toString().equals(simulation.getSimulationId().toString())){
 				response = true;
 				break;
 			}

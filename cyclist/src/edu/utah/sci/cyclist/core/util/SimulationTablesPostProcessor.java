@@ -78,7 +78,7 @@ public class SimulationTablesPostProcessor {
     	applicationsMap.put("linux-arm", "cycpost-linux-arm");
     }
 	
-	public static void process(CyclistDatasource ds){
+	public static Boolean process(CyclistDatasource ds){
 		Logger log = Logger.getLogger(SimulationTablesPostProcessor.class);
 		Boolean isUpdated = false;
 		Connection conn = null;
@@ -123,9 +123,12 @@ public class SimulationTablesPostProcessor {
 						file.delete();
 					}
 				}
+				return result;
 			}
+			return false;
 		}else{
 			log.warn("database is already updated");
+			return true;
 		}
 	}
 	
@@ -257,10 +260,12 @@ public class SimulationTablesPostProcessor {
 			      //Tables already exist - no need to reproduce additional tables.
 			      if(line.indexOf("post processed") > -1){
 			    	  isAlreadyProcessed = true;
+			      }else{
+			    	  //An error occurred
+			    	  return false;
 			      }
 			    }
 			} catch(Exception ex){
-				ex.printStackTrace();
 				return false;
 			}
 		    
