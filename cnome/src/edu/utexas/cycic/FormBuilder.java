@@ -234,6 +234,7 @@ public class FormBuilder extends ViewBase {
 						}
 					} else {
 						// Special form building functions that are used for specific tags
+						//System.out.println(facArray);
 						switch ((String) facArray.get(2).toString().toLowerCase()) {
 						case "incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);

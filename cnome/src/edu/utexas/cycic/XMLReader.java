@@ -3,10 +3,12 @@ package edu.utexas.cycic;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -22,8 +24,8 @@ public class XMLReader {
 		{
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
-			add(":agents:Sink");
-			add(":agents:Source");
+			add(":cycamore:Sink");
+			add(":cycamore:Source");
 			add(":agents:KFacility");
 			add(":agents:Prey");
 			add(":agents:Predator");
@@ -72,48 +74,64 @@ public class XMLReader {
 		jsonReader.close();
 		JsonObject vars = jsonObject.getJsonObject("vars");
 		for(int i = 0; i < xmlschema.size(); i++){
+			System.out.println(xmlschema.get(i));
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}
-		System.out.println(xmlschema);
+		//System.out.println(xmlschema);
 		return xmlschema;
 	}
 	
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
+				//System.out.println(dataArray.get(i));
 				combiner((ArrayList<Object>)dataArray.get(i), json);
 			}
 		} else if(dataArray.get(1) instanceof ArrayList){
+			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
 			while(dataArray.size() < 9){
 				if(dataArray.size() == 6){
 					dataArray.add(0);
 				}
 				dataArray.add(null);
 			}
-			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			if(dataArray.get(2) == "oneOrMore"){
+				if(json_pass.get("cycic") != null){
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add(json_pass.get("cycic").toString().replace("\"", ""));
+				} else {
+					//((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add("");
+				}
+			} else if (dataArray.get(2) == "zeroOrMore"){
+				if(json_pass.get("cycic") != null){
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add(json_pass.get("cycic").toString().replace("\"", ""));
+				} else {
+					//((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add("");
+				}
+			}
 			combiner((ArrayList<Object>)dataArray.get(1), json);
-			if(dataArray.get(2) == null){
-				dataArray.set(2, "");
+			try{
+				if(json_pass.get("units") != null){
+					dataArray.set(3, json_pass.get("units").toString());
+				}
+				if(json_pass.get("range") != null){
+					dataArray.set(4, json_pass.get("range").toString());
+				}
+				if(json_pass.get("default") != null){
+					dataArray.set(6, 1);
+					dataArray.set(5, json_pass.get("default").toString());
+				}
+				if(json_pass.get("userlevel") != null){
+					dataArray.set(6, json_pass.get("userlevel"));
+				}
+				if(json_pass.get("tooltip") != null){
+					dataArray.set(7, json_pass.get("tooltip").toString());
+				}
+				if(json_pass.get("doc") != null){
+					dataArray.set(8, json_pass.get("doc").toString());
+				}
+			} catch (Exception ex){
+				//ex.printStackTrace();
 			}
-			/*if(json_pass.get("cycic") != null){
-				dataArray.set(2, json_pass.get("cycic").toString());
-			}*/
-			if(json_pass.get("units") != null){
-				dataArray.set(3, json_pass.get("units").toString());
-			}
-			dataArray.set(4, json_pass.get("range"));
-			dataArray.set(5, json_pass.get("default"));
-			if(json_pass.get("default") != null){
-				dataArray.set(6, 1);
-				dataArray.set(5, json_pass.get("default").toString());
-			}
-			if(json_pass.get("userlevel") != null){
-				dataArray.set(6, json_pass.get("userlevel"));
-			} else {
-				dataArray.set(6, 0);
-			}
-			dataArray.set(7, json_pass.get("tooltip").toString());
-			dataArray.set(8, json_pass.get("doc").toString());
 		} else {
 			while(dataArray.size() < 9){
 				if(dataArray.size() == 6){
@@ -123,35 +141,38 @@ public class XMLReader {
 			}
 			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
 			try{
-				//System.out.println(dataArray);
 				if(dataArray.get(2) == null){
 					dataArray.set(2, "");
+					if(json_pass.get("cycic") != null){
+						dataArray.set(2, json_pass.get("cycic").toString().replace("\"", ""));
+					}
 				}
-				/*if(json_pass.get("cycic") != null){
-					dataArray.set(2, json_pass.get("cycic").toString());
-				}*/
 				if(json_pass.get("units") != null){
 					dataArray.set(3, json_pass.get("units").toString());
 				}
-				dataArray.set(4, json_pass.get("range"));
-				dataArray.set(5, json_pass.get("default"));
+				if(json_pass.get("range") != null){
+					dataArray.set(4, json_pass.get("range").toString());
+				}
 				if(json_pass.get("default") != null){
 					dataArray.set(6, 1);
 					dataArray.set(5, json_pass.get("default").toString());
 				}
 				if(json_pass.get("userlevel") != null){
 					dataArray.set(6, json_pass.get("userlevel"));
-				} else {
-					dataArray.set(6, 0);
 				}
-				dataArray.set(7, json_pass.get("tooltip").toString());
-				dataArray.set(8, json_pass.get("doc").toString());
+				if(json_pass.get("tooltip") != null){
+					dataArray.set(7, json_pass.get("tooltip").toString());
+				}
+				if(json_pass.get("doc") != null){
+					dataArray.set(8, json_pass.get("doc").toString());
+				}
 			} catch (Exception ex) {
-				
+				ex.printStackTrace();
 			}	
 		}
-		return;
 	}
+	
+	
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++){

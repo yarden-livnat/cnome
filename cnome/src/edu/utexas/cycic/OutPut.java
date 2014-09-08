@@ -45,23 +45,13 @@ public class OutPut {
 			// Commodities
 			for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
 				commodityBuilder(doc, rootElement, commod);
-			}
-			
-			// Markets
-			for(MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
-				Element marketID = doc.createElement("market");
-				
-				rootElement.appendChild(marketID);
-				marketBuilder(doc, marketID, market);
-			}
-			
+			}			
 			// Facilities
 			for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
 				Element facID = doc.createElement("facility");
 				facilityBuilder(doc, facID, facility);
 				rootElement.appendChild(facID);
 			}
-			
 			// Regions
 			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 				Element regionID = doc.createElement("region");
@@ -147,14 +137,6 @@ public class OutPut {
 		Element simStartYear = doc.createElement("startyear");
 		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
 		control.appendChild(simStartYear);
-		
-		Element simStart = doc.createElement("simstart");
-		simStart.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simStart));
-		control.appendChild(simStart);
-		
-		Element decay = doc.createElement("decay");
-		decay.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
-		control.appendChild(decay);
 	}
 	
 	/**
@@ -345,38 +327,12 @@ public class OutPut {
 		}
 	}
 	
-	/**
-	 * This function is a quick hack that builds the markets in the simulation. 
-	 * All markets are forced to be TestMarkets for now.
-	 * @param rootElement The element that will serve as the heading for 
-	 * substructures built in this function.
-	 * @param market marketCircle being written to the xml file. 
-	 */
-	public static void marketBuilder(Document doc, Element rootElement, MarketCircle market){
-		Element marketName = doc.createElement("name");
-		marketName.appendChild(doc.createTextNode((String) market.name));
-		rootElement.appendChild(marketName);
-		
-		Element marketCommod = doc.createElement("mktcommodity");
-		marketCommod.appendChild(doc.createTextNode(market.commodity));
-		rootElement.appendChild(marketCommod);
-				
-		Element marketModel = doc.createElement("model");
-		Element marketType = doc.createElement("TestMarket");
-		marketModel.appendChild(marketType);
-		rootElement.appendChild(marketModel);	
-	}
-	
 	public static void saveFile(Document doc, Element rootElement){
 			Element cycicElement = doc.createElement("CycicSimulation");
 			rootElement.appendChild(cycicElement);
 			
 			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){				
 				cycicElement.appendChild(outputFacility(doc, facility));
-			}
-			
-			for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes){
-				cycicElement.appendChild(outputMarket(doc, market));
 			}
 	}
 	
@@ -412,19 +368,7 @@ public class OutPut {
 			}
 			
 			NodeList marketList = doc.getElementsByTagName("marketNode");
-			
-			for (int i = 0; i < marketList.getLength(); i++){
-				org.w3c.dom.Node marketNode = marketList.item(i);
-				
-				Element element = (Element) marketNode;
-				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
-				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
-				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
-				tempNode.setCenterX(Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent()));
-				tempNode.setCenterY(Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent()));
-				tempNode.commodity = element.getElementsByTagName("cycicCommodity").item(0).getTextContent();
-			}		
-			VisFunctions.reloadPane();
+			VisFunctions.marketHide();
 		} catch (Exception e){
 			e.printStackTrace();
 		}
@@ -461,26 +405,6 @@ public class OutPut {
 		}
 		
 		return facElement;
-	}
-	
-	static Element outputMarket(Document doc, MarketCircle market){
-		Element markElement = doc.createElement("marketNode");
-		Element marketName = doc.createElement("name");
-		marketName.appendChild(doc.createTextNode((String) market.name));
-		markElement.appendChild(marketName);
-		// X position
-		Element xPosition = doc.createElement("xPosition");
-		xPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterX())));
-		markElement.appendChild(xPosition);
-		// Y position
-		Element yPosition = doc.createElement("yPosition");
-		yPosition.appendChild(doc.createTextNode(String.format("%.2f", market.getCenterY())));
-		markElement.appendChild(yPosition);
-		
-		Element commodityObj = doc.createElement("cycicCommodity");
-		commodityObj.appendChild(doc.createTextNode(market.commodity));
-		markElement.appendChild(commodityObj);
-		return markElement;
 	}
 	
 	static Element outputRegion(Document doc, regionNode region){
@@ -522,18 +446,8 @@ public class OutPut {
 				Element element = (Element) facNode;
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
 				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
-			}
-			
-			NodeList marketList = doc.getElementsByTagName("market");
-			
-			for (int i = 0; i < marketList.getLength(); i++){
-				org.w3c.dom.Node marketNode = marketList.item(i);
-				
-				Element element = (Element) marketNode;
-				MarketNodes.addMarket(element.getElementsByTagName("name").item(0).getTextContent());
-				MarketCircle tempNode = Cycic.workingScenario.marketNodes.get(Cycic.workingScenario.marketNodes.size() - 1);
-			}		
-			VisFunctions.reloadPane();
+			}	
+			VisFunctions.marketHide();
 		} catch (Exception e){
 			e.printStackTrace();
 		}

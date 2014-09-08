@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Stream;
 
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utexas.cycic.tools.FormBuilderTool;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -20,8 +23,11 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -29,6 +35,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -39,7 +46,7 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
-		/*String string;
+		String string;
 		for(int i = 0; i < XMLReader.test_string.size(); i++){
 			StringBuilder sb = new StringBuilder();
 			StringBuilder sb1 = new StringBuilder();
@@ -55,10 +62,8 @@ public class Cycic extends ViewBase{
 				while((string = read1.readLine()) != null){
 					sb1.append(string);
 				}
-				//System.out.println(sb);
-				//XMLReader.readSchema(sb.toString());
 				facilityStructure test = new facilityStructure();
-				test.facilityName = XMLReader.test_string.get(i);
+				test.facilityName = XMLReader.test_string.get(i).replace(":", " ");
 				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 				DataArrays.simFacilities.add(test);
 			} catch (IOException e) {
@@ -126,9 +131,9 @@ public class Cycic extends ViewBase{
 				CycicScenarios.workingCycicScenario = workingScenario;
 			}
 		});
-		if (DataArrays.simFacilities.size() < 1){
+		/*if (DataArrays.simFacilities.size() < 1){
 			RealFacs.init();
-		}
+		}*/
 		
 		VBox cycicBox = new VBox();
 		cycicBox.autosize();
@@ -187,79 +192,41 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(submit1, 4, 0);
-		/*Text text_sting = new Text();
-		text_sting.setText(System.getenv("PATH").toString());
-		grid.add(text_sting, 5, 0);*/
 		
-		// Adding a new Market
-		/*Text scenetitle2 = new Text("Market");
-		scenetitle2.setFont(new Font(20));
-		grid.add(scenetitle2, 0, 1);
-		Label markName = new Label("Name");
-		grid.add(markName, 1, 1);
-		// Name Field
-		final TextField markNameField = new TextField();
-		grid.add(markNameField, 2, 1);
-		Button submit2 = new Button("Add");
-		submit2.setOnAction(new EventHandler<ActionEvent>(){
-			@Override
-			public void handle(ActionEvent event){
-				MarketNodes.addMarket(markNameField.getText());
-				Cycic.workingMarket = workingScenario.marketNodes.get(workingScenario.marketNodes.size() - 1);
-			}
-		});
-		grid.add(submit2, 3, 1);
-		pane.setOnMouseClicked(new EventHandler<MouseEvent>(){
-			@Override
-			public void handle(MouseEvent event){
-				for(int i = 0; i < pane.getChildren().size(); i ++){
-					if(event.getButton().equals(MouseButton.PRIMARY)){
-						if(pane.getChildren().get(i).getStyleClass().toString() == "menu-bar"){
-							pane.getChildren().get(i).setVisible(false);
-						}
-					}
-				}			
-			}
-		});*/
-		
-		
-		/*Button hideMarkets = new Button();
-		hideMarkets.setText("Hide Markets");
-		hideMarkets.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent event){
-				if (Cycic.marketHideBool == true){
-					VisFunctions.marketHide();
-					marketHideBool = false;
-				} else {
-					VisFunctions.reloadPane();
-					marketHideBool = true;
-				}
-			}
-		});
-		grid.add(hideMarkets, 0, 3);*/
-		//grid.add(toggle, 0, 3);
-		
-		
-		/*ScrollPane scroll = new ScrollPane();
-		GridPane grid2 = new GridPane();
+		ScrollPane scroll = new ScrollPane();
+		/*GridPane grid2 = new GridPane();
 		grid2.setHgap(15);
-		grid2.setPadding(new Insets(10, 0, 0, 0));
+		grid2.setPadding(new Insets(10, 0, 0, 0));*/
+		Pane nodesPane = new Pane();
 		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
-			Circle circle = new Circle();
+			FacilityCircle circle = new FacilityCircle();
 			circle.setRadius(40);
-			circle.setFill(Color.RED);
+			circle.setFill(Color.web("#CF5300"));
+			circle.setCenterX(45+(i*90));
+			circle.setCenterY(50);
+			circle.text.setText(DataArrays.simFacilities.get(i).facilityName);
+			circle.text.setWrapText(true);
+			circle.text.setMaxWidth(60);
+			//circle.text.relocate(circle.getCenterX()-circle.getRadius()*0.6, circle.getCenterY()-circle.getRadius()*0.6);
+			circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
+			circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+			circle.text.setTextAlignment(TextAlignment.CENTER);
 			circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 				public void handle(MouseEvent e){
 					
+					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
+					ClipboardContent content = new ClipboardContent();				
+					content.put(DnD.VALUE_FORMAT, circle.text.getText());
+					db.setContent(content);
+					e.consume();
 				}
 			});
-			grid2.add(circle, i, 0);
+			nodesPane.getChildren().addAll(circle,circle.text);
 		}
-		scroll.setContent(grid2);
-		scroll.autosize();
+		scroll.setContent(nodesPane);
+
 		
-		cycicBox.getChildren().addAll(grid, scroll, pane);*/
-		cycicBox.getChildren().addAll(grid, pane);
+		cycicBox.getChildren().addAll(grid, scroll, pane);
 		setContent(cycicBox);
 	}
 }

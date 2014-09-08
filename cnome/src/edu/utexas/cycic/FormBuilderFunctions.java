@@ -106,9 +106,10 @@ public class FormBuilderFunctions {
 
 				node.cycicCircle.tooltip.setText(newValue);
 				node.sorterCircle.tooltip.setText(newValue);
+				node.cycicCircle.rgbColor=VisFunctions.stringToColor(newValue);;
+				node.cycicCircle.setFill(Color.rgb(node.cycicCircle.rgbColor.get(0), node.cycicCircle.rgbColor.get(1), node.cycicCircle.rgbColor.get(2)));
 			}
 		});
-		
 		return textField;
 	}
 	

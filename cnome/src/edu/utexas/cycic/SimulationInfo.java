@@ -12,6 +12,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -122,6 +123,7 @@ public class SimulationInfo extends ViewBase{
 	public void init(){
 		setTitle(TITLE);
 		TextField duration = VisFunctions.numberField();
+		duration.setMaxWidth(150);
 		duration.setPromptText("Length of Simulation");
 		duration.setText(Cycic.workingScenario.simulationData.duration);
 		duration.textProperty().addListener(new ChangeListener<String>(){
@@ -129,9 +131,8 @@ public class SimulationInfo extends ViewBase{
 				Cycic.workingScenario.simulationData.duration = newValue;
 			}
 		});
-		simInfo.add(new Label("Duration"), 0, 0);
+		simInfo.add(new Label("Duration (Months)"), 0, 0);
 		simInfo.add(duration, 1, 0);
-		simInfo.add(new Label("Months"), 2, 0);
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
@@ -158,6 +159,7 @@ public class SimulationInfo extends ViewBase{
 			}
 		});
 		startYear.setPromptText("Starting Year");
+		startYear.setMaxWidth(150);
 		simInfo.add(new Label("Start Year"), 0, 2);
 		simInfo.add(startYear, 1, 2);
 		
@@ -191,6 +193,16 @@ public class SimulationInfo extends ViewBase{
 			}
 		});
 		simInfo.add(load, 1, 5);
+		TextArea notes = new TextArea();
+		notes.setMaxSize(350, 250);
+		notes.setWrapText(true);
+		TextArea description = new TextArea();
+		description.setMaxSize(350, 250);
+		description.setWrapText(true);
+		simInfo.add(new Label("Description"), 0, 3);
+		simInfo.add(description, 1, 3);
+		simInfo.add(new Label("Notes"), 0, 4);
+		simInfo.add(notes, 1, 4);
 		buildCommodPane();
 		
 		
