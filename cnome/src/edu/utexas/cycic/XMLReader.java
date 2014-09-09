@@ -167,7 +167,7 @@ public class XMLReader {
 					dataArray.set(8, json_pass.get("doc").toString());
 				}
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				//ex.printStackTrace();
 			}	
 		}
 	}

@@ -129,8 +129,8 @@ class simInfo{
 	String duration;
 	String startMonth;
 	String startYear;
-	String simStart;
-	String decay;
+	String notes;
+	String description;
 }
 
 class facilityNode{

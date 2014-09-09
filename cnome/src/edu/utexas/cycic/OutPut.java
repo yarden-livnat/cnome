@@ -205,11 +205,12 @@ public class OutPut {
 	@SuppressWarnings("unchecked")
 	public static void facilityBuilder(Document doc, Element rootElement, facilityNode facility){
 		String facType = facility.facilityType;
+		String facName = (String) facility.name;
 		ArrayList<Object> facArray = facility.facilityStructure;
 		ArrayList<Object> dataArray = facility.facilityData;
 		
 		Element name = doc.createElement("name");
-		
+		name.appendChild(doc.createElement(facName.replace(" ", "")));
 		rootElement.appendChild(name);
 		
 		Element model = doc.createElement("model");

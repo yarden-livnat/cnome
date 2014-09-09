@@ -162,6 +162,28 @@ public class SimulationInfo extends ViewBase{
 		startYear.setMaxWidth(150);
 		simInfo.add(new Label("Start Year"), 0, 2);
 		simInfo.add(startYear, 1, 2);
+				
+		TextArea description = new TextArea();
+		description.setMaxSize(350, 250);
+		description.setWrapText(true);
+		description.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.description = newValue;
+			}
+		});
+		simInfo.add(new Label("Description"), 0, 3);
+		simInfo.add(description, 1, 3);
+		
+		TextArea notes = new TextArea();
+		notes.setMaxSize(350, 250);
+		notes.setWrapText(true);
+		notes.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.notes = newValue;
+			}
+		});
+		simInfo.add(new Label("Notes"), 0, 4);
+		simInfo.add(notes, 1, 4);
 		
 	
 		// Prints the Cyclus input associated with this simulator. 
@@ -193,16 +215,6 @@ public class SimulationInfo extends ViewBase{
 			}
 		});
 		simInfo.add(load, 1, 5);
-		TextArea notes = new TextArea();
-		notes.setMaxSize(350, 250);
-		notes.setWrapText(true);
-		TextArea description = new TextArea();
-		description.setMaxSize(350, 250);
-		description.setWrapText(true);
-		simInfo.add(new Label("Description"), 0, 3);
-		simInfo.add(description, 1, 3);
-		simInfo.add(new Label("Notes"), 0, 4);
-		simInfo.add(notes, 1, 4);
 		buildCommodPane();
 		
 		
@@ -246,6 +258,7 @@ public class SimulationInfo extends ViewBase{
 		commodity.setText("");
 		Cycic.workingScenario.CommoditiesList.add(commodity);
 		TextField newCommod = new TextField();
+		newCommod.autosize();
 		newCommod.setPromptText("Enter Commodity Name");
 		newCommod.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
