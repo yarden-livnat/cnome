@@ -410,7 +410,10 @@ public class FlowView extends CyclistViewBase {
 		Task<ObservableList<Inventory>> task = new Task<ObservableList<Inventory>>() {
 			@Override
 			protected ObservableList<Inventory> call() throws Exception {
+				long t = System.currentTimeMillis();
 				ObservableList<Inventory> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
+				long t1 = System.currentTimeMillis();
+				System.out.println("query Inventory: "+(t1-t)/1000.0);
 				return list;
 			}	
 		};
@@ -429,7 +432,11 @@ public class FlowView extends CyclistViewBase {
 		Task<ObservableList<Transaction>> task = new Task<ObservableList<Transaction>>() {
 			@Override
 			protected ObservableList<Transaction> call() throws Exception {
-				return _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
+				long t = System.currentTimeMillis();
+				ObservableList<Transaction> list =  _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
+				long t1 = System.currentTimeMillis();
+				System.out.println("query material flow: "+(t1-t)/1000.0);
+				return list;
 			}	
 		};
 		
@@ -455,7 +462,10 @@ public class FlowView extends CyclistViewBase {
 			protected ObservableMap<FlowNode,ObservableList<Transaction>> call() throws Exception {
 				Map<FlowNode, ObservableList<Transaction>> map = new HashMap<>();
 				for (FlowNode node : list) {
+					long t = System.currentTimeMillis();
 					ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
+					long t1 = System.currentTimeMillis();
+					System.out.println("getTransaction: node="+node.getValue().toString()+" time:"+(t1-t)/1000.0);
 					map.put(node, list);
 				}
 				

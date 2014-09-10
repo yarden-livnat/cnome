@@ -192,6 +192,14 @@ public class FieldGlyph extends HBox {
                                         numericIitem.getGraphic().setVisible(true);
                                         categoryIitem.getGraphic().setVisible(false);
                                         _field.setRole(Role.MEASURE);
+                                        if (_field.get(FieldProperties.AGGREGATION_FUNC, String.class) == null) {
+                                        	String value = _field.get(FieldProperties.AGGREGATION_DEFAULT_FUNC, String.class);
+                                        	if (value == null) {
+                                        		value = "Value";
+                                        		_field.set(FieldProperties.AGGREGATION_DEFAULT_FUNC, value);
+                                        	}
+                                        	_field.set(FieldProperties.AGGREGATION_FUNC, value);
+                                        }
                                         _label.setText(getTitle());
                                         fireActionEvent();
                                 }
