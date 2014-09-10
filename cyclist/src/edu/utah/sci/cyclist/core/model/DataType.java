@@ -12,6 +12,7 @@ public class DataType {
 		TEXT,
 		DATE,
 		DATETIME,
+		INT_TIME,
 		BOOLEAN,
 		NA
 	}
@@ -52,7 +53,8 @@ public class DataType {
 			_interp = Interpretation.DISCRETE;
 		case DATE:
 		case DATETIME:
-			_role = Role.DIMENSION;
+		case INT_TIME:
+			_role = Role.INT_TIME;
 			_interp = Interpretation.DISCRETE;
 		case BOOLEAN:
 		case NA:

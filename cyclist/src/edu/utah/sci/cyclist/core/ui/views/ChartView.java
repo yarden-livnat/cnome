@@ -711,9 +711,11 @@ public class ChartView extends CyclistViewBase {
 		} else if (isPaneType(x, y, Classification.Qi, Classification.Qd)) {
 			_viewType = ViewType.LINE;
 			//                        _markType = MarkType.LINE;
-		}else if (isPaneType(x, y, Classification.Qi, Classification.Qi)) {
+		} else if (isPaneType(x, y, Classification.Qi, Classification.Qi)) {
 			_viewType = ViewType.SCATTER_PLOT;
 			//                        _markType = MarkType.SHAPE;
+		} else if (isPaneType(x, y, Classification.C, Classification.Cdate)) {
+			_viewType = ViewType.SCATTER_PLOT;
 		} else {
 			_viewType = ViewType.NA;
 			//                        _markType = MarkType.NA;

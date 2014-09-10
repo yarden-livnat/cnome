@@ -290,6 +290,8 @@ public class SchemaPanel extends TitledPanel {
                 _type2Icon.put(DataType.Type.NUMERIC, AwesomeIcon.SORT_NUMERIC_ASC); 
                 _type2Icon.put(DataType.Type.TEXT, AwesomeIcon.SORT_ALPHA_ASC); 
                 _type2Icon.put(DataType.Type.DATE, AwesomeIcon.CLOCK_ALT); 
-                _type2Icon.put(DataType.Type.DATETIME, AwesomeIcon.CLOCK_ALT);                 
+                _type2Icon.put(DataType.Type.DATETIME, AwesomeIcon.CLOCK_ALT);   
+                _type2Icon.put(DataType.Type.INT_TIME, AwesomeIcon.CLOCK_ALT);                 
+
         }
 }

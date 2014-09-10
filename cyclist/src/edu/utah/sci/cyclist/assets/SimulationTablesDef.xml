@@ -21,13 +21,13 @@
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Lifetime">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="EnterTime">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="NUMERIC"/>
 			</field>	
 			<field name="ExitTime">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="NUMERIC"/>
 			</field>	
 		</Schema>
 	</Table>
@@ -60,7 +60,7 @@
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Time" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="Natural_Uranium" >
 				<datatype role="MEASURE" type="NUMERIC"/>
@@ -92,13 +92,13 @@
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="EnterTime" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="ExitTime" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="Lifetime">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			
 		</Schema>
@@ -115,16 +115,16 @@
 			<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="StartTime" >
-			<datatype role="DIMENSION" type="NUMERIC"/>
+			<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="EndTime" >
-			<datatype role="DIMENSION" type="NUMERIC"/>
+			<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="QualID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Quantity">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
@@ -158,7 +158,7 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="TimeCreated" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
@@ -265,7 +265,7 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Time" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 		</Schema>
 	</Table>
