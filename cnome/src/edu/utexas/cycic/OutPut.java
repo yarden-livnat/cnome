@@ -475,13 +475,6 @@ public class OutPut {
 		String startYear = doc.getElementsByTagName("startyear").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.startYear = startYear;
 		
-		// Sim Start
-		String simStart = doc.getElementsByTagName("simstart").item(0).getTextContent();
-		Cycic.workingScenario.simulationData.simStart = simStart;
-		
-		// Decay
-		String decay = doc.getElementsByTagName("decay").item(0).getTextContent();
-		Cycic.workingScenario.simulationData.decay = decay;
 	}
 	
 	static public void loadFacilities(Document doc){

@@ -24,6 +24,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -105,7 +106,6 @@ public class Cycic extends ViewBase{
 	public static final String TITLE = "Cycic";
 	static Pane pane = new Pane(){
 		{
-			
 		}
 	};
 	static facilityNode workingNode = null;
@@ -124,7 +124,40 @@ public class Cycic extends ViewBase{
 	/**
 	 * Initiates the Pane and GridPane.
 	 */
-	private void init(){	
+	private void init(){
+		pane.setOnDragOver(new EventHandler <DragEvent>(){
+			public void handle(DragEvent event){
+				event.acceptTransferModes(TransferMode.ANY);
+				event.consume();
+			}
+		});
+		pane.setOnDragEntered(new EventHandler<DragEvent>(){
+			public void handle(DragEvent event) {
+				System.out.println(event.getDragboard().getContent(DnD.VALUE_FORMAT));
+				event.acceptTransferModes();
+			}
+			
+		});
+		pane.setOnDragDropped(new EventHandler<DragEvent>(){
+			public void handle(DragEvent event){
+				if(event.getDragboard().hasContent(DnD.VALUE_FORMAT)){
+					facilityNode facility = new facilityNode();
+					facility.facilityType = (String) event.getDragboard().getContent(DnD.VALUE_FORMAT);
+					for (int i = 0; i < DataArrays.simFacilities.size(); i++){
+						if (DataArrays.simFacilities.get(i).facilityName == facility.facilityType){
+							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
+						}				
+					}
+					facility.name = "";
+					facility.cycicCircle = CycicCircles.addNode("Name", facility);
+					facility.cycicCircle.setCenterX(event.getX());
+					facility.cycicCircle.setCenterY(event.getY());
+					facility.sorterCircle = SorterCircles.addNode("Name", facility, facility);
+					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);
+					event.consume();
+				}
+			}
+		});
 		setTitle(TITLE);
 		setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
@@ -194,9 +227,6 @@ public class Cycic extends ViewBase{
 		grid.add(submit1, 4, 0);
 		
 		ScrollPane scroll = new ScrollPane();
-		/*GridPane grid2 = new GridPane();
-		grid2.setHgap(15);
-		grid2.setPadding(new Insets(10, 0, 0, 0));*/
 		Pane nodesPane = new Pane();
 		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
 			FacilityCircle circle = new FacilityCircle();
