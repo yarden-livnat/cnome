@@ -20,7 +20,7 @@ import org.xml.sax.InputSource;
 
 
 public class XMLReader {
-	static ArrayList<String> test_string = new ArrayList<String>(){
+	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
@@ -29,6 +29,17 @@ public class XMLReader {
 			add(":agents:KFacility");
 			add(":agents:Prey");
 			add(":agents:Predator");
+		}
+	};
+	static ArrayList<String> regionList = new ArrayList<String>(){
+		{
+			add(":cycamore:GrowthRegion");
+		}
+	};
+	static ArrayList<String> institutionList = new ArrayList<String>(){
+		{
+			add(":cycamore:DeployInst");
+			add(":cycamore:ManagerInst");
 		}
 	};
 	static String test = "<interleave><element name=\"in_commods\"><oneOrMore><element name=\"val\">" +  

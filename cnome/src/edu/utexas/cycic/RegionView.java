@@ -34,18 +34,6 @@ public class RegionView extends ViewBase{
 	 */
 	public RegionView(){
 		super();
-		// Facility list view for available facilities list of the region
-		final ListView<String> facilityList = new ListView<String>();
-		facilityList.setOrientation(Orientation.VERTICAL);
-		facilityList.setMinHeight(25);
-		facilityList.setOnMousePressed(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent event){
-				if (event.isSecondaryButtonDown()){
-					workingRegion.availFacilities.remove(facilityList.getSelectionModel().getSelectedItem());
-					facilityList.getItems().remove(facilityList.getSelectionModel().getSelectedItem());
-				}
-			}
-		});
 		//Institution list view for the region.
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
@@ -79,12 +67,8 @@ public class RegionView extends ViewBase{
 				} else {
 					rowNumber = 0;
 					grid.getChildren().clear();
-					facilityList.getItems().clear();
 					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(structureCB.getItems().indexOf(newValue));
 					RegionCorralView.workingRegion = DataArrays.regionNodes.get(structureCB.getItems().indexOf(newValue));
-					for(int i = 0; i < workingRegion.availFacilities.size(); i++){
-						facilityList.getItems().add(workingRegion.availFacilities.get(i));
-					}
 					for (int i = 0; i < workingRegion.institutions.size(); i++){
 						institList.getItems().add(workingRegion.institutions.get(i));
 					}
@@ -117,10 +101,8 @@ public class RegionView extends ViewBase{
 		addAvailFac.setText("Add Facility Prototype to Region");
 		addAvailFac.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				facilityList.getItems().clear();
 				workingRegion.availFacilities.add(addNewFacilityBox.getValue());
 				for (String facility: workingRegion.availFacilities){
-					facilityList.getItems().add(facility);
 				}
 			}
 		});
@@ -167,14 +149,12 @@ public class RegionView extends ViewBase{
 		grid.setStyle("-fx-background-color: silver;");
 				
 		HBox regionSideBar = new HBox();
-		VBox facilitiesBox = new VBox();
-		facilitiesBox.getChildren().addAll(new Label("Allowed Facilities"), facilityList);
 		VBox institBox = new VBox();
 		institBox.getChildren().addAll(new Label("Institutions"), institList);
 		regionSideBar.setPadding(new Insets(0, 5, 0, 0));
 		regionSideBar.setMinWidth(200);
 		regionSideBar.setPrefWidth(200);
-		regionSideBar.getChildren().addAll(facilitiesBox, institBox);
+		regionSideBar.getChildren().addAll(institBox);
 		
 		VBox regionGridBox = new VBox();
 		regionGridBox.getChildren().addAll(topGrid, grid);		
@@ -186,9 +166,6 @@ public class RegionView extends ViewBase{
 		setPrefSize(600,400);
 		
 		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
-
-		//regionNode.regionCircle.institutionList = institList;
-		//regionNode.regionCircle.facilityList = facilityList;
 		
 	}
 	

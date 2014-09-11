@@ -50,23 +50,23 @@ public class Cycic extends ViewBase{
 	public Cycic(){
 		super();
 		String string;
-		for(int i = 0; i < XMLReader.test_string.size(); i++){
+		for(int i = 0; i < XMLReader.facilityList.size(); i++){
 			StringBuilder sb = new StringBuilder();
 			StringBuilder sb1 = new StringBuilder();
 			Process proc;
 			try {
-				proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.test_string.get(i)); 
+				proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.facilityList.get(i)); 
 				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 				while((string = read.readLine()) != null){
 					sb.append(string);
 				}
-				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.test_string.get(i));
+				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.facilityList.get(i));
 				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
 				while((string = read1.readLine()) != null){
 					sb1.append(string);
 				}
 				facilityStructure test = new facilityStructure();
-				test.facilityName = XMLReader.test_string.get(i).replace(":", " ").trim();
+				test.facilityName = XMLReader.facilityList.get(i).replace(":", " ").trim();
 				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 				DataArrays.simFacilities.add(test);
 			} catch (IOException e) {

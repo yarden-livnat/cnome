@@ -42,18 +42,7 @@ public class OutPut {
 			controlSetup(doc, control);
 			
 			//Archetypes 
-			Element archetypes = doc.createElement("archetypes");
-			rootElement.appendChild(archetypes);
-			for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
-				Element spec = doc.createElement("spec");
-				Element lib = doc.createElement("lib");
-				lib.setTextContent(facility.facilityType.split(" ")[0]);
-				spec.appendChild(lib);
-				Element name = doc.createElement("name");
-				name.setTextContent(facility.facilityType.split(" ")[1]);
-				spec.appendChild(name);
-				archetypes.appendChild(spec);
-			}
+			archetypeSetup(doc, rootElement);
 			
 			// Commodities
 			for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
@@ -121,6 +110,7 @@ public class OutPut {
 			tfe.printStackTrace();
 		}
 	}
+	
 	/**
 	 * Sets up the control information for the simulation.
 	 * @param doc The xml.parser document that controls the cyclus 
@@ -143,6 +133,47 @@ public class OutPut {
 		control.appendChild(simStartYear);
 	}
 	
+	/**
+	 * 
+	 * @param doc
+	 * @param rootElement
+	 */
+	public static void archetypeSetup(Document doc, Element rootElement){
+		Element archetypes = doc.createElement("archetypes");
+		rootElement.appendChild(archetypes);
+		for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
+			Element spec = doc.createElement("spec");
+			Element lib = doc.createElement("lib");
+			lib.setTextContent(facility.facilityType.split(" ")[0]);
+			spec.appendChild(lib);
+			Element name = doc.createElement("name");
+			name.setTextContent(facility.facilityType.split(" ")[1]);
+			spec.appendChild(name);
+			archetypes.appendChild(spec);
+		}
+		
+		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
+			Element spec = doc.createElement("spec");
+			Element lib = doc.createElement("lib");
+			lib.setTextContent(region.type.split(" ")[0]);
+			spec.appendChild(lib);
+			Element name = doc.createElement("name");
+			name.setTextContent(region.type.split(" ")[1]);
+			spec.appendChild(name);
+			archetypes.appendChild(spec);
+		}
+		for(instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
+			Element spec = doc.createElement("spec");
+			Element lib = doc.createElement("lib");
+			lib.setTextContent(instit.type.split(" ")[0]);
+			spec.appendChild(lib);
+			Element name = doc.createElement("name");
+			name.setTextContent(instit.type.split(" ")[1]);
+			spec.appendChild(name);
+			archetypes.appendChild(spec);
+		}
+	}
+
 	/**
 	 * Function used to create commodities in the Cyclus input xml.
 	 * @param doc The xml.parser document that controls the cyclus input document.

@@ -1,5 +1,8 @@
 package edu.utexas.cycic;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javafx.collections.FXCollections;
@@ -144,7 +147,31 @@ public class RegionCorralView extends ViewBase {
 		corralButton.setOnMouseClicked(addRegion);
 
 		if (CycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
-			PracticeRegions.init();
+			String string;
+			for(int i = 0; i < XMLReader.regionList.size(); i++){
+				StringBuilder sb = new StringBuilder();
+				StringBuilder sb1 = new StringBuilder();
+				Process proc;
+				try {
+					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.regionList.get(i)); 
+					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					while((string = read.readLine()) != null){
+						sb.append(string);
+					}
+					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.regionList.get(i));
+					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+					while((string = read1.readLine()) != null){
+						sb1.append(string);
+					}
+					regionNode test = new regionNode();
+					test.name = XMLReader.facilityList.get(i).replace(":", " ").trim();
+					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.regionNodes.add(test);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 
 	}
