@@ -148,7 +148,7 @@ public class InstitutionView extends ViewBase{
 					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(CycicScenarios.workingCycicScenario.institNodes.size()-1);
 					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
-							
+							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
 						}
 					}
 					//workingInstit.institStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.institNodes.get(0);
