@@ -29,7 +29,6 @@ public class DataArrays{
 	static ArrayList<instituteNode> institNodes = new ArrayList<instituteNode>();
 	
 	static ArrayList<Object> marketStructs = new ArrayList<Object>();
-	static ArrayList<MarketCircle> marketNodes = new ArrayList<MarketCircle>();
 	
 	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 

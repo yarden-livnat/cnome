@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 public class OutPut {
 	/**
 	 * Function to convert the information stored in the CYCIC
-	 * simulation into a cylcus input file. 
+	 * simulation into a Cyclus input file. 
 	 */
 	public static void output(File file){
 		try {
@@ -36,11 +36,24 @@ public class OutPut {
 			Element rootElement = doc.createElement("Simulation");
 			doc.appendChild(rootElement);
 			
+			// General Simulation Information
 			Element control = doc.createElement("control");
 			rootElement.appendChild(control);
-			
-			// General Simulation Information
 			controlSetup(doc, control);
+			
+			//Archetypes 
+			Element archetypes = doc.createElement("archetypes");
+			rootElement.appendChild(archetypes);
+			for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
+				Element spec = doc.createElement("spec");
+				Element lib = doc.createElement("lib");
+				lib.setTextContent(facility.facilityType.split(" ")[0]);
+				spec.appendChild(lib);
+				Element name = doc.createElement("name");
+				name.setTextContent(facility.facilityType.split(" ")[1]);
+				spec.appendChild(name);
+				archetypes.appendChild(spec);
+			}
 			
 			// Commodities
 			for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
@@ -56,16 +69,7 @@ public class OutPut {
 			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
-				
-				Element regionName = doc.createElement("Name");
-				regionID.appendChild(regionName);
-				
-				for(String facility: region.availFacilities){
-					Element allowedFac = doc.createElement("allowedfacility");
-					allowedFac.appendChild(doc.createTextNode(facility));
-					regionID.appendChild(allowedFac);
-				}
-				
+			
 				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, "GrowthRegion");
 				// Building the institutions within regions.
 				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
@@ -204,29 +208,29 @@ public class OutPut {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void facilityBuilder(Document doc, Element rootElement, facilityNode facility){
-		String facType = facility.facilityType;
+		String facType = facility.facilityType.split(" ")[1];
 		String facName = (String) facility.name;
 		ArrayList<Object> facArray = facility.facilityStructure;
 		ArrayList<Object> dataArray = facility.facilityData;
 		
 		Element name = doc.createElement("name");
-		name.appendChild(doc.createElement(facName.replace(" ", "")));
+		name.setTextContent(facName);
 		rootElement.appendChild(name);
 		
-		Element model = doc.createElement("model");
-		rootElement.appendChild(model);
+		Element config = doc.createElement("config");
+		rootElement.appendChild(config);
 		
-		Element modelType = doc.createElement(facType.replace(" ", "").toString());
-		model.appendChild(modelType);
+		Element configType = doc.createElement(facType.replace(" ", "").toString());
+		config.appendChild(configType);
 		
 		for(int i = 1; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
-				facilityDataElement(doc, modelType, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
+				facilityDataElement(doc, configType, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
 			} else {
 				// Adding the label
 				Element heading = doc.createElement((String) facArray.get(0));
 				heading.appendChild(doc.createTextNode((String) dataArray.get(0)));
-				modelType.appendChild(heading);
+				configType.appendChild(heading);
 			}
 		}
 	}
@@ -310,7 +314,7 @@ public class OutPut {
 	@SuppressWarnings("unchecked")
 	public static void regionBuilder(Document doc, Element rootElement, String name, ArrayList<Object> structArray, ArrayList<Object> dataArray, String nodeType){
 		rootElement.appendChild(facilityNameElement(doc, name));
-		Element model = doc.createElement("model");
+		Element model = doc.createElement("config");
 		rootElement.appendChild(model);
 		
 		Element modelType = doc.createElement(nodeType.replace(" ", "").toString());

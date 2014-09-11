@@ -112,26 +112,7 @@ public class FormBuilderFunctions {
 		return textField;
 	}
 	
-	/***
-	 * Function designed for the naming of a marketCircle. Updates name and text of the marketCircle node.
-	 * @param node The marketCircle associated with the form that calls this function.
-	 * @return TextField linked to the name and text of the marketCircle node.
-	 */
-	static TextField marketNameBuilder(final MarketCircle node){
-		TextField textField = new TextField();
-		textField.setText((String) node.name);
-		
-		textField.textProperty().addListener(new ChangeListener<String>(){         
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				node.name = (String) newValue;
-				node.text.setText(newValue);
-				node.tooltip.setText(newValue);
-			}
-		});
-		
-		return textField;
-	}
-	
+
 	/**
 	 * Function used to create a TextField for the naming of a regionNode.
 	 * @param node regionNode associated with the form that calls this function.
@@ -148,15 +129,15 @@ public class FormBuilderFunctions {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
 
-				node.regionCircle.name.equals(newValue);
-				node.regionCircle.text.setText(newValue);
-				node.regionCircle.rgbColor = VisFunctions.stringToColor(newValue);
-				node.regionCircle.setFill(Color.rgb(node.regionCircle.rgbColor.get(0), node.regionCircle.rgbColor.get(1), node.regionCircle.rgbColor.get(2)));
+				regionNode.regionCircle.name.equals(newValue);
+				regionNode.regionCircle.text.setText(newValue);
+				regionNode.regionCircle.rgbColor = VisFunctions.stringToColor(newValue);
+				regionNode.regionCircle.setFill(Color.rgb(regionNode.regionCircle.rgbColor.get(0), regionNode.regionCircle.rgbColor.get(1), regionNode.regionCircle.rgbColor.get(2)));
 				// Setting font color for visibility //
-				if(VisFunctions.colorTest(node.regionCircle.rgbColor) == true){
-					node.regionCircle.text.setTextFill(Color.BLACK);
+				if(VisFunctions.colorTest(regionNode.regionCircle.rgbColor) == true){
+					regionNode.regionCircle.text.setTextFill(Color.BLACK);
 				}else{
-					node.regionCircle.text.setTextFill(Color.WHITE);
+					regionNode.regionCircle.text.setTextFill(Color.WHITE);
 				}
 			}
 		});
@@ -291,7 +272,7 @@ public class FormBuilderFunctions {
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
 
-				for (Label label: CycicScenarios.workingCycicScenario.CommoditiesList){
+				for (Label label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.getText());
 				}
 				cb.getItems().add("New Commodity");
@@ -307,31 +288,10 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				MarketCircle marketCircle = null;
 
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
-					/*for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-						if (newValue == circle.commodity){
-							marketCircle = circle;
-						}
-					}
-					if (marketCircle != null){
-						VisFunctions.linkMarketFac(marketCircle, facNode.cycicCircle);
-						defaultValue.set(0, newValue);
-						facNode.cycicCircle.incommods.add(newValue);
-						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
-							if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
-								facNode.cycicCircle.incommods.remove(i);
-								i--;
-							}
-						}
-						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
-							System.out.println(facNode.cycicCircle.incommods.get(i));
-						}
-						VisFunctions.reloadPane();
-					}*/
 					facNode.cycicCircle.incommods.add(newValue);
 					defaultValue.set(0, newValue);
 					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
@@ -363,7 +323,7 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Label label: CycicScenarios.workingCycicScenario.CommoditiesList){
+				for (Label label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.getText());
 				}
 				cb.getItems().add("New Commodity");
@@ -379,31 +339,9 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				MarketCircle marketCircle = null;
-
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
-					/*for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-						if (newValue == circle.commodity){
-							marketCircle = circle;
-						}
-					}
-					if (marketCircle != null){
-						VisFunctions.linkMarketFac(marketCircle, facNode.cycicCircle);
-						defaultValue.set(0, newValue);
-						facNode.cycicCircle.incommods.add(newValue);
-						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
-							if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
-								facNode.cycicCircle.incommods.remove(i);
-								i--;
-							}
-						}
-						for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
-							System.out.println(facNode.cycicCircle.incommods.get(i));
-						}
-						VisFunctions.reloadPane();
-					}*/
 					facNode.cycicCircle.outcommods.add(newValue);
 					defaultValue.set(0, newValue);
 					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
@@ -434,7 +372,7 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes) {
+				for (Nrecipe recipe: DataArrays.Recipes) {
 					cb.getItems().add(recipe.Name);
 				}
 			}
@@ -463,8 +401,8 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-					cb.getItems().add(circle.commodity);
+				for (Label label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.getText());
 				}
 				cb.getItems().add("New Commodity");
 			}

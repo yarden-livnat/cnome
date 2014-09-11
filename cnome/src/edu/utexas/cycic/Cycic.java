@@ -111,7 +111,6 @@ public class Cycic extends ViewBase{
 		}
 	};
 	static facilityNode workingNode = null;
-	static MarketCircle workingMarket = null;
 	static DataArrays workingScenario;
 	static ToggleGroup group = new ToggleGroup();
 	static ToggleButton toggle = new ToggleButton("RANDOM TEXT"){

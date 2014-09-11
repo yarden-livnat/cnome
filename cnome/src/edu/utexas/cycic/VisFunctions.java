@@ -149,58 +149,6 @@ public class VisFunctions {
 	};
 
 	/**
-	 * Code used to link a facilityCircle and a marketCircle in the CYCIC pane.
-	 * @param source facilityCircle that starts the line.
-	 * @param target marketCircle that ends the line.
-	 */
-	static void linkFacMarket(FacilityCircle source, MarketCircle target){
-		MarketCircle markIndex = null;
-		nodeLink link = new nodeLink();
-		link.source = source;
-		link.target = target;
-		link.line.setStartX(source.getCenterX());
-		link.line.setStartY(source.getCenterY());
-		link.line.setEndX(target.getCenterX());
-		link.line.setEndY(target.getCenterY());
-
-		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			if(CycicScenarios.workingCycicScenario.marketNodes.get(i) == target){
-				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
-			}
-		}
-		link.line.updatePosition();
-		link.line.text.setText(target.commodity);
-		CycicScenarios.workingCycicScenario.Links.add(link);
-		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
-		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
-		link.line.toBack();
-	}
-
-
-	static void linkMarketFac(MarketCircle source, FacilityCircle target){
-		MarketCircle markIndex = null;
-		nodeLink link = new nodeLink();
-		link.source = source;
-		link.target = target;
-		link.line.setStartX(source.getCenterX());
-		link.line.setStartY(source.getCenterY());
-		link.line.setEndX(target.getCenterX());
-		link.line.setEndY(target.getCenterY());
-
-		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			if(CycicScenarios.workingCycicScenario.marketNodes.get(i) == source){
-				markIndex = CycicScenarios.workingCycicScenario.marketNodes.get(i);
-			}
-		}
-		link.line.updatePosition();
-		link.line.text.setText(source.commodity);
-		CycicScenarios.workingCycicScenario.Links.add(link);
-		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
-		Cycic.pane.getChildren().addAll( link.line.left1, link.line.right1);
-		link.line.toBack();
-	}
-
-	/**
 	 * 
 	 * @param source
 	 * @param target
@@ -220,53 +168,6 @@ public class VisFunctions {
 		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
 		link.line.toBack();
 	}
-
-	/**
-	 * Reloads the CYCIC pane when changes have been made to it's contents.
-	 */
-	/*static void reloadPane(){
-		Cycic.pane.getChildren().remove(0, Cycic.pane.getChildren().size());
-		for(int i = 0; i < CycicScenarios.workingCycicScenario.FacilityNodes.size(); i++){
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle);
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.menu);
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.text);
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.image);
-			for(int ii = 0; ii < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.size(); ii++){
-				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii));
-				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).menu);
-				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).text);
-				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).image);
-			}
-			for(int n = 0; n < CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.size(); n++){
-				Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line);
-				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenLinks.get(n).line.toBack();
-			}
-		}
-		for(int i = 0; i < CycicScenarios.workingCycicScenario.marketNodes.size(); i++){
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i));
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).menu);
-			Cycic.pane.getChildren().add(CycicScenarios.workingCycicScenario.marketNodes.get(i).text);			
-		}
-		CycicScenarios.workingCycicScenario.Links.clear();
-		for (facilityNode outFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
-			for (int i = 0; i < outFac.cycicCircle.outcommods.size(); i++) {
-				for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes) {
-					if (outFac.cycicCircle.outcommods.get(i) == market.commodity){
-						linkFacMarket(outFac.cycicCircle, market);
-					}
-				}
-			}
-		}
-		for (facilityNode inFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
-			for (int i = 0; i < inFac.cycicCircle.incommods.size(); i++) {
-				for (MarketCircle market: CycicScenarios.workingCycicScenario.marketNodes) {
-					if (inFac.cycicCircle.incommods.get(i) == market.commodity){
-						linkMarketFac(market, inFac.cycicCircle);
-					}
-				}
-			}
-		}
-	}*/
 
 	/**
 	 * Reloads the CYCIC pane without Markets.
