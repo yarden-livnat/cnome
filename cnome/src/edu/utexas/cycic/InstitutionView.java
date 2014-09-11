@@ -1,11 +1,17 @@
 package edu.utexas.cycic;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import org.controlsfx.dialog.Dialog;
 
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -34,6 +40,34 @@ public class InstitutionView extends ViewBase{
 	public InstitutionView(){
 		super();
 		setPrefSize(500,500);
+		
+		// Ensures the temperary institution is initiated only once. 
+		if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
+			String string;
+			for(int i = 0; i < XMLReader.regionList.size(); i++){
+				StringBuilder sb = new StringBuilder();
+				StringBuilder sb1 = new StringBuilder();
+				Process proc;
+				try {
+					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.regionList.get(i)); 
+					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					while((string = read.readLine()) != null){
+						sb.append(string);
+					}
+					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.regionList.get(i));
+					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+					while((string = read1.readLine()) != null){
+						sb1.append(string);
+					}
+					regionNode test = new regionNode();
+					test.name = XMLReader.facilityList.get(i).replace(":", " ").trim();
+					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.regionNodes.add(test);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		
 		// ListView for initial facilities in the institution.
 		final ListView<String> facilityList = new ListView<String>();
@@ -66,8 +100,8 @@ public class InstitutionView extends ViewBase{
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				structureCB.getItems().clear();
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.institNodes.size(); i++){
-					structureCB.getItems().add((String) CycicScenarios.workingCycicScenario.institNodes.get(i).name);
+				for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+					structureCB.getItems().add((String) DataArrays.simInstitutions.get(i).institName);
 				}
 				structureCB.getItems().add("New Institution");
 			}
@@ -82,10 +116,39 @@ public class InstitutionView extends ViewBase{
 				} else if(newValue == "New Institution"){
 					grid.getChildren().clear();
 					rowNumber = 1;
-					CycicScenarios.workingCycicScenario.institNodes.add(new instituteNode());
+					instituteNode tempInstit = new instituteNode();
+					Dialog dlg = new Dialog(grid, "Institution Name");
+					dlg.getActions().add(Dialog.Actions.OK);
+					GridPane dlgGrid = new GridPane();
+					TextField txtName = new TextField();
+					txtName.textProperty().addListener(new ChangeListener<String>(){
+						public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+							tempInstit.name = newValue;
+						}
+					});
+					dlgGrid.add(new Label("Name"), 0, 0);
+					dlgGrid.add(txtName, 1, 0);
+					ComboBox cbType = new ComboBox();
+					cbType.setOnAction(new EventHandler<Event>(){
+						public void handle(Event event) {
+							for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+								if (DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) cbType.getValue())){
+									tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+								}
+							}								
+						}
+					});
+					dlgGrid.add(new Label("Type"), 0, 1);
+					dlgGrid.add(cbType, 1, 1);
+					dlg.setContent(dlgGrid);
+					dlg.show();
 					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(CycicScenarios.workingCycicScenario.institNodes.size()-1);
-					workingInstit.type = "deployInst";
-					workingInstit.institStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.institStructs.get(0);
+					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
+							
+						}
+					}
+					//workingInstit.institStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.institNodes.get(0);
 					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
 					facilityList.getItems().clear();
@@ -254,10 +317,7 @@ public class InstitutionView extends ViewBase{
 		setContent(institBox);
 		setPrefSize(600,400);
 		
-		// Ensures the temperary institution is initiated only once. 
-		if (CycicScenarios.workingCycicScenario.institStructs.size() < 1) {
-			PracticeInstitute.init();
-		}
+
 	}
 	
 	private ComboBox<String> structureCB = new ComboBox<String>();

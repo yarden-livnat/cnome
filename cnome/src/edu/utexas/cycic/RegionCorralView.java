@@ -62,6 +62,33 @@ public class RegionCorralView extends ViewBase {
 	};
 
 	public RegionCorralView() {
+		
+		if (CycicScenarios.workingCycicScenario.simRegions.size() < 1) {
+			String string;
+			for(int i = 0; i < XMLReader.regionList.size(); i++){
+				StringBuilder sb = new StringBuilder();
+				StringBuilder sb1 = new StringBuilder();
+				Process proc;
+				try {
+					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.regionList.get(i)); 
+					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					while((string = read.readLine()) != null){
+						sb.append(string);
+					}
+					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.regionList.get(i));
+					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+					while((string = read1.readLine()) != null){
+						sb1.append(string);
+					}
+					regionStructure test = new regionStructure();
+					test.regionName = XMLReader.facilityList.get(i).replace(":", " ").trim();
+					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.simRegions.add(test);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 		/* Create content for RegionCorralView header */
 
@@ -72,8 +99,11 @@ public class RegionCorralView extends ViewBase {
 		final TextField regionText = new TextField();
 		regionCorralGrid.add(regionText, 1, 0);
 
-		ObservableList<String> typeList = FXCollections.observableArrayList("Growth Region", "Other");
-		final ComboBox typeOptions = new ComboBox(typeList);
+		final ComboBox typeOptions = new ComboBox();
+		typeOptions.getItems().clear();
+		for(int i = 0; i < DataArrays.simRegions.size(); i++){
+			typeOptions.getItems().add(DataArrays.simRegions);
+		}
 		regionCorralGrid.add(typeOptions, 2, 0);
 
 		final Button corralButton = new Button();
@@ -145,34 +175,5 @@ public class RegionCorralView extends ViewBase {
 		};	//ends EventHandler addRegion
 
 		corralButton.setOnMouseClicked(addRegion);
-
-		if (CycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
-			String string;
-			for(int i = 0; i < XMLReader.regionList.size(); i++){
-				StringBuilder sb = new StringBuilder();
-				StringBuilder sb1 = new StringBuilder();
-				Process proc;
-				try {
-					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.regionList.get(i)); 
-					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					while((string = read.readLine()) != null){
-						sb.append(string);
-					}
-					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.regionList.get(i));
-					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-					while((string = read1.readLine()) != null){
-						sb1.append(string);
-					}
-					regionNode test = new regionNode();
-					test.name = XMLReader.facilityList.get(i).replace(":", " ").trim();
-					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-					DataArrays.regionNodes.add(test);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-
 	}
 }

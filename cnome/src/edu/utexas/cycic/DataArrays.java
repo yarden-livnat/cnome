@@ -22,25 +22,42 @@ public class DataArrays{
 	static ArrayList<Nrecipe> Recipes = new ArrayList<Nrecipe>();
 	static ArrayList<Label> RecipesList = new ArrayList<Label>();
 	
-	static ArrayList<Object> regionStructs = new ArrayList<Object>();
 	static ArrayList<regionNode> regionNodes = new ArrayList<regionNode>();
-	
-	static ArrayList<Object> institStructs = new ArrayList<Object>();
 	static ArrayList<instituteNode> institNodes = new ArrayList<instituteNode>();
-	
-	static ArrayList<Object> marketStructs = new ArrayList<Object>();
-	
 	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 
 	static simInfo simulationData = new simInfo();
 	static ArrayList<facilityStructure> simFacilities = new ArrayList<facilityStructure>();
-	
+	static ArrayList<regionStructure> simRegions = new ArrayList<regionStructure>();
+	static ArrayList<institutionStructure> simInstitutions = new ArrayList<institutionStructure>();
+		
 }
-
-
+/**
+ * 
+ * @author Robert
+ *
+ */
 class facilityStructure {
 	String facilityName;
 	ArrayList<Object> facStruct = new ArrayList<Object>();
+}
+/**
+ * 
+ * @author Robert
+ *
+ */
+class regionStructure {
+	String regionName;
+	ArrayList<Object> regionStruct = new ArrayList<Object>();
+}
+/**
+ * 
+ * @author Robert
+ *
+ */
+class institutionStructure {
+	String institName;
+	ArrayList<Object> institStruct = new ArrayList<Object>();
 }
 /**
  * Class used to build the recipes for cyclus.
