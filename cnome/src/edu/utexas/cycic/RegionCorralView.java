@@ -81,7 +81,7 @@ public class RegionCorralView extends ViewBase {
 						sb1.append(string);
 					}
 					regionStructure test = new regionStructure();
-					test.regionName = XMLReader.facilityList.get(i).replace(":", " ").trim();
+					test.regionName = XMLReader.regionList.get(i).replace(":", " ").trim();
 					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 					DataArrays.simRegions.add(test);
 				} catch (IOException e) {
@@ -102,7 +102,7 @@ public class RegionCorralView extends ViewBase {
 		final ComboBox typeOptions = new ComboBox();
 		typeOptions.getItems().clear();
 		for(int i = 0; i < DataArrays.simRegions.size(); i++){
-			typeOptions.getItems().add(DataArrays.simRegions);
+			typeOptions.getItems().add(DataArrays.simRegions.get(i).regionName);
 		}
 		regionCorralGrid.add(typeOptions, 2, 0);
 
@@ -161,8 +161,12 @@ public class RegionCorralView extends ViewBase {
 		EventHandler addRegion = new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent event) {
 				final regionNode region = new regionNode();
-				region.regionStruct = PracticeRegions.growthRegion;
-				region.type = typeOptions.getId();
+				region.type = (String) typeOptions.getValue();
+				for(int i = 0; i < DataArrays.simRegions.size(); i++){
+					if(DataArrays.simRegions.get(i).regionName.equalsIgnoreCase(region.type)){
+						region.regionStruct = DataArrays.simRegions.get(i).regionStruct;
+					}
+				}
 				FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
 				regionNode.regionCircle = RegionShape.addRegion(regionText.getText(), region);
 				

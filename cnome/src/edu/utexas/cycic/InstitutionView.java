@@ -44,25 +44,25 @@ public class InstitutionView extends ViewBase{
 		// Ensures the temperary institution is initiated only once. 
 		if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
 			String string;
-			for(int i = 0; i < XMLReader.regionList.size(); i++){
+			for(int i = 0; i < XMLReader.institutionList.size(); i++){
 				StringBuilder sb = new StringBuilder();
 				StringBuilder sb1 = new StringBuilder();
 				Process proc;
 				try {
-					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.regionList.get(i)); 
+					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.institutionList.get(i)); 
 					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					while((string = read.readLine()) != null){
 						sb.append(string);
 					}
-					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.regionList.get(i));
+					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.institutionList.get(i));
 					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
 					while((string = read1.readLine()) != null){
 						sb1.append(string);
 					}
-					regionNode test = new regionNode();
-					test.name = XMLReader.facilityList.get(i).replace(":", " ").trim();
-					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-					DataArrays.regionNodes.add(test);
+					institutionStructure test = new institutionStructure();
+					test.institName = XMLReader.institutionList.get(i).replace(":", " ").trim();
+					test.institStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.simInstitutions.add(test);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -100,8 +100,8 @@ public class InstitutionView extends ViewBase{
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				structureCB.getItems().clear();
-				for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-					structureCB.getItems().add((String) DataArrays.simInstitutions.get(i).institName);
+				for(int i = 0; i < DataArrays.institNodes.size(); i++){
+					structureCB.getItems().add((String) DataArrays.institNodes.get(i).name);
 				}
 				structureCB.getItems().add("New Institution");
 			}
@@ -129,6 +129,9 @@ public class InstitutionView extends ViewBase{
 					dlgGrid.add(new Label("Name"), 0, 0);
 					dlgGrid.add(txtName, 1, 0);
 					ComboBox cbType = new ComboBox();
+					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+						cbType.getItems().add(DataArrays.simInstitutions.get(i).institName);
+					}
 					cbType.setOnAction(new EventHandler<Event>(){
 						public void handle(Event event) {
 							for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
