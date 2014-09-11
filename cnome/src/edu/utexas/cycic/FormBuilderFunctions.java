@@ -67,9 +67,10 @@ public class FormBuilderFunctions {
 	}
 	
 	/**
-	 * A function used to create the generic text fields inputs. 
-	 * @param array The ArrayList<Object> used to store the information in the TextField. 
-	 * @return A TextField tied via a listener to the value of this input field.
+	 * 
+	 * @param facArray
+	 * @param defaultValue
+	 * @return
 	 */
 	static TextField textFieldBuilder(final ArrayList<Object> facArray, final ArrayList<Object> defaultValue){
 		
@@ -87,13 +88,11 @@ public class FormBuilderFunctions {
 		return textField;
 	}
 	
-	 /**
-	 * Special function used for the name flag in a facility.
-	 * @param node The facility node that is currently being worked on
-	 * @param dataArray The ArrayList<Object> that contains the name field data for the facility.
-	 * @return TextField that controls the input of this field. 
+	/**
+	 * 
+	 * @param node
+	 * @return
 	 */
-
 	static TextField nameFieldBuilder(final facilityNode node){
 		TextField textField = new TextField();
 		textField.setText((String)node.name);

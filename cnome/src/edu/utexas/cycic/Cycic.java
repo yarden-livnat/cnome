@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Stream;
 
+import org.controlsfx.dialog.Dialog;
+
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
@@ -64,7 +66,7 @@ public class Cycic extends ViewBase{
 					sb1.append(string);
 				}
 				facilityStructure test = new facilityStructure();
-				test.facilityName = XMLReader.test_string.get(i).replace(":", " ");
+				test.facilityName = XMLReader.test_string.get(i).replace(":", " ").trim();
 				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 				DataArrays.simFacilities.add(test);
 			} catch (IOException e) {
@@ -128,31 +130,40 @@ public class Cycic extends ViewBase{
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
-				event.consume();
 			}
-		});
-		pane.setOnDragEntered(new EventHandler<DragEvent>(){
-			public void handle(DragEvent event) {
-				System.out.println(event.getDragboard().getContent(DnD.VALUE_FORMAT));
-				event.acceptTransferModes();
-			}
-			
 		});
 		pane.setOnDragDropped(new EventHandler<DragEvent>(){
 			public void handle(DragEvent event){
 				if(event.getDragboard().hasContent(DnD.VALUE_FORMAT)){
 					facilityNode facility = new facilityNode();
-					facility.facilityType = (String) event.getDragboard().getContent(DnD.VALUE_FORMAT);
+					facility.facilityType = event.getDragboard().getContent(DnD.VALUE_FORMAT).toString();
+					facility.facilityType.trim();
+					
 					for (int i = 0; i < DataArrays.simFacilities.size(); i++){
-						if (DataArrays.simFacilities.get(i).facilityName == facility.facilityType){
+						System.out.println(DataArrays.simFacilities.get(i).facilityName + " " + facility.facilityType);
+						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
-						}				
+						}
 					}
-					facility.name = "";
-					facility.cycicCircle = CycicCircles.addNode("Name", facility);
+					Dialog dgl = new Dialog(pane, "Facility Name");
+					GridPane dglGrid = new GridPane();
+					TextField txt = new TextField();
+					txt.textProperty().addListener(new ChangeListener<String>(){
+							public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+								facility.name = newValue;
+							}
+					});
+					dgl.getActions().add(Dialog.Actions.OK);
+					dglGrid.add(new Label("Facility Name:"), 0 , 0);
+					dglGrid.add(txt, 1, 0);
+					dgl.setContent(dglGrid);
+					dgl.show();
+					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
-					facility.sorterCircle = SorterCircles.addNode("Name", facility, facility);
+					facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
+					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
+					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
 					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);
 					event.consume();
 				}
@@ -219,8 +230,8 @@ public class Cycic extends ViewBase{
 					}				
 				}
 				tempNode.name = facNameField.getText();
-				tempNode.cycicCircle = CycicCircles.addNode(facNameField.getText(), tempNode);
-				tempNode.sorterCircle = SorterCircles.addNode(facNameField.getText(), tempNode, tempNode);
+				tempNode.cycicCircle = CycicCircles.addNode((String)tempNode.name, tempNode);
+				tempNode.sorterCircle = SorterCircles.addNode((String)tempNode.name, tempNode, tempNode);
 				FormBuilderFunctions.formArrayBuilder(tempNode.facilityStructure, tempNode.facilityData);
 			}
 		});
@@ -237,13 +248,12 @@ public class Cycic extends ViewBase{
 			circle.text.setText(DataArrays.simFacilities.get(i).facilityName);
 			circle.text.setWrapText(true);
 			circle.text.setMaxWidth(60);
-			//circle.text.relocate(circle.getCenterX()-circle.getRadius()*0.6, circle.getCenterY()-circle.getRadius()*0.6);
 			circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
 			circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
 			circle.text.setTextAlignment(TextAlignment.CENTER);
+			circle.text.setMouseTransparent(true);
 			circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 				public void handle(MouseEvent e){
-					
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
 					ClipboardContent content = new ClipboardContent();				
 					content.put(DnD.VALUE_FORMAT, circle.text.getText());
