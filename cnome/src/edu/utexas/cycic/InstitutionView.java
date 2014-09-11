@@ -145,7 +145,8 @@ public class InstitutionView extends ViewBase{
 					dlgGrid.add(cbType, 1, 1);
 					dlg.setContent(dlgGrid);
 					dlg.show();
-					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(CycicScenarios.workingCycicScenario.institNodes.size()-1);
+					System.out.println("YES");
+					workingInstit = tempInstit;
 					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
 							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
