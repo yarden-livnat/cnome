@@ -269,4 +269,36 @@
 			</field>
 		</Schema>
 	</Table>
+	<Table name="TimeQuantitySingle">
+		<Schema>
+			<field name="Time">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="NucID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Prototype" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Quantity" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>
+	<Table name="TimeQuantityAll">
+		<Schema>
+			<field name="Time">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="NucID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Prototype" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Quantity" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>
 </root>

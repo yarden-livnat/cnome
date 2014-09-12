@@ -37,22 +37,17 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicatorBuilder;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBoxBuilder;
-import javafx.scene.text.TextBuilder;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageBuilder;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -76,8 +71,6 @@ public class DatasourceWizard extends VBox {
 	private Map<String, DatasourceWizardPage> _panes;
 	private DatasourceWizardPage              _currentPage;	
 	
-	private String current = null;
-
 	// This will have to be changed to a data source
 	private ObjectProperty<CyclistDatasource> selection = new SimpleObjectProperty<>();
 
@@ -93,9 +86,8 @@ public class DatasourceWizard extends VBox {
 	
 	// * * * Create the dialog * * * //
 	private void createDialog(CyclistDatasource sourceProperty){
-		_dialog = StageBuilder.create()
-				.title("Create or Edit DataType Source")
-				.build();
+		_dialog = new Stage();
+		_dialog.setTitle("Create or Edit DataType Source");
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, sourceProperty) );
 		_dialog.centerOnScreen();
@@ -119,19 +111,17 @@ public class DatasourceWizard extends VBox {
 		
 		
 		// The user-specified name of the table
-		HBox nameBox = HBoxBuilder.create()
-				.spacing(25)
-				.padding(new Insets(0, 0, -10, 0))
-				.alignment(Pos.CENTER_LEFT)
-				.children(
-						TextBuilder.create().text("Name:").build(), 
-						_nameField = TextFieldBuilder.create()
-						.prefWidth(125)
-						.text(sourceName)
-						.build())
-					.build();
-						
-			
+		HBox nameBox = new HBox();
+		nameBox.setSpacing(25);
+		nameBox.setPadding(new Insets(0, 0, -10, 0));
+		nameBox.setAlignment(Pos.CENTER_LEFT);
+		
+		_nameField = new TextField();
+		_nameField.setPrefWidth(125);
+		_nameField.setText(sourceName);
+		
+		nameBox.getChildren().addAll(new Text("Name:"),_nameField);
+								
 		// The selector for type of connection
 		final Pane pane = new Pane();
 		pane.prefHeight(200);
@@ -154,6 +144,11 @@ public class DatasourceWizard extends VBox {
 					pane.getChildren().clear();
 					pane.getChildren().add(page.getNode());
 					_currentPage = page;
+					_dialog.sizeToScene();
+					if(_currentPage.getNode() instanceof Pane){
+						Pane currentPage = (Pane) _currentPage.getNode();
+						currentPage.prefWidthProperty().bind(pane.widthProperty());
+					}
 									}
 			}
 		});
@@ -165,47 +160,44 @@ public class DatasourceWizard extends VBox {
 		
 		// The ok/cancel buttons
 		Button ok;
-		HBox buttonsBox = HBoxBuilder.create()
-				.spacing(10)
-				.alignment(Pos.CENTER_RIGHT)
-				.padding(new Insets(5))
-				.children(					
-						// Test Connection
-						ButtonBuilder.create()
-						.text("Test Connection")
-						.minWidth(115)
-						.prefWidth(115)
-						.onAction(new EventHandler<ActionEvent>() {
-							@Override
-							public void handle(ActionEvent arg0) {
-								CyclistDatasource ds = _currentPage.getDataSource();
-								testConnection(ds);
-							};
-						})
-						.build(),
-//						_statusDisplay = ImageViewBuilder.create().build(),
-						_status = new Label(),
-						ProgressIndicatorBuilder.create().progress(-1).maxWidth(8).maxHeight(8).visible(false).build(),	
-						new Spring(),						
-						// Cancel
-						ButtonBuilder.create()
-						.text("Cancel")
-						.minWidth(60)
-						.prefWidth(60)
-						.onAction(new EventHandler<ActionEvent>() {
+		HBox buttonsBox = new HBox();
+		buttonsBox.setSpacing(10);
+		buttonsBox.setAlignment(Pos.CENTER_RIGHT);
+		buttonsBox.setPadding(new Insets(5));
+		
+		Button testConn = new Button("Test Connection");
+		testConn.setMinWidth(115);
+		testConn.setPrefWidth(115);
+		testConn.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				CyclistDatasource ds = _currentPage.getDataSource();
+				testConnection(ds);
+			};
+		});
+		
+		_status = new Label();
+				
+		ProgressIndicator progressIndicator = new ProgressIndicator();
+		progressIndicator.setProgress(-1);
+		progressIndicator.setMaxWidth(8);
+		progressIndicator.setMaxHeight(8);
+		progressIndicator.setVisible(false);
+		
+		Button cancel = new Button("Cancel");
+		cancel.setMinWidth(60);
+		cancel.setPrefWidth(60);
+		cancel.setOnAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent arg0) {
 								dialog.hide();
 							};
-						})
-						.build(),
-
-						// OK
-						ok = ButtonBuilder.create()
-						.text("Ok")
-						.minWidth(40)
-						.prefWidth(40)
-						.onAction(new EventHandler<ActionEvent>() {	
+						});
+		
+		ok = new Button("Ok");
+		ok.setMinWidth(40);
+		ok.setPrefWidth(40);
+		ok.setOnAction(new EventHandler<ActionEvent>() {	
 							@Override
 							public void handle(ActionEvent arg0) {
 //								System.out.println("Create & return a new data source");
@@ -217,34 +209,29 @@ public class DatasourceWizard extends VBox {
 								//selection.set(sourceProperty);
 								dialog.hide();
 							};
-						})
-						.build()	
-						)
-						.build();
+						});
+		
+		buttonsBox.getChildren().addAll(testConn,_status,progressIndicator,new Spring(),cancel,ok);
+		
 		HBox.setHgrow(buttonsBox,  Priority.ALWAYS);
 		
 		// Disable the ok button until we at least have a name field
 		ok.disableProperty().bind(_nameField.textProperty().isNull().or(_nameField.textProperty().isEqualTo("")));
 
 		// The vertical layout of the whole wizard
-		VBox header = VBoxBuilder.create()
-				.spacing(10)
-				.padding(new Insets(0))
-				.children(cb,
-						nameBox, 
-						pane, 
-						buttonsBox)
-						.build();	
-
-
-		Scene scene = new Scene(
-				VBoxBuilder.create()
-					.spacing(5)
-					.padding(new Insets(5))
-					.id("datasource-wizard")
-					.children(header)
-					.build()
-				);
+		VBox header = new VBox();
+		header.setSpacing(10);
+		header.setPadding(new Insets(0));
+		header.getChildren().addAll(cb,nameBox,pane,buttonsBox);
+		
+		VBox body = new VBox();
+		body.setSpacing(5);
+		body.setPadding(new Insets(5));
+		body.setId("datasource-wizard");
+		body.getChildren().add(header);
+		
+		Scene scene = new Scene(body);
+		
 		
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
 		return scene;

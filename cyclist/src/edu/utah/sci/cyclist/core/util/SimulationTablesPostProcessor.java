@@ -53,6 +53,31 @@ public class SimulationTablesPostProcessor {
 	private static final String UPDATED_INDICATION_TABLE_CREATE = "create table UpdatedIndication (flag INTEGER DEFAULT 1)";
 	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
+	private static final String QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE = "create table TimeQuantitySingle as "
+								   + "SELECT tl.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
+								   + "cast(SUM(inv.Quantity*cmp.MassFrac) as REAL) AS Quantity "
+								   + "FROM "
+								   + "Timelist AS tl "
+								   + "INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
+								   + "INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
+								   + "INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId "
+								   + "WHERE "
+								   + "inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId "
+								   + "GROUP BY tl.Time,cmp.NucId,ag.Prototype;";
+	
+	private static final String QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE = "create table TimeQuantityAll as "
+								+ "SELECT tr.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
+								+ "cast(SUM(cmp.MassFrac * res.Quantity) AS REAL) AS Quantity "
+								+ "FROM "
+								+ "Resources AS res "
+								+ "INNER JOIN Transactions AS tr ON tr.ResourceId = res.ResourceId "
+								+ "INNER JOIN Agents AS ag ON ag.AgentId = tr.SenderID "
+								+ "INNER JOIN Compositions AS cmp ON cmp.QualId = res.QualId "
+								+ "WHERE "
+								+ "tr.SimId = res.SimId AND ag.SimId = tr.SimId and cmp.SimId=res.SimId "
+							    + "GROUP BY cmp.NucId,tr.Time,ag.Prototype "
+								+ "ORDER BY tr.Time ASC;";
+	
 	private static String[] UpdateTablesRunningOrderTbl = 
 	{
 		FIX_AGENTS_TABLE_PHASE1,
@@ -60,7 +85,9 @@ public class SimulationTablesPostProcessor {
 	    FACILITIES_TABLE_CREATE,
 	    FACILITIES_TABLE_UPDATE,
 	    FACILITIES_TABLE_INDEX,
-	    UPDATED_INDICATION_TABLE_CREATE
+	    QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE,
+//	    QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE,
+	    UPDATED_INDICATION_TABLE_CREATE,
 	};
 	
 	private static final Map<String,String> applicationsMap;
@@ -77,7 +104,7 @@ public class SimulationTablesPostProcessor {
     	applicationsMap.put("linux-386", "cycpost-linux-386");
     	applicationsMap.put("linux-arm", "cycpost-linux-arm");
     }
-	
+    
 	public static Boolean process(CyclistDatasource ds){
 		Logger log = Logger.getLogger(SimulationTablesPostProcessor.class);
 		Boolean isUpdated = false;
@@ -130,6 +157,16 @@ public class SimulationTablesPostProcessor {
 			log.warn("database is already updated");
 			return true;
 		}
+	}
+	
+	/**
+	 * Returns whether or not a database update post process is required
+	 * (Right now it is only based on whether or not it is a Sqlite datasource)
+	 * @param ds - the data source to check.
+	 * @return Boolean. true if need update, false if not.
+	 */
+	public static Boolean isUpdateRequired(CyclistDatasource ds){
+		return ds.isSQLite();
 	}
 	
 	/*
@@ -259,9 +296,13 @@ public class SimulationTablesPostProcessor {
 			      log.warn(line);
 			      //Tables already exist - no need to reproduce additional tables.
 			      if(line.indexOf("post processed") > -1){
-			    	  isAlreadyProcessed = true;
+//			    	  //If reached here the "UpdatedIndication" table doesn't exit. It means some of the other tables
+			    	  //are missing, so even though the external applications update is not needed,
+			    	  //it should try to produce the other tables anyway.
+//			    	  isAlreadyProcessed = true;  
+			    	  ;
 			      }else{
-			    	  //An error occurred
+			    	  //An error occurred - should not continue.
 			    	  return false;
 			      }
 			    }
