@@ -59,7 +59,7 @@ public class OutPut {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
 			
-				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, "GrowthRegion");
+				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
 				// Building the institutions within regions.
 				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 					for (String instit: region.institutions){
@@ -254,7 +254,7 @@ public class OutPut {
 		Element configType = doc.createElement(facType.replace(" ", "").toString());
 		config.appendChild(configType);
 		
-		for(int i = 1; i < dataArray.size(); i++){
+		for(int i = 0; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
 				facilityDataElement(doc, configType, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
 			} else {
@@ -296,13 +296,18 @@ public class OutPut {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void facilityDataElement(Document doc, Element rootElement, ArrayList<Object> structArray, ArrayList<Object> dataArray){
+		System.out.println(structArray + " " + dataArray);
 		for (int i = 0; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
 				if (structArray.size() > 2 && !(structArray.get(2) instanceof ArrayList)){ 
 					if (indentCheck((String) structArray.get(2))){
 						Element tempElement = doc.createElement((String) structArray.get(0).toString().replace(" ", ""));
-						facilityDataElement(doc, tempElement, (ArrayList<Object>) structArray.get(1), (ArrayList<Object>) dataArray.get(i));
 						rootElement.appendChild(tempElement);
+						for(int j = 0; j < dataArray.size(); j++){
+							facilityDataElement(doc, tempElement, (ArrayList<Object>) structArray.get(1), (ArrayList<Object>) dataArray.get(j));
+						}
+						break;
+						
 					}
 				} else {
 					facilityDataElement(doc, rootElement, (ArrayList<Object>) structArray.get(i), (ArrayList<Object>) dataArray.get(i));
