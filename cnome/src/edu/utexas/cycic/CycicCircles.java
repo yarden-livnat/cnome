@@ -97,16 +97,16 @@ public class CycicCircles{
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
 		MenuItem facForm = new MenuItem("Facility Form");
-		/*facForm.setOnAction(new EventHandler<ActionEvent>(){
+		facForm.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				ToolFactory factory = new FormBuilderToolFactory();
 				try {
-					Cycic._presenter.addTool(factory.create());
+					factory.create();
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
-		});*/
+		});
 		
 		
 		MenuItem delete = new MenuItem("Delete");
