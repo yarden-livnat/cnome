@@ -24,6 +24,7 @@ public class XMLReader {
 		{
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
+			add(":cycamore:BatchReactor");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
 			add(":agents:KFacility");
@@ -85,7 +86,7 @@ public class XMLReader {
 		jsonReader.close();
 		JsonObject vars = jsonObject.getJsonObject("vars");
 		for(int i = 0; i < xmlschema.size(); i++){
-			//System.out.println(xmlschema.get(i));
+			System.out.println(xmlschema.get(i));
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}
 		//System.out.println(xmlschema);

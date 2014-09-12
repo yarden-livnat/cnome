@@ -151,6 +151,7 @@ public class FormBuilderFunctions {
 	 */
 	static TextField institNameBuilder(final instituteNode node){
 		TextField textName = new TextField();
+		textName.setText(node.name);
 		
 		textName.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -275,7 +276,7 @@ public class FormBuilderFunctions {
 				for (Label label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.getText());
 				}
-				cb.getItems().add("New Commodity");
+				//cb.getItems().add("New Commodity");
 				
 				if ( defaultValue.get(0) != "") {
 					cb.setValue((String) defaultValue.get(0));
@@ -326,7 +327,7 @@ public class FormBuilderFunctions {
 				for (Label label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.getText());
 				}
-				cb.getItems().add("New Commodity");
+				//cb.getItems().add("New Commodity");
 				
 				if (defaultValue.get(0) != "") {
 					cb.setValue((String) defaultValue.get(0));
@@ -404,7 +405,7 @@ public class FormBuilderFunctions {
 				for (Label label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.getText());
 				}
-				cb.getItems().add("New Commodity");
+				//cb.getItems().add("New Commodity");
 			}
 		});
 		return cb;

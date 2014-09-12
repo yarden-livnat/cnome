@@ -38,12 +38,7 @@ public class FormBuilder extends ViewBase {
 		formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 		
 		Button button = new Button();
-		button.setText("Check Array");
-		button.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				System.out.println(formNode.facilityData);
-			}
-		});
+		button.setText(formNode.facilityType);
 		for(int i = 0; i < 11; i++){
 			userLevelBox.getItems().add(String.format("%d", i));
 		}
@@ -247,6 +242,12 @@ public class FormBuilder extends ViewBase {
 							break;
 						case "commodity":
 							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
+							break;
+						case "facTag":
+							//TODO STUFF
+							break;
+						case "commodTag":
+							//TODO Stuff
 							break;
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);

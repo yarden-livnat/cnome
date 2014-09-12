@@ -134,6 +134,7 @@ public class InstitutionView extends ViewBase{
 					}
 					cbType.setOnAction(new EventHandler<Event>(){
 						public void handle(Event event) {
+							tempInstit.type = (String) cbType.getValue();
 							for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 								if (DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) cbType.getValue())){
 									tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
@@ -145,28 +146,30 @@ public class InstitutionView extends ViewBase{
 					dlgGrid.add(cbType, 1, 1);
 					dlg.setContent(dlgGrid);
 					dlg.show();
-					System.out.println("YES");
 					workingInstit = tempInstit;
 					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
 							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
 						}
 					}
-					//workingInstit.institStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.institNodes.get(0);
+					System.out.println(workingInstit.institStruct);
 					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
+					
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
+					DataArrays.institNodes.add(tempInstit);
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
 					Label institutionName = new Label("Name");
 					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
 					grid.add(institutionName, 0, 0);
 					grid.add(nameTextField, 1, 0);
+					typeButton.setText(workingInstit.type);
 				} else {
-					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
 					rowNumber = 1;
 					grid.getChildren().clear();
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
+					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
 					for(String facility: workingInstit.availPrototypes) {
 						facilityList.getItems().add(facility);
 					}
@@ -178,19 +181,13 @@ public class InstitutionView extends ViewBase{
 					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
 					grid.add(institutionName, 0, 0);
 					grid.add(nameTextField, 1, 0);
+					typeButton.setText(workingInstit.type);
 				}
 			}
 		});
-		
-		Button button = new Button();
-		button.setText("Check Array");
-		button.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				System.out.println(workingInstit.institData);
-			}
-		});
+		structureCB.autosize();
 		topGrid.add(structureCB, 0, 0);
-		topGrid.add(button, 2, 0);
+		topGrid.add(typeButton, 3, 0);
 		
 				
 		// ComboBox to add facilities to the prototype ListView
@@ -279,15 +276,18 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-				
+		
 		// Building the grids for the views.
 		topGrid.add(new Label("Available Facilities"), 0, 1);
 		topGrid.add(facilityList, 1, 1);
-		topGrid.add(addNewProtoBox, 0, 2);
-		topGrid.add(addAvailProto, 1, 2);
-		topGrid.add(addNewFacBox, 0, 3);
-		topGrid.add(facilityNumber, 1, 3);
-		topGrid.add(addAvailFac, 2, 3);
+		topGrid.add(new Label("Prototype"), 0, 2);
+		topGrid.add(addNewProtoBox, 1, 2);
+		topGrid.add(addAvailProto, 2, 2);
+		topGrid.add(new Label("Prototype"), 0, 3);
+		topGrid.add(addNewFacBox, 1, 3);
+		topGrid.add(new Label("Amount"), 2, 3);
+		topGrid.add(facilityNumber, 3, 3);
+		topGrid.add(addAvailFac, 4, 3);
 		topGrid.setHgap(10);
 		
 /*		topGrid.add(new Label("Name"), 0, 4);
@@ -326,8 +326,16 @@ public class InstitutionView extends ViewBase{
 	
 	private ComboBox<String> structureCB = new ComboBox<String>();
 	private GridPane grid = new GridPane();
-	private GridPane topGrid = new GridPane();
-	private FacilityCircle formNode = null;
+	private GridPane topGrid = new GridPane(){
+		{
+			autosize();
+		}
+	};
+	private Button typeButton = new Button(){
+		{
+			autosize();
+		}
+	};
 	private int rowNumber = 1;
 	private int columnNumber = 0;
 	private int columnEnd = 0;
@@ -465,6 +473,10 @@ public class InstitutionView extends ViewBase{
  				FormBuilderFunctions.formArrayBuilder(facArray, (ArrayList<Object>) dataArray);
 				grid.getChildren().clear();
 				rowNumber = 1;
+				Label institutionName = new Label("Name");
+				TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+				grid.add(institutionName, 0, 0);
+				grid.add(nameTextField, 1, 0);
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 			}
 		});
@@ -488,6 +500,10 @@ public class InstitutionView extends ViewBase{
 				dataArray.remove(dataArrayNumber);
 				grid.getChildren().clear();
 				rowNumber = 1;
+				Label institutionName = new Label("Name");
+				TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+				grid.add(institutionName, 0, 0);
+				grid.add(nameTextField, 1, 0);
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 			}
 		});

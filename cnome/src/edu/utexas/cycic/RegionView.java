@@ -48,7 +48,7 @@ public class RegionView extends ViewBase{
 		});		
 		// Selection for new or currently built regions.
 		
-		structureCB.valueProperty().addListener(new ChangeListener<String>(){
+		/*structureCB.valueProperty().addListener(new ChangeListener<String>(){
 			@SuppressWarnings("unchecked")
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				if (newValue == null){
@@ -75,10 +75,10 @@ public class RegionView extends ViewBase{
 					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
 				}
 			}
-		});
+		});*/
 		
 		Button button = new Button();
-		button.setText("Check Array");
+		button.setText(workingRegion.type);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				System.out.println(workingRegion.regionData);
@@ -87,7 +87,7 @@ public class RegionView extends ViewBase{
 		topGrid.add(button, 2, 0);
 		
 		// Code section to add new facility to region.
-		final ComboBox<String> addNewFacilityBox = new ComboBox<String>();
+		/*final ComboBox<String> addNewFacilityBox = new ComboBox<String>();
 		addNewFacilityBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacilityBox.getItems().clear();
@@ -105,7 +105,7 @@ public class RegionView extends ViewBase{
 				for (String facility: workingRegion.availFacilities){
 				}
 			}
-		});
+		});*/
 		
 		// Code to add new institution to region.
 		final ComboBox<String> addNewInstitBox = new ComboBox<String>();
@@ -131,8 +131,8 @@ public class RegionView extends ViewBase{
 		});
 		
 		// Setting up the view visuals.
-		topGrid.add(addNewFacilityBox, 0, 2);
-		topGrid.add(addAvailFac, 1, 2);
+		/*topGrid.add(addNewFacilityBox, 0, 2);
+		topGrid.add(addAvailFac, 1, 2);*/
 		topGrid.add(addNewInstitBox, 0, 3);
 		topGrid.add(addInstit, 1, 3);
 		topGrid.setHgap(10);
@@ -169,7 +169,7 @@ public class RegionView extends ViewBase{
 		
 	}
 	
-	private ComboBox<String> structureCB = new ComboBox<String>();
+	//private ComboBox<String> structureCB = new ComboBox<String>();
 	private GridPane grid = new GridPane();
 	private GridPane topGrid = new GridPane();
 	private int rowNumber = 0;
