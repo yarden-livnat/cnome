@@ -67,13 +67,15 @@ import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
+import edu.utexas.cycic.tools.FormBuilderTool;
+import edu.utexas.cycic.tools.FormBuilderToolFactory;
 
 
 public class CyclistController {
 	
 	private final EventBus _eventBus;
 	private MainScreen _screen;
-	private WorkspacePresenter _presenter;
+	public static WorkspacePresenter _presenter;
 	private Model _model = new Model();
 	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cnome/";
 	private String SAVE_FILE = "save.xml";
@@ -347,8 +349,10 @@ public class CyclistController {
 			item.setOnAction(viewAction);
 		}
 		
+
+		
 	}
-	
+		
 	private void quit() {
 		// TODO: check is we need to save  
 		if(_dirtyFlag){

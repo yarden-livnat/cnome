@@ -1,9 +1,12 @@
 package edu.utexas.cycic;
 
+import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
+import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
@@ -97,17 +100,20 @@ public class CycicCircles{
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
 		MenuItem facForm = new MenuItem("Facility Form");
-		facForm.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				ToolFactory factory = new FormBuilderToolFactory();
-				try {
-					factory.create();
-				} catch (Exception e1) {
-					e1.printStackTrace();
+		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				try{
+					CyclistController._presenter.addTool(new FormBuilderTool());
+					menu1.setVisible(false);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
-		});
+		};
+		facForm.setOnAction(circleAction);
 		
+
 		
 		MenuItem delete = new MenuItem("Delete");
 		
@@ -251,13 +257,14 @@ public class CycicCircles{
 					
 				}
 				if (event.getClickCount() >= 2){
-					if(circle.childrenShow == true){
+					CyclistController._presenter.addTool(new FormBuilderTool());
+					/*if(circle.childrenShow == true){
 						circle.childrenShow = false;
 						VisFunctions.marketHide();
 					}else{
 						circle.childrenShow = true;
 						VisFunctions.marketHide();
-					}
+					}*/
 				}
 				if(Cycic.group.getSelectedToggle() == Cycic.toggle){
 					// TODO Figure out how to group facilities.
