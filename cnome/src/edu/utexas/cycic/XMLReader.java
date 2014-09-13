@@ -189,12 +189,16 @@ public class XMLReader {
 	
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
+		System.out.println(array);
 		for (int i = 0; i < nodes.getLength(); i++){
 			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
-				/*if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
-					Dialog dlg = new Dialog(null , "Error");
-					
-				}*/
+				try{
+					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
+
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				newArray = nodeListener(nodes.item(i), newArray);
 				array.add(newArray);
@@ -227,7 +231,6 @@ public class XMLReader {
 					}
 				}
 			}
-			//System.out.println(array);
 		}
 		return array;
 	}
