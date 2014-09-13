@@ -106,7 +106,7 @@ public class FormBuilder extends ViewBase {
 	 */
 	public Button orMoreAddButton(final GridPane grid, final ArrayList<Object> facArray,final ArrayList<Object> dataArray){
 		Button button = new Button();
-		button.setText("Add");
+		button.setText("Add " + facArray.get(0));
 		
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
@@ -163,26 +163,26 @@ public class FormBuilder extends ViewBase {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
+						//grid.add(new Label((String) facArray.get(2)), columnNumber+1, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
 							if ( ii > 0 ) {
-								grid.add(arrayListRemove(grid, dataArray, ii), columnNumber-1, rowNumber);
+								grid.add(arrayListRemove(grid, dataArray, ii), columnNumber+2, rowNumber);
 							}
 							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						
 					}
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
-						rowNumber += 1;
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
@@ -192,6 +192,8 @@ public class FormBuilder extends ViewBase {
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber, rowNumber);
+						rowNumber += 1;
 					}
 				} else if (facArray.get(1) instanceof ArrayList) {
 					if ((int)facArray.get(6) <= userLevel){

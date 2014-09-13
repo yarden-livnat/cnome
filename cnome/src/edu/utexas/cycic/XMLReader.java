@@ -12,6 +12,7 @@ import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.controlsfx.dialog.Dialog;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -24,7 +25,8 @@ public class XMLReader {
 		{
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
-			add(":cycamore:BatchReactor");
+			//add(":cycamore:BatchReactor");
+			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
 			add(":agents:KFacility");
@@ -39,7 +41,7 @@ public class XMLReader {
 	};
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			add(":cycamore:DeployInst");
+			//add(":cycamore:DeployInst");
 			add(":cycamore:ManagerInst");
 		}
 	};
@@ -189,6 +191,10 @@ public class XMLReader {
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++){
 			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
+				/*if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
+					Dialog dlg = new Dialog(null , "Error");
+					
+				}*/
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				newArray = nodeListener(nodes.item(i), newArray);
 				array.add(newArray);
@@ -221,6 +227,7 @@ public class XMLReader {
 					}
 				}
 			}
+			//System.out.println(array);
 		}
 		return array;
 	}

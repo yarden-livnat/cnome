@@ -12,7 +12,7 @@ public class CycicTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.CycicTool";
 	public static final String TOOL_NAME 	= "Cycic";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.QUESTION_CIRCLE;
+	public static final AwesomeIcon ICON 	= AwesomeIcon.EYE;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;

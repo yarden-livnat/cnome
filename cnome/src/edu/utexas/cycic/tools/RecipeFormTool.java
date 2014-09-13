@@ -12,7 +12,7 @@ public class RecipeFormTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.RecipeFormTool";
 	public static final String TOOL_NAME 	= "Recipe Builder";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.QUESTION_CIRCLE;
+	public static final AwesomeIcon ICON 	= AwesomeIcon.EYE;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;

@@ -39,7 +39,7 @@ public class SimulationInfo extends ViewBase{
 		init();
 	}
 	
-	public static final String TITLE = "Simulation Details";
+	public static final String TITLE = "Commodities and Details";
 	HashMap<String, String> months = new HashMap<String, String>();
 	ArrayList<String> monthList = new ArrayList<String>();
 	static Window window;

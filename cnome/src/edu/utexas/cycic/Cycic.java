@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Stream;
 
+import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
+import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
@@ -143,19 +145,12 @@ public class Cycic extends ViewBase{
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
 						}
 					}
-					Dialog dgl = new Dialog(pane, "Facility Name");
-					GridPane dglGrid = new GridPane();
-					TextField txt = new TextField();
-					txt.textProperty().addListener(new ChangeListener<String>(){
-							public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-								facility.name = newValue;
-							}
-					});
-					dgl.getActions().add(Dialog.Actions.OK);
-					dglGrid.add(new Label("Facility Name:"), 0 , 0);
-					dglGrid.add(txt, 1, 0);
-					dgl.setContent(dglGrid);
-					dgl.show();
+					event.consume();
+					String response =  Dialogs.create()
+							.title("Name Facility")
+							.message("Enter Facility Name")
+							.showTextInput();
+					facility.name = response;
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
@@ -163,7 +158,7 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
 					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
 					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);
-					event.consume();
+					
 				}
 			}
 		});
