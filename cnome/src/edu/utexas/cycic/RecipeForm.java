@@ -158,7 +158,7 @@ public class RecipeForm extends ViewBase{
 		
 		isotopeNumber.setMinSize(40, 20);
 		isotopeNumber.setMaxSize(100, 20);
-		isotopeNumber.setText("ZZAAA");
+		isotopeNumber.setPromptText("Isotope");
 		
 		//Recording Isotope Name
 		isotopeNumber.textProperty().addListener(new ChangeListener<String>(){

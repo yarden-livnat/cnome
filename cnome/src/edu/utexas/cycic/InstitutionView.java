@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import org.controlsfx.dialog.Dialog;
 
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
+import edu.utah.sci.cyclist.core.event.ui.CyclistEvent;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,9 +41,8 @@ public class InstitutionView extends ViewBase{
 	 */
 	public InstitutionView(){
 		super();
-		setPrefSize(500,500);
 		
-		// Ensures the temperary institution is initiated only once. 
+		// Ensures the temporary institution is initiated only once. 
 		if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
 			String string;
 			for(int i = 0; i < XMLReader.institutionList.size(); i++){
@@ -94,7 +95,7 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-		
+		structureCB.setPromptText("Select Institution");
 		// Building the list of objects to be put in to the ComboBox.
 		// Inputs all built institutions and adds a field for adding a new one. 
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
@@ -152,18 +153,19 @@ public class InstitutionView extends ViewBase{
 							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
 						}
 					}
-					System.out.println(workingInstit.institStruct);
+					//System.out.println(workingInstit.institStruct);
 					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
-					
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
 					DataArrays.institNodes.add(tempInstit);
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
 					Label institutionName = new Label("Name");
 					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+					CyclistNotification notification = new CyclistNotification("newInstitution");
+					
 					grid.add(institutionName, 0, 0);
 					grid.add(nameTextField, 1, 0);
-					typeButton.setText(workingInstit.type);
+					typeLabel.setText(workingInstit.type);
 				} else {
 					rowNumber = 1;
 					grid.getChildren().clear();
@@ -181,17 +183,19 @@ public class InstitutionView extends ViewBase{
 					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
 					grid.add(institutionName, 0, 0);
 					grid.add(nameTextField, 1, 0);
-					typeButton.setText(workingInstit.type);
+					typeLabel.setText(workingInstit.type);
 				}
 			}
 		});
 		structureCB.autosize();
-		topGrid.add(structureCB, 0, 0);
-		topGrid.add(typeButton, 3, 0);
+		topGrid.add(new Label("Choose Institution"), 0, 0);
+		topGrid.add(structureCB, 1, 0);
+		topGrid.add(typeLabel, 3, 0);
 		
 				
 		// ComboBox to add facilities to the prototype ListView
 		final ComboBox<String> addNewProtoBox = new ComboBox<String>();
+		addNewProtoBox.setPromptText("Select Facility Type");
 		addNewProtoBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewProtoBox.getItems().clear();
@@ -203,7 +207,7 @@ public class InstitutionView extends ViewBase{
 		
 		// Button to sumbit selected object in addNewPrototypeBox to Prototype ListView and Institution prototype array. 
 		Button addAvailProto = new Button();
-		addAvailProto.setText("Add Prototype");
+		addAvailProto.setText("Add Facility Type");
 		addAvailProto.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				prototypeList.getItems().clear();
@@ -216,6 +220,7 @@ public class InstitutionView extends ViewBase{
 		
 		//ComboBox for adding a new facility to the initial facility array of the institution.
 		final ComboBox<String> addNewFacBox = new ComboBox<String>();
+		addNewFacBox.setPromptText("Select Facility Type");
 		addNewFacBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacBox.getItems().clear();
@@ -240,18 +245,12 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		};
-		
+		facilityNumber.setPromptText("Integer");
 		// Change Listener to update facilityItem with number of facilities to add at simulation start up
-		facilityNumber.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				for(facilityItem facility: workingInstit.availFacilities){
-					if (facility.name == addNewFacBox.getValue()) {
-						facility.number = newValue;
-					}
-				}
-			}
-		});
-		// ComboBox change listener to add new facility to the instutitions initial facility list.
+		
+		// TODO Auto update list from TextField
+		
+		// ComboBox change listener to add new facility to the institutions initial facility list.
 		addNewFacBox.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				for(facilityItem facility: workingInstit.availFacilities){
@@ -261,7 +260,7 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-		// Button to sumbit selection in addNewFacBox ComboBox.
+		// Button to submit selection in addNewFacBox ComboBox.
 		Button addAvailFac = new Button();
 		addAvailFac.setText("Add Starting Facility");
 		addAvailFac.setOnAction(new EventHandler<ActionEvent>(){
@@ -278,20 +277,16 @@ public class InstitutionView extends ViewBase{
 		});
 		
 		// Building the grids for the views.
-		topGrid.add(new Label("Available Facilities"), 0, 1);
-		topGrid.add(facilityList, 1, 1);
-		topGrid.add(new Label("Prototype"), 0, 2);
-		topGrid.add(addNewProtoBox, 1, 2);
-		topGrid.add(addAvailProto, 2, 2);
-		topGrid.add(new Label("Prototype"), 0, 3);
-		topGrid.add(addNewFacBox, 1, 3);
-		topGrid.add(new Label("Amount"), 2, 3);
-		topGrid.add(facilityNumber, 3, 3);
-		topGrid.add(addAvailFac, 4, 3);
+		topGrid.add(new Label("Add Available Facility Type"), 0, 1);
+		topGrid.add(addNewProtoBox, 1, 1);
+		topGrid.add(addAvailProto, 2, 1);
+		topGrid.add(new Label("Add Starting Facility"), 0, 2);
+		topGrid.add(addNewFacBox, 1, 2);
+		topGrid.add(new Label("Number: "), 2, 2);
+		topGrid.add(facilityNumber, 3, 2);
+		topGrid.add(addAvailFac, 4, 2);
 		topGrid.setHgap(10);
-		
-/*		topGrid.add(new Label("Name"), 0, 4);
-		topGrid.add(FormBuilderFunctions.institNameBuilder(workingInstit), 1, 4);*/
+		topGrid.setVgap(5);
 		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);
@@ -313,14 +308,13 @@ public class InstitutionView extends ViewBase{
 		
 		
 		VBox institGridBox = new VBox();
+		institGridBox.autosize();
 		institGridBox.getChildren().addAll(topGrid, grid);		
 		
 		HBox institBox = new HBox();
 		institBox.getChildren().addAll(institSideBar, institGridBox);
 		
 		setContent(institBox);
-		setPrefSize(600,400);
-		
 
 	}
 	
@@ -331,7 +325,7 @@ public class InstitutionView extends ViewBase{
 			autosize();
 		}
 	};
-	private Button typeButton = new Button(){
+	private Label typeLabel = new Label(){
 		{
 			autosize();
 		}

@@ -134,12 +134,12 @@ public class RegionCorralView extends ViewBase {
 
 		/* Create content of RegionCorral footer */
 
-		Label unassociatedFacilityTitle = new Label("Unassociated Facilities:"){
+		Label unassociatedInstitutions = new Label("Unassociated Institutions:"){
 			{
 				setFont(new Font(12));
 			}
 		};
-		regionCorralGrid.add(unassociatedFacilityTitle, 4, 1);
+		regionCorralGrid.add(unassociatedInstitutions, 4, 1);
 		
 		HBox unassociatedFacilityList = new HBox(10);
 
@@ -151,6 +151,7 @@ public class RegionCorralView extends ViewBase {
 		};
 		root2.setContent(unassociatedFacilityList);
 		regionCorralGrid.add(root2, 5, 1);
+		regionCorralGrid.autosize();
 
 		/* Place RegionCorralView header, corralPane, and footer on main corralVBox */
 
