@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -54,6 +55,7 @@ import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.components.DatasourceSelector;
+import edu.utah.sci.cyclist.core.ui.components.UpdateDbDialog;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
@@ -78,6 +80,7 @@ public class DatatableWizard extends TilePane {
 	private ObjectProperty<Table> _selection =  new SimpleObjectProperty<>();
 	private DatasourceSelector    _selector;
 	private String               _workDir = WorkDirectoryController.SAVE_DIR;
+	private UpdateDbDialog		 _updateDialog;
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -174,10 +177,26 @@ public class DatatableWizard extends TilePane {
 	    connectBox.setAlignment(Pos.CENTER_LEFT);
 	    
 	    selectionButton = new Button("Connect");
+	    
+	    Runnable updateDbTask = new Runnable() {
+			@Override
+			public void run() {
+				Platform.runLater(new Runnable(){
+					@Override
+					public void run(){
+						selectConnection(_current);
+					}
+				});
+			}
+		};
+	    
 	    selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
-				selectConnection(_current);
+				setDbUpdateWait(true,_current);
+				Thread update = new Thread(updateDbTask);
+				update.setDaemon(true);
+				update.start();
 			};
 				
 	    });
@@ -302,7 +321,8 @@ public class DatatableWizard extends TilePane {
 		*/	
 		_sourcesView.getSelectionModel().selectFirst();
 		//_sourcesView.getSelectionModel().clearAndSelect(0);
-	
+		
+		_updateDialog = new UpdateDbDialog();
 		
 		// Return the scene
 		return scene;
@@ -328,8 +348,10 @@ public class DatatableWizard extends TilePane {
 		
 		Boolean dsIsValid = true;
 		_tablesView.getItems().clear();
-		if(ds.isSQLite()){
+		
+		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
 			dsIsValid = SimulationTablesPostProcessor.process(ds);
+			setDbUpdateWait(false, ds);
 		}
 		
 		//If database has to be updated but the update process has failed.
@@ -365,6 +387,16 @@ public class DatatableWizard extends TilePane {
 		table.setLocalDatafile(_workDir);
 		table.setProperty(Table.REMOTE_TABLE_NAME, name);
 		//table.extractSchema();
+	}
+	
+	private void setDbUpdateWait(Boolean isRunning, CyclistDatasource ds){
+		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
+			if(isRunning){
+				_updateDialog.show(_dialog.getScene().getWindow());
+			}else{
+				_updateDialog.hide();
+			}
+		}
 	}
 
 	public CyclistDatasource getSelectedSource() {

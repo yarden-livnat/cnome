@@ -31,6 +31,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -65,6 +66,7 @@ import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
+import edu.utah.sci.cyclist.core.ui.components.UpdateDbDialog;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
@@ -84,7 +86,8 @@ public class SimulationWizard extends TilePane {
 	private TableView<SimInfo>		    _simulationsTbl;
 	private ObservableList<SimInfo> 	_simData =FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
-	
+	private UpdateDbDialog				_updateDialog;
+	   
 	// DataType elements
 	private CyclistDatasource     _current;
 	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
@@ -192,11 +195,29 @@ public class SimulationWizard extends TilePane {
 		buttonsVbox.getChildren().addAll(addButton,editButton,removeButton);
 		
 		Button selectionButton = new Button("Connect");
+		
+		
+		Runnable updateDbTask = new Runnable() {
+			@Override
+			public void run() {
+				Platform.runLater(new Runnable(){
+					@Override
+					public void run(){
+						selectConnection(_current);
+					}
+				});
+			}
+		};
+		
+		
 		selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
-				selectConnection(_current);
-			};
+				setDbUpdateWait(true,_current);
+				Thread update = new Thread(updateDbTask);
+				update.setDaemon(true);
+				update.start();
+			}			
 		});
 //		_statusDisplay = new ImageView();
 		conHBox.getChildren().addAll(selectionButton, _status/*_statusDisplay*/);
@@ -330,6 +351,8 @@ public class SimulationWizard extends TilePane {
 	
 		_sourcesView.getSelectionModel().selectFirst();
 		
+		_updateDialog = new UpdateDbDialog();
+		
 		// Return the scene
 		return scene;
 	}
@@ -345,7 +368,7 @@ public class SimulationWizard extends TilePane {
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
 				if (!_sourcesView.getItems().contains(newVal))
 					_sourcesView.getItems().add(newVal);
-				_sourcesView.getSelectionModel().select(newVal);
+					_sourcesView.getSelectionModel().select(newVal);
 			}
 		});
 	}
@@ -355,8 +378,9 @@ public class SimulationWizard extends TilePane {
 		_simData.clear();
 		Boolean dsIsValid = true;
 		
-		if(ds.isSQLite()){
+		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
 			dsIsValid = SimulationTablesPostProcessor.process(ds);
+			setDbUpdateWait(false, ds);
 		}
 		
 		if(!dsIsValid){
@@ -397,6 +421,17 @@ public class SimulationWizard extends TilePane {
 			}
 		}
 	}
+	
+	private void setDbUpdateWait(Boolean isRunning, CyclistDatasource ds){
+		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
+			if(isRunning){
+				_updateDialog.show(_dialog.getScene().getWindow());
+			}else{
+				_updateDialog.hide();
+			}
+		}
+	}
+	
 	/*
 	 * Checks if the simID field type is BLOB.
 	 * @param - Connection conn: the connection to the database.

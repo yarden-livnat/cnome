@@ -33,6 +33,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
@@ -91,10 +93,11 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 		if (path == null) path = "";
 
 		 _path = new TextField(path);
-		 _path.setPrefWidth(125);
+		 _path.setPrefWidth(250);
 		 
 		 
 		 Button button = new Button("...");
+		 button.setFont(new Font(15));
 		 button.getStyleClass().add("flat-button");
 		 button.setOnAction(new EventHandler<ActionEvent>() {
 				 @Override
@@ -108,10 +111,12 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 		 });
 		 
 		 HBox textBox = new HBox();
+		 textBox.setSpacing(5);
 		 textBox.getChildren().addAll(_path, button);
-		 
 		 
 		add(new Text("File:"), 0, 0);
 		add(textBox, 1, 0);
+		textBox.prefWidthProperty().bind(this.widthProperty());
+		HBox.setHgrow(_path, Priority.ALWAYS);
 	}
 }

@@ -222,7 +222,11 @@ public class SimulationsPanel extends TitledPanel  {
 				Entry entry = createEntry(simulation);
 				_entries.add(entry);
 				_vbox.getChildren().add(entry.title);
-				
+			}
+			//If this is the first and only simulation in the panel - make it also the selected simulation.
+			if(_entries.size() == 1){
+				_simulationProperty.set(_items.get(0));
+				select(_entries.get(0));
 			}
 		}else{
 			//If the list has been reset - clean the last selection as well.
