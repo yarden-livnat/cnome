@@ -33,7 +33,7 @@ public class SimulationTablesPostProcessor {
 	
 	//Must create the Facilities table in 2 steps, 
 	//otherwise, if it just copies a BLOB column from another table, without explicitly creating it as a BLOB, the column is created without any type at all.
-	private static final String FACILITIES_TABLE_CREATE = "create table Facilities (SimID BLOB,"+
+	private static final String FACILITIES_TABLE_CREATE = "create table if not exist Facilities (SimID BLOB,"+
 																					"AgentId INTEGER,"+
 																					"Spec TEXT,"+
 																					"Prototype TEXT,"+
@@ -46,16 +46,14 @@ public class SimulationTablesPostProcessor {
 														  "select f.SimId, f.AgentId, f.Spec, f.Prototype, i.AgentId, " +
 														  "cast(-1 as INTEGER), f.EnterTime, f.ExitTime, f.Lifetime from Agents as f, Agents as i " +
 														  "where f.Kind = 'Facility' and i.Kind = 'Inst' and f.ParentId = i.AgentId;";
-//	private static final String FACILITIES_TABLE_CREATE = "create table Facilities as " +
-//			  "select cast(f.SimId as BLOB) as SimID, f.AgentId as AgentId, f.Spec, f.Prototype, i.AgentId as InstitutionId, cast(-1 as INTEGER) as RegionId, " +
-//			  "f.EnterTime, f.ExitTime, f.Lifetime from Agents as f, Agents as i where f.Kind = 'Facility' and i.Kind = 'Inst' and f.ParentId = i.AgentId;";
-	private static final String FACILITIES_TABLE_INDEX = "create index Facilities_idx on Facilities (SimId ASC, AgentId ASC);";
-	private static final String UPDATED_INDICATION_TABLE_CREATE = "create table UpdatedIndication (flag INTEGER DEFAULT 1)";
+
+	private static final String FACILITIES_TABLE_INDEX = "create index if not exists Facilities_idx on Facilities (SimId ASC, AgentId ASC);";
+	private static final String UPDATED_INDICATION_TABLE_CREATE = "create table if not exists UpdatedIndication (flag INTEGER DEFAULT 1)";
 	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
-	private static final String QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE = "DROP table if exist TimeQuantitySingle; "
-								   + "CREATE table TimeQuantitySingle as "
-								   + "SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
+	private static final String QUANTITY_INVENTORY_BASE_CREATE = 
+								   	"CREATE table if not exists QuantityInventoryBase as "
+								   + "SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.AgentID as AgentID, "
 								   + "  	cast(SUM(inv.Quantity*cmp.MassFrac) as REAL) AS Quantity "
 								   + " FROM "
 								   + "		Timelist AS tl "
@@ -64,11 +62,20 @@ public class SimulationTablesPostProcessor {
 								   + "		INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId "
 								   + "	WHERE "
 								   + "		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId "
-								   + "	GROUP BY inv.SimId, tl.Time, cmp.NucId, ag.Prototype;";
+								   + "	GROUP BY inv.SimId, tl.Time, cmp.NucId, ag.AgentID;";
 	
-	private static final String QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE = "drop table if exist TimeQuantityAll; "
-								+ "CREATE table TimeQuantityAll as "
-								+ "SELECT res.SimId as SimId, tr.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
+	private static final String QUANTITY_INVENTORY_VIEW_CREATE = 
+								  "CREATE view if not exists  QuantityInventory as "
+								+ " SELECT base.SimID as SimID, Time, Quantity, NucId, base.AgentId as AgentId, Kind, Spec, Prototype"
+								+ " FROM"
+								+ "  	QuantityInventoryBase as base, Agents ag "
+								+ " WHERE "
+								+ "		base.SimID = ag.SimID "
+								+ " AND base.AgentId = ag.AgentId";
+	
+	private static final String QUANTITY_TRANSACTED_BASE_CREATE = 
+								  "CREATE table if not exists QuantityTransactedBase as "
+								+ "SELECT res.SimId as SimId, tr.Time AS Time,cmp.NucId AS NucId, ag.AgentID as AgentID, "
 								+ "		cast(SUM(cmp.MassFrac * res.Quantity) AS REAL) AS Quantity "
 								+ "	FROM "
 								+ "		Resources AS res "
@@ -77,8 +84,17 @@ public class SimulationTablesPostProcessor {
 								+ "		INNER JOIN Compositions AS cmp ON cmp.QualId = res.QualId "
 								+ "	WHERE "
 								+ "		tr.SimId = res.SimId AND ag.SimId = tr.SimId and cmp.SimId=res.SimId "
-							    + "	GROUP BY res.SimId, cmp.NucId, tr.Time, ag.Prototype"
+							    + "	GROUP BY res.SimId, cmp.NucId, tr.Time, ag.AgentID"
 								+ "	ORDER BY tr.Time ASC;";
+	
+	private static final String QUANTITY_TRANSACTED_VIEW_CREATE = 
+			  "CREATE view if not exists QuantityTransacted as "
+			+ " SELECT base.SimID as SimID, Time, Quantity, NucId, base.AgentId as AgentId, Kind, Spec, Prototype"
+			+ " FROM"
+			+ "  	QuantityTransactedBase as base, Agents ag "
+			+ " WHERE "
+			+ "		base.SimID = ag.SimID "
+			+ " AND base.AgentId = ag.AgentId";
 	
 	private static String[] UpdateTablesRunningOrderTbl = 
 	{
@@ -87,8 +103,10 @@ public class SimulationTablesPostProcessor {
 	    FACILITIES_TABLE_CREATE,
 	    FACILITIES_TABLE_UPDATE,
 	    FACILITIES_TABLE_INDEX,
-	    QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE,
-	    QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE,
+	    QUANTITY_INVENTORY_BASE_CREATE,
+	    QUANTITY_INVENTORY_VIEW_CREATE,
+	    QUANTITY_TRANSACTED_BASE_CREATE,
+	    QUANTITY_TRANSACTED_VIEW_CREATE,
 	    UPDATED_INDICATION_TABLE_CREATE,
 	};
 	

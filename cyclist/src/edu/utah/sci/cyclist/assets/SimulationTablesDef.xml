@@ -269,33 +269,57 @@
 			</field>
 		</Schema>
 	</Table>
-	<Table name="TimeQuantitySingle">
+	<Table name="QuantityInventory">
 		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
 			<field name="Time">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="NucID" >
+			<field name="AgentID" semantic="AgentID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Kind">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Spec">
+				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
+			<field name="NucID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>			
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
-	<Table name="TimeQuantityAll">
+	<Table name="QuantityTransacted">
 		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
 			<field name="Time">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="NucID" >
+			<field name="AgentID" semantic="AgentID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Kind">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Spec">
+				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
+			<field name="NucID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>			
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>

@@ -42,27 +42,14 @@ public class DataType {
 	private FilterType _filterType;
 	
 	public DataType(Type type) {
+		this(type, null);
+	}
+	
+	public DataType(Type type, Role role) {
+		if (role == null)
+			role = defaultRole(type);
 		_type = type;
-		switch (type) {
-		case NUMERIC:
-			_role = Role.MEASURE;
-			_interp = Interpretation.CONTINUOUS;
-			break;
-		case TEXT:
-			_role = Role.DIMENSION;
-			_interp = Interpretation.DISCRETE;
-		case DATE:
-		case DATETIME:
-		case INT_TIME:
-			_role = Role.DIMENSION;
-			_interp = Interpretation.DISCRETE;
-		case BOOLEAN:
-		case NA:
-			break;
-		}
-		
-		setDefaultFilterType();
-		
+		setRole(role);
 		update();
 	}
 	
@@ -82,6 +69,29 @@ public class DataType {
 		_filterType = copy._filterType;
 	}
 	
+	private Role defaultRole(Type type) {
+		Role role = Role.DIMENSION; // TODO: this may not be the correct default
+		switch (type) {
+		case NUMERIC:
+			role = Role.MEASURE;
+			break;
+		case TEXT:
+			role = Role.DIMENSION;
+			break;
+		case DATE:
+		case DATETIME:
+		case INT_TIME:
+			role = Role.DIMENSION;
+			break;
+		case BOOLEAN:
+		case NA:
+			break;
+		}
+		
+		return role;
+	}
+	
+
 	/**
 	 * read-only
 	 * @return
@@ -120,7 +130,6 @@ public class DataType {
 				_interp = Interpretation.CONTINUOUS;
 		}
 		setDefaultFilterType();
-
 		update();
 	}
 	

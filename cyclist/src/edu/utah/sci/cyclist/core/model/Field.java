@@ -288,11 +288,8 @@ public class Field {
 			IMemento dataTypeMemento = memento.getChild("datatype");
 			
 			DataType.Type type = DataType.Type.valueOf(dataTypeMemento.getString("type"));
-			_dataType = new DataType(type);
 			DataType.Role role = dataTypeMemento.getString("role")!= "" ? DataType.Role.valueOf(dataTypeMemento.getString("role")):null;
-			if(role != null){
-				_dataType.setRole(role);
-			}
+			_dataType = new DataType(type, role);
 			if (_dataType.getRole() == Role.MEASURE){
 				set(FieldProperties.AGGREGATION_DEFAULT_FUNC, SQL.DEFAULT_FUNCTION);
 			}
