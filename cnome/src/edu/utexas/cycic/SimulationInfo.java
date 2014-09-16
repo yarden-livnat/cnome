@@ -17,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
@@ -85,6 +86,9 @@ public class SimulationInfo extends ViewBase{
 	static VBox simDetailBox = new VBox(){
 		{
 			getChildren().add(simInfo);
+			setStyle("-fx-border-style: solid;"
+	                + "-fx-border-width: 1;"
+	                + "-fx-border-color: black");
 		}
 	};
 	
@@ -95,7 +99,12 @@ public class SimulationInfo extends ViewBase{
 		{
 			getChildren().add(new HBox(){
 				{
-					getChildren().add(new Label("Simulation Commodities"));
+					getChildren().add(new Label(){
+						{
+							setText("Simulation Commodities");
+							setFont(new Font("Times", 16));
+						}
+					});
 					getChildren().add(addNewCommod);
 					setSpacing(5);
 				}
@@ -103,13 +112,16 @@ public class SimulationInfo extends ViewBase{
 			getChildren().add(commodGrid);
 			setPadding(new Insets(10, 10, 10, 10));
 			setSpacing(5);
+			setStyle("-fx-border-style: solid;"
+	                + "-fx-border-width: 1;"
+	                + "-fx-border-color: black");
 		}
 	};
 
 	/**
 	 * 
 	 */
-	static VBox simControlBox = new VBox(){
+	static HBox simControlBox = new HBox(){
 		{
 			setStyle("-fx-font-size: 12;");
 			getChildren().addAll(simDetailBox, commodBox);

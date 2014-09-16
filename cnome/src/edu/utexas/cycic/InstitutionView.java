@@ -141,7 +141,7 @@ public class InstitutionView extends ViewBase{
 								if (DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) cbType.getValue())){
 									tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
 								}
-							}								
+							}			
 						}
 					});
 					dlgGrid.add(new Label("Type"), 0, 1);

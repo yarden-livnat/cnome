@@ -2,8 +2,10 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.tools.Tool;
+import edu.utexas.cycic.tools.FormBuilderTool;
 import edu.utexas.cycic.tools.RegionViewTool;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -91,6 +93,11 @@ public class RegionShape extends Rectangle {
 		//Adding the circle's menu and its functions.
 
 		MenuItem regionForm = new MenuItem("Region Form");
+		regionForm.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent event){
+				CyclistController._presenter.addTool(new RegionViewTool());
+			}
+		});
 
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
@@ -125,6 +132,9 @@ public class RegionShape extends Rectangle {
 					circle.menuBar.setLayoutY(circle.getY());
 				}
 				
+				if(menuEvent.getClickCount() == 2){
+					CyclistController._presenter.addTool(new RegionViewTool());
+				}
 				for(int i = 0; i < RegionCorralView.corralPane.getChildren().size(); i++){
 					if(RegionCorralView.corralPane.getChildren().get(i).getId() == "this"){
 						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStroke(Color.BLACK);

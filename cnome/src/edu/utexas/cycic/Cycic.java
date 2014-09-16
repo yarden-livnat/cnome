@@ -235,6 +235,7 @@ public class Cycic extends ViewBase{
 		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
 			FacilityCircle circle = new FacilityCircle();
 			circle.setRadius(40);
+			circle.setStroke(Color.BLACK);
 			circle.setFill(Color.web("#CF5300"));
 			circle.setCenterX(45+(i*90));
 			circle.setCenterY(50);

@@ -18,10 +18,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
@@ -31,26 +33,20 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utexas.cycic.tools.RegionViewTool;
 
 public class RegionCorralView extends ViewBase {
 
-	{
-		setMinHeight(530);
-		setMaxHeight(530);
-		setMinWidth(630);
-		setMaxWidth(630);
-	}
-
 	static regionNode workingRegion = null; 
 
 	static Pane corralPane = new Pane(){
 		{
-			setMinHeight(375);
-			setMaxHeight(375);
-			setMinWidth(630);
-			setMaxWidth(630);
+			setPrefHeight(375);
+			//setMaxHeight(375);
+			setPrefWidth(630);
+			//setMaxWidth(630);
 		}
 	};
 
@@ -93,9 +89,8 @@ public class RegionCorralView extends ViewBase {
 				}
 			}
 		}
-
-		/* Create content for RegionCorralView header */
-
+		
+		// Create content for RegionCorralView header 
 		final Label regionLabel = new Label("Region Name:");
 		regionLabel.setFont(new Font(12));
 		regionCorralGrid.add(regionLabel, 0, 0);
@@ -115,28 +110,41 @@ public class RegionCorralView extends ViewBase {
 		regionCorralGrid.add(corralButton, 3, 0);
 
 		final Label regionPrototypeLabel = new Label("Region Prototypes:");
-		regionCorralGrid.add(regionPrototypeLabel, 4, 0);
+		regionCorralGrid.add(regionPrototypeLabel, 0, 1);
 
-		ScrollPane root = new ScrollPane(){
-			{
-				setMinHeight(50);
-				setMaxHeight(50);
-			}
-		};
-		HBox hroot = new HBox(){
-			{
-				setLayoutY(50);
-				setSpacing(10);
-			}
-		};
-		
-		
-	
-		hroot.setLayoutX(corralPane.getMaxWidth()-regionLabel.getLayoutX()-regionText.getLayoutX()-typeOptions.getLayoutX()-corralButton.getLayoutX()-regionPrototypeLabel.getLayoutX());
-		root.setContent(hroot);
-		regionCorralGrid.add(root, 5, 0);
+		ScrollPane scroll = new ScrollPane();
+		scroll.autosize();
+		Pane nodesPane = new Pane();
+		nodesPane.autosize();
+		for(int i = 0; i < DataArrays.simRegions.size(); i++){
+			RegionRectangle region = new RegionRectangle();
+			region.setFill(Color.web("#CF5300"));
+			region.setX(10 + (i*75));
+			region.setY(5);
+			region.setWidth(80);
+			region.setHeight(80);
+			region.setStroke(Color.BLACK);
+			region.text.setText(DataArrays.simRegions.get(i).regionName);
+			region.text.setWrapText(true);
+			region.text.setMaxWidth(region.getWidth()*0.8);
+			region.text.setLayoutX(region.getX()+region.getWidth()*0.1);
+			region.text.setLayoutY(region.getY()+region.getHeight()*0.1);	
+			region.text.setTextAlignment(TextAlignment.CENTER);
+			region.text.setMouseTransparent(true);
+			region.setOnDragDetected(new EventHandler<MouseEvent>(){
+				public void handle(MouseEvent e){
+					Dragboard db = region.startDragAndDrop(TransferMode.COPY);
+					ClipboardContent content = new ClipboardContent();				
+					content.put(DnD.VALUE_FORMAT, region.text.getText());
+					db.setContent(content);
+					e.consume();
+				}
+			});
+			nodesPane.getChildren().addAll(region,region.text);
+		}
+		scroll.setContent(nodesPane);
 
-		/* Create content of RegionCorral footer */
+		/* Create content of RegionCorral footer 
 
 		Label unassociatedInstitutions = new Label("Unassociated Institutions:"){
 			{
@@ -146,7 +154,7 @@ public class RegionCorralView extends ViewBase {
 		regionCorralGrid.add(unassociatedInstitutions, 4, 1);
 		
 	
-		HBox unassociatedFacilityList = new HBox(10);
+		HBox unassociatedInstitList = new HBox(10);
 
 		ScrollPane root2 = new ScrollPane(){
 			{
@@ -154,14 +162,14 @@ public class RegionCorralView extends ViewBase {
 				setMaxHeight(50);
 			}
 		};
-		root2.setContent(unassociatedFacilityList);
-		regionCorralGrid.add(root2, 5, 1);
+		root2.setContent(unassociatedInstitList);
+		regionCorralGrid.add(root2, 5, 1);*/
 		regionCorralGrid.autosize();
 
 		/* Place RegionCorralView header, corralPane, and footer on main corralVBox */
 
 		VBox mainCorralVBox = new VBox(15);
-		mainCorralVBox.getChildren().addAll(regionCorralGrid, corralPane);
+		mainCorralVBox.getChildren().addAll(regionCorralGrid, scroll, corralPane);
 		setContent(mainCorralVBox);
 
 		EventHandler addRegion = new EventHandler<MouseEvent>(){

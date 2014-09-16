@@ -258,13 +258,6 @@ public class CycicCircles{
 				}
 				if (event.getClickCount() >= 2){
 					CyclistController._presenter.addTool(new FormBuilderTool());
-					/*if(circle.childrenShow == true){
-						circle.childrenShow = false;
-						VisFunctions.marketHide();
-					}else{
-						circle.childrenShow = true;
-						VisFunctions.marketHide();
-					}*/
 				}
 				if(Cycic.group.getSelectedToggle() == Cycic.toggle){
 					// TODO Figure out how to group facilities.
