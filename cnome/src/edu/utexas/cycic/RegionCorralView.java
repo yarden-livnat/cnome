@@ -60,7 +60,11 @@ public class RegionCorralView extends ViewBase {
 			setVgap(5);
 		}
 	};
-
+	static HBox unassociatedFacilityList = new HBox(10);
+	
+	public static void addUnassInstit(){
+		unassociatedFacilityList.getChildren().add(new Circle());
+	}
 	public RegionCorralView() {
 		
 		if (CycicScenarios.workingCycicScenario.simRegions.size() < 1) {
@@ -141,6 +145,7 @@ public class RegionCorralView extends ViewBase {
 		};
 		regionCorralGrid.add(unassociatedInstitutions, 4, 1);
 		
+	
 		HBox unassociatedFacilityList = new HBox(10);
 
 		ScrollPane root2 = new ScrollPane(){

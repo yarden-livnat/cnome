@@ -10,6 +10,7 @@ import org.controlsfx.dialog.Dialog;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.event.ui.CyclistEvent;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -160,9 +161,7 @@ public class InstitutionView extends ViewBase{
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
 					Label institutionName = new Label("Name");
-					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
-					CyclistNotification notification = new CyclistNotification("newInstitution");
-					
+					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);				
 					grid.add(institutionName, 0, 0);
 					grid.add(nameTextField, 1, 0);
 					typeLabel.setText(workingInstit.type);
