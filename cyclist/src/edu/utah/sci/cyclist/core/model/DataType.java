@@ -54,7 +54,7 @@ public class DataType {
 		case DATE:
 		case DATETIME:
 		case INT_TIME:
-			_role = Role.INT_TIME;
+			_role = Role.DIMENSION;
 			_interp = Interpretation.DISCRETE;
 		case BOOLEAN:
 		case NA:
@@ -119,6 +119,8 @@ public class DataType {
 			else
 				_interp = Interpretation.CONTINUOUS;
 		}
+		setDefaultFilterType();
+
 		update();
 	}
 	

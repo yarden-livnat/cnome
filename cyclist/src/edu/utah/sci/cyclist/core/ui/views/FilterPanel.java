@@ -418,7 +418,7 @@ public class FilterPanel extends TitledPanel {
 	
 	private static String getTitle(Filter filter) {
 		String title = null;
-		if (filter.getRole() == Role.DIMENSION) {
+		if (filter.getRole() == Role.DIMENSION || filter.getRole() == Role.INT_TIME) {
 			title = filter.getName();
 		} else {
 			String funcName = filter.getField().get(FieldProperties.AGGREGATION_FUNC, String.class);
@@ -427,7 +427,10 @@ public class FilterPanel extends TitledPanel {
 				filter.getField().set(FieldProperties.AGGREGATION_FUNC, funcName);
 			}
 			SQL.Function func = SQL.getFunction(funcName);
-			title = func.getLabel(filter.getName());
+			if (func == null) 
+				title = filter.getName();
+			else
+				title = func.getLabel(filter.getName());
 		}
 		
 		return title;

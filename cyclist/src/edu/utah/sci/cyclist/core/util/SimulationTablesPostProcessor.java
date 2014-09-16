@@ -53,30 +53,32 @@ public class SimulationTablesPostProcessor {
 	private static final String UPDATED_INDICATION_TABLE_CREATE = "create table UpdatedIndication (flag INTEGER DEFAULT 1)";
 	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
-	private static final String QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE = "create table TimeQuantitySingle as "
-								   + "SELECT tl.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
-								   + "cast(SUM(inv.Quantity*cmp.MassFrac) as REAL) AS Quantity "
-								   + "FROM "
-								   + "Timelist AS tl "
-								   + "INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
-								   + "INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
-								   + "INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId "
-								   + "WHERE "
-								   + "inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId "
-								   + "GROUP BY tl.Time,cmp.NucId,ag.Prototype;";
+	private static final String QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE = "DROP table if exist TimeQuantitySingle; "
+								   + "CREATE table TimeQuantitySingle as "
+								   + "SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
+								   + "  	cast(SUM(inv.Quantity*cmp.MassFrac) as REAL) AS Quantity "
+								   + " FROM "
+								   + "		Timelist AS tl "
+								   + "		INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
+								   + "		INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
+								   + "		INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId "
+								   + "	WHERE "
+								   + "		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId "
+								   + "	GROUP BY inv.SimId, tl.Time, cmp.NucId, ag.Prototype;";
 	
-	private static final String QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE = "create table TimeQuantityAll as "
-								+ "SELECT tr.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
-								+ "cast(SUM(cmp.MassFrac * res.Quantity) AS REAL) AS Quantity "
-								+ "FROM "
-								+ "Resources AS res "
-								+ "INNER JOIN Transactions AS tr ON tr.ResourceId = res.ResourceId "
-								+ "INNER JOIN Agents AS ag ON ag.AgentId = tr.SenderID "
-								+ "INNER JOIN Compositions AS cmp ON cmp.QualId = res.QualId "
-								+ "WHERE "
-								+ "tr.SimId = res.SimId AND ag.SimId = tr.SimId and cmp.SimId=res.SimId "
-							    + "GROUP BY cmp.NucId,tr.Time,ag.Prototype "
-								+ "ORDER BY tr.Time ASC;";
+	private static final String QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE = "drop table if exist TimeQuantityAll; "
+								+ "CREATE table TimeQuantityAll as "
+								+ "SELECT res.SimId as SimId, tr.Time AS Time,cmp.NucId AS NucId,ag.Prototype as Prototype, "
+								+ "		cast(SUM(cmp.MassFrac * res.Quantity) AS REAL) AS Quantity "
+								+ "	FROM "
+								+ "		Resources AS res "
+								+ "		INNER JOIN Transactions AS tr ON tr.ResourceId = res.ResourceId "
+								+ "		INNER JOIN Agents AS ag ON ag.AgentId = tr.SenderID "
+								+ "		INNER JOIN Compositions AS cmp ON cmp.QualId = res.QualId "
+								+ "	WHERE "
+								+ "		tr.SimId = res.SimId AND ag.SimId = tr.SimId and cmp.SimId=res.SimId "
+							    + "	GROUP BY res.SimId, cmp.NucId, tr.Time, ag.Prototype"
+								+ "	ORDER BY tr.Time ASC;";
 	
 	private static String[] UpdateTablesRunningOrderTbl = 
 	{
@@ -86,7 +88,7 @@ public class SimulationTablesPostProcessor {
 	    FACILITIES_TABLE_UPDATE,
 	    FACILITIES_TABLE_INDEX,
 	    QUANTITY_BY_TIME_ALL_TIME_STEP_CREATE,
-//	    QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE,
+	    QUANTITY_BY_TIME_SINGLE_TIME_STEP_CREATE,
 	    UPDATED_INDICATION_TABLE_CREATE,
 	};
 	

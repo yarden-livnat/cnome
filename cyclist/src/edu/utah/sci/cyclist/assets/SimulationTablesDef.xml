@@ -272,7 +272,7 @@
 	<Table name="TimeQuantitySingle">
 		<Schema>
 			<field name="Time">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="NucID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
@@ -288,7 +288,7 @@
 	<Table name="TimeQuantityAll">
 		<Schema>
 			<field name="Time">
-				<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="NucID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
