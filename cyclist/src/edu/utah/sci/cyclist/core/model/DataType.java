@@ -46,10 +46,8 @@ public class DataType {
 	}
 	
 	public DataType(Type type, Role role) {
-		if (role == null)
-			role = defaultRole(type);
 		_type = type;
-		setRole(role);
+		setRole(role != null ? role : defaultRole(type));
 		update();
 	}
 	
@@ -128,6 +126,8 @@ public class DataType {
 				_interp = Interpretation.DISCRETE;
 			else
 				_interp = Interpretation.CONTINUOUS;
+		} else {
+			_interp = Interpretation.DISCRETE;
 		}
 		setDefaultFilterType();
 		update();

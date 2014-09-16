@@ -818,6 +818,7 @@ public class ChartView extends CyclistViewBase {
 		return axis;
 	}
 
+	long t0;
 
 	private void build() {
 		setTitle(TITLE);
@@ -855,7 +856,10 @@ public class ChartView extends CyclistViewBase {
 							ObservableList<TableRow> oldValue, ObservableList<TableRow> newValue) {
 
 				if (newValue != null) {
+					long t1 = System.currentTimeMillis();
 					assignData(_spec, newValue);
+					long t2 = System.currentTimeMillis();
+					System.out.println("assigned data: "+(t2-t1)/1000+"secs");
 				}
 			}
 		});
