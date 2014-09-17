@@ -29,6 +29,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -96,8 +97,63 @@ public class SimpleTableView extends CyclistViewBase {
 			}
 		};
 		
-		filters().addListener(listener);
-		remoteFilters().addListener(listener);
+		filters().addListener(new ListChangeListener<Filter>() {
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+				boolean update = false;
+				
+				CyclistDatasource ds = getAvailableDatasource();
+				
+				while (change.next()) {
+					for (Filter f : change.getRemoved()) {
+						update = update || f.isActive();
+						f.removeListener(listener);
+					}
+					for (Filter f : change.getAddedSubList()) {
+						//For a new filter - add the current data source as its data source.
+						f.setDatasource(ds);
+							
+						update = update || f.isActive();
+						f.addListener(listener);
+					}
+				}
+
+				if (update) {
+					fetchRows();
+				}
+			}
+		});
+
+		remoteFilters().addListener(new ListChangeListener<Filter>() {
+
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
+				while (change.next()) {
+					for (Filter filter : change.getRemoved()) {
+						filter.removeListener(listener);
+					}
+					for (Filter filter : change.getAddedSubList()) {
+						filter.addListener(listener);
+					}
+				}
+				fetchRows();
+			}
+		});
+		
+	}
+	
+	/*
+	 * Tries to find an available data source either from the current table or the current simulation.
+	 * @return CyclistDatasource - the data source which has been found.
+	 */
+	private CyclistDatasource getAvailableDatasource(){
+		Simulation currentSim = getCurrentSimulation();
+		
+		CyclistDatasource ds = (_currentTable != null && _currentTable.getDataSource()!= null) ? 
+				_currentTable.getDataSource() : 
+				currentSim != null ? currentSim.getDataSource() : null;
+		return ds;		
 	}
 	
 	@Override
@@ -147,11 +203,26 @@ public class SimpleTableView extends CyclistViewBase {
 				_simFilter = new ValueFilter(_simField, sim.getSimulationId());
 			}
 		}
+		updateFilters();
+	
 				
 		if (_currentTable != null) {
 			loadTable();
 		}
 
+	}
+	
+	/*
+	 * Updates the local filters data source, on a simulation change.
+	 */
+	private void updateFilters() {
+		CyclistDatasource ds = getAvailableDatasource();
+		
+		if (ds != null){
+			for (Filter filter : filters()) {
+				filter.setDatasource(ds);
+			}
+		}
 	}
 	
 	private void loadTable() {
