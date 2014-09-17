@@ -15,7 +15,7 @@ public class WorkDirectoryController {
 
 	public static final String SAVE_DIR = System.getProperty("user.home").replace("\\", "/") + "/.cyclist/";
 	private static final String GENERAL_CONFIG_FILE = SAVE_DIR+"generalConfig.xml";
-	public static final String DEFAULT_WORKSPACE = System.getProperty("user.home").replace("\\", "/");
+	public static final String DEFAULT_WORKSPACE = System.getProperty("user.home").replace("\\", "/")+ "/cyclist-default-ws";
 	private ObservableList<String> _workdirectories = FXCollections.observableArrayList();
 	private int _lastId = 0;
 	private int _lastChosenIndex = 0;
@@ -45,11 +45,11 @@ public class WorkDirectoryController {
 					workDirectories.putInteger("lastChosenId", 0);
 					new WorkDirectory(_lastId, DEFAULT_WORKSPACE).save(workDirectories.createChild("workDirectory"));
 					_lastId++;
-					new WorkDirectory(_lastId, DEFAULT_WORKSPACE+"/software" ).save(workDirectories.createChild("workDirectory"));
+					new WorkDirectory(_lastId, SAVE_DIR+"cyclist-default-ws" ).save(workDirectories.createChild("workDirectory"));
 					_lastId++;
 					memento.save(new PrintWriter(saveFile));
 					_workdirectories.add(DEFAULT_WORKSPACE);
-					_workdirectories.add(DEFAULT_WORKSPACE+"/software");
+					_workdirectories.add(SAVE_DIR+"cyclist-default-ws");
 					return false;
 				} catch (IOException e) {
 						// TODO Auto-generated catch block
