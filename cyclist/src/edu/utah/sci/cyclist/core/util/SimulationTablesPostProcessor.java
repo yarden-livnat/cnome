@@ -33,7 +33,7 @@ public class SimulationTablesPostProcessor {
 	
 	//Must create the Facilities table in 2 steps, 
 	//otherwise, if it just copies a BLOB column from another table, without explicitly creating it as a BLOB, the column is created without any type at all.
-	private static final String FACILITIES_TABLE_CREATE = "create table if not exist Facilities (SimID BLOB,"+
+	private static final String FACILITIES_TABLE_CREATE = "create table if not exists Facilities (SimID BLOB,"+
 																					"AgentId INTEGER,"+
 																					"Spec TEXT,"+
 																					"Prototype TEXT,"+
