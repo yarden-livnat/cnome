@@ -274,7 +274,7 @@ public class ChartView extends CyclistViewBase {
 				n=0;
 				for (Field field : _yArea.getFields()) {
 					if (table.hasField(field)) {
-						if (field.getRole() == Role.DIMENSION)
+						if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
 							fields.add(field);
 						else
 							aggregators.add(field);
