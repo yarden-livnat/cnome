@@ -12,6 +12,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.concurrent.Task;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -125,7 +127,19 @@ public class SimulationTablesPostProcessor {
     	applicationsMap.put("linux-arm", "cycpost-linux-arm");
     }
     
-	public static Boolean process(CyclistDatasource ds){
+	public static Task<Boolean> process(CyclistDatasource ds){
+		 Task<Boolean> task = new Task<Boolean>() {
+	         @Override protected Boolean call() throws Exception {
+	        	 return processTask(ds);
+	         }
+		 };
+		 Thread th = new Thread(task);
+         th.setDaemon(true);
+         th.start();
+	     return task;
+	}
+    
+    public static Boolean processTask(CyclistDatasource ds){
 		Logger log = Logger.getLogger(SimulationTablesPostProcessor.class);
 		Boolean isUpdated = false;
 		Connection conn = null;
@@ -352,6 +366,7 @@ public class SimulationTablesPostProcessor {
 			stmt = conn.createStatement();
 			for(String queryName : UpdateTablesRunningOrderTbl){
 				stmt.executeUpdate(queryName);
+				System.out.println("query = " + queryName);
 			}
 			return true;
 		} catch (SQLException e) {
