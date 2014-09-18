@@ -78,7 +78,6 @@ public class WorkspaceWizard extends VBox {
 	
 		dialog = new Stage();
 		dialog.setTitle("Select Workspace Directory");
-		dialog.setMaxWidth(250);
 		dialog.setMinWidth(250);
 		dialog.setMaxHeight(120);
 		dialog.setMinHeight(95);
@@ -111,6 +110,7 @@ public class WorkspaceWizard extends VBox {
 		pane.setAlignment(Pos.CENTER);
 		pane.setPadding(new Insets(5));
 		pane.setSpacing(10);
+		pane.setMinWidth(250);
 		
 		Button btn = new Button("...");
 		btn.setOnAction(new EventHandler<ActionEvent>() {
@@ -146,8 +146,10 @@ public class WorkspaceWizard extends VBox {
 			}
 		});
 		
-		pane.getChildren().addAll(cb = new ComboBox<>(),btn);
-		
+		cb = new ComboBox<>();
+		cb.setMaxWidth(Double.MAX_VALUE);
+		pane.getChildren().addAll(cb,btn);
+	
 		HBox.setHgrow(cb, Priority.ALWAYS);
 		
 		HBox buttons = new HBox();

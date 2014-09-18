@@ -277,6 +277,12 @@
 			<field name="Time">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
+			<field name="Quantity" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="NucID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
 			<field name="AgentID" semantic="AgentID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
@@ -288,12 +294,6 @@
 			</field>
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="NucID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>			
-			<field name="Quantity" >
-				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
@@ -305,6 +305,12 @@
 			<field name="Time">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
+			<field name="Quantity" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="NucID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
 			<field name="AgentID" semantic="AgentID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
@@ -316,12 +322,6 @@
 			</field>
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="NucID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>			
-			<field name="Quantity" >
-				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 		</Schema>
 	</Table>
