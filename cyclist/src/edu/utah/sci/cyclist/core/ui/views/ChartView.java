@@ -1067,7 +1067,7 @@ public class ChartView extends CyclistViewBase {
 
 		//                grid.getColumnConstraints().add(new ColumnConstraints(17));
 
-		grid.getColumnConstraints().add(new ColumnConstraints(20));
+		grid.getColumnConstraints().add(new ColumnConstraints(50));
 		cc = new ColumnConstraints();
 		cc.setHgrow(Priority.SOMETIMES);
 		grid.getColumnConstraints().add(cc);
