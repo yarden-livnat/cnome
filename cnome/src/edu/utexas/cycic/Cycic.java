@@ -27,6 +27,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -249,6 +250,7 @@ public class Cycic extends ViewBase{
 			circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 				public void handle(MouseEvent e){
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
+					//db.setDragView(circle.image.getImage());
 					ClipboardContent content = new ClipboardContent();				
 					content.put(DnD.VALUE_FORMAT, circle.text.getText());
 					db.setContent(content);

@@ -21,6 +21,9 @@ import org.xml.sax.InputSource;
 
 
 public class XMLReader {
+	/**
+	 * 
+	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
 			add(":Brightlite:ReactorFacility");
@@ -34,21 +37,37 @@ public class XMLReader {
 			add(":agents:Predator");
 		}
 	};
+	
+	/**
+	 * 
+	 */
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
 			add(":cycamore:GrowthRegion");
 		}
 	};
+	
+	/**
+	 * 
+	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
 			//add(":cycamore:DeployInst");
 			add(":cycamore:ManagerInst");
 		}
 	};
+	
+	/**
+	 * 
+	 */
 	static String test = "<interleave><element name=\"in_commods\"><oneOrMore><element name=\"val\">" +  
 			"<data type=\"token\" /></element></oneOrMore></element><element name=\"capacity\">"+
 			"<data type=\"double\" /></element><optional><element name=\"max_inv_size\"><data type=\"double\" />"+
 			"</element></optional></interleave>";
+	
+	/**
+	 * 
+	 */
 	static String jsonTest = "{"+
 		"\"doc\" : \"A minimum implementation sink facility that accepts specified amounts of commodities from other agents\","+
 		"\"vars\" : {" +
@@ -60,7 +79,12 @@ public class XMLReader {
       	"}, \"inventory\" : {\"capacity\" : \"max_inv_size\", \"index\" : 3, \"type\" : \"cyclus::toolkit::ResourceBuff\"},"+
       	"\"max_inv_size\" : {\"default\" : 1.000000000000000e+299, \"doc\" : \"total maximum inventory size of sink facility\","+
         "\"index\" : 2, \"tooltip\" : \"sink maximum inventory size\", \"type\" : \"double\"}}}";
-			
+	
+	/**
+	 * 
+	 * @param xmlSchema
+	 * @return
+	 */
 	static ArrayList<Object> readSchema(String xmlSchema){
 		ArrayList<Object> schema = new ArrayList<Object>();
 		try{
@@ -81,6 +105,12 @@ public class XMLReader {
 		return schema;
 	}
 	
+	/**
+	 * 
+	 * @param jsonSchema
+	 * @param xmlschema
+	 * @return
+	 */
 	static ArrayList<Object> annotationReader(String jsonSchema, ArrayList<Object> xmlschema){
 		Reader schema = new StringReader(jsonSchema);
 		JsonReader jsonReader = Json.createReader(schema);
@@ -95,6 +125,11 @@ public class XMLReader {
 		return xmlschema;
 	}
 	
+	/**
+	 * 
+	 * @param dataArray
+	 * @param json
+	 */
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
@@ -103,90 +138,94 @@ public class XMLReader {
 			}
 		} else if(dataArray.get(1) instanceof ArrayList){
 			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
-			while(dataArray.size() < 9){
-				if(dataArray.size() == 6){
-					dataArray.add(0);
-				}
-				dataArray.add(null);
-			}
+			cycicResize(dataArray);
 			if(dataArray.get(2) == "oneOrMore"){
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 				if(json_pass.get("cycic") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add(json_pass.get("cycic").toString().replace("\"", ""));
-				} else {
-					//((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add("");
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("cycic").toString().replace("\"", ""));
 				}
+				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			} else if (dataArray.get(2) == "zeroOrMore"){
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 				if(json_pass.get("cycic") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add(json_pass.get("cycic").toString().replace("\"", ""));
-				} else {
-					//((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).add("");
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("cycic").toString().replace("\"", ""));
 				}
+				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
 			combiner((ArrayList<Object>)dataArray.get(1), json);
 			try{
-				if(json_pass.get("units") != null){
-					dataArray.set(3, json_pass.get("units").toString());
-				}
-				if(json_pass.get("range") != null){
-					dataArray.set(4, json_pass.get("range").toString());
-				}
-				if(json_pass.get("default") != null){
-					dataArray.set(6, 1);
-					dataArray.set(5, json_pass.get("default").toString());
-				}
-				if(json_pass.get("userlevel") != null){
-					dataArray.set(6, json_pass.get("userlevel"));
-				}
-				if(json_pass.get("tooltip") != null){
-					dataArray.set(7, json_pass.get("tooltip").toString());
-				}
-				if(json_pass.get("doc") != null){
-					dataArray.set(8, json_pass.get("doc").toString());
-				}
+				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
 				//ex.printStackTrace();
 			}
 		} else {
-			while(dataArray.size() < 9){
-				if(dataArray.size() == 6){
-					dataArray.add(0);
-				}
-				dataArray.add(null);
-			}
+			cycicResize(dataArray);
 			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
 			try{
-				if(dataArray.get(2) == null){
-					dataArray.set(2, "");
-					if(json_pass.get("cycic") != null){
-						dataArray.set(2, json_pass.get("cycic").toString().replace("\"", ""));
-					}
-				}
-				if(json_pass.get("units") != null){
-					dataArray.set(3, json_pass.get("units").toString());
-				}
-				if(json_pass.get("range") != null){
-					dataArray.set(4, json_pass.get("range").toString());
-				}
-				if(json_pass.get("default") != null){
-					dataArray.set(6, 1);
-					dataArray.set(5, json_pass.get("default").toString());
-				}
-				if(json_pass.get("userlevel") != null){
-					dataArray.set(6, json_pass.get("userlevel"));
-				}
-				if(json_pass.get("tooltip") != null){
-					dataArray.set(7, json_pass.get("tooltip").toString());
-				}
-				if(json_pass.get("doc") != null){
-					dataArray.set(8, json_pass.get("doc").toString());
-				}
+				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
 				//ex.printStackTrace();
 			}	
 		}
 	}
 	
+	/**
+	 * 
+	 * @param dataArray
+	 * @return
+	 */
+	static ArrayList<Object> cycicResize(ArrayList<Object> dataArray){
+		while(dataArray.size() < 9){
+			if(dataArray.size() == 6){
+				dataArray.add(0);
+			}
+			dataArray.add(null);
+		}
+		return dataArray;
+	}
 	
+	
+	/**
+	 * 
+	 * @param json_pass
+	 * @param dataArray
+	 * @return
+	 */
+	static ArrayList<Object> cycicInfoControl(JsonObject json_pass, ArrayList<Object> dataArray){
+		if(dataArray.get(2) == null){
+			dataArray.set(2, "");
+			if(json_pass.get("cycic") != null){
+				dataArray.set(2, json_pass.get("cycic").toString().replace("\"", ""));
+			}
+		}
+		if(json_pass.get("units") != null){
+			dataArray.set(3, json_pass.get("units").toString());
+		}
+		if(json_pass.get("range") != null){
+			dataArray.set(4, json_pass.get("range").toString());
+		}
+		if(json_pass.get("default") != null){
+			dataArray.set(6, 1);
+			dataArray.set(5, json_pass.get("default").toString());
+		}
+		if(json_pass.get("userlevel") != null){
+			dataArray.set(6, json_pass.get("userlevel"));
+		}
+		if(json_pass.get("tooltip") != null){
+			dataArray.set(7, json_pass.get("tooltip").toString());
+		}
+		if(json_pass.get("doc") != null){
+			dataArray.set(8, json_pass.get("doc").toString());
+		}
+		return dataArray;
+	}
+	
+	/**
+	 * 
+	 * @param node
+	 * @param array
+	 * @return
+	 */
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
 		System.out.println(array);

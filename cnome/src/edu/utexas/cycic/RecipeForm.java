@@ -63,6 +63,7 @@ public class RecipeForm extends ViewBase{
 				recipiesList.getItems().add("Add New Recipe");
 			}
 		});
+		recipiesList.setPromptText("Select a Recipe");
 		
 		recipiesList.valueProperty().addListener(new ChangeListener<String>(){ 
 			@Override

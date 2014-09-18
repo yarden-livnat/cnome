@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
@@ -409,5 +410,32 @@ public class FormBuilderFunctions {
 			}
 		});
 		return cb;
+	}
+	
+	static GridPane cycicTypeTest(GridPane grid, facilityNode formNode, ArrayList<Object> facArray, ArrayList<Object> dataArray, int col, int row){
+		switch ((String) facArray.get(2).toString().toLowerCase()) {
+		case "incommodity":
+			grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+col, row);
+			break;
+		case "outcommodity":
+			grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+col, row);
+			break;
+		case "inrecipe": case "outrecipe": case "recipe":
+			grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+col, row);
+			break;
+		case "commodity":
+			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+col, row);
+			break;
+		case "facTag":
+			//TODO STUFF
+			break;
+		case "commodTag":
+			//TODO Stuff
+			break;
+		default:
+			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+col, row);
+			break;
+		}
+		return grid;
 	}
 }

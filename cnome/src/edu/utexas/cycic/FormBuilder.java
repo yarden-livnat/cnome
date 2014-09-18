@@ -162,6 +162,7 @@ public class FormBuilder extends ViewBase {
 				if (facArray.get(2) == "oneOrMore"){
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
 						grid.add(name, columnNumber, rowNumber);
 						//grid.add(new Label((String) facArray.get(2)), columnNumber+1, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
@@ -231,32 +232,9 @@ public class FormBuilder extends ViewBase {
 						}
 					} else {
 						// Special form building functions that are used for specific tags
-						//System.out.println(facArray);
-						switch ((String) facArray.get(2).toString().toLowerCase()) {
-						case "incommodity":
-							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "outcommodity":
-							grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "inrecipe": case "outrecipe": case "recipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "commodity":
-							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "facTag":
-							//TODO STUFF
-							break;
-						case "commodTag":
-							//TODO Stuff
-							break;
-						default:
-							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
-						}
+						FormBuilderFunctions.cycicTypeTest(grid, formNode, facArray, dataArray, columnNumber, rowNumber);
 					}
+					columnEnd = 2 + columnNumber;
 					grid.add(FormBuilderFunctions.unitsBuilder((String)facArray.get(3)), columnEnd, rowNumber);
 					columnEnd = 0;
 					rowNumber += 1;
