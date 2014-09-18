@@ -1,25 +1,16 @@
 package edu.utexas.cycic;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.stream.Stream;
-
-import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.Dialog;
 import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
-import edu.utexas.cycic.tools.FormBuilderTool;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -31,18 +22,15 @@ import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 
@@ -140,7 +128,6 @@ public class Cycic extends ViewBase{
 					facilityNode facility = new facilityNode();
 					facility.facilityType = event.getDragboard().getContent(DnD.VALUE_FORMAT).toString();
 					facility.facilityType.trim();
-					
 					for (int i = 0; i < DataArrays.simFacilities.size(); i++){
 						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
@@ -250,7 +237,6 @@ public class Cycic extends ViewBase{
 			circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 				public void handle(MouseEvent e){
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
-					//db.setDragView(circle.image.getImage());
 					ClipboardContent content = new ClipboardContent();				
 					content.put(DnD.VALUE_FORMAT, circle.text.getText());
 					db.setContent(content);
