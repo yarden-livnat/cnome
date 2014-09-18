@@ -371,8 +371,13 @@ public class FlowView extends CyclistViewBase {
 			if (inventory == null) {
 				queryInventory(node).addListener((Observable o)->{
 					ObjectProperty<ObservableList<Inventory>> p = (ObjectProperty<ObservableList<Inventory>>) o;
+					long t0 = System.currentTimeMillis();
 					entry.setInventory(p.get());
+					long t1 = System.currentTimeMillis();
 					addToChart(entry, p.get());
+					long t2 = System.currentTimeMillis();
+					
+					System.out.println("inventory processing: "+(t1-t0)/1000.0+"  "+(t2-t1)/1000.0);
 				});
 				
 			} else {

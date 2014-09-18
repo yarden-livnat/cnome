@@ -1076,7 +1076,7 @@ public class ChartView extends CyclistViewBase {
 
 		_xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
 		_yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.ALL);
-		_lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
+		_lodArea = createControlArea(grid, "Group by", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 		//                _lodArea = createControlArea(grid, "LOD", 0, 3, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 		//                _indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
 		//                Button swapButton = new Button("", new ImageView(Resources.getIcon("swap")));
