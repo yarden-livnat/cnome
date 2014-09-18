@@ -211,19 +211,19 @@ public class CyclistDatasource implements DataSource {
 	public void releaseConnection() {
 		if (isSQLite()) {
 //			System.out.println("sqlite: release");
-//			_SQLiteSemaphore.release();
+			_SQLiteSemaphore.release();
 		}
 	}
 	
 	private Connection getSQLiteConnection() throws SQLException {
-//		try {
-//			_SQLiteSemaphore.acquire();
+		try {
+			_SQLiteSemaphore.acquire();
 //			if (_SQLiteConnection == null) 
 				_SQLiteConnection =  DriverManager.getConnection(_url, _properties);
-//		} catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+			e.printStackTrace();
+		}
 		return _SQLiteConnection;
 	}
 	

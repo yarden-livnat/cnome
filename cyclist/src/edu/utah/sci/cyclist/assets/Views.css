@@ -105,8 +105,8 @@
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
 }
 
-.view .chart-view .chart {
-	-fx-stroke-width: 2px;
+.line-chart .chart-series-line {
+	-fx-stroke-width: 1px;
 	-fx-effect: null;
 }
 
@@ -241,7 +241,8 @@
     -fx-background-radius: 2, 2;
 }
 
- .flow .timestep:focused {
+
+.flow .timestep:focused {
 	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;	
     -fx-background-insets: 1, 2;
     -fx-background-radius: 2, 2;

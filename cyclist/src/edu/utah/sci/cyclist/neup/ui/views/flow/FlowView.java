@@ -142,6 +142,7 @@ public class FlowView extends CyclistViewBase {
 		
 		fetchFacilities();
 		fetchFilterValues();
+//		_rangeField.setRange(new Range<Integer>(1, currentSim.getDuration()));
 	}
 	
 	private void fetchFacilities() {
@@ -237,7 +238,8 @@ public class FlowView extends CyclistViewBase {
 				list.add(node);
 		}
 		
-		queryTransactions(list);	
+		if (list.size() > 0)
+			queryTransactions(list);	
 	}
 	
 	private void removeAllConnectors() {

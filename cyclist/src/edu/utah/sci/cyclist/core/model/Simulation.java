@@ -41,10 +41,12 @@ public class Simulation {
 	
 	private CyclistDatasource _datasource;
 	private String _alias;
+	private int _startYear;
+	private int _startMonth;
+	private int _duration;
 	private Map<String, Object> _properties = new HashMap<>();
 	
 	public Simulation() {
-//		this(null);
 	}
 	
 	public Simulation(Blob simulationId) {
@@ -56,26 +58,51 @@ public class Simulation {
 		Simulation copy = new Simulation(_simulationId);
 		copy.setDataSource(_datasource);
 		copy.setAlias(_alias);
+		copy.setStartYear(_startYear);
+		copy.setStartMonth(_startMonth);
+		copy.setDuration(_duration);
 		return copy;
+	}
+	
+	public void setStartYear(Integer year) {
+		if (year == null) year = 0;
+		_startYear = year;
+	}
+	
+	public int getStartYear() {
+		return _startYear;
+	}
+	
+	public void setStartMonth(Integer month) {
+		if (month == null) month = 0;
+		_startMonth = month;
+	}
+	
+	public int getStartMonth() {
+		return _startMonth;
+	}
+	
+	public void setDuration(Integer duration) {
+		if (duration == null) duration = 1;
+		_duration = duration;
+	}
+	
+	public int getDuration() {
+		return _duration;
 	}
 	
     // Save the simulation
 	public void save(IMemento memento) {
-
-		// Set the name
 		memento.putString("simulation-id", getSimulationId().toString());
-		
-		// Save the uid of the data source
 		memento.putString("datasource-uid", _datasource.getUID());
-		
-		//Save the alias
 		memento.putString("alias", getAlias());
+		memento.putInteger("startYear", _startYear);
+		memento.putInteger("startMonth", _startMonth);
+		memento.putInteger("duration", _duration);
 	}
 	
 	// Restore the simulation
 	public void restore(IMemento memento, ObservableList<CyclistDatasource> sources){
-	
-		// Get the name
 		setSimulationId(memento.getString("simulation-id"));
 
 		// Get the datasource
@@ -85,8 +112,10 @@ public class Simulation {
 				setDataSource(source);
 		}
 		
-		//Get the alias
 		setAlias(memento.getString("alias"));
+		setStartYear(memento.getInteger("startYear"));
+		setStartMonth(memento.getInteger("startMonth"));
+		setDuration(memento.getInteger("duration"));
 	}
 	
 	public Blob getSimulationId(){

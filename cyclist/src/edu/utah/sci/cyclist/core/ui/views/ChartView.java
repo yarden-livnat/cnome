@@ -742,6 +742,7 @@ public class ChartView extends CyclistViewBase {
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
 			lineChart.setCreateSymbols(false);
+			lineChart.getStyleClass().add("line-chart");
 			setChart(lineChart);
 			break;
 		case SCATTER_PLOT:
@@ -758,7 +759,6 @@ public class ChartView extends CyclistViewBase {
 		// chart.setLegendVisible(false);
 		               
 		if (getChart() != null) {
-			getChart().getStyleClass().add("chart");
 			getChart().setAnimated(false);
 			getChart().setHorizontalZeroLineVisible(false);
 			getChart().setVerticalZeroLineVisible(false);
