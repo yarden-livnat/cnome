@@ -144,9 +144,7 @@ public class ChartView extends CyclistViewBase {
 			_lodArea.getFields().add(field.clone());
 		}
 
-
 		getFiltersArea().copy(other.getFiltersArea());
-
 	}
 
 	public void setActive(boolean state) {
@@ -743,7 +741,7 @@ public class ChartView extends CyclistViewBase {
 			break;
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
-			//                        lineChart.setCreateSymbols(false);
+			lineChart.setCreateSymbols(false);
 			setChart(lineChart);
 			break;
 		case SCATTER_PLOT:
@@ -757,10 +755,10 @@ public class ChartView extends CyclistViewBase {
 
 		}
 
-		//                chart.setCreateSymbols(false);
-		//                chart.setLegendVisible(false);
-		//                
+		// chart.setLegendVisible(false);
+		               
 		if (getChart() != null) {
+			getChart().getStyleClass().add("chart");
 			getChart().setAnimated(false);
 			getChart().setHorizontalZeroLineVisible(false);
 			getChart().setVerticalZeroLineVisible(false);
