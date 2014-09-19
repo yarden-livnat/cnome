@@ -6,19 +6,16 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
-import edu.utah.sci.cyclist.core.model.Nuclide;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
-import edu.utah.sci.cyclist.core.util.SQLFactory;
+import edu.utah.sci.cyclist.core.util.SQLUtil;
 
 public class TableProxy {
 	private static final String GET_ROWS_QUERY = "select * from %s limit ?";
@@ -94,7 +91,7 @@ public class TableProxy {
 //					convert[c] = o->{return o;};	
 //			}
 			
-			Function<Object, Object> convert[] = SQLFactory.factories(rmd);
+			Function<Object, Object> convert[] = SQLUtil.factories(rmd);
 			while (rs.next()) {
 				TableRow row = new TableRow(cols);
 				for (int i=0; i<cols; i++) {
