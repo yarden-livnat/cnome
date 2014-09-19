@@ -279,7 +279,7 @@ public class NuclideUtils {
 					else
 						throw new NotNuclide(nucstr, newnuc);
 				}
-			} else if (DIGITS.contains(nucstr.substring(0, 1))) {
+			} else if (ALPHABET.contains(nucstr.substring(0, 1))) {
 
 				// Nuclide is probably in name form, or some variation therein
 				String anum_str = nucstr.replaceAll("[a-zA-Z]", "");
