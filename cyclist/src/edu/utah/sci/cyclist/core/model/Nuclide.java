@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.core.model;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +99,6 @@ public class Nuclide implements CyclistData {
 		if (nuc < 0)
 			throw new NotNuclide(nuc, "");
 
-		int newnuc;
 		int zzz = nuc / 10000000;     // ZZZ ?
 		int aaassss = nuc % 10000000; // AAA-SSSS ?
 		int aaa = aaassss / 10000;    // AAA ?

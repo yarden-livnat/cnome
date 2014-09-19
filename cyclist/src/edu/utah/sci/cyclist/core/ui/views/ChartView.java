@@ -65,6 +65,7 @@ import edu.utah.sci.cyclist.core.model.Indicator;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
+import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
@@ -87,8 +88,8 @@ public class ChartView extends CyclistViewBase {
 	private ViewType _viewType;
 	private boolean _active = true;
 
-	//        private MarkType _markType;
-
+	private TableProxy _tableProxy = null;
+	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
 
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
@@ -206,6 +207,7 @@ public class ChartView extends CyclistViewBase {
 		}
 
 		if (table != getCurrentTable()) {
+			_tableProxy = new TableProxy(table);
 			invalidateChart();
 			_currentTableProperty.set(table);
 		}
@@ -333,7 +335,7 @@ public class ChartView extends CyclistViewBase {
 				Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 					@Override
 					protected ObservableList<TableRow> call() throws Exception {
-						return getCurrentTable().getRows(ds, builder.toString());
+						return _tableProxy.getRows(ds, builder.toString());
 					}
 				};
 				
