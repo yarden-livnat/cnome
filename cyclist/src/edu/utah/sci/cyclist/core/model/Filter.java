@@ -266,7 +266,9 @@ public class Filter implements Observable {
 			
 						if (item instanceof String) {
 							builder.append("'").append(item.toString()).append("'");
-						} else
+						} else if (item instanceof CyclistData) {
+							builder.append(((CyclistData)item).sqlValue());
+						} else 
 							builder.append(item.toString());
 					}
 					builder.append(")");

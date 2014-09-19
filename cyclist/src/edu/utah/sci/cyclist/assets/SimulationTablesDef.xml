@@ -295,10 +295,6 @@
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-<<<<<<< HEAD
-			
-=======
->>>>>>> 2377b6ade47ee41d2b04c717a2877cc8ab253ced
 		</Schema>
 	</Table>
 	<Table name="QuantityTransacted">
@@ -312,11 +308,7 @@
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-<<<<<<< HEAD
 			<field name="NucID" semantic="Nuclide">
-=======
-			<field name="NucID" >
->>>>>>> 2377b6ade47ee41d2b04c717a2877cc8ab253ced
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="AgentID" semantic="AgentID">

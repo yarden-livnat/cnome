@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.apache.log4j.Logger;
 
@@ -527,11 +528,14 @@ public class Table {
 							// TODO: Fix this query building hack 
 							String query = "select distinct "+field.getName()+" from "+getName()+" order by "+field.getName();
 							log.debug("query: "+query);
-							System.out.println(query);
 							ResultSet rs = stmt.executeQuery(query);
 							long t2 = System.currentTimeMillis();
 							System.out.println("time: "+(t2-t1)/1000.0);
 						
+							Function<Object, Object> convert = o->{return o;};
+							if (field.getName().toLowerCase().equals("nucid"))
+								convert = o->{return new Nuclide(o);};
+								
 							while (rs.next()) {
 								if (isCancelled()) {
 									System.out.println("task canceled");
@@ -540,7 +544,7 @@ public class Table {
 									break;
 								}
 							
-								values.add(rs.getObject(1));
+								values.add(convert.apply(rs.getObject(1)));
 							}
 						
 							long t3 = System.currentTimeMillis();

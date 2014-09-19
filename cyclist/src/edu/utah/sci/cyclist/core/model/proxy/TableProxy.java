@@ -9,16 +9,16 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.function.Function;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
+import edu.utah.sci.cyclist.core.model.Nuclide;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
+import edu.utah.sci.cyclist.core.util.SQLFactory;
 
 public class TableProxy {
 	private static final String GET_ROWS_QUERY = "select * from %s limit ?";
@@ -83,17 +83,27 @@ public class TableProxy {
 			ResultSetMetaData rmd = rs.getMetaData();
 			
 			int cols = rmd.getColumnCount();
+// 			Function<Object, Object> convert[] = new Function[cols];
+//			for (int c=0; c<cols; c++) {
+//				String name = rmd.getColumnName(c+1).toLowerCase();
+//				if (name.equals("nucid"))
+//					convert[c] = o->{return new Nuclide(o);};
+//				else if (rmd.getColumnType(c+1) == Types.BLOB)
+//					convert[c] = o->{return new Blob((byte[])o);};
+//				else
+//					convert[c] = o->{return o;};	
+//			}
+			
+			Function<Object, Object> convert[] = SQLFactory.factories(rmd);
 			while (rs.next()) {
 				TableRow row = new TableRow(cols);
 				for (int i=0; i<cols; i++) {
-					int columnType = rmd.getColumnType(i+1);
-					row.value[i] = columnType == Types.BLOB ? new Blob((byte[]) rs.getObject(i+1)) : rs.getObject(i+1);
+					row.value[i] = convert[i].apply(rs.getObject(i+1));
 				}
 				rows.add(row);
 			}
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
+		} catch (SQLException e) {
+			System.out.println("Error parsing sql meta data: "+e.getMessage());
 		} finally {
 			ds.releaseConnection();
 		}
