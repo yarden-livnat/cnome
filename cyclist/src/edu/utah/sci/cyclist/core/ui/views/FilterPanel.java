@@ -207,6 +207,7 @@ public class FilterPanel extends TitledPanel {
 			createList();
 			break;
 		case Cdate:
+			createRange();
 			break;
 		case Qd:
 			createRange();
