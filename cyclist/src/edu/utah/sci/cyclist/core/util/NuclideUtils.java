@@ -234,7 +234,7 @@ public class NuclideUtils {
 		int newnuc = 0;
 		String lem_name;
 
-		if (nuc.length() >= 5) { // nuc must be at least 4 characters or greater
+		if (nuc.length() >= 4) { // nuc must be at least 4 characters or greater
 									// if it is in ZZLLAAAM form.
 			if (nuc.substring(1, 1 + 3).contains("-")
 					&& nuc.substring(4, 4 + 5).contains("-")) {
@@ -307,8 +307,7 @@ public class NuclideUtils {
 					throw new NotNuclide(nucstr, newnuc);
 
 				// Add the Z-number
-				elem_name = nucstr.substring(0, nuclen - 1).replaceAll("[0-9]",
-						"");
+				elem_name = nucstr.substring(0, nuclen - 1).replaceAll("[0-9]", "");
 				elem_name = capitalize(elem_name);
 				if (_name_zz.containsKey(elem_name))
 					newnuc = (10000000 * _name_zz.get(elem_name)) + newnuc;
