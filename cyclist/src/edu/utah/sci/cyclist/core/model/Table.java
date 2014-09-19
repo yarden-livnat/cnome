@@ -29,9 +29,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -47,10 +45,10 @@ import org.apache.log4j.Logger;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.core.controller.XMLMemento;
+import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 import edu.utah.sci.cyclist.core.util.SQL;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -489,7 +487,7 @@ public class Table {
 							}
 
 							writeFieldValuesToCache(field.getName(), ds, values);
-							writeFieldValuesToFile(field.getName(), ds, values);
+							writeFieldValuesToFile(field.getName(), field.getType().toString(), field.getRole().toString(), ds, values);
 						} catch (SQLException e) {
 							System.out.println("task sql exception: "+e.getLocalizedMessage());
 							updateMessage(e.getLocalizedMessage());
@@ -532,9 +530,15 @@ public class Table {
 	}
 	
 	/* Saves the values of a chosen filter into a file 
-	 * Creates an xml file with the table name, and writes the filter's field name and its values
-	 * If the field already exist in the file - do nothing. */
-	private void writeFieldValuesToFile(String fieldName, CyclistDatasource ds, List<Object> values){
+	 * Creates an xml file with the table name, and writes the filter's field name, its type, role and its values
+	 * If the field already exist in the file - do nothing. 
+	 * @param fieldName - String.
+	 * @param fieldType - DataType.Type enum.
+	 * @param role - DataType.Role enum
+	 * @param ds - data source.
+	 * @param List<Object> values - list of values to save.
+	 * */
+	private void writeFieldValuesToFile(String fieldName, String fieldType, String role ,CyclistDatasource ds, List<Object> values){
 		if(_saveDir == ""){
 			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
 		}
@@ -588,7 +592,7 @@ public class Table {
 	    
 			 //If no such field node yet - write the field and its values into the file.
 			 if(writeNewNode){
-				 writeFieldNodeToFile(fieldName, fieldsNode, values);
+				 writeFieldNodeToFile(fieldName, fieldType, role, fieldsNode, values);
 			 }
 			 root.save(new PrintWriter(saveFile));
 		} catch (Exception e) {
@@ -620,13 +624,15 @@ public class Table {
 	}
 	
 	/* Creates a new Field node in the table xml file*/
-	private void writeFieldNodeToFile(String fieldName, IMemento fieldsNode, List<Object> values){
+	private void writeFieldNodeToFile(String fieldName, String fieldType, String fieldRole, IMemento fieldsNode, List<Object> values){
 		
 		//Create the Field node
 		 IMemento FieldNode = fieldsNode.createChild("Field");
 		
 		 // Set the field name
 		 FieldNode.putString("name", fieldName);
+		 FieldNode.putString("type", fieldType);
+		 FieldNode.putString("role", fieldRole);
 		 StringBuilder sb = new StringBuilder(); 
 		 for(Object value:values){
 			 if (value == null) {
@@ -681,7 +687,12 @@ public class Table {
 	
 	/* Reads distinct values from a file 
 	 * For a given field in a given table- 
-	 * if the table xml file exists and it contains the field values - read the values from the file */
+	 * if the table xml file exists and it contains the field values - read the values from the file 
+	 * Before reading - check the field type, and convert the values to the right type. 
+	 * @param fieldName - field name to search
+	 * @param ds - defines the file to look for the field properties 
+	 * */
+
 	private List<Object> readFieldValuesFromFile(String fieldName, CyclistDatasource ds){
 		
 		List<Object> values = new ArrayList<>();
@@ -701,9 +712,43 @@ public class Table {
 				 IMemento field = getField(fieldsNode, fieldName);
 				 if(field != null){
 					 String[] tmpValues = field.getTextData().split(";");
-					 for(String value: tmpValues){
-						 values.add(value);
+					 String type = field.getString("type") == null?"TEXT":field.getString("type");
+					 try{
+						 switch(DataType.Type.valueOf(type)){
+							 case TEXT:
+								 for(String value: tmpValues){
+									 values.add(value);
+								 }
+								 break;
+							 case NUMERIC:
+								 String role = field.getString("role")==null? "MEASURE":field.getString("role");
+								 if(DataType.Role.valueOf(role) == Role.MEASURE){
+									 for(String value: tmpValues){
+										 values.add(Double.parseDouble(value));
+									 }
+								 }else{
+									 for(String value: tmpValues){
+										 values.add(Integer.parseInt(value));
+									 }
+								 }
+								 break;
+							 case INT_TIME:
+								 for(String value: tmpValues){
+									 values.add(Integer.parseInt(value));
+								 }
+								 break;
+							default: 
+									 for(String value: tmpValues){
+										 values.add(value);
+									 }
+						 }
+					 }catch(NumberFormatException ex){
+						 for(String value: tmpValues){
+							 values.add(value);
+						 }
 					 }
+					 
+					 
 				 }
 				 //If reading from file - it means the values weren't found in the cache.
 				 //Save them in the cache for the next time.
