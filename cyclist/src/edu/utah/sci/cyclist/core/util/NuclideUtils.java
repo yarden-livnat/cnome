@@ -9,7 +9,6 @@ import java.util.Set;
 
 import edu.utah.sci.cyclist.neup.model.IndeterminateNuclideForm;
 import edu.utah.sci.cyclist.neup.model.NotNuclide;
-import edu.utah.sci.cyclist.neup.model.Nuclide;
 
 public class NuclideUtils {
 

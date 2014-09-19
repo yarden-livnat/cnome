@@ -1,7 +1,6 @@
 package edu.utah.sci.cyclist.core.model.proxy;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -12,13 +11,10 @@ import java.util.function.Function;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
-import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
-import edu.utah.sci.cyclist.neup.model.Nuclide;
 
 public class TableProxy {
 	

@@ -33,10 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.animation.RotateTransition;
-import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -426,40 +423,24 @@ public class SimulationWizard extends TilePane {
 			}
 		}
 	}
-	
-	private Boolean runDbUpdate(CyclistDatasource ds){
+		
+	private Boolean runDbUpdate(final CyclistDatasource ds){
 		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
 			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
 			Task<Boolean> task = postProcessor.process(ds);
-			if(task != null){
-				ObjectProperty<Boolean> taskValue = new SimpleObjectProperty<Boolean>(false);
-				taskValue.bind(task.valueProperty());
-				taskValue.addListener(new ChangeListener<Boolean>() {
+			if(task != null){	
+				task.valueProperty().addListener(new ChangeListener<Boolean>() {
 					 
 			        @Override 
 			        public void changed(ObservableValue<? extends Boolean> arg0,Boolean oldVal, Boolean newVal) {
+			        	_animation.stop();
 			        	_dsIsValid.set(newVal);
 			        	setDbUpdate(false, ds);
 			        }
 			    });
-				
+			
 				_statusLabel.textProperty().bind(task.messageProperty());
-				
-//				DoubleProperty progress = new SimpleDoubleProperty();
-//				progress.bind(task.progressProperty());
-					
-//				progress.addListener(new ChangeListener<Number>() {
-//					@Override
-//					public void changed(ObservableValue<? extends Number> arg0, Number oldVal, Number newVal) {
-//						if(newVal != oldVal  ){
-//							if(newVal.doubleValue()>=0.0 && newVal.doubleValue() <1.0){
-//								_animation.play();
-//							}else if(newVal.doubleValue() >= 1){
-//								_animation.stop();
-//							}
-//						}
-//					}
-//				});
+				_animation.play();
 			}
 			
 		}

@@ -38,12 +38,12 @@ public class Nuclide implements CyclistData {
 	static public Nuclide create(Integer nuc) {
 		Nuclide nuclide = _cache.get(nuc);
 		if (nuclide == null) {
-			String name;
 			try {
-				name = NuclideUtils.name(nuc);
+				String name = NuclideUtils.name(nuc);
 				nuclide = new Nuclide(nuc, name);
 				_cache.put(nuc, nuclide);
 			} catch (NotNuclide | IndeterminateNuclideForm e) {
+				e.printStackTrace();
 				nuclide = UNKNOWN;
 			}
 		}
@@ -51,8 +51,13 @@ public class Nuclide implements CyclistData {
 	}
 	
 	static public Nuclide create(String code) {
-		// TODO: implement
-		return UNKNOWN;
+		try {
+			Integer nuc = NuclideUtils.id(code);
+			return new Nuclide(nuc, code);
+		} catch (NotNuclide | IndeterminateNuclideForm e) {
+			e.printStackTrace();
+			return UNKNOWN;
+		}
 	}
 	
 	static public Nuclide create(Object key) {

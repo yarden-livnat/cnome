@@ -46,6 +46,7 @@ import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.core.controller.XMLMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
+import edu.utah.sci.cyclist.core.util.DataFactory;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 import edu.utah.sci.cyclist.core.util.SQL;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
@@ -633,6 +634,9 @@ public class Table {
 		 FieldNode.putString("name", fieldName);
 		 FieldNode.putString("type", fieldType);
 		 FieldNode.putString("role", fieldRole);
+		 if (values.size() > 0) {
+			 FieldNode.putString("class", values.get(0).getClass().getCanonicalName());
+		 }
 		 StringBuilder sb = new StringBuilder(); 
 		 for(Object value:values){
 			 if (value == null) {
@@ -711,42 +715,49 @@ public class Table {
 				 IMemento fieldsNode = root.getChild("Fields");
 				 IMemento field = getField(fieldsNode, fieldName);
 				 if(field != null){
+					 String className = field.getString("class");
+					 Function<String, Object> factory = DataFactory.findFactory(className);
+					 
 					 String[] tmpValues = field.getTextData().split(";");
-					 String type = field.getString("type") == null?"TEXT":field.getString("type");
-					 try{
-						 switch(DataType.Type.valueOf(type)){
-							 case TEXT:
-								 for(String value: tmpValues){
-									 values.add(value);
-								 }
-								 break;
-							 case NUMERIC:
-								 String role = field.getString("role")==null? "MEASURE":field.getString("role");
-								 if(DataType.Role.valueOf(role) == Role.MEASURE){
-									 for(String value: tmpValues){
-										 values.add(Double.parseDouble(value));
-									 }
-								 }else{
-									 for(String value: tmpValues){
-										 values.add(Integer.parseInt(value));
-									 }
-								 }
-								 break;
-							 case INT_TIME:
-								 for(String value: tmpValues){
-									 values.add(Integer.parseInt(value));
-								 }
-								 break;
-							default: 
-									 for(String value: tmpValues){
-										 values.add(value);
-									 }
-						 }
-					 }catch(NumberFormatException ex){
-						 for(String value: tmpValues){
-							 values.add(value);
-						 }
+					 
+					 for (String value : tmpValues) {
+						 values.add(factory.apply(value));
 					 }
+//					 String type = field.getString("type") == null?"TEXT":field.getString("type");
+//					 try{
+//						 switch(DataType.Type.valueOf(type)){
+//							 case TEXT:
+//								 for(String value: tmpValues){
+//									 values.add(value);
+//								 }
+//								 break;
+//							 case NUMERIC:
+//								 String role = field.getString("role")==null? "MEASURE":field.getString("role");
+//								 if(DataType.Role.valueOf(role) == Role.MEASURE){
+//									 for(String value: tmpValues){
+//										 values.add(Double.parseDouble(value));
+//									 }
+//								 }else{
+//									 for(String value: tmpValues){
+//										 values.add(Integer.parseInt(value));
+//									 }
+//								 }
+//								 break;
+//							 case INT_TIME:
+//								 for(String value: tmpValues){
+//									 values.add(Integer.parseInt(value));
+//								 }
+//								 break;
+//							default: 
+//									 for(String value: tmpValues){
+//										 values.add(value);
+//									 }
+//						 }
+//					 }catch(NumberFormatException ex){
+//						 for(String value: tmpValues){
+//							 values.add(value);
+//						 }
+//					 }
 					 
 					 
 				 }

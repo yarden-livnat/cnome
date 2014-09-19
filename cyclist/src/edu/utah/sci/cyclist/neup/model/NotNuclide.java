@@ -25,7 +25,7 @@ public class NotNuclide extends Exception {
 	}
 
 	public String toString() {
-		String str = "Not a Nuclide";
+		String str = "Not a Nuclide: ";
 		if (_was != null)
 			str = str + _was;
 		if (_now != null)
