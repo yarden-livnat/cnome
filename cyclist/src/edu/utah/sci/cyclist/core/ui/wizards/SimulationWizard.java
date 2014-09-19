@@ -31,14 +31,18 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -87,6 +91,10 @@ public class SimulationWizard extends TilePane {
 	private ObservableList<SimInfo> 	_simData =FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	private UpdateDbDialog				_updateDialog;
+	ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
+	Label _statusLabel;
+	RotateTransition _animation;
+	
 	   
 	// DataType elements
 	private CyclistDatasource     _current;
@@ -195,28 +203,17 @@ public class SimulationWizard extends TilePane {
 		buttonsVbox.getChildren().addAll(addButton,editButton,removeButton);
 		
 		Button selectionButton = new Button("Connect");
-		
-		
-		Runnable updateDbTask = new Runnable() {
-			@Override
-			public void run() {
-				Platform.runLater(new Runnable(){
-					@Override
-					public void run(){
-						selectConnection(_current);
-					}
-				});
-			}
-		};
-		
-		
+			
 		selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
-				setDbUpdateWait(true,_current);
-				Thread update = new Thread(updateDbTask);
-				update.setDaemon(true);
-				update.start();
+				setDbUpdate(true,_current);
+				_dsIsValid.addListener(new ChangeListener<Boolean>(){
+					@Override
+					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+						selectConnection(_current,newVal);
+					}
+				});
 			}			
 		});
 //		_statusDisplay = new ImageView();
@@ -351,7 +348,9 @@ public class SimulationWizard extends TilePane {
 	
 		_sourcesView.getSelectionModel().selectFirst();
 		
-		_updateDialog = new UpdateDbDialog();
+		_statusLabel = new Label();
+		_animation = new RotateTransition();
+		_updateDialog = new UpdateDbDialog(_statusLabel, _animation);
 		
 		// Return the scene
 		return scene;
@@ -373,16 +372,10 @@ public class SimulationWizard extends TilePane {
 		});
 	}
 	
-	private void selectConnection(CyclistDatasource ds) {
+	private void selectConnection(CyclistDatasource ds, Boolean dsIsValid) {
 		
 		_simData.clear();
-		Boolean dsIsValid = true;
-		
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
-			dsIsValid = SimulationTablesPostProcessor.process(ds);
-			setDbUpdateWait(false, ds);
-		}
-		
+	
 		if(!dsIsValid){
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));
 		}else{
@@ -422,14 +415,65 @@ public class SimulationWizard extends TilePane {
 		}
 	}
 	
-	private void setDbUpdateWait(Boolean isRunning, CyclistDatasource ds){
+	private void setDbUpdate(Boolean isRunning, CyclistDatasource ds){
 		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
 			if(isRunning){
-				_updateDialog.show(_dialog.getScene().getWindow());
+				ObjectProperty<Boolean> selection = _updateDialog.show(_dialog.getScene().getWindow());
+				selection.addListener(new ChangeListener<Boolean>(){
+					@Override
+					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+						if(newVal){
+							runDbUpdate(ds);
+						}else{
+							_dsIsValid.set(false);
+							_updateDialog.hide();
+						}
+					}
+				});
 			}else{
 				_updateDialog.hide();
 			}
 		}
+	}
+	
+	
+	private Boolean runDbUpdate(CyclistDatasource ds){
+		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
+			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
+			Task<Boolean> task = postProcessor.process(ds);
+			if(task != null){
+				ObjectProperty<Boolean> taskEnded = new SimpleObjectProperty<Boolean>(false);
+				taskEnded.bind(task.valueProperty());
+				taskEnded.addListener(new ChangeListener<Boolean>() {
+					 
+			        @Override 
+			        public void changed(ObservableValue<? extends Boolean> arg0,Boolean oldVal, Boolean newVal) {
+			        	_dsIsValid.set(newVal);
+			        	setDbUpdate(false, ds);
+			        }
+			    });
+				
+				_statusLabel.textProperty().bind(task.messageProperty());
+				
+				DoubleProperty progress = new SimpleDoubleProperty();
+				progress.bind(task.progressProperty());
+					
+//				progress.addListener(new ChangeListener<Number>() {
+//					@Override
+//					public void changed(ObservableValue<? extends Number> arg0, Number oldVal, Number newVal) {
+//						if(newVal != oldVal  ){
+//							if(newVal.doubleValue()>=0.0 && newVal.doubleValue() <1.0){
+//								_animation.play();
+//							}else if(newVal.doubleValue() >= 1){
+//								_animation.stop();
+//							}
+//						}
+//					}
+//				});
+			}
+			
+		}
+		return true;
 	}
 	
 	/*
