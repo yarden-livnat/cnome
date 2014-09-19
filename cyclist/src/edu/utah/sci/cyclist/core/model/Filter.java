@@ -228,10 +228,6 @@ public class Filter implements Observable {
 		}
 	}
 	
-	private Boolean isBlob(String item){
-		return (item.indexOf("X'") == 0 && item.lastIndexOf("'")== item.length()-1);
-	}
-	
 	public boolean isActive() {
 		boolean active = true;
 		if (getValues() == null || _selectedItems.size() == getValues().size()) {

@@ -195,6 +195,7 @@ public class Field {
 		String interp =  _dataType.getInterpretation()!=null?_dataType.getInterpretation().toString():"";
 		dataMemento.putString("interp", interp);		
 		dataMemento.putString("classification", getClassification().toString());
+		dataMemento.putString("semantic", _semantic);
 
 		memento.putBoolean("selected", _selected.get());
 		
@@ -243,9 +244,10 @@ public class Field {
 		DataType.Type type = DataType.Type.valueOf(dataMemento.getString("type"));
 		DataType.Interpretation interp = dataMemento.getString("interp")!= "" ? DataType.Interpretation.valueOf(dataMemento.getString("interp")):null;
 		DataType.Classification classification = DataType.Classification.valueOf(dataMemento.getString("classification"));
-
+		
 		_dataType = new DataType(role, type, interp, classification);
 
+		_semantic = memento.getString("semantic");
 		_selected.set(memento.getBoolean("selected"));
 				
 		// Get the entries in the field
