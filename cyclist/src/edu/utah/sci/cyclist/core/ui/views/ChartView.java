@@ -144,9 +144,7 @@ public class ChartView extends CyclistViewBase {
 			_lodArea.getFields().add(field.clone());
 		}
 
-
 		getFiltersArea().copy(other.getFiltersArea());
-
 	}
 
 	public void setActive(boolean state) {
@@ -274,7 +272,7 @@ public class ChartView extends CyclistViewBase {
 				n=0;
 				for (Field field : _yArea.getFields()) {
 					if (table.hasField(field)) {
-						if (field.getRole() == Role.DIMENSION)
+						if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
 							fields.add(field);
 						else
 							aggregators.add(field);
@@ -743,7 +741,8 @@ public class ChartView extends CyclistViewBase {
 			break;
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
-			//                        lineChart.setCreateSymbols(false);
+			lineChart.setCreateSymbols(false);
+			lineChart.getStyleClass().add("line-chart");
 			setChart(lineChart);
 			break;
 		case SCATTER_PLOT:
@@ -757,9 +756,8 @@ public class ChartView extends CyclistViewBase {
 
 		}
 
-		//                chart.setCreateSymbols(false);
-		//                chart.setLegendVisible(false);
-		//                
+		// chart.setLegendVisible(false);
+		               
 		if (getChart() != null) {
 			getChart().setAnimated(false);
 			getChart().setHorizontalZeroLineVisible(false);
@@ -1069,14 +1067,14 @@ public class ChartView extends CyclistViewBase {
 
 		//                grid.getColumnConstraints().add(new ColumnConstraints(17));
 
-		grid.getColumnConstraints().add(new ColumnConstraints(20));
+		grid.getColumnConstraints().add(new ColumnConstraints(50));
 		cc = new ColumnConstraints();
 		cc.setHgrow(Priority.SOMETIMES);
 		grid.getColumnConstraints().add(cc);
 
 		_xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
 		_yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.ALL);
-		_lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
+		_lodArea = createControlArea(grid, "Group by", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 		//                _lodArea = createControlArea(grid, "LOD", 0, 3, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 		//                _indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
 		//                Button swapButton = new Button("", new ImageView(Resources.getIcon("swap")));

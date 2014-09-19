@@ -26,8 +26,8 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Range;
 
 public class FlowChart extends VBox {
-	private static final String NET_CHART_LABEL = "Net Flow";
-	private static final String COMMULATIVE_CHART_LABEL = "Commulative Flow";
+	private static final String NET_CHART_LABEL = "Shiped - Recieved";
+	private static final String COMMULATIVE_CHART_LABEL = "Total Shiped/Receieved";
 	
 	private HBox _header;
 	private StackPane _stack;

@@ -138,12 +138,14 @@ public class SimulationProxy {
 		
 		String query = String.format(INVENTORY_QUERY, type);
 		System.out.println("query: "+query);
+		long t0 = System.currentTimeMillis();
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 				stmt.setBytes(1, _sim.getSimulationId().getData());
 				stmt.setString(2, value);				
 
 				ResultSet rs = stmt.executeQuery();
+				long t1 = System.currentTimeMillis();
 				while (rs.next()) {
 					Inventory i = new Inventory();
 					i.time = rs.getInt(1);
@@ -151,6 +153,9 @@ public class SimulationProxy {
 					i.amount = rs.getDouble(3);
 					list.add(i);
 				}
+				long t2 = System.currentTimeMillis();
+				
+				System.out.println("Inventory size:"+list.size()+"  timing: "+(t2-t0)/1000.0+"sec, execute:"+(t1-t0)/1000.0+"sec, "+(t2-t1)/(float)(list.size())+" ms/item");
 			}
 		} finally {
 			_sim.getDataSource().releaseConnection();
