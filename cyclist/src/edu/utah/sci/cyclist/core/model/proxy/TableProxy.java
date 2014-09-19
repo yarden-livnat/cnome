@@ -15,10 +15,10 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
-import edu.utah.sci.cyclist.core.model.Nuclide;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
+import edu.utah.sci.cyclist.neup.model.Nuclide;
 
 public class TableProxy {
 	

@@ -6,7 +6,7 @@ import java.sql.Types;
 import java.util.function.Function;
 
 import edu.utah.sci.cyclist.core.model.Blob;
-import edu.utah.sci.cyclist.core.model.Nuclide;
+import edu.utah.sci.cyclist.neup.model.Nuclide;
 
 
 public class SQLUtil {
@@ -14,7 +14,7 @@ public class SQLUtil {
 	  // TODO: replace with an abstract factory and register these functions.
 	  //       will need both the function and a condition for selecting it (based on the rmd and col num)
 	  static private Function<Object, Object> noop = o->{return o;};
-	  static private Function<Object, Object> nuclide =  o -> { return new Nuclide(o); };
+	  static private Function<Object, Object> nuclide =  o -> { return Nuclide.create(o); };
 	  static private Function<Object, Object> blob = o -> { return new Blob((byte[]) o); };
 	  
 	  
