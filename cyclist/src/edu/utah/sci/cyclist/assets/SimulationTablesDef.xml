@@ -39,7 +39,7 @@
 			<field name="QualID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="NucID" >
+			<field name="NucID" semantic="Nuclide">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="MassFrac">
@@ -280,7 +280,7 @@
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="NucID" >
+			<field name="NucID" semantic="Nuclide">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="AgentID" semantic="AgentID">
@@ -308,7 +308,7 @@
 			<field name="Quantity" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="NucID" >
+			<field name="NucID" semantic="Nuclide">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="AgentID" semantic="AgentID">

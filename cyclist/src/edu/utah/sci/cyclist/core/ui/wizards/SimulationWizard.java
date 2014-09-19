@@ -24,6 +24,7 @@ package edu.utah.sci.cyclist.core.ui.wizards;
  *******************************************************************************/
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
@@ -81,6 +82,8 @@ import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
  * Also controls the creation/editing of data sources.
  */
 public class SimulationWizard extends TilePane {
+
+	private static String SIMULATION_INFO_QUERY = "select initialYear, initialMonth, Duration from Info where SimID=?";
 
 	// GUI elements
 	private Stage                       _dialog;
@@ -203,17 +206,16 @@ public class SimulationWizard extends TilePane {
 		buttonsVbox.getChildren().addAll(addButton,editButton,removeButton);
 		
 		Button selectionButton = new Button("Connect");
-			
 		selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
 				setDbUpdate(true,_current);
-				_dsIsValid.addListener(new ChangeListener<Boolean>(){
-					@Override
-					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
-						selectConnection(_current,newVal);
-					}
-				});
+ 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
+ 					@Override
+ 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+ 						selectConnection(_current,newVal);
+ 					}
+ 				});
 			}			
 		});
 //		_statusDisplay = new ImageView();
@@ -382,20 +384,9 @@ public class SimulationWizard extends TilePane {
 		
 		
 			try (Connection conn = ds.getConnection()) {
-				//Check the SimID field type
-//				Boolean _isBlob = false;
-//				if(ds.isSQLite()){
-//					_isBlob = isBlob(conn);
-//				}
 				_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 				Statement stmt = conn.createStatement();
 				ResultSet rs = null;
-	//			if(_isBlob){
-	//				//If the field is a BLOB - fetch it in a string format.
-	//				rs = stmt.executeQuery(SIMULATION_ID_BLOB_QUERY);
-	//			}else{
-	//				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
-	//			}
 				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 				while (rs.next()) {
 					 Blob simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
@@ -436,7 +427,6 @@ public class SimulationWizard extends TilePane {
 		}
 	}
 	
-	
 	private Boolean runDbUpdate(CyclistDatasource ds){
 		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
 			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
@@ -458,48 +448,24 @@ public class SimulationWizard extends TilePane {
 				DoubleProperty progress = new SimpleDoubleProperty();
 				progress.bind(task.progressProperty());
 					
-//				progress.addListener(new ChangeListener<Number>() {
-//					@Override
-//					public void changed(ObservableValue<? extends Number> arg0, Number oldVal, Number newVal) {
-//						if(newVal != oldVal  ){
-//							if(newVal.doubleValue()>=0.0 && newVal.doubleValue() <1.0){
-//								_animation.play();
-//							}else if(newVal.doubleValue() >= 1){
-//								_animation.stop();
-//							}
-//						}
-//					}
-//				});
+				progress.addListener(new ChangeListener<Number>() {
+					@Override
+					public void changed(ObservableValue<? extends Number> arg0, Number oldVal, Number newVal) {
+						if(newVal != oldVal  ){
+							if(newVal.doubleValue()>=0.0 && newVal.doubleValue() <1.0){
+								_animation.play();
+							}else if(newVal.doubleValue() >= 1){
+								_animation.stop();
+							}
+						}
+					}
+				});
 			}
 			
 		}
 		return true;
 	}
-	
-	/*
-	 * Checks if the simID field type is BLOB.
-	 * @param - Connection conn: the connection to the database.
-	 * @return Boolean - true if BLOB, false if another type.
-	 */
-	private Boolean isBlob(Connection conn){
-		Statement stmt;
-		try {
-			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(INFO_TABLE_DATA);
-			while (rs.next()) {
-				String fieldName = rs.getString("name");
-				if(fieldName.toLowerCase().equals(SIMULATION_ID_FIELD_NAME.toLowerCase())){
-					return( rs.getString("type").equals("BLOB"));
-				}
-			}
-			return false;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
+
 	private void updateSimulation() {
 		List<SimInfo> simulations = _simulationsTbl.getSelectionModel().getSelectedItems();
 		_selection.clear();
@@ -513,6 +479,7 @@ public class SimulationWizard extends TilePane {
 					alias = simId.toString();
 				}
 				simulation.setAlias(alias);
+				fetchSimulationInfo(simulation);
 				_selection.add(simulation);
 			}
 		}
@@ -528,6 +495,23 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	public void setWorkDir(String workDir){
+	}
+		
+	private void fetchSimulationInfo(Simulation sim) {
+		try (Connection conn = sim.getDataSource().getConnection()) {
+			PreparedStatement stmt = conn.prepareStatement(SIMULATION_INFO_QUERY);
+			stmt.setBytes(1, sim.getSimulationId().getData());
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				sim.setStartYear(rs.getInt(1));
+				sim.setStartMonth(rs.getInt(2));
+				sim.setDuration(rs.getInt(3));
+			}
+		} catch (SQLException e) {
+			System.out.println("Error fetching simulation information:"+e.getMessage());
+		} finally {
+			sim.getDataSource().releaseConnection();
+		}
 	}
 	
 	public static class SimInfo {

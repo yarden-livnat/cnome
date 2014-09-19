@@ -9,6 +9,6 @@
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/controlsfx-8.0.4-dev.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.0-20130827.035027-1.jar"/>
+	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.5-pre1.jar" sourcepath="/Users/yarden/.m2/repository/org/xerial/sqlite-jdbc/3.8.5-pre1/sqlite-jdbc-3.8.5-pre1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

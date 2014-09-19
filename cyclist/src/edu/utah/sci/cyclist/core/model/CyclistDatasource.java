@@ -210,8 +210,8 @@ public class CyclistDatasource implements DataSource {
 	
 	public void releaseConnection() {
 		if (isSQLite()) {
-//			System.out.println("sqlite: release")
-;			_SQLiteSemaphore.release();
+//			System.out.println("sqlite: release");
+			_SQLiteSemaphore.release();
 		}
 	}
 	

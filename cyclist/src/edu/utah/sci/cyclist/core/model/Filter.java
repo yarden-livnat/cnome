@@ -228,10 +228,6 @@ public class Filter implements Observable {
 		}
 	}
 	
-	private Boolean isBlob(String item){
-		return (item.indexOf("X'") == 0 && item.lastIndexOf("'")== item.length()-1);
-	}
-	
 	public boolean isActive() {
 		boolean active = true;
 		if (getValues() == null || _selectedItems.size() == getValues().size()) {
@@ -270,7 +266,9 @@ public class Filter implements Observable {
 			
 						if (item instanceof String) {
 							builder.append("'").append(item.toString()).append("'");
-						} else
+						} else if (item instanceof CyclistData) {
+							builder.append(((CyclistData)item).sqlValue());
+						} else 
 							builder.append(item.toString());
 					}
 					builder.append(")");

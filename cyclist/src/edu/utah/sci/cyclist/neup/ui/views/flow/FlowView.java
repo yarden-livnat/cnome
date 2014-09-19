@@ -142,6 +142,7 @@ public class FlowView extends CyclistViewBase {
 		
 		fetchFacilities();
 		fetchFilterValues();
+//		_rangeField.setRange(new Range<Integer>(1, currentSim.getDuration()));
 	}
 	
 	private void fetchFacilities() {
@@ -237,7 +238,8 @@ public class FlowView extends CyclistViewBase {
 				list.add(node);
 		}
 		
-		queryTransactions(list);	
+		if (list.size() > 0)
+			queryTransactions(list);	
 	}
 	
 	private void removeAllConnectors() {
@@ -371,8 +373,13 @@ public class FlowView extends CyclistViewBase {
 			if (inventory == null) {
 				queryInventory(node).addListener((Observable o)->{
 					ObjectProperty<ObservableList<Inventory>> p = (ObjectProperty<ObservableList<Inventory>>) o;
+					long t0 = System.currentTimeMillis();
 					entry.setInventory(p.get());
+					long t1 = System.currentTimeMillis();
 					addToChart(entry, p.get());
+					long t2 = System.currentTimeMillis();
+					
+					System.out.println("inventory processing: "+(t1-t0)/1000.0+"  "+(t2-t1)/1000.0);
 				});
 				
 			} else {

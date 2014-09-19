@@ -65,6 +65,7 @@ import edu.utah.sci.cyclist.core.model.Indicator;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
+import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
@@ -87,8 +88,8 @@ public class ChartView extends CyclistViewBase {
 	private ViewType _viewType;
 	private boolean _active = true;
 
-	//        private MarkType _markType;
-
+	private TableProxy _tableProxy = null;
+	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
 
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
@@ -144,9 +145,7 @@ public class ChartView extends CyclistViewBase {
 			_lodArea.getFields().add(field.clone());
 		}
 
-
 		getFiltersArea().copy(other.getFiltersArea());
-
 	}
 
 	public void setActive(boolean state) {
@@ -208,6 +207,7 @@ public class ChartView extends CyclistViewBase {
 		}
 
 		if (table != getCurrentTable()) {
+			_tableProxy = new TableProxy(table);
 			invalidateChart();
 			_currentTableProperty.set(table);
 		}
@@ -335,7 +335,7 @@ public class ChartView extends CyclistViewBase {
 				Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
 					@Override
 					protected ObservableList<TableRow> call() throws Exception {
-						return getCurrentTable().getRows(ds, builder.toString());
+						return _tableProxy.getRows(ds, builder.toString());
 					}
 				};
 				
@@ -743,7 +743,8 @@ public class ChartView extends CyclistViewBase {
 			break;
 		case LINE:
 			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
-			//                        lineChart.setCreateSymbols(false);
+			lineChart.setCreateSymbols(false);
+			lineChart.getStyleClass().add("line-chart");
 			setChart(lineChart);
 			break;
 		case SCATTER_PLOT:
@@ -757,9 +758,8 @@ public class ChartView extends CyclistViewBase {
 
 		}
 
-		//                chart.setCreateSymbols(false);
-		//                chart.setLegendVisible(false);
-		//                
+		// chart.setLegendVisible(false);
+		               
 		if (getChart() != null) {
 			getChart().setAnimated(false);
 			getChart().setHorizontalZeroLineVisible(false);
@@ -1069,14 +1069,14 @@ public class ChartView extends CyclistViewBase {
 
 		//                grid.getColumnConstraints().add(new ColumnConstraints(17));
 
-		grid.getColumnConstraints().add(new ColumnConstraints(20));
+		grid.getColumnConstraints().add(new ColumnConstraints(50));
 		cc = new ColumnConstraints();
 		cc.setHgrow(Priority.SOMETIMES);
 		grid.getColumnConstraints().add(cc);
 
 		_xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
 		_yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.ALL);
-		_lodArea = createControlArea(grid, "LOD", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
+		_lodArea = createControlArea(grid, "Group by", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 		//                _lodArea = createControlArea(grid, "LOD", 0, 3, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
 		//                _indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
 		//                Button swapButton = new Button("", new ImageView(Resources.getIcon("swap")));
