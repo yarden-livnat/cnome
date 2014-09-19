@@ -12,6 +12,10 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 
 import org.apache.commons.io.FileUtils;
@@ -98,7 +102,7 @@ public class SimulationTablesPostProcessor {
 			+ "		base.SimID = ag.SimID "
 			+ " AND base.AgentId = ag.AgentId";
 	
-	private static String[] UpdateTablesRunningOrderTbl = 
+	private static String[] UpdateTablesRunningOrderTbl1 = 
 	{
 		FIX_AGENTS_TABLE_PHASE1,
 		FIX_AGENTS_TABLE_PHASE2,
@@ -111,6 +115,20 @@ public class SimulationTablesPostProcessor {
 	    QUANTITY_TRANSACTED_VIEW_CREATE,
 	    UPDATED_INDICATION_TABLE_CREATE,
 	};
+	
+	private QueryOperation[] UpdateTablesRunningOrderTbl = 
+		{
+			 new QueryOperation("Fix \"Agents\" table phase #1",FIX_AGENTS_TABLE_PHASE1),
+		     new QueryOperation("Fix \"Agents\" table phase #2",FIX_AGENTS_TABLE_PHASE2),
+		     new QueryOperation("Create \"Facilitites\" table",FACILITIES_TABLE_CREATE),
+		     new QueryOperation("Update \"Facilitites\" table",FACILITIES_TABLE_UPDATE),
+		     new QueryOperation("Create \"Facilitites\" index",FACILITIES_TABLE_INDEX),
+		     new QueryOperation("Create base table \"QuantityInventoryBase\"",QUANTITY_INVENTORY_BASE_CREATE),
+		     new QueryOperation("Create view \"QuantityInventory\"",QUANTITY_INVENTORY_VIEW_CREATE),
+		     new QueryOperation("Create base table \"QuantityTransactedBase\"",QUANTITY_TRANSACTED_BASE_CREATE),
+		     new QueryOperation("Create view \"QuantityTransacted\"",QUANTITY_TRANSACTED_VIEW_CREATE),
+		     new QueryOperation("Create table \"UpdatedIndication\"",UPDATED_INDICATION_TABLE_CREATE)
+		};
 	
 	private static final Map<String,String> applicationsMap;
     static
@@ -127,10 +145,27 @@ public class SimulationTablesPostProcessor {
     	applicationsMap.put("linux-arm", "cycpost-linux-arm");
     }
     
-	public static Task<Boolean> process(CyclistDatasource ds){
-		 Task<Boolean> task = new Task<Boolean>() {
+    private static ObjectProperty<String> _message = new SimpleObjectProperty<String>("");
+    private static ObjectProperty<Double> _progress = new SimpleObjectProperty<Double>(-1.0);
+    
+	public Task<Boolean> process(CyclistDatasource ds){ 
+		Task<Boolean> task = new Task<Boolean>() {
 	         @Override protected Boolean call() throws Exception {
-	        	 return processTask(ds);
+	        	 Boolean result = false;
+	        	 _message.addListener(new ChangeListener<String>() {	 
+	 		        @Override 
+	 		        public void changed(ObservableValue<? extends String> arg0,String oldVal, String newVal) {
+	 		        	updateMessage(_message.getValue());
+	 		        }
+	 		    });
+//	        	_progress.addListener(new ChangeListener<Double>() {	 
+//		 		        @Override 
+//		 		        public void changed(ObservableValue<? extends Double> arg0,Double oldVal, Double newVal) {
+//		 		        	updateProgress(newVal, 1.0);
+//		 		        }
+//		 		});
+	        	result= processTask(ds);
+	        	return result;
 	         }
 		 };
 		 Thread th = new Thread(task);
@@ -139,7 +174,7 @@ public class SimulationTablesPostProcessor {
 	     return task;
 	}
     
-    public static Boolean processTask(CyclistDatasource ds){
+    public Boolean processTask(CyclistDatasource ds){
 		Logger log = Logger.getLogger(SimulationTablesPostProcessor.class);
 		Boolean isUpdated = false;
 		Connection conn = null;
@@ -163,6 +198,7 @@ public class SimulationTablesPostProcessor {
 		//
 		if(!isUpdated){
 			Boolean result = true;
+//			_progress.setValue(0.0);
 			String dsPath = ds.getProperties().getProperty("path");
 			//Save the current db in a temporary file
 			String savedPath = saveSqliteFile(dsPath);
@@ -176,7 +212,8 @@ public class SimulationTablesPostProcessor {
 				//If one of the updates has failed - roll back to the saved database.
 				if(!result){
 					cancelDbChanges(savedPath,dsPath);
-					log.warn("Update database failed!");
+					_message.setValue("Update database failed!");
+//					log.warn("Update database failed!");
 				}else{
 					//No need for the saved file anymore.
 					File file = new File(savedPath);
@@ -184,11 +221,16 @@ public class SimulationTablesPostProcessor {
 						file.delete();
 					}
 				}
+//				_progress.setValue(1.0);
+				_message.setValue("Done!");
 				return result;
 			}
+//			_progress.setValue(1.0);
 			return false;
 		}else{
-			log.warn("database is already updated");
+			_message.setValue("database is already updated");
+//			log.warn("database is already updated");
+//			_progress.setValue(1.0);
 			return true;
 		}
 	}
@@ -279,6 +321,7 @@ public class SimulationTablesPostProcessor {
 	 * @param : CyclistDatasource ds - the data source to work on.
 	 */
 	private static Boolean updateSqliteSimTables(CyclistDatasource ds, Logger log){
+		_message.setValue("Running external application");
 		String dsPath = ds.getProperties().getProperty("path");
 		
 		String currPath = Resources1.getCurrentPath();
@@ -293,12 +336,14 @@ public class SimulationTablesPostProcessor {
 		}
 		
 		String os = OsUtil.getOsDef();
+		_message.setValue("Running external application. os="+os);
 		String app = applicationsMap.get(os);
 		
 		Process process = null;
 		
 		if(app == null || app.isEmpty()){
-			log.warn("No app has been found for os: " + os );
+//			log.warn("No app has been found for os: " + os );
+			_message.setValue("No app has been found for os: " + os);
 			return false;
 		}
 		
@@ -313,7 +358,8 @@ public class SimulationTablesPostProcessor {
 		        file.setWritable(true, false);
 		}
 		
-		log.warn("path= " + currPath);
+//		log.warn("path= " + currPath);
+		_message.setValue("path= " + currPath);
 			
 		//Indication whether or not the new tables have been produced.
 	    Boolean isAlreadyProcessed = false;
@@ -327,7 +373,8 @@ public class SimulationTablesPostProcessor {
 			    String line;
 			    
 			    while ((line = br.readLine()) != null) {
-			      log.warn(line);
+			      _message.setValue(line);
+//			      log.warn(line);
 			      //Tables already exist - no need to reproduce additional tables.
 			      if(line.indexOf("post processed") > -1){
 //			    	  //If reached here the "UpdatedIndication" table doesn't exit. It means some of the other tables
@@ -357,16 +404,20 @@ public class SimulationTablesPostProcessor {
 	 * @param conn - the connection to the database.
 	 * @return true if succeed , false if fails.
 	 */
-	private static Boolean createAdditionalTables(CyclistDatasource ds){
+	private Boolean createAdditionalTables(CyclistDatasource ds){
 		Statement stmt;
 		Connection conn = null;
 		
 		try {
 			conn = ds.getConnection();
 			stmt = conn.createStatement();
-			for(String queryName : UpdateTablesRunningOrderTbl){
-				stmt.executeUpdate(queryName);
-				System.out.println("query = " + queryName);
+			_message.setValue("running queries");
+			double index = 0.1;
+			for(QueryOperation queryOp : UpdateTablesRunningOrderTbl){
+//				_progress.setValue(0.4+index);
+//				index += 0.05;
+				_message.setValue("running query: " + queryOp.name);
+				stmt.executeUpdate(queryOp.query);
 			}
 			return true;
 		} catch (SQLException e) {
@@ -381,5 +432,14 @@ public class SimulationTablesPostProcessor {
 			}
 			ds.releaseConnection();
 		}
+	}
+	
+	public class QueryOperation{
+		public QueryOperation(String name,String query){
+			this.name = name;
+			this.query = query;
+		}
+		public String name;
+		public String query;
 	}
 }

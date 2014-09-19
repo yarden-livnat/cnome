@@ -432,9 +432,9 @@ public class SimulationWizard extends TilePane {
 			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
 			Task<Boolean> task = postProcessor.process(ds);
 			if(task != null){
-				ObjectProperty<Boolean> taskEnded = new SimpleObjectProperty<Boolean>(false);
-				taskEnded.bind(task.valueProperty());
-				taskEnded.addListener(new ChangeListener<Boolean>() {
+				ObjectProperty<Boolean> taskValue = new SimpleObjectProperty<Boolean>(false);
+				taskValue.bind(task.valueProperty());
+				taskValue.addListener(new ChangeListener<Boolean>() {
 					 
 			        @Override 
 			        public void changed(ObservableValue<? extends Boolean> arg0,Boolean oldVal, Boolean newVal) {
@@ -445,21 +445,21 @@ public class SimulationWizard extends TilePane {
 				
 				_statusLabel.textProperty().bind(task.messageProperty());
 				
-				DoubleProperty progress = new SimpleDoubleProperty();
-				progress.bind(task.progressProperty());
+//				DoubleProperty progress = new SimpleDoubleProperty();
+//				progress.bind(task.progressProperty());
 					
-				progress.addListener(new ChangeListener<Number>() {
-					@Override
-					public void changed(ObservableValue<? extends Number> arg0, Number oldVal, Number newVal) {
-						if(newVal != oldVal  ){
-							if(newVal.doubleValue()>=0.0 && newVal.doubleValue() <1.0){
-								_animation.play();
-							}else if(newVal.doubleValue() >= 1){
-								_animation.stop();
-							}
-						}
-					}
-				});
+//				progress.addListener(new ChangeListener<Number>() {
+//					@Override
+//					public void changed(ObservableValue<? extends Number> arg0, Number oldVal, Number newVal) {
+//						if(newVal != oldVal  ){
+//							if(newVal.doubleValue()>=0.0 && newVal.doubleValue() <1.0){
+//								_animation.play();
+//							}else if(newVal.doubleValue() >= 1){
+//								_animation.stop();
+//							}
+//						}
+//					}
+//				});
 			}
 			
 		}

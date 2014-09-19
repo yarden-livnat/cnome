@@ -18,7 +18,6 @@ public class OsUtil {
 		String osFormatted = convertOs(os);
 		String osArc = System.getProperty("os.arch").toLowerCase();
 		String osArcFormatted = convertOsArc(osArc);
-		log.warn("os= " + os + " arch= " + osArc);
 		
 		return osFormatted+"-"+osArcFormatted;
 	}

@@ -34,6 +34,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -322,7 +323,7 @@ public class DatatableWizard extends TilePane {
 		_sourcesView.getSelectionModel().selectFirst();
 		//_sourcesView.getSelectionModel().clearAndSelect(0);
 		
-		_updateDialog = new UpdateDbDialog();
+		_updateDialog = new UpdateDbDialog(null,null);
 		
 		// Return the scene
 		return scene;
@@ -350,7 +351,8 @@ public class DatatableWizard extends TilePane {
 		_tablesView.getItems().clear();
 		
 		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
-			dsIsValid = SimulationTablesPostProcessor.process(ds);
+			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
+			Task task = postProcessor.process(ds);
 			setDbUpdateWait(false, ds);
 		}
 		
