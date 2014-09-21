@@ -37,7 +37,7 @@ public class InstitutionViewTool implements Tool {
 	@Override
 	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null)
-			_presenter = new InstitutionViewPresenter(bus);
+			_presenter = new ViewPresenter(bus);
 		return _presenter;
 	}
 

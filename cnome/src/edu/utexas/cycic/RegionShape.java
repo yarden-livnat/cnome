@@ -53,42 +53,42 @@ public class RegionShape extends Rectangle {
 	}
 
 	static RegionShape addRegion(final String name, final regionNode region) {
-		final RegionShape circle = new RegionShape();
+		final RegionShape rect = new RegionShape();
 		
 		RegionCorralView.workingRegion = region;
 		
 		// Set properties of regionNode
 		region.name = name;
 		
-		circle.setWidth(80);
-		circle.setHeight(80);
-		circle.setX(50);
-		circle.setY(50);
-		circle.setStroke(Color.DARKGRAY);
-		circle.setStrokeWidth(5);
+		rect.setWidth(80);
+		rect.setHeight(80);
+		rect.setX(50);
+		rect.setY(50);
+		rect.setStroke(Color.DARKGRAY);
+		rect.setStrokeWidth(5);
 		
-		circle.name = name;
-		circle.text.setText(name);
-		circle.text.setLayoutX(circle.getX()+circle.getHeight()*0.2);
-		circle.text.setLayoutY(circle.getY()+circle.getHeight()*0.2);	
-		circle.text.setMaxWidth(circle.getWidth()*0.8);
-		circle.text.setMaxHeight(circle.getHeight()*0.8);
-		circle.text.setMouseTransparent(true);
-		circle.text.setFont(new Font(14));
-		circle.text.setWrapText(true);
+		rect.name = name;
+		rect.text.setText(name);
+		rect.text.setLayoutX(rect.getX()+rect.getHeight()*0.2);
+		rect.text.setLayoutY(rect.getY()+rect.getHeight()*0.2);	
+		rect.text.setMaxWidth(rect.getWidth()*0.8);
+		rect.text.setMaxHeight(rect.getHeight()*0.8);
+		rect.text.setMouseTransparent(true);
+		rect.text.setFont(new Font(14));
+		rect.text.setWrapText(true);
 		
 		// Set circle color
-		circle.rgbColor=VisFunctions.stringToColor((String)circle.name);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
+		rect.rgbColor=VisFunctions.stringToColor((String)rect.name);
+		rect.setFill(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2)));
 
 		// Setting font color for visibility //
-		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setTextFill(Color.BLACK);
+		if(VisFunctions.colorTest(rect.rgbColor) == true){
+			rect.text.setTextFill(Color.BLACK);
 		}else{
-			circle.text.setTextFill(Color.WHITE);
+			rect.text.setTextFill(Color.WHITE);
 		}
 		
-		circle.setEffect(VisFunctions.lighting);
+		rect.setEffect(VisFunctions.lighting);
 
 		//Adding the circle's menu and its functions.
 
@@ -101,7 +101,7 @@ public class RegionShape extends Rectangle {
 
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
-				deleteRegion(circle, region);
+				deleteRegion(rect, region);
 			}
 		};
 		MenuItem delete = new MenuItem("Delete");
@@ -109,7 +109,7 @@ public class RegionShape extends Rectangle {
 
 		EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent exitEvent) {
-				circle.menuBar.setVisible(false);
+				rect.menuBar.setVisible(false);
 			}
 		};
 		MenuItem exit = new MenuItem("Exit");
@@ -118,18 +118,18 @@ public class RegionShape extends Rectangle {
 		final Menu menu = new Menu("Options");
 		menu.getItems().addAll(regionForm, delete, exit);		
 
-		circle.menuBar.getMenus().add(menu);
-		circle.menuBar.setLayoutX(circle.getX());
-		circle.menuBar.setLayoutY(circle.getY());
-		circle.menuBar.setVisible(false);
+		rect.menuBar.getMenus().add(menu);
+		rect.menuBar.setLayoutX(rect.getX());
+		rect.menuBar.setLayoutY(rect.getY());
+		rect.menuBar.setVisible(false);
 
-		circle.onMouseClickedProperty().set(new EventHandler <MouseEvent>(){
+		rect.onMouseClickedProperty().set(new EventHandler <MouseEvent>(){
 			@Override
 			public void handle(MouseEvent menuEvent){
 				if(menuEvent.getButton().equals(MouseButton.SECONDARY)){
-					circle.menuBar.setVisible(true);
-					circle.menuBar.setLayoutX(circle.getX());
-					circle.menuBar.setLayoutY(circle.getY());
+					rect.menuBar.setVisible(true);
+					rect.menuBar.setLayoutX(rect.getX());
+					rect.menuBar.setLayoutY(rect.getY());
 				}
 				
 				if(menuEvent.getClickCount() == 2){
@@ -142,15 +142,15 @@ public class RegionShape extends Rectangle {
 					}
 				}
 				
-				circle.setEffect(VisFunctions.lighting);
-				circle.setStrokeWidth(5);
-				circle.setStroke(Color.DARKGRAY);
+				rect.setEffect(VisFunctions.lighting);
+				rect.setStrokeWidth(5);
+				rect.setStroke(Color.DARKGRAY);
 				
 			}
 		});
 		
 		// Allows a shift + (drag and drop) to start a new RegionView for this RegionShape.
-		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
+		rect.setOnDragDetected(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent regionViewEvent){
 				if(regionViewEvent.isShiftDown() == true){
@@ -160,7 +160,7 @@ public class RegionShape extends Rectangle {
 					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 					clipboard.put(DnD.TOOL_FORMAT, Tool.class, new RegionViewTool());
 					
-					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
+					Dragboard db = rect.startDragAndDrop(TransferMode.COPY);
 					ClipboardContent content = new ClipboardContent();				
 					content.put( DnD.TOOL_FORMAT, "Region View");
 					db.setContent(content);
@@ -170,7 +170,7 @@ public class RegionShape extends Rectangle {
 			}
 		});
 		
-		return circle;	
+		return rect;	
 	};
 
 	static void deleteRegion(RegionShape circle, regionNode region){

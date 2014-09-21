@@ -150,8 +150,7 @@ public class OutPut {
 			name.setTextContent(facility.facilityType.split(" ")[1]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
-		}
-		
+		}	
 		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");

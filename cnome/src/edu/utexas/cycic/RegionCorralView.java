@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.controlsfx.dialog.Dialogs;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -25,6 +27,7 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -44,9 +47,40 @@ public class RegionCorralView extends ViewBase {
 	static Pane corralPane = new Pane(){
 		{
 			setPrefHeight(375);
-			//setMaxHeight(375);
 			setPrefWidth(630);
-			//setMaxWidth(630);
+			setOnDragDropped(new EventHandler<DragEvent>(){
+				public void handle(DragEvent event){
+					if(event.getDragboard().hasContent(DnD.VALUE_FORMAT)){
+						regionNode region = new regionNode();
+						region.type = event.getDragboard().getContent(DnD.VALUE_FORMAT).toString();
+						region.type.trim();
+						for (int i = 0; i < DataArrays.simRegions.size(); i++){
+							if(DataArrays.simRegions.get(i).regionName.equalsIgnoreCase(region.type)){
+								region.regionStruct = DataArrays.simRegions.get(i).regionStruct;
+							}
+						}
+						event.consume();
+						/*String response =  Dialogs.create()
+								.title("Name Region")
+								.message("Enter Region Name")
+								.showTextInput();
+						region.name = response;*/
+						FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
+						regionNode.regionCircle = RegionShape.addRegion((String)region.name, region);
+						regionNode.regionCircle.setX(event.getX());
+						regionNode.regionCircle.setY(event.getY());
+						regionNode.regionCircle.text.setLayoutX(event.getX()-regionNode.regionCircle.getWidth()*0.85);
+						regionNode.regionCircle.text.setLayoutY(event.getY()-regionNode.regionCircle.getHeight()*0.85);
+						DataArrays.regionNodes.add(region);
+						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+					}
+				}
+			});
+			setOnDragOver(new EventHandler <DragEvent>(){
+				public void handle(DragEvent event){
+					event.acceptTransferModes(TransferMode.ANY);
+				}
+			});
 		}
 	};
 
@@ -63,7 +97,7 @@ public class RegionCorralView extends ViewBase {
 	}
 	public RegionCorralView() {
 		
-		if (CycicScenarios.workingCycicScenario.simRegions.size() < 1) {
+		if (DataArrays.simRegions.size() < 1) {
 			String string;
 			for(int i = 0; i < XMLReader.regionList.size(); i++){
 				StringBuilder sb = new StringBuilder();

@@ -34,6 +34,8 @@ public class RegionView extends ViewBase{
 	 */
 	public RegionView(){
 		super();
+		TITLE = (String) RegionView.workingRegion.name;
+		
 		//Institution list view for the region.
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
@@ -85,27 +87,6 @@ public class RegionView extends ViewBase{
 			}
 		});
 		topGrid.add(button, 2, 0);
-		
-		// Code section to add new facility to region.
-		/*final ComboBox<String> addNewFacilityBox = new ComboBox<String>();
-		addNewFacilityBox.setOnMousePressed(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent e){
-				addNewFacilityBox.getItems().clear();
-				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					addNewFacilityBox.getItems().add((String)node.name);
-				}
-			}
-		});
-		
-		Button addAvailFac = new Button();
-		addAvailFac.setText("Add Facility Prototype to Region");
-		addAvailFac.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				workingRegion.availFacilities.add(addNewFacilityBox.getValue());
-				for (String facility: workingRegion.availFacilities){
-				}
-			}
-		});*/
 		
 		// Code to add new institution to region.
 		final ComboBox<String> addNewInstitBox = new ComboBox<String>();
@@ -162,9 +143,9 @@ public class RegionView extends ViewBase{
 		HBox regionBox = new HBox();
 		regionBox.getChildren().addAll(regionSideBar, regionGridBox);
 		
+		setTitle(TITLE);
 		setContent(regionBox);
-		setPrefSize(600,400);
-		
+		setPrefSize(600,400);		
 		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
 		
 	}
@@ -176,6 +157,7 @@ public class RegionView extends ViewBase{
 	private int columnNumber = 0;
 	private int columnEnd = 0;
 	private int userLevel = 0;
+	public static String TITLE;
 	static regionNode workingRegion;
 
 	/**

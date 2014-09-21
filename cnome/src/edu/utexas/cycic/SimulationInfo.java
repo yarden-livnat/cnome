@@ -124,7 +124,7 @@ public class SimulationInfo extends ViewBase{
 	static HBox simControlBox = new HBox(){
 		{
 			setStyle("-fx-font-size: 12;");
-			getChildren().addAll(simDetailBox, commodBox);
+			getChildren().addAll(commodBox, simDetailBox);
 		}
 	};
 

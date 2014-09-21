@@ -199,6 +199,7 @@ public class RecipeForm extends ViewBase{
 				}
 			});
 		}
+		isoWeightFrac.setPromptText("0.0");
 		recipeGrid.add(isoWeightFrac, 3, rowNumber);
 		recipeGrid.add(removeIsotope(recipe, isoData), 4, rowNumber);
 		recipe.Composition.add(isoData);

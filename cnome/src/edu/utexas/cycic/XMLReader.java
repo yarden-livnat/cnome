@@ -28,10 +28,12 @@ public class XMLReader {
 		{
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
-			//add(":cycamore:BatchReactor");
+			add(":cycamore:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
+			add(":agents:Source");
+			add(":agents:Sink");
 			add(":agents:KFacility");
 			add(":agents:Prey");
 			add(":agents:Predator");
@@ -52,7 +54,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			//add(":cycamore:DeployInst");
+			add(":cycamore:DeployInst");
 			add(":cycamore:ManagerInst");
 		}
 	};
@@ -130,6 +132,7 @@ public class XMLReader {
 	 * @param dataArray
 	 * @param json
 	 */
+	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){

@@ -42,7 +42,6 @@ public class InstitutionView extends ViewBase{
 	 */
 	public InstitutionView(){
 		super();
-		
 		// Ensures the temporary institution is initiated only once. 
 		if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
 			String string;
@@ -108,7 +107,7 @@ public class InstitutionView extends ViewBase{
 				structureCB.getItems().add("New Institution");
 			}
 		});
-		
+		//InstitutionViewPresenter.newInstitution(structureCB);
 		// Change Listener for structureCB to indicate the selection of a new or saved institution to be loaded.
 		structureCB.valueProperty().addListener(new ChangeListener<String>(){
 			@SuppressWarnings("unchecked")
@@ -172,10 +171,10 @@ public class InstitutionView extends ViewBase{
 					prototypeList.getItems().clear();
 					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
 					for(String facility: workingInstit.availPrototypes) {
-						facilityList.getItems().add(facility);
+						prototypeList.getItems().add(facility);
 					}
 					for (facilityItem prototype: workingInstit.availFacilities) {
-						prototypeList.getItems().add(prototype.name);
+						facilityList.getItems().add(prototype.name + " - " + prototype.number);
 					}
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
 					Label institutionName = new Label("Name");
@@ -312,7 +311,6 @@ public class InstitutionView extends ViewBase{
 		
 		HBox institBox = new HBox();
 		institBox.getChildren().addAll(institSideBar, institGridBox);
-		
 		setContent(institBox);
 
 	}
@@ -334,6 +332,7 @@ public class InstitutionView extends ViewBase{
 	private int columnEnd = 0;
 	private int userLevel = 0;
 	static instituteNode workingInstit;
+	public static String TITLE;
 
 	/**
 	 * This function takes a constructed data array and it's corresponding 
