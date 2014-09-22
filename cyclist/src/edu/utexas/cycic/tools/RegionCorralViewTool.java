@@ -11,7 +11,7 @@ import edu.utexas.cycic.presenter.RegionCorralViewPresenter;
 public class RegionCorralViewTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.RegionCorralViewTool";
-	public static final String TOOL_NAME 	= "Region Corral";
+	public static final String TOOL_NAME 	= "CycIC - Region Corral";
 	public static final AwesomeIcon ICON 	= AwesomeIcon.EYE;
 	
 	private View _view = null;
