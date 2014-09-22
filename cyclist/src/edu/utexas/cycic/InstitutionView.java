@@ -297,12 +297,12 @@ public class InstitutionView extends ViewBase{
 		HBox institSideBar = new HBox();
 		VBox facilitiesBox = new VBox();
 		facilitiesBox.getChildren().addAll(new Label("Starting Facilities"), facilityList);
-		VBox prototypesBox = new VBox();
-		prototypesBox.getChildren().addAll(new Label("Prototypes"), prototypeList);
+		//VBox prototypesBox = new VBox();
+		//prototypesBox.getChildren().addAll(new Label("Prototypes"), prototypeList);
 		institSideBar.setPadding(new Insets(0, 5, 0, 0));
 		institSideBar.setMinWidth(200);
 		institSideBar.setPrefWidth(200);
-		institSideBar.getChildren().addAll(facilitiesBox, prototypesBox);
+		institSideBar.getChildren().addAll(facilitiesBox);
 		
 		
 		VBox institGridBox = new VBox();

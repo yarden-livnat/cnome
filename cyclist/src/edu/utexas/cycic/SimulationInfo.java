@@ -233,7 +233,7 @@ public class SimulationInfo extends ViewBase{
 			}
 		});
 		simInfo.add(output, 0, 5);
-		Button load = new Button();
+		/*Button load = new Button();
 		load.setText("Load");
 		load.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
@@ -243,7 +243,7 @@ public class SimulationInfo extends ViewBase{
 				OutPut.loadFile(file);
 			}
 		});
-		simInfo.add(load, 1, 5);
+		simInfo.add(load, 1, 5);*/
 		buildCommodPane();
 		
 		
