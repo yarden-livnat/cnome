@@ -26,8 +26,8 @@ public class XMLReader {
 	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
-			add(":Brightlite:ReactorFacility");
-			add(":Brightlite:FuelfabFacility");
+			//add(":Brightlite:ReactorFacility");
+			//add(":Brightlite:FuelfabFacility");
 			add(":cycamore:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
@@ -46,6 +46,8 @@ public class XMLReader {
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
 			add(":cycamore:GrowthRegion");
+			add("::agents:NullRegion");
+			
 		}
 	};
 	
@@ -56,11 +58,12 @@ public class XMLReader {
 		{
 			add(":cycamore:DeployInst");
 			add(":cycamore:ManagerInst");
+			add(":agents:NullInst");
 		}
 	};
 	
 	/**
-	 * 
+	 * Test for schema
 	 */
 	static String test = "<interleave><element name=\"in_commods\"><oneOrMore><element name=\"val\">" +  
 			"<data type=\"token\" /></element></oneOrMore></element><element name=\"capacity\">"+
@@ -68,7 +71,7 @@ public class XMLReader {
 			"</element></optional></interleave>";
 	
 	/**
-	 * 
+	 * Test for annotations
 	 */
 	static String jsonTest = "{"+
 		"\"doc\" : \"A minimum implementation sink facility that accepts specified amounts of commodities from other agents\","+
@@ -82,6 +85,11 @@ public class XMLReader {
       	"\"max_inv_size\" : {\"default\" : 1.000000000000000e+299, \"doc\" : \"total maximum inventory size of sink facility\","+
         "\"index\" : 2, \"tooltip\" : \"sink maximum inventory size\", \"type\" : \"double\"}}}";
 	
+	
+	static String deploy = "<oneOrMore><element name=\"buildorder\"><element name=\"prototype\"><data type=\"string\"/>" +           
+						"</element><element name=\"number\"><data type=\"nonNegativeInteger\"/></element><element name=\"date\">" +               
+						"<data type=\"nonNegativeInteger\"/></element></element></oneOrMore>";
+						
 	/**
 	 * 
 	 * @param xmlSchema
