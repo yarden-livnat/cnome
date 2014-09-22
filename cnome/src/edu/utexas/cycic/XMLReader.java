@@ -103,7 +103,7 @@ public class XMLReader {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
+		System.out.print(schema);
 		return schema;
 	}
 	
@@ -236,7 +236,9 @@ public class XMLReader {
 			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
 				try{
 					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
-
+						ArrayList<Object> newArray = new ArrayList<Object>();
+						newArray = nodeListener(nodes.item(i), newArray);
+						array.add(newArray);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
