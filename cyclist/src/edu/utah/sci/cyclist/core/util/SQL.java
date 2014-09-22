@@ -33,7 +33,7 @@ public class SQL {
 	}
 	
 	public static final List<Function> FUNCTIONS = new ArrayList<>();
-	public static final String DEFAULT_FUNCTION = "Avg";
+	public static final String DEFAULT_FUNCTION = "Sum";
 	
 	public enum Functions{VALUE,AVG,SUM,COUNT,COUNT_DISTINCT,MIN,MAX;
 		public String toName() {

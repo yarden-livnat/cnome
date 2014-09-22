@@ -71,11 +71,6 @@ public class NuclideUtils {
 		// Removing first two characters (redundant), for 1 digit nuclides, such
 		// as 2-He-4, the first slash will be removed, and the second attempt to
 		// remove the second slash will do nothing.
-		// nucstr = nucstr.substring(2);
-		// nucstr = pyne::remove_substring(nucstr, "-");
-		// // Does nothing if nuclide is short, otherwise removes the second "-"
-		// instance
-		// nucstr = pyne::remove_substring(nucstr, "-");
 		nucstr = nucstr.replace("-", "");
 
 		int nuclen = nucstr.length();
