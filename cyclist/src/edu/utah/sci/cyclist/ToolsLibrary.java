@@ -26,13 +26,11 @@ import edu.utah.sci.cyclist.core.tools.SimpleToolFactory;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utexas.cycic.tools.CommoditiesViewToolFactory;
 import edu.utexas.cycic.tools.CycicToolFactory;
-import edu.utexas.cycic.tools.FormBuilderToolFactory;
+import edu.utexas.cycic.tools.FacilitySorterToolFactory;
 import edu.utexas.cycic.tools.InstitutionViewToolFactory;
-import edu.utexas.cycic.tools.MarketViewToolFactory;
 import edu.utexas.cycic.tools.RecipeFormToolFactory;
-import edu.utexas.cycic.tools.RegionViewToolFactory;
+import edu.utexas.cycic.tools.RegionCorralViewToolFactory;
 import edu.utexas.cycic.tools.SimulationInfoToolFactory;
 
 public class ToolsLibrary {
@@ -64,13 +62,11 @@ public class ToolsLibrary {
 				"presenter.WorkspacePresenter"),
 		
 		new CycicToolFactory(),
-		new CommoditiesViewToolFactory(),
-		new FormBuilderToolFactory(),
 		new InstitutionViewToolFactory(),
-		new MarketViewToolFactory(),
 		new RecipeFormToolFactory(),
-		new RegionViewToolFactory(),
-		new SimulationInfoToolFactory()
+		new SimulationInfoToolFactory(),
+		new RegionCorralViewToolFactory(),
+		new FacilitySorterToolFactory()
 	};
 	
 	public static ToolFactory findFactory(String name) {

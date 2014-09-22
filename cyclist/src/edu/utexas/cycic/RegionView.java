@@ -21,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
 /**
  * A View Class for generating the form required for interacting with a Cyclus region.
@@ -33,18 +34,8 @@ public class RegionView extends ViewBase{
 	 */
 	public RegionView(){
 		super();
-		// Facility list view for available facilities list of the region
-		final ListView<String> facilityList = new ListView<String>();
-		facilityList.setOrientation(Orientation.VERTICAL);
-		facilityList.setMinHeight(25);
-		facilityList.setOnMousePressed(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent event){
-				if (event.isSecondaryButtonDown()){
-					workingRegion.availFacilities.remove(facilityList.getSelectionModel().getSelectedItem());
-					facilityList.getItems().remove(facilityList.getSelectionModel().getSelectedItem());
-				}
-			}
-		});
+		TITLE = (String) RegionView.workingRegion.name;
+		
 		//Institution list view for the region.
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
@@ -58,17 +49,8 @@ public class RegionView extends ViewBase{
 			}
 		});		
 		// Selection for new or currently built regions.
-		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent e){
-				structureCB.getItems().clear();
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.regionNodes.size(); i++){
-					structureCB.getItems().add((String) CycicScenarios.workingCycicScenario.regionNodes.get(i).name);
-				}
-				structureCB.getItems().add("New Region");
-			}
-		});
 		
-		structureCB.valueProperty().addListener(new ChangeListener<String>(){
+		/*structureCB.valueProperty().addListener(new ChangeListener<String>(){
 			@SuppressWarnings("unchecked")
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				if (newValue == null){
@@ -82,57 +64,29 @@ public class RegionView extends ViewBase{
 					workingRegion.regionStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.regionStructs.get(0);
 					FormBuilderFunctions.formArrayBuilder(workingRegion.regionStruct, workingRegion.regionData);
 					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+					regionNode.regionCircle = RegionShape.addRegion("", workingRegion);
+					RegionCorralView.corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.menuBar, regionNode.regionCircle.text);
 				} else {
 					rowNumber = 0;
 					grid.getChildren().clear();
-					facilityList.getItems().clear();
 					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(structureCB.getItems().indexOf(newValue));
-					for(int i = 0; i < workingRegion.availFacilities.size(); i++){
-						facilityList.getItems().add(workingRegion.availFacilities.get(i));
-					}
+					RegionCorralView.workingRegion = DataArrays.regionNodes.get(structureCB.getItems().indexOf(newValue));
 					for (int i = 0; i < workingRegion.institutions.size(); i++){
 						institList.getItems().add(workingRegion.institutions.get(i));
 					}
 					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
 				}
 			}
-		});
+		});*/
 		
 		Button button = new Button();
-		button.setText("Check Array");
+		button.setText(workingRegion.type);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				System.out.println(workingRegion.regionData);
 			}
 		});
-		
-		topGrid.add(structureCB, 0, 0);
 		topGrid.add(button, 2, 0);
-		
-		// Code section to add new facility to region.
-		final ComboBox<String> addNewFacilityBox = new ComboBox<String>();
-		addNewFacilityBox.setOnMousePressed(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent e){
-				addNewFacilityBox.getItems().clear();
-				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (facilityNode child: node.facilityClones) {
-						addNewFacilityBox.getItems().add((String)child.name);
-					}
-				}
-			}
-		});
-		
-		Button addAvailFac = new Button();
-		addAvailFac.setText("Add Facility Prototype to Region");
-		addAvailFac.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				facilityList.getItems().clear();
-				workingRegion.availFacilities.add(addNewFacilityBox.getValue());
-				for (String facility: workingRegion.availFacilities){
-					facilityList.getItems().add(facility);
-				}
-			}
-		});
 		
 		// Code to add new institution to region.
 		final ComboBox<String> addNewInstitBox = new ComboBox<String>();
@@ -158,12 +112,15 @@ public class RegionView extends ViewBase{
 		});
 		
 		// Setting up the view visuals.
-		topGrid.add(addNewFacilityBox, 0, 2);
-		topGrid.add(addAvailFac, 1, 2);
+		/*topGrid.add(addNewFacilityBox, 0, 2);
+		topGrid.add(addAvailFac, 1, 2);*/
 		topGrid.add(addNewInstitBox, 0, 3);
 		topGrid.add(addInstit, 1, 3);
 		topGrid.setHgap(10);
 		topGrid.setVgap(2);
+		
+		topGrid.add(new Label("Name"), 0, 4);
+		topGrid.add(FormBuilderFunctions.regionNameBuilder(workingRegion), 1, 4);
 		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);
@@ -173,14 +130,12 @@ public class RegionView extends ViewBase{
 		grid.setStyle("-fx-background-color: silver;");
 				
 		HBox regionSideBar = new HBox();
-		VBox facilitiesBox = new VBox();
-		facilitiesBox.getChildren().addAll(new Label("Allowed Facilities"), facilityList);
 		VBox institBox = new VBox();
 		institBox.getChildren().addAll(new Label("Institutions"), institList);
 		regionSideBar.setPadding(new Insets(0, 5, 0, 0));
 		regionSideBar.setMinWidth(200);
 		regionSideBar.setPrefWidth(200);
-		regionSideBar.getChildren().addAll(facilitiesBox, institBox);
+		regionSideBar.getChildren().addAll(institBox);
 		
 		VBox regionGridBox = new VBox();
 		regionGridBox.getChildren().addAll(topGrid, grid);		
@@ -188,23 +143,23 @@ public class RegionView extends ViewBase{
 		HBox regionBox = new HBox();
 		regionBox.getChildren().addAll(regionSideBar, regionGridBox);
 		
+		setTitle(TITLE);
 		setContent(regionBox);
-		setPrefSize(600,400);
+		setPrefSize(600,400);		
+		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
 		
-		if (CycicScenarios.workingCycicScenario.regionStructs.size() < 1) {
-			PracticeRegions.init();
-		}
 	}
 	
-	private ComboBox<String> structureCB = new ComboBox<String>();
+	//private ComboBox<String> structureCB = new ComboBox<String>();
 	private GridPane grid = new GridPane();
 	private GridPane topGrid = new GridPane();
-	private FacilityCircle formNode = null;
 	private int rowNumber = 0;
 	private int columnNumber = 0;
 	private int columnEnd = 0;
 	private int userLevel = 0;
+	public static String TITLE;
 	static regionNode workingRegion;
+
 	/**
 	 * This function takes a constructed data array and it's corresponding facility structure array and creates
 	 * a form in for the structure and data array and facility structure.
@@ -288,10 +243,6 @@ public class RegionView extends ViewBase{
 						}
 					} else {
 						switch ((String) facArray.get(0)) {
-						case "Name":
-							grid.add(FormBuilderFunctions.regionNameBuilder(workingRegion, dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
 						/*case "Incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;
@@ -302,7 +253,7 @@ public class RegionView extends ViewBase{
 							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;*/
 						default:
-							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
+							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 							break;
 						}
@@ -314,6 +265,8 @@ public class RegionView extends ViewBase{
 			}
 		}
 	}
+	
+	
 	
 	/**
 	 * Function to add an orMore button to the form. This button allows the user to add additional fields to zeroOrMore or oneOrMore form inputs.

@@ -71,9 +71,9 @@ public class Clones {
 		
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(clone.rgbColor) == true){
-			clone.text.setFill(Color.WHITE);
+			clone.text.setTextFill(Color.WHITE);
 		}else{
-			clone.text.setFill(Color.BLACK);
+			clone.text.setTextFill(Color.BLACK);
 		}
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
@@ -101,9 +101,9 @@ public class Clones {
 		clone.menu.setVisible(false);
 		// Adding circle.text to be shown in the CYCIC pane.
 		clone.text.setText(name.toString());
-		clone.text.setX(clone.getCenterX()-clone.getRadius()*0.6);
-		clone.text.setY(clone.getCenterY());
-		clone.text.setWrappingWidth(clone.getRadius()*1.6);
+		clone.text.setLayoutX(clone.getCenterX()-clone.getRadius()*0.6);
+		clone.text.setLayoutY(clone.getCenterY());
+		clone.text.setMaxWidth(clone.getRadius()*1.4);
 		clone.text.setMouseTransparent(true);
 		clone.text.setFont(new Font(14));
 		
@@ -170,8 +170,8 @@ public class Clones {
 				}
 				clone.menu.setLayoutX(clone.getCenterX());
 				clone.menu.setLayoutY(clone.getCenterY());
-				clone.text.setX(clone.getCenterX()-clone.getRadius()*0.6);
-				clone.text.setY(clone.getCenterY());
+				clone.text.setLayoutX(clone.getCenterX()-clone.getRadius()*0.6);
+				clone.text.setLayoutY(clone.getCenterY());
 				parentChild.line.setEndX(clone.getCenterX());
 				parentChild.line.setEndY(clone.getCenterY());
 				for(int i = 0; i < DataArrays.Links.size();i++){
@@ -240,6 +240,6 @@ public class Clones {
 				parent.facilityClones.remove(i);
 			}
 		}
-		VisFunctions.reloadPane();
+		VisFunctions.marketHide();
 	}
 }

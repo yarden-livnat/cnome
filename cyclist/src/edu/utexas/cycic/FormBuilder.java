@@ -33,16 +33,12 @@ public class FormBuilder extends ViewBase {
 	public FormBuilder(){
 		super();
 		formNode = Cycic.workingNode;
+		TITLE = (String) Cycic.workingNode.name;
 		
 		formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 		
 		Button button = new Button();
-		button.setText("Check Array");
-		button.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				System.out.println(formNode.facilityData);
-			}
-		});
+		button.setText(formNode.facilityType);
 		for(int i = 0; i < 11; i++){
 			userLevelBox.getItems().add(String.format("%d", i));
 		}
@@ -64,6 +60,9 @@ public class FormBuilder extends ViewBase {
 		topGrid.setHgap(10);
 		topGrid.setVgap(10);
 		
+		topGrid.add(new Label("Name"), 0, 1);
+		topGrid.add(FormBuilderFunctions.nameFieldBuilder(formNode), 1, 1);
+		
 		grid.setAlignment(Pos.BASELINE_CENTER);
 		grid.setVgap(15);
 		grid.setHgap(10);
@@ -72,9 +71,6 @@ public class FormBuilder extends ViewBase {
 		
 		VBox formGrid = new VBox();
 		formGrid.getChildren().addAll(topGrid, grid);
-		/*final ScrollPane sc = new ScrollPane();
-		sc.setStyle("-fx-background-color: silver;");
-		sc.setContent(formGrid);*/
 		
 		// This is a quick hack. 
 		setOnMousePressed(new EventHandler<MouseEvent>(){
@@ -82,7 +78,7 @@ public class FormBuilder extends ViewBase {
 				Cycic.workingNode = formNode;
 			}
 		});
-		
+		setTitle(TITLE);
 		setContent(formGrid);
 	}
 	
@@ -94,6 +90,7 @@ public class FormBuilder extends ViewBase {
 	private int columnNumber = 0;
 	private int columnEnd = 0;
 	private int userLevel= 0;
+	public static String TITLE;
 	
 	/**
 	 * Function builds a button to add a orMore button to the facility form.
@@ -106,7 +103,7 @@ public class FormBuilder extends ViewBase {
 	 */
 	public Button orMoreAddButton(final GridPane grid, final ArrayList<Object> facArray,final ArrayList<Object> dataArray){
 		Button button = new Button();
-		button.setText("Add");
+		button.setText("Add " + facArray.get(0));
 		
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
@@ -162,27 +159,28 @@ public class FormBuilder extends ViewBase {
 				if (facArray.get(2) == "oneOrMore"){
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
+						//grid.add(new Label((String) facArray.get(2)), columnNumber+1, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
 							if ( ii > 0 ) {
-								grid.add(arrayListRemove(grid, dataArray, ii), columnNumber-1, rowNumber);
+								grid.add(arrayListRemove(grid, dataArray, ii), columnNumber+2, rowNumber);
 							}
 							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						
 					}
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
-						rowNumber += 1;
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
@@ -192,6 +190,8 @@ public class FormBuilder extends ViewBase {
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber, rowNumber);
+						rowNumber += 1;
 					}
 				} else if (facArray.get(1) instanceof ArrayList) {
 					if ((int)facArray.get(6) <= userLevel){
@@ -229,29 +229,9 @@ public class FormBuilder extends ViewBase {
 						}
 					} else {
 						// Special form building functions that are used for specific tags
-						switch ((String) facArray.get(0).toString().toLowerCase()) {
-						case "name":
-							grid.add(FormBuilderFunctions.nameFieldBuilder(formNode, dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
-						case "incommodity":
-							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "outcommodity":
-							grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "inrecipe": case "outrecipe": case "recipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "commodity":
-							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
-							break;
-						default:
-							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
-						}
+						FormBuilderFunctions.cycicTypeTest(grid, formNode, facArray, dataArray, columnNumber, rowNumber);
 					}
+					columnEnd = 2 + columnNumber;
 					grid.add(FormBuilderFunctions.unitsBuilder((String)facArray.get(3)), columnEnd, rowNumber);
 					columnEnd = 0;
 					rowNumber += 1;

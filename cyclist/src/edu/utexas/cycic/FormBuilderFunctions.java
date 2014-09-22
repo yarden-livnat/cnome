@@ -11,6 +11,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 
 /**
  * This class is built to handle all of the functions used in building the forms for CYCIC. 
@@ -64,15 +68,18 @@ public class FormBuilderFunctions {
 	}
 	
 	/**
-	 * A function used to create the generic text fields inputs. 
-	 * @param array The ArrayList<Object> used to store the information in the TextField. 
-	 * @return A TextField tied via a listener to the value of this input field.
+	 * 
+	 * @param facArray
+	 * @param defaultValue
+	 * @return
 	 */
-	static TextField textFieldBuilder(final ArrayList<Object> defaultValue){
+	static TextField textFieldBuilder(final ArrayList<Object> facArray, final ArrayList<Object> defaultValue){
 		
 		TextField textField = new TextField();
 		textField.setText(defaultValue.get(0).toString());
-		
+		if(facArray.get(1) != null){
+			textField.setPromptText(facArray.get(1).toString());
+		}
 		textField.textProperty().addListener(new ChangeListener<Object>(){         
 			public void changed(ObservableValue<?> observable, Object oldValue, Object newValue){
 				defaultValue.set(0, newValue);
@@ -83,12 +90,11 @@ public class FormBuilderFunctions {
 	}
 	
 	/**
-	 * Special function used for the name flag in a facility.
-	 * @param node The facility node that is currently being worked on
-	 * @param dataArray The ArrayList<Object> that contains the name field data for the facility.
-	 * @return TextField that controls the input of this field. 
+	 * 
+	 * @param node
+	 * @return
 	 */
-	static TextField nameFieldBuilder(final facilityNode node, final ArrayList<Object> dataArray){
+	static TextField nameFieldBuilder(final facilityNode node){
 		TextField textField = new TextField();
 		textField.setText((String)node.name);
 		
@@ -97,62 +103,63 @@ public class FormBuilderFunctions {
 				node.name = newValue;
 				node.cycicCircle.text.setText(newValue);
 				node.sorterCircle.text.setText(newValue);
-				dataArray.set(0, newValue);
+
+				node.cycicCircle.tooltip.setText(newValue);
+				node.sorterCircle.tooltip.setText(newValue);
+				node.cycicCircle.rgbColor=VisFunctions.stringToColor(newValue);;
+				node.cycicCircle.setFill(Color.rgb(node.cycicCircle.rgbColor.get(0), node.cycicCircle.rgbColor.get(1), node.cycicCircle.rgbColor.get(2)));
 			}
 		});
-		
 		return textField;
 	}
 	
-	/***
-	 * Function designed for the naming of a marketCircle. Updates name and text of the marketCircle node.
-	 * @param node The marketCircle associated with the form that calls this function.
-	 * @return TextField linked to the name and text of the marketCircle node.
-	 */
-	static TextField marketNameBuilder(final MarketCircle node){
-		TextField textField = new TextField();
-		textField.setText((String) node.name);
-		
-		textField.textProperty().addListener(new ChangeListener<String>(){         
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				node.name = (String) newValue;
-				node.text.setText(newValue);
-			}
-		});
-		
-		return textField;
-	}
-	
+
 	/**
 	 * Function used to create a TextField for the naming of a regionNode.
 	 * @param node regionNode associated with the form that calls this function.
 	 * @param dataArray ArrayList<Object> that contains the name field for this regionNode.
 	 * @return TextField linked to the name of a regionNode.
 	 */
-	static TextField regionNameBuilder(final regionNode node, final ArrayList<Object> dataArray){
+
+	static TextField regionNameBuilder(final regionNode node){
 		TextField textField = new TextField();
+		RegionCorralView.workingRegion = node;
 		textField.setText((String) node.name);
 		
 		textField.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = (String) newValue;
-				dataArray.set(0, newValue);
+
+				regionNode.regionCircle.name.equals(newValue);
+				regionNode.regionCircle.text.setText(newValue);
+				regionNode.regionCircle.rgbColor = VisFunctions.stringToColor(newValue);
+				regionNode.regionCircle.setFill(Color.rgb(regionNode.regionCircle.rgbColor.get(0), regionNode.regionCircle.rgbColor.get(1), regionNode.regionCircle.rgbColor.get(2)));
+				// Setting font color for visibility //
+				if(VisFunctions.colorTest(regionNode.regionCircle.rgbColor) == true){
+					regionNode.regionCircle.text.setTextFill(Color.BLACK);
+				}else{
+					regionNode.regionCircle.text.setTextFill(Color.WHITE);
+				}
 			}
 		});
 		return textField;
 	}
 	
-	static TextField institNameBuilder(final instituteNode node, final ArrayList<Object> dataArray){
-		TextField textField = new TextField();
-		textField.setText((String) node.name);
+	/**
+	 * 
+	 * @param node
+	 * @return
+	 */
+	static TextField institNameBuilder(final instituteNode node){
+		TextField textName = new TextField();
+		textName.setText(node.name);
 		
-		textField.textProperty().addListener(new ChangeListener<String>(){         
+		textName.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				node.name = (String) newValue;
-				dataArray.set(0, newValue);
+				node.name = newValue;
 			}
 		});
-		return textField;
+		return textName;
 	}
 	/**
 	 * This function builds the slider for continuous ranges given a minimum and maximum. 
@@ -228,6 +235,7 @@ public class FormBuilderFunctions {
 		for(String value : string.split(",")){
 			cb.getItems().add(value.trim());
 		}
+		cb.setPromptText("Select value");
 		cb.setValue(defaultValue.get(0).toString());
 		
 		cb.valueProperty().addListener(new ChangeListener<String>(){
@@ -262,49 +270,39 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-					cb.getItems().add(circle.commodity);
+
+				for (Label label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.getText());
 				}
-				cb.getItems().add("New Commodity");
+				//cb.getItems().add("New Commodity");
+				
+				if ( defaultValue.get(0) != "") {
+					cb.setValue((String) defaultValue.get(0));
+				}
 			}
 		});
-		
 		if ( defaultValue.get(0) != "") {
 			cb.setValue((String) defaultValue.get(0));
 		}
-		
-		
+		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				MarketCircle marketCircle = null;
-				Object oldMarket = null;
+
 				if (newValue == "New Commodity"){
 					// Tell Commodity Window to add a new commodity 
 				} else {
-					for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-						if (newValue == circle.commodity){
-							marketCircle = circle;
-						}
-						if (defaultValue.get(0) == circle.commodity) {
-							oldMarket = circle;
-						}
-					}
-					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode.cycicCircle && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-							CycicScenarios.workingCycicScenario.Links.remove(j);
-							j -= 1;
+					facNode.cycicCircle.incommods.add(newValue);
+					defaultValue.set(0, newValue);
+					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
+							facNode.cycicCircle.incommods.remove(i);
+							i--;
 						}
 					}
-					if (marketCircle != null){
-						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
-						defaultValue.set(0, newValue);
-						VisFunctions.reloadPane();
-					}
-					
+					VisFunctions.marketHide();
 				}
 			}
 		});
@@ -323,48 +321,38 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-		
+				
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-					cb.getItems().add(circle.commodity);
+				for (Label label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.getText());
 				}
-				cb.getItems().add("New Commodity");
+				//cb.getItems().add("New Commodity");
+				
+				if (defaultValue.get(0) != "") {
+					cb.setValue((String) defaultValue.get(0));
+				}
 			}
 		});
-		
-		if ( defaultValue.get(0) != "") {
+		if (defaultValue.get(0) != "") {
 			cb.setValue((String) defaultValue.get(0));
 		}
-		
+		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				MarketCircle marketCircle = null;
-				Object oldMarket = null;
 				if (newValue == "New Commodity"){
-					//
+					// Tell Commodity Window to add a new commodity 
 				} else {
-					for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-						if (newValue == circle.commodity){
-							marketCircle = circle;
-						}
-						if (defaultValue.get(0) == circle.commodity) {
-							oldMarket = circle;
-						}
-					}
-					for (int j = 0; j < CycicScenarios.workingCycicScenario.Links.size(); j++) {
-						if (CycicScenarios.workingCycicScenario.Links.get(j).source == facNode.cycicCircle && CycicScenarios.workingCycicScenario.Links.get(j).target == oldMarket){
-							CycicScenarios.workingCycicScenario.Links.remove(j);
-							j -= 1;
+					facNode.cycicCircle.outcommods.add(newValue);
+					defaultValue.set(0, newValue);
+					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
+						if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
+							facNode.cycicCircle.outcommods.remove(i);
+							i--;
 						}
 					}
-					if (marketCircle != null){
-						VisFunctions.linkNodesSimple(facNode.cycicCircle, marketCircle);
-						defaultValue.set(0, newValue);
-						VisFunctions.reloadPane();
-					}
-					
+					VisFunctions.marketHide();
 				}
 			}
 		});
@@ -376,7 +364,7 @@ public class FormBuilderFunctions {
 	 * Function used to link a recipe to a facility. 
 	 * @param facNode facilityCircle that was used to construct the form. 
 	 * @param defaultValue ArrayList<Object> containing the data for a "recipe" field in the facilityCircle. 
-	 * @return ComboBox containing all of the recipies currently available in the simulation, tied to the value of this recipe field. 
+	 * @return ComboBox containing all of the recipes currently available in the simulation, tied to the value of this recipe field. 
 	 */
 	static ComboBox<String> recipeComboBox(facilityNode facNode, final ArrayList<Object> defaultValue){
 		final ComboBox<String> cb = new ComboBox<String>();
@@ -386,7 +374,7 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes) {
+				for (Nrecipe recipe: DataArrays.Recipes) {
 					cb.getItems().add(recipe.Name);
 				}
 			}
@@ -411,16 +399,43 @@ public class FormBuilderFunctions {
 		// Create and fill the comboBox
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
-
+		cb.setPromptText("Select a commodity");
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (MarketCircle circle: CycicScenarios.workingCycicScenario.marketNodes){
-					cb.getItems().add(circle.commodity);
+				for (Label label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.getText());
 				}
-				cb.getItems().add("New Commodity");
+				//cb.getItems().add("New Commodity");
 			}
 		});
 		return cb;
+	}
+	
+	static GridPane cycicTypeTest(GridPane grid, facilityNode formNode, ArrayList<Object> facArray, ArrayList<Object> dataArray, int col, int row){
+		switch ((String) facArray.get(2).toString().toLowerCase()) {
+		case "incommodity":
+			grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+col, row);
+			break;
+		case "outcommodity":
+			grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+col, row);
+			break;
+		case "inrecipe": case "outrecipe": case "recipe":
+			grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+col, row);
+			break;
+		case "commodity":
+			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+col, row);
+			break;
+		case "facTag":
+			//TODO STUFF
+			break;
+		case "commodTag":
+			//TODO Stuff
+			break;
+		default:
+			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+col, row);
+			break;
+		}
+		return grid;
 	}
 }

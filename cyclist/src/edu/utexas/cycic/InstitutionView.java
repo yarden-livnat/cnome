@@ -1,11 +1,20 @@
 package edu.utexas.cycic;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import org.controlsfx.dialog.Dialog;
+
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
+import edu.utah.sci.cyclist.core.event.ui.CyclistEvent;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -14,7 +23,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -23,18 +31,44 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 /**
- * A view used to build and develope instutitions for the simulation 
+ * A view used to build and develop institutions for the simulation 
  * currently being built. 
  * @author Robert
  *
  */
 public class InstitutionView extends ViewBase{
 	/**
-	 * Initiates a new window for building and modifying instutitions. 
+	 * Initiates a new window for building and modifying institutions. 
 	 */
 	public InstitutionView(){
 		super();
-		setPrefSize(500,500);
+		// Ensures the temporary institution is initiated only once. 
+		if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
+			String string;
+			for(int i = 0; i < XMLReader.institutionList.size(); i++){
+				StringBuilder sb = new StringBuilder();
+				StringBuilder sb1 = new StringBuilder();
+				Process proc;
+				try {
+					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.institutionList.get(i)); 
+					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					while((string = read.readLine()) != null){
+						sb.append(string);
+					}
+					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.institutionList.get(i));
+					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+					while((string = read1.readLine()) != null){
+						sb1.append(string);
+					}
+					institutionStructure test = new institutionStructure();
+					test.institName = XMLReader.institutionList.get(i).replace(":", " ").trim();
+					test.institStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.simInstitutions.add(test);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		
 		// ListView for initial facilities in the institution.
 		final ListView<String> facilityList = new ListView<String>();
@@ -61,19 +95,19 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-		
+		structureCB.setPromptText("Select Institution");
 		// Building the list of objects to be put in to the ComboBox.
 		// Inputs all built institutions and adds a field for adding a new one. 
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				structureCB.getItems().clear();
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.institNodes.size(); i++){
-					structureCB.getItems().add((String) CycicScenarios.workingCycicScenario.institNodes.get(i).name);
+				for(int i = 0; i < DataArrays.institNodes.size(); i++){
+					structureCB.getItems().add((String) DataArrays.institNodes.get(i).name);
 				}
 				structureCB.getItems().add("New Institution");
 			}
 		});
-		
+		//InstitutionViewPresenter.newInstitution(structureCB);
 		// Change Listener for structureCB to indicate the selection of a new or saved institution to be loaded.
 		structureCB.valueProperty().addListener(new ChangeListener<String>(){
 			@SuppressWarnings("unchecked")
@@ -82,58 +116,96 @@ public class InstitutionView extends ViewBase{
 					
 				} else if(newValue == "New Institution"){
 					grid.getChildren().clear();
-					rowNumber = 0;
-					CycicScenarios.workingCycicScenario.institNodes.add(new instituteNode());
-					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(CycicScenarios.workingCycicScenario.institNodes.size()-1);
-					workingInstit.type = "deployInst";
-					workingInstit.institStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.institStructs.get(0);
+					rowNumber = 1;
+					instituteNode tempInstit = new instituteNode();
+					Dialog dlg = new Dialog(grid, "Institution Name");
+					dlg.getActions().add(Dialog.Actions.OK);
+					GridPane dlgGrid = new GridPane();
+					TextField txtName = new TextField();
+					txtName.textProperty().addListener(new ChangeListener<String>(){
+						public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+							tempInstit.name = newValue;
+						}
+					});
+					dlgGrid.add(new Label("Name"), 0, 0);
+					dlgGrid.add(txtName, 1, 0);
+					ComboBox cbType = new ComboBox();
+					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+						cbType.getItems().add(DataArrays.simInstitutions.get(i).institName);
+					}
+					cbType.setOnAction(new EventHandler<Event>(){
+						public void handle(Event event) {
+							tempInstit.type = (String) cbType.getValue();
+							for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+								if (DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) cbType.getValue())){
+									tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+								}
+							}			
+						}
+					});
+					dlgGrid.add(new Label("Type"), 0, 1);
+					dlgGrid.add(cbType, 1, 1);
+					dlg.setContent(dlgGrid);
+					dlg.show();
+					workingInstit = tempInstit;
+					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
+							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+						}
+					}
+					//System.out.println(workingInstit.institStruct);
 					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
+					DataArrays.institNodes.add(tempInstit);
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
+					Label institutionName = new Label("Name");
+					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);				
+					grid.add(institutionName, 0, 0);
+					grid.add(nameTextField, 1, 0);
+					typeLabel.setText(workingInstit.type);
 				} else {
-					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
-					rowNumber = 0;
+					rowNumber = 1;
 					grid.getChildren().clear();
 					facilityList.getItems().clear();
 					prototypeList.getItems().clear();
+					workingInstit = CycicScenarios.workingCycicScenario.institNodes.get(structureCB.getItems().indexOf(newValue));
 					for(String facility: workingInstit.availPrototypes) {
-						facilityList.getItems().add(facility);
+						prototypeList.getItems().add(facility);
 					}
 					for (facilityItem prototype: workingInstit.availFacilities) {
-						prototypeList.getItems().add(prototype.name);
+						facilityList.getItems().add(prototype.name + " - " + prototype.number);
 					}
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
+					Label institutionName = new Label("Name");
+					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+					grid.add(institutionName, 0, 0);
+					grid.add(nameTextField, 1, 0);
+					typeLabel.setText(workingInstit.type);
 				}
 			}
 		});
+		structureCB.autosize();
+		topGrid.add(new Label("Choose Institution"), 0, 0);
+		topGrid.add(structureCB, 1, 0);
+		topGrid.add(typeLabel, 3, 0);
 		
-		Button button = new Button();
-		button.setText("Check Array");
-		button.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				System.out.println(workingInstit.institData);
-			}
-		});
-		topGrid.add(structureCB, 0, 0);
-		topGrid.add(button, 2, 0);
-		
+				
 		// ComboBox to add facilities to the prototype ListView
 		final ComboBox<String> addNewProtoBox = new ComboBox<String>();
+		addNewProtoBox.setPromptText("Select Facility Type");
 		addNewProtoBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewProtoBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (facilityNode child: node.facilityClones) {
-						addNewProtoBox.getItems().add((String)child.name);
-					}
+					addNewProtoBox.getItems().add((String)node.name);
 				}
 			}
 		});
 		
 		// Button to sumbit selected object in addNewPrototypeBox to Prototype ListView and Institution prototype array. 
 		Button addAvailProto = new Button();
-		addAvailProto.setText("Add Prototype");
+		addAvailProto.setText("Add Facility Type");
 		addAvailProto.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				prototypeList.getItems().clear();
@@ -141,19 +213,17 @@ public class InstitutionView extends ViewBase{
 				for (String facility: workingInstit.availPrototypes){
 					prototypeList.getItems().add(facility);
 				}
-
 			}
 		});
 		
 		//ComboBox for adding a new facility to the initial facility array of the institution.
 		final ComboBox<String> addNewFacBox = new ComboBox<String>();
+		addNewFacBox.setPromptText("Select Facility Type");
 		addNewFacBox.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				addNewFacBox.getItems().clear();
 				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					for (facilityNode child: node.facilityClones) {
-						addNewFacBox.getItems().add((String)child.name);
-					}
+						addNewFacBox.getItems().add((String)node.name);
 				}
 			}
 		});
@@ -173,18 +243,12 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		};
-		
+		facilityNumber.setPromptText("Integer");
 		// Change Listener to update facilityItem with number of facilities to add at simulation start up
-		facilityNumber.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				for(facilityItem facility: workingInstit.availFacilities){
-					if (facility.name == addNewFacBox.getValue()) {
-						facility.number = newValue;
-					}
-				}
-			}
-		});
-		// ComboBox change listener to add new facility to the instutitions initial facility list.
+		
+		// TODO Auto update list from TextField
+		
+		// ComboBox change listener to add new facility to the institutions initial facility list.
 		addNewFacBox.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				for(facilityItem facility: workingInstit.availFacilities){
@@ -194,7 +258,7 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-		// Button to sumbit selection in addNewFacBox ComboBox.
+		// Button to submit selection in addNewFacBox ComboBox.
 		Button addAvailFac = new Button();
 		addAvailFac.setText("Add Starting Facility");
 		addAvailFac.setOnAction(new EventHandler<ActionEvent>(){
@@ -209,16 +273,18 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-				
+		
 		// Building the grids for the views.
-		topGrid.add(new Label("Available Facilities"), 0, 1);
-		topGrid.add(facilityList, 1, 1);
-		topGrid.add(addNewProtoBox, 0, 2);
-		topGrid.add(addAvailProto, 1, 2);
-		topGrid.add(addNewFacBox, 0, 3);
-		topGrid.add(facilityNumber, 1, 3);
-		topGrid.add(addAvailFac, 2, 3);
+		topGrid.add(new Label("Add Available Facility Type"), 0, 1);
+		topGrid.add(addNewProtoBox, 1, 1);
+		topGrid.add(addAvailProto, 2, 1);
+		topGrid.add(new Label("Add Starting Facility"), 0, 2);
+		topGrid.add(addNewFacBox, 1, 2);
+		topGrid.add(new Label("Number: "), 2, 2);
+		topGrid.add(facilityNumber, 3, 2);
+		topGrid.add(addAvailFac, 4, 2);
 		topGrid.setHgap(10);
+		topGrid.setVgap(5);
 		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);
@@ -240,33 +306,37 @@ public class InstitutionView extends ViewBase{
 		
 		
 		VBox institGridBox = new VBox();
+		institGridBox.autosize();
 		institGridBox.getChildren().addAll(topGrid, grid);		
 		
 		HBox institBox = new HBox();
 		institBox.getChildren().addAll(institSideBar, institGridBox);
-		
 		setContent(institBox);
-		setPrefSize(600,400);
-		
-		// Ensures the temperary institution is initiated only once. 
-		if (CycicScenarios.workingCycicScenario.institStructs.size() < 1) {
-			PracticeInstitute.init();
-		}
+
 	}
 	
 	private ComboBox<String> structureCB = new ComboBox<String>();
 	private GridPane grid = new GridPane();
-	private GridPane topGrid = new GridPane();
-	private FacilityCircle formNode = null;
-	private int rowNumber = 0;
+	private GridPane topGrid = new GridPane(){
+		{
+			autosize();
+		}
+	};
+	private Label typeLabel = new Label(){
+		{
+			autosize();
+		}
+	};
+	private int rowNumber = 1;
 	private int columnNumber = 0;
 	private int columnEnd = 0;
 	private int userLevel = 0;
 	static instituteNode workingInstit;
+	public static String TITLE;
 
 	/**
 	 * This function takes a constructed data array and it's corresponding 
-	 * institution structure array and creates a form in for the structure 
+	 * institution structure array and creates a form for the structure 
 	 * and data arrays.
 	 * @param facArray This is the structure of the data array. Included 
 	 * in this array should be all of the information needed to fully 
@@ -351,10 +421,6 @@ public class InstitutionView extends ViewBase{
 					} else {
 						// Switch that will contain current and future key words to indicate special form functions.
 						switch ((String) facArray.get(0)) {
-						case "Name":
-							grid.add(FormBuilderFunctions.institNameBuilder(workingInstit, dataArray), 1+columnNumber, rowNumber);
-							columnEnd = 2 + columnNumber;
-							break;
 						/*case "Incommodity":
 							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;
@@ -365,7 +431,7 @@ public class InstitutionView extends ViewBase{
 							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
 							break;*/
 						default:
-							grid.add(FormBuilderFunctions.textFieldBuilder((ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
+							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 							break;
 						}
@@ -398,7 +464,11 @@ public class InstitutionView extends ViewBase{
 			public void handle(ActionEvent e){
  				FormBuilderFunctions.formArrayBuilder(facArray, (ArrayList<Object>) dataArray);
 				grid.getChildren().clear();
-				rowNumber = 0;
+				rowNumber = 1;
+				Label institutionName = new Label("Name");
+				TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+				grid.add(institutionName, 0, 0);
+				grid.add(nameTextField, 1, 0);
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 			}
 		});
@@ -421,7 +491,11 @@ public class InstitutionView extends ViewBase{
 			public void handle(ActionEvent e) {
 				dataArray.remove(dataArrayNumber);
 				grid.getChildren().clear();
-				rowNumber = 0;
+				rowNumber = 1;
+				Label institutionName = new Label("Name");
+				TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);
+				grid.add(institutionName, 0, 0);
+				grid.add(nameTextField, 1, 0);
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 			}
 		});

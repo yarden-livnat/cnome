@@ -171,6 +171,7 @@
 
 .field-glyph:hover .arrow {
     -fx-background-color: -fx-mark-color, #a0a0a0;
+
 }
 
 .field-glyph .separator .line {

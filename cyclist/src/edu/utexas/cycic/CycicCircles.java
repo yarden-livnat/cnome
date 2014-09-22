@@ -1,23 +1,36 @@
 package edu.utexas.cycic;
 
+import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.tools.Tool;
+import edu.utah.sci.cyclist.core.ui.MainScreen;
+import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utexas.cycic.tools.FormBuilderTool;
+import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.VPos;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 /**
  * The class used to build a new Prototype Facility node.
@@ -31,6 +44,9 @@ public class CycicCircles{
 	protected static double x;
 	protected static double y;
 	
+
+
+	
 	/**
 	 * Function to build a prototype facility node. This node will contain
 	 * the facilities available to institutions and regions. All children 
@@ -38,6 +54,7 @@ public class CycicCircles{
 	 * @param name Name of the new prototype facility.
 	 */
 	static FacilityCircle addNode(String name, final facilityNode parent) {
+
 		final FacilityCircle circle = parent.cycicCircle;
 		circle.setRadius(45);
 		circle.setCenterX(60);
@@ -45,25 +62,30 @@ public class CycicCircles{
 		circle.type = "Parent";
 		circle.childrenShow = true;
 		
-		//Setting up the name and nameing structure of the circle.
-		circle.text = new Text(name);
-		circle.name = name;
-		circle.text.setX(circle.getCenterX()-circle.getRadius()*0.7);
-		circle.text.setY(circle.getCenterY());	
-		circle.text.setWrappingWidth(circle.getRadius()*1.6);
+		//Setting up the name and naming structure of the circle.
+		circle.text.setText(name);
+		circle.tooltip.setText(name);
+		circle.text.setTooltip(circle.tooltip);
+		circle.text.setWrapText(true);
+		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+		circle.text.setTextAlignment(TextAlignment.CENTER);
+		circle.text.setMaxWidth(circle.getRadius()*1.4);
 		circle.text.setMouseTransparent(true);
-		circle.text.setFont(new Font(14));
+		circle.text.setFont(new Font("ComicSans", 14));
+		circle.text.setMaxHeight(circle.getRadius()*1.2);
+		
+		
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
-		circle.rgbColor=VisFunctions.stringToColor((String)circle.name);
+		circle.rgbColor=VisFunctions.stringToColor(name);
 		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
-		
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setFill(Color.BLACK);
+			circle.text.setTextFill(Color.BLACK);
 		}else{
-			circle.text.setFill(Color.WHITE);
+			circle.text.setTextFill(Color.WHITE);
 		}
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
@@ -78,6 +100,21 @@ public class CycicCircles{
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
 		MenuItem facForm = new MenuItem("Facility Form");
+		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				try{
+					CyclistController._presenter.addTool(new FormBuilderTool());
+					menu1.setVisible(false);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		facForm.setOnAction(circleAction);
+		
+
+		
 		MenuItem delete = new MenuItem("Delete");
 		
 		delete.setOnAction(new EventHandler<ActionEvent>(){
@@ -171,13 +208,19 @@ public class CycicCircles{
 				circle.image.setLayoutX(circle.getCenterX()-60);
 				circle.image.setLayoutY(circle.getCenterY()-50);
 				
-				circle.text.setX(circle.getCenterX()-circle.getRadius()*0.6);
-				circle.text.setY(circle.getCenterY());
+				circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+				circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
 				
 				for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
 						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+					}
+					if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
+						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
 					}
 				}
 				for(int i = 0; i < circle.childrenLinks.size(); i++){
@@ -189,12 +232,13 @@ public class CycicCircles{
 					circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
 					circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
 					circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-					circle.childrenList.get(i).text.setX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
-					circle.childrenList.get(i).text.setY(circle.childrenList.get(i).getCenterY());
+					circle.childrenList.get(i).text.setLayoutX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
+					circle.childrenList.get(i).text.setLayoutY(circle.childrenList.get(i).getCenterY()-circle.childrenList.get(i).getRadius()*0.6);
 					for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 						if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
 							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
+							CycicScenarios.workingCycicScenario.Links.get(ii).line.updatePosition();
 						}
 					}
 				}
@@ -209,14 +253,11 @@ public class CycicCircles{
 				if(event.getButton().equals(MouseButton.SECONDARY)){
 					circle.menu.setVisible(true);
 				}
+				if(event.isAltDown() && event.isControlDown()){
+					
+				}
 				if (event.getClickCount() >= 2){
-					if(circle.childrenShow == true){
-						circle.childrenShow = false;
-						VisFunctions.reloadPane();
-					}else{
-						circle.childrenShow = true;
-						VisFunctions.reloadPane();
-					}
+					CyclistController._presenter.addTool(new FormBuilderTool());
 				}
 				if(Cycic.group.getSelectedToggle() == Cycic.toggle){
 					// TODO Figure out how to group facilities.
@@ -245,10 +286,8 @@ public class CycicCircles{
 					
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
 					ClipboardContent content = new ClipboardContent();				
-					content.put( DnD.TOOL_FORMAT, "Facility Form");
+					content.put(DnD.TOOL_FORMAT, "Facility Form");
 					db.setContent(content);
-					
-//					DnDIcon.getInstance().show(icon, title);
 					event.consume();
 				}
 			}
@@ -291,7 +330,7 @@ public class CycicCircles{
 				CycicScenarios.workingCycicScenario.FacilityNodes.get(i).cycicCircle.childrenList.get(ii).parentIndex = i;
 			}
 		}
-		VisFunctions.reloadPane();
+		VisFunctions.marketHide();
 
 	}
 }

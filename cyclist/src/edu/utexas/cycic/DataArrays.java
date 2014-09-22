@@ -22,20 +22,43 @@ public class DataArrays{
 	static ArrayList<Nrecipe> Recipes = new ArrayList<Nrecipe>();
 	static ArrayList<Label> RecipesList = new ArrayList<Label>();
 	
-	static ArrayList<Object> regionStructs = new ArrayList<Object>();
 	static ArrayList<regionNode> regionNodes = new ArrayList<regionNode>();
-	
-	static ArrayList<Object> institStructs = new ArrayList<Object>();
 	static ArrayList<instituteNode> institNodes = new ArrayList<instituteNode>();
-	
-	static ArrayList<Object> marketStructs = new ArrayList<Object>();
-	static ArrayList<MarketCircle> marketNodes = new ArrayList<MarketCircle>();
-	
 	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 
 	static simInfo simulationData = new simInfo();
+	static ArrayList<facilityStructure> simFacilities = new ArrayList<facilityStructure>();
+	static ArrayList<regionStructure> simRegions = new ArrayList<regionStructure>();
+	static ArrayList<institutionStructure> simInstitutions = new ArrayList<institutionStructure>();
+		
 }
-
+/**
+ * 
+ * @author Robert
+ *
+ */
+class facilityStructure {
+	String facilityName;
+	ArrayList<Object> facStruct = new ArrayList<Object>();
+}
+/**
+ * 
+ * @author Robert
+ *
+ */
+class regionStructure {
+	String regionName;
+	ArrayList<Object> regionStruct = new ArrayList<Object>();
+}
+/**
+ * 
+ * @author Robert
+ *
+ */
+class institutionStructure {
+	String institName;
+	ArrayList<Object> institStruct = new ArrayList<Object>();
+}
 /**
  * Class used to build the recipes for cyclus.
  * @author Robert
@@ -64,9 +87,9 @@ class isotopeData {
  *
  */
 class nodeLink {
-	FacilityCircle source;
+	Object source;
 	Object target;
-	Line line = new Line();
+	ConnectorLine line = new ConnectorLine();
 }
 
 /**
@@ -80,8 +103,8 @@ class regionNode{
 	String type = new String();
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
 	ArrayList<Object> regionData  = new ArrayList<Object>();
-	ArrayList<String> availFacilities = new ArrayList<String>(); 
 	ArrayList<String> institutions = new ArrayList<String>();
+	static RegionShape regionCircle = new RegionShape();
 }
 
 /**
@@ -121,8 +144,8 @@ class simInfo{
 	String duration;
 	String startMonth;
 	String startYear;
-	String simStart;
-	String decay;
+	String notes;
+	String description;
 }
 
 class facilityNode{
@@ -130,7 +153,7 @@ class facilityNode{
 	String facilityType = "";
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
-	ArrayList<Object> facilityStructure = new ArrayList<Object>();
+	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
 	ArrayList<facilityNode> facilityClones = new ArrayList<facilityNode>();
 	int parentIndex;
 	FacilityCircle cycicCircle = new FacilityCircle();

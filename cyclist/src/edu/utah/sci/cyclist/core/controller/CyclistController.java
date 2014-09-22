@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,13 +67,15 @@ import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.util.StreamUtils;
+import edu.utexas.cycic.tools.FormBuilderTool;
+import edu.utexas.cycic.tools.FormBuilderToolFactory;
 
 
 public class CyclistController {
 	
 	private final EventBus _eventBus;
 	private MainScreen _screen;
-	private WorkspacePresenter _presenter;
+	public static WorkspacePresenter _presenter;
 	private Model _model = new Model();
 	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cyclist/";
 	private String SAVE_FILE = "save.xml";
@@ -356,7 +359,6 @@ public class CyclistController {
 						}
 					}
 				}
-				
 			}
 		};
 		
@@ -376,7 +378,7 @@ public class CyclistController {
 		});
 		
 	}
-	
+		
 	private void quit() {
 		// TODO: check is we need to save  
 		if(_dirtyFlag || _presenter.getDirtyFlag()){

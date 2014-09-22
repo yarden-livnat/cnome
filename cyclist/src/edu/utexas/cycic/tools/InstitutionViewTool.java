@@ -11,8 +11,8 @@ import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 public class InstitutionViewTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.InstitutionViewTool";
-	public static final String TOOL_NAME 	= "Institution View";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.QUESTION_CIRCLE;
+	public static final String TOOL_NAME 	= "CycIC - Institution View";
+	public static final AwesomeIcon ICON 	= AwesomeIcon.EYE;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;
@@ -37,7 +37,7 @@ public class InstitutionViewTool implements Tool {
 	@Override
 	public ViewPresenter getPresenter(EventBus bus) {
 		if (_presenter == null)
-			_presenter = new InstitutionViewPresenter(bus);
+			_presenter = new ViewPresenter(bus);
 		return _presenter;
 	}
 
