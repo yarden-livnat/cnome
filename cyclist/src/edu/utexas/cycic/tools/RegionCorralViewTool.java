@@ -1,15 +1,11 @@
 package edu.utexas.cycic.tools;
 
-import javafx.scene.image.Image;
-import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
+import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.View;
-import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.tools.Tool;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utexas.cycic.RegionCorralView;
-import edu.utexas.cycic.presenter.RecipeFormPresenter;
 import edu.utexas.cycic.presenter.RegionCorralViewPresenter;
 
 public class RegionCorralViewTool implements Tool {
