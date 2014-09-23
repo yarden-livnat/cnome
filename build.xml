@@ -20,49 +20,49 @@
 		<mkdir dir="externalLibs" />
 		
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="mysql-connector-java-5.1.18-bin.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="log4j-1.2.16.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="controlsfx-8.0.4-dev.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="sqlite-jdbc-3.8.5-pre1.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="commons-collections-3.2.1.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="commons-logging.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="javax.json-1.0.4.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="externalLibs">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist/lib">
+			<fileset dir="./cyclist/lib">
 				<filename name="commons-io-2.4.jar"/>	
 			</fileset>
 		</copy>
 		
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="/Users/yarden/git/cyclist/cyclist">
+			<fileset dir="./cyclist">
 				<include name="src/**" />
 			</fileset>
 		</copy>
