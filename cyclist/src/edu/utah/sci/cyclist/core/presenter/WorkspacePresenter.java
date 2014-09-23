@@ -157,7 +157,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				}                                
 			});
 
-			final Closure.V1<Filter> onShowFunc = workspace.getOnShowFilter();;
+			final Closure.V1<Filter> onShowFunc = workspace.getOnShowFilter();
 			workspace.setOnShowFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
@@ -165,6 +165,17 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 						onShowFunc.call(filter);
 					}
 					broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
+				}
+			});
+			
+			final Closure.V1<Filter> onRemoveFunc = workspace.getOnRemoveFilter();
+			workspace.setOnRemoveFilter(new Closure.V1<Filter>() {
+				@Override
+				public void call(Filter filter) {
+					if(onRemoveFunc != null){
+						onRemoveFunc.call(filter);
+					}
+					broadcast(getLocalEventBus(), new CyclistFilterNotification(CyclistNotifications.REMOVE_FILTER, filter));
 				}
 			});
 
@@ -411,8 +422,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 				}
 			}
 		});
-
-
+	
 		// parent notifications
 		addNotificationHandler(CyclistNotifications.REMOVE_REMOTE_FILTER, new CyclistNotificationHandler() {
 
