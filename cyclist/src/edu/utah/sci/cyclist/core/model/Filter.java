@@ -247,7 +247,8 @@ public class Filter implements Observable {
 		if (!_valid) {
 			if (getValues() == null || allValuesSelected()) {
 				if(_selectedRangeValues.size() > 0){
-					String function = _field.getString(FieldProperties.AGGREGATION_FUNC);
+//					String function = _field.getString(FieldProperties.AGGREGATION_FUNC);
+					String function = null;
 					String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
 					String str = name+" >=" + _selectedRangeValues.get(NumericRangeValues.MIN) + " AND " + name +" <=" + _selectedRangeValues.get(NumericRangeValues.MAX);
 					_value = str;

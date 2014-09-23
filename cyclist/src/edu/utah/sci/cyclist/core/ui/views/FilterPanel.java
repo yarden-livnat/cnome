@@ -1,10 +1,13 @@
 package edu.utah.sci.cyclist.core.ui.views;
 
 
+import java.text.DecimalFormat;
+
 import org.controlsfx.control.RangeSlider;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.MapProperty;
@@ -31,11 +34,13 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.util.converter.NumberStringConverter;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.Field;
@@ -342,6 +347,7 @@ public class FilterPanel extends TitledPanel {
 			
 			Double min = (Double) (_map.get(NumericRangeValues.MIN) != null ? _map.get(NumericRangeValues.MIN):0.0);
 			Double max = (Double) (_map.get(NumericRangeValues.MAX) != null ? _map.get(NumericRangeValues.MAX):0.0);
+			
 			final RangeSlider rangeSlider = new RangeSlider(min,max,min,max);
 			rangeSlider.setShowTickLabels(true);
 			rangeSlider.setShowTickMarks(true);
@@ -365,8 +371,8 @@ public class FilterPanel extends TitledPanel {
 			
 			minTxt.setPrefSize(80, 18);
 			maxTxt.setPrefSize(80, 18);
-			minTxt.setEditable(false);
-			maxTxt.setEditable(false);
+			minTxt.setEditable(true);
+			maxTxt.setEditable(true);
 			minTxt.setAlignment(Pos.CENTER_LEFT);
 			maxTxt.setAlignment(Pos.CENTER_LEFT);
 			minTxt.setText(Double.toString(min));
@@ -394,19 +400,33 @@ public class FilterPanel extends TitledPanel {
 				
 			
 			// Change the filter's values according to the user new choice.
+			// Must use user's actions events since using the RangeSlider lowValueProperty and highValueProperty
+			// are changing too rapidly when sliding, and it causes a database driver exception.
 			rangeSlider.setOnMouseReleased(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent e) {
 					_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
 				}
 			}); 
 			
-			// Update the text field to show the current value on the slider.
-			rangeSlider.setOnMouseDragged(new EventHandler<Event>() {
-				public void handle(Event e) {
-					minTxt.setText(Double.toString(rangeSlider.getLowValue()));
-					maxTxt.setText(Double.toString(rangeSlider.getHighValue()));
+			minTxt.setOnKeyReleased(new EventHandler<KeyEvent>() {
+				public void handle(KeyEvent e) {
+					if(!minTxt.getText().isEmpty()){
+						_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
+					}
 				}
 			});
+			
+			maxTxt.setOnKeyReleased(new EventHandler<KeyEvent>() {
+				public void handle(KeyEvent e) {
+					if(!maxTxt.getText().isEmpty()){
+						_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
+					}
+				}
+			});
+			
+			// Update the text field to show the current value on the slider. and vice versa
+			Bindings.bindBidirectional(minTxt.textProperty(), rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
+			Bindings.bindBidirectional(maxTxt.textProperty(), rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
 				
 		}
 	}
@@ -418,22 +438,53 @@ public class FilterPanel extends TitledPanel {
 	
 	
 	private static String getTitle(Filter filter) {
-		String title = null;
-		if (filter.getRole() == Role.DIMENSION || filter.getRole() == Role.INT_TIME) {
-			title = filter.getName();
-		} else {
-			String funcName = filter.getField().get(FieldProperties.AGGREGATION_FUNC, String.class);
-			if (funcName == null){
-				funcName = filter.getField().get(FieldProperties.AGGREGATION_DEFAULT_FUNC, String.class);
-				filter.getField().set(FieldProperties.AGGREGATION_FUNC, funcName);
-			}
-			SQL.Function func = SQL.getFunction(funcName);
-			if (func == null) 
-				title = filter.getName();
-			else
-				title = func.getLabel(filter.getName());
+//		String title = null;
+//		if (filter.getRole() == Role.DIMENSION || filter.getRole() == Role.INT_TIME) {
+//			title = filter.getName();
+//		} else {
+//			String funcName = filter.getField().get(FieldProperties.AGGREGATION_FUNC, String.class);
+//			if (funcName == null){
+//				funcName = filter.getField().get(FieldProperties.AGGREGATION_DEFAULT_FUNC, String.class);
+//				filter.getField().set(FieldProperties.AGGREGATION_FUNC, funcName);
+//			}
+//			SQL.Function func = SQL.getFunction(funcName);
+//			if (func == null) 
+//				title = filter.getName();
+//			else
+//				title = func.getLabel(filter.getName());
+//		}
+//		
+//		return title;
+		return filter.getName();
+	}
+	
+	/*
+	 * A converter from String to Number which handles the case when the string is empty.
+	 */
+	public class EmptyStrNumberStringConverter extends NumberStringConverter{
+		
+		DecimalFormat df = new DecimalFormat("#.##");
+		
+		public EmptyStrNumberStringConverter(String pattern) {
+			super(pattern);
 		}
 		
-		return title;
+		@Override
+		public Number fromString(String value){
+			if(!value.isEmpty()){
+				return super.fromString(value);
+			}else{
+				return 0.0;
+			}
+		}
+		
+		@Override
+		public String toString(Number value){
+			if(value.doubleValue() > 9999){
+				return super.toString(value);
+			}else{
+				return df.format(value);
+			}
+		}
 	}
 }
