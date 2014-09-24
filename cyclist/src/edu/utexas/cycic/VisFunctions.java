@@ -65,15 +65,9 @@ public class VisFunctions {
 			red=Integer.parseInt(hashCode);
 		}
 
-		while (red>255) {
-			red-=256;
-		}
-		while (green>255) {
-			green-=256;
-		}
-		while (blue>255) {
-			blue-=256;
-		}
+		red = red % 256;
+		green = green % 256;
+		blue = blue % 256;
 
 		rgbArray.add(red);
 		rgbArray.add(green);
@@ -88,17 +82,10 @@ public class VisFunctions {
 	 * @return
 	 */
 	public static boolean colorTest(ArrayList<Integer> array){
-		int tally = 0;
-		for(int i = 0; i < array.size(); i++){
-			if(array.get(i) < 120){
-				tally +=1;
-			}
+		for (Integer v : array) {
+			if (v < 120) return true;
 		}
-		if(tally > 0){
-			return true;
-		}else{
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -108,11 +95,7 @@ public class VisFunctions {
 	 * @return
 	 */
 	public static double colorMultiplierTest(Integer color){
-		if(color < 185){
-			return 1.3;
-		}else{
-			return 0.7;
-		}
+		return color < 185 ? 1.3 : 0.7;
 	}
 
 	/**

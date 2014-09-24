@@ -80,7 +80,7 @@ public class DatatableWizard extends TilePane {
 	private CyclistDatasource     _current;
 	private ObjectProperty<Table> _selection =  new SimpleObjectProperty<>();
 	private DatasourceSelector    _selector;
-	private String               _workDir = WorkDirectoryController.SAVE_DIR;
+	private String               _workDir = WorkDirectoryController.CYCLIST_DIR;
 	private UpdateDbDialog		 _updateDialog;
 	
 	// * * * Constructor creates a new stage * * * //

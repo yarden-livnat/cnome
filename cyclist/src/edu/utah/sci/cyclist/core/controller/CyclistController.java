@@ -29,11 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.net.URI;
 import java.util.Arrays;
-import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -46,6 +42,9 @@ import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
@@ -67,8 +66,6 @@ import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.util.StreamUtils;
-import edu.utexas.cycic.tools.FormBuilderTool;
-import edu.utexas.cycic.tools.FormBuilderToolFactory;
 
 
 public class CyclistController {
@@ -77,7 +74,6 @@ public class CyclistController {
 	private MainScreen _screen;
 	public static WorkspacePresenter _presenter;
 	private Model _model = new Model();
-	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cyclist/";
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
@@ -95,7 +91,7 @@ public class CyclistController {
 		_workDirectoryController = new WorkDirectoryController();
 		
 		// If the save directory does not exist, create it
-		File saveDir = new File(WorkDirectoryController.SAVE_DIR);
+		File saveDir = new File(WorkDirectoryController.CYCLIST_DIR);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
@@ -570,7 +566,7 @@ public class CyclistController {
 	 */
 	private String getLastChosenWorkDirectory(){
 		if(_workDirectoryController == null){
-			return WorkDirectoryController.SAVE_DIR;
+			return WorkDirectoryController.CYCLIST_DIR;
 		}
 		return _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
 	}

@@ -13,9 +13,9 @@ import edu.utah.sci.cyclist.core.model.WorkDirectory;
 
 public class WorkDirectoryController {
 
-	public static final String SAVE_DIR = System.getProperty("user.home").replace("\\", "/") + "/.cyclist/";
-	private static final String GENERAL_CONFIG_FILE = SAVE_DIR+"generalConfig.xml";
-	public static final String DEFAULT_WORKSPACE = System.getProperty("user.home").replace("\\", "/")+ "/cyclist-default-ws";
+	public static final String CYCLIST_DIR = System.getProperty("user.home").replace("\\", "/") + "/.cyclist/";
+	private static final String CONFIG_FILE = CYCLIST_DIR+"config.xml";
+	public static final String DEFAULT_WORKSPACE = CYCLIST_DIR+ "workspace";
 	private ObservableList<String> _workdirectories = FXCollections.observableArrayList();
 	private int _lastId = 0;
 	private int _lastChosenIndex = 0;
@@ -30,7 +30,7 @@ public class WorkDirectoryController {
 	 */
 	public Boolean initGeneralConfigFile(){
 		// The user general config  file
-		File saveFile = new File(GENERAL_CONFIG_FILE);
+		File saveFile = new File(CONFIG_FILE);
 		
 		//First time - create a new file.
 		if (!saveFile.exists())
@@ -45,11 +45,11 @@ public class WorkDirectoryController {
 					workDirectories.putInteger("lastChosenId", 0);
 					new WorkDirectory(_lastId, DEFAULT_WORKSPACE).save(workDirectories.createChild("workDirectory"));
 					_lastId++;
-					new WorkDirectory(_lastId, SAVE_DIR+"cyclist-default-ws" ).save(workDirectories.createChild("workDirectory"));
+					new WorkDirectory(_lastId, CYCLIST_DIR+"cyclist-default-ws" ).save(workDirectories.createChild("workDirectory"));
 					_lastId++;
 					memento.save(new PrintWriter(saveFile));
 					_workdirectories.add(DEFAULT_WORKSPACE);
-					_workdirectories.add(SAVE_DIR+"cyclist-default-ws");
+					_workdirectories.add(CYCLIST_DIR+"cyclist-default-ws");
 					return false;
 				} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -65,7 +65,7 @@ public class WorkDirectoryController {
 	public void restoreGeneralConfigFile(){
 		
 		// Check if the save file exists
-		File saveFile = new File(GENERAL_CONFIG_FILE);
+		File saveFile = new File(CONFIG_FILE);
 					
 		// If we have a save file, read it in
 		if(saveFile.exists()){
@@ -117,7 +117,7 @@ public class WorkDirectoryController {
 		if(list.size()>1){
 			
 			// The user general config  file
-			File saveFile = new File(GENERAL_CONFIG_FILE);
+			File saveFile = new File(CONFIG_FILE);
 		
 			//If the config file doesn't exist create a new file.
 			if (!saveFile.exists()){
