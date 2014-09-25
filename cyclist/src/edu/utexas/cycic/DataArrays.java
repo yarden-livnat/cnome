@@ -29,8 +29,7 @@ public class DataArrays{
 	static simInfo simulationData = new simInfo();
 	static ArrayList<facilityStructure> simFacilities = new ArrayList<facilityStructure>();
 	static ArrayList<regionStructure> simRegions = new ArrayList<regionStructure>();
-	static ArrayList<institutionStructure> simInstitutions = new ArrayList<institutionStructure>();
-		
+	static ArrayList<institutionStructure> simInstitutions = new ArrayList<institutionStructure>();	
 }
 /**
  * 
@@ -40,7 +39,24 @@ public class DataArrays{
 class facilityStructure {
 	String facilityName;
 	ArrayList<Object> facStruct = new ArrayList<Object>();
+	
+	String getName(){
+		return this.facilityName;
+	}
+	
+	ArrayList<Object> getStruct(){
+		return this.facStruct;
+	}
+	
+	void setName(String name){
+		this.facilityName = name;
+	}
+	
+	void setStruct(ArrayList<Object> struct){
+		this.facStruct = struct;
+	}
 }
+
 /**
  * 
  * @author Robert
@@ -49,7 +65,24 @@ class facilityStructure {
 class regionStructure {
 	String regionName;
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
+	
+	String getName(){
+		return this.regionName;
+	}
+	
+	ArrayList<Object> getStruct(){
+		return this.regionStruct;
+	}
+	
+	void setName(String name){
+		this.regionName = name;
+	}
+	
+	void setStruct(ArrayList<Object> struct){
+		this.regionStruct = struct;
+	}
 }
+
 /**
  * 
  * @author Robert
@@ -58,7 +91,24 @@ class regionStructure {
 class institutionStructure {
 	String institName;
 	ArrayList<Object> institStruct = new ArrayList<Object>();
+	
+	String getName(){
+		return this.institName;
+	}
+	
+	ArrayList<Object> getStruct(){
+		return this.institStruct;
+	}
+	
+	void setName(String name){
+		this.institName = name;
+	}
+	
+	void setStruct(ArrayList<Object> struct){
+		this.institStruct = struct;
+	}
 }
+
 /**
  * Class used to build the recipes for cyclus.
  * @author Robert
@@ -68,6 +118,30 @@ class Nrecipe {
 	String Name = new String();
 	String Basis = new String();
 	ArrayList<isotopeData> Composition = new ArrayList<isotopeData>();
+	
+	String getName(){
+		return this.Name;
+	}
+	
+	String getBasis(){
+		return this.Basis;
+	}
+	
+	ArrayList<isotopeData> getComposition(){
+		return this.Composition;
+	}
+	
+	void setName(String name){
+		this.Name = name;
+	}
+	
+	void setBasis(String basis){
+		this.Basis = basis;
+	}
+	
+	void setComposition(ArrayList<isotopeData> isoData){
+		this.Composition = isoData;
+	}
 }
 
 /**
@@ -79,6 +153,8 @@ class isotopeData {
 	String Name = new String();
 	double atom;
 	double mass;
+	
+	
 }
 
 /**
