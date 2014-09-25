@@ -7,6 +7,7 @@ import javafx.scene.effect.Bloom;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Light.Distant;
 import javafx.scene.effect.Lighting;
+import javafx.scene.shape.Line;
 
 /**
  * Contains all of the generic and misc visualization functions 
@@ -89,16 +90,12 @@ public class VisFunctions {
 	 */
 	public static boolean colorTest(ArrayList<Integer> array){
 		int tally = 0;
-		for(int i = 0; i < array.size(); i++){
-			if(array.get(i) < 120){
-				tally +=1;
+		for(Integer v: array){
+			if(v < 120){
+				return true;
 			}
 		}
-		if(tally > 0){
-			return true;
-		}else{
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -157,10 +154,11 @@ public class VisFunctions {
 		nodeLink link = new nodeLink();
 		link.source = source;
 		link.target = target;
-		link.line.setStartX(source.getCenterX());
-		link.line.setStartY(source.getCenterY());
-		link.line.setEndX(target.getCenterX());
-		link.line.setEndY(target.getCenterY());
+		Line line = link.line;
+		line.setStartX(source.getCenterX());
+		line.setStartY(source.getCenterY());
+		line.setEndX(target.getCenterX());
+		line.setEndY(target.getCenterY());
 
 		link.line.updatePosition();
 		CycicScenarios.workingCycicScenario.Links.add(link);
