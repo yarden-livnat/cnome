@@ -85,7 +85,9 @@ public class XMLReader {
       	"\"max_inv_size\" : {\"default\" : 1.000000000000000e+299, \"doc\" : \"total maximum inventory size of sink facility\","+
         "\"index\" : 2, \"tooltip\" : \"sink maximum inventory size\", \"type\" : \"double\"}}}";
 	
-	
+	/**
+	 * 
+	 */
 	static String deploy = "<oneOrMore><element name=\"buildorder\"><element name=\"prototype\"><data type=\"string\"/>" +           
 						"</element><element name=\"number\"><data type=\"nonNegativeInteger\"/></element><element name=\"date\">" +               
 						"<data type=\"nonNegativeInteger\"/></element></element></oneOrMore>";
@@ -111,7 +113,7 @@ public class XMLReader {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		System.out.print(schema);
+		//System.out.print(schema);
 		return schema;
 	}
 	

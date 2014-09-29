@@ -3,8 +3,8 @@ package edu.utexas.cycic;
 import java.util.ArrayList;
 
 public class CycicScenarios {
-	ArrayList<DataArrays> cycicScenarios = new ArrayList<DataArrays>();
-	DataArrays workingCycicScenario;
+	static ArrayList<DataArrays> cycicScenarios = new ArrayList<DataArrays>();
+	static DataArrays workingCycicScenario;
 	
 	ArrayList<DataArrays> getScenarios(){
 		return this.cycicScenarios;

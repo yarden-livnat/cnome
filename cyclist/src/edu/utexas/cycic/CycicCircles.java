@@ -44,16 +44,13 @@ public class CycicCircles{
 	protected static double x;
 	protected static double y;
 	
-
-
-	
 	/**
 	 * Function to build a prototype facility node. This node will contain
 	 * the facilities available to institutions and regions. All children 
 	 * built from this node will mimic its structure. 
 	 * @param name Name of the new prototype facility.
 	 */
-	static FacilityCircle addNode(String name, final facilityNode parent) {
+	FacilityCircle addNode(String name, final facilityNode parent) {
 
 		final FacilityCircle circle = parent.cycicCircle;
 		circle.setRadius(45);
@@ -99,6 +96,7 @@ public class CycicCircles{
 		
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
+		
 		MenuItem facForm = new MenuItem("Facility Form");
 		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
 			@Override

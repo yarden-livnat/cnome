@@ -174,7 +174,7 @@ public class Cycic extends ViewBase{
 		grid.setVgap(5);
 		
 		// Adding a new Facility //
-		Text scenetitle1 = new Text("Add Facility");
+		Text scenetitle1 = new Text("Add Prototype");
 		scenetitle1.setFont(new Font(20));
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
@@ -193,7 +193,7 @@ public class Cycic extends ViewBase{
 				structureCB.setValue(newValue);
 			}
 		});
-		structureCB.setPromptText("Select Facility Type");
+		structureCB.setPromptText("Select Facility Archetype");
 		grid.add(structureCB, 3, 0);
 		//Submit Button
 		Button submit1 = new Button("Add");
