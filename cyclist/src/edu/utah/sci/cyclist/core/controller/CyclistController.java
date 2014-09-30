@@ -33,6 +33,7 @@ import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -65,6 +66,7 @@ import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
 import edu.utah.sci.cyclist.core.util.StreamUtils;
 
 
@@ -252,6 +254,29 @@ public class CyclistController {
 								}
 							}
 							_model.setSelectedDatasource(wizard.getSelectedSource());
+						}
+					}
+				});
+			}
+		});
+		
+		_screen.onLoadSqlite().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				final SqliteLoaderWizard wizard = new SqliteLoaderWizard();
+				
+				ObjectProperty<Simulation> selection = wizard.show(_screen.getWindow());
+				selection.addListener(new ChangeListener<Simulation>() {
+					@Override
+					public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
+						if(newVal != null)
+						{
+							if(!_model.simExists(newVal)){
+								Simulation sim = newVal.clone();
+								_model.getSimulations().add(sim);
+								_dirtyFlag = true;
+							}
+							_model.setSelectedDatasource(newVal.getDataSource());
 						}
 					}
 				});
