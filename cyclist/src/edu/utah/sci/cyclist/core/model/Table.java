@@ -543,6 +543,10 @@ public class Table {
 		if(_saveDir == ""){
 			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
 		}
+		File defaultDir = new File(_saveDir);
+		if(!defaultDir.exists()){
+			defaultDir.mkdir();
+		}
 		
 		// If the save directory does not exist, create it
 		File saveDir = new File(_saveDir+ "/" + ds.getUID() +"/");

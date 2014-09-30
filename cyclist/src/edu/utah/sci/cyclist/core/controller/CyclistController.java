@@ -95,6 +95,9 @@ public class CyclistController {
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
+		File defaultWs = new File(WorkDirectoryController.DEFAULT_WORKSPACE);
+		if (!defaultWs.exists())	
+			defaultWs.mkdir();
 		
 		if(_workDirectoryController.initGeneralConfigFile())
 		{
