@@ -412,6 +412,31 @@ public class FormBuilderFunctions {
 		return cb;
 	}
 	
+	static ComboBox<String> comboBoxFac(final ArrayList<Object> defaultValue){
+		final ComboBox<String> cb = new ComboBox<String>();
+		cb.setMinWidth(80);
+		cb.setPromptText("Select a Facility");
+		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				cb.getItems().clear();
+				for (facilityNode facility: DataArrays.FacilityNodes){
+					cb.getItems().add((String) facility.name);
+				}
+			}
+		});
+		return cb;
+	}
+	
+	/**
+	 * 
+	 * @param grid
+	 * @param formNode
+	 * @param facArray
+	 * @param dataArray
+	 * @param col
+	 * @param row
+	 * @return
+	 */
 	static GridPane cycicTypeTest(GridPane grid, facilityNode formNode, ArrayList<Object> facArray, ArrayList<Object> dataArray, int col, int row){
 		switch ((String) facArray.get(2).toString().toLowerCase()) {
 		case "incommodity":
@@ -426,11 +451,8 @@ public class FormBuilderFunctions {
 		case "commodity":
 			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+col, row);
 			break;
-		case "facTag":
-			//TODO STUFF
-			break;
-		case "commodTag":
-			//TODO Stuff
+		case "facility":
+			grid.add(comboBoxFac(dataArray), 1+col, row);
 			break;
 		default:
 			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+col, row);

@@ -46,7 +46,7 @@ public class XMLReader {
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
 			add(":cycamore:GrowthRegion");
-			add("::agents:NullRegion");
+			add(":agents:NullRegion");
 			
 		}
 	};
@@ -154,14 +154,14 @@ public class XMLReader {
 			cycicResize(dataArray);
 			if(dataArray.get(2) == "oneOrMore"){
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("cycic") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("cycic").toString().replace("\"", ""));
+				if(json_pass.get("uitype") != null){
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}
 				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			} else if (dataArray.get(2) == "zeroOrMore"){
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("cycic") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("cycic").toString().replace("\"", ""));
+				if(json_pass.get("uitype") != null){
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}
 				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
@@ -207,8 +207,8 @@ public class XMLReader {
 	static ArrayList<Object> cycicInfoControl(JsonObject json_pass, ArrayList<Object> dataArray){
 		if(dataArray.get(2) == null){
 			dataArray.set(2, "");
-			if(json_pass.get("cycic") != null){
-				dataArray.set(2, json_pass.get("cycic").toString().replace("\"", ""));
+			if(json_pass.get("uitype") != null){
+				dataArray.set(2, json_pass.get("uitype").toString().replace("\"", ""));
 			}
 		}
 		if(json_pass.get("units") != null){

@@ -75,7 +75,7 @@ public class CyclistController {
 	
 	private final EventBus _eventBus;
 	private MainScreen _screen;
-	public WorkspacePresenter _presenter;
+	public static WorkspacePresenter _presenter;
 	private Model _model = new Model();
 	//private String SAVE_DIR = System.getProperty("user.dir") + "/.cyclist/";
 	private String SAVE_FILE = "save.xml";

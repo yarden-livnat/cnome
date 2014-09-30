@@ -3,14 +3,18 @@ package edu.utexas.cycic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -18,6 +22,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -25,6 +30,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -65,30 +71,6 @@ public class Cycic extends ViewBase{
 				e.printStackTrace();
 			}
 		}
-		/*try {
-			//String string;
-			//String string1;
-			//Process readproc = Runtime.getRuntime().exec("cyclus -a");
-			//BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-			while(schema.readLine() != null){
-				System.out.println(schema.readLine());
-				//Process proc = Runtime.getRuntime().exec("echo cyclus");
-				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+string1);
-				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-				while((string = read.readLine()) != null){
-					sb.append(string);
-				}
-				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+string1);
-				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-				while((string = read1.readLine()) != null){
-					sb1.append(string);
-				}
-			}
-			//System.out.println(sb.toString());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		if (CycicScenarios.cycicScenarios.size() < 1){
 			DataArrays scenario = new DataArrays();
 			workingScenario = scenario;
@@ -103,15 +85,65 @@ public class Cycic extends ViewBase{
 	};
 	static facilityNode workingNode = null;
 	static DataArrays workingScenario;
-	static ToggleGroup group = new ToggleGroup();
-	static ToggleButton toggle = new ToggleButton("RANDOM TEXT"){
-		{
-			setToggleGroup(group);
-		}
-	};
 	static boolean marketHideBool = true;
 	static Window window;
 	
+	/**
+	 * 
+	 */
+	static GridPane commodGrid = new GridPane(){
+		{
+			setVgap(5);
+			setHgap(5);
+		}
+	};
+	
+	/**
+	 * 
+	 */
+	static Button addNewCommod = new Button(){
+		{
+			setOnAction(new EventHandler<ActionEvent>(){
+				public void handle(ActionEvent e){
+					addNewCommodity();
+				}
+			});
+			setText("+");
+			setStyle("-fx-font-size: 9;");
+		}
+	};
+	static VBox commodBox = new VBox(){
+		{
+			getChildren().add(new HBox(){
+				{
+					getChildren().add(new Label(){
+						{
+							setText("Simulation Commodities");
+							setOnMouseClicked(new EventHandler<MouseEvent>(){
+								public void handle(MouseEvent event){
+									Dialogs.create()
+										.title("Help")
+										.message("Commodities facilitate the transfer of materials from one facility to another."
+												+ "Facilities with the same commodities are allowed to trade with each other.")
+										.showInformation();
+								}
+							});
+							setTooltip(new Tooltip("Commodities to be traded in the simulation"));
+							setFont(new Font("Times", 16));
+						}
+					});
+					getChildren().add(addNewCommod);
+					setSpacing(5);
+				}
+			});
+			getChildren().add(commodGrid);
+			setPadding(new Insets(10, 10, 10, 10));
+			setSpacing(5);
+			setStyle("-fx-border-style: solid;"
+	                + "-fx-border-width: 1;"
+	                + "-fx-border-color: black");
+		}
+	};
 	
 	/**
 	 * Initiates the Pane and GridPane.
@@ -156,9 +188,6 @@ public class Cycic extends ViewBase{
 				CycicScenarios.workingCycicScenario = workingScenario;
 			}
 		});
-		/*if (DataArrays.simFacilities.size() < 1){
-			RealFacs.init();
-		}*/
 		
 		VBox cycicBox = new VBox();
 		cycicBox.autosize();
@@ -222,33 +251,127 @@ public class Cycic extends ViewBase{
 		Pane nodesPane = new Pane();
 		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
 			FacilityCircle circle = new FacilityCircle();
-			circle.setRadius(40);
-			circle.setStroke(Color.BLACK);
-			circle.setFill(Color.web("#CF5300"));
-			circle.setCenterX(45+(i*90));
-			circle.setCenterY(50);
-			circle.text.setText(DataArrays.simFacilities.get(i).facilityName);
-			circle.text.setWrapText(true);
-			circle.text.setMaxWidth(60);
-			circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
-			circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
-			circle.text.setTextAlignment(TextAlignment.CENTER);
-			circle.text.setMouseTransparent(true);
-			circle.setOnDragDetected(new EventHandler<MouseEvent>(){
-				public void handle(MouseEvent e){
-					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
-					ClipboardContent content = new ClipboardContent();				
-					content.put(DnD.VALUE_FORMAT, circle.text.getText());
-					db.setContent(content);
-					e.consume();
-				}
-			});
+			buildDnDCircle(circle, i, DataArrays.simFacilities.get(i).facilityName);
 			nodesPane.getChildren().addAll(circle,circle.text);
 		}
 		scroll.setContent(nodesPane);
-
-		
 		cycicBox.getChildren().addAll(grid, scroll, pane);
-		setContent(cycicBox);
+		
+		HBox mainView = new HBox(){
+			{
+				setSpacing(5);
+			}
+		};
+		
+		mainView.getChildren().addAll(commodBox, cycicBox);
+		
+		setContent(mainView);
+	}
+	
+	/**
+	 * 
+	 */
+	public void retrieveSchema(){
+		try {
+			StringBuilder sb = new StringBuilder();
+			StringBuilder sb1 = new StringBuilder();
+			String string;
+			Process readproc = Runtime.getRuntime().exec("cd ~/Bright-lite2 && cyclus -a");
+			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+			while(schema.readLine() != null){
+				System.out.println(schema.readLine());
+				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema ");
+				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				while((string = read.readLine()) != null){
+					sb.append(string);
+				}
+				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations ");
+				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+				while((string = read1.readLine()) != null){
+					sb1.append(string);
+				}*/
+			}
+			System.out.println(sb.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param circle
+	 * @param i
+	 * @param name
+	 */
+	public void buildDnDCircle(FacilityCircle circle, int i, String name){
+		circle.setRadius(40);
+		circle.setStroke(Color.BLACK);
+		circle.setFill(Color.web("#CF5300"));
+		circle.setCenterX(45+(i*90));
+		circle.setCenterY(50);
+		circle.text.setText(name);
+		circle.text.setWrapText(true);
+		circle.text.setMaxWidth(60);
+		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
+		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+		circle.text.setTextAlignment(TextAlignment.CENTER);
+		circle.text.setMouseTransparent(true);
+		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
+				ClipboardContent content = new ClipboardContent();				
+				content.put(DnD.VALUE_FORMAT, circle.text.getText());
+				db.setContent(content);
+				e.consume();
+			}
+		});
+	}
+	
+	/**
+	 * 
+	 */
+	public static void buildCommodPane(){
+		commodGrid.getChildren().clear();
+		for (int i = 0; i < Cycic.workingScenario.CommoditiesList.size(); i++){
+			TextField commodity = new TextField();
+			commodity.setText(Cycic.workingScenario.CommoditiesList.get(i).getText());
+			commodGrid.add(commodity, 0, i );
+			final int index = i;
+			commodity.setPromptText("Enter Commodity Name");
+			commodity.textProperty().addListener(new ChangeListener<String>(){
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+					Cycic.workingScenario.CommoditiesList.get(index).setText(newValue);
+				}
+			});
+			Button removeCommod = new Button();
+			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
+			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
+				public void handle(ActionEvent e){
+					Cycic.workingScenario.CommoditiesList.remove(index);
+					buildCommodPane();
+				}
+			});	
+			commodGrid.add(removeCommod, 1, index);
+		}
+	}
+	
+	/**
+	 * Adds a new TextField to the commodity GridPane tied to a new commodity in the 
+	 * simulation.
+	 */
+	static public void addNewCommodity(){
+		Label commodity = new Label();
+		commodity.setText("");
+		Cycic.workingScenario.CommoditiesList.add(commodity);
+		TextField newCommod = new TextField();
+		newCommod.autosize();
+		newCommod.setPromptText("Enter Commodity Name");
+		newCommod.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.CommoditiesList.get(Cycic.workingScenario.CommoditiesList.size()-1).setText(newValue);
+			}
+		});
+		buildCommodPane();
 	}
 }

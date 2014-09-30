@@ -50,7 +50,7 @@ public class CycicCircles{
 	 * built from this node will mimic its structure. 
 	 * @param name Name of the new prototype facility.
 	 */
-	FacilityCircle addNode(String name, final facilityNode parent) {
+	static FacilityCircle addNode(String name, final facilityNode parent) {
 
 		final FacilityCircle circle = parent.cycicCircle;
 		circle.setRadius(45);
@@ -256,9 +256,6 @@ public class CycicCircles{
 				}
 				if (event.getClickCount() >= 2){
 					CyclistController._presenter.addTool(new FormBuilderTool());
-				}
-				if(Cycic.group.getSelectedToggle() == Cycic.toggle){
-					// TODO Figure out how to group facilities.
 				} else if (event.getButton().equals(MouseButton.PRIMARY)){
 					for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 						if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
