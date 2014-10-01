@@ -262,7 +262,7 @@ public class CyclistController {
 		_screen.onLoadSqlite().set(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				final SqliteLoaderWizard wizard = new SqliteLoaderWizard();
+				final SqliteLoaderWizard wizard = new SqliteLoaderWizard(_model.getSources());
 				
 				ObjectProperty<Simulation> selection = wizard.show(_screen.getWindow());
 				selection.addListener(new ChangeListener<Simulation>() {
@@ -270,19 +270,18 @@ public class CyclistController {
 					public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
 						if(newVal != null)
 						{
-							if(!_model.simExists(newVal)){
-								Simulation sim = newVal.clone();
-								_model.getSimulations().add(sim);
-								_dirtyFlag = true;
-							}
-							//Add also the datasource of the simulation to the data sources list.
+							//Add also the datasource of the simulation to the data sources list, if not exists.
 							CyclistDatasource ds = newVal.getDataSource();
 							if(!_model.dataSourceExists(ds)){
 								_model.getSources().add(ds);
 								_dirtyFlag = true;
 							}
-								
 							
+							if(!_model.simExists(newVal)){
+								Simulation sim = newVal.clone();
+								_model.getSimulations().add(sim);
+								_dirtyFlag = true;
+							}		
 							_model.setSelectedDatasource(newVal.getDataSource());
 						}
 					}
