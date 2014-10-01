@@ -30,47 +30,7 @@
 				<datatype role="INT_TIME" type="NUMERIC"/>
 			</field>	
 		</Schema>
-	</Table>
-		<Table name="Compositions">
-		<Schema>
-			<field name="SimID">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="QualID">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="NucID" semantic="Nuclide">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="MassFrac">
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-		</Schema>
-	</Table>
-	<!-- 
-	<Table name="Enrichments">
-		<Schema>
-			<field name="SimID">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="ENTRY" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="ID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="Time" >
-				<datatype role="INT_TIME" type="INT_TIME"/>
-			</field>
-			<field name="Natural_Uranium" >
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-			<field name="SWU" >
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-		</Schema>
-	</Table>
-	-->
+	</Table>	
 	<Table name="Facilities">
 		<Schema>
 			<field name="SimID" >
@@ -119,6 +79,154 @@
 			</field>
 		</Schema>
 	</Table>
+
+	<Table name="Info">
+		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Handle" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="InitialYear" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="InitialMonth" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Duration" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="ParentSimID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="ParentType" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="BranchTime" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="CyclusVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="CyclusVersionDescribe" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="SqliteVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Hdf5Version" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="BoostVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="LibXML2Version" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="CoinCBCVersion" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
+	<Table name="QuantityInventory">
+		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Time">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Quantity" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="NucID" semantic="Nuclide">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="AgentID" semantic="AgentID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Kind">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Spec">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Prototype" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
+	<Table name="QuantityTransacted">
+		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Time">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Quantity" >
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="NucID" semantic="Nuclide">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="AgentID" semantic="AgentID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Kind">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Spec">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Prototype" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
+	<Table name="Transactions">
+		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="TransactionID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="SenderID" semantic="AgentID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="ReceiverID" semantic="AgentID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="ResourceID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Commodity" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Time" >
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+		</Schema>
+	</Table>
+	<Table name="Compositions">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="QualID">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="NucID" semantic="Nuclide">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="MassFrac">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>
+	
 	<Table name="Inventories">
 		<Schema>
 			<field name="SimID" >
@@ -193,152 +301,29 @@
 			</field>
 		</Schema>
 	</Table>
-	<Table name="Info">
-		<Schema>
-			<field name="SimID" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Handle" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="InitialYear" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="InitialMonth" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="Duration" >
-				<datatype role="MEASURE" type="NUMERIC"/>
-			</field>
-			<field name="ParentSimID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="ParentType" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="BranchTime" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="CyclusVersion" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="CyclusVersionDescribe" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="SqliteVersion" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Hdf5Version" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="BoostVersion" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="LibXML2Version" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="CoinCBCVersion" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-		</Schema>
-	</Table>
 	<!-- 
-	<Table name="TransactedResources">
+	<Table name="Enrichments">
 		<Schema>
-			<field name="SimID" >
+			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="TransactionID" >
+			<field name="ENTRY" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
-			<field name="Position" >
+			<field name="ID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="ResourceID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-		</Schema>
-	</Table>
-	-->
-	<Table name="Transactions">
-		<Schema>
-			<field name="SimID" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="TransactionID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="SenderID" semantic="AgentID">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="ReceiverID" semantic="AgentID">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="ResourceID" >
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="Commodity" >
-				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Time" >
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-		</Schema>
-	</Table>
-	<Table name="QuantityInventory">
-		<Schema>
-			<field name="SimID" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Time">
-				<datatype role="INT_TIME" type="INT_TIME"/>
-			</field>
-			<field name="Quantity" >
+			<field name="Natural_Uranium" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="NucID" semantic="Nuclide">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="AgentID" semantic="AgentID">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="Kind">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Spec">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Prototype" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-		</Schema>
-	</Table>
-	<Table name="QuantityTransacted">
-		<Schema>
-			<field name="SimID" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Time">
-				<datatype role="INT_TIME" type="INT_TIME"/>
-			</field>
-			<field name="Quantity" >
+			<field name="SWU" >
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
-			<field name="NucID" semantic="Nuclide">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="AgentID" semantic="AgentID">
-				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
-			<field name="Kind">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Spec">
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
-			<field name="Prototype" >
-				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
 		</Schema>
 	</Table>
+	
+	-->
 </root>

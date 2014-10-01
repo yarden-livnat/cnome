@@ -243,9 +243,9 @@ public class MainScreen extends VBox {
 		Menu dataMenu = createDataMenu();
 		_viewMenu = createViewMenu();
 //		Menu panelMenu = createPanelMenu();
-		_perspectiveMenu = createPerspectiveMenu();
+//		_perspectiveMenu = createPerspectiveMenu();
 		
-		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _perspectiveMenu);
+		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu/*, _perspectiveMenu*/);
 		
 		return menubar;
 	}
