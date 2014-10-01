@@ -34,6 +34,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -42,6 +43,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -57,6 +59,7 @@ import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.SQLitePage;
+import edu.utah.sci.cyclist.core.ui.components.UpdateDbDialog;
 
 public class SqliteLoaderWizard extends VBox {
 	
@@ -64,12 +67,16 @@ public class SqliteLoaderWizard extends VBox {
 	private String _fileName = "";
 	private VBox _errorMessageBox = null;
 	private VBox _vbox = null;
+	private TextArea _statusText;
+	private RotateTransition _animation;
+	private UpdateDbDialog _updateDialog;
 	private ObjectProperty<Simulation> _selection = new SimpleObjectProperty<Simulation>();
 	
 	
 	private static final String SIMULATION_ID_FIELD_NAME = "SimID";
 	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT " + SIMULATION_ID_FIELD_NAME  +" FROM Info order by SimID";
 	private static String SIMULATION_INFO_QUERY = "select initialYear, initialMonth, Duration from Info where SimID=?";
+	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
 	public ObjectProperty<Simulation> show(Window window) {
 		_dialog.initOwner(window);
@@ -141,6 +148,10 @@ public class SqliteLoaderWizard extends VBox {
 			public void handle(ActionEvent event) {
 				Simulation simulation = null;
 				CyclistDatasource ds = getDataSource(path.getText());
+				Boolean updateReuired = isDbUpdateRequired(ds);
+				if(updateReuired){
+					
+				}
 				if(ds != null){
 					simulation = getSimulation(ds);
 				}
@@ -155,6 +166,12 @@ public class SqliteLoaderWizard extends VBox {
 			
 		HBox.setHgrow(buttons,  Priority.ALWAYS);
 		
+		// Controls for the update database dialog part
+		_statusText = new TextArea();
+		_animation = new RotateTransition();
+		_updateDialog = new UpdateDbDialog(_statusText, _animation);
+		
+		//The error message VBox, to be displayed when more than one simulation.
 		_errorMessageBox = new VBox();
 		_errorMessageBox.setSpacing(15);
 		_errorMessageBox.setPadding(new Insets(10));
@@ -227,8 +244,8 @@ public class SqliteLoaderWizard extends VBox {
 			p.setProperty("driver", "sqlite");
 			p.setProperty("type", "SQLite");
 			p.setProperty("path", path);
-			String name = path;
-			p.setProperty("name", name.substring(name.lastIndexOf("/")+1));
+			String name = _fileName;
+			p.setProperty("name", name);
 		}
 		return ds;	
 	}
@@ -296,5 +313,30 @@ public class SqliteLoaderWizard extends VBox {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	}
+	
+	/*
+	 * Checks if the update indication table exists in the current database.
+	 * If it exists, it means the database is already updated.
+	 * @param Connection conn - the connection to the database.
+	 * @return Boolean - true if the indication table was found, false otherwise.
+	 */
+	private Boolean isDbUpdateRequired(CyclistDatasource ds){
+		Statement stmt;
+		try (Connection conn = ds.getConnection()) {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(TEST_UPDATED_QUERY);
+			if(rs.next()){
+				return true;
+			}else{
+				return false;
+			}
+		}catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}finally{
+			ds.releaseConnection();
+		}
 	}
 }

@@ -83,6 +83,17 @@ public class Model {
 		return response;
 	}
 	
+	public Boolean dataSourceExists(CyclistDatasource ds){
+		Boolean response = false;
+		for(CyclistDatasource dataSource : _sources){
+			if(dataSource.getURL().equals(ds.getURL())){
+				response = true;
+				break;
+			}
+		}
+		return response;
+	}
+	
 	public List<Table> getSimulationsTablesDef(){
 		return _simulationTablesDef;
 	}

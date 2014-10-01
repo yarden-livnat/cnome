@@ -33,7 +33,6 @@ import java.util.Arrays;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -276,6 +275,14 @@ public class CyclistController {
 								_model.getSimulations().add(sim);
 								_dirtyFlag = true;
 							}
+							//Add also the datasource of the simulation to the data sources list.
+							CyclistDatasource ds = newVal.getDataSource();
+							if(!_model.dataSourceExists(ds)){
+								_model.getSources().add(ds);
+								_dirtyFlag = true;
+							}
+								
+							
 							_model.setSelectedDatasource(newVal.getDataSource());
 						}
 					}
