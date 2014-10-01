@@ -382,7 +382,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	}
 	
 	//Let the sub classes have access to the current simulation.
-	protected Simulation getCurrentSimulation(){
+	public Simulation getCurrentSimulation(){
 		return _currentSim;
 	}
 	

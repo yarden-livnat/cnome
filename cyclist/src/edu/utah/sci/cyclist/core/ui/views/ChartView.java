@@ -999,7 +999,7 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 
-		MenuItem duplicateItem = new MenuItem("Duplicate chart");
+		MenuItem duplicateItem = new MenuItem("Duplicate plot");
 		duplicateItem.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
