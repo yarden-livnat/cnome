@@ -102,20 +102,6 @@ public class SimulationTablesPostProcessor {
 			+ "		base.SimID = ag.SimID "
 			+ " AND base.AgentId = ag.AgentId";
 	
-	private static String[] UpdateTablesRunningOrderTbl1 = 
-	{
-		FIX_AGENTS_TABLE_PHASE1,
-		FIX_AGENTS_TABLE_PHASE2,
-	    FACILITIES_TABLE_CREATE,
-	    FACILITIES_TABLE_UPDATE,
-	    FACILITIES_TABLE_INDEX,
-	    QUANTITY_INVENTORY_BASE_CREATE,
-	    QUANTITY_INVENTORY_VIEW_CREATE,
-	    QUANTITY_TRANSACTED_BASE_CREATE,
-	    QUANTITY_TRANSACTED_VIEW_CREATE,
-	    UPDATED_INDICATION_TABLE_CREATE,
-	};
-	
 	private QueryOperation[] UpdateTablesRunningOrderTbl = 
 		{
 			 new QueryOperation("Fix \"Agents\" table phase #1",FIX_AGENTS_TABLE_PHASE1),
@@ -146,26 +132,17 @@ public class SimulationTablesPostProcessor {
     }
     
     private static ObjectProperty<String> _message = new SimpleObjectProperty<String>("");
-    private static ObjectProperty<Double> _progress = new SimpleObjectProperty<Double>(-1.0);
-    
+   
 	public Task<Boolean> process(CyclistDatasource ds){ 
 		Task<Boolean> task = new Task<Boolean>() {
 	         @Override protected Boolean call() throws Exception {
-	        	 Boolean result = false;
 	        	 _message.addListener(new ChangeListener<String>() {	 
 	 		        @Override 
 	 		        public void changed(ObservableValue<? extends String> arg0,String oldVal, String newVal) {
 	 		        	updateMessage(_message.getValue());
 	 		        }
 	 		    });
-//	        	_progress.addListener(new ChangeListener<Double>() {	 
-//		 		        @Override 
-//		 		        public void changed(ObservableValue<? extends Double> arg0,Double oldVal, Double newVal) {
-//		 		        	updateProgress(newVal, 1.0);
-//		 		        }
-//		 		});
-	        	result= processTask(ds);
-	        	return result;
+	        	return processTask(ds);
 	         }
 		 };
 		 Thread th = new Thread(task);
@@ -198,7 +175,6 @@ public class SimulationTablesPostProcessor {
 		//
 		if(!isUpdated){
 			Boolean result = true;
-//			_progress.setValue(0.0);
 			String dsPath = ds.getProperties().getProperty("path");
 			//Save the current db in a temporary file
 			String savedPath = saveSqliteFile(dsPath);
@@ -212,8 +188,7 @@ public class SimulationTablesPostProcessor {
 				//If one of the updates has failed - roll back to the saved database.
 				if(!result){
 					cancelDbChanges(savedPath,dsPath);
-					_message.setValue("Update database failed!");
-//					log.warn("Update database failed!");
+					_message.setValue(_message.getValue() + "Update database failed! \n");
 				}else{
 					//No need for the saved file anymore.
 					File file = new File(savedPath);
@@ -221,28 +196,39 @@ public class SimulationTablesPostProcessor {
 						file.delete();
 					}
 				}
-//				_progress.setValue(1.0);
-				_message.setValue("Done!");
+				_message.setValue(_message.getValue() + "Done! \n");
 				return result;
 			}
-//			_progress.setValue(1.0);
 			return false;
 		}else{
-			_message.setValue("database is already updated");
-//			log.warn("database is already updated");
-//			_progress.setValue(1.0);
+			_message.setValue(_message.getValue()+ "database is already updated \n");
 			return true;
 		}
 	}
 	
 	/**
-	 * Returns whether or not a database update post process is required
-	 * (Right now it is only based on whether or not it is a Sqlite datasource)
+	 * Checks if the update indication table exists in the current database.
+	 * If it exists, it means the database is already updated, and no further update is required.
 	 * @param ds - the data source to check.
-	 * @return Boolean. true if need update, false if not.
+	 * @return Boolean - true if the indication table was found, false otherwise.
 	 */
-	public static Boolean isUpdateRequired(CyclistDatasource ds){
-		return ds.isSQLite();
+	public static Boolean isDbUpdateRequired(CyclistDatasource ds){
+		Statement stmt;
+		try (Connection conn = ds.getConnection()) {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(TEST_UPDATED_QUERY);
+			if(rs.next()){
+				return false;
+			}else{
+				return true;
+			}
+		}catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return true;
+		}finally{
+			ds.releaseConnection();
+		}
 	}
 	
 	/*
@@ -321,7 +307,6 @@ public class SimulationTablesPostProcessor {
 	 * @param : CyclistDatasource ds - the data source to work on.
 	 */
 	private static Boolean updateSqliteSimTables(CyclistDatasource ds, Logger log){
-		_message.setValue("Running external application");
 		String dsPath = ds.getProperties().getProperty("path");
 		
 		String currPath = Resources1.getCurrentPath();
@@ -336,14 +321,13 @@ public class SimulationTablesPostProcessor {
 		}
 		
 		String os = OsUtil.getOsDef();
-		_message.setValue("Running external application. os="+os);
+		_message.setValue(_message.getValue() + "Running external application. os="+os + "\n");
 		String app = applicationsMap.get(os);
 		
 		Process process = null;
 		
 		if(app == null || app.isEmpty()){
-//			log.warn("No app has been found for os: " + os );
-			_message.setValue("No app has been found for os: " + os);
+			_message.setValue(_message.getValue() + "No app has been found for os: " + os + "\n");
 			return false;
 		}
 		
@@ -358,8 +342,7 @@ public class SimulationTablesPostProcessor {
 		        file.setWritable(true, false);
 		}
 		
-//		log.warn("path= " + currPath);
-		_message.setValue("path= " + currPath);
+		_message.setValue(_message.getValue() + "path= " + currPath + "\n");
 			
 		//Indication whether or not the new tables have been produced.
 	    Boolean isAlreadyProcessed = false;
@@ -373,8 +356,7 @@ public class SimulationTablesPostProcessor {
 			    String line;
 			    
 			    while ((line = br.readLine()) != null) {
-			      _message.setValue(line);
-//			      log.warn(line);
+			      _message.setValue(_message.getValue() + line + "\n");
 			      //Tables already exist - no need to reproduce additional tables.
 			      if(line.indexOf("post processed") > -1){
 //			    	  //If reached here the "UpdatedIndication" table doesn't exit. It means some of the other tables
@@ -411,12 +393,9 @@ public class SimulationTablesPostProcessor {
 		try {
 			conn = ds.getConnection();
 			stmt = conn.createStatement();
-			_message.setValue("running queries");
-			double index = 0.1;
+			_message.setValue(_message.getValue() + "running queries: \n");
 			for(QueryOperation queryOp : UpdateTablesRunningOrderTbl){
-//				_progress.setValue(0.4+index);
-//				index += 0.05;
-				_message.setValue("running query: " + queryOp.name);
+				_message.setValue(_message.getValue() + queryOp.name + "\n");
 				stmt.executeUpdate(queryOp.query);
 			}
 			return true;

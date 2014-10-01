@@ -30,18 +30,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -57,6 +64,8 @@ import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.SQLitePage;
+import edu.utah.sci.cyclist.core.ui.components.UpdateDbDialog;
+import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
 
 public class SqliteLoaderWizard extends VBox {
 	
@@ -64,12 +73,18 @@ public class SqliteLoaderWizard extends VBox {
 	private String _fileName = "";
 	private VBox _errorMessageBox = null;
 	private VBox _vbox = null;
+	private TextArea _statusText;
+	private RotateTransition _animation;
+	private UpdateDbDialog _updateDialog;
 	private ObjectProperty<Simulation> _selection = new SimpleObjectProperty<Simulation>();
+	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
+	private List<CyclistDatasource> _sources = null;
 	
 	
 	private static final String SIMULATION_ID_FIELD_NAME = "SimID";
 	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT " + SIMULATION_ID_FIELD_NAME  +" FROM Info order by SimID";
 	private static String SIMULATION_INFO_QUERY = "select initialYear, initialMonth, Duration from Info where SimID=?";
+	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
 	public ObjectProperty<Simulation> show(Window window) {
 		_dialog.initOwner(window);
@@ -79,8 +94,9 @@ public class SqliteLoaderWizard extends VBox {
 		return _selection;
 	}
 	
-	public SqliteLoaderWizard() {	
+	public SqliteLoaderWizard(List<CyclistDatasource> sources) {	
 		createDialog();
+		_sources = new ArrayList<>(sources);
 	}
 	
 	private void createDialog(){
@@ -139,14 +155,22 @@ public class SqliteLoaderWizard extends VBox {
 		ok.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				Simulation simulation = null;
 				CyclistDatasource ds = getDataSource(path.getText());
 				if(ds != null){
-					simulation = getSimulation(ds);
-				}
-				if(simulation != null){
-					_selection.set(simulation);
-					dialog.close();
+					Boolean updateReuired = SimulationTablesPostProcessor.isDbUpdateRequired(ds);
+					if(updateReuired){
+						setDbUpdate(true,ds);
+		 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
+		 					@Override
+		 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+		 						setSimulation(ds);
+		 					}
+		 				});
+					}
+					else{
+						_dsIsValid.set(true);
+						setSimulation(ds);
+					}
 				}
 			}
 		});
@@ -155,6 +179,12 @@ public class SqliteLoaderWizard extends VBox {
 			
 		HBox.setHgrow(buttons,  Priority.ALWAYS);
 		
+		// Controls for the update database dialog part
+		_statusText = new TextArea();
+		_animation = new RotateTransition();
+		_updateDialog = new UpdateDbDialog(_statusText, _animation);
+		
+		//The error message VBox, to be displayed when more than one simulation.
 		_errorMessageBox = new VBox();
 		_errorMessageBox.setSpacing(15);
 		_errorMessageBox.setPadding(new Insets(10));
@@ -189,6 +219,31 @@ public class SqliteLoaderWizard extends VBox {
 		
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
 		return scene;
+	}
+
+	private void setSimulation(CyclistDatasource ds){
+		Simulation simulation = null;
+		if(_dsIsValid.getValue()){
+			simulation= getSimulation(ds);
+		}
+		_selection.set(simulation);
+		_dialog.close();
+	}
+	
+	/*
+	 * Checks if the simulation data source already exists in the model sources list.
+	 * If yes - use it as the simulation datasource. (to make sure the datasource uid is the same).
+	 * This is important since if the data source alre
+	 */
+	private CyclistDatasource getExistingDs(CyclistDatasource ds){
+		CyclistDatasource dataSource = null;
+		for(CyclistDatasource source : _sources){
+			if(source.getURL().equals(ds.getURL())){
+				dataSource = source;
+				break;
+			}
+		}
+		return dataSource;
 	}
 	
 	/*
@@ -227,8 +282,8 @@ public class SqliteLoaderWizard extends VBox {
 			p.setProperty("driver", "sqlite");
 			p.setProperty("type", "SQLite");
 			p.setProperty("path", path);
-			String name = path;
-			p.setProperty("name", name.substring(name.lastIndexOf("/")+1));
+			String name = _fileName;
+			p.setProperty("name", name);
 		}
 		return ds;	
 	}
@@ -296,5 +351,89 @@ public class SqliteLoaderWizard extends VBox {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	}
+	
+	/*
+	 * Checks if the update indication table exists in the current database.
+	 * If it exists, it means the database is already updated.
+	 * @param Connection conn - the connection to the database.
+	 * @return Boolean - true if the indication table was found, false otherwise.
+	 */
+//	private Boolean isDbUpdateRequired(CyclistDatasource ds){
+//		Statement stmt;
+//		try (Connection conn = ds.getConnection()) {
+//			stmt = conn.createStatement();
+//			ResultSet rs = stmt.executeQuery(TEST_UPDATED_QUERY);
+//			if(rs.next()){
+//				return false;
+//			}else{
+//				return true;
+//			}
+//		}catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return true;
+//		}finally{
+//			ds.releaseConnection();
+//		}
+//	}
+	
+	/*
+	 * Checks the argument "isStart":
+	 * If true - 
+	 * 	its the beginning of the database update process. 
+	 * 	Display the updateDb dialog and ask the user whether or not to update the database.
+	 * 	If user approves - start the update process.
+	 * 	If user cancels - hide the dialog and set the datasource validity to false.
+	 * 
+	 * If false - the data base update is done - close the update dialog.
+	 * @param isStart - is it the start or the end of the process.
+	 * @CyclistDatasource ds - the datasource to update.
+	 * 
+	 */
+	private void setDbUpdate(Boolean isStart, CyclistDatasource ds){
+		if(isStart){
+			ObjectProperty<Boolean> selection = _updateDialog.show(_dialog.getScene().getWindow());
+			selection.addListener(new ChangeListener<Boolean>(){
+				@Override
+				public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+					if(newVal){
+						runDbUpdate(ds);
+					}else{
+						_dsIsValid.set(false);
+						_updateDialog.hide();
+					}
+				}
+			});
+		}else{
+			_updateDialog.hide();
+		}
+
+	}
+	
+	/*
+	 * Calls the post processing utility to perform a database update.
+	 * Updates the animation and the status text to display the database update status to the user.
+	 * @param CyclistDatasource ds - 
+	 */
+	private Boolean runDbUpdate(final CyclistDatasource ds){
+			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
+			Task<Boolean> task = postProcessor.process(ds);
+			if(task != null){	
+				task.valueProperty().addListener(new ChangeListener<Boolean>() {
+					 
+			        @Override 
+			        public void changed(ObservableValue<? extends Boolean> arg0,Boolean oldVal, Boolean newVal) {
+			        	_animation.stop();
+			        	_dsIsValid.set(newVal);
+			        	setDbUpdate(false, ds);
+			        }
+			    });
+			
+				_statusText.textProperty().bind(task.messageProperty());
+				_animation.play();
+			}
+			
+		return true;
 	}
 }
