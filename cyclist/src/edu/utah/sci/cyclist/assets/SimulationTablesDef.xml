@@ -103,6 +103,22 @@
 			
 		</Schema>
 	</Table>
+	<Table name="Prototypes">
+		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Prototype" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="AgentID" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Spec" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
 	<Table name="Inventories">
 		<Schema>
 			<field name="SimID" >
