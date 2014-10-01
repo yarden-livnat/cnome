@@ -179,27 +179,11 @@ public class DatatableWizard extends TilePane {
 	    
 	    selectionButton = new Button("Connect");
 	    
-	    Runnable updateDbTask = new Runnable() {
-			@Override
-			public void run() {
-				Platform.runLater(new Runnable(){
-					@Override
-					public void run(){
-						selectConnection(_current);
-					}
-				});
-			}
-		};
-	    
 	    selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent arg0) {
-				setDbUpdateWait(true,_current);
-				Thread update = new Thread(updateDbTask);
-				update.setDaemon(true);
-				update.start();
-			};
-				
+			public void handle(ActionEvent arg0) {	
+				selectConnection(_current);
+			};	
 	    });
 		    
 	    _status = new Label();
@@ -323,7 +307,7 @@ public class DatatableWizard extends TilePane {
 		_sourcesView.getSelectionModel().selectFirst();
 		//_sourcesView.getSelectionModel().clearAndSelect(0);
 		
-		_updateDialog = new UpdateDbDialog(null,null);
+//		_updateDialog = new UpdateDbDialog(null,null);
 		
 		// Return the scene
 		return scene;
@@ -349,12 +333,6 @@ public class DatatableWizard extends TilePane {
 		
 		Boolean dsIsValid = true;
 		_tablesView.getItems().clear();
-		
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
-			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
-			Task task = postProcessor.process(ds);
-			setDbUpdateWait(false, ds);
-		}
 		
 		//If database has to be updated but the update process has failed.
 		if(!dsIsValid){
@@ -391,16 +369,6 @@ public class DatatableWizard extends TilePane {
 		//table.extractSchema();
 	}
 	
-	private void setDbUpdateWait(Boolean isRunning, CyclistDatasource ds){
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
-			if(isRunning){
-				_updateDialog.show(_dialog.getScene().getWindow());
-			}else{
-				_updateDialog.hide();
-			}
-		}
-	}
-
 	public CyclistDatasource getSelectedSource() {
 		return _current;
 	}

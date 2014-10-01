@@ -68,7 +68,7 @@ public class Model {
 	}
 	
 	/**
-	 * Checkes if a given simulation already exists in the list.
+	 * Checks if a given simulation already exists in the list.
 	 * @param simId - the simulation id to check
 	 * @return true - if simulation id already exists, false - if not.
 	 */
@@ -83,6 +83,11 @@ public class Model {
 		return response;
 	}
 	
+	/**
+	 * Checks if a given data source already exists in the list.
+	 * @param ds - the data source to check
+	 * @return true - if data source id already exists, false - if not.
+	 */
 	public Boolean dataSourceExists(CyclistDatasource ds){
 		Boolean response = false;
 		for(CyclistDatasource dataSource : _sources){
