@@ -182,6 +182,7 @@ public class MainScreen extends VBox {
 	private MenuItem _quitMenuItem;
 	private MenuItem _saveMenuItem;
 	private MenuItem _simulationMenuItem;
+	private MenuItem _sqliteLoaderMenuItem;
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
@@ -189,6 +190,10 @@ public class MainScreen extends VBox {
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddSimulation() {
 		return _simulationMenuItem.onActionProperty();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onLoadSqlite() {
+		return _sqliteLoaderMenuItem.onActionProperty();
 	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onSelectWorkspace() {
@@ -270,11 +275,12 @@ public class MainScreen extends VBox {
 	private Menu createDataMenu() {
 		_datasourceMenuItem = new MenuItem("Datatable", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));	
 		_simulationMenuItem = new MenuItem("Simulation", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));
+		_sqliteLoaderMenuItem = new MenuItem("Load Sqlite", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));
 		
 		// -- setup the menu 
 		Menu dataMenu = new Menu("Data");
 		dataMenu.getItems().addAll(
-				_datasourceMenuItem,_simulationMenuItem);
+				_datasourceMenuItem,_simulationMenuItem,_sqliteLoaderMenuItem);
 		return dataMenu;
 	}
 
