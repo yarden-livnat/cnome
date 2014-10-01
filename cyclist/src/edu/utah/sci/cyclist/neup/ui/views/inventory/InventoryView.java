@@ -218,8 +218,7 @@ public class InventoryView extends CyclistViewBase {
 		return vbox;
 	}
 	
-	public Node buildAgentCtrl() {
-		
+	public Node buildAgentCtrl() {		
 		TitledPanel panel = new TitledPanel("Agents");
 		panel.getStyleClass().add("agents-panel");
 		
@@ -344,7 +343,8 @@ public class InventoryView extends CyclistViewBase {
 			series.add(current);
 		}
 		info.series = series;
-		_chart.add(info);
+		if (info.active)
+			_chart.add(info);
 	}
 	
 	private Node buildChart() {
@@ -356,6 +356,7 @@ public class InventoryView extends CyclistViewBase {
 		public String field;
 		public String value;
 		public Color color;
+		public Boolean active;
 		public ListProperty<Inventory> inventory = new SimpleListProperty<>();
 		public FilteredList<Inventory> filteredInventory; 
 		
@@ -365,6 +366,7 @@ public class InventoryView extends CyclistViewBase {
 		public AgentInfo(String field, String value) {
 			this.field = field;
 			this.value = value;
+			this.active = true;
 			color = Configuration.getInstance().getColor(getName());
 			
 			inventory.addListener((Observable o)->{
@@ -422,19 +424,17 @@ public class InventoryView extends CyclistViewBase {
 			});
 			
 			setOnMouseClicked(e->{
-				text.setDisable(!text.isDisable());
-				if (text.isDisable()) {
-					_chart.remove(info);
-					System.out.println("remove");
-				} else {
+				info.active = !info.active;
+				text.setDisable(!info.active);
+				if (info.active) {
 					_chart.add(info);
-					System.out.println("add");
+				} else {
+					_chart.remove(info);
 				}
 				
 			});
 			
 			button.setOnMouseClicked(e->{
-				System.out.println("delete");
 				if (_onClose != null) {
 					_onClose.accept(this);
 				}

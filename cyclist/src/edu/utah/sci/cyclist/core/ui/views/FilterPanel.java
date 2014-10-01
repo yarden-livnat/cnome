@@ -3,8 +3,6 @@ package edu.utah.sci.cyclist.core.ui.views;
 
 import java.text.DecimalFormat;
 
-import org.controlsfx.control.RangeSlider;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -41,19 +39,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.converter.NumberStringConverter;
+
+import org.controlsfx.control.RangeSlider;
+
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.Field;
-import edu.utah.sci.cyclist.core.model.FieldProperties;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
-import edu.utah.sci.cyclist.core.util.SQL;
 
 public class FilterPanel extends TitledPanel {
 
