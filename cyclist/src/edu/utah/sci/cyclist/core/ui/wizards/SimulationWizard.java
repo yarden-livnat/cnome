@@ -354,7 +354,6 @@ public class SimulationWizard extends TilePane {
 		
 		_statusText = new TextArea();
 		_animation = new RotateTransition();
-		_updateDialog = new UpdateDbDialog(_statusText, _animation);
 		
 		// Return the scene
 		return scene;
@@ -410,6 +409,8 @@ public class SimulationWizard extends TilePane {
 	
 	private void setDbUpdate(Boolean isRunning, CyclistDatasource ds){
 			if(isRunning){
+					_updateDialog = new UpdateDbDialog(_statusText, _animation);
+					_statusText.clear();  //in case it is not the first time it is called.
 					ObjectProperty<Boolean> selection = _updateDialog.show(_dialog.getScene().getWindow());
 					selection.addListener(new ChangeListener<Boolean>(){
 						@Override

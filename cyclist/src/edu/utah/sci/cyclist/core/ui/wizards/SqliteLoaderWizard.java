@@ -224,7 +224,9 @@ public class SqliteLoaderWizard extends VBox {
 	private void setSimulation(CyclistDatasource ds){
 		Simulation simulation = null;
 		if(_dsIsValid.getValue()){
-			simulation= getSimulation(ds);
+			//Return an existing data source with the same path, if already exists.
+			CyclistDatasource dataSource = getExistingDs(ds);
+			simulation= getSimulation(dataSource);
 		}
 		_selection.set(simulation);
 		_dialog.close();
@@ -236,7 +238,7 @@ public class SqliteLoaderWizard extends VBox {
 	 * This is important since if the data source alre
 	 */
 	private CyclistDatasource getExistingDs(CyclistDatasource ds){
-		CyclistDatasource dataSource = null;
+		CyclistDatasource dataSource = ds;
 		for(CyclistDatasource source : _sources){
 			if(source.getURL().equals(ds.getURL())){
 				dataSource = source;

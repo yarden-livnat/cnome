@@ -152,7 +152,7 @@ public class SimulationTablesPostProcessor {
 	}
     
     public Boolean processTask(CyclistDatasource ds){
-		Logger log = Logger.getLogger(SimulationTablesPostProcessor.class);
+		_message.set("");
 		Boolean isUpdated = false;
 		Connection conn = null;
 		
@@ -179,7 +179,7 @@ public class SimulationTablesPostProcessor {
 			//Save the current db in a temporary file
 			String savedPath = saveSqliteFile(dsPath);
 			if(!savedPath.isEmpty()){
-				result = updateSqliteSimTables(ds, log);
+				result = updateSqliteSimTables(ds);
 				//If result is true it means the new tables have been created by the external applications, 
 				//Should also add the internal tables needed for the simulation database.
 				if(result){
@@ -306,7 +306,7 @@ public class SimulationTablesPostProcessor {
 	 * @param : Connection conn - the connection to the database.
 	 * @param : CyclistDatasource ds - the data source to work on.
 	 */
-	private static Boolean updateSqliteSimTables(CyclistDatasource ds, Logger log){
+	private static Boolean updateSqliteSimTables(CyclistDatasource ds){
 		String dsPath = ds.getProperties().getProperty("path");
 		
 		String currPath = Resources1.getCurrentPath();
