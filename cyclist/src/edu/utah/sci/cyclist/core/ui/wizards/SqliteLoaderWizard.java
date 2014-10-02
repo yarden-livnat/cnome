@@ -383,7 +383,7 @@ public class SqliteLoaderWizard extends VBox {
 	/*
 	 * Checks the argument "isStart":
 	 * If true - 
-	 * 	its the beginning of the database update process. 
+	 * 	it's the beginning of the database update process. 
 	 * 	Display the updateDb dialog and ask the user whether or not to update the database.
 	 * 	If user approves - start the update process.
 	 * 	If user cancels - hide the dialog and set the datasource validity to false.
@@ -403,12 +403,14 @@ public class SqliteLoaderWizard extends VBox {
 						runDbUpdate(ds);
 					}else{
 						_dsIsValid.set(false);
+						_statusText.textProperty().unbind();
 						_updateDialog.hide();
 					}
 				}
 			});
 		}else{
 			_updateDialog.hide();
+			_statusText.textProperty().unbind();
 		}
 
 	}
@@ -416,9 +418,9 @@ public class SqliteLoaderWizard extends VBox {
 	/*
 	 * Calls the post processing utility to perform a database update.
 	 * Updates the animation and the status text to display the database update status to the user.
-	 * @param CyclistDatasource ds - 
+	 * @param CyclistDatasource ds - the data source to update.
 	 */
-	private Boolean runDbUpdate(final CyclistDatasource ds){
+	private void runDbUpdate(final CyclistDatasource ds){
 			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
 			Task<Boolean> task = postProcessor.process(ds);
 			if(task != null){	
@@ -435,7 +437,5 @@ public class SqliteLoaderWizard extends VBox {
 				_statusText.textProperty().bind(task.messageProperty());
 				_animation.play();
 			}
-			
-		return true;
 	}
 }

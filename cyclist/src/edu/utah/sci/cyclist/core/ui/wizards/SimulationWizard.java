@@ -92,9 +92,9 @@ public class SimulationWizard extends TilePane {
 	private ObservableList<SimInfo> 	_simData =FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	private UpdateDbDialog				_updateDialog;
-	ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
-	TextArea _statusText;
-	RotateTransition _animation;
+	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
+	private TextArea _statusText;
+	private RotateTransition _animation;
 	
 	   
 	// DataType elements
@@ -407,6 +407,19 @@ public class SimulationWizard extends TilePane {
 		}
 	}
 	
+	/*
+	 * Checks the argument "isRunning":
+	 * If true - 
+	 * 	it's the beginning of the database update process. 
+	 * 	Display the updateDb dialog and ask the user whether or not to update the database.
+	 * 	If user approves - start the update process.
+	 * 	If user cancels - hide the dialog and set the datasource validity to false.
+	 * 
+	 * If false - the data base update is done - close the update dialog.
+	 * @param isStart - is it the start or the end of the process.
+	 * @CyclistDatasource ds - the datasource to update.
+	 * 
+	 */
 	private void setDbUpdate(Boolean isRunning, CyclistDatasource ds){
 			if(isRunning){
 					_updateDialog = new UpdateDbDialog(_statusText, _animation);
@@ -419,16 +432,23 @@ public class SimulationWizard extends TilePane {
 								runDbUpdate(ds);
 							}else{
 								_dsIsValid.set(false);
+								_statusText.textProperty().unbind();
 								_updateDialog.hide();
 							}
 						}
 					});
 			}else{
+				_statusText.textProperty().unbind();
 				_updateDialog.hide();
 			}
 	}
 		
-	private Boolean runDbUpdate(final CyclistDatasource ds){
+	/*
+	 * Calls the post processing utility to perform a database update.
+	 * Updates the animation and the status text to display the database update status to the user.
+	 * @param CyclistDatasource ds - the data source to update 
+	 */
+	private void runDbUpdate(final CyclistDatasource ds){
 			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
 			Task<Boolean> task = postProcessor.process(ds);
 			if(task != null){	
@@ -445,8 +465,6 @@ public class SimulationWizard extends TilePane {
 				_statusText.textProperty().bind(task.messageProperty());
 				_animation.play();
 			}
-			
-		return true;
 	}
 
 	private void updateSimulation() {
