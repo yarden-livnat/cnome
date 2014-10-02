@@ -30,6 +30,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -231,7 +233,7 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				final SimulationWizard wizard = new SimulationWizard();
 				
-				wizard.setItems(_model.getSources());
+				wizard.setItems(_model.getSources(), _model.getSimAliases().keySet());
 				if(_model.getSelectedDatasource() != null){
 					wizard.setSelectedSource(_model.getSelectedDatasource());
 				}
@@ -406,12 +408,17 @@ public class CyclistController {
 				while (listChange.next()) {
 					for(Simulation sim : listChange.getRemoved()){
 						_presenter.removeSimulation(sim);
+						_model.markSimALiasAsRemoved(sim);
+					}
+					for(Simulation sim : listChange.getAddedSubList()){
+						_model.addNewSimALias(sim,"");
 					}
 				}
 			}
 		});
 		
 	}
+	
 		
 	private void quit() {
 		// TODO: check is we need to save  
@@ -468,6 +475,14 @@ public class CyclistController {
 		//Save the Simulations
 		for(Simulation simulation: _model.getSimulations()){
 			simulation.save(memento.createChild("Simulation"));
+		}
+		
+		//Save the simulations aliases
+		IMemento aliases = memento.createChild("Aliases");
+		for (Map.Entry<Simulation, String> entry : _model.getSimAliases().entrySet()){
+			IMemento alias = aliases.createChild("Alias");
+			Simulation sim = entry.getKey();
+			sim.save(alias,entry.getValue());
 		}
 		
 		_presenter.save(memento.createChild("Tools"));
@@ -541,6 +556,19 @@ public class CyclistController {
 						lastSimulationId = lastSimulation.getString("simulation-id");
 					}
 					_screen.getSimulationPanel().selectSimulation(lastSimulationId);
+					
+					IMemento aliasesTitle = memento.getChild("Aliases");
+					if(aliasesTitle != null){
+						IMemento[]aliases = aliasesTitle.getChildren("Alias");
+						if(aliases != null){
+							for(IMemento alias:aliases){
+								Simulation sim = new Simulation();
+								sim.restoreAlias(alias);
+								String date = alias.getString("date");
+								_model.addNewSimALias(sim,date);
+							}
+						}
+					}
 					
 					_dirtyFlag = false;
 					

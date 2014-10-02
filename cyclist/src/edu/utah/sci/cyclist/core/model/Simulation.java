@@ -91,7 +91,21 @@ public class Simulation {
 		return _duration;
 	}
 	
-    // Save the simulation
+    /**Save the simulation alias and its date of deletion
+     * 
+     * @param memento
+     */
+	public void save(IMemento memento, String date) {
+		memento.putString("simulation-id", getSimulationId().toString());
+		memento.putString("alias", getAlias());
+		memento.putString("date", date);
+	}
+	
+	
+	/** Save the simulation
+	 * 
+	 * @param memento
+	 */
 	public void save(IMemento memento) {
 		memento.putString("simulation-id", getSimulationId().toString());
 		memento.putString("datasource-uid", _datasource.getUID());
@@ -101,7 +115,20 @@ public class Simulation {
 		memento.putInteger("duration", _duration);
 	}
 	
-	// Restore the simulation
+	/**
+	 * Restores a simulation which contains only the simulation id and its alias 
+	 * @param memento
+	 */
+	public void restoreAlias(IMemento memento){
+		setSimulationId(memento.getString("simulation-id"));
+		setAlias(memento.getString("alias"));
+	}
+	
+	/**
+	 *  Restore the simulation
+	 * @param memento
+	 * @param sources - the currently existing data sources in the model
+	 */
 	public void restore(IMemento memento, ObservableList<CyclistDatasource> sources){
 		setSimulationId(memento.getString("simulation-id"));
 

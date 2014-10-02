@@ -135,7 +135,7 @@ public class SimulationsPanel extends TitledPanel  {
 			scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 				@Override
 				public void handle(KeyEvent event) {
-					if (event.getCode() == KeyCode.ESCAPE) {
+//					if (event.getCode() == KeyCode.ESCAPE) {
 						//Check If there is any entry in edit mode.
 						if(_entryEdit){
 							resetTimer();
@@ -163,7 +163,7 @@ public class SimulationsPanel extends TitledPanel  {
 							setEditSimulation(true);
 						}
 					}
-				}
+//				}
 			});
 		}
 	}

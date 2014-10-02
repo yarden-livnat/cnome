@@ -29,8 +29,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
@@ -95,6 +97,7 @@ public class SimulationWizard extends TilePane {
 	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
 	private TextArea _statusText;
 	private RotateTransition _animation;
+	private List<Simulation> _aliases;
 	
 	   
 	// DataType elements
@@ -113,10 +116,11 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	// * * * Set the existing data sources in the combo box * * * //
-	public void setItems(final ObservableList<CyclistDatasource> sources) {
+	public void setItems(final ObservableList<CyclistDatasource> sources, Set<Simulation> aliases) {
 		_sources = sources;
 		_sourcesView.setItems(_sources);
 		_sourcesView.getSelectionModel().selectFirst();
+		_aliases = new ArrayList<>(aliases);
 	}
 			
 	// * * * Show the dialog * * * //
@@ -391,7 +395,8 @@ public class SimulationWizard extends TilePane {
 				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 				while (rs.next()) {
 					 Blob simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
-					 _simData.add(new SimInfo(simulationId, ""));
+					 String alias = getAlias(simulationId.toString());
+					 _simData.add(new SimInfo(simulationId, alias));
 				}
 				
 				_simulationsTbl.setItems(_simData);
@@ -484,6 +489,17 @@ public class SimulationWizard extends TilePane {
 				_selection.add(simulation);
 			}
 		}
+	}
+	
+	private String getAlias(String simId){
+		String alias = "";
+		for(Simulation sim : _aliases){
+			if(sim.getSimulationId().toString().equals(simId)){
+				alias = sim.getAlias();
+				break;
+			}
+		}
+		return alias;
 	}
 	
 	public CyclistDatasource getSelectedSource() {
