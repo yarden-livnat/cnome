@@ -41,6 +41,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -76,7 +78,7 @@ public class SqliteLoaderWizard extends VBox {
 	private TextArea _statusText;
 	private RotateTransition _animation;
 	private UpdateDbDialog _updateDialog;
-	private ObjectProperty<Simulation> _selection = new SimpleObjectProperty<Simulation>();
+	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
 	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
 	private List<CyclistDatasource> _sources = null;
 	
@@ -84,9 +86,13 @@ public class SqliteLoaderWizard extends VBox {
 	private static final String SIMULATION_ID_FIELD_NAME = "SimID";
 	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT " + SIMULATION_ID_FIELD_NAME  +" FROM Info order by SimID";
 	private static String SIMULATION_INFO_QUERY = "select initialYear, initialMonth, Duration from Info where SimID=?";
-	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
-	public ObjectProperty<Simulation> show(Window window) {
+	/**
+	 * Shows the dialog.
+	 * @param Window window - the owner.
+	 * @return  ObservableList<Simulation> - list of the simulations in the sqlite database.
+	 */
+	public ObservableList<Simulation> show(Window window) {
 		_dialog.initOwner(window);
 		_dialog.show();
 		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
@@ -163,13 +169,14 @@ public class SqliteLoaderWizard extends VBox {
 		 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
 		 					@Override
 		 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
-		 						setSimulation(ds);
+		 						_dsIsValid.setValue(newVal);
+		 						setSimulations(ds);
 		 					}
 		 				});
 					}
 					else{
 						_dsIsValid.set(true);
-						setSimulation(ds);
+						setSimulations(ds);
 					}
 				}
 			}
@@ -194,7 +201,7 @@ public class SqliteLoaderWizard extends VBox {
 		dismiss.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				_selection.set(null);
+				_selection.clear();
 				dialog.close();
 			}
 		});
@@ -206,7 +213,7 @@ public class SqliteLoaderWizard extends VBox {
 		
 		btn.getChildren().add(dismiss);
 		
-		Text errorText = new Text("database contains more than one simulation - load failed");
+		Text errorText = new Text("Load simulations from the current database failed");
 		
 		_errorMessageBox.getChildren().addAll(errorText, btn);
 		
@@ -221,15 +228,20 @@ public class SqliteLoaderWizard extends VBox {
 		return scene;
 	}
 
-	private void setSimulation(CyclistDatasource ds){
-		Simulation simulation = null;
+	private void setSimulations(CyclistDatasource ds){
+		List<Simulation> simulations = new ArrayList<>();
 		if(_dsIsValid.getValue()){
 			//Return an existing data source with the same path, if already exists.
 			CyclistDatasource dataSource = getExistingDs(ds);
-			simulation= getSimulation(dataSource);
+			simulations= getSimulations(dataSource);
 		}
-		_selection.set(simulation);
-		_dialog.close();
+		if(simulations != null && simulations.size() >0){
+			_selection.addAll(simulations);
+			_dialog.close();
+		}else{
+			_vbox.getChildren().clear();
+			_vbox.getChildren().add(_errorMessageBox);
+		}
 	}
 	
 	/*
@@ -296,9 +308,9 @@ public class SqliteLoaderWizard extends VBox {
 	 * @param CyclistDatasource ds - the data source to look for the simulation.
 	 * @return Simulation = the simulation found in the specified data source.
 	 */
-	private Simulation getSimulation(CyclistDatasource ds){
+	private List<Simulation> getSimulations(CyclistDatasource ds){
+		List<Simulation> simulations = new ArrayList<>();
 		try (Connection conn = ds.getConnection()) {
-			int numOfSims = 0;
 			Blob simulationId = null;
 			Simulation simulation = null;
 			Statement stmt = conn.createStatement();
@@ -306,27 +318,33 @@ public class SqliteLoaderWizard extends VBox {
 			rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 			while (rs.next()) {
 				 simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
-				 numOfSims++;
+				if(simulationId != null ){
+					simulation = new Simulation(simulationId);
+					simulation.setDataSource(ds);
+					String alias = _fileName.substring(0,_fileName.indexOf(".sqlite"));
+					simulation.setAlias(alias);
+					fetchSimulationInfo(simulation, conn);
+					simulations.add(simulation);
+				}
 			}
-			
-			if(numOfSims==1 && simulationId != null ){
-				simulation = new Simulation(simulationId);
-				simulation.setDataSource(ds);
-				String alias = _fileName.substring(0,_fileName.indexOf(".sqlite"));
-				simulation.setAlias(alias);
-				fetchSimulationInfo(simulation, conn);
-			}else{
-				_vbox.getChildren().clear();
-				_vbox.getChildren().add(_errorMessageBox);
+			if(simulations.size()>1){
+				for(int i=0;i<simulations.size();i++){
+					Simulation sim = simulations.get(i);
+					sim.setAlias(sim.getAlias()+"-"+(i+1));
+				}
 			}
-			return simulation;
+			return simulations;
 			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimId doesn't exist");
+			_vbox.getChildren().clear();
+			_vbox.getChildren().add(_errorMessageBox);
 			return null;
 		}
 		catch (Exception e) {
 			System.out.println("Get simulation failed");
+			_vbox.getChildren().clear();
+			_vbox.getChildren().add(_errorMessageBox);
 			return null;
 		}finally{
 			ds.releaseConnection();
