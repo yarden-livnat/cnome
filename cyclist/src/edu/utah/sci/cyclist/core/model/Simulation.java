@@ -29,6 +29,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 public class Simulation {
@@ -40,29 +42,42 @@ public class Simulation {
 	private Blob _simulationId;
 	
 	private CyclistDatasource _datasource;
-	private String _alias;
 	private int _startYear;
 	private int _startMonth;
 	private int _duration;
 	private Map<String, Object> _properties = new HashMap<>();
+	private  ObjectProperty<String> _aliasProperty = new SimpleObjectProperty<>();
 	
 	public Simulation() {
 	}
 	
 	public Simulation(Blob simulationId) {
 		_simulationId = simulationId;
-		_alias = _simulationId.toString();
+		setAlias(_simulationId.toString());
 	}
 	
 	public Simulation clone(){
 		Simulation copy = new Simulation(_simulationId);
 		copy.setDataSource(_datasource);
-		copy.setAlias(_alias);
+		copy.setAlias(getAlias());
 		copy.setStartYear(_startYear);
 		copy.setStartMonth(_startMonth);
 		copy.setDuration(_duration);
 		return copy;
 	}
+	
+	public ObjectProperty<String> aliasProperty() {
+		return _aliasProperty;
+	}
+	
+	public void setAlias(String alias) {
+		_aliasProperty.set(alias);
+	}
+	
+	public String getAlias() {
+		return _aliasProperty.get();
+	}
+	
 	
 	public void setStartYear(Integer year) {
 		if (year == null) year = 0;
@@ -202,13 +217,5 @@ public class Simulation {
 	 */
 	public CyclistDatasource getDataSource(){
 		return _datasource;
-	}
-	
-	public String getAlias(){
-		return _alias;
-	}
-	
-	public void setAlias(String alias){
-		_alias = alias;
 	}
 }

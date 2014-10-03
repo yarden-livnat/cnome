@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
@@ -248,9 +247,14 @@ public class CyclistController {
 						if(newList != null)
 						{
 							for(Simulation simulation:newList.getList()){
-								if(!_model.simExists(simulation)){
-									Simulation sim = simulation.clone();
+								Simulation sim = simulation.clone();
+								Simulation existingSim = _model.simExists(simulation);
+								if(existingSim==null){
 									_model.getSimulations().add(sim);
+									_dirtyFlag = true;
+								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
+									existingSim.setAlias(simulation.getAlias());
+									_model.addNewSimALias(existingSim, "");
 									_dirtyFlag = true;
 								}
 							}
@@ -282,9 +286,14 @@ public class CyclistController {
 							}
 							
 							for(Simulation simulation:newList.getList()){
-								if(!_model.simExists(simulation)){
-									Simulation sim = simulation.clone();
+								Simulation sim = simulation.clone();
+								Simulation existingSim = _model.simExists(simulation);
+								if(existingSim == null){
 									_model.getSimulations().add(sim);
+									_dirtyFlag = true;
+								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
+									existingSim.setAlias(simulation.getAlias());
+									_model.addNewSimALias(existingSim, "");
 									_dirtyFlag = true;
 								}
 							}
@@ -346,12 +355,15 @@ public class CyclistController {
 			}
 		});
 		
-		_screen.editSimulationProperty().addListener(new ChangeListener<Boolean>() {
+		_screen.editSimulationProperty().addListener(new ChangeListener<Simulation>() {
 			@Override
-			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
-				if(newVal){
+			public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal, Simulation newVal) {
+				if(newVal != oldVal && newVal != null){
+					if(newVal.getSimulationId() != null){
+						_model.addNewSimALias(newVal, "");
+					}
 					_dirtyFlag = true;
-					_screen.editSimulationProperty().setValue(false);
+					_screen.editSimulationProperty().setValue(null);
 				}
 			}
 		});

@@ -83,16 +83,17 @@ public class Model {
 	 * @param simId - the simulation id to check
 	 * @return true - if simulation id already exists, false - if not.
 	 */
-	public Boolean simExists(Simulation simulation){
-		Boolean response = false;
+	public Simulation simExists(Simulation simulation){
+		Simulation response = null;
 		for(Simulation sim: _simulations){
 			if(sim.getSimulationId().toString().equals(simulation.getSimulationId().toString())){
-				response = true;
+				response = sim;
 				break;
 			}
 		}
 		return response;
 	}
+	
 	
 	/**
 	 * Checks if a given data source already exists in the list.
