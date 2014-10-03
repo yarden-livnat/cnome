@@ -39,6 +39,7 @@ public class DnD {
 	public static final DataFormat FILTER_FORMAT 		= new DataFormat("cyclist.dnd.filter");
 	public static final DataFormat INDICATOR_FORMAT		= new DataFormat("cyclist.dnd.indicator");
 	public static final DataFormat SIMULATION_FORMAT	= new DataFormat("cyclist.dnd.simulation");
+	public static final DataFormat JOB_FORMAT 			= new DataFormat("cyclist.dnd.job");
 	
 	private static DnD _instance = new DnD();
 	

@@ -18,7 +18,7 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.model.CyclusRun;
+import edu.utah.sci.cyclist.core.model.CyclusJob;
 
 public class CyclusService {
 	public static final String CLOUDIUS_URL = "http://cycrun.fuelcycle.org";
@@ -26,7 +26,7 @@ public class CyclusService {
 	public static final String CLOUDIUS_STATUS = CLOUDIUS_URL+"/api/v1/job/";
 	
 	private EventBus _eventBus;
-	private ListProperty<CyclusRun> _runs = new SimpleListProperty<>(FXCollections.observableArrayList());
+	private ListProperty<CyclusJob> _runs = new SimpleListProperty<>(FXCollections.observableArrayList());
 	private PollService _pollService = new PollService();
 	
 	
@@ -34,12 +34,12 @@ public class CyclusService {
 		_eventBus = eventBus;
 	}
 	
-	public ListProperty<CyclusRun> runs() {
+	public ListProperty<CyclusJob> jobs() {
 		return _runs;
 	}
 	
 	public void submit(File file) {
-		CyclusRun run = new CyclusRun(file.getAbsolutePath());
+		CyclusJob run = new CyclusJob(file.getAbsolutePath());
 		
 		try {
 			InputStream stream = Request.Post(CLOUDIUS_SUBMIT)
@@ -65,16 +65,16 @@ public class CyclusService {
 	
 	class PollService extends Thread {
 	
-		private List<CyclusRun> _jobs;
+		private List<CyclusJob> _jobs;
 		
 		public void run() {
 			for (;;) {
 //				System.out.println("PollService: check runs");
 				synchronized(_runs) {
-					_jobs = _runs.filtered(r->{return r.getStatus() == CyclusRun.Status.SUMITTED; });
+					_jobs = _runs.filtered(r->{return r.getStatus() == CyclusJob.Status.SUMITTED; });
 				}
 //				System.out.println("PollSevice: "+_jobs.size()+" runs");
-				for (CyclusRun run : _jobs) {
+				for (CyclusJob run : _jobs) {
 					try {
 //						System.out.println("PollService: check run "+run.getId());
 //						long t = System.currentTimeMillis();

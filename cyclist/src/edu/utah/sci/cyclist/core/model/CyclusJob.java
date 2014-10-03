@@ -5,21 +5,23 @@ import java.time.LocalDateTime;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import javax.json.JsonObject;
 
-public class CyclusRun {
+public class CyclusJob {
 	public enum Status { INIT, SUMITTED, COMPLETED, FAILED }
 	
 	private JsonObject _info;
-	private String _id;
 	private ObjectProperty<Status> _status = new SimpleObjectProperty<>(Status.INIT);
 	private ObjectProperty<LocalDateTime> _dateSumbitted = new SimpleObjectProperty<>();
 	private ObjectProperty<LocalDateTime> _lastChecked = new SimpleObjectProperty<>();
+	private StringProperty _alias = new SimpleStringProperty();
 	private String _inputFilePath = "";
 	
 	
-	public CyclusRun(String path) {
+	public CyclusJob(String path) {
 		_inputFilePath = path;
 	}	
 	
@@ -28,10 +30,6 @@ public class CyclusRun {
 	}
 	
 	public void updateInfo(JsonObject info) {
-		setInfo(info);
-	}
-	
-	public void setInfo(JsonObject info) {
 		_info = info;
 		System.out.println("set status to "+info.getString("Status"));
 		String s = info.getString("Status");
@@ -43,8 +41,27 @@ public class CyclusRun {
 			setStatus(Status.SUMITTED);
 	}
 	
+	public void setInfo(JsonObject info) {
+		_info = info;
+		if (getAlias() == null)
+			setAlias(getId());
+		updateInfo(info);
+	}
+	
 	public String getId() {
 		return _info.getString("Id");
+	}
+	
+	public StringProperty aliasProperty() {
+		return _alias;
+	}
+	
+	public String getAlias() {
+		return aliasProperty().get();
+	}
+	
+	public void setAlias(String alias) {
+		aliasProperty().set(alias);
 	}
 	
 	public ObjectProperty<Status> statusProperty() {
