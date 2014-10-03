@@ -40,6 +40,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -58,6 +59,7 @@ import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
+import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.components.SQLitePage;
@@ -78,6 +80,7 @@ public class CyclistController {
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
+	private CyclusService _cyclusService;
 	
 	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
 	
@@ -88,6 +91,8 @@ public class CyclistController {
 	 */
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
+		
+		_cyclusService = new CyclusService(eventBus);
 		
 		_workDirectoryController = new WorkDirectoryController();
 		
@@ -289,6 +294,18 @@ public class CyclistController {
 			}
 		});
 		
+		_screen.onRun().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				FileChooser chooser = new FileChooser();
+				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Cyclus files (*.xml)", "*.xml") );
+				File file = chooser.showOpenDialog(null);
+				if (file != null) {
+					_cyclusService.submit(file);
+				}
+			}
+		});
+		
 		_screen.onSelectWorkspace().set(new EventHandler<ActionEvent>(){
 
 			@Override
@@ -375,7 +392,7 @@ public class CyclistController {
 				quit();
 			}
 		});
-		
+		;
 		EventHandler<ActionEvent> viewAction = new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
