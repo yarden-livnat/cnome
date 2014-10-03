@@ -228,7 +228,7 @@ public class MainScreen extends VBox {
 	 * (trigger - mouse right click)
 	 * @return ObjectProperty<Boolean> - property is set to true on mouse right click.
 	 */
-	public ObjectProperty<Boolean> editSimulationProperty() {
+	public ObjectProperty<Simulation> editSimulationProperty() {
 		return _simulationPanel.editSimulationProperty();
 	}
 	

@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -236,7 +237,7 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				final SimulationWizard wizard = new SimulationWizard();
 				
-				wizard.setItems(_model.getSources());
+				wizard.setItems(_model.getSources(), _model.getSimAliases().keySet());
 				if(_model.getSelectedDatasource() != null){
 					wizard.setSelectedSource(_model.getSelectedDatasource());
 				}
@@ -251,9 +252,14 @@ public class CyclistController {
 						if(newList != null)
 						{
 							for(Simulation simulation:newList.getList()){
-								if(!_model.simExists(simulation)){
-									Simulation sim = simulation.clone();
+								Simulation sim = simulation.clone();
+								Simulation existingSim = _model.simExists(simulation);
+								if(existingSim==null){
 									_model.getSimulations().add(sim);
+									_dirtyFlag = true;
+								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
+									existingSim.setAlias(simulation.getAlias());
+									_model.addNewSimALias(existingSim, "");
 									_dirtyFlag = true;
 								}
 							}
@@ -269,25 +275,34 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				final SqliteLoaderWizard wizard = new SqliteLoaderWizard(_model.getSources());
 				
-				ObjectProperty<Simulation> selection = wizard.show(_screen.getWindow());
-				selection.addListener(new ChangeListener<Simulation>() {
+				ObservableList<Simulation> selection = wizard.show(_screen.getWindow());
+				
+				selection.addListener(new ListChangeListener<Simulation>() {
 					@Override
-					public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal,Simulation newVal) {
-						if(newVal != null)
+					public void onChanged(ListChangeListener.Change<? extends Simulation> newList) {
+						if(newList != null)
 						{
-							//Add also the datasource of the simulation to the data sources list, if not exists.
-							CyclistDatasource ds = newVal.getDataSource();
+							//Add also the datasource of the simulations to the data sources list, if not exists.
+							Simulation firstSim = newList.getList().get(0);
+							CyclistDatasource ds = firstSim.getDataSource();
 							if(!_model.dataSourceExists(ds)){
 								_model.getSources().add(ds);
 								_dirtyFlag = true;
 							}
 							
-							if(!_model.simExists(newVal)){
-								Simulation sim = newVal.clone();
-								_model.getSimulations().add(sim);
-								_dirtyFlag = true;
-							}		
-							_model.setSelectedDatasource(newVal.getDataSource());
+							for(Simulation simulation:newList.getList()){
+								Simulation sim = simulation.clone();
+								Simulation existingSim = _model.simExists(simulation);
+								if(existingSim == null){
+									_model.getSimulations().add(sim);
+									_dirtyFlag = true;
+								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
+									existingSim.setAlias(simulation.getAlias());
+									_model.addNewSimALias(existingSim, "");
+									_dirtyFlag = true;
+								}
+							}
+							_model.setSelectedDatasource(ds);
 						}
 					}
 				});
@@ -357,12 +372,15 @@ public class CyclistController {
 			}
 		});
 		
-		_screen.editSimulationProperty().addListener(new ChangeListener<Boolean>() {
+		_screen.editSimulationProperty().addListener(new ChangeListener<Simulation>() {
 			@Override
-			public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
-				if(newVal){
+			public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal, Simulation newVal) {
+				if(newVal != oldVal && newVal != null){
+					if(newVal.getSimulationId() != null){
+						_model.addNewSimALias(newVal, "");
+					}
 					_dirtyFlag = true;
-					_screen.editSimulationProperty().setValue(false);
+					_screen.editSimulationProperty().setValue(null);
 				}
 			}
 		});
@@ -419,12 +437,17 @@ public class CyclistController {
 				while (listChange.next()) {
 					for(Simulation sim : listChange.getRemoved()){
 						_presenter.removeSimulation(sim);
+						_model.markSimALiasAsRemoved(sim);
+					}
+					for(Simulation sim : listChange.getAddedSubList()){
+						_model.addNewSimALias(sim,"");
 					}
 				}
 			}
 		});
 		
 	}
+	
 		
 	private void quit() {
 		// TODO: check is we need to save  
@@ -481,6 +504,14 @@ public class CyclistController {
 		//Save the Simulations
 		for(Simulation simulation: _model.getSimulations()){
 			simulation.save(memento.createChild("Simulation"));
+		}
+		
+		//Save the simulations aliases
+		IMemento aliases = memento.createChild("Aliases");
+		for (Map.Entry<Simulation, String> entry : _model.getSimAliases().entrySet()){
+			IMemento alias = aliases.createChild("Alias");
+			Simulation sim = entry.getKey();
+			sim.save(alias,entry.getValue());
 		}
 		
 		_presenter.save(memento.createChild("Tools"));
@@ -554,6 +585,19 @@ public class CyclistController {
 						lastSimulationId = lastSimulation.getString("simulation-id");
 					}
 					_screen.getSimulationPanel().selectSimulation(lastSimulationId);
+					
+					IMemento aliasesTitle = memento.getChild("Aliases");
+					if(aliasesTitle != null){
+						IMemento[]aliases = aliasesTitle.getChildren("Alias");
+						if(aliases != null){
+							for(IMemento alias:aliases){
+								Simulation sim = new Simulation();
+								sim.restoreAlias(alias);
+								String date = alias.getString("date");
+								_model.addNewSimALias(sim,date);
+							}
+						}
+					}
 					
 					_dirtyFlag = false;
 					
