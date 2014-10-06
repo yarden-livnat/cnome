@@ -93,7 +93,7 @@ public class CyclistController {
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
 		
-		_cyclusService = new CyclusService(eventBus);
+		_cyclusService = new CyclusService();
 		
 		_workDirectoryController = new WorkDirectoryController();
 		
