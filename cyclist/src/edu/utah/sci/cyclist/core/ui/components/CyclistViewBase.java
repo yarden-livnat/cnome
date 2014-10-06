@@ -16,22 +16,16 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.DragEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
-import javafx.util.Callback;
+import javafx.util.StringConverter;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -71,8 +65,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private Map<String, Info<Simulation>> _sims = new HashMap<>(); 
 
 	private ChoiceBox<String> _tableChoice;
-	private ChoiceBox<String> _simChoice;
-	private ComboBox<String> _simCombo;
+	private ChoiceBox<Simulation> _simChoice;
 	
 	private Label _tableGlyph;
 	private Label _simGlyph;
@@ -128,17 +121,8 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		_simChoice = new ChoiceBox<>();
 		_simChoice.getStyleClass().add("flat-button");
 		_simChoice.setVisible(false);
-		
-		_simCombo = new ComboBox<String>();
-		_simCombo.getStyleClass().addAll("flat-button","sim-box");
-		_simCombo.setVisible(false);
-		
-		_simCombo.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
-            @Override
-            public ListCell<String> call(ListView<String> param) {
-                return new SimItemCell();
-            }
-        });
+		SimulationStringConverter converter =  new SimulationStringConverter();
+		_simChoice.setConverter(converter);
 		
 		_filtersArea = new FilterArea();
 		_filtersArea.setVisible(false);
@@ -152,7 +136,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 				_tableChoice,
 				_simGlyph,
 				_simChoice,
-//				_simCombo,
 				_filterGlyph,
 				_filtersArea
 				));
@@ -319,22 +302,17 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	public void addSimulation(final Simulation simulation, boolean remote, boolean active ) {
 		Info<Simulation> info = new Info<>(simulation, remote);
 		_sims.put(simulation.getAlias(), info);
-		_simChoice.getItems().add(simulation.getAlias()); 
-		
-		_simCombo.getItems().add(simulation.getAlias());
-		_simCombo.setVisibleRowCount(_sims.size());
+		_simChoice.getItems().add(simulation); 
+	
 		if (active) {
-			_simCombo.setValue(simulation.getAlias());
-			_simCombo.getSelectionModel().select(simulation.getAlias());
-		}
-		if (active) {
-			_simChoice.setValue(simulation.getAlias());
+			_simChoice.setValue(simulation);
 		}
 		if (_sims.size() > 1 || !remote) {
 			_simChoice.setVisible(true);
-			_simCombo.setVisible(true);
 			_simGlyph.setVisible(true);
 		}
+		
+		simulation.aliasProperty().addListener(_aliasListener);
 	}
 	
 	/**
@@ -344,14 +322,16 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	@Override
 	public void removeSimulation(Simulation simulation) {
 		_sims.remove(simulation.getAlias());
-		_simCombo.getItems().remove(simulation.getAlias());
-		_simChoice.getItems().remove(simulation.getAlias());
-		_simCombo.setVisibleRowCount(_sims.size());
+		_simChoice.getItems().remove(simulation);
 		
-		boolean visible = _sims.size()> 1 || (_sims.size() == 1 && !_sims.get(_simCombo.getItems().get(0)).remote);
-		_simCombo.setVisible(visible);
+		boolean visible = _sims.size()> 1 || (_sims.size() == 1 && !_sims.get(_simChoice.getItems().get(0).getAlias()).remote);
 		_simChoice.setVisible(visible);
 		_simGlyph.setVisible(isToplevel() || visible);
+		simulation.aliasProperty().removeListener(_aliasListener);
+		if(_currentSim == null){
+			//Try to find the next simulation to be selected if the current one has been removed.
+			selectNextAvaliableSimulation();
+		}
 	}
 	
 	/**
@@ -362,11 +342,9 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	@Override
 	public void selectSimulation(Simulation simulation, boolean active) {
 		if (active){
-			_simCombo.setValue(simulation.getAlias());
-			_simChoice.setValue(simulation.getAlias());
+			_simChoice.setValue(simulation);
 		}
-		else if (simulation.getAlias().equals(_simChoice.getValue())) {
-			_simCombo.setValue(null);
+		else if (simulation.getAlias().equals(_simChoice.getValue().getAlias())) {
 			_simChoice.setValue(null);
 		}
 		if (!active && simulation != _currentSim) {
@@ -379,6 +357,23 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	//Let the sub classes have access to the filters area
 	protected FilterArea getFiltersArea(){
 		return _filtersArea;
+	}
+	
+	/*
+	 * If no simulation is selected - select the next available one.
+	 */
+	private void selectNextAvaliableSimulation(){
+		int simsSize = _simChoice.getItems().size();
+		
+		if(simsSize >0){
+			for(int i = simsSize;i>0;i--){
+				Simulation nextSim = _simChoice.getItems().get(i-1);
+				if(_sims.get(nextSim.getAlias()) != null && !_sims.get(nextSim.getAlias()).remote){
+					selectSimulation(nextSim, true);
+					break;
+				}	
+			}
+		}
 	}
 	
 	//Let the sub classes have access to the current simulation.
@@ -395,13 +390,13 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	}
 	
 	//Notification about changes in the simulations list
-	public ObservableList<String> simulations(){
-		return _simChoice.getItems();
-	}
+//	public ObservableList<String> simulations(){
+//		return _simChoice.getItems();
+//	}
 	
-	public ObservableValue<String> lastChosenSimulation(){
-		return _simChoice.valueProperty();
-	}
+//	public ObservableValue<String> lastChosenSimulation(){
+//		return _simChoice.valueProperty();
+//	}
 	
 	/*
 	 * Listeners
@@ -446,7 +441,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	public void removeFilterFromDropArea(Filter filter){
 		;
 	}
-	
 	
 	private void setListeners() {
 		getHeader().setOnDragEntered(new EventHandler<DragEvent>() {
@@ -600,28 +594,18 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 			}
 		});
 		
-		_simCombo.valueProperty().addListener(new ChangeListener<String>() {
+		_simChoice.valueProperty().addListener(new ChangeListener<Simulation>() {
 			@Override
-			public void changed(ObservableValue<? extends String> observable,
-					String prev, String selected) {
+			public void changed(ObservableValue<? extends Simulation> observable,
+					Simulation prev, Simulation selected) {
 				if (_onSimulationSelectedAction != null) {
-					if (selected != null)					
-						_onSimulationSelectedAction.call(_sims.get(selected).item, true);
-					else
-						_onSimulationSelectedAction.call(_sims.get(prev).item, false);
-				}
-			}
-		});
-		
-		_simChoice.valueProperty().addListener(new ChangeListener<String>() {
-			@Override
-			public void changed(ObservableValue<? extends String> observable,
-					String prev, String selected) {
-				if (_onSimulationSelectedAction != null) {
-					if (selected != null)					
-						_onSimulationSelectedAction.call(_sims.get(selected).item, true);
-					else
-						_onSimulationSelectedAction.call(_sims.get(prev).item, false);
+					if (selected != null){					
+						_onSimulationSelectedAction.call(_sims.get(selected.getAlias()).item, true);
+					} else if(prev != null){
+						if(_sims.get(prev.getAlias()) != null){
+							_onSimulationSelectedAction.call(_sims.get(prev.getAlias()).item, false);
+						}
+					}
 				}
 			}
 		});
@@ -646,6 +630,51 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		});
 	}
 	
+	private ChangeListener<String> _aliasListener = new ChangeListener<String>() {
+		@Override
+		public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
+			//Just for refreshing the choice box , so it displays the new value.
+			Simulation sim = new Simulation();
+			sim.setAlias("test");
+			_simChoice.getItems().add(sim);
+			_simChoice.getItems().remove(sim);
+			
+			//Update the simulations map with the new value.
+			Info<Simulation> value = _sims.get(oldVal);
+			if(value != null){
+				_sims.remove(oldVal);
+				value.item.setAlias(newVal);
+				_sims.put(newVal, value);
+			}	
+		}
+	};
+	
+	/**
+	 *  A class to convert from a simulation to its representative string (e.g its alias)
+	 *  Used for the simulations choice box, to show only the alias of a simulation.
+	 */
+	public class SimulationStringConverter extends StringConverter<Simulation>{
+
+		public SimulationStringConverter() {
+			super();
+		}
+		
+		@Override
+		public String toString(Simulation object) {
+			super.toString();
+			return object.getAlias();
+		}
+
+		@Override
+		public Simulation fromString(String string) {
+			super.toString();
+			Simulation sim = new Simulation();
+			sim.setAlias(string);
+			return sim;
+		}
+		
+	}
+	
 //	 public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes){
 // 		_sourcesTransferModes = sourcesTransferModes;
 // 	}
@@ -662,62 +691,6 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
         sourcesTransferModes.put(FilterArea.class, new TransferMode[]{TransferMode.COPY});
         sourcesTransferModes.put(DnDSource.class, new TransferMode[]{TransferMode.COPY});
         return sourcesTransferModes;
-	}
-	
-	public class SimItemCell extends ListCell<String> {
-		Label label = new Label("(empty)");
-		HBox hBox = new HBox();
-		Button btn = new Button("", GlyphRegistry.get(AwesomeIcon.TIMES));
-		private static final String SELECTED_CELL_STYLE  = "-fx-background-color: transparent; -fx-text-fill: -fx-text-base-color;";
-		
-		
-		public SimItemCell() {
-			super();	
-//			btn.getStyleClass().add("flat-menu-button");
-//			btn.getStyleClass().add("flat-button");
-			btn.setStyle("-fx-background-color: transparent;-fx-text-fill: black;-fx-padding: 0;-fx-alignment: bottom-center;-fx-max-height: 10px;");
-			
-			hBox.setSpacing(10);
-			hBox.getChildren().addAll(label,btn);
-			hBox.setAlignment(Pos.CENTER_LEFT);
-//			btn.setVisible(false);
-//			hBox.setOnMouseEntered(new EventHandler<MouseEvent>() {
-//				@Override
-//				public void handle(MouseEvent e) {
-//					btn.setVisible(true);
-//				}
-//			 });
-//			hBox.setOnMouseExited(new EventHandler<MouseEvent>() {
-//				@Override
-//				public void handle(MouseEvent e) {
-//					btn.setVisible(false);
-//				}
-//			 });
-			
-			getStyleClass().add("sim-cell");
-			
-		}
-		
-		@Override 
-		protected void updateItem(String item, boolean empty) {
-			 super.updateItem(item, empty);
-			 setText(null); 
-			 setGraphic(null);
-			 if(!empty){
-				 btn.setOnMousePressed(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent e) {
-						removeSimulation(_sims.get(item).item);
-						_simCombo.hide();
-					}
-				 });	
-				 
-				label.setText(item!=null ? item : "<null>");
-//				setText(item!=null ? item : "<null>");
-				setGraphic(hBox);
-			 }
-		}
-		
 	}
 	
 }

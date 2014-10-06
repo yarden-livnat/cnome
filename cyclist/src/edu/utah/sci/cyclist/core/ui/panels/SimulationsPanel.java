@@ -289,35 +289,7 @@ public class SimulationsPanel extends TitledPanel  {
 		entry.title.setOnMousePressed(new EventHandler<Event>(){
 			@Override
 			public void handle(Event event) {
-				
-				if(!_entryEdit){
-					//Should be set here because need to be sure the Scene has already been created.
-					setKeyboardEvent();
-		
-					_timer = new Timer();
-					_timer.schedule( 
-					        new java.util.TimerTask() {
-					            @Override
-					            public void run() {
-					            	//Should run later because cannot do javafx actions directly from a timer task.
-					            	Platform.runLater(new Runnable() {
-					                    @Override
-					                    public void run() {
-					                    	_entryEdit = true;
-					                    	for(Node node :_vbox.getChildren()){
-							            		Label lbl = (Label)node;
-							            		if(lbl.getText().equals(entry.title.getText())){
-							            			createEditableEntry(node);
-							            			break;
-							            		}
-							            	}
-					                    }
-					                });
-					            }
-					        }, 
-					        ALIAS_EDIT_WAIT_TIME 
-					);
-				}
+				handleEntryEditRequest(entry, ALIAS_EDIT_WAIT_TIME);
 			}
 		});
 		
@@ -372,6 +344,43 @@ public class SimulationsPanel extends TitledPanel  {
 		
 		return entry;
 	}
+	
+	/*
+	 * Makes the specified entry in the panel editable.
+	 * @param Entry entry - the entry to make editable.
+	 * @param long timerWait - how much time to wait until making the entry editable
+	 * (relevant when it is called from pressing on the entry)
+	 */
+	private void handleEntryEditRequest(Entry entry, long timerWait ){
+		if(!_entryEdit){
+			//Should be set here because need to be sure the Scene has already been created.
+			setKeyboardEvent();
+
+			_timer = new Timer();
+			_timer.schedule( 
+			        new java.util.TimerTask() {
+			            @Override
+			            public void run() {
+			            	//Should run later because cannot do javafx actions directly from a timer task.
+			            	Platform.runLater(new Runnable() {
+			                    @Override
+			                    public void run() {
+			                    	_entryEdit = true;
+			                    	for(Node node :_vbox.getChildren()){
+					            		Label lbl = (Label)node;
+					            		if(lbl.getText().equals(entry.title.getText())){
+					            			createEditableEntry(node);
+					            			break;
+					            		}
+					            	}
+			                    }
+			                });
+			            }
+			        }, 
+			        timerWait 
+			);
+		}
+	}
 		
 		
 		
@@ -388,7 +397,13 @@ public class SimulationsPanel extends TitledPanel  {
 		 								_selected = null;
 		 							}
 		 });
-		 _menu.getItems().add(deleteSimulation);
+		 MenuItem editSimulation = new MenuItem("Edit simulation");
+		 editSimulation.setOnAction(new EventHandler<ActionEvent>() {
+		 							public void handle(ActionEvent e) { 
+		 								handleEntryEditRequest(_selected,0);
+		 							}
+		 });
+		 _menu.getItems().addAll(deleteSimulation,editSimulation);
 	}
 	
 	class Entry {

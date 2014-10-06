@@ -214,8 +214,9 @@ public class MainScreen extends VBox {
 	
 	/**
 	 * Property which is changed when user wants to edit a simulation entry in the simulations panel.
-	 * (trigger - mouse right click)
-	 * @return ObjectProperty<Boolean> - property is set to true on mouse right click.
+	 * (Changes the simulation alias field).
+	 * (keyboard - escape or enter pressed)
+	 * @return ObjectProperty<Simulation> - property is set to the new Simulation value on enter/escape pressed.
 	 */
 	public ObjectProperty<Simulation> editSimulationProperty() {
 		return _simulationPanel.editSimulationProperty();
