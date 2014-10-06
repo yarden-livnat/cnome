@@ -368,7 +368,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 		if(simsSize >0){
 			for(int i = simsSize;i>0;i--){
 				Simulation nextSim = _simChoice.getItems().get(i-1);
-				if(_sims.get(nextSim.getAlias()) != null && !_sims.get(nextSim.getAlias()).remote){
+				if(_sims.get(nextSim.getAlias()) != null /*&& !_sims.get(nextSim.getAlias()).remote*/){
 					selectSimulation(nextSim, true);
 					break;
 				}	
