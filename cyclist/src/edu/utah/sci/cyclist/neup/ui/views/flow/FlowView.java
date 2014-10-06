@@ -221,7 +221,7 @@ public class FlowView extends CyclistViewBase {
 		if (total == 0) {
 			_total.setText("");
 		} else {
-			_total.setText(String.format("%.2e kg [%d]", total, n));
+			_total.setText(String.format("%.2e kg [%d tx]", total, n));
 		}
 	}
 	

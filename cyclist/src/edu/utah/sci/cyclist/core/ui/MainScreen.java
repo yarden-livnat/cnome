@@ -63,9 +63,10 @@ public class MainScreen extends VBox {
 	private ToolsPanel _toolsPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
-	
+
 	private Menu _perspectiveMenu;
 	private Menu _viewMenu;
+	private Menu _runMenu;
 	
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
 		
@@ -177,12 +178,17 @@ public class MainScreen extends VBox {
 		return _perspectiveMenu;
 	}
 	
+	public Menu getRunMenu() {
+		return _runMenu;
+	}
+	
 	private MenuItem _datasourceMenuItem;
 	private MenuItem _workspaceMenuItem;
 	private MenuItem _quitMenuItem;
 	private MenuItem _saveMenuItem;
 	private MenuItem _simulationMenuItem;
 	private MenuItem _sqliteLoaderMenuItem;
+	private MenuItem _runMenuItem;
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
@@ -208,9 +214,14 @@ public class MainScreen extends VBox {
 		return _quitMenuItem.onActionProperty();
 	}
 	
+	public ObjectProperty<EventHandler<ActionEvent>> onRun() {
+		return _runMenuItem.onActionProperty();
+	}
+	
 	public ObjectProperty<Boolean> editDataSourceProperty() {
 		return _datasourcesPanel.editTableProperty();
 	}
+
 	
 	/**
 	 * Property which is changed when user wants to edit a simulation entry in the simulations panel.
@@ -243,10 +254,11 @@ public class MainScreen extends VBox {
 		Menu fileMenu = createFileMenu();
 		Menu dataMenu = createDataMenu();
 		_viewMenu = createViewMenu();
+		_runMenu = createRunMenu();
 //		Menu panelMenu = createPanelMenu();
 //		_perspectiveMenu = createPerspectiveMenu();
 		
-		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu/*, _perspectiveMenu*/);
+		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _runMenu /*, _perspectiveMenu*/);
 		
 		return menubar;
 	}
@@ -293,6 +305,16 @@ public class MainScreen extends VBox {
 			menu.getItems().add(item);
 		}
 
+		return menu;
+	}
+	
+	private Menu createRunMenu() {
+		Menu menu= new Menu("Run");
+		_runMenuItem = new MenuItem("Submit file", GlyphRegistry.get(AwesomeIcon.EXCHANGE));
+		_runMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+R"));
+
+		menu.getItems().add(_runMenuItem);
+	
 		return menu;
 	}
 	
