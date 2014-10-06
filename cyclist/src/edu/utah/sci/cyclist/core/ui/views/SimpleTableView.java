@@ -173,7 +173,7 @@ public class SimpleTableView extends CyclistViewBase {
 			_simField = null;
 		}
 		
-		loadTable();
+		loadTable(true);
 	}
 	
 	/**
@@ -207,7 +207,7 @@ public class SimpleTableView extends CyclistViewBase {
 	
 				
 		if (_currentTable != null) {
-			loadTable();
+			loadTable(false);
 		}
 
 	}
@@ -225,12 +225,13 @@ public class SimpleTableView extends CyclistViewBase {
 		}
 	}
 	
-	private void loadTable() {
+	private void loadTable(boolean updateColumns) {
 		_tableView.itemsProperty().unbind();
 		if (_tableView.getItems() != null) _tableView.getItems().clear();
-		_tableView.getColumns().clear();
 		
-		if (_currentTable != null) {
+		if (_currentTable == null || updateColumns) _tableView.getColumns().clear();
+		
+		if (_currentTable != null && updateColumns) {
 			//TODO: this be done only if the table is active
 			Schema schema = _currentTable.getSchema();	
 			
@@ -241,8 +242,11 @@ public class SimpleTableView extends CyclistViewBase {
 			}
 			
 			_tableView.getColumns().addAll(cols);
-			fetchRows();
 		}
+		
+		if (_currentTable != null) 
+			fetchRows();
+
 	}
 	
 	private String buildQuery() {
