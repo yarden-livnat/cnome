@@ -51,11 +51,7 @@ public class UpdateDbDialog extends HBox {
 	 * @param window
 	 */
 	public ObjectProperty<Boolean> show(Window window) {
-		if(_dialog.getOwner() == null){
-			_dialog.initOwner(window);
-		}else{
-			initializeDialog();
-		}
+		_dialog.initOwner(window);
 		_dialog.show();
 		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
 		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
@@ -182,11 +178,5 @@ public class UpdateDbDialog extends HBox {
         
         _runningBox.getChildren().addAll(animationBox,new Text("Update info:"),_statusText);
 		return scene;
-	}
-	
-	private void initializeDialog(){
-		_body.getChildren().clear();
-		_dialog.setWidth(300);
-		_dialog.setHeight(150);
 	}
 }

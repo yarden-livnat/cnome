@@ -64,7 +64,7 @@ public class SimulationsPanel extends TitledPanel  {
 	
 	public static final String SELECTED_STYLE = "-fx-background-color: #99ccff";
 	public static final String UNSELECTED_STYLE = "-fx-background-color: #f0f0f0";
-	public static final long ALIAS_EDIT_WAIT_TIME = 2000;
+	public static final long ALIAS_EDIT_WAIT_TIME = 1000;
 	
 	
 	private ContextMenu _menu = new ContextMenu();
@@ -75,7 +75,7 @@ public class SimulationsPanel extends TitledPanel  {
 	private ObservableList<Simulation> _items;
 	private ObjectProperty<Simulation> _simulationProperty = new SimpleObjectProperty<>();
 	private Entry _selected = null;
-	private ObjectProperty<Boolean> _editSimulationProperty = new SimpleObjectProperty<>();
+	private ObjectProperty<Simulation> _editSimulationProperty = new SimpleObjectProperty<>();
 	private InvalidationListener _listener = new InvalidationListener() {
 		
 		@Override
@@ -103,22 +103,21 @@ public class SimulationsPanel extends TitledPanel  {
 				_items.removeListener(_listener);
 			}
 			
-			items.addListener(_listener);	
+			items.addListener(_listener);
 			_items = items;
 		}
-		
 		resetContent();
 	}
 	
-	public ObjectProperty<Boolean> editSimulationProperty() {
+	public ObjectProperty<Simulation> editSimulationProperty() {
         return _editSimulationProperty;
 }
 
-	public Boolean getEditSimulation() {
+	public Simulation getEditSimulation() {
 	        return _editSimulationProperty.get();
 	}
 	
-	public void setEditSimulation(Boolean value) {
+	public void setEditSimulation(Simulation value) {
 		 _editSimulationProperty.set(value);
 	}
 	
@@ -135,7 +134,7 @@ public class SimulationsPanel extends TitledPanel  {
 			scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 				@Override
 				public void handle(KeyEvent event) {
-					if (event.getCode() == KeyCode.ESCAPE) {
+					if (event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER) {
 						//Check If there is any entry in edit mode.
 						if(_entryEdit){
 							resetTimer();
@@ -144,10 +143,11 @@ public class SimulationsPanel extends TitledPanel  {
 							_vbox.getChildren().clear();
 							
 							int index=0;
+							Entry entry = null;
 							for(Node node : nodes){
 								//For a node which has been edited - save the edited text and return to non-edit mode.
 								if (node.getClass() == TextField.class){
-									 Entry entry = updateEntry((TextField)node, index);
+									 entry = updateEntry((TextField)node, index);
 									_vbox.getChildren().add(entry.title);
 								}else{
 									//Node which has not been edited - do nothing.
@@ -160,7 +160,9 @@ public class SimulationsPanel extends TitledPanel  {
 							_entryEdit=false;
 							
 							//Let cyclicControler listener to know about the change.
-							setEditSimulation(true);
+							if(entry != null){
+								setEditSimulation(entry.simulation);
+							}
 						}
 					}
 				}
@@ -216,10 +218,15 @@ public class SimulationsPanel extends TitledPanel  {
 		_vbox = (VBox) getContent();
 		_vbox.getChildren().clear();
 		
+		if(_entries != null && _entries.size()>0){
+			unbindEntries();
+		}
+		
 		_entries = new ArrayList<>();
 		if(_items != null && _items.size()>0){
 			for (Simulation simulation : _items) {
 				Entry entry = createEntry(simulation);
+				entry.title.textProperty().bindBidirectional(simulation.aliasProperty());
 				_entries.add(entry);
 				_vbox.getChildren().add(entry.title);
 			}
@@ -231,6 +238,12 @@ public class SimulationsPanel extends TitledPanel  {
 		}else{
 			//If the list has been reset - clean the last selection as well.
 			_simulationProperty.set(null);
+		}
+	}	
+	
+	private void unbindEntries(){
+		for(Entry entry: _entries){
+			entry.title.textProperty().unbind();
 		}
 	}
 		
@@ -371,7 +384,7 @@ public class SimulationsPanel extends TitledPanel  {
 		 deleteSimulation.setOnAction(new EventHandler<ActionEvent>() {
 		 							public void handle(ActionEvent e) { 
 		 								removeSimulation(_selected);
-		 								setEditSimulation(true);
+		 								setEditSimulation(new Simulation());
 		 								_selected = null;
 		 							}
 		 });
