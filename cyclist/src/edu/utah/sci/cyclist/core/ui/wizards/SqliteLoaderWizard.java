@@ -374,31 +374,6 @@ public class SqliteLoaderWizard extends VBox {
 	}
 	
 	/*
-	 * Checks if the update indication table exists in the current database.
-	 * If it exists, it means the database is already updated.
-	 * @param Connection conn - the connection to the database.
-	 * @return Boolean - true if the indication table was found, false otherwise.
-	 */
-//	private Boolean isDbUpdateRequired(CyclistDatasource ds){
-//		Statement stmt;
-//		try (Connection conn = ds.getConnection()) {
-//			stmt = conn.createStatement();
-//			ResultSet rs = stmt.executeQuery(TEST_UPDATED_QUERY);
-//			if(rs.next()){
-//				return false;
-//			}else{
-//				return true;
-//			}
-//		}catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			return true;
-//		}finally{
-//			ds.releaseConnection();
-//		}
-//	}
-	
-	/*
 	 * Checks the argument "isStart":
 	 * If true - 
 	 * 	it's the beginning of the database update process. 

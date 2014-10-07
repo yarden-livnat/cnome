@@ -177,6 +177,7 @@ public class DatasourceWizard extends VBox {
 		});
 		
 		_status = new Label();
+		_status.setPrefWidth(15);  //To make sure the status is not hidden.
 				
 		ProgressIndicator progressIndicator = new ProgressIndicator();
 		progressIndicator.setProgress(-1);

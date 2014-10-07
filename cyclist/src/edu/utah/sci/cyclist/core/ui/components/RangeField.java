@@ -30,6 +30,7 @@ public class RangeField extends TextField {
 	}
 	
 	public void setRange(Range<Integer> range) {
+	  	if (range.equals(getRange())) return;
 		rangeProperty().set(range);
 		update();
 	}
