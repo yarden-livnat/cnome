@@ -93,7 +93,7 @@ public class CyclistController {
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
 		
-		_cyclusService = new CyclusService(eventBus);
+		_cyclusService = new CyclusService();
 		
 		_workDirectoryController = new WorkDirectoryController();
 		
@@ -141,6 +141,9 @@ public class CyclistController {
 		sip.setSimIds(_model.getSimulations());
 		sip.setSimPanel(screen.getSimulationPanel());
 		
+		// Jobs panel
+		// TODO: there will probably be a race condition with the CyclusService. Need to ensure the list is locked
+		screen.getJobsPanel().jobsProperty().bindBidirectional(_cyclusService.jobs());
 		
 		// ToolsLibrary panel
 		ToolsPresenter tp = new ToolsPresenter(_eventBus);

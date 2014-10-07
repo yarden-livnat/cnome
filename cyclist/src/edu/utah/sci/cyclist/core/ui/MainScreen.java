@@ -44,6 +44,7 @@ import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.panels.FiltersListPanel;
+import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
@@ -63,6 +64,7 @@ public class MainScreen extends VBox {
 	private ToolsPanel _toolsPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
+	private JobsPanel _jobsPanel;
 
 	private Menu _perspectiveMenu;
 	private Menu _viewMenu;
@@ -110,6 +112,10 @@ public class MainScreen extends VBox {
 		return _simulationPanel;
 	}
 	
+	public JobsPanel getJobsPanel() {
+		return _jobsPanel;
+	}
+	
 	public Workspace getWorkSpace(){
 		for(Object obj : _workspacePane.getChildren()){
 			if (obj.getClass() == Workspace.class) {
@@ -142,6 +148,7 @@ public class MainScreen extends VBox {
 		_toolsPane.setOrientation(Orientation.VERTICAL);
 		_toolsPane.getItems().addAll(
 				_simulationPanel = new SimulationsPanel(),
+				_jobsPanel = new JobsPanel(),
 				_datasourcesPanel = new TablesPanel(),
 				_fieldsPanel = new SchemaPanel("Fields"),
 				
