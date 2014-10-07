@@ -265,9 +265,20 @@ public class SimpleTableView extends CyclistViewBase {
 			}
 		}
 		
+		//Get the current columns
+		List<TableColumn<TableRow,?>> cols = _tableView.getColumns();
+		List<Field> fields = new ArrayList<>();
+		for (TableColumn<TableRow,?> tc : cols){
+			String fieldName = tc.getText();
+			if(!fieldName.isEmpty()){
+				fields.add(new Field(fieldName));
+			}
+		}
+			
 		// build the query
 		QueryBuilder builder = _currentTable.queryBuilder()
-			.filters(filtersList);
+			.filters(filtersList)
+			.fields(fields);
 		
 		System.out.println("TableView Query: "+builder.toString());
 		

@@ -71,9 +71,9 @@
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="AgentID" >
+			<!--  <field name="AgentID" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
-			</field>
+			</field>-->
 			<field name="Spec" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>

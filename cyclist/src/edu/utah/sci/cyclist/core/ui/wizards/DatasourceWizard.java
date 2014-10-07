@@ -121,6 +121,7 @@ public class DatasourceWizard extends VBox {
 		_nameField.setText(sourceName);
 		
 		nameBox.getChildren().addAll(new Text("Name:"),_nameField);
+		HBox.setHgrow(_nameField, Priority.ALWAYS);
 								
 		// The selector for type of connection
 		final Pane pane = new Pane();
