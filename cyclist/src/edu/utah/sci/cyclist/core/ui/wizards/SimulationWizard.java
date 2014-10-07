@@ -23,6 +23,7 @@ package edu.utah.sci.cyclist.core.ui.wizards;
  *     Kristi Potter
  *******************************************************************************/
 
+import java.beans.PropertyChangeEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,9 +42,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -372,8 +375,14 @@ public class SimulationWizard extends TilePane {
 		selection.addListener(new ChangeListener<CyclistDatasource>(){
 			@Override
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				if (!_sourcesView.getItems().contains(newVal))
+				if (!_sourcesView.getItems().contains(newVal)){
 					_sourcesView.getItems().add(newVal);
+				}else{
+					CyclistDatasource demoDs = new CyclistDatasource();
+					demoDs.setName("demo");
+					_sourcesView.getItems().add(demoDs);
+					_sourcesView.getItems().remove(demoDs);
+				}
 					_sourcesView.getSelectionModel().select(newVal);
 			}
 		});

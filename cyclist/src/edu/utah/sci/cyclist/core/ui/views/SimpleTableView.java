@@ -28,6 +28,7 @@ import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -227,7 +228,6 @@ public class SimpleTableView extends CyclistViewBase {
 	
 	private void loadTable(boolean updateColumns) {
 		_tableView.itemsProperty().unbind();
-		if (_tableView.getItems() != null) _tableView.getItems().clear();
 		
 		if (_currentTable == null || updateColumns) _tableView.getColumns().clear();
 		
@@ -311,7 +311,24 @@ public class SimpleTableView extends CyclistViewBase {
 		};
 		
 		setCurrentTask(task);
-		_tableView.itemsProperty().bind( task.valueProperty());	
+//		_tableView.itemsProperty().bind( task.valueProperty());	
+		
+			task.valueProperty().addListener(new ChangeListener<ObservableList<TableRow> >() {
+
+				@Override
+				public void changed(
+						ObservableValue<? extends ObservableList<TableRow>> observable,
+						ObservableList<TableRow> oldValue,
+						ObservableList<TableRow> newValue) {
+					if(newValue == null && _tableView.getItems() != null){
+						_tableView.getItems().clear();
+					}else if(newValue != null){
+						_tableView.setItems(newValue);
+					}
+					
+				}
+				
+	        });
 		
 		Thread th = new Thread(task);
 		th.setDaemon(true);
