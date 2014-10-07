@@ -109,7 +109,6 @@ public class XMLReader {
 			for(int i = 0; i < top.getLength(); i++){
 				schema = nodeListener(top.item(i), schema);
 			}
-			//System.out.println(schema);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
