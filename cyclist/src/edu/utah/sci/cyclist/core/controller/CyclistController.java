@@ -309,6 +309,8 @@ public class CyclistController {
 						}
 					}
 				});
+				
+				wizard.runOperations();
 			}
 		});
 		

@@ -229,6 +229,11 @@ public class SimpleTableView extends CyclistViewBase {
 	private void loadTable(boolean updateColumns) {
 		_tableView.itemsProperty().unbind();
 		
+		//Clear the table previous data.
+		if(_tableView.getItems() != null){
+			_tableView.getItems().clear();
+		}
+		
 		if (_currentTable == null || updateColumns) _tableView.getColumns().clear();
 		
 		if (_currentTable != null && updateColumns) {
