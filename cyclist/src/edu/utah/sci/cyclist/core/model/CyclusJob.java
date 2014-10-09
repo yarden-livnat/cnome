@@ -11,7 +11,7 @@ import javafx.beans.property.StringProperty;
 import javax.json.JsonObject;
 
 public class CyclusJob {
-	public enum Status { INIT, SUBMITTED, COMPLETED, FAILED }
+	public enum Status { INIT, SUBMITTED, COMPLETED, FAILED, LOADING, READY }
 	
 	private JsonObject _info;
 	private ObjectProperty<Status> _status = new SimpleObjectProperty<>(Status.INIT);
@@ -44,9 +44,23 @@ public class CyclusJob {
 	public void setInfo(JsonObject info) {
 		_info = info;
 		if (getAlias() == null)
-			setAlias(getId());
-		updateInfo(info);
+			setAlias(getId().substring(0,4));
 	}
+	
+	public void setStatus(String s) {
+		System.out.println("set status to "+s);;
+		if ("complete".equals(s)) 
+			setStatus(Status.COMPLETED);
+		else if ("failed".equals(s))
+			setStatus(Status.FAILED);
+		else if ("loading".equals(s))
+			setStatus(Status.LOADING);
+		else if ("ready".equals(s))
+			setStatus(Status.READY);
+		else
+			setStatus(Status.SUBMITTED);
+	}
+	
 	
 	public String getId() {
 		return _info.getString("Id");

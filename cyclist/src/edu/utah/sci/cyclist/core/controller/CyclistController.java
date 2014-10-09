@@ -142,7 +142,6 @@ public class CyclistController {
 		sip.setSimPanel(screen.getSimulationPanel());
 		
 		// Jobs panel
-		// TODO: there will probably be a race condition with the CyclusService. Need to ensure the list is locked
 		screen.getJobsPanel().jobsProperty().bindBidirectional(_cyclusService.jobs());
 		
 		// ToolsLibrary panel
