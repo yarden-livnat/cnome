@@ -161,12 +161,10 @@ public class CyclusService {
 				    }
 					return new JobStatus(job, "ready", null);
 				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println("Communication Error: "+e.getMessage());
 					return new JobStatus(job, e.getMessage(), null);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println("IO Error: "+e.getMessage());
 					return new JobStatus(job, e.getMessage(), null);
 				}
 			}
