@@ -22,6 +22,7 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.model;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -52,6 +53,7 @@ public class CyclistDatasource implements DataSource {
 //	private boolean _isSQLite = false;
 	private final Semaphore _SQLiteSemaphore = new Semaphore(1, true);
 	private Connection _SQLiteConnection = null;
+	private static final String SQLITE_PREFIX = "jdbc:sqlite:/";
 	
 	
 	public CyclistDatasource() {
@@ -217,6 +219,12 @@ public class CyclistDatasource implements DataSource {
 	
 	private Connection getSQLiteConnection() throws SQLException {
 		try {
+			//If file doesn't exist the sqlite driver, creates one, and returns it without any error.
+			//In order to show an error, when non-existing file is chosen - have to check the existence of the file.
+			File file = new File(_url.replace(SQLITE_PREFIX, ""));
+			if(!file.exists()){
+				throw new SQLException();
+			}
 			_SQLiteSemaphore.acquire();
 //			if (_SQLiteConnection == null) 
 				_SQLiteConnection =  DriverManager.getConnection(_url, _properties);

@@ -55,7 +55,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -81,6 +80,8 @@ public class SqliteLoaderWizard extends VBox {
 	private ObservableList<Simulation> _selection =  FXCollections.observableArrayList();
 	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
 	private List<CyclistDatasource> _sources = null;
+	TextField _path;
+	double _windowX=0, _windowWidth = 0, _windowY=0, _windowHeight=0;
 	
 	
 	private static final String SIMULATION_ID_FIELD_NAME = "SimID";
@@ -94,15 +95,25 @@ public class SqliteLoaderWizard extends VBox {
 	 */
 	public ObservableList<Simulation> show(Window window) {
 		_dialog.initOwner(window);
-		_dialog.show();
-		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
-		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
+//		_dialog.show();
+		_windowX=window.getX();
+		_windowWidth=window.getWidth();
+		_windowY=window.getY();
+		_windowHeight=window.getHeight();
+//		_dialog.setX(window.getX() + (window.getWidth() - _dialog.getWidth())*0.5);
+//		_dialog.setY(window.getY() + (window.getHeight() - _dialog.getHeight())*0.5);
+		_dialog.setWidth(350);
+		_dialog.setHeight(120);
 		return _selection;
 	}
 	
 	public SqliteLoaderWizard(List<CyclistDatasource> sources) {	
 		createDialog();
 		_sources = new ArrayList<>(sources);
+	}
+	
+	public void runOperations(){
+		showFileChoser();
 	}
 	
 	private void createDialog(){
@@ -120,33 +131,27 @@ public class SqliteLoaderWizard extends VBox {
 		pane.setSpacing(10);
 		pane.setMinWidth(250);
 		
-		TextField path = new TextField();
-		path.setPrefWidth(250);
+		_path = new TextField();
+		_path.setPrefWidth(250);
 		
-		Button button = new Button("...");
-		button.setFont(new Font(15));
-		button.getStyleClass().add("flat-button");
-		button.setOnAction(new EventHandler<ActionEvent>() {
-				 @Override
-				 public void handle(ActionEvent event) {
-					 FileChooser chooser = new FileChooser();
-					 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
-					 File file = chooser.showOpenDialog(null);
-					 if (file != null){
-						 path.setText(file.getPath());
-						 _fileName = file.getName();
-					 }
-				 }
-		});
+//		Button button = new Button("...");
+//		button.setFont(new Font(15));
+//		button.getStyleClass().add("flat-button");
+//		button.setOnAction(new EventHandler<ActionEvent>() {
+//				 @Override
+//				 public void handle(ActionEvent event) {
+//					 showFileChoser();
+//				 }
+//		});
 		
 		
-		pane.getChildren().addAll(new Text("Path:"),path,button);
+		pane.getChildren().addAll(/*new Text("Path:"),*/_path/*,button*/);
 	
-		HBox.setHgrow(path, Priority.ALWAYS);
+//		HBox.setHgrow(_path, Priority.ALWAYS);
 		
 		HBox buttons = new HBox();
-		buttons.setSpacing(10);
-		buttons.setPadding(new Insets(5));
+//		buttons.setSpacing(10);
+//		buttons.setPadding(new Insets(5));
 		buttons.setAlignment(Pos.CENTER_RIGHT);
 		
 		Button cancel = new Button("Cancel");
@@ -161,7 +166,7 @@ public class SqliteLoaderWizard extends VBox {
 		ok.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				CyclistDatasource ds = getDataSource(path.getText());
+				CyclistDatasource ds = getDataSource(_path.getText());
 				if(ds != null){
 					Boolean updateReuired = SimulationTablesPostProcessor.isDbUpdateRequired(ds);
 					if(updateReuired){
@@ -220,7 +225,7 @@ public class SqliteLoaderWizard extends VBox {
 		_vbox = new VBox();
 		_vbox.setSpacing(5);
 		_vbox.setPadding(new Insets(5));
-		_vbox.getChildren().addAll(pane,buttons);
+		_vbox.getChildren().addAll(pane/*,buttons*/);
 		
 		Scene scene = new Scene(_vbox);
 		
@@ -229,18 +234,65 @@ public class SqliteLoaderWizard extends VBox {
 	}
 
 	private void setSimulations(CyclistDatasource ds){
-		List<Simulation> simulations = new ArrayList<>();
+		List<Simulation> simulations = null;
 		if(_dsIsValid.getValue()){
 			//Return an existing data source with the same path, if already exists.
+			simulations = new ArrayList<>();
 			CyclistDatasource dataSource = getExistingDs(ds);
 			simulations= getSimulations(dataSource);
+		}else{
+			setErrorDisplay();
 		}
+		
 		if(simulations != null && simulations.size() >0){
 			_selection.addAll(simulations);
 			_dialog.close();
-		}else{
+		}else if(simulations != null){   //No simulations in list.
 			_vbox.getChildren().clear();
 			_vbox.getChildren().add(_errorMessageBox);
+			_dialog.close();
+		}
+	}
+	
+	/*
+	 * Displays the file choser tool to choose a sqlite file.
+	 */
+	private void showFileChoser(){
+		 FileChooser chooser = new FileChooser();
+		 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
+		 File file = chooser.showOpenDialog(null);
+		 if (file != null){
+			 _path.setText(file.getPath());
+			 _fileName = file.getName();
+			 setChosenDatabaseFile();
+		 }else{
+			 _dialog.close();
+		 }
+	}
+	
+	/*
+	 * Sets the datasource as the sqlite file and tries to fetch the simulations from this data source.
+	 */
+	private void setChosenDatabaseFile(){
+		CyclistDatasource ds = getDataSource(_path.getText());
+		if(ds != null){
+			Boolean updateReuired = SimulationTablesPostProcessor.isDbUpdateRequired(ds);
+			if(updateReuired){
+				setDbUpdate(true,ds);
+ 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
+ 					@Override
+ 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+ 						_dsIsValid.setValue(newVal);
+ 						setSimulations(ds);
+ 					}
+ 				});
+			}
+			else{
+				_dsIsValid.set(true);
+				setSimulations(ds);
+			}
+		}else{
+			_dialog.close();
 		}
 	}
 	
@@ -337,18 +389,27 @@ public class SqliteLoaderWizard extends VBox {
 			
 		}catch(SQLSyntaxErrorException e){
 			System.out.println("Table for SimId doesn't exist");
-			_vbox.getChildren().clear();
-			_vbox.getChildren().add(_errorMessageBox);
+			setErrorDisplay();
 			return null;
 		}
 		catch (Exception e) {
 			System.out.println("Get simulation failed");
-			_vbox.getChildren().clear();
-			_vbox.getChildren().add(_errorMessageBox);
+			setErrorDisplay();
 			return null;
 		}finally{
 			ds.releaseConnection();
 		}
+	}
+	
+	/* 
+	 * shows the dialog, and displays an error message with a "dismiss" button.
+	 */
+	private void setErrorDisplay(){
+		_dialog.show();
+		_dialog.setX(_windowX + (_windowWidth - _dialog.getWidth())*0.5);
+		_dialog.setY(_windowY + (_windowHeight - _dialog.getHeight())*0.5);
+		_vbox.getChildren().clear();
+		_vbox.getChildren().add(_errorMessageBox);
 	}
 	
 	/*
@@ -372,31 +433,6 @@ public class SqliteLoaderWizard extends VBox {
 				e.printStackTrace();
 			}
 	}
-	
-	/*
-	 * Checks if the update indication table exists in the current database.
-	 * If it exists, it means the database is already updated.
-	 * @param Connection conn - the connection to the database.
-	 * @return Boolean - true if the indication table was found, false otherwise.
-	 */
-//	private Boolean isDbUpdateRequired(CyclistDatasource ds){
-//		Statement stmt;
-//		try (Connection conn = ds.getConnection()) {
-//			stmt = conn.createStatement();
-//			ResultSet rs = stmt.executeQuery(TEST_UPDATED_QUERY);
-//			if(rs.next()){
-//				return false;
-//			}else{
-//				return true;
-//			}
-//		}catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			return true;
-//		}finally{
-//			ds.releaseConnection();
-//		}
-//	}
 	
 	/*
 	 * Checks the argument "isStart":

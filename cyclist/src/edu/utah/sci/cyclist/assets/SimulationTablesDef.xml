@@ -71,7 +71,7 @@
 			<field name="Prototype" >
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
-			<field name="AgentID" >
+			  <field name="AgentID" isHidden="true" >
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Spec" >

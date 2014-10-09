@@ -223,9 +223,8 @@ public class SimulationTablesPostProcessor {
 				return true;
 			}
 		}catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return true;
+//			e.printStackTrace();
+			return false;
 		}finally{
 			ds.releaseConnection();
 		}

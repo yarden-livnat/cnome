@@ -372,8 +372,15 @@ public class SimulationWizard extends TilePane {
 		selection.addListener(new ChangeListener<CyclistDatasource>(){
 			@Override
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				if (!_sourcesView.getItems().contains(newVal))
+				if (!_sourcesView.getItems().contains(newVal)){
 					_sourcesView.getItems().add(newVal);
+				}else{
+					//A ListView hack: in order to refresh the displayed items, Should change the number of items in the list.
+					CyclistDatasource demoDs = new CyclistDatasource();
+					demoDs.setName("demo");
+					_sourcesView.getItems().add(demoDs);
+					_sourcesView.getItems().remove(demoDs);
+				}
 					_sourcesView.getSelectionModel().select(newVal);
 			}
 		});
