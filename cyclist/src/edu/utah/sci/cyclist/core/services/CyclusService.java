@@ -1,7 +1,11 @@
 package edu.utah.sci.cyclist.core.services;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -35,34 +41,27 @@ import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 
 public class CyclusService {
 	public static final String CLOUDIUS_URL = "http://cycrun.fuelcycle.org";
-	public static final String CLOUDIUS_SUBMIT = CLOUDIUS_URL+"/api/v1/job-infile";
-	public static final String CLOUDIUS_STATUS = CLOUDIUS_URL+"/api/v1/job-stat/";
-	public static final String CLOUDIUS_LOAD = CLOUDIUS_URL+"/api/v1/job-outfiles/";
-
+	public static final String CLOUDIUS_SUBMIT = CLOUDIUS_URL + "/api/v1/job-infile";
+	public static final String CLOUDIUS_STATUS = CLOUDIUS_URL + "/api/v1/job-stat/";
+	public static final String CLOUDIUS_LOAD   = CLOUDIUS_URL + "/api/v1/job-outfiles/";
+	
 	private ListProperty<CyclusJob> _jobs = new SimpleListProperty<>(FXCollections.observableArrayList());
 	private Map<String, ScheduledService<JobStatus>> _running = new HashMap<>();
 	static Logger log = Logger.getLogger(CyclusService.class);
-			
+
 	public CyclusService() {
 		_jobs.addListener(new ListChangeListener<CyclusJob>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CyclusJob> c) {
 				while (c.next()) {
-					if (c.wasPermutated()) {
-
-					} else if (c.wasUpdated()) {
-
-					} else {
-						for (CyclusJob job : c.getRemoved()) {
-							ScheduledService<JobStatus> service = _running.remove(job.getId());
-							if (service != null) {
-								log.info("Job "+job.getAlias()+" canceled");
-								service.cancel();
-							}
+					for (CyclusJob job : c.getRemoved()) {
+						ScheduledService<JobStatus> service = _running.remove(job.getId());
+						if (service != null) {
+							log.info("Job " + job.getAlias() + " canceled");
+							service.cancel();
 						}
 					}
 				}
-
 			}
 		});
 	}
@@ -76,8 +75,8 @@ public class CyclusService {
 
 		try {
 			InputStream stream = Request.Post(CLOUDIUS_SUBMIT)
-					.bodyFile(file, ContentType.DEFAULT_TEXT)
-					.execute().returnContent().asStream();
+					.bodyFile(file, ContentType.DEFAULT_TEXT).execute()
+					.returnContent().asStream();
 			JsonReader reader = Json.createReader(stream);
 			JsonObject info = reader.readObject();
 			job.setInfo(info);
@@ -98,121 +97,158 @@ public class CyclusService {
 		service.setDelay(Duration.seconds(0));
 		service.setPeriod(Duration.seconds(5));
 
-		service.lastValueProperty().addListener(new ChangeListener<JobStatus>() {
+		service.lastValueProperty().addListener(
+				new ChangeListener<JobStatus>() {
 
-			@Override
-			public void changed(ObservableValue<? extends JobStatus> observable, JobStatus prev, JobStatus current) {
-				if (current.info != null) {
-					current.job.setInfo(current.info);
-					current.job.setStatus(current.status);
-					switch (current.job.getStatus()) {
-					case COMPLETED:
-						service.cancel();
-						_running.remove(service.getJob().getId());
-						loadData(current.job);
-						break;
-					case FAILED:
-						service.cancel();
-						_running.remove(service.getJob().getId());
-						break;
-					case SUBMITTED:
-					case INIT:
-						break;
-					case LOADING:
-					case READY:
-						// cannot occur during this stage
-						break;
-					}	
-				}
-			}
-		});
-		
+					@Override
+					public void changed(
+							ObservableValue<? extends JobStatus> observable,
+							JobStatus prev, JobStatus current) {
+						if (current.info != null) {
+							current.job.setInfo(current.info);
+							current.job.setStatus(current.status);
+							switch (current.job.getStatus()) {
+							case COMPLETED:
+								service.cancel();
+								_running.remove(job.getId());
+								loadData(current.job);
+								break;
+							case FAILED:
+								service.cancel();
+								_running.remove(job.getId());
+								break;
+							case SUBMITTED:
+							case INIT:
+								break;
+							case LOADING:
+							case READY:
+								// cannot occur during this stage
+								break;
+							}
+						}
+					}
+				});
+
 		_running.put(job.getId(), service);
 		service.start();
 	}
 
+	private Path createSaveDirectory(String id) throws IOException {
+		String home = System.getProperty("user.home");
+		Path dir = Paths.get(home, "cyclist/data/", id);
+		dir.toFile().mkdirs();
+		return dir;
+	}
+	
 	private void loadData(final CyclusJob job) {
 		job.setStatus(Status.LOADING);
-		Task<JobStatus> task = new Task<JobStatus> () {
+		Task<JobStatus> task = new Task<JobStatus>() {
+			@SuppressWarnings("unused")
 			protected JobStatus call() {
+				String msg;
 				try {
-					Path dir = Paths.get("/Users/yarden/data/neup/",job.getId());
+//					Path dir = Paths.get("/Users/yarden/data/neup/", job.getId());
+					Path dir = createSaveDirectory(job.getId());
 					Path file = dir.resolve("data.zip");
-					
-					Files.createDirectory(dir);
-					
-					Request.Get(CyclusService.CLOUDIUS_LOAD+job.getId())
-							.connectTimeout(1000)
-							.socketTimeout(1000)
-							.execute().saveContent(file.toFile());
-					
-					Process process = Runtime.getRuntime().exec("unzip data.zip", null, dir.toFile());
-					InputStream is = process.getInputStream();
-				    InputStreamReader isr = new InputStreamReader(is);
-				    BufferedReader br = new BufferedReader(isr);
-				    String line;
-				    
-				    while ((line = br.readLine()) != null) {
-				    	log.info("unzip: "+line);
-				    }
-				    job.setDatafilePath(dir.resolve("cyclus.sqlite").toString());
-;					return new JobStatus(job, "ready", null);
+
+					if (false) {
+						Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
+								.connectTimeout(1000).socketTimeout(1000)
+								.execute()
+								.saveContent(file.toFile());
+	
+						Process process = Runtime.getRuntime().exec("unzip data.zip", null, dir.toFile());
+						InputStream is = process.getInputStream();
+						BufferedReader br = new BufferedReader(new InputStreamReader(is));
+						
+						String line;
+						while ((line = br.readLine()) != null) {
+							log.info("unzip: " + line);
+						}
+						
+						job.setDatafilePath(dir.resolve("cyclus.sqlite").toString());
+					} else {
+						InputStream input = Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
+								.connectTimeout(1000).socketTimeout(1000)
+								.execute().returnContent().asStream();
+						saveZipStream(input, dir);
+					}
+			
+					msg = "ready";
 				} catch (ClientProtocolException e) {
-					log.error("Communication error while loading simulation data",e);
-					return new JobStatus(job, e.getMessage(), null);
+					log.error("Communication error while loading simulation data", e);
+					msg = e.getMessage();
 				} catch (IOException e) {
-					log.error("IO error while loading simulation data"+e);
-					return new JobStatus(job, e.getMessage(), null);
+					log.error("IO error while loading simulation data" + e);
+					msg = e.getMessage();
 				}
+				return new JobStatus(job, msg, null);
 			}
 		};
-		
-		task.valueProperty().addListener(new ChangeListener<JobStatus>() {
 
+		task.valueProperty().addListener(new ChangeListener<JobStatus>() {
 			@Override
-            public void changed(
-                    ObservableValue<? extends JobStatus> observable,
-                    JobStatus prev, JobStatus status) {
-	            job.setStatus(status.status);          
-            }
+			public void changed(
+					ObservableValue<? extends JobStatus> observable,
+					JobStatus prev, JobStatus newStatus) {
+				job.setStatus(newStatus.status);
+			}
 		});
-		
+
 		Thread th = new Thread(task);
 		th.setDaemon(true);
 		th.start();
 	}
+	
+	final int BUFFER = 2048;
+	private void saveZipStream(InputStream input, Path dir) throws FileNotFoundException, IOException {
+		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(input));
+		ZipEntry entry;
+		while ((entry = zis.getNextEntry()) != null) {
+			System.out.println("extracting: "+entry);
+			int count;
+            byte data[] = new byte[BUFFER];
+            // write the files to the disk
+            FileOutputStream fos = new FileOutputStream(dir.resolve(entry.getName()).toString());
+            BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+            while ((count = zis.read(data, 0, BUFFER))  != -1) {
+               dest.write(data, 0, count);
+            }
+            dest.flush();
+            dest.close();
+         }
+         zis.close();
+	}
 }
-
 
 class PollService extends ScheduledService<JobStatus> {
 	private final CyclusJob _job;
-	private static Logger log =  Logger.getLogger(PollService.class);
-	
+	private static Logger log = Logger.getLogger(PollService.class);
+
 	public PollService(CyclusJob job) {
 		_job = job;
 	}
-	
-	public CyclusJob getJob() { return _job; }
-	
+
 	@Override
 	protected Task<JobStatus> createTask() {
 		return new Task<JobStatus>() {
 			protected JobStatus call() {
 				InputStream stream;
 				try {
-					stream = Request.Get(CyclusService.CLOUDIUS_STATUS+_job.getId())
-							.connectTimeout(1000)
-							.socketTimeout(1000)
-							.execute().returnContent().asStream();
+					stream = Request
+							.Get(CyclusService.CLOUDIUS_STATUS + _job.getId())
+							.connectTimeout(1000).socketTimeout(1000)
+							.execute()
+							.returnContent().asStream();
 
 					if (isCancelled()) {
 						return new JobStatus(_job, "cancelled", null);
 					}
-					JsonReader reader = Json.createReader(stream);
-					JsonObject reply = reader.readObject();
+					
+					JsonObject reply = Json.createReader(stream).readObject();
 					return new JobStatus(_job, reply.getString("Status"), reply);
 				} catch (ClientProtocolException e) {
-					log.error("Communication error while polling remote execution service", e);
+					log.error("Communication error while polling remote execution service",	e);
 					return new JobStatus(_job, e.getMessage(), null);
 				} catch (IOException e) {
 					log.error("IO error while polling remote execution service", e);
@@ -234,7 +270,3 @@ class JobStatus {
 		this.info = info;
 	}
 }
-
-
-
-
