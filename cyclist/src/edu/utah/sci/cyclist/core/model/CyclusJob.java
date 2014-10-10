@@ -20,7 +20,7 @@ public class CyclusJob {
 	private StringProperty _alias = new SimpleStringProperty();
 	private String _inputFilePath = "";
 	private String _datafilePath = "";
-	
+	private StringProperty _statusTextProperty = new SimpleStringProperty();
 	
 	public CyclusJob(String path) {
 		_inputFilePath = path;
@@ -41,22 +41,17 @@ public class CyclusJob {
 	public void updateInfo(JsonObject info) {
 		_info = info;
 		String s = info.getString("Status");
-		if ("complete".equals(s)) 
-			setStatus(Status.COMPLETED);
-		else if ("failed".equals(s))
-			setStatus(Status.FAILED);
-		else 
-			setStatus(Status.SUBMITTED);
+		setStatus(s);
 	}
 	
 	public void setInfo(JsonObject info) {
 		_info = info;
 		if (getAlias() == null)
-			setAlias(getId().substring(0,4));
+			setAlias("#"+getId().substring(0,4));
 	}
 	
 	public void setStatus(String s) {
-		System.out.println("set status to "+s);;
+		_statusTextProperty.set(s);
 		if ("complete".equals(s)) 
 			setStatus(Status.COMPLETED);
 		else if ("failed".equals(s))
@@ -69,6 +64,9 @@ public class CyclusJob {
 			setStatus(Status.SUBMITTED);
 	}
 	
+	public StringProperty statusTextProperty() {
+		return _statusTextProperty;
+	}
 	
 	public String getId() {
 		return _info.getString("Id");

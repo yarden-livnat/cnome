@@ -35,21 +35,24 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
-import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
+import edu.utah.sci.cyclist.core.model.Progress;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -93,7 +96,7 @@ public class JobsPanel extends TitledPanel  {
 	private void addJob(CyclusJob job) {
 		Entry entry = createEntry(job);
 		_entries.add(entry);
-		_vbox.getChildren().add(entry.title);
+		_vbox.getChildren().add(entry.info);
 	}
 	
 	private Label getStatusIcon(CyclusJob job) {
@@ -101,18 +104,15 @@ public class JobsPanel extends TitledPanel  {
 		switch( job.getStatus()) {
 		case COMPLETED:
 			icon = AwesomeIcon.CLOCK_ALT;
-			System.out.println("completed");
 			break;
 		case FAILED:
 			icon = AwesomeIcon.TIMES;
 			break;
 		case LOADING:
 			icon = AwesomeIcon.DOWNLOAD;
-			System.out.println("dowload");
 			break;
 		case READY:
 			icon = AwesomeIcon.CHECK;
-			System.out.println("ready");
 			break;
 		case SUBMITTED:
 		case INIT:
@@ -125,10 +125,7 @@ public class JobsPanel extends TitledPanel  {
 	
 	private Entry createEntry(CyclusJob job) {
 		
-		final Entry entry = new Entry();
-		entry.job = job;
-		entry.title = new Label(job.getAlias(), getStatusIcon(job));
-		
+		final Entry entry = new Entry(job);		
 		entry.title.setOnMouseClicked(new EventHandler<Event>() {
 
 			@Override
@@ -145,12 +142,10 @@ public class JobsPanel extends TitledPanel  {
 		});
 		
 		job.statusProperty().addListener(new ChangeListener<CyclusJob.Status>() {
-
 			@Override
 			public void changed(ObservableValue<? extends Status> observable,
 					Status oldValue, Status newValue) {
-				entry.title.setGraphic(getStatusIcon(entry.job));
-				
+				entry.setIcon(getStatusIcon(entry.job));
 			}
 		});
 		
@@ -163,6 +158,7 @@ public class JobsPanel extends TitledPanel  {
 	}
 	
 	public void removeJob(Entry entry) {
+		entry.release();
 		_jobs.remove(entry.job);
 	}
 	
@@ -186,7 +182,7 @@ public class JobsPanel extends TitledPanel  {
 						for (CyclusJob job: c.getRemoved()) {
 							Entry e = getEntry(job);
 							_entries.remove(e);
-							_vbox.getChildren().remove(e.title);						
+							_vbox.getChildren().remove(e.info);						
 						}
 						for (CyclusJob job: c.getAddedSubList()) {
 							addJob(job);
@@ -197,6 +193,7 @@ public class JobsPanel extends TitledPanel  {
 			
 		});
 	}
+	
 	private void createMenu(){
 		 MenuItem deleteJob = new MenuItem("Delete job");
 		 deleteJob.setOnAction(new EventHandler<ActionEvent>() {
@@ -206,25 +203,19 @@ public class JobsPanel extends TitledPanel  {
 		 							}
 		 });
 		 
-		 MenuItem loadData = new MenuItem("Load data");
+		 MenuItem loadData = new MenuItem("Load simulations");
 		 loadData.setOnAction(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) { 
 					if (_onLoadSimulations != null) {
 						final Entry entry = _currentEntry;
 						_currentEntry = null;
-						final ListProperty<Simulation> list = LoadSqlite.load(_currentEntry.job.getDatafilePath(), new Stage()/*getScene().getWindow()*/);
-						list.addListener(new ChangeListener<ObservableList<Simulation>>() {
-							@Override
-					        public void changed(
-					                ObservableValue<? extends ObservableList<Simulation>> observable,
-					                ObservableList<Simulation> oldValue,
-					                ObservableList<Simulation> newValue) 
-							{
-								_onLoadSimulations.call(list);
-								list.removeListener(this);
-								removeJob(entry);
-					        }
+						final Progress<ObservableList<Simulation>> progress = LoadSqlite.load(entry.job.getDatafilePath(), new Stage()/*getScene().getWindow()*/);
+						progress.then(list->{
+							entry.status.textProperty().unbind();
+							_onLoadSimulations.call(list);
+							removeJob(entry);
 						});
+						entry.status.textProperty().bind(progress.message);
 					}
 				}
 		 });
@@ -232,8 +223,33 @@ public class JobsPanel extends TitledPanel  {
 		 _menu.getItems().addAll(loadData, new SeparatorMenuItem(), deleteJob);
 	}
 	
+
 	class Entry {
-		Label title;
+		Label status;
+		Text title;
+		Label icon;
 		CyclusJob job;
+		HBox info;
+		
+		public Entry(CyclusJob job) {
+			this.job = job;
+			this.icon = getStatusIcon(job);
+			this.title = new Text(job.getAlias());
+			this.status = new Label("status");
+			this.status.textProperty().bind(job.statusTextProperty());
+			
+			info = new HBox(8);
+			info.setAlignment(Pos.CENTER_LEFT);
+			info.getChildren().addAll(icon, title, status);
+		}
+		
+		public void setIcon(Label icon) {
+			this.icon = icon;
+			info.getChildren().remove(0);
+			info.getChildren().add(0, icon);
+		}
+		public void release() {
+			status.textProperty().unbind();
+		}
 	}
 }

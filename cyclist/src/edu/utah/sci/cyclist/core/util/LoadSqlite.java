@@ -12,6 +12,7 @@ import java.util.Properties;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -25,6 +26,7 @@ import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
+import edu.utah.sci.cyclist.core.model.Progress;
 import edu.utah.sci.cyclist.core.model.Simulation;
 
 public class LoadSqlite {
@@ -32,17 +34,18 @@ public class LoadSqlite {
 	LoadSqlite() {	
 	}
 	
-	public static ListProperty<Simulation> load(String path, Window window) {
-		ListProperty<Simulation> list = new SimpleListProperty<Simulation>();
+	public static Progress<ObservableList<Simulation>> load(String path, Window window) {
+		Progress<ObservableList<Simulation>> progress = new Progress<>();
+		
 		CyclistDatasource ds = createDataSource(path);
 		if(ds != null){
 			if(SimulationTablesPostProcessor.isDbUpdateRequired(ds)){
-				updateDB(ds, window, list);
+				updateDB(ds, window, progress);
 			} else {	
-				loadSimulations(ds, list);
+				loadSimulations(ds, progress);
 			}
 		}
-		return list;
+		return progress;
 	}
 	
 	private static CyclistDatasource createDataSource(String path) {
@@ -67,7 +70,7 @@ public class LoadSqlite {
 		return ds;	
 	}
 	
-    private static void updateDB(CyclistDatasource ds, Window window, ListProperty<Simulation> list) {
+    private static void updateDB(CyclistDatasource ds, Window window, Progress<ObservableList<Simulation>> progress) {
 		Action response = Dialogs.create()
 			.owner(window)
 			.title("SQLite loader")
@@ -85,17 +88,22 @@ public class LoadSqlite {
 				}
 			};
 			
-			Dialogs.create()
-				.owner(window)
-				.title("SQLite loader")
-				.masthead("Updating database")
-				.showWorkerProgress(service);
+			progress.message.bind(service.messageProperty());
+			progress.progress.bind(service.progressProperty());
+			
+//			Dialogs.create()
+//				.owner(window)
+//				.title("SQLite loader")
+//				.masthead("Updating database")
+//				.showWorkerProgress(service);
 			
 			service.start();
 			service.setOnSucceeded( new EventHandler<WorkerStateEvent>() {			
 				@Override
 				public void handle(WorkerStateEvent event) {
-					loadSimulations(ds, list);
+					progress.message.unbind();
+					progress.progress.unbind();
+					loadSimulations(ds, progress);
 				}
 			});
 			
@@ -106,8 +114,9 @@ public class LoadSqlite {
     
 	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID, initialYear, initialMonth, Duration FROM Info order by SimID";
 
-    private static void loadSimulations(CyclistDatasource ds, ListProperty<Simulation> list) {
-    	List<Simulation> simulations = new ArrayList<>();
+    private static void loadSimulations(CyclistDatasource ds, Progress<ObservableList<Simulation>> progress) {
+    	progress.message.set("loading");
+    	List<Simulation> list = new ArrayList<>();
 		try (Connection conn = ds.getConnection()) {
 			Blob simulationId = null;
 			Simulation simulation = null;
@@ -123,7 +132,7 @@ public class LoadSqlite {
 					simulation.setStartYear(rs.getInt(2));
 					simulation.setStartMonth(rs.getInt(3));
 					simulation.setDuration(rs.getInt(4));
-					simulations.add(simulation);
+					list.add(simulation);
 				}
 			}
     			
@@ -136,6 +145,6 @@ public class LoadSqlite {
 			ds.releaseConnection();
 		}
 		
-		list.set(FXCollections.observableArrayList(simulations));
+		progress.result.set((FXCollections.observableArrayList(list)));
 	}
 }

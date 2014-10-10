@@ -140,14 +140,12 @@ public class CyclusService {
 	}
 	
 	private void loadData(final CyclusJob job) {
-		job.setStatus(Status.LOADING);
+		job.setStatus("loading");
 		Task<JobStatus> task = new Task<JobStatus>() {
-			@SuppressWarnings("unused")
 			protected JobStatus call() {
 				String msg;
 				try {
 					Path dir = createSaveDirectory(job.getId());
-					Path file = dir.resolve("data.zip");
 
 					InputStream input = Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
 							.connectTimeout(1000).socketTimeout(100000)
@@ -186,7 +184,6 @@ public class CyclusService {
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(input));
 		ZipEntry entry;
 		while ((entry = zis.getNextEntry()) != null) {
-			System.out.println("extracting: "+entry);
 			int count;
             byte data[] = new byte[BUFFER];
             // write the files to the disk

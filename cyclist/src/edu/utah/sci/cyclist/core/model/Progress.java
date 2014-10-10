@@ -18,6 +18,7 @@ public class Progress<T> {
 	public ObjectProperty<T> result = new SimpleObjectProperty<>();
 	private Consumer<T> _onDone;
 	
+	
 	private ChangeListener<T> listener = new ChangeListener<T>() {
 
 		@Override
@@ -30,7 +31,7 @@ public class Progress<T> {
         }
 	};
 	
-	public Progress<T> foo(Consumer<T> func) {
+	public Progress<T> then(Consumer<T> func) {
 		_onDone = func;
 		if (_onDone != null) {
 			result.addListener(listener);
