@@ -397,7 +397,7 @@ public class SimulationsPanel extends TitledPanel  {
 		 								_selected = null;
 		 							}
 		 });
-		 MenuItem editSimulation = new MenuItem("Edit simulation");
+		 MenuItem editSimulation = new MenuItem("Edit alias");
 		 editSimulation.setOnAction(new EventHandler<ActionEvent>() {
 		 							public void handle(ActionEvent e) { 
 		 								handleEntryEditRequest(_selected,0);

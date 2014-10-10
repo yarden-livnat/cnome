@@ -633,7 +633,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	private ChangeListener<String> _aliasListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
-			//Just for refreshing the choice box , so it displays the new value.
+			//HACK - Just for refreshing the choice box , so it displays the new value.
 			Simulation sim = new Simulation();
 			sim.setAlias("test");
 			_simChoice.getItems().add(sim);

@@ -229,6 +229,11 @@ public class SimpleTableView extends CyclistViewBase {
 	private void loadTable(boolean updateColumns) {
 		_tableView.itemsProperty().unbind();
 		
+		//Clear the table previous data.
+		if(_tableView.getItems() != null){
+			_tableView.getItems().clear();
+		}
+		
 		if (_currentTable == null || updateColumns) _tableView.getColumns().clear();
 		
 		if (_currentTable != null && updateColumns) {
@@ -238,7 +243,7 @@ public class SimpleTableView extends CyclistViewBase {
 			List<TableColumn<TableRow, Object>> cols = new ArrayList<>();
 			for (int f=0; f<schema.size(); f++) {
 				Field field = schema.getField(f);				
-				cols.add(createColumn(field, f));
+				cols.add(createColumn(field, f, field.getIsHidden()));
 			}
 			
 			_tableView.getColumns().addAll(cols);
@@ -268,21 +273,10 @@ public class SimpleTableView extends CyclistViewBase {
 				filtersList.add(filter);
 			}
 		}
-		
-		//Get the current columns
-		List<TableColumn<TableRow,?>> cols = _tableView.getColumns();
-		List<Field> fields = new ArrayList<>();
-		for (TableColumn<TableRow,?> tc : cols){
-			String fieldName = tc.getText();
-			if(!fieldName.isEmpty()){
-				fields.add(new Field(fieldName));
-			}
-		}
 			
 		// build the query
 		QueryBuilder builder = _currentTable.queryBuilder()
-			.filters(filtersList)
-			.fields(fields);
+			.filters(filtersList);
 		
 		System.out.println("TableView Query: "+builder.toString());
 		
@@ -311,34 +305,18 @@ public class SimpleTableView extends CyclistViewBase {
 		};
 		
 		setCurrentTask(task);
-//		_tableView.itemsProperty().bind( task.valueProperty());	
-		
-			task.valueProperty().addListener(new ChangeListener<ObservableList<TableRow> >() {
-
-				@Override
-				public void changed(
-						ObservableValue<? extends ObservableList<TableRow>> observable,
-						ObservableList<TableRow> oldValue,
-						ObservableList<TableRow> newValue) {
-					if(newValue == null && _tableView.getItems() != null){
-						_tableView.getItems().clear();
-					}else if(newValue != null){
-						_tableView.setItems(newValue);
-					}
-					
-				}
-				
-	        });
+		_tableView.itemsProperty().bind( task.valueProperty());	
 		
 		Thread th = new Thread(task);
 		th.setDaemon(true);
 		th.start();
 	}
 	
-	private TableColumn<TableRow, Object> createColumn(final Field field, final int col) {
+	private TableColumn<TableRow, Object> createColumn(final Field field, final int col, final Boolean isHidden) {
 				
 		TableColumn<TableRow, Object> tc = new TableColumn<>();
 		tc.setText(field.getName());
+		tc.setVisible(!isHidden);
 		
 		tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableRow,Object>, ObservableValue<Object>>() {
 			@Override
