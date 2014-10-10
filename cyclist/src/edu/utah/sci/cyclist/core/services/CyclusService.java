@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -147,32 +146,14 @@ public class CyclusService {
 			protected JobStatus call() {
 				String msg;
 				try {
-//					Path dir = Paths.get("/Users/yarden/data/neup/", job.getId());
 					Path dir = createSaveDirectory(job.getId());
 					Path file = dir.resolve("data.zip");
 
-					if (false) {
-						Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
-								.connectTimeout(1000).socketTimeout(1000)
-								.execute()
-								.saveContent(file.toFile());
-	
-						Process process = Runtime.getRuntime().exec("unzip data.zip", null, dir.toFile());
-						InputStream is = process.getInputStream();
-						BufferedReader br = new BufferedReader(new InputStreamReader(is));
-						
-						String line;
-						while ((line = br.readLine()) != null) {
-							log.info("unzip: " + line);
-						}
-						
-						job.setDatafilePath(dir.resolve("cyclus.sqlite").toString());
-					} else {
-						InputStream input = Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
-								.connectTimeout(1000).socketTimeout(1000)
-								.execute().returnContent().asStream();
-						saveZipStream(input, dir);
-					}
+					InputStream input = Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
+							.connectTimeout(1000).socketTimeout(100000)
+							.execute().returnContent().asStream();
+					saveZipStream(input, dir);
+					job.setDatafilePath(dir.resolve("cyclus.sqlite").toString());
 			
 					msg = "ready";
 				} catch (ClientProtocolException e) {

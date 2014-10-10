@@ -1,6 +1,7 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
 
+import javafx.application.Platform;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 
@@ -56,12 +57,13 @@ public class Console extends ScrollPane {
 		@Override
 		public void doAppend(LoggingEvent event) {
 			StringBuilder builder = new StringBuilder();
-			builder.append(_text.getText()).append(event.getMessage()).append("\n");
-			try{
-				_text.setText(builder.toString());	
-			}catch(Exception ex){
-				ex.printStackTrace();
-			}
+			String msg = builder.append(_text.getText()).append(event.getMessage()).append("\n").toString();
+			Platform.runLater(new Runnable() {                          
+                @Override
+                public void run() {
+                	_text.setText(msg);
+                }
+			});
 		}
 
 		@Override

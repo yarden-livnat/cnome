@@ -19,7 +19,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -132,8 +131,21 @@ public class SimulationTablesPostProcessor {
     }
     
     private static ObjectProperty<String> _message = new SimpleObjectProperty<String>("");
-   
-	public Task<Boolean> process(CyclistDatasource ds){ 
+    private static boolean _onlyLastMsg = false;
+    
+    private static void postMsg(String s) {
+    	if (_onlyLastMsg)
+    		_message.set(s);
+    	else
+    		_message.set( _message.get()+s+"\n");
+    }
+    
+	public Task<Boolean> process(CyclistDatasource ds){
+		return process(ds, false);
+	}
+	
+	public Task<Boolean> process(CyclistDatasource ds, boolean last) {
+		_onlyLastMsg = last;
 		Task<Boolean> task = new Task<Boolean>() {
 	         @Override protected Boolean call() throws Exception {
 	        	 _message.addListener(new ChangeListener<String>() {	 
@@ -188,7 +200,7 @@ public class SimulationTablesPostProcessor {
 				//If one of the updates has failed - roll back to the saved database.
 				if(!result){
 					cancelDbChanges(savedPath,dsPath);
-					_message.setValue(_message.getValue() + "Update database failed! \n");
+					postMsg("Update database failed!");
 				}else{
 					//No need for the saved file anymore.
 					File file = new File(savedPath);
@@ -196,12 +208,12 @@ public class SimulationTablesPostProcessor {
 						file.delete();
 					}
 				}
-				_message.setValue(_message.getValue() + "Done! \n");
+				postMsg("Done");
 				return result;
 			}
 			return false;
 		}else{
-			_message.setValue(_message.getValue()+ "database is already updated \n");
+			postMsg("database is already updated ");
 			return true;
 		}
 	}
@@ -217,13 +229,10 @@ public class SimulationTablesPostProcessor {
 		try (Connection conn = ds.getConnection()) {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(TEST_UPDATED_QUERY);
-			if(rs.next()){
-				return false;
-			}else{
-				return true;
-			}
+			return !rs.next();
 		}catch (SQLException e) {
-//			e.printStackTrace();
+			// TODO: should NOT catch this rather let it propagate up
+			System.out.println("SQL error while testing if db needs post processing: "+e.getMessage());
 			return false;
 		}finally{
 			ds.releaseConnection();
@@ -320,13 +329,13 @@ public class SimulationTablesPostProcessor {
 		}
 		
 		String os = OsUtil.getOsDef();
-		_message.setValue(_message.getValue() + "Running external application. os="+os + "\n");
+		postMsg("Running external application. os="+os);
 		String app = applicationsMap.get(os);
 		
 		Process process = null;
 		
 		if(app == null || app.isEmpty()){
-			_message.setValue(_message.getValue() + "No app has been found for os: " + os + "\n");
+			postMsg("No app has been found for os: " + os);
 			return false;
 		}
 		
@@ -341,7 +350,7 @@ public class SimulationTablesPostProcessor {
 		        file.setWritable(true, false);
 		}
 		
-		_message.setValue(_message.getValue() + "path= " + currPath + "\n");
+		postMsg("path= " + currPath);
 			
 		//Indication whether or not the new tables have been produced.
 	    Boolean isAlreadyProcessed = false;
@@ -355,7 +364,7 @@ public class SimulationTablesPostProcessor {
 			    String line;
 			    
 			    while ((line = br.readLine()) != null) {
-			      _message.setValue(_message.getValue() + line + "\n");
+			      postMsg(line);
 			      //Tables already exist - no need to reproduce additional tables.
 			      if(line.indexOf("post processed") > -1){
 //			    	  //If reached here the "UpdatedIndication" table doesn't exit. It means some of the other tables
@@ -392,9 +401,9 @@ public class SimulationTablesPostProcessor {
 		try {
 			conn = ds.getConnection();
 			stmt = conn.createStatement();
-			_message.setValue(_message.getValue() + "running queries: \n");
+			postMsg("running queries:");
 			for(QueryOperation queryOp : UpdateTablesRunningOrderTbl){
-				_message.setValue(_message.getValue() + queryOp.name + "\n");
+				postMsg(queryOp.name);
 				stmt.executeUpdate(queryOp.query);
 			}
 			return true;

@@ -36,6 +36,7 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
+import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -43,6 +44,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import org.mo.closure.v1.Closure;
 
@@ -208,7 +210,9 @@ public class JobsPanel extends TitledPanel  {
 		 loadData.setOnAction(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) { 
 					if (_onLoadSimulations != null) {
-						final ListProperty<Simulation> list = LoadSqlite.load(_currentEntry.job.getDatafilePath(), getScene().getWindow());
+						final Entry entry = _currentEntry;
+						_currentEntry = null;
+						final ListProperty<Simulation> list = LoadSqlite.load(_currentEntry.job.getDatafilePath(), new Stage()/*getScene().getWindow()*/);
 						list.addListener(new ChangeListener<ObservableList<Simulation>>() {
 							@Override
 					        public void changed(
@@ -218,8 +222,7 @@ public class JobsPanel extends TitledPanel  {
 							{
 								_onLoadSimulations.call(list);
 								list.removeListener(this);
-								removeJob(_currentEntry);
-								_currentEntry = null;
+								removeJob(entry);
 					        }
 						});
 					}

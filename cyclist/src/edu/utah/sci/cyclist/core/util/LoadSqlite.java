@@ -11,15 +11,11 @@ import java.util.Properties;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import org.apache.log4j.Logger;
@@ -40,8 +36,7 @@ public class LoadSqlite {
 		ListProperty<Simulation> list = new SimpleListProperty<Simulation>();
 		CyclistDatasource ds = createDataSource(path);
 		if(ds != null){
-			Boolean updateReuired = SimulationTablesPostProcessor.isDbUpdateRequired(ds);
-			if(updateReuired){
+			if(SimulationTablesPostProcessor.isDbUpdateRequired(ds)){
 				updateDB(ds, window, list);
 			} else {	
 				loadSimulations(ds, list);
@@ -86,7 +81,7 @@ public class LoadSqlite {
 				@Override
 				protected Task<Boolean> createTask() {
 					SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
-					return postProcessor.process(ds);
+					return postProcessor.process(ds, true);
 				}
 			};
 			
@@ -97,16 +92,15 @@ public class LoadSqlite {
 				.showWorkerProgress(service);
 			
 			service.start();
-			service.setOnSucceeded( new EventHandler<WorkerStateEvent>() {
-				
+			service.setOnSucceeded( new EventHandler<WorkerStateEvent>() {			
 				@Override
 				public void handle(WorkerStateEvent event) {
 					loadSimulations(ds, list);
-					
 				}
 			});
 			
 		} else {
+			// needs a better way out. upstream should know the user declined
 		}		
 	}
     
@@ -125,26 +119,19 @@ public class LoadSqlite {
 				if(simulationId != null ){
 					simulation = new Simulation(simulationId);
 					simulation.setDataSource(ds);
-					simulation.setAlias(simulationId.toString().substring(2, 6));
+					simulation.setAlias("#"+simulationId.toString().substring(2, 6));
 					simulation.setStartYear(rs.getInt(2));
 					simulation.setStartMonth(rs.getInt(3));
 					simulation.setDuration(rs.getInt(4));
 					simulations.add(simulation);
 				}
 			}
-			
-			if(simulations.size()>1){
-				for(int i=0;i<simulations.size();i++){
-					Simulation sim = simulations.get(i);
-					sim.setAlias(sim.getAlias()+"-"+(i+1));
-				}
-			}
     			
 		}catch(SQLSyntaxErrorException e){
-			System.out.println("Table for SimId doesn't exist");
+			System.out.println("Table for SimId doesn't exist: "+e.getMessage());
 		}
 		catch (Exception e) {
-			System.out.println("Get simulation failed");
+			System.out.println("Get simulation failed: "+e.getMessage());
 		}finally{
 			ds.releaseConnection();
 		}

@@ -43,6 +43,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -403,7 +404,7 @@ public class SimulationsPanel extends TitledPanel  {
 		 								handleEntryEditRequest(_selected,0);
 		 							}
 		 });
-		 _menu.getItems().addAll(deleteSimulation,editSimulation);
+		 _menu.getItems().addAll(editSimulation, new SeparatorMenuItem(), deleteSimulation);
 	}
 	
 	class Entry {
