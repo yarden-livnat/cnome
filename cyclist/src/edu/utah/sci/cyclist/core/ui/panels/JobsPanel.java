@@ -25,15 +25,9 @@ package edu.utah.sci.cyclist.core.ui.panels;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -42,29 +36,22 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
+
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel.Entry;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.core.util.LoadSqlite;
 
 public class JobsPanel extends TitledPanel  {
 	public static final String ID 		= "jobs-panel";
@@ -76,19 +63,22 @@ public class JobsPanel extends TitledPanel  {
 	
 	
 	private ContextMenu _menu = new ContextMenu();
-	VBox _vbox = null;
-	Boolean _entryEdit = false;
+	private VBox _vbox = null;
+
+	private Closure.V1<List<Simulation>> _onLoadSimulations = null;
+	
 	private ListProperty<CyclusJob> _jobs = new SimpleListProperty<>();
-	
 	private List<Entry> _entries = new ArrayList<>();
-	
-	private Entry _selected = null;
+	private Entry _currentEntry = null;
 	
 	public JobsPanel() {
 		super(TITLE, GlyphRegistry.get(AwesomeIcon.COGS));
 		build();
 	}
 	
+	public void setOnLoadSimulations(Closure.V1<List<Simulation>> action) {
+		_onLoadSimulations = action;
+	}
 //	@Override
 	public void setTitle(String title) {
 		setTitle(title);
@@ -109,20 +99,23 @@ public class JobsPanel extends TitledPanel  {
 		switch( job.getStatus()) {
 		case COMPLETED:
 			icon = AwesomeIcon.CLOCK_ALT;
+			System.out.println("completed");
 			break;
 		case FAILED:
 			icon = AwesomeIcon.TIMES;
 			break;
 		case LOADING:
 			icon = AwesomeIcon.DOWNLOAD;
+			System.out.println("dowload");
 			break;
 		case READY:
 			icon = AwesomeIcon.CHECK;
+			System.out.println("ready");
 			break;
 		case SUBMITTED:
 		case INIT:
 		default:
-			icon = AwesomeIcon.COG;
+			icon = AwesomeIcon.CLOCK_ALT;
 			break;
 		}
 		return GlyphRegistry.get(icon);
@@ -164,7 +157,7 @@ public class JobsPanel extends TitledPanel  {
 		
 		
 	private void select(Entry entry) {
-		_selected = entry;
+		_currentEntry = entry;
 	}
 	
 	public void removeJob(Entry entry) {
@@ -206,22 +199,34 @@ public class JobsPanel extends TitledPanel  {
 		 MenuItem deleteJob = new MenuItem("Delete job");
 		 deleteJob.setOnAction(new EventHandler<ActionEvent>() {
 		 							public void handle(ActionEvent e) { 
-		 								removeJob(_selected);
-		 								_selected = null;
+		 								removeJob(_currentEntry);
+		 								_currentEntry = null;
 		 							}
 		 });
 		 
 		 MenuItem loadData = new MenuItem("Load data");
 		 loadData.setOnAction(new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) { 
-					System.out.println("load data");
-					removeJob(_selected);
-					_selected = null;
+					if (_onLoadSimulations != null) {
+						final ListProperty<Simulation> list = LoadSqlite.load(_currentEntry.job.getDatafilePath(), getScene().getWindow());
+						list.addListener(new ChangeListener<ObservableList<Simulation>>() {
+							@Override
+					        public void changed(
+					                ObservableValue<? extends ObservableList<Simulation>> observable,
+					                ObservableList<Simulation> oldValue,
+					                ObservableList<Simulation> newValue) 
+							{
+								_onLoadSimulations.call(list);
+								list.removeListener(this);
+								removeJob(_currentEntry);
+								_currentEntry = null;
+					        }
+						});
+					}
 				}
 		 });
 		 
-		 _menu.getItems().add(deleteJob);
-		 _menu.getItems().add(loadData);
+		 _menu.getItems().addAll(loadData, new SeparatorMenuItem(), deleteJob);
 	}
 	
 	class Entry {

@@ -28,6 +28,7 @@ import javax.json.JsonReader;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
+import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
@@ -40,7 +41,8 @@ public class CyclusService {
 
 	private ListProperty<CyclusJob> _jobs = new SimpleListProperty<>(FXCollections.observableArrayList());
 	private Map<String, ScheduledService<JobStatus>> _running = new HashMap<>();
-
+	static Logger log = Logger.getLogger(CyclusService.class);
+			
 	public CyclusService() {
 		_jobs.addListener(new ListChangeListener<CyclusJob>() {
 			@Override
@@ -54,7 +56,7 @@ public class CyclusService {
 						for (CyclusJob job : c.getRemoved()) {
 							ScheduledService<JobStatus> service = _running.remove(job.getId());
 							if (service != null) {
-								System.out.println("CyclusService: cancel service");
+								log.info("Job "+job.getAlias()+" canceled");
 								service.cancel();
 							}
 						}
@@ -84,10 +86,9 @@ public class CyclusService {
 			poll(job);
 
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			log.error("Submit job communication error", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Submit job IO error", e);
 		}
 	}
 
@@ -101,13 +102,7 @@ public class CyclusService {
 
 			@Override
 			public void changed(ObservableValue<? extends JobStatus> observable, JobStatus prev, JobStatus current) {
-				if (current.info == null) {
-					// handle error
-					System.out.println("** Warning: JobStatus is null");
-				} else if (current.status == "canceled") {
-					System.out.println("** poll: job canceled");
-//					_running.remove(service.getJob().getId());
-				} else 	{
+				if (current.info != null) {
 					current.job.setInfo(current.info);
 					current.job.setStatus(current.status);
 					switch (current.job.getStatus()) {
@@ -120,12 +115,12 @@ public class CyclusService {
 						service.cancel();
 						_running.remove(service.getJob().getId());
 						break;
-					case LOADING:
-						break;
-					case READY:
-						break;
 					case SUBMITTED:
 					case INIT:
+						break;
+					case LOADING:
+					case READY:
+						// cannot occur during this stage
 						break;
 					}	
 				}
@@ -137,6 +132,7 @@ public class CyclusService {
 	}
 
 	private void loadData(final CyclusJob job) {
+		job.setStatus(Status.LOADING);
 		Task<JobStatus> task = new Task<JobStatus> () {
 			protected JobStatus call() {
 				try {
@@ -157,14 +153,15 @@ public class CyclusService {
 				    String line;
 				    
 				    while ((line = br.readLine()) != null) {
-				    	System.out.println("unzip: "+line);
+				    	log.info("unzip: "+line);
 				    }
-					return new JobStatus(job, "ready", null);
+				    job.setDatafilePath(dir.resolve("cyclus.sqlite").toString());
+;					return new JobStatus(job, "ready", null);
 				} catch (ClientProtocolException e) {
-					System.out.println("Communication Error: "+e.getMessage());
+					log.error("Communication error while loading simulation data",e);
 					return new JobStatus(job, e.getMessage(), null);
 				} catch (IOException e) {
-					System.out.println("IO Error: "+e.getMessage());
+					log.error("IO error while loading simulation data"+e);
 					return new JobStatus(job, e.getMessage(), null);
 				}
 			}
@@ -189,6 +186,7 @@ public class CyclusService {
 
 class PollService extends ScheduledService<JobStatus> {
 	private final CyclusJob _job;
+	private static Logger log =  Logger.getLogger(PollService.class);
 	
 	public PollService(CyclusJob job) {
 		_job = job;
@@ -208,19 +206,16 @@ class PollService extends ScheduledService<JobStatus> {
 							.execute().returnContent().asStream();
 
 					if (isCancelled()) {
-						System.out.println("job cancelled ["+_job.getId());
 						return new JobStatus(_job, "cancelled", null);
 					}
 					JsonReader reader = Json.createReader(stream);
 					JsonObject reply = reader.readObject();
 					return new JobStatus(_job, reply.getString("Status"), reply);
 				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("Communication error while polling remote execution service", e);
 					return new JobStatus(_job, e.getMessage(), null);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("IO error while polling remote execution service", e);
 					return new JobStatus(_job, e.getMessage(), null);
 				}
 			}

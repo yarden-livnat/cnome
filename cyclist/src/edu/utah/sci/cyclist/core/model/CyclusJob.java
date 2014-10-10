@@ -19,6 +19,7 @@ public class CyclusJob {
 	private ObjectProperty<LocalDateTime> _lastChecked = new SimpleObjectProperty<>();
 	private StringProperty _alias = new SimpleStringProperty();
 	private String _inputFilePath = "";
+	private String _datafilePath = "";
 	
 	
 	public CyclusJob(String path) {
@@ -29,9 +30,16 @@ public class CyclusJob {
 		return _inputFilePath;
 	}
 	
+	public void setDatafilePath(String path) {
+		_datafilePath = path;
+	}
+	
+	public String getDatafilePath() {
+		return _datafilePath;
+	}
+	
 	public void updateInfo(JsonObject info) {
 		_info = info;
-		System.out.println("set status to "+info.getString("Status"));
 		String s = info.getString("Status");
 		if ("complete".equals(s)) 
 			setStatus(Status.COMPLETED);
