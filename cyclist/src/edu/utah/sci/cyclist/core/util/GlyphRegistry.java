@@ -1,6 +1,7 @@
 package edu.utah.sci.cyclist.core.util;
 
 import javafx.scene.control.Label;
+import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import edu.utah.sci.cyclist.Cyclist;
 
@@ -35,5 +36,12 @@ public class GlyphRegistry {
         label.setStyle("-fx-font-family:"+font+"; -fx-font-size: " + size + ";");
         
         return label;
+	}
+	
+	static public Text getText(AwesomeIcon iconName) {
+		Text text = new Text(iconName.toString());
+		text.getStyleClass().add("awesome-icon");
+		text.setStyle("-fx-font-family: FontAwesome; -fx-font-size: " + DEFAULT_ICON_SIZE + ";");
+		return text;
 	}
 }
