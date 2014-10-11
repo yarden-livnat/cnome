@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -40,13 +38,13 @@ public class LoadSqlite {
 		_dsList= list;
 	}
 	
-	public static Progress<ObservableList<Simulation>> load(String path, Window window) {
+	public static Progress<ObservableList<Simulation>> load(String path, Object owner) {
 		Progress<ObservableList<Simulation>> progress = new Progress<>();
 		
 		CyclistDatasource ds = createDataSource(path);
 		if(ds != null){
 			if(SimulationTablesPostProcessor.isDbUpdateRequired(ds)){
-				updateDB(ds, window, progress);
+				updateDB(ds, owner, progress);
 			} else {	
 				loadSimulations(ds, progress);
 			}
@@ -78,16 +76,16 @@ public class LoadSqlite {
 		return ds;	
 	}
 	
-    private static void updateDB(CyclistDatasource ds, Window window, Progress<ObservableList<Simulation>> progress) {
-		Action response = Dialogs.create()
-			.owner(window)
-			.title("SQLite loader")
-			.masthead(null)
-			.message("Database needs postprocessing, which may take long time.\nContinue ?")
-			.actions(Dialog.Actions.OK, Dialog.Actions.NO)
-			.showConfirm();
-		
-		if (response == Dialog.Actions.OK) {			
+    private static void updateDB(CyclistDatasource ds, Object owner, Progress<ObservableList<Simulation>> progress) {
+//		Action response = Dialogs.create()
+//			.owner(owner)
+//			.title("SQLite loader")
+//			.masthead(null)
+//			.message("Database needs postprocessing, which may take long time.\nContinue ?")
+//			.actions(Dialog.Actions.OK, Dialog.Actions.NO)
+//			.showConfirm();
+//		
+//		if (response == Dialog.Actions.OK) {			
 			Service<Boolean> service = new Service<Boolean>() {
 				@Override
 				protected Task<Boolean> createTask() {
@@ -109,9 +107,8 @@ public class LoadSqlite {
 				}
 			});
 			
-		} else {
-			// needs a better way out. upstream should know the user declined
-		}		
+//		} else {
+//		}		
 	}
     
 	private static final String SIMULATION_ID_QUERY = "SELECT DISTINCT SimID, initialYear, initialMonth, Duration FROM Info order by SimID";

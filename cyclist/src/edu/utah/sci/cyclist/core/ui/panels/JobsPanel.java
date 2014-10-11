@@ -127,18 +127,13 @@ public class JobsPanel extends TitledPanel  {
 	private Entry createEntry(CyclusJob job) {
 		
 		final Entry entry = new Entry(job);		
-		entry.info.setOnMouseClicked(new EventHandler<Event>() {
-
+		entry.info.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
-			public void handle(Event event) {
-			    
-				MouseEvent mouseEvent = (MouseEvent)event;
+			public void handle(MouseEvent event) {			    
 				select(entry);
-				//Right click loads the "delete" simulation dialog box.
-				if( mouseEvent.getButton()   == MouseButton.SECONDARY){
+				if( event.getButton()   == MouseButton.SECONDARY){
 					_loadData.setDisable(entry.job.getStatus() != CyclusJob.Status.READY);
-					_menu.show(entry.title, Side.BOTTOM, 0, 0);
-					
+					_menu.show(entry.title, Side.BOTTOM, 0, 0);			
 				}  
 			}
 		});
@@ -216,14 +211,12 @@ public class JobsPanel extends TitledPanel  {
 					if (_onLoadSimulations != null) {
 						final Entry entry = _currentEntry;
 						_currentEntry = null;
-						final Progress<ObservableList<Simulation>> progress = LoadSqlite.load(entry.job.getDatafilePath(), /*new Stage()*/getScene().getWindow());
+						final Progress<ObservableList<Simulation>> progress = LoadSqlite.load(entry.job.getDatafilePath(), new Stage() /*getScene().getWindow())*/);
 						progress.then(list->{
-//							entry.status.textProperty().unbind();
 							progress.message.removeListener(msgListener);
 							_onLoadSimulations.call(list);
 							removeJob(entry);
 						});
-//						entry.status.textProperty().bind(progress.message);
 						progress.message.addListener(msgListener);
 					}
 				}
