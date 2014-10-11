@@ -72,6 +72,7 @@ import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
+import edu.utah.sci.cyclist.core.util.LoadSqlite;
 import edu.utah.sci.cyclist.core.util.StreamUtils;
 
 
@@ -95,8 +96,10 @@ public class CyclistController {
 	 */
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
-		
 		_cyclusService = new CyclusService();
+		
+		// TODO: fix this hack. We need a better way of passing around the list of datasources
+		LoadSqlite.setSources(_model.getSources());
 		
 		_workDirectoryController = new WorkDirectoryController();
 		

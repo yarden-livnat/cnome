@@ -31,7 +31,13 @@ import edu.utah.sci.cyclist.core.model.Simulation;
 
 public class LoadSqlite {
 
+	private static ObservableList<CyclistDatasource> _dsList;
+	
 	LoadSqlite() {	
+	}
+	
+	public static void setSources(ObservableList<CyclistDatasource> list) {
+		_dsList= list;
 	}
 	
 	public static Progress<ObservableList<Simulation>> load(String path, Window window) {
@@ -67,6 +73,8 @@ public class LoadSqlite {
 		p.setProperty("path", path);
 		p.setProperty("name", Paths.get(path).getFileName().toString());
 		
+		_dsList.add(ds);
+		
 		return ds;	
 	}
 	
@@ -90,12 +98,6 @@ public class LoadSqlite {
 			
 			progress.message.bind(service.messageProperty());
 			progress.progress.bind(service.progressProperty());
-			
-//			Dialogs.create()
-//				.owner(window)
-//				.title("SQLite loader")
-//				.masthead("Updating database")
-//				.showWorkerProgress(service);
 			
 			service.start();
 			service.setOnSucceeded( new EventHandler<WorkerStateEvent>() {			
