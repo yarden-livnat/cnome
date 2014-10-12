@@ -45,7 +45,7 @@
 				</copy>
 		<copy todir="deploy/externalLibs">
 			<fileset dir="${basedir}\cyclist\lib">
-				<filename name="controlsfx-8.0.4-dev.jar"/>	
+				<filename name="controlsfx-8.0.6.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
@@ -105,7 +105,7 @@
 		<copy todir="deploy/build/libs">
 			<fileset dir="deploy/externalLibs">
 				<include name="commons-logging.jar"/>
-				<include name="controlsfx-8.0.4-dev.jar"/>
+				<include name="controlsfx-8.0.6.jar"/>
 				<include name="log4j-1.2.16.jar"/>
 				<include name="mysql-connector-java-5.1.18-bin.jar"/>
 				<include name="commons-collections-3.2.1.jar"/>
@@ -189,7 +189,7 @@
 			<manifest>
 				<attribute name="Implementation-Vendor" value="SCI Institute, University of Utah"/>
 				<attribute name="Implementation-Title" value="Cyclist"/>
-				<attribute name="Implementation-Version" value="0.4"/>
+				<attribute name="Implementation-Version" value="0.8.1"/>
 				<attribute name="JavaFX-Feature-Proxy" value="None"/>
 			</manifest>
 		</fx:jar>
