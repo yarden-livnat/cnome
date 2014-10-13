@@ -167,7 +167,7 @@ public class Cycic extends ViewBase{
 						}
 					}
 					event.consume();
-					String response =  Dialog.create()
+					String response =  Dialogs.create()
 							.title("Name Facility")
 							.message("Enter Facility Name")
 							.showTextInput();
