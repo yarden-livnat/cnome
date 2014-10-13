@@ -1,5 +1,6 @@
 package edu.utexas.cycic;
 
+import java.awt.Dialog;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -166,7 +167,7 @@ public class Cycic extends ViewBase{
 						}
 					}
 					event.consume();
-					String response =  Dialogs.create()
+					String response =  Dialog.create()
 							.title("Name Facility")
 							.message("Enter Facility Name")
 							.showTextInput();
