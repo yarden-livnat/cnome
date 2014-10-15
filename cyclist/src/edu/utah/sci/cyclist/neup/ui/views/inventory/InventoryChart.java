@@ -6,13 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.geometry.Side;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
@@ -20,16 +13,11 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
 public class InventoryChart extends VBox {
@@ -98,7 +86,7 @@ public class InventoryChart extends VBox {
 			_upperBound = last;
 		}
 		
-		final String style = ColorUtil.toString(entry.color).substring(0, 7);//+"55";
+		final String style = ColorUtil.toString(entry.color).substring(0, 7)+"aa";
 		XYChart.Series<Number, Number> series = createSeries(entry.series, style);
 		double scale = computeScale(entry.series); // relative to the current chart type
 		
@@ -121,19 +109,28 @@ public class InventoryChart extends VBox {
 		final XYChart.Series<Number, Number> series = new XYChart.Series<>();
 		
 		series.nodeProperty().addListener(o->{
+			Path fillPath;
+			Path linePath;
 			switch (_mode) {
 			case LINE:	
 				Node node = series.getNode();
 				node.setStyle("-fx-stroke: "+style);
 				break;
 			case AREA:
-				break;
-			case STACKED:
-				Group g = (Group) series.getNode();
+				Group g1 = (Group) series.getNode();
 				// Note: based on StackedAreaChart.java in JavaFX
 				// unfortunately there isn't any official ways to do this
-				Path fillPath = (Path)g.getChildren().get(0);
-				Path linePath = (Path)g.getChildren().get(1);
+				fillPath = (Path)g1.getChildren().get(0);
+				linePath = (Path)g1.getChildren().get(1);
+				linePath.setStyle("-fx-stroke: "+style);
+				fillPath.setStyle("-fx-fill: "+style);
+				break;
+			case STACKED:
+				Group g2 = (Group) series.getNode();
+				// Note: based on StackedAreaChart.java in JavaFX
+				// unfortunately there isn't any official ways to do this
+				fillPath = (Path)g2.getChildren().get(0);
+				linePath = (Path)g2.getChildren().get(1);
 				linePath.setStyle("-fx-stroke: "+style);
 				fillPath.setStyle("-fx-fill: "+style);
 				break;
@@ -312,7 +309,7 @@ public class InventoryChart extends VBox {
 		_yAxis.setLabel("Amount");
 		_yAxis.setAnimated(false);
 		
-		setMode(ChartMode.STACKED);
+		setMode(_mode);
 		
 		return _chart;
 	}
