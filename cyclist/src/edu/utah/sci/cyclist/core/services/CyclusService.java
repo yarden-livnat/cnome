@@ -84,9 +84,9 @@ public class CyclusService {
 			poll(job);
 
 		} catch (ClientProtocolException e) {
-			log.error("Submit job communication error", e);
+			log.error("Submit job communication error: "+ e.getMessage());
 		} catch (IOException e) {
-			log.error("Submit job IO error", e);
+			log.error("submit job IO error: "+ e.getMessage());
 		}
 	}
 
