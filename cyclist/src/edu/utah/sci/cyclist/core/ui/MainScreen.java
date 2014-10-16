@@ -44,6 +44,7 @@ import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.panels.FiltersListPanel;
+import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
@@ -63,9 +64,11 @@ public class MainScreen extends VBox {
 	private ToolsPanel _toolsPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
-	
+	private JobsPanel _jobsPanel;
+
 	private Menu _perspectiveMenu;
 	private Menu _viewMenu;
+	private Menu _runMenu;
 	
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
 		
@@ -109,6 +112,10 @@ public class MainScreen extends VBox {
 		return _simulationPanel;
 	}
 	
+	public JobsPanel getJobsPanel() {
+		return _jobsPanel;
+	}
+	
 	public Workspace getWorkSpace(){
 		for(Object obj : _workspacePane.getChildren()){
 			if (obj.getClass() == Workspace.class) {
@@ -118,12 +125,13 @@ public class MainScreen extends VBox {
 		return null;
 	}
 	
-	private double toolsWidth = 120; 
+	private double TOOLS_WIDTH = 120; 
+	
 	private void build(Stage stage){
 		getStyleClass().add("main-screen");
 		double[] div = {0.2, 0.4, 0.8, 1.0};
 		
-		double [] mainDividers = {toolsWidth/600.0};
+		double [] mainDividers = {TOOLS_WIDTH/600.0};
 		
 		this.setPrefWidth(600);
 		this.setPrefHeight(400);
@@ -141,6 +149,7 @@ public class MainScreen extends VBox {
 		_toolsPane.setOrientation(Orientation.VERTICAL);
 		_toolsPane.getItems().addAll(
 				_simulationPanel = new SimulationsPanel(),
+				_jobsPanel = new JobsPanel(),
 				_datasourcesPanel = new TablesPanel(),
 				_fieldsPanel = new SchemaPanel("Fields"),
 				
@@ -177,11 +186,17 @@ public class MainScreen extends VBox {
 		return _perspectiveMenu;
 	}
 	
+	public Menu getRunMenu() {
+		return _runMenu;
+	}
+	
 	private MenuItem _datasourceMenuItem;
 	private MenuItem _workspaceMenuItem;
 	private MenuItem _quitMenuItem;
 	private MenuItem _saveMenuItem;
 	private MenuItem _simulationMenuItem;
+	private MenuItem _sqliteLoaderMenuItem;
+	private MenuItem _runMenuItem;
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
@@ -189,6 +204,10 @@ public class MainScreen extends VBox {
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddSimulation() {
 		return _simulationMenuItem.onActionProperty();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onLoadSqlite() {
+		return _sqliteLoaderMenuItem.onActionProperty();
 	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onSelectWorkspace() {
@@ -203,16 +222,22 @@ public class MainScreen extends VBox {
 		return _quitMenuItem.onActionProperty();
 	}
 	
+	public ObjectProperty<EventHandler<ActionEvent>> onRun() {
+		return _runMenuItem.onActionProperty();
+	}
+	
 	public ObjectProperty<Boolean> editDataSourceProperty() {
 		return _datasourcesPanel.editTableProperty();
 	}
+
 	
 	/**
 	 * Property which is changed when user wants to edit a simulation entry in the simulations panel.
-	 * (trigger - mouse right click)
-	 * @return ObjectProperty<Boolean> - property is set to true on mouse right click.
+	 * (Changes the simulation alias field).
+	 * (keyboard - escape or enter pressed)
+	 * @return ObjectProperty<Simulation> - property is set to the new Simulation value on enter/escape pressed.
 	 */
-	public ObjectProperty<Boolean> editSimulationProperty() {
+	public ObjectProperty<Simulation> editSimulationProperty() {
 		return _simulationPanel.editSimulationProperty();
 	}
 	
@@ -237,10 +262,11 @@ public class MainScreen extends VBox {
 		Menu fileMenu = createFileMenu();
 		Menu dataMenu = createDataMenu();
 		_viewMenu = createViewMenu();
+		_runMenu = createRunMenu();
 //		Menu panelMenu = createPanelMenu();
-		_perspectiveMenu = createPerspectiveMenu();
+//		_perspectiveMenu = createPerspectiveMenu();
 		
-		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _perspectiveMenu);
+		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _runMenu /*, _perspectiveMenu*/);
 		
 		return menubar;
 	}
@@ -270,11 +296,12 @@ public class MainScreen extends VBox {
 	private Menu createDataMenu() {
 		_datasourceMenuItem = new MenuItem("Datatable", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));	
 		_simulationMenuItem = new MenuItem("Simulation", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));
+		_sqliteLoaderMenuItem = new MenuItem("Load Sqlite", GlyphRegistry.get(AwesomeIcon.FOLDER_OPEN_ALT));
 		
 		// -- setup the menu 
 		Menu dataMenu = new Menu("Data");
 		dataMenu.getItems().addAll(
-				_datasourceMenuItem,_simulationMenuItem);
+				_datasourceMenuItem,_simulationMenuItem,_sqliteLoaderMenuItem);
 		return dataMenu;
 	}
 
@@ -286,6 +313,16 @@ public class MainScreen extends VBox {
 			menu.getItems().add(item);
 		}
 
+		return menu;
+	}
+	
+	private Menu createRunMenu() {
+		Menu menu= new Menu("Run");
+		_runMenuItem = new MenuItem("Submit file", GlyphRegistry.get(AwesomeIcon.EXCHANGE));
+		_runMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+R"));
+
+		menu.getItems().add(_runMenuItem);
+	
 		return menu;
 	}
 	

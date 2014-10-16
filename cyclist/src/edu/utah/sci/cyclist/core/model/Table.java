@@ -543,6 +543,10 @@ public class Table {
 		if(_saveDir == ""){
 			_saveDir = WorkDirectoryController.DEFAULT_WORKSPACE;
 		}
+		File defaultDir = new File(_saveDir);
+		if(!defaultDir.exists()){
+			defaultDir.mkdir();
+		}
 		
 		// If the save directory does not exist, create it
 		File saveDir = new File(_saveDir+ "/" + ds.getUID() +"/");
@@ -822,28 +826,28 @@ public class Table {
 						Boolean checkForSum = false;
 						double min,max=0;
 						
-						switch(function){
-						case AVG:
-						case MIN:
-						case MAX:
-						case VALUE:
-							query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
-							break;
-						case COUNT:
-							query = "SELECT 0 AS min, COUNT(" + field.getName() + ") AS max FROM "+ getName();
-							break;
-						case COUNT_DISTINCT:
-							query = "SELECT 0 AS min, COUNT( DISTINCT " + field.getName() + ") AS max FROM "+ getName();
-						case SUM:
-							query = "SELECT SUM( CASE WHEN " + field.getName()+ " <0 THEN " + field.getName() + " ELSE 0 END) AS neg_sum, " +  
-									"SUM( CASE WHEN " + field.getName()+ " >0 THEN " + field.getName() + " ELSE 0 END) AS pos_sum, " + 
-									"MIN(" + field.getName() +") as min, MAX(" + field.getName() +") as max "+
-									"FROM " + getName();
-							checkForSum = true;
-							break;
-						}
+//						switch(function){
+//						case AVG:
+//						case MIN:
+//						case MAX:
+//						case VALUE:
+//							query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
+//							break;
+//						case COUNT:
+//							query = "SELECT 0 AS min, COUNT(" + field.getName() + ") AS max FROM "+ getName();
+//							break;
+//						case COUNT_DISTINCT:
+//							query = "SELECT 0 AS min, COUNT( DISTINCT " + field.getName() + ") AS max FROM "+ getName();
+//						case SUM:
+//							query = "SELECT SUM( CASE WHEN " + field.getName()+ " <0 THEN " + field.getName() + " ELSE 0 END) AS neg_sum, " +  
+//									"SUM( CASE WHEN " + field.getName()+ " >0 THEN " + field.getName() + " ELSE 0 END) AS pos_sum, " + 
+//									"MIN(" + field.getName() +") as min, MAX(" + field.getName() +") as max "+
+//									"FROM " + getName();
+//							checkForSum = true;
+//							break;
+//						}
 						
-						
+						query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
 						
 						log.debug("query: "+query);
 						System.out.println(query);

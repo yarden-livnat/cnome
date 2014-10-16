@@ -18,9 +18,11 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -32,14 +34,16 @@ public class UpdateDbDialog extends HBox {
 	private Stage _dialog;
 	
 	private ObjectProperty<Boolean> _selection = new SimpleObjectProperty<>();
-	private Label _statusLabel;
+	private TextArea _statusText;
 	private RotateTransition _animation;
+	private VBox _body;
+	private VBox _runningBox;
 	
 	/**
 	 * Default constructor
 	 **/
-	public UpdateDbDialog(Label statusLbl, RotateTransition animation) {
-		createDialog(statusLbl, animation);
+	public UpdateDbDialog(TextArea statusText, RotateTransition animation) {
+		createDialog(statusText, animation);
 	}
 	
 	/**
@@ -61,11 +65,11 @@ public class UpdateDbDialog extends HBox {
 	/**
 	 * Creates the dialog
 	 */
-	private void createDialog(Label statusLbl, RotateTransition animation){
+	private void createDialog(TextArea statusText, RotateTransition animation){
 		_dialog = new Stage();
 		_dialog.setTitle("Update DB");
 		_dialog.initModality(Modality.WINDOW_MODAL);
-		_statusLabel = statusLbl;
+		_statusText = statusText;
 		_animation = animation;
 		_dialog.setScene( createScene(_dialog) );
 		_dialog.centerOnScreen();
@@ -75,7 +79,7 @@ public class UpdateDbDialog extends HBox {
 	
 	private Scene createScene(final Stage dialog){
 		
-		Label txt = new Label("A Database update may be required. \n" + 
+		Label txt = new Label("A Database update is required. \n" + 
 							  "This operation can take a long time. \n" +
 							  "Continue?");
 //		txt.setFont(new Font(15));
@@ -91,7 +95,7 @@ public class UpdateDbDialog extends HBox {
 		HBox buttonsBox = new HBox();
 		buttonsBox.setSpacing(10);
 		buttonsBox.setPadding(new Insets(5));
-		buttonsBox.getChildren().addAll(ok,cancel);
+		buttonsBox.getChildren().addAll(cancel,ok);
 		buttonsBox.setAlignment(Pos.CENTER_RIGHT);
 		
 		cancel.setOnAction(new EventHandler<ActionEvent>() {
@@ -116,21 +120,26 @@ public class UpdateDbDialog extends HBox {
 		hbox.setAlignment(Pos.CENTER);
 		HBox.setHgrow(txt, Priority.ALWAYS);
 		
-		_statusLabel.setPadding(new Insets(5));
-		_statusLabel.setAlignment(Pos.CENTER);
-		_statusLabel.setPrefWidth(350);
-//		_statusLabel.setFont(new Font(15));
+		_statusText.setPadding(new Insets(5));
+		_statusText.setEditable(false);
+		_statusText.setPrefWidth(400);
+		_statusText.setPrefHeight(150);
+				
+		_body = new VBox();
+		_body.setSpacing(5);
+		_body.setAlignment(Pos.CENTER);
+		_body.setPadding(new Insets(5));
+		_body.getChildren().addAll(hbox,buttonsBox);
 		
+		VBox globalBody = new VBox();
+		globalBody.getChildren().add(_body);
 		
-		VBox body = new VBox();
-		body.setSpacing(5);
-		body.setAlignment(Pos.CENTER);
-		body.setPadding(new Insets(5));
-		body.getChildren().addAll(hbox,buttonsBox);
-		
-//		Scene scene = new Scene(body,400,100);
-		Scene scene = new Scene(body,400,150);
+		Scene scene = new Scene(globalBody,300,150);
         scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
+        
+        _runningBox = new VBox();
+        _runningBox.setSpacing(5);
+        _runningBox.setAlignment(Pos.CENTER);
         
         Node icon;
         icon = GlyphRegistry.get(AwesomeIcon.REFRESH, "20px");
@@ -141,24 +150,33 @@ public class UpdateDbDialog extends HBox {
 		_animation.setByAngle(360);
 		_animation.setCycleCount(Animation.INDEFINITE);
 		_animation.setInterpolator(Interpolator.LINEAR);
+		
+		HBox animationBox = new HBox();
+		animationBox.setPadding(new Insets(5));
+		animationBox.setAlignment(Pos.CENTER_LEFT);
+		animationBox.getChildren().add(icon);
+		
+		VBox.setVgrow(_runningBox, Priority.ALWAYS);
+		VBox.setVgrow(_statusText, Priority.ALWAYS);
+		VBox.setVgrow(_body, Priority.ALWAYS);
       
-        _statusLabel.textProperty().addListener(new ChangeListener<String>() {
+        _statusText.textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> arg0, String oldVal, String newVal) {
 				if(!newVal.isEmpty()){
-					if(body.getChildren().get(0) != _statusLabel ){
-						body.getChildren().removeAll(body.getChildren());
-						body.getChildren().addAll(_statusLabel, icon);
-//						animation.play();
+					if(_body.getChildren().get(0) != _runningBox ){
+						_body.getChildren().clear();
+						_body.getChildren().add(_runningBox);
+						_dialog.setWidth(500);
+						_dialog.setHeight(200);
 					}
-					if(newVal.equals("Done!")){
-//						animation.stop();
-//						body.getChildren().remove(icon);
-					}
-					
-				}
+					_statusText.setScrollTop(Double.MAX_VALUE);  //Doesn't work -javafx bug?
+					_statusText.appendText(""); //Should fix the javafx bug, but it doesn't.
+				}	
 			}
 		});
+        
+        _runningBox.getChildren().addAll(animationBox,new Text("Update info:"),_statusText);
 		return scene;
 	}
 }

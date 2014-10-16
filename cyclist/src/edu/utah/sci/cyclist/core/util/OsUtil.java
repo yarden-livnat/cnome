@@ -13,7 +13,7 @@ public class OsUtil {
 	 * @return String
 	 */
 	public static String getOsDef(){
-		Logger log = Logger.getLogger(OsUtil.class);
+//		Logger log = Logger.getLogger(OsUtil.class);
 		String os = System.getProperty("os.name").toLowerCase();
 		String osFormatted = convertOs(os);
 		String osArc = System.getProperty("os.arch").toLowerCase();

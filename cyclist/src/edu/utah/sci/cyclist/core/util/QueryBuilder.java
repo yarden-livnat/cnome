@@ -61,10 +61,11 @@ public class QueryBuilder {
 		
 		//_filters.addAll(list);
 		for (Filter filter : list) {
-			if (filter.getRole() == Role.DIMENSION) 
-				_filters.add(filter);
-			else
-				_having.add(filter);
+//			if (filter.getRole() == Role.DIMENSION || filter.getRole() == Role.INT_TIME) 
+//				_filters.add(filter);
+//			else
+//				_having.add(filter);
+			_filters.add(filter);
 		}
 		return this;
 	}

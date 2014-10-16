@@ -50,6 +50,7 @@ public class Field {
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
 	private MapProperty<Object,Object> _rangeValuesProperty= new SimpleMapProperty<>();
 	private Map<String, Object> _properties = new HashMap<>();
+	private Boolean _isHidden = false;
 	
 	public Field(){
 		this("");
@@ -182,6 +183,10 @@ public class Field {
 		return getName().equals(field.getName()) && getType() == field.getType() && getTable() == field.getTable();
 	}
 	
+	public Boolean getIsHidden(){
+		return _isHidden;
+	}
+	
 	
 	// Save this field
 	public void save(IMemento memento) {
@@ -287,6 +292,8 @@ public class Field {
 			_name = memento.getString("name");
 			_semantic = memento.getString("semantic");
 			if (_semantic == null) _semantic = _name;
+			_isHidden = memento.getBoolean("isHidden");
+			if(_isHidden==null) _isHidden=false;
 			IMemento dataTypeMemento = memento.getChild("datatype");
 			
 			DataType.Type type = DataType.Type.valueOf(dataTypeMemento.getString("type"));

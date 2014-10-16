@@ -121,6 +121,7 @@ public class DatasourceWizard extends VBox {
 		_nameField.setText(sourceName);
 		
 		nameBox.getChildren().addAll(new Text("Name:"),_nameField);
+		HBox.setHgrow(_nameField, Priority.ALWAYS);
 								
 		// The selector for type of connection
 		final Pane pane = new Pane();
@@ -177,6 +178,7 @@ public class DatasourceWizard extends VBox {
 		});
 		
 		_status = new Label();
+		_status.setPrefWidth(15);  //To make sure the status is not hidden.
 				
 		ProgressIndicator progressIndicator = new ProgressIndicator();
 		progressIndicator.setProgress(-1);

@@ -29,8 +29,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
@@ -53,6 +55,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
@@ -91,9 +94,10 @@ public class SimulationWizard extends TilePane {
 	private ObservableList<SimInfo> 	_simData =FXCollections.observableArrayList();
 	private ObservableList<CyclistDatasource> _sources = FXCollections.observableArrayList();
 	private UpdateDbDialog				_updateDialog;
-	ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
-	Label _statusLabel;
-	RotateTransition _animation;
+	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
+	private TextArea _statusText;
+	private RotateTransition _animation;
+	private List<Simulation> _aliases;
 	
 	   
 	// DataType elements
@@ -112,10 +116,11 @@ public class SimulationWizard extends TilePane {
 	}
 	
 	// * * * Set the existing data sources in the combo box * * * //
-	public void setItems(final ObservableList<CyclistDatasource> sources) {
+	public void setItems(final ObservableList<CyclistDatasource> sources, Set<Simulation> aliases) {
 		_sources = sources;
 		_sourcesView.setItems(_sources);
 		_sourcesView.getSelectionModel().selectFirst();
+		_aliases = new ArrayList<>(aliases);
 	}
 			
 	// * * * Show the dialog * * * //
@@ -206,13 +211,17 @@ public class SimulationWizard extends TilePane {
 		selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
-				setDbUpdate(true,_current);
- 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
- 					@Override
- 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
- 						selectConnection(_current,newVal);
- 					}
- 				});
+				if(SimulationTablesPostProcessor.isDbUpdateRequired(_current)){
+					setDbUpdate(true,_current);
+	 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
+	 					@Override
+	 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+	 						selectConnection(_current,newVal);
+	 					}
+	 				});
+				}else{
+					selectConnection(_current,true);
+				}
 			}			
 		});
 //		_statusDisplay = new ImageView();
@@ -347,9 +356,8 @@ public class SimulationWizard extends TilePane {
 	
 		_sourcesView.getSelectionModel().selectFirst();
 		
-		_statusLabel = new Label();
+		_statusText = new TextArea();
 		_animation = new RotateTransition();
-		_updateDialog = new UpdateDbDialog(_statusLabel, _animation);
 		
 		// Return the scene
 		return scene;
@@ -364,8 +372,15 @@ public class SimulationWizard extends TilePane {
 		selection.addListener(new ChangeListener<CyclistDatasource>(){
 			@Override
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				if (!_sourcesView.getItems().contains(newVal))
+				if (!_sourcesView.getItems().contains(newVal)){
 					_sourcesView.getItems().add(newVal);
+				}else{
+					//A ListView hack: in order to refresh the displayed items, Should change the number of items in the list.
+					CyclistDatasource demoDs = new CyclistDatasource();
+					demoDs.setName("demo");
+					_sourcesView.getItems().add(demoDs);
+					_sourcesView.getItems().remove(demoDs);
+				}
 					_sourcesView.getSelectionModel().select(newVal);
 			}
 		});
@@ -387,7 +402,8 @@ public class SimulationWizard extends TilePane {
 				rs = stmt.executeQuery(SIMULATION_ID_QUERY);
 				while (rs.next()) {
 					 Blob simulationId = new Blob(rs.getBytes(SIMULATION_ID_FIELD_NAME));
-					 _simData.add(new SimInfo(simulationId, ""));
+					 String alias = getAlias(simulationId.toString());
+					 _simData.add(new SimInfo(simulationId, alias));
 				}
 				
 				_simulationsTbl.setItems(_simData);
@@ -403,29 +419,48 @@ public class SimulationWizard extends TilePane {
 		}
 	}
 	
+	/*
+	 * Checks the argument "isRunning":
+	 * If true - 
+	 * 	it's the beginning of the database update process. 
+	 * 	Display the updateDb dialog and ask the user whether or not to update the database.
+	 * 	If user approves - start the update process.
+	 * 	If user cancels - hide the dialog and set the datasource validity to false.
+	 * 
+	 * If false - the data base update is done - close the update dialog.
+	 * @param isStart - is it the start or the end of the process.
+	 * @CyclistDatasource ds - the datasource to update.
+	 * 
+	 */
 	private void setDbUpdate(Boolean isRunning, CyclistDatasource ds){
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
 			if(isRunning){
-				ObjectProperty<Boolean> selection = _updateDialog.show(_dialog.getScene().getWindow());
-				selection.addListener(new ChangeListener<Boolean>(){
-					@Override
-					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
-						if(newVal){
-							runDbUpdate(ds);
-						}else{
-							_dsIsValid.set(false);
-							_updateDialog.hide();
+					_updateDialog = new UpdateDbDialog(_statusText, _animation);
+					_statusText.clear();  //in case it is not the first time it is called.
+					ObjectProperty<Boolean> selection = _updateDialog.show(_dialog.getScene().getWindow());
+					selection.addListener(new ChangeListener<Boolean>(){
+						@Override
+						public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+							if(newVal){
+								runDbUpdate(ds);
+							}else{
+								_dsIsValid.set(false);
+								_statusText.textProperty().unbind();
+								_updateDialog.hide();
+							}
 						}
-					}
-				});
+					});
 			}else{
+				_statusText.textProperty().unbind();
 				_updateDialog.hide();
 			}
-		}
 	}
 		
-	private Boolean runDbUpdate(final CyclistDatasource ds){
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
+	/*
+	 * Calls the post processing utility to perform a database update.
+	 * Updates the animation and the status text to display the database update status to the user.
+	 * @param CyclistDatasource ds - the data source to update 
+	 */
+	private void runDbUpdate(final CyclistDatasource ds){
 			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
 			Task<Boolean> task = postProcessor.process(ds);
 			if(task != null){	
@@ -439,12 +474,9 @@ public class SimulationWizard extends TilePane {
 			        }
 			    });
 			
-				_statusLabel.textProperty().bind(task.messageProperty());
+				_statusText.textProperty().bind(task.messageProperty());
 				_animation.play();
 			}
-			
-		}
-		return true;
 	}
 
 	private void updateSimulation() {
@@ -464,6 +496,17 @@ public class SimulationWizard extends TilePane {
 				_selection.add(simulation);
 			}
 		}
+	}
+	
+	private String getAlias(String simId){
+		String alias = "";
+		for(Simulation sim : _aliases){
+			if(sim.getSimulationId().toString().equals(simId)){
+				alias = sim.getAlias();
+				break;
+			}
+		}
+		return alias;
 	}
 	
 	public CyclistDatasource getSelectedSource() {

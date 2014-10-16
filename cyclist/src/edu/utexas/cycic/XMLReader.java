@@ -26,8 +26,8 @@ public class XMLReader {
 	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
-			//add(":Brightlite:ReactorFacility");
-			//add(":Brightlite:FuelfabFacility");
+			add(":Brightlite:ReactorFacility");
+			add(":Brightlite:FuelfabFacility");
 			add(":cycamore:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");

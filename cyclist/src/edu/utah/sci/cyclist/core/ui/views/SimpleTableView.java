@@ -28,6 +28,7 @@ import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -173,7 +174,7 @@ public class SimpleTableView extends CyclistViewBase {
 			_simField = null;
 		}
 		
-		loadTable();
+		loadTable(true);
 	}
 	
 	/**
@@ -207,7 +208,7 @@ public class SimpleTableView extends CyclistViewBase {
 	
 				
 		if (_currentTable != null) {
-			loadTable();
+			loadTable(false);
 		}
 
 	}
@@ -225,24 +226,32 @@ public class SimpleTableView extends CyclistViewBase {
 		}
 	}
 	
-	private void loadTable() {
+	private void loadTable(boolean updateColumns) {
 		_tableView.itemsProperty().unbind();
-		if (_tableView.getItems() != null) _tableView.getItems().clear();
-		_tableView.getColumns().clear();
 		
-		if (_currentTable != null) {
+		//Clear the table previous data.
+		if(_tableView.getItems() != null){
+			_tableView.getItems().clear();
+		}
+		
+		if (_currentTable == null || updateColumns) _tableView.getColumns().clear();
+		
+		if (_currentTable != null && updateColumns) {
 			//TODO: this be done only if the table is active
 			Schema schema = _currentTable.getSchema();	
 			
 			List<TableColumn<TableRow, Object>> cols = new ArrayList<>();
 			for (int f=0; f<schema.size(); f++) {
 				Field field = schema.getField(f);				
-				cols.add(createColumn(field, f));
+				cols.add(createColumn(field, f, field.getIsHidden()));
 			}
 			
 			_tableView.getColumns().addAll(cols);
-			fetchRows();
 		}
+		
+		if (_currentTable != null) 
+			fetchRows();
+
 	}
 	
 	private String buildQuery() {
@@ -264,7 +273,7 @@ public class SimpleTableView extends CyclistViewBase {
 				filtersList.add(filter);
 			}
 		}
-		
+			
 		// build the query
 		QueryBuilder builder = _currentTable.queryBuilder()
 			.filters(filtersList);
@@ -303,10 +312,11 @@ public class SimpleTableView extends CyclistViewBase {
 		th.start();
 	}
 	
-	private TableColumn<TableRow, Object> createColumn(final Field field, final int col) {
+	private TableColumn<TableRow, Object> createColumn(final Field field, final int col, final Boolean isHidden) {
 				
 		TableColumn<TableRow, Object> tc = new TableColumn<>();
 		tc.setText(field.getName());
+		tc.setVisible(!isHidden);
 		
 		tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableRow,Object>, ObservableValue<Object>>() {
 			@Override

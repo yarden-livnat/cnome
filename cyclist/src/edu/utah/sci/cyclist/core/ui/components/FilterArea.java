@@ -218,8 +218,9 @@ public class FilterArea extends ToolBar {
 						getOnAction().handle(event);
 					}
 				} else if (event.getEventType() == FilterEvent.DELETE) {
-					//                                        if (getOnAction() != null) {
-						//                                                getOnAction().handle(event);
+                        if (getOnAction() != null) {
+                        	getOnAction().handle(event);
+                        }
 						getFilters().remove(glyph.getFilter());
 					} else if(event.getEventType() == FilterEvent.REMOVE_FILTER_FIELD){
 						//If filter is connected to a numeric field - clean the field connection as well.

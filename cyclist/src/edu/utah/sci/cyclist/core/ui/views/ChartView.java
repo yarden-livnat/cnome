@@ -77,7 +77,7 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 
 public class ChartView extends CyclistViewBase {
-	public static final String TITLE = "Chart";
+	public static final String TITLE = "Plot";
 	static Logger log = Logger.getLogger(ChartView.class);
 
 	enum ViewType { CROSS_TAB, BAR, LINE, SCATTER_PLOT, GANTT, NA }
@@ -999,7 +999,7 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 
-		MenuItem duplicateItem = new MenuItem("Duplicate chart");
+		MenuItem duplicateItem = new MenuItem("Duplicate plot");
 		duplicateItem.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {

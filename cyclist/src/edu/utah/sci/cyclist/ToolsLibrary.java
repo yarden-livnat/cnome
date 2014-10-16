@@ -42,7 +42,7 @@ public class ToolsLibrary {
 				"presenter.TablePresenter"),
 		
 		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
-				"Chart", AwesomeIcon.BAR_CHART_ALT, 
+				"Plot", AwesomeIcon.BAR_CHART_ALT, 
 				"ui.views.ChartView", 
 				"presenter.ChartPresenter"),
 		

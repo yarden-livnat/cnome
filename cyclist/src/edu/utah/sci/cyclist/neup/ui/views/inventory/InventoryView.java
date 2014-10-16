@@ -18,16 +18,24 @@ import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -181,6 +189,8 @@ public class InventoryView extends CyclistViewBase {
 		setTitle(TITLE);
 		getStyleClass().add("inventory");
 	
+		setupActions();
+		
 		BorderPane pane = new BorderPane();
 		pane.setCenter(buildChart());
 		pane.setLeft(buildCtrl());
@@ -218,8 +228,7 @@ public class InventoryView extends CyclistViewBase {
 		return vbox;
 	}
 	
-	public Node buildAgentCtrl() {
-		
+	public Node buildAgentCtrl() {		
 		TitledPanel panel = new TitledPanel("Agents");
 		panel.getStyleClass().add("agents-panel");
 		
@@ -344,7 +353,8 @@ public class InventoryView extends CyclistViewBase {
 			series.add(current);
 		}
 		info.series = series;
-		_chart.add(info);
+		if (info.active)
+			_chart.add(info);
 	}
 	
 	private Node buildChart() {
@@ -352,10 +362,57 @@ public class InventoryView extends CyclistViewBase {
 		return _chart;
 	}
 	
+	private void setupActions() {
+		final Button options = new Button("mode", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		options.getStyleClass().add("flat-button");
+
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		MenuItem item = new MenuItem("Line chart");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				_chart.setMode(InventoryChart.ChartMode.LINE);
+			}
+		});
+		contextMenu.getItems().add(item);
+		
+		item = new MenuItem("Area chart");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				_chart.setMode(InventoryChart.ChartMode.AREA);
+			}
+		});
+		contextMenu.getItems().add(item);
+		
+		item = new MenuItem("Stacked chart");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				_chart.setMode(InventoryChart.ChartMode.STACKED);
+			}
+		});
+		contextMenu.getItems().add(item);
+		
+		options.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(options, Side.BOTTOM, 0, 0);
+			}
+		});
+
+		List<Node> actions = new ArrayList<>();
+		actions.add(options);
+		addActions(actions);
+	}
+	
+	
 	class AgentInfo {
 		public String field;
 		public String value;
 		public Color color;
+		public Boolean active;
 		public ListProperty<Inventory> inventory = new SimpleListProperty<>();
 		public FilteredList<Inventory> filteredInventory; 
 		
@@ -365,6 +422,7 @@ public class InventoryView extends CyclistViewBase {
 		public AgentInfo(String field, String value) {
 			this.field = field;
 			this.value = value;
+			this.active = true;
 			color = Configuration.getInstance().getColor(getName());
 			
 			inventory.addListener((Observable o)->{
@@ -422,19 +480,17 @@ public class InventoryView extends CyclistViewBase {
 			});
 			
 			setOnMouseClicked(e->{
-				text.setDisable(!text.isDisable());
-				if (text.isDisable()) {
-					_chart.remove(info);
-					System.out.println("remove");
-				} else {
+				info.active = !info.active;
+				text.setDisable(!info.active);
+				if (info.active) {
 					_chart.add(info);
-					System.out.println("add");
+				} else {
+					_chart.remove(info);
 				}
 				
 			});
 			
 			button.setOnMouseClicked(e->{
-				System.out.println("delete");
 				if (_onClose != null) {
 					_onClose.accept(this);
 				}
@@ -485,8 +541,9 @@ public class InventoryView extends CyclistViewBase {
 			_task = task;
 			if (_task != null) {
 				visibleProperty().bind(task.runningProperty());
-				_task.runningProperty().addListener(e->{
-					if (_task.isRunning()) {
+				_task.runningProperty().addListener(o->{
+					SimpleBooleanProperty running= (SimpleBooleanProperty) o;
+					if (running.get()) {
 						_animation.play();
 						log.info("Fetch invetory");
 					} else {

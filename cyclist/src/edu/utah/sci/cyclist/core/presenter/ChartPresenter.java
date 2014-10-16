@@ -36,17 +36,22 @@ public class ChartPresenter extends CyclistViewPresenter {
 	
 	@Override
 	public ViewPresenter clone(View view) {
+		ChartView chartView = (ChartView) view;
 		ChartPresenter copy = new ChartPresenter(getEventBus());
 		copy.setView(view);
+		
+		for (SelectionModel<Simulation>.Entry entry: getSimulationRecords()) {
+			chartView.addSimulation(entry.item, entry.remote, entry.active);
+			copy.getSelectionModelSim().addItem(entry.item, entry.remote, entry.active, entry.remoteActive);
+		}
+		chartView.selectSimulation(getView().getCurrentSimulation(), true);
 		
 		// copy tables
 		for (SelectionModel<Table>.Entry entry : getSelectionModelTbl().getEntries()) {
 			copy.addTable(entry.item, entry.remote, entry.active, entry.remoteActive);
 		}
 		
-		ChartView chartView = (ChartView) view;
 		chartView.copy(getView());
-
 		chartView.setActive(true);
 		return copy;
 	}

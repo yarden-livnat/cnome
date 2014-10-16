@@ -22,8 +22,14 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.model;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -35,6 +41,7 @@ public class Model {
 	private ObservableList<Simulation> _simulations = FXCollections.observableArrayList();
 	private List<Table> _simulationTablesDef = new ArrayList<>();
 	private Simulation _lastPanelSelectedSimulation = null;
+	private Map<Simulation,String>_simulationsAliases = new HashMap<>();
 	/**
 	 * getTables
 	 * @return
@@ -67,15 +74,36 @@ public class Model {
 		return _simulations;
 	}
 	
+	public Map<Simulation,String> getSimAliases(){
+		return _simulationsAliases;
+	}
+	
 	/**
-	 * Checkes if a given simulation already exists in the list.
+	 * Checks if a given simulation already exists in the list.
 	 * @param simId - the simulation id to check
 	 * @return true - if simulation id already exists, false - if not.
 	 */
-	public Boolean simExists(Simulation simulation){
-		Boolean response = false;
+	public Simulation simExists(Simulation simulation){
+		Simulation response = null;
 		for(Simulation sim: _simulations){
 			if(sim.getSimulationId().toString().equals(simulation.getSimulationId().toString())){
+				response = sim;
+				break;
+			}
+		}
+		return response;
+	}
+	
+	
+	/**
+	 * Checks if a given data source already exists in the list.
+	 * @param ds - the data source to check
+	 * @return true - if data source id already exists, false - if not.
+	 */
+	public Boolean dataSourceExists(CyclistDatasource ds){
+		Boolean response = false;
+		for(CyclistDatasource dataSource : _sources){
+			if(dataSource.getURL().equals(ds.getURL())){
 				response = true;
 				break;
 			}
@@ -93,6 +121,53 @@ public class Model {
 	
 	public void setLastSelectedSimulation(Simulation simulation){
 		_lastPanelSelectedSimulation = simulation;
+	}
+	
+	/**
+	 * Adds a new simulation alias to the simulations aliases list.
+	 * If the simulation already exists in the list - it will be updated with the specified date.
+	 * If it's a new simulation - it will be added to the list with an empty date.
+	 * @param Simulation sim - the simulation which its alias should be added/updated.
+	 * @param date - the last date it was marked with.
+	 */
+	public void addNewSimALias(Simulation sim, String date){
+		Simulation simulation = null;
+
+		//First check if that simulation already exist 
+		for (Map.Entry<Simulation, String> entry : _simulationsAliases.entrySet()){
+			Simulation mapSim = entry.getKey();
+			if(mapSim.getSimulationId().toString().equals(sim.getSimulationId().toString())){
+				simulation = mapSim;
+				break;
+			}
+		}
+		if(simulation!= null){
+			simulation.setAlias(sim.getAlias());
+		}else{
+			simulation = new Simulation();
+		    simulation = sim.clone();
+		}
+		_simulationsAliases.put(simulation, date);
+	}
+	
+	/**
+	 * Mark an existing simulation alias as removed by entering the current date.
+	 * @param Simulation sim - the simulation to update.
+	 */
+	public void markSimALiasAsRemoved(Simulation sim){
+		Simulation simulation = null;
+		for (Map.Entry<Simulation, String> entry : _simulationsAliases.entrySet()){
+			Simulation mapSim = entry.getKey();
+			if(mapSim.getSimulationId().toString().equals(sim.getSimulationId().toString())){
+				simulation = mapSim;
+				break;
+			}
+		}	
+		if(simulation!= null){
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+			Date date = new Date();
+			_simulationsAliases.put(simulation, dateFormat.format(date));
+		}
 	}
 	
 }

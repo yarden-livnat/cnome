@@ -27,7 +27,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
-import javafx.application.Platform;
+import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -43,6 +43,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
@@ -80,8 +81,11 @@ public class DatatableWizard extends TilePane {
 	private CyclistDatasource     _current;
 	private ObjectProperty<Table> _selection =  new SimpleObjectProperty<>();
 	private DatasourceSelector    _selector;
-	private String               _workDir = WorkDirectoryController.SAVE_DIR;
+	private String               _workDir = WorkDirectoryController.CYCLIST_DIR;
 	private UpdateDbDialog		 _updateDialog;
+	private ObjectProperty<Boolean> _dsIsValid  = new SimpleObjectProperty<>();
+	private TextArea _statusText;
+	private RotateTransition _animation;
 	
 	// * * * Constructor creates a new stage * * * //
 	public DatatableWizard() {
@@ -179,27 +183,21 @@ public class DatatableWizard extends TilePane {
 	    
 	    selectionButton = new Button("Connect");
 	    
-	    Runnable updateDbTask = new Runnable() {
-			@Override
-			public void run() {
-				Platform.runLater(new Runnable(){
-					@Override
-					public void run(){
-						selectConnection(_current);
-					}
-				});
-			}
-		};
-	    
 	    selectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent arg0) {
-				setDbUpdateWait(true,_current);
-				Thread update = new Thread(updateDbTask);
-				update.setDaemon(true);
-				update.start();
-			};
-				
+			public void handle(ActionEvent arg0) {	
+				if(SimulationTablesPostProcessor.isDbUpdateRequired(_current)){
+					setDbUpdate(true,_current);
+	 				_dsIsValid.addListener(new ChangeListener<Boolean>(){
+	 					@Override
+	 					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+	 						selectConnection(_current,newVal);
+	 					}
+	 				});
+				}else{
+					selectConnection(_current,true);
+				}
+			};	
 	    });
 		    
 	    _status = new Label();
@@ -315,6 +313,9 @@ public class DatatableWizard extends TilePane {
 		scene.getStylesheets().add(Cyclist.class.getResource("assets/Cyclist.css").toExternalForm());
 		_selector.disableProperty().bind(_tablesView.getSelectionModel().selectedItemProperty().isNull());
 		
+		_statusText = new TextArea();
+		_animation = new RotateTransition();
+		
 	/*if(_current != null)
 			_sourcesView.getSelectionModel().select(_current);
 		else if(_sourcesView.getItems().size() == 1)
@@ -323,7 +324,7 @@ public class DatatableWizard extends TilePane {
 		_sourcesView.getSelectionModel().selectFirst();
 		//_sourcesView.getSelectionModel().clearAndSelect(0);
 		
-		_updateDialog = new UpdateDbDialog(null,null);
+//		_updateDialog = new UpdateDbDialog(null,null);
 		
 		// Return the scene
 		return scene;
@@ -338,23 +339,23 @@ public class DatatableWizard extends TilePane {
 		selection.addListener(new ChangeListener<CyclistDatasource>(){
 			@Override
 			public void changed(ObservableValue<? extends CyclistDatasource> arg0, CyclistDatasource oldVal, CyclistDatasource newVal) {
-				if (!_sourcesView.getItems().contains(newVal))
+				if (!_sourcesView.getItems().contains(newVal)){
 					_sourcesView.getItems().add(newVal);
+				}else{
+					//A ListView hack: in order to refresh the displayed items, Should change the number of items in the list.
+					CyclistDatasource demoDs = new CyclistDatasource();
+					demoDs.setName("demo");
+					_sourcesView.getItems().add(demoDs);
+					_sourcesView.getItems().remove(demoDs);
+				}
 				_sourcesView.getSelectionModel().select(newVal);
 			}
 		});
 	}
 	
-	private void selectConnection(CyclistDatasource ds) {
+	private void selectConnection(CyclistDatasource ds, Boolean dsIsValid) {
 		
-		Boolean dsIsValid = true;
 		_tablesView.getItems().clear();
-		
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
-			SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
-			Task task = postProcessor.process(ds);
-			setDbUpdateWait(false, ds);
-		}
 		
 		//If database has to be updated but the update process has failed.
 		if(!dsIsValid){
@@ -391,16 +392,6 @@ public class DatatableWizard extends TilePane {
 		//table.extractSchema();
 	}
 	
-	private void setDbUpdateWait(Boolean isRunning, CyclistDatasource ds){
-		if(SimulationTablesPostProcessor.isUpdateRequired(ds)){
-			if(isRunning){
-				_updateDialog.show(_dialog.getScene().getWindow());
-			}else{
-				_updateDialog.hide();
-			}
-		}
-	}
-
 	public CyclistDatasource getSelectedSource() {
 		return _current;
 	}
@@ -413,5 +404,64 @@ public class DatatableWizard extends TilePane {
 	public void setWorkDir(String workDir){
 		_workDir = workDir;
 	}
+	
+	/*
+	 * Checks the argument "isRunning":
+	 * If true - 
+	 * 	it's the beginning of the database update process. 
+	 * 	Display the updateDb dialog and ask the user whether or not to update the database.
+	 * 	If user approves - start the update process.
+	 * 	If user cancels - hide the dialog and set the datasource validity to false.
+	 * 
+	 * If false - the data base update is done - close the update dialog.
+	 * @param isStart - is it the start or the end of the process.
+	 * @CyclistDatasource ds - the datasource to update.
+	 * 
+	 */
+	private void setDbUpdate(Boolean isRunning, CyclistDatasource ds){
+		if(isRunning){
+				_updateDialog = new UpdateDbDialog(_statusText, _animation);
+				_statusText.clear();  //in case it is not the first time it is called.
+				ObjectProperty<Boolean> selection = _updateDialog.show(_dialog.getScene().getWindow());
+				selection.addListener(new ChangeListener<Boolean>(){
+					@Override
+					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+						if(newVal){
+							runDbUpdate(ds);
+						}else{
+							_dsIsValid.set(false);
+							_updateDialog.hide();
+						}
+					}
+				});
+		}else{
+			_statusText.textProperty().unbind();
+			_updateDialog.hide();
+		}
+	}
+	
+	/*
+	 * Calls the post processing utility to perform a database update.
+	 * Updates the animation and the status text to display the database update status to the user.
+	 * @param CyclistDatasource ds - the data source to update 
+	 */
+	private void runDbUpdate(final CyclistDatasource ds){
+		SimulationTablesPostProcessor postProcessor = new SimulationTablesPostProcessor();
+		Task<Boolean> task = postProcessor.process(ds);
+		if(task != null){	
+			task.valueProperty().addListener(new ChangeListener<Boolean>() {
+				 
+		        @Override 
+		        public void changed(ObservableValue<? extends Boolean> arg0,Boolean oldVal, Boolean newVal) {
+		        	_animation.stop();
+		        	_dsIsValid.set(newVal);
+		        	setDbUpdate(false, ds);
+		        }
+		    });
+		
+			_statusText.textProperty().bind(task.messageProperty());
+			_animation.play();
+		}
+}
 	
 }
