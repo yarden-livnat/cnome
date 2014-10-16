@@ -2,8 +2,11 @@ package edu.utexas.cycic;
 
 import java.awt.Dialog;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.controlsfx.dialog.Dialogs;
@@ -21,6 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -39,6 +43,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 
@@ -48,6 +53,9 @@ public class Cycic extends ViewBase{
 	 */
 	public Cycic(){
 		super();
+		if (monthList.size() == 0){
+			months();
+		}
 		String string;
 		for(int i = 0; i < XMLReader.facilityList.size(); i++){
 			StringBuilder sb = new StringBuilder();
@@ -69,8 +77,7 @@ public class Cycic extends ViewBase{
 				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 				DataArrays.simFacilities.add(test);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
 			}
 		}
 		if (CycicScenarios.cycicScenarios.size() < 1){
@@ -89,6 +96,29 @@ public class Cycic extends ViewBase{
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
 	static Window window;
+	
+	/**
+	 * 
+	 */
+	static GridPane simInfo = new GridPane(){
+		{
+			setHgap(4);
+			setVgap(4);
+			setPadding(new Insets(10, 10, 10, 10));			
+		}
+	};
+	
+	/**
+	 * 
+	 */
+	static VBox simDetailBox = new VBox(){
+		{
+			getChildren().add(simInfo);
+			setStyle("-fx-border-style: solid;"
+	                + "-fx-border-width: 1;"
+	                + "-fx-border-color: black");
+		}
+	};
 	
 	/**
 	 * 
@@ -250,6 +280,7 @@ public class Cycic extends ViewBase{
 		grid.add(submit1, 4, 0);
 		
 		ScrollPane scroll = new ScrollPane();
+		scroll.setMinHeight(120);
 		Pane nodesPane = new Pane();
 		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
 			FacilityCircle circle = new FacilityCircle();
@@ -264,8 +295,19 @@ public class Cycic extends ViewBase{
 				setSpacing(5);
 			}
 		};
-		
-		mainView.getChildren().addAll(commodBox, cycicBox);
+		details();
+		VBox sideView = new VBox(){
+			{
+				setSpacing(5);
+				setStyle("-fx-border-style: solid;"
+		                + "-fx-border-width: 1;"
+		                + "-fx-border-color: black");
+			}
+		};
+		//ScrollPane commodScroll = new ScrollPane();
+		//commodScroll.setContent(commodBox); 
+		sideView.getChildren().addAll(simDetailBox, commodBox);
+		mainView.getChildren().addAll(sideView, cycicBox);
 		
 		setContent(mainView);
 	}
@@ -281,7 +323,6 @@ public class Cycic extends ViewBase{
 			Process readproc = Runtime.getRuntime().exec("cd ~/Bright-lite2 && cyclus -a");
 			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
 			while(schema.readLine() != null){
-				System.out.println(schema.readLine());
 				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema ");
 				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 				while((string = read.readLine()) != null){
@@ -376,4 +417,127 @@ public class Cycic extends ViewBase{
 		});
 		buildCommodPane();
 	}
+	
+	HashMap<String, String> months = new HashMap<String, String>();
+	ArrayList<String> monthList = new ArrayList<String>();
+	/**
+	 * Quick hack to convert months into their integer values.
+	 * i.e. January = 0, Feb = 1, etc...
+	 */
+	public void months(){
+		
+		Cycic.workingScenario.simulationData.startMonth = "0";
+		
+		monthList.add("January");
+		monthList.add("February");
+		monthList.add("March");
+		monthList.add("April");
+		monthList.add("May");
+		monthList.add("June");
+		monthList.add("July");
+		monthList.add("August");
+		monthList.add("September");
+		monthList.add("October");
+		monthList.add("November");
+		monthList.add("December");
+		
+		months.put("January", "0");
+		months.put("Febuary", "1");
+		months.put("March", "2");
+		months.put("April", "3");
+		months.put("May", "4");
+		months.put("June", "5");
+		months.put("July", "6");
+		months.put("August", "7");
+		months.put("September", "8");
+		months.put("October", "9");
+		months.put("November", "10");
+		months.put("December", "11");
+	}
+	public void details(){
+		
+		TextField duration = VisFunctions.numberField();
+		duration.setMaxWidth(150);
+		duration.setPromptText("Length of Simulation");
+		duration.setText(Cycic.workingScenario.simulationData.duration);
+		duration.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.duration = newValue;
+			}
+		});
+		simInfo.add(new Label("Duration (Months)"), 0, 0);
+		simInfo.add(duration, 1, 0);
+		
+
+		final ComboBox<String> startMonth = new ComboBox<String>();
+		startMonth.setValue(months.get(Cycic.workingScenario.simulationData.startMonth));
+		for(int i = 0; i < 12; i++ ){
+			startMonth.getItems().add(monthList.get(i));
+		}
+		
+		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)));
+		startMonth.valueProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.startMonth = months.get(newValue);
+			}
+		});
+		startMonth.setPromptText("Select Month");
+		simInfo.add(new Label("Start Month"), 0, 1);
+		simInfo.add(startMonth, 1, 1);
+		
+		TextField startYear = VisFunctions.numberField();
+		startYear.setText(Cycic.workingScenario.simulationData.startYear);
+		startYear.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.startYear = newValue;
+			}
+		});
+		startYear.setPromptText("Starting Year");
+		startYear.setMaxWidth(150);
+		simInfo.add(new Label("Start Year"), 0, 2);
+		simInfo.add(startYear, 1, 2);
+				
+		TextArea description = new TextArea();
+		description.setMaxSize(250, 150);
+		description.setWrapText(true);
+		description.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.description = newValue;
+			}
+		});
+		simInfo.add(new Label("Description"), 0, 3);
+		simInfo.add(description, 1, 3);
+		
+		TextArea notes = new TextArea();
+		notes.setMaxSize(250, 150);
+		notes.setWrapText(true);
+		notes.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.notes = newValue;
+			}
+		});
+		simInfo.add(new Label("Notes"), 0, 4);
+		simInfo.add(notes, 1, 4);
+		
+	
+		// Prints the Cyclus input associated with this simulator. 
+		Button output = new Button();
+		output.setText("Generate Cyclus Input");
+		output.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent event){
+	              FileChooser fileChooser = new FileChooser();
+	              
+	              //Set extension filter
+	              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+	              fileChooser.getExtensionFilters().add(extFilter);
+	              fileChooser.setTitle("Please save as Cyclus input file.");
+	              
+	              //Show save file dialog
+	              File file = fileChooser.showSaveDialog(window);
+				OutPut.output(file);
+			}
+		});
+		simInfo.add(output, 0, 5);
+	}
+	
 }

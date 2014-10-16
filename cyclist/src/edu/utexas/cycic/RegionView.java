@@ -34,7 +34,7 @@ public class RegionView extends ViewBase{
 	 */
 	public RegionView(){
 		super();
-		TITLE = (String) RegionView.workingRegion.name;
+		TITLE = (String) RegionCorralView.workingRegion.name;
 		
 		//Institution list view for the region.
 		final ListView<String> institList = new ListView<String>();
@@ -80,7 +80,7 @@ public class RegionView extends ViewBase{
 		});*/
 		
 		Button button = new Button();
-		button.setText(workingRegion.type);
+		button.setText(RegionCorralView.workingRegion.type);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				System.out.println(workingRegion.regionData);
@@ -120,7 +120,7 @@ public class RegionView extends ViewBase{
 		topGrid.setVgap(2);
 		
 		topGrid.add(new Label("Name"), 0, 4);
-		topGrid.add(FormBuilderFunctions.regionNameBuilder(workingRegion), 1, 4);
+		topGrid.add(FormBuilderFunctions.regionNameBuilder(RegionCorralView.workingRegion), 1, 4);
 		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);

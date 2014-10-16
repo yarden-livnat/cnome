@@ -3,16 +3,12 @@ package edu.utexas.cycic;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Map;
-
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.controlsfx.dialog.Dialog;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,7 +24,8 @@ public class XMLReader {
 		{
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
-			add(":cycamore:BatchReactor");
+			add(":Brightlite:ReprocessFacility");
+			//add(":cycamore:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
@@ -56,7 +53,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			add(":cycamore:DeployInst");
+			//add(":cycamore:DeployInst");
 			add(":cycamore:ManagerInst");
 			add(":agents:NullInst");
 		}
@@ -112,7 +109,6 @@ public class XMLReader {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		//System.out.print(schema);
 		return schema;
 	}
 	
@@ -221,7 +217,7 @@ public class XMLReader {
 			dataArray.set(5, json_pass.get("default").toString());
 		}
 		if(json_pass.get("userlevel") != null){
-			dataArray.set(6, json_pass.get("userlevel"));
+			dataArray.set(6, Integer.parseInt(json_pass.get("userlevel").toString()));
 		}
 		if(json_pass.get("tooltip") != null){
 			dataArray.set(7, json_pass.get("tooltip").toString());
@@ -240,7 +236,6 @@ public class XMLReader {
 	 */
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
-		System.out.println(array);
 		for (int i = 0; i < nodes.getLength(); i++){
 			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
 				try{

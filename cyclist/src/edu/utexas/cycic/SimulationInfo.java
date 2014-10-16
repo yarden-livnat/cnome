@@ -172,17 +172,6 @@ public class SimulationInfo extends ViewBase{
 			}
 		});
 		simInfo.add(output, 0, 5);
-		/*Button load = new Button();
-		load.setText("Load");
-		load.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent event){
-				FileChooser fc = new FileChooser();
-				fc.setTitle("Please choose a saved scenario.");
-				File file = fc.showOpenDialog(window);
-				OutPut.loadFile(file);
-			}
-		});
-		simInfo.add(load, 1, 5);*/
 	
 		
 		setContent(simControlBox);
