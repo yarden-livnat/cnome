@@ -146,7 +146,7 @@ public class RegionView extends ViewBase{
 		setTitle(TITLE);
 		setContent(regionBox);
 		setPrefSize(600,400);		
-		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+		formBuilder(RegionCorralView.workingRegion.regionStruct, RegionCorralView.workingRegion.regionData);
 		
 	}
 	
