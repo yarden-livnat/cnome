@@ -29,6 +29,9 @@ public class FormBuilderFunctions {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void formArrayBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		if(facArray.size() == 0){
+			return;
+		}
 		Boolean test = true;
 		String defaultValue = "";
 		for (int i = 0; i < facArray.size(); i++){
@@ -451,7 +454,7 @@ public class FormBuilderFunctions {
 		case "commodity":
 			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+col, row);
 			break;
-		case "facility":
+		case "prototype":
 			grid.add(comboBoxFac(dataArray), 1+col, row);
 			break;
 		default:
