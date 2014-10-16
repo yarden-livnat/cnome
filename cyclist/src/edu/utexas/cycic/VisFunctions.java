@@ -84,7 +84,6 @@ public class VisFunctions {
 	 */
 	public static boolean colorTest(ArrayList<Integer> array){
 		for (Integer v : array) {
-		for(Integer v: array){
 			if(v < 120){
 				return true;
 			}
