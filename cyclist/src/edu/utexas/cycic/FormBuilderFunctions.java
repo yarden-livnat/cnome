@@ -412,6 +412,12 @@ public class FormBuilderFunctions {
 				//cb.getItems().add("New Commodity");
 			}
 		});
+		
+		cb.valueProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				defaultValue.set(0, newValue);
+			}
+		});
 		return cb;
 	}
 	
@@ -425,6 +431,12 @@ public class FormBuilderFunctions {
 				for (facilityNode facility: DataArrays.FacilityNodes){
 					cb.getItems().add((String) facility.name);
 				}
+			}
+		});
+		
+		cb.valueProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				defaultValue.set(0, newValue);
 			}
 		});
 		return cb;

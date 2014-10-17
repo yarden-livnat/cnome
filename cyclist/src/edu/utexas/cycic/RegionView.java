@@ -112,8 +112,6 @@ public class RegionView extends ViewBase{
 		});
 		
 		// Setting up the view visuals.
-		/*topGrid.add(addNewFacilityBox, 0, 2);
-		topGrid.add(addAvailFac, 1, 2);*/
 		topGrid.add(addNewInstitBox, 0, 3);
 		topGrid.add(addInstit, 1, 3);
 		topGrid.setHgap(10);

@@ -168,7 +168,6 @@ public class XMLReader {
 					JsonArray array = json_pass.getJsonArray("uitype");
 					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 						String string = array.get(i+1).toString().replaceAll("\"", "");
-						System.out.println(string);
 						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
 						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
 					}
