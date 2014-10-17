@@ -347,7 +347,7 @@ public class InstitutionView extends ViewBase{
 	@SuppressWarnings("unchecked")
 	public void formBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
 		if (facArray.size() == 0){
-			grid.add(new Label("This archetype is empty."), 0, 0);
+			grid.add(new Label("This archetype is empty."), 2, 2);
 			return;
 		}
 		for (int i = 0; i < facArray.size(); i++){
