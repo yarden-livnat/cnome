@@ -165,7 +165,7 @@ public class XMLReader {
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 				if(json_pass.get("uitype") instanceof JsonArray){
 					//
-				} else {
+				} else if(json_pass.get("uitype") != null){
 					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}
 				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
