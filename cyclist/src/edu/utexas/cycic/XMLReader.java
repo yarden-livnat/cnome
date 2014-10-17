@@ -30,7 +30,7 @@ public class XMLReader {
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
 			add(":Brightlite:ReprocessFacility");
-			//add(":cycaless:BatchReactor");
+			add(":cycaless:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
@@ -114,7 +114,6 @@ public class XMLReader {
 				}
 			} else {
 				for(int i = 0; i < doc.getChildNodes().getLength(); i++){
-					//System.out.println(doc.getChildNodes().item(i).get("name"));
 					schema = nodeListener(doc, schema);
 				}
 			}
@@ -167,7 +166,6 @@ public class XMLReader {
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 				if(json_pass.get("uitype") instanceof JsonArray){
 					JsonArray array = json_pass.getJsonArray("uitype");
-					System.out.println(dataArray.get(1));
 					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 						String string = array.get(i+1).toString().replaceAll("\"", "");
 						System.out.println(string);

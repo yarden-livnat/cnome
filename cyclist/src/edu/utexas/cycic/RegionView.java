@@ -1,6 +1,7 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
@@ -98,7 +99,6 @@ public class RegionView extends ViewBase{
 				}
 			}
 		});
-		
 		Button addInstit = new Button();
 		addInstit.setText("Add Institution");
 		addInstit.setOnAction(new EventHandler<ActionEvent>(){

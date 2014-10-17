@@ -120,7 +120,7 @@ public class RegionCorralView extends ViewBase {
 					test.regionName = XMLReader.regionList.get(i).replace(":", " ").trim();
 					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 					DataArrays.simRegions.add(test);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

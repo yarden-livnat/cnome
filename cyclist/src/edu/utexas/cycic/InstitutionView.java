@@ -64,7 +64,7 @@ public class InstitutionView extends ViewBase{
 					test.institName = XMLReader.institutionList.get(i).replace(":", " ").trim();
 					test.institStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 					DataArrays.simInstitutions.add(test);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

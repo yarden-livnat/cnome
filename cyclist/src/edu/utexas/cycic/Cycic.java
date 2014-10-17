@@ -76,7 +76,7 @@ public class Cycic extends ViewBase{
 				test.facilityName = XMLReader.facilityList.get(i).replace(":", " ").trim();
 				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 				DataArrays.simFacilities.add(test);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				
 			}
 		}
