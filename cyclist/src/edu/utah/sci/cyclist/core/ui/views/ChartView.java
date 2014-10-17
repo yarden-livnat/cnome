@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -100,7 +101,14 @@ public class ChartView extends CyclistViewBase {
 	private TableProxy _tableProxy = null;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
-
+	private BooleanBinding 	_noChart = new BooleanBinding() {
+		{ super.bind(_chartProperty); }
+		@Override
+		protected boolean computeValue() {
+			return _chartProperty.get() == null;
+		}
+	};
+	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
@@ -131,6 +139,7 @@ public class ChartView extends CyclistViewBase {
 	public ChartView() {
 		super();
 		build();
+		setChart(null);
 	}
 
 	@Override 
@@ -1069,6 +1078,8 @@ public class ChartView extends CyclistViewBase {
 				export();
 			}
 		});
+
+		item.disableProperty().bind(_noChart);
 		contextMenu.getItems().add(item);
 		button.setOnMousePressed(new EventHandler<Event>() {
 			@Override
