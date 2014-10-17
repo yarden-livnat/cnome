@@ -688,7 +688,7 @@ public class FlowView extends CyclistViewBase {
 		final ContextMenu contextMenu = new ContextMenu();
 		
 		// export graph
-		MenuItem item = new MenuItem("Export graph");
+		MenuItem item = new MenuItem("Graph");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
@@ -699,7 +699,7 @@ public class FlowView extends CyclistViewBase {
 		contextMenu.getItems().add(item);
 
 		// export chart
-		item = new MenuItem("Export chart");
+		item = new MenuItem("Plot");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
