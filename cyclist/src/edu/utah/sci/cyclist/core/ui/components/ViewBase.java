@@ -250,7 +250,10 @@ public class ViewBase extends BorderPane implements View {
 		VBox.setVgrow(node, Priority.NEVER);
 	}
 	
-
+	protected Node getContent() {
+		return getCenter();
+	}
+	
 	/*
 	 * 
 	 */

@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.neup.ui.views.flow;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import javax.imageio.ImageIO;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -26,13 +33,23 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -41,12 +58,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.RangeField;
+import edu.utah.sci.cyclist.core.ui.views.SimpleTableView;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Facility;
@@ -71,6 +90,8 @@ public class FlowView extends CyclistViewBase {
 
   public static final int INIT_TIMESTEP = 1;
   public static final int MIN_TIMESTEP = 1;
+
+  static final Logger log = LogManager.getLogger(FlowView.class.getName());
 
   private FlowLine _line[]; 
   private FlowChart _chart;
@@ -110,6 +131,7 @@ public class FlowView extends CyclistViewBase {
 	super();
 
 	init();
+	setupActions();
 	build();
   }
 
@@ -651,6 +673,69 @@ public class FlowView extends CyclistViewBase {
 	}
   }
 
+	private void setupActions() {
+		List<Node> actions = new ArrayList<>();
+		actions.add(createExportActions());
+		addActions(actions);
+	}
+	
+	private Node createExportActions() {
+		final Button button = new Button("Export", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		button.getStyleClass().add("flat-button");
+
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		// export graph
+		MenuItem item = new MenuItem("Export graph");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				BorderPane bp = (BorderPane) getContent();
+				export(bp.getCenter());
+			}
+		});
+		contextMenu.getItems().add(item);
+
+		// export chart
+		item = new MenuItem("Export chart");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				BorderPane bp = (BorderPane) getContent();
+				export(bp.getBottom());
+			}
+		});
+		
+		contextMenu.getItems().add(item);
+		button.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(button, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		return button;
+	}
+	
+	private void export(Node node) {
+		FileChooser chooser = new FileChooser();
+//		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif" ));
+		File file = chooser.showSaveDialog(null);
+		if (file != null) {
+			WritableImage image = node.snapshot(new SnapshotParameters(), null);
+
+		    try {
+		    	String name = file.getName();
+		    	String ext = name.substring(name.indexOf(".")+1, name.length());
+		    	System.out.println("name: "+name+"  ext:"+ext);
+		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
+		    } catch (IOException e) {
+		        log.error("Error writing image to file: "+e.getMessage());
+		    }
+		}
+	}
+	
   private void build() {
 	setTitle(TITLE);
 	getStyleClass().add("flow");
@@ -893,7 +978,7 @@ public class FlowView extends CyclistViewBase {
 
 	vbox.getChildren().addAll(
 		new Separator(),
-		_chart
+			_chart
 		);
 	return vbox;
   }

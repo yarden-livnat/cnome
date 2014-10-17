@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.neup.ui.views.inventory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
@@ -25,11 +29,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
@@ -39,6 +45,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -47,6 +54,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import org.apache.log4j.LogManager;
@@ -186,6 +194,48 @@ public class InventoryView extends CyclistViewBase {
 		return l >7 ? n->n>=f && n<=t :
 			l > 4 ? n->n/10000>=f && n/10000<=t:
 				n->n/10000000<=f && n/10000000<=t;		
+	}
+	
+
+	private Node createExportActions() {
+		final Button button = new Button("Export", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		button.getStyleClass().add("flat-button");
+
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		// csv chart
+		MenuItem item = new MenuItem("Export png");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				export();
+			}
+		});
+		contextMenu.getItems().add(item);
+		button.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(button, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		return button;
+	}
+	
+	private void export() {
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("PNG file (*.png)", "*.png") );
+		File file = chooser.showSaveDialog(null);
+		if (file != null) {
+			WritableImage image = _chart.snapshot(new SnapshotParameters(), null);
+
+		    try {
+		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+		    } catch (IOException e) {
+		        log.error("Error writing image to file: "+e.getMessage());
+		    }
+		}
 	}
 	
 	private void build() {
@@ -368,6 +418,7 @@ public class InventoryView extends CyclistViewBase {
 	private void setupActions() {
 		List<Node> actions = new ArrayList<>();
 		actions.add(createModeActions());
+		actions.add(createExportActions());
 		addActions(actions);
 	}
 	
