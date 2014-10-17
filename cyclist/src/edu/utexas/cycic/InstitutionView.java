@@ -287,7 +287,6 @@ public class InstitutionView extends ViewBase{
 		topGrid.setVgap(5);
 		
 		grid.autosize();
-		grid.setAlignment(Pos.BASELINE_CENTER);
 		grid.setVgap(10);
 		grid.setHgap(5);
 		grid.setPadding(new Insets(30, 30, 30, 30));

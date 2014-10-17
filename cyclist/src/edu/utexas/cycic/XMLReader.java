@@ -3,9 +3,12 @@ package edu.utexas.cycic;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -53,7 +56,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			//add(":cycamore:DeployInst");
+			add(":cycaless:DeployInst");
 			add(":cycamore:ManagerInst");
 			add(":agents:NullInst");
 		}
@@ -103,9 +106,17 @@ public class XMLReader {
 			Document doc = dBuilder.parse(is);
 			
 			NodeList top = doc.getChildNodes();
-			for(int i = 0; i < top.getLength(); i++){
-				schema = nodeListener(top.item(i), schema);
+			if(top.item(0).getNodeName() == "interleave"){
+				for(int i = 0; i < top.getLength(); i++){
+					schema = nodeListener(top.item(i), schema);			
+				}
+			} else {
+				for(int i = 0; i < doc.getChildNodes().getLength(); i++){
+					//System.out.println(doc.getChildNodes().item(i).get("name"));
+					schema = nodeListener(doc, schema);
+				}
 			}
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -125,10 +136,9 @@ public class XMLReader {
 		jsonReader.close();
 		JsonObject vars = jsonObject.getJsonObject("vars");
 		for(int i = 0; i < xmlschema.size(); i++){
-			//System.out.println(xmlschema.get(i));
+			//System.out.println(xmlschema);
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}
-		//System.out.println(xmlschema);
 		return xmlschema;
 	}
 	
@@ -139,23 +149,23 @@ public class XMLReader {
 	 */
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
+		JsonObject json_pass;
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
-				//System.out.println(dataArray.get(i));
 				combiner((ArrayList<Object>)dataArray.get(i), json);
 			}
 		} else if(dataArray.get(1) instanceof ArrayList){
-			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			if(json.get((String)dataArray.get(0)) instanceof JsonString){
+				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
+			} else {
+				json_pass = json.getJsonObject((String)dataArray.get(0));
+			}
 			cycicResize(dataArray);
-			if(dataArray.get(2) == "oneOrMore"){
+			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" ){
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("uitype") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
-				}
-				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-			} else if (dataArray.get(2) == "zeroOrMore"){
-				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("uitype") != null){
+				if(json_pass.get("uitype") instanceof JsonArray){
+					//
+				} else {
 					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}
 				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
@@ -168,7 +178,7 @@ public class XMLReader {
 			}
 		} else {
 			cycicResize(dataArray);
-			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			json_pass = json.getJsonObject((String)dataArray.get(0));
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
@@ -263,7 +273,6 @@ public class XMLReader {
 			}
 			if(nodes.item(i).getNodeName() == "optional"){
 				Node newNode = nodes.item(i).getChildNodes().item(1);
-				//System.out.println(newNode);
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				for(int j = 0; j < newNode.getAttributes().getLength(); j++){
 					if (newNode.getAttributes().item(j).getNodeName() == "name"){

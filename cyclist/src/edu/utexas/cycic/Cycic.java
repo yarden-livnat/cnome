@@ -288,6 +288,13 @@ public class Cycic extends ViewBase{
 			nodesPane.getChildren().addAll(circle,circle.text);
 		}
 		scroll.setContent(nodesPane);
+		Button button1 = new Button("Cyclus -a");
+		button1.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				retrieveSchema();
+			}
+		});
+		grid.add(button1, 6, 0);
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
@@ -320,7 +327,8 @@ public class Cycic extends ViewBase{
 			StringBuilder sb = new StringBuilder();
 			StringBuilder sb1 = new StringBuilder();
 			String string;
-			Process readproc = Runtime.getRuntime().exec("cd ~/Bright-lite2 && cyclus -a");
+			Process readproc = Runtime.getRuntime().exec("cyclus -a");
+			
 			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
 			while(schema.readLine() != null){
 				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema ");
