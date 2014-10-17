@@ -176,9 +176,13 @@ public class XMLReader {
 			} catch (Exception ex){
 				//ex.printStackTrace();
 			}
-		} else {
+		} else {	
 			cycicResize(dataArray);
-			json_pass = json.getJsonObject((String)dataArray.get(0));
+			if(json.get((String)dataArray.get(0)) instanceof JsonString){
+				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
+			} else {
+				json_pass = json.getJsonObject((String)dataArray.get(0));
+			}
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
