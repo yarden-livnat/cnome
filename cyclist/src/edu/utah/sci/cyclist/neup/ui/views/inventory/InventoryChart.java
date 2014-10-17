@@ -256,7 +256,6 @@ public class InventoryChart extends VBox {
 			
 	public void setMode(ChartMode mode) {
 		_mode = mode;
-		getChildren().clear();
 		switch (_mode) {
 		case LINE:
 			LineChart<Number, Number> lineChart = new LineChart<>(_xAxis, _yAxis);
@@ -264,24 +263,21 @@ public class InventoryChart extends VBox {
 			lineChart.setCreateSymbols(false);
 			lineChart.setLegendVisible(false);
 			lineChart.setAnimated(false);
-			_chart = lineChart;
-			getChildren().add(_chart);
+			setChart(lineChart);
 			break;
 		case AREA:
 			AreaChart<Number, Number> areaChart = new AreaChart<>(_xAxis, _yAxis);
 			areaChart.getStyleClass().add("chart");
 			areaChart.setLegendVisible(false);
 			areaChart.setAnimated(false);
-			_chart = areaChart;
-			getChildren().add(_chart);
+			setChart(areaChart);
 			break;
 		case STACKED:
 			StackedAreaChart<Number, Number> stackedAreaChart = new StackedAreaChart<>(_xAxis, _yAxis);
 			stackedAreaChart.getStyleClass().add("chart");
 			stackedAreaChart.setLegendVisible(false);
 			stackedAreaChart.setAnimated(false);
-			_chart = stackedAreaChart;
-			getChildren().add(_chart);
+			setChart(stackedAreaChart);
 			break;
 		}
 		
@@ -289,14 +285,19 @@ public class InventoryChart extends VBox {
 			info.series = createSeries(info.values, info.style);
 		}
 	}
+	
+	private void setChart(XYChart<Number, Number> chart) {
+		getChildren().clear();
+		VBox.setVgrow(chart, Priority.ALWAYS);
+		getChildren().add(chart);
+		_chart = chart;
+	}
+	
 	private void build() {
 		getStyleClass().add("fchart");
 
-//		getChildren().add(
-			buildChart();
-//		);
+		buildChart();
 		
-		VBox.setVgrow(_chart, Priority.ALWAYS);
 		setFillWidth(true);
 	}	
 
