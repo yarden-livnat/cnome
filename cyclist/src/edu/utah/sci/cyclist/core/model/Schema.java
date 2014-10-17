@@ -28,7 +28,6 @@ import java.util.Vector;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.util.SQL;
-import edu.utah.sci.cyclist.core.util.SQLUtil;
 
 
 

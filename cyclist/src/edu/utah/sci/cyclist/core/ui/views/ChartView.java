@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.core.ui.views;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -21,12 +26,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -38,6 +45,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -48,12 +56,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.util.converter.TimeStringConverter;
 
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -91,7 +101,14 @@ public class ChartView extends CyclistViewBase {
 	private TableProxy _tableProxy = null;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
-
+	private BooleanBinding 	_noChart = new BooleanBinding() {
+		{ super.bind(_chartProperty); }
+		@Override
+		protected boolean computeValue() {
+			return _chartProperty.get() == null;
+		}
+	};
+	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
 	private List<DistanceIndicator> _distanceIndicators = new ArrayList<>();
@@ -122,6 +139,7 @@ public class ChartView extends CyclistViewBase {
 	public ChartView() {
 		super();
 		build();
+		setChart(null);
 	}
 
 	@Override 
@@ -818,6 +836,7 @@ public class ChartView extends CyclistViewBase {
 		return axis;
 	}
 
+	
 	long t0;
 
 	private void build() {
@@ -970,9 +989,15 @@ public class ChartView extends CyclistViewBase {
 		forceZeroProperty().set(false);
 	}
 
-
 	private void setupActions() {
-		final Button options = new Button("", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		List<Node> actions = new ArrayList<>();
+		actions.add(createExportActions());
+		actions.add(createOptions());
+		addActions(actions);
+	}
+	
+	private Node createOptions() {
+		final Button options = new Button("Options", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		options.getStyleClass().add("flat-button");
 
 		// create menu
@@ -1018,10 +1043,6 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 
-		List<Node> actions = new ArrayList<>();
-		actions.add(options);
-		addActions(actions);
-
 		chartProperty().addListener(new InvalidationListener() {
 
 			@Override
@@ -1039,8 +1060,53 @@ public class ChartView extends CyclistViewBase {
 
 
 		forceZeroProperty().set(false);
+		return options;
 	}
 
+	private Node createExportActions() {
+		final Button button = new Button("Export", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		button.getStyleClass().add("flat-button");
+
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		// csv chart
+		MenuItem item = new MenuItem("Plot");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				export();
+			}
+		});
+
+		item.disableProperty().bind(_noChart);
+		contextMenu.getItems().add(item);
+		button.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(button, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		return button;
+	}
+	
+	private void export() {
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image file (png, jpg, gif)", "*.png", "*.jpg", "'*.gif") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+		if (file != null) {
+			WritableImage image = _chartProperty.get().snapshot(new SnapshotParameters(), null);
+			String name = file.getName();
+			String ext = name.substring(name.indexOf(",")+1, name.length()-1);
+		    try {
+		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
+		    } catch (IOException e) {
+		        log.error("Error writing image to file: "+e.getMessage());
+		    }
+		}
+	}
+	
 	private void createIndicator() {
 		Indicator indicator = new Indicator();
 

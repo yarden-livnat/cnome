@@ -202,16 +202,18 @@ public class Cycic extends ViewBase{
 							.title("Name Facility")
 							.message("Enter Facility Name")
 							.showTextInput();
-					facility.name = response.orElse("");
-					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
-					facility.cycicCircle.setCenterX(event.getX());
-					facility.cycicCircle.setCenterY(event.getY());
-					facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
-					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
-					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
-					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);
-					
-				}
+					if(response.isPresent()){
+						facility.name = response.orElse("");
+						facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
+						facility.cycicCircle.setCenterX(event.getX());
+						facility.cycicCircle.setCenterY(event.getY());
+						facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
+						facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
+						facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
+						FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);
+					} else {
+						return;
+					}				}
 			}
 		});
 		setTitle(TITLE);

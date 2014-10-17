@@ -22,21 +22,33 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui.views;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
@@ -48,7 +60,10 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
@@ -60,6 +75,8 @@ import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.model.ValueFilter;
 import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 
 public class SimpleTableView extends CyclistViewBase {
@@ -67,7 +84,8 @@ public class SimpleTableView extends CyclistViewBase {
 	public static final String TITLE = "Table";
 	
 	public static final String SIMULATION_FIELD_NAME = "SimID";
-	
+	static final Logger log = LogManager.getLogger(SimpleTableView.class.getName());
+
 	private TableView<TableRow> _tableView;
 	private Table _currentTable = null;
 	private Field _simField; 
@@ -77,6 +95,7 @@ public class SimpleTableView extends CyclistViewBase {
 		super();
 		build();
 		addListeners();
+		setupActions();
 	}
 	
 	private void build() {
@@ -88,6 +107,76 @@ public class SimpleTableView extends CyclistViewBase {
 		_tableView.getSelectionModel().setCellSelectionEnabled(true);
 		setContent(_tableView);
 		VBox.setVgrow(_tableView, Priority.NEVER);
+	}
+	
+	private void setupActions() {
+		List<Node> actions = new ArrayList<>();
+		actions.add(createExportActions());
+		addActions(actions);
+	}
+	
+	private Node createExportActions() {
+		final Button button = new Button("Export", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		button.getStyleClass().add("flat-button");
+
+		// create menu
+		final ContextMenu contextMenu = new ContextMenu();
+		
+		// csv chart
+		MenuItem item = new MenuItem("Export csv");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				export();
+			}
+		});
+		contextMenu.getItems().add(item);
+		button.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				contextMenu.show(button, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		return button;
+	}
+	
+	private void export() {
+		if (_currentTable == null) return;
+		
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+		if (file != null) {
+			try {
+	            FileWriter f = new FileWriter(file);
+	            
+	            List<Integer> cols = new ArrayList<>();
+	            Schema schema = _currentTable.getSchema();	
+	            int len = schema.size();
+	            for (int i=0; i<len; i++) {
+					Field field = schema.getField(i);	
+					if (!field.isHidden()) {
+						f.write(field.getName());
+						f.write( i < len-1 ? ", " : "\n");
+						cols.add(i);
+					}
+				}
+	            
+    			for (TableRow row : _tableView.itemsProperty().get()) {
+    				boolean first = true;
+    				for (int c : cols) {
+    					if (first) first = false;
+    					else f.write(", "); 
+    					f.write(row.value[c].toString());
+    				}
+    				f.write("\n");
+    			}
+    			f.close();
+			} catch (IOException e) {
+	            log.error("Error: Can not write to file ["+e.getMessage()+"]");
+            }
+		}
 	}
 	
 	private void addListeners() {
@@ -243,7 +332,7 @@ public class SimpleTableView extends CyclistViewBase {
 			List<TableColumn<TableRow, Object>> cols = new ArrayList<>();
 			for (int f=0; f<schema.size(); f++) {
 				Field field = schema.getField(f);				
-				cols.add(createColumn(field, f, field.getIsHidden()));
+				cols.add(createColumn(field, f, field.isHidden()));
 			}
 			
 			_tableView.getColumns().addAll(cols);

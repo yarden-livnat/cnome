@@ -64,9 +64,7 @@ public class ToolsLibrary {
 		new CycicToolFactory(),
 		new InstitutionViewToolFactory(),
 		new RecipeFormToolFactory(),
-		new SimulationInfoToolFactory(),
-		new RegionCorralViewToolFactory(),
-		new FacilitySorterToolFactory()
+		new RegionCorralViewToolFactory()
 	};
 	
 	public static ToolFactory findFactory(String name) {

@@ -3,12 +3,14 @@ package edu.utexas.cycic;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -28,7 +30,7 @@ public class XMLReader {
 			add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
 			add(":Brightlite:ReprocessFacility");
-			//add(":cycamore:BatchReactor");
+			//add(":cycaless:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
@@ -164,7 +166,14 @@ public class XMLReader {
 			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" ){
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 				if(json_pass.get("uitype") instanceof JsonArray){
-					//
+					JsonArray array = json_pass.getJsonArray("uitype");
+					System.out.println(dataArray.get(1));
+					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+						String string = array.get(i+1).toString().replaceAll("\"", "");
+						System.out.println(string);
+						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
+					}
 				} else if(json_pass.get("uitype") != null){
 					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}

@@ -40,6 +40,7 @@ import javafx.stage.FileChooser;
 
 import org.apache.log4j.Logger;
 
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.ui.wizards.DatasourceWizardPage;
 
@@ -104,7 +105,7 @@ public class SQLitePage extends GridPane implements DatasourceWizardPage {
 				 public void handle(ActionEvent event) {
 					 FileChooser chooser = new FileChooser();
 					 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
-					 File file = chooser.showOpenDialog(null);
+					 File file = chooser.showOpenDialog(Cyclist.cyclistStage);
 					 if (file != null)
 						 _path.setText(file.getPath());
 				 }

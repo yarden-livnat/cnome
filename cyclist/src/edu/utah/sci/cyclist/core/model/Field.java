@@ -183,7 +183,7 @@ public class Field {
 		return getName().equals(field.getName()) && getType() == field.getType() && getTable() == field.getTable();
 	}
 	
-	public Boolean getIsHidden(){
+	public Boolean isHidden(){
 		return _isHidden;
 	}
 	

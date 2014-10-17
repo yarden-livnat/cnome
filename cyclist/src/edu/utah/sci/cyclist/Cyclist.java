@@ -39,6 +39,8 @@ public class Cyclist extends Application {
 	public static final String TITLE = "Cyclist";
     static Logger log = Logger.getLogger(Cyclist.class);
 
+    public static Stage cyclistStage;
+    
     /**
      * @param args the command line arguments
      */
@@ -48,6 +50,8 @@ public class Cyclist extends Application {
     
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		Cyclist.cyclistStage = primaryStage;
+		
 		StackPane stack = new StackPane();
 		
 		Pane glass = new Pane();

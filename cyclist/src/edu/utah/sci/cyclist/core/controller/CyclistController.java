@@ -332,7 +332,7 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				FileChooser chooser = new FileChooser();
 				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Cyclus files (*.xml)", "*.xml") );
-				File file = chooser.showOpenDialog(null);
+				File file = chooser.showOpenDialog(Cyclist.cyclistStage);
 				if (file != null) {
 					_cyclusService.submit(file);
 				}
