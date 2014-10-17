@@ -136,11 +136,11 @@ public class Cycic extends ViewBase{
 						}
 					}
 					event.consume();
-					String response =  Dialogs.create()
+					Optional<String> response =  Dialogs.create()
 							.title("Name Facility")
 							.message("Enter Facility Name")
 							.showTextInput();
-					facility.name = response;
+					facility.name = response.orElse("");
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());

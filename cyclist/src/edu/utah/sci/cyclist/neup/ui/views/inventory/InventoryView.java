@@ -60,6 +60,7 @@ import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Configuration;
@@ -205,7 +206,7 @@ public class InventoryView extends CyclistViewBase {
 		final ContextMenu contextMenu = new ContextMenu();
 		
 		// csv chart
-		MenuItem item = new MenuItem("Export png");
+		MenuItem item = new MenuItem("Graph");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
@@ -225,8 +226,8 @@ public class InventoryView extends CyclistViewBase {
 	
 	private void export() {
 		FileChooser chooser = new FileChooser();
-		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("PNG file (*.png)", "*.png") );
-		File file = chooser.showSaveDialog(null);
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image file (png, jpg, gif)", "*.png", "*.jpg", "*.gif") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
 		if (file != null) {
 			WritableImage image = _chart.snapshot(new SnapshotParameters(), null);
 

@@ -61,7 +61,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
@@ -144,7 +146,7 @@ public class SimpleTableView extends CyclistViewBase {
 		
 		FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv") );
-		File file = chooser.showSaveDialog(null);
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
 		if (file != null) {
 			try {
 	            FileWriter f = new FileWriter(file);

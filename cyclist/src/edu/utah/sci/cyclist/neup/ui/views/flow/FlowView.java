@@ -59,6 +59,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Field;
@@ -720,8 +721,8 @@ public class FlowView extends CyclistViewBase {
 	
 	private void export(Node node) {
 		FileChooser chooser = new FileChooser();
-//		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif" ));
-		File file = chooser.showSaveDialog(null);
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image Files (png, jpg, gif)", "*.png", "*.jpg", "*.gif" ));
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
 		if (file != null) {
 			WritableImage image = node.snapshot(new SnapshotParameters(), null);
 

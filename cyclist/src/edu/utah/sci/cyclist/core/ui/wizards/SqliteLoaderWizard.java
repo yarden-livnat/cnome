@@ -260,7 +260,7 @@ public class SqliteLoaderWizard extends VBox {
 	private void showFileChoser(){
 		 FileChooser chooser = new FileChooser();
 		 chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("SQLite files (*.sqlite)", "*.sqlite") );
-		 File file = chooser.showOpenDialog(null);
+		 File file = chooser.showOpenDialog(Cyclist.cyclistStage);
 		 if (file != null){
 			 _path.setText(file.getPath());
 			 _fileName = file.getName();

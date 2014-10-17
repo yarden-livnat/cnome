@@ -62,6 +62,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -1061,7 +1062,7 @@ public class ChartView extends CyclistViewBase {
 		final ContextMenu contextMenu = new ContextMenu();
 		
 		// csv chart
-		MenuItem item = new MenuItem("Export png");
+		MenuItem item = new MenuItem("Plot");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
@@ -1081,13 +1082,14 @@ public class ChartView extends CyclistViewBase {
 	
 	private void export() {
 		FileChooser chooser = new FileChooser();
-		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("PNG file (*.png)", "*.png") );
-		File file = chooser.showSaveDialog(null);
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image file (png, jpg, gif)", "*.png", "*.jpg", "'*.gif") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
 		if (file != null) {
 			WritableImage image = _chartProperty.get().snapshot(new SnapshotParameters(), null);
-
+			String name = file.getName();
+			String ext = name.substring(name.indexOf(",")+1, name.length()-1);
 		    try {
-		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
 		    } catch (IOException e) {
 		        log.error("Error writing image to file: "+e.getMessage());
 		    }
