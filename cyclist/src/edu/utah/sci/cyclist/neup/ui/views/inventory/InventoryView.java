@@ -31,11 +31,14 @@ import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -80,7 +83,7 @@ public class InventoryView extends CyclistViewBase {
 	
 	private SimulationProxy _simProxy = null;
 		
-	private InventoryChart _chart;
+	private InventoryChart _chart = new InventoryChart();
 	
 	
 	/**
@@ -192,7 +195,7 @@ public class InventoryView extends CyclistViewBase {
 		setupActions();
 		
 		BorderPane pane = new BorderPane();
-		pane.setCenter(buildChart());
+		pane.setCenter(_chart); //buildChart());
 		pane.setLeft(buildCtrl());
 
 		setContent(pane);
@@ -357,17 +360,25 @@ public class InventoryView extends CyclistViewBase {
 			_chart.add(info);
 	}
 	
-	private Node buildChart() {
-		_chart = new InventoryChart();	
-		return _chart;
-	}
+//	private Node buildChart() {
+//		_chart = new InventoryChart();	
+//		return _chart;
+//	}
 	
 	private void setupActions() {
-		final Button options = new Button("mode", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
-		options.getStyleClass().add("flat-button");
+		List<Node> actions = new ArrayList<>();
+		actions.add(createModeActions());
+		addActions(actions);
+	}
+	
+	private Node createModeActions() {
+		final Button button = new Button("Options", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		button.getStyleClass().add("flat-button");
 
 		// create menu
 		final ContextMenu contextMenu = new ContextMenu();
+		
+		// line chart
 		MenuItem item = new MenuItem("Line chart");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
@@ -377,15 +388,17 @@ public class InventoryView extends CyclistViewBase {
 		});
 		contextMenu.getItems().add(item);
 		
-		item = new MenuItem("Area chart");
-		item.setOnAction(new EventHandler<ActionEvent>() {		
-			@Override
-			public void handle(ActionEvent event) {
-				_chart.setMode(InventoryChart.ChartMode.AREA);
-			}
-		});
-		contextMenu.getItems().add(item);
+//		// area chart
+//		item = new MenuItem("Area chart");
+//		item.setOnAction(new EventHandler<ActionEvent>() {		
+//			@Override
+//			public void handle(ActionEvent event) {
+//				_chart.setMode(InventoryChart.ChartMode.AREA);
+//			}
+//		});
+//		contextMenu.getItems().add(item);
 		
+		// stacked chart
 		item = new MenuItem("Stacked chart");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
@@ -395,18 +408,27 @@ public class InventoryView extends CyclistViewBase {
 		});
 		contextMenu.getItems().add(item);
 		
-		options.setOnMousePressed(new EventHandler<Event>() {
+		contextMenu.getItems().add(new SeparatorMenuItem());
+		
+		CheckMenuItem checked = new CheckMenuItem("Show total");
+		checked.setSelected(_chart.getShowTotal());
+		checked.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_chart.setShowTotal(!_chart.getShowTotal());
+            }
+		});
+		contextMenu.getItems().add(checked);
+		
+		button.setOnMousePressed(new EventHandler<Event>() {
 			@Override
 			public void handle(Event event) {
-				contextMenu.show(options, Side.BOTTOM, 0, 0);
+				contextMenu.show(button, Side.BOTTOM, 0, 0);
 			}
 		});
-
-		List<Node> actions = new ArrayList<>();
-		actions.add(options);
-		addActions(actions);
+		
+		return button;
 	}
-	
 	
 	class AgentInfo {
 		public String field;

@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
@@ -13,10 +17,12 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
+import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
@@ -39,10 +45,13 @@ public class InventoryChart extends VBox {
 	private NumberAxis _yAxis;
 	private double _scale = 1;
 	private ChartType _type = ChartType.INVENTORY;
-	private int _upperBound;
+	private int _upperBound = 0;
 	private ChartMode _mode = ChartMode.LINE;
+	private boolean _showTotal = false;
 	
 	private Map<AgentInfo, ChartInfo> _items = new HashMap<>();
+	private XYChart.Series<Number, Number> _totalSeries = null;
+	private String totalStyle = "#00000055; -fx-stroke-width: 1px; -fx-effect: dropshadow(gaussian, #c0c0c0, 2,1, 1,1)";
 	
 	public class ChartInfo {
 		public Collection<Pair<Integer, Double>> values;
@@ -70,6 +79,59 @@ public class InventoryChart extends VBox {
 		updateAll();
 	}
 	
+	public boolean getShowTotal() {
+		return _showTotal;
+	}
+	
+	public void setShowTotal(boolean show) {
+		if (show) {
+			updateTotal();
+		} else if (_totalSeries != null) {
+			_chart.getData().remove(_totalSeries);
+			_totalSeries = null;
+		}
+		_showTotal = show;
+		
+	}
+	
+	private void updateTotal() {
+		if (_items.size() < 2) {
+			_chart.getData().remove(_totalSeries);
+			_totalSeries = null;
+			return;
+		}
+		
+		int min_x = (int) Math.round(_xAxis.getLowerBound());
+		int max_x = (int) Math.round(_xAxis.getUpperBound());
+		
+		double total[] = new double[max_x-min_x+1];
+		for (int i=0; i< total.length; i++)
+			total[i] = 0;
+		
+		for (AgentInfo info : _items.keySet()) {
+			for (Pair<Integer, Double> pt : info.series) {	
+				total[pt.v1-min_x] += pt.v2;
+			}
+		}
+		int last = total.length-1;
+		while (last >= 0 && total[last] == 0) last--;
+		List<Pair<Integer, Double>> pts = new ArrayList<>();
+		int i = 0;
+		while (total[i] == 0 && i<= last) i++;
+		for (;i<total.length; i++) {
+			pts.add(new Pair<Integer, Double>(i, total[i]));
+		}
+		
+		if (_totalSeries != null) {
+			_chart.getData().remove(_totalSeries);
+		}
+		_totalSeries = createSeries(pts, totalStyle);
+		double scale = computeScale(pts); // relative to the current chart type
+		if (scale > _scale) {
+			updateScale(scale);
+		}	
+	}
+	
 	public void add(AgentInfo entry) {
 		ChartInfo info = _items.remove(entry);
 		if (info != null) {
@@ -86,13 +148,13 @@ public class InventoryChart extends VBox {
 			_upperBound = last;
 		}
 		
-		final String style = ColorUtil.toString(entry.color).substring(0, 7)+"aa";
+//		for (Pair<Integer, Double> pt : entry.series) {
+//			System.out.format("(%d, %.2f) ",pt.v1, pt.v2);
+//		}
+//		System.out.println("----");
+		final String style = ColorUtil.toString(entry.color).substring(0, 7)+"aa";  // 'aa' is alpha
 		XYChart.Series<Number, Number> series = createSeries(entry.series, style);
 		double scale = computeScale(entry.series); // relative to the current chart type
-		
-		if (scale > _scale) {
-			updateScale(scale);
-		}
 		
 		info = new ChartInfo();
 		info.values = entry.series;
@@ -102,7 +164,11 @@ public class InventoryChart extends VBox {
 		info.style = style;
 		_items.put(entry, info);
 		
-
+		if (_showTotal) {
+			updateTotal();
+		} else if (scale > _scale) {
+			updateScale(scale);
+		}
 	}
 	
 	public XYChart.Series<Number, Number> createSeries(Collection<Pair<Integer, Double>> data, String style) {
@@ -156,7 +222,10 @@ public class InventoryChart extends VBox {
 			s = Math.max(ci.scale, s);
 			_upperBound = Math.max(_upperBound, ci.last);
 		}
-		if (s != _scale) {
+		
+		if (_showTotal) {
+			updateTotal();
+		} else if (s != _scale) {
 			updateScale(s);
 			updateYAxis();
 		}
@@ -216,19 +285,20 @@ public class InventoryChart extends VBox {
 	}
 	
 	private void updateSeries(XYChart.Series<Number, Number> series, Collection<Pair<Integer, Double>> values) {
-//		boolean updating = _chart.getData().contains(series);
-//		if (updating)
-//			_chart.getData().remove(series);
-		
-//		series.getData().clear();
 		List<XYChart.Data<Number, Number>> list = new ArrayList<>();
 		
 		if (_type == ChartType.INVENTORY) {
 			double sum = 0;
-			for (Pair<Integer, Double> value : values) {;
-//				sum += value.v2/_scale;
+
+			for (Pair<Integer, Double> value : values) {
+				if (list.isEmpty()) {
+					list.add(new XYChart.Data<Number, Number>(value.v1-1, 0));
+				}
+//				if (!list.isEmpty())
+//					list.add(new XYChart.Data<Number, Number>(((float)value.v1)-0.1, sum));
 				sum = value.v2/_scale;
 				list.add(new XYChart.Data<Number, Number>(value.v1, sum));
+				
 			}
 		} else {
 			double prev = 0;
@@ -240,23 +310,17 @@ public class InventoryChart extends VBox {
 					first = false;
 				}
 				list.add(new XYChart.Data<Number, Number>(value.v1, v-prev));
+				
 				prev = v;
 			}
 		}
 		
-//		System.out.println("==values==");
-//		for (XYChart.Data<Number, Number> i : list)
-//			System.out.println(i.getXValue()+", "+i.getYValue());
 		series.getData().setAll(list);
-//		if (updating) {
-//			_chart.getData().add(series);
-//		}
 	}
 
 			
 	public void setMode(ChartMode mode) {
 		_mode = mode;
-		getChildren().clear();
 		switch (_mode) {
 		case LINE:
 			LineChart<Number, Number> lineChart = new LineChart<>(_xAxis, _yAxis);
@@ -264,24 +328,28 @@ public class InventoryChart extends VBox {
 			lineChart.setCreateSymbols(false);
 			lineChart.setLegendVisible(false);
 			lineChart.setAnimated(false);
-			_chart = lineChart;
-			getChildren().add(_chart);
+			setChart(lineChart);
+			if (_showTotal) {
+				updateTotal();
+			}
 			break;
 		case AREA:
 			AreaChart<Number, Number> areaChart = new AreaChart<>(_xAxis, _yAxis);
 			areaChart.getStyleClass().add("chart");
 			areaChart.setLegendVisible(false);
 			areaChart.setAnimated(false);
-			_chart = areaChart;
-			getChildren().add(_chart);
+			setChart(areaChart);
+			if (_showTotal) {
+				updateTotal();
+			}
 			break;
 		case STACKED:
 			StackedAreaChart<Number, Number> stackedAreaChart = new StackedAreaChart<>(_xAxis, _yAxis);
 			stackedAreaChart.getStyleClass().add("chart");
 			stackedAreaChart.setLegendVisible(false);
 			stackedAreaChart.setAnimated(false);
-			_chart = stackedAreaChart;
-			getChildren().add(_chart);
+			setChart(stackedAreaChart);
+			_totalSeries = null;
 			break;
 		}
 		
@@ -289,14 +357,17 @@ public class InventoryChart extends VBox {
 			info.series = createSeries(info.values, info.style);
 		}
 	}
+	
+	private void setChart(XYChart<Number, Number> chart) {
+		getChildren().clear();
+		VBox.setVgrow(chart, Priority.ALWAYS);
+		getChildren().add(chart);
+		_chart = chart;
+	}
+	
 	private void build() {
 		getStyleClass().add("fchart");
-
-//		getChildren().add(
-			buildChart();
-//		);
-		
-		VBox.setVgrow(_chart, Priority.ALWAYS);
+		buildChart();
 		setFillWidth(true);
 	}	
 
