@@ -69,28 +69,41 @@ public class CyclusService {
 		return _jobs;
 	}
 
-	public void submit(File file) {
-		CyclusJob job = new CyclusJob(file.getAbsolutePath());
+    private void _submit(String path, Request request) {
+        CyclusJob job = new CyclusJob(path);
 
-		try {
-			InputStream stream = Request.Post(CLOUDIUS_SUBMIT)
-					.bodyFile(file, ContentType.DEFAULT_TEXT).execute()
-					.returnContent().asStream();
-			JsonReader reader = Json.createReader(stream);
-			JsonObject info = reader.readObject();
-			job.setInfo(info);
-			job.setStatus(Status.SUBMITTED);
-			_jobs.add(job);
-			poll(job);
+        try {
+            InputStream stream = request.execute().returnContent().asStream();
+            JsonReader reader = Json.createReader(stream);
+            JsonObject info = reader.readObject();
+            job.setInfo(info);
+            job.setStatus(Status.SUBMITTED);
+            _jobs.add(job);
+            poll(job);
+        } catch (ClientProtocolException e) {
+            log.error("Submit job communication error: "+ e.getMessage());
+        } catch (IOException e) {
+            log.error("submit job IO error: "+ e.getMessage());
+        }
+    }
 
-		} catch (ClientProtocolException e) {
-			log.error("Submit job communication error: "+ e.getMessage());
-		} catch (IOException e) {
-			log.error("submit job IO error: "+ e.getMessage());
-		}
-	}
+    public void submit(File file) {
+        String path = file.getAbsolutePath();
+        Request request = Request.Post(CLOUDIUS_SUBMIT)
+            .bodyFile(file, ContentType.DEFAULT_TEXT);
+        this._submit(path, request);
+    }
 
-	private void poll(final CyclusJob job) {
+    public void submit(String file) {
+        // file is a string of XML here that represents an input file,
+        // rather than a file path
+        String path = "cycic.xml";
+        Request request = Request.Post(CLOUDIUS_SUBMIT)
+            .bodyString(file, ContentType.DEFAULT_TEXT);
+        this._submit(path, request);
+    }
+
+    private void poll(final CyclusJob job) {
 		final PollService service = new PollService(job);
 
 		service.setDelay(Duration.seconds(0));
