@@ -435,6 +435,7 @@ public enum AwesomeIcon {
     WHEELCHAIR('\uf193'),
     VIMEO_SQUARE('\uf194'),
     TURKISH_LIRA('\uf195'),
+    UNIVERSITY('\uf19c'),
     TRY('\uf195');
     
     private final Character character;
