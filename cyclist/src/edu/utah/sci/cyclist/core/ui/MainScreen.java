@@ -49,6 +49,7 @@ import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
+import edu.utah.sci.cyclist.core.ui.panels.InputPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -61,13 +62,15 @@ public class MainScreen extends VBox {
 	private SplitPane _toolsPane;
 	private TablesPanel _datasourcesPanel;
 	private SchemaPanel _fieldsPanel;
-	private ToolsPanel _toolsPanel;
+    private ToolsPanel _toolsPanel;
+    private InputPanel _inputPanel;
 	private StackPane _workspacePane;
 	private SimulationsPanel _simulationPanel;
 	private JobsPanel _jobsPanel;
 
 	private Menu _perspectiveMenu;
-	private Menu _viewMenu;
+    private Menu _viewMenu;
+    private Menu _inputMenu;
 	private Menu _runMenu;
 	
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
@@ -104,10 +107,14 @@ public class MainScreen extends VBox {
 		return _fieldsPanel;
 	}
 	
-	public ToolsPanel getToolsPanel() {
-		return _toolsPanel;
-	}
-	
+    public ToolsPanel getToolsPanel() {
+        return _toolsPanel;
+    }
+    
+    public InputPanel getInputPanel() {
+        return _inputPanel;
+    }
+    
 	public SimulationsPanel getSimulationPanel(){
 		return _simulationPanel;
 	}
@@ -153,7 +160,8 @@ public class MainScreen extends VBox {
 				_datasourcesPanel = new TablesPanel(),
 				_fieldsPanel = new SchemaPanel("Fields"),
 				
-				_toolsPanel = new ToolsPanel(),
+                _toolsPanel = new ToolsPanel(),
+                _inputPanel = new InputPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);
 		_toolsPane.setDividerPositions(div);
@@ -178,10 +186,14 @@ public class MainScreen extends VBox {
 	 * Menus & Actions
 	 */
 	
-	public Menu getViewMenu() {
-		return _viewMenu;
-	}
-	
+    public Menu getViewMenu() {
+        return _viewMenu;
+    }
+    
+    public Menu getInputMenu() {
+        return _inputMenu;
+    }
+    
 	public Menu getPerspectiveMenu() {
 		return _perspectiveMenu;
 	}
@@ -261,12 +273,13 @@ public class MainScreen extends VBox {
 		
 		Menu fileMenu = createFileMenu();
 		Menu dataMenu = createDataMenu();
-		_viewMenu = createViewMenu();
+        _viewMenu = createViewMenu();
+        _inputMenu = createInputMenu();
 		_runMenu = createRunMenu();
 //		Menu panelMenu = createPanelMenu();
 //		_perspectiveMenu = createPerspectiveMenu();
 		
-		menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _runMenu /*, _perspectiveMenu*/);
+        menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _inputMenu, _runMenu /*, _perspectiveMenu*/);
 		
 		return menubar;
 	}
@@ -305,17 +318,28 @@ public class MainScreen extends VBox {
 		return dataMenu;
 	}
 
-	private Menu createViewMenu() {
-		Menu menu = new Menu("Views");			
+    private Menu createViewMenu() {
+        Menu menu = new Menu("Views");          
 
-		for (final ToolFactory factory : ToolsLibrary.factories) {
-			MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
-			menu.getItems().add(item);
-		}
+        for (final ToolFactory factory : ToolsLibrary.factories) {
+            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+            menu.getItems().add(item);
+        }
 
-		return menu;
-	}
+        return menu;
+    }
 	
+    private Menu createInputMenu() {
+        Menu menu = new Menu("Input");          
+
+        for (final ToolFactory factory : ToolsLibrary.inputFactories) {
+            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+            menu.getItems().add(item);
+        }
+
+        return menu;
+    }
+
 	private Menu createRunMenu() {
 		Menu menu= new Menu("Run");
 		_runMenuItem = new MenuItem("Submit file", GlyphRegistry.get(AwesomeIcon.EXCHANGE));
