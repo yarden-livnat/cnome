@@ -86,7 +86,7 @@ public class CyclistController {
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
-	private CyclusService _cyclusService;
+    public static CyclusService _cyclusService;
 	
 	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
 	
