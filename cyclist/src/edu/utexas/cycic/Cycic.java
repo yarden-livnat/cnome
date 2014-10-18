@@ -17,6 +17,7 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.core.controller.CyclistController;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -48,6 +49,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
+import edu.utah.sci.cyclist.core.services.CyclusService;
 
 public class Cycic extends ViewBase{
 	/**
@@ -530,30 +532,41 @@ public class Cycic extends ViewBase{
 		});
 		simInfo.add(output, 0, 6);
 		
-		Button runInput = new Button("Run Locally");
-		runInput.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-				String cycicTemp = "cycic"+tempHash;
-				try {
-					File temp = File.createTempFile(cycicTemp, ".xml");
-					FileWriter fileOutput = new FileWriter(temp);
-					BufferedWriter buffOut = new BufferedWriter(fileOutput);
-					
-					Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-				
-			}
-		});
-		runInput.setStyle("-fx-fill: green;"
-		                + "-fx-border-width: 1;"
-		                + "-fx-border-color: black");
-		simInfo.add(runInput, 2,6);
-		
-	}
-	
+        Button runRemote = new Button("Run Remotely");
+        runRemote.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                String cycicXml = OutPut.xmlStringGen();
+                CyclistController._cyclusService.submit(cycicXml);
+            }
+        });
+        runRemote.setStyle("-fx-fill: green;"
+                        + "-fx-border-width: 1;"
+                        + "-fx-border-color: black");
+        simInfo.add(runRemote, 1, 6);
+    
+        Button runInput = new Button("Run Locally");
+        runInput.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+                String cycicTemp = "cycic"+tempHash;
+                try {
+                    File temp = File.createTempFile(cycicTemp, ".xml");
+                    FileWriter fileOutput = new FileWriter(temp);
+                    BufferedWriter buffOut = new BufferedWriter(fileOutput);
+                    
+                    Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                
+            }
+        });
+        runInput.setStyle("-fx-fill: green;"
+                        + "-fx-border-width: 1;"
+                        + "-fx-border-color: black");
+        simInfo.add(runInput, 2,6);    
+    }
+
 	public void createArchetypeBar(GridPane grid){
 		ComboBox<String> archetypes = new ComboBox<String>();
 		for(int i = 0; i < XMLReader.facilityList.size(); i++){
