@@ -11,8 +11,8 @@ import edu.utexas.cycic.presenter.RegionViewPresenter;
 public class RegionViewTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.RegionViewTool";
-	public static final String TOOL_NAME 	= "Region Form";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.EYE;
+    public static final String TOOL_NAME    = "Region View";
+    public static final AwesomeIcon ICON    = AwesomeIcon.GLOBE;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;

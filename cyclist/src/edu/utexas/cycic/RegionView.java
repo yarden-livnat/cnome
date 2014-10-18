@@ -1,6 +1,7 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.beans.value.ChangeListener;
@@ -34,8 +35,8 @@ public class RegionView extends ViewBase{
 	 */
 	public RegionView(){
 		super();
-		TITLE = (String) RegionView.workingRegion.name;
-		
+		TITLE = (String) RegionCorralView.workingRegion.name;
+		workingRegion = RegionCorralView.workingRegion;
 		//Institution list view for the region.
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
@@ -79,13 +80,9 @@ public class RegionView extends ViewBase{
 			}
 		});*/
 		
-		Button button = new Button();
-		button.setText(workingRegion.type);
-		button.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				System.out.println(workingRegion.regionData);
-			}
-		});
+		Label button = new Label(RegionCorralView.workingRegion.type);
+		button.setText(RegionCorralView.workingRegion.type);
+
 		topGrid.add(button, 2, 0);
 		
 		// Code to add new institution to region.
@@ -98,7 +95,6 @@ public class RegionView extends ViewBase{
 				}
 			}
 		});
-		
 		Button addInstit = new Button();
 		addInstit.setText("Add Institution");
 		addInstit.setOnAction(new EventHandler<ActionEvent>(){
@@ -112,15 +108,13 @@ public class RegionView extends ViewBase{
 		});
 		
 		// Setting up the view visuals.
-		/*topGrid.add(addNewFacilityBox, 0, 2);
-		topGrid.add(addAvailFac, 1, 2);*/
 		topGrid.add(addNewInstitBox, 0, 3);
 		topGrid.add(addInstit, 1, 3);
 		topGrid.setHgap(10);
 		topGrid.setVgap(2);
 		
 		topGrid.add(new Label("Name"), 0, 4);
-		topGrid.add(FormBuilderFunctions.regionNameBuilder(workingRegion), 1, 4);
+		topGrid.add(FormBuilderFunctions.regionNameBuilder(RegionCorralView.workingRegion), 1, 4);
 		
 		grid.autosize();
 		grid.setAlignment(Pos.BASELINE_CENTER);
@@ -146,7 +140,7 @@ public class RegionView extends ViewBase{
 		setTitle(TITLE);
 		setContent(regionBox);
 		setPrefSize(600,400);		
-		formBuilder(workingRegion.regionStruct, workingRegion.regionData);
+		formBuilder(RegionCorralView.workingRegion.regionStruct, RegionCorralView.workingRegion.regionData);
 		
 	}
 	
@@ -170,6 +164,10 @@ public class RegionView extends ViewBase{
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		if (facArray.size() == 0){
+			grid.add(new Label("This archetype is empty."), 0, 0);
+			return;
+		}
 		for (int i = 0; i < facArray.size(); i++){
 			if (facArray.get(i) instanceof ArrayList && facArray.get(0) instanceof ArrayList) {
 				formBuilder((ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -243,15 +241,11 @@ public class RegionView extends ViewBase{
 						}
 					} else {
 						switch ((String) facArray.get(0)) {
-						/*case "Incommodity":
-							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
+						case "prototype":
+							grid.add(FormBuilderFunctions.comboBoxFac(dataArray), 1+columnNumber, rowNumber);
 							break;
-						case "Outcommodity":
-							grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "Recipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;*/
+						case "commodity":
+							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;

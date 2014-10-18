@@ -44,9 +44,6 @@ public class CycicCircles{
 	protected static double x;
 	protected static double y;
 	
-
-
-	
 	/**
 	 * Function to build a prototype facility node. This node will contain
 	 * the facilities available to institutions and regions. All children 
@@ -79,8 +76,8 @@ public class CycicCircles{
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
-		circle.rgbColor=VisFunctions.stringToColor(name);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
+		circle.rgbColor=VisFunctions.stringToColor(parent.facilityType);
+		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.8));
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
 			circle.text.setTextFill(Color.BLACK);
@@ -99,6 +96,7 @@ public class CycicCircles{
 		
 		// Adding the menu and it's menu items.
 		final Menu menu1 = new Menu("Options");
+		
 		MenuItem facForm = new MenuItem("Facility Form");
 		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
 			@Override
@@ -258,9 +256,6 @@ public class CycicCircles{
 				}
 				if (event.getClickCount() >= 2){
 					CyclistController._presenter.addTool(new FormBuilderTool());
-				}
-				if(Cycic.group.getSelectedToggle() == Cycic.toggle){
-					// TODO Figure out how to group facilities.
 				} else if (event.getButton().equals(MouseButton.PRIMARY)){
 					for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 						if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){

@@ -3,16 +3,17 @@ package edu.utexas.cycic;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.controlsfx.dialog.Dialog;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,9 +27,10 @@ public class XMLReader {
 	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
-			//add(":Brightlite:ReactorFacility");
-			//add(":Brightlite:FuelfabFacility");
-			add(":cycamore:BatchReactor");
+			add(":Brightlite:ReactorFacility");
+			add(":Brightlite:FuelfabFacility");
+			add(":Brightlite:ReprocessFacility");
+			add(":cycaless:BatchReactor");
 			add(":cycamore:EnrichmentFacility");
 			add(":cycamore:Sink");
 			add(":cycamore:Source");
@@ -46,7 +48,7 @@ public class XMLReader {
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
 			add(":cycamore:GrowthRegion");
-			add("::agents:NullRegion");
+			add(":agents:NullRegion");
 			
 		}
 	};
@@ -56,7 +58,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			add(":cycamore:DeployInst");
+			add(":cycaless:DeployInst");
 			add(":cycamore:ManagerInst");
 			add(":agents:NullInst");
 		}
@@ -85,7 +87,9 @@ public class XMLReader {
       	"\"max_inv_size\" : {\"default\" : 1.000000000000000e+299, \"doc\" : \"total maximum inventory size of sink facility\","+
         "\"index\" : 2, \"tooltip\" : \"sink maximum inventory size\", \"type\" : \"double\"}}}";
 	
-	
+	/**
+	 * 
+	 */
 	static String deploy = "<oneOrMore><element name=\"buildorder\"><element name=\"prototype\"><data type=\"string\"/>" +           
 						"</element><element name=\"number\"><data type=\"nonNegativeInteger\"/></element><element name=\"date\">" +               
 						"<data type=\"nonNegativeInteger\"/></element></element></oneOrMore>";
@@ -104,14 +108,19 @@ public class XMLReader {
 			Document doc = dBuilder.parse(is);
 			
 			NodeList top = doc.getChildNodes();
-			for(int i = 0; i < top.getLength(); i++){
-				schema = nodeListener(top.item(i), schema);
+			if(top.item(0).getNodeName() == "interleave"){
+				for(int i = 0; i < top.getLength(); i++){
+					schema = nodeListener(top.item(i), schema);			
+				}
+			} else {
+				for(int i = 0; i < doc.getChildNodes().getLength(); i++){
+					schema = nodeListener(doc, schema);
+				}
 			}
-			//System.out.println(schema);
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		System.out.print(schema);
 		return schema;
 	}
 	
@@ -128,10 +137,9 @@ public class XMLReader {
 		jsonReader.close();
 		JsonObject vars = jsonObject.getJsonObject("vars");
 		for(int i = 0; i < xmlschema.size(); i++){
-			//System.out.println(xmlschema.get(i));
+			//System.out.println(xmlschema);
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}
-		//System.out.println(xmlschema);
 		return xmlschema;
 	}
 	
@@ -142,36 +150,45 @@ public class XMLReader {
 	 */
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
+		JsonObject json_pass;
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
-				//System.out.println(dataArray.get(i));
 				combiner((ArrayList<Object>)dataArray.get(i), json);
 			}
 		} else if(dataArray.get(1) instanceof ArrayList){
-			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			if(json.get((String)dataArray.get(0)) instanceof JsonString){
+				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
+			} else {
+				json_pass = json.getJsonObject((String)dataArray.get(0));
+			}
 			cycicResize(dataArray);
-			if(dataArray.get(2) == "oneOrMore"){
+			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" ){
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("cycic") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("cycic").toString().replace("\"", ""));
+				if(json_pass.get("uitype") instanceof JsonArray){
+					JsonArray array = json_pass.getJsonArray("uitype");
+					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+						String string = array.get(i+1).toString().replaceAll("\"", "");
+						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
+					}
+				} else if(json_pass.get("uitype") != null){
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}
-				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-			} else if (dataArray.get(2) == "zeroOrMore"){
-				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("cycic") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("cycic").toString().replace("\"", ""));
-				}
-				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
+				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
 			combiner((ArrayList<Object>)dataArray.get(1), json);
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
-				//ex.printStackTrace();
+				
 			}
-		} else {
+		} else {	
 			cycicResize(dataArray);
-			JsonObject json_pass = json.getJsonObject((String)dataArray.get(0));
+			if(json.get((String)dataArray.get(0)) instanceof JsonString){
+				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
+			} else {
+				json_pass = json.getJsonObject((String)dataArray.get(0));
+			}
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
@@ -198,35 +215,35 @@ public class XMLReader {
 	
 	/**
 	 * 
-	 * @param json_pass
+	 * @param jsonPass
 	 * @param dataArray
 	 * @return
 	 */
-	static ArrayList<Object> cycicInfoControl(JsonObject json_pass, ArrayList<Object> dataArray){
+	static ArrayList<Object> cycicInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
 		if(dataArray.get(2) == null){
 			dataArray.set(2, "");
-			if(json_pass.get("cycic") != null){
-				dataArray.set(2, json_pass.get("cycic").toString().replace("\"", ""));
+			if(jsonPass.get("uitype") != null){
+				dataArray.set(2, jsonPass.get("uitype").toString().replace("\"", ""));
 			}
 		}
-		if(json_pass.get("units") != null){
-			dataArray.set(3, json_pass.get("units").toString());
+		if(jsonPass.get("units") != null){
+			dataArray.set(3, jsonPass.get("units").toString());
 		}
-		if(json_pass.get("range") != null){
-			dataArray.set(4, json_pass.get("range").toString());
+		if(jsonPass.get("range") != null){
+			dataArray.set(4, jsonPass.get("range").toString());
 		}
-		if(json_pass.get("default") != null){
+		if(jsonPass.get("default") != null){
 			dataArray.set(6, 1);
-			dataArray.set(5, json_pass.get("default").toString());
+			dataArray.set(5, jsonPass.get("default").toString());
 		}
-		if(json_pass.get("userlevel") != null){
-			dataArray.set(6, json_pass.get("userlevel"));
+		if(jsonPass.get("userlevel") != null){
+			dataArray.set(6, Integer.parseInt(jsonPass.get("userlevel").toString()));
 		}
-		if(json_pass.get("tooltip") != null){
-			dataArray.set(7, json_pass.get("tooltip").toString());
+		if(jsonPass.get("tooltip") != null){
+			dataArray.set(7, jsonPass.get("tooltip").toString());
 		}
-		if(json_pass.get("doc") != null){
-			dataArray.set(8, json_pass.get("doc").toString());
+		if(jsonPass.get("doc") != null){
+			dataArray.set(8, jsonPass.get("doc").toString());
 		}
 		return dataArray;
 	}
@@ -239,7 +256,6 @@ public class XMLReader {
 	 */
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
-		System.out.println(array);
 		for (int i = 0; i < nodes.getLength(); i++){
 			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
 				try{
@@ -267,7 +283,6 @@ public class XMLReader {
 			}
 			if(nodes.item(i).getNodeName() == "optional"){
 				Node newNode = nodes.item(i).getChildNodes().item(1);
-				//System.out.println(newNode);
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				for(int j = 0; j < newNode.getAttributes().getLength(); j++){
 					if (newNode.getAttributes().item(j).getNodeName() == "name"){
@@ -285,5 +300,12 @@ public class XMLReader {
 			}
 		}
 		return array;
+	}
+	
+	static ArrayList<Object> orMoreInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
+		
+		
+		return dataArray;
+		
 	}
 }

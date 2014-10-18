@@ -11,8 +11,8 @@ import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 public class InstitutionViewTool implements Tool {
 
 	public static final String ID 			= "edu.utexas.cycic.InstitutionViewTool";
-	public static final String TOOL_NAME 	= "CycIC - Institution View";
-	public static final AwesomeIcon ICON 	= AwesomeIcon.EYE;
+    public static final String TOOL_NAME    = "Institution View";
+    public static final AwesomeIcon ICON    = AwesomeIcon.INFO;
 	
 	private View _view = null;
 	private ViewPresenter _presenter = null;

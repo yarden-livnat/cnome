@@ -39,6 +39,11 @@
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
+			<fileset dir="${basedir}\cyclist\lib">
+				<filename name="javax.json-1.0.4.jar"/>	
+			</fileset>
+		</copy>
+		<copy todir="deploy/externalLibs">
 					<fileset dir="${basedir}\cyclist\lib">
 						<filename name="javax.json-1.0.4.jar"/>	
 					</fileset>

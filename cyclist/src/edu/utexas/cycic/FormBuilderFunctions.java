@@ -29,6 +29,9 @@ public class FormBuilderFunctions {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void formArrayBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		if(facArray.size() == 0){
+			return;
+		}
 		Boolean test = true;
 		String defaultValue = "";
 		for (int i = 0; i < facArray.size(); i++){
@@ -106,8 +109,6 @@ public class FormBuilderFunctions {
 
 				node.cycicCircle.tooltip.setText(newValue);
 				node.sorterCircle.tooltip.setText(newValue);
-				node.cycicCircle.rgbColor=VisFunctions.stringToColor(newValue);;
-				node.cycicCircle.setFill(Color.rgb(node.cycicCircle.rgbColor.get(0), node.cycicCircle.rgbColor.get(1), node.cycicCircle.rgbColor.get(2)));
 			}
 		});
 		return textField;
@@ -132,14 +133,6 @@ public class FormBuilderFunctions {
 
 				regionNode.regionCircle.name.equals(newValue);
 				regionNode.regionCircle.text.setText(newValue);
-				regionNode.regionCircle.rgbColor = VisFunctions.stringToColor(newValue);
-				regionNode.regionCircle.setFill(Color.rgb(regionNode.regionCircle.rgbColor.get(0), regionNode.regionCircle.rgbColor.get(1), regionNode.regionCircle.rgbColor.get(2)));
-				// Setting font color for visibility //
-				if(VisFunctions.colorTest(regionNode.regionCircle.rgbColor) == true){
-					regionNode.regionCircle.text.setTextFill(Color.BLACK);
-				}else{
-					regionNode.regionCircle.text.setTextFill(Color.WHITE);
-				}
 			}
 		});
 		return textField;
@@ -274,8 +267,8 @@ public class FormBuilderFunctions {
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
 
-				for (Label label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.getText());
+				for (CommodityNode label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.name.getText());
 				}
 				//cb.getItems().add("New Commodity");
 				
@@ -325,8 +318,8 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Label label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.getText());
+				for (CommodityNode label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.name.getText());
 				}
 				//cb.getItems().add("New Commodity");
 				
@@ -403,15 +396,53 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Label label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.getText());
+				for (CommodityNode label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.name.getText());
 				}
 				//cb.getItems().add("New Commodity");
+			}
+		});
+		
+		cb.valueProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				defaultValue.set(0, newValue);
 			}
 		});
 		return cb;
 	}
 	
+	static ComboBox<String> comboBoxFac(final ArrayList<Object> defaultValue){
+		final ComboBox<String> cb = new ComboBox<String>();
+		cb.setMinWidth(80);
+		cb.setPromptText("Select a Facility");
+		cb.setValue((String) defaultValue.get(0));
+		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				cb.getItems().clear();
+				for (facilityNode facility: DataArrays.FacilityNodes){
+					cb.getItems().add((String) facility.name);
+				}
+			}
+		});
+		
+		cb.valueProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				defaultValue.set(0, newValue);
+			}
+		});
+		return cb;
+	}
+	
+	/**
+	 * 
+	 * @param grid
+	 * @param formNode
+	 * @param facArray
+	 * @param dataArray
+	 * @param col
+	 * @param row
+	 * @return
+	 */
 	static GridPane cycicTypeTest(GridPane grid, facilityNode formNode, ArrayList<Object> facArray, ArrayList<Object> dataArray, int col, int row){
 		switch ((String) facArray.get(2).toString().toLowerCase()) {
 		case "incommodity":
@@ -426,11 +457,8 @@ public class FormBuilderFunctions {
 		case "commodity":
 			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+col, row);
 			break;
-		case "facTag":
-			//TODO STUFF
-			break;
-		case "commodTag":
-			//TODO Stuff
+		case "prototype":
+			grid.add(comboBoxFac(dataArray), 1+col, row);
 			break;
 		default:
 			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+col, row);

@@ -61,6 +61,7 @@ import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
+import edu.utah.sci.cyclist.core.presenter.InputPresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
@@ -85,7 +86,7 @@ public class CyclistController {
 	private String SAVE_FILE = "save.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
-	private CyclusService _cyclusService;
+    public static CyclusService _cyclusService;
 	
 	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
 	
@@ -158,11 +159,16 @@ public class CyclistController {
 		});
 		
 		
-		// ToolsLibrary panel
-		ToolsPresenter tp = new ToolsPresenter(_eventBus);
-		tp.setPanel(screen.getToolsPanel());
-		tp.setFactories(Arrays.asList(ToolsLibrary.factories));
-		
+        // ToolsLibrary panel
+        ToolsPresenter tp = new ToolsPresenter(_eventBus);
+        tp.setPanel(screen.getToolsPanel());
+        tp.setFactories(Arrays.asList(ToolsLibrary.factories));
+
+        // InputLibrary panel
+        InputPresenter ip = new InputPresenter(_eventBus);
+        ip.setPanel(screen.getInputPanel());
+        ip.setFactories(Arrays.asList(ToolsLibrary.inputFactories));
+        
 		// set up the main workspace
 		Workspace workspace = new Workspace(true);
 //		workspace.setWorkDirPath(getLastChosenWorkDirectory());

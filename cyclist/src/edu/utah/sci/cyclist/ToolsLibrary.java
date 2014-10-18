@@ -35,7 +35,7 @@ import edu.utexas.cycic.tools.SimulationInfoToolFactory;
 
 public class ToolsLibrary {
 
-	public static final ToolFactory[] factories = {
+    public static final ToolFactory[] factories = {
 		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
 				"Table", AwesomeIcon.LIST_ALT, 
 				"ui.views.SimpleTableView", 
@@ -59,16 +59,16 @@ public class ToolsLibrary {
 		new SimpleToolFactory("edu.utah.sci.cyclist.core", 
 				"Workspace", AwesomeIcon.DESKTOP, 
 				"ui.views.Workspace", 
-				"presenter.WorkspacePresenter"),
-		
-		new CycicToolFactory(),
-		new InstitutionViewToolFactory(),
-		new RecipeFormToolFactory(),
-		new SimulationInfoToolFactory(),
-		new RegionCorralViewToolFactory(),
-		new FacilitySorterToolFactory()
+                "presenter.WorkspacePresenter")
 	};
-	
+
+    public static final ToolFactory[] inputFactories = {
+        new CycicToolFactory(),
+        new InstitutionViewToolFactory(),
+        new RecipeFormToolFactory(),
+        new RegionCorralViewToolFactory()
+    };
+    
 	public static ToolFactory findFactory(String name) {
 		for (int i=0; i<factories.length; i++) {
 			if (factories[i].getToolName().equals(name))

@@ -1,11 +1,8 @@
 package edu.utexas.cycic;
 
-import java.awt.Cursor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.controlsfx.dialog.Dialogs;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,19 +14,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 /**
  * View for the Simulation Control Information
  * @author Robert
@@ -71,64 +61,13 @@ public class SimulationInfo extends ViewBase{
 			setHgap(5);
 		}
 	};
-	
-	/**
-	 * 
-	 */
-	static Button addNewCommod = new Button(){
-		{
-			setOnAction(new EventHandler<ActionEvent>(){
-				public void handle(ActionEvent e){
-					addNewCommodity();
-				}
-			});
-			setText("+");
-			setStyle("-fx-font-size: 9;");
-		}
-	};
-	
+		
 	/**
 	 * 
 	 */
 	static VBox simDetailBox = new VBox(){
 		{
 			getChildren().add(simInfo);
-			setStyle("-fx-border-style: solid;"
-	                + "-fx-border-width: 1;"
-	                + "-fx-border-color: black");
-		}
-	};
-	
-	/**
-	 * 
-	 */
-	static VBox commodBox = new VBox(){
-		{
-			getChildren().add(new HBox(){
-				{
-					getChildren().add(new Label(){
-						{
-							setText("Simulation Commodities");
-							setOnMouseClicked(new EventHandler<MouseEvent>(){
-								public void handle(MouseEvent event){
-									Dialogs.create()
-										.title("Help")
-										.message("Commodities facilitate the transfer of materials from one facility to another."
-												+ "Facilities with the same commodities are allowed to trade with each other.")
-										.showInformation();
-								}
-							});
-							setTooltip(new Tooltip("Commodities to be traded in the simulation"));
-							setFont(new Font("Times", 16));
-						}
-					});
-					getChildren().add(addNewCommod);
-					setSpacing(5);
-				}
-			});
-			getChildren().add(commodGrid);
-			setPadding(new Insets(10, 10, 10, 10));
-			setSpacing(5);
 			setStyle("-fx-border-style: solid;"
 	                + "-fx-border-width: 1;"
 	                + "-fx-border-color: black");
@@ -141,7 +80,7 @@ public class SimulationInfo extends ViewBase{
 	static HBox simControlBox = new HBox(){
 		{
 			setStyle("-fx-font-size: 12;");
-			getChildren().addAll(commodBox, simDetailBox);
+			getChildren().addAll(simDetailBox);
 		}
 	};
 
@@ -233,70 +172,11 @@ public class SimulationInfo extends ViewBase{
 			}
 		});
 		simInfo.add(output, 0, 5);
-		/*Button load = new Button();
-		load.setText("Load");
-		load.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent event){
-				FileChooser fc = new FileChooser();
-				fc.setTitle("Please choose a saved scenario.");
-				File file = fc.showOpenDialog(window);
-				OutPut.loadFile(file);
-			}
-		});
-		simInfo.add(load, 1, 5);*/
-		buildCommodPane();
-		
+	
 		
 		setContent(simControlBox);
 	}
-	
-	/**
-	 * 
-	 */
-	public static void buildCommodPane(){
-		commodGrid.getChildren().clear();
-		for (int i = 0; i < Cycic.workingScenario.CommoditiesList.size(); i++){
-			TextField commodity = new TextField();
-			commodity.setText(Cycic.workingScenario.CommoditiesList.get(i).getText());
-			commodGrid.add(commodity, 0, i );
-			final int index = i;
-			commodity.setPromptText("Enter Commodity Name");
-			commodity.textProperty().addListener(new ChangeListener<String>(){
-				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-					Cycic.workingScenario.CommoditiesList.get(index).setText(newValue);
-				}
-			});
-			Button removeCommod = new Button();
-			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
-			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
-				public void handle(ActionEvent e){
-					Cycic.workingScenario.CommoditiesList.remove(index);
-					buildCommodPane();
-				}
-			});	
-			commodGrid.add(removeCommod, 1, index);
-		}
-	}
-	
-	/**
-	 * Adds a new TextField to the commodity GridPane tied to a new commodity in the 
-	 * simulation.
-	 */
-	static public void addNewCommodity(){
-		Label commodity = new Label();
-		commodity.setText("");
-		Cycic.workingScenario.CommoditiesList.add(commodity);
-		TextField newCommod = new TextField();
-		newCommod.autosize();
-		newCommod.setPromptText("Enter Commodity Name");
-		newCommod.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				Cycic.workingScenario.CommoditiesList.get(Cycic.workingScenario.CommoditiesList.size()-1).setText(newValue);
-			}
-		});
-		buildCommodPane();
-	}
-	
+
 	/**
 	 * Quick hack to convert months into their integer values.
 	 * i.e. January = 0, Feb = 1, etc...

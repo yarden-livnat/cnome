@@ -64,7 +64,7 @@ public class InstitutionView extends ViewBase{
 					test.institName = XMLReader.institutionList.get(i).replace(":", " ").trim();
 					test.institStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 					DataArrays.simInstitutions.add(test);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -95,7 +95,43 @@ public class InstitutionView extends ViewBase{
 				}
 			}
 		});
-		structureCB.setPromptText("Select Institution");
+		
+		TextField institName = new TextField();
+		
+		final ComboBox typeOptions = new ComboBox();
+		typeOptions.getItems().clear();
+		for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+			typeOptions.getItems().add(DataArrays.simInstitutions.get(i).institName);
+		}
+		
+		Button institButton = new Button("Add Institution");
+		institButton.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				grid.getChildren().clear();
+				rowNumber = 1;
+				instituteNode tempInstit = new instituteNode();
+				tempInstit.name = institName.getText();
+				workingInstit = tempInstit;
+				for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+					if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) typeOptions.getValue())){
+						tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+					}
+				}
+				tempInstit.type = (String) typeOptions.getValue();
+				FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
+				formBuilder(workingInstit.institStruct, workingInstit.institData);
+				DataArrays.institNodes.add(tempInstit);
+				facilityList.getItems().clear();
+				prototypeList.getItems().clear();
+				Label institutionName = new Label("Name");
+				TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);				
+				grid.add(institutionName, 0, 0);
+				grid.add(nameTextField, 1, 0);
+				typeLabel.setText(workingInstit.type);
+			}
+		});
+		
+		structureCB.setPromptText("Select Existing Institution");
 		// Building the list of objects to be put in to the ComboBox.
 		// Inputs all built institutions and adds a field for adding a new one. 
 		structureCB.setOnMouseClicked(new EventHandler<MouseEvent>(){
@@ -104,7 +140,6 @@ public class InstitutionView extends ViewBase{
 				for(int i = 0; i < DataArrays.institNodes.size(); i++){
 					structureCB.getItems().add((String) DataArrays.institNodes.get(i).name);
 				}
-				structureCB.getItems().add("New Institution");
 			}
 		});
 		//InstitutionViewPresenter.newInstitution(structureCB);
@@ -113,57 +148,6 @@ public class InstitutionView extends ViewBase{
 			@SuppressWarnings("unchecked")
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				if (newValue == null){
-					
-				} else if(newValue == "New Institution"){
-					grid.getChildren().clear();
-					rowNumber = 1;
-					instituteNode tempInstit = new instituteNode();
-					Dialog dlg = new Dialog(grid, "Institution Name");
-					dlg.getActions().add(Dialog.Actions.OK);
-					GridPane dlgGrid = new GridPane();
-					TextField txtName = new TextField();
-					txtName.textProperty().addListener(new ChangeListener<String>(){
-						public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-							tempInstit.name = newValue;
-						}
-					});
-					dlgGrid.add(new Label("Name"), 0, 0);
-					dlgGrid.add(txtName, 1, 0);
-					ComboBox cbType = new ComboBox();
-					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-						cbType.getItems().add(DataArrays.simInstitutions.get(i).institName);
-					}
-					cbType.setOnAction(new EventHandler<Event>(){
-						public void handle(Event event) {
-							tempInstit.type = (String) cbType.getValue();
-							for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-								if (DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) cbType.getValue())){
-									tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
-								}
-							}			
-						}
-					});
-					dlgGrid.add(new Label("Type"), 0, 1);
-					dlgGrid.add(cbType, 1, 1);
-					dlg.setContent(dlgGrid);
-					dlg.show();
-					workingInstit = tempInstit;
-					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
-							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
-						}
-					}
-					//System.out.println(workingInstit.institStruct);
-					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
-					formBuilder(workingInstit.institStruct, workingInstit.institData);
-					DataArrays.institNodes.add(tempInstit);
-					facilityList.getItems().clear();
-					prototypeList.getItems().clear();
-					Label institutionName = new Label("Name");
-					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);				
-					grid.add(institutionName, 0, 0);
-					grid.add(nameTextField, 1, 0);
-					typeLabel.setText(workingInstit.type);
 				} else {
 					rowNumber = 1;
 					grid.getChildren().clear();
@@ -186,35 +170,14 @@ public class InstitutionView extends ViewBase{
 			}
 		});
 		structureCB.autosize();
-		topGrid.add(new Label("Choose Institution"), 0, 0);
-		topGrid.add(structureCB, 1, 0);
-		topGrid.add(typeLabel, 3, 0);
+		topGrid.add(new Label("New Institution"), 0, 0);
+		topGrid.add(institName, 1, 0);
+		topGrid.add(typeOptions, 2, 0);
+		topGrid.add(institButton, 3, 0);
+		topGrid.add(structureCB, 4, 0);
+		topGrid.add(typeLabel, 5, 0);
 		
 				
-		// ComboBox to add facilities to the prototype ListView
-		final ComboBox<String> addNewProtoBox = new ComboBox<String>();
-		addNewProtoBox.setPromptText("Select Facility Type");
-		addNewProtoBox.setOnMousePressed(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent e){
-				addNewProtoBox.getItems().clear();
-				for (facilityNode node: CycicScenarios.workingCycicScenario.FacilityNodes){
-					addNewProtoBox.getItems().add((String)node.name);
-				}
-			}
-		});
-		
-		// Button to sumbit selected object in addNewPrototypeBox to Prototype ListView and Institution prototype array. 
-		Button addAvailProto = new Button();
-		addAvailProto.setText("Add Facility Type");
-		addAvailProto.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				prototypeList.getItems().clear();
-				workingInstit.availPrototypes.add(addNewProtoBox.getValue());
-				for (String facility: workingInstit.availPrototypes){
-					prototypeList.getItems().add(facility);
-				}
-			}
-		});
 		
 		//ComboBox for adding a new facility to the initial facility array of the institution.
 		final ComboBox<String> addNewFacBox = new ComboBox<String>();
@@ -275,9 +238,6 @@ public class InstitutionView extends ViewBase{
 		});
 		
 		// Building the grids for the views.
-		topGrid.add(new Label("Add Available Facility Type"), 0, 1);
-		topGrid.add(addNewProtoBox, 1, 1);
-		topGrid.add(addAvailProto, 2, 1);
 		topGrid.add(new Label("Add Starting Facility"), 0, 2);
 		topGrid.add(addNewFacBox, 1, 2);
 		topGrid.add(new Label("Number: "), 2, 2);
@@ -287,7 +247,6 @@ public class InstitutionView extends ViewBase{
 		topGrid.setVgap(5);
 		
 		grid.autosize();
-		grid.setAlignment(Pos.BASELINE_CENTER);
 		grid.setVgap(10);
 		grid.setHgap(5);
 		grid.setPadding(new Insets(30, 30, 30, 30));
@@ -347,6 +306,10 @@ public class InstitutionView extends ViewBase{
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		if (facArray.size() == 0){
+			grid.add(new Label("This archetype is empty."), 2, 2);
+			return;
+		}
 		for (int i = 0; i < facArray.size(); i++){
 			if (facArray.get(i) instanceof ArrayList && facArray.get(0) instanceof ArrayList) {
 				formBuilder((ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -421,15 +384,11 @@ public class InstitutionView extends ViewBase{
 					} else {
 						// Switch that will contain current and future key words to indicate special form functions.
 						switch ((String) facArray.get(0)) {
-						/*case "Incommodity":
-							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
+						case "prototype":
+							grid.add(FormBuilderFunctions.comboBoxFac(dataArray), 1+columnNumber, rowNumber);
 							break;
-						case "Outcommodity":
-							grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "Recipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;*/
+						case "commodity":
+							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.controlsfx.dialog.Dialogs;
 
@@ -60,11 +61,13 @@ public class RegionCorralView extends ViewBase {
 							}
 						}
 						event.consume();
-						/*String response =  Dialogs.create()
+						/*Optional<String> response =  Dialogs.create()
 								.title("Name Region")
 								.message("Enter Region Name")
 								.showTextInput();
-						region.name = response;*/
+						region.name = response.get();*/
+						region.name = "";
+						workingRegion = region;
 						FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
 						regionNode.regionCircle = RegionShape.addRegion((String)region.name, region);
 						regionNode.regionCircle.setX(event.getX());
@@ -118,7 +121,7 @@ public class RegionCorralView extends ViewBase {
 					test.regionName = XMLReader.regionList.get(i).replace(":", " ").trim();
 					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
 					DataArrays.simRegions.add(test);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -155,8 +158,8 @@ public class RegionCorralView extends ViewBase {
 			region.setFill(Color.web("#CF5300"));
 			region.setX(10 + (i*75));
 			region.setY(5);
-			region.setWidth(80);
-			region.setHeight(80);
+			region.setWidth(70);
+			region.setHeight(70);
 			region.setStroke(Color.BLACK);
 			region.text.setText(DataArrays.simRegions.get(i).regionName);
 			region.text.setWrapText(true);

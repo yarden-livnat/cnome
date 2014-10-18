@@ -78,9 +78,8 @@ public class RegionShape extends Rectangle {
 		rect.text.setWrapText(true);
 		
 		// Set circle color
-		rect.rgbColor=VisFunctions.stringToColor((String)rect.name);
-		rect.setFill(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2)));
-
+		rect.rgbColor=VisFunctions.stringToColor(region.type);
+		rect.setFill(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2), 0.8));
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(rect.rgbColor) == true){
 			rect.text.setTextFill(Color.BLACK);
