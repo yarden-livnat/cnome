@@ -15,9 +15,12 @@ import javax.imageio.ImageIO;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -45,6 +48,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
@@ -63,6 +67,8 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
+import com.sun.xml.internal.org.jvnet.staxex.NamespaceContextEx.Binding;
+
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
@@ -76,10 +82,12 @@ import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
 import edu.utah.sci.cyclist.core.ui.components.LineIndicator;
+import edu.utah.sci.cyclist.core.ui.components.LogAxis;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -101,11 +109,36 @@ public class ChartView extends CyclistViewBase {
 	private TableProxy _tableProxy = null;
 	
 	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
+	@SuppressWarnings("rawtypes")
+    private Axis _xAxis = null;
+	@SuppressWarnings("rawtypes")
+    private Axis _yAxis = null;
+	private ObjectProperty<CyclistAxis.Mode> _xAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistAxis.Mode> _yAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
+	private BooleanProperty _xForceZero = new SimpleBooleanProperty(false);
+	private BooleanProperty _yForceZero = new SimpleBooleanProperty(false);
+
 	private BooleanBinding 	_noChart = new BooleanBinding() {
 		{ super.bind(_chartProperty); }
 		@Override
 		protected boolean computeValue() {
 			return _chartProperty.get() == null;
+		}
+	};
+	
+	private BooleanBinding _xLinearMode = new BooleanBinding() {
+		{super.bind(_xAxisMode); }
+		@Override
+		protected boolean computeValue() {
+			return _xAxisMode.get() == CyclistAxis.Mode.LINEAR;
+		}
+	};
+	
+	private BooleanBinding _yLinearMode = new BooleanBinding() {
+		{super.bind(_yAxisMode); }
+		@Override
+		protected boolean computeValue() {
+			return _xAxisMode.get() == CyclistAxis.Mode.LINEAR;
 		}
 	};
 	
@@ -128,7 +161,6 @@ public class ChartView extends CyclistViewBase {
 
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
 	private ListProperty<TableRow> _items = new SimpleListProperty<>();
-	private ObjectProperty<Boolean> _forceZeroProperty = new SimpleObjectProperty<>();
 
 	private StackPane _stackPane;
 	private Pane _glassPane;
@@ -193,18 +225,6 @@ public class ChartView extends CyclistViewBase {
 	public Table getCurrentTable() {
 		return _currentTableProperty.get();
 	}
-
-	public ObjectProperty<Boolean> forceZeroProperty() {
-		return _forceZeroProperty;
-	}
-
-	public Boolean getForceZero() {
-		return _forceZeroProperty.get();
-	}
-
-	public void setForceZero(Boolean value) {
-		_forceZeroProperty.set(value);
-	}
 	
 	public void updateSimulationData(){
 		fetchData();
@@ -254,6 +274,22 @@ public class ChartView extends CyclistViewBase {
 			_stackPane.getChildren().remove(0);
 		}
 
+		if (getChart() != null) {
+			if (_xAxis instanceof NumberAxis) {
+				((NumberAxis) _xAxis).forceZeroInRangeProperty().unbind();
+			}
+			if (_xAxis instanceof CyclistAxis) {
+				((CyclistAxis) _xAxis).mode().unbind();
+				((CyclistAxis) _xAxis).forceZeroInRangeProperty().unbind();
+			}
+			if (_yAxis instanceof NumberAxis) {
+				((NumberAxis) _yAxis).forceZeroInRangeProperty().unbind();
+			}
+			if (_yAxis instanceof CyclistAxis) {
+				((CyclistAxis) _yAxis).mode().unbind();
+				((CyclistAxis) _yAxis).forceZeroInRangeProperty().unbind();
+			}
+		}
 		setChart(null);
 		setCurrentTask(null);
 	}
@@ -332,7 +368,7 @@ public class ChartView extends CyclistViewBase {
 						.aggregates(aggregators)
 						.grouping(grouping)
 						.filters(filtersList);
-				System.out.println("Query: "+builder.toString());
+//				System.out.println("Query: "+builder.toString());
 
 				List<Field> order = builder.getOrder();
 
@@ -367,105 +403,6 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 	}
-
-
-
-	//        public final double MIN_BAR_WIDTH = 2;
-	//        
-	//        
-	//        private void updateAxes(List<XYChart.Series<Object, Object>> graphs) {
-	//                Axis<? extends Object> axis =  _chart.getXAxis();
-	//                if (axis instanceof NumberAxis) {
-	//
-	//                        XYChart.Series<Object, Object> series = graphs.get(0);
-	//                        XYChart.Data<Object, Object> entry = series.getData().get(0);
-	//                        if (entry.getXValue() instanceof Number) {
-	//                                Double min = (Double) entry.getXValue();
-	//                                Double max = min;
-	//                                for (XYChart.Data<Object, Object> item : series.getData()) {                                
-	//                                        Double value = (Double) item.getXValue();
-	////                                        item.setXValue(-(Double) item.getXValue());
-	//                                        if (value < min) min = value;
-	//                                        else if (max < value) max = value;
-	//                                }
-	//                                
-	//                                if (max < 0) {
-	//                                        NumberAxis numAxis = (NumberAxis) axis;
-	//                                        numAxis.setUpperBound(max);
-	//                                        numAxis.setLowerBound(min);
-	//                                }
-	//                        }
-	//                }
-	//                
-	//                axis =  _chart.getYAxis();
-	//                if (axis instanceof NumberAxis) {
-	//                        XYChart.Series<Object, Object> series = graphs.get(0);
-	//                        XYChart.Data<Object, Object> entry = series.getData().get(0);
-	//                        if (entry.getYValue() instanceof Number) {
-	//                                Double min = (Double) entry.getYValue();
-	//                                Double max = min;
-	//                                for (XYChart.Data<Object, Object> item : series.getData()) {                                
-	//                                        Double value = (Double) item.getYValue();
-	//                                        if (value < min) min = value;
-	//                                        else if (max < value) max = value;
-	//                                }
-	//                                
-	//                                if (max < 0) {
-	//                                        NumberAxis numAxis = (NumberAxis) axis;
-	//                                        numAxis.setUpperBound(max);
-	//                                }
-	//                        }
-	//                }        
-	//        }
-
-
-	//        @SuppressWarnings("unchecked")
-	//        private <T> void updateAxis( Axis<?> axis, Object[] data, T Klass) {
-	//                if (axis instanceof NumberAxis) {
-	//                        NumberAxis numAxis = (NumberAxis) axis;
-	//                        
-	//                        Comparable<T> from = (Comparable<T>) data[0];
-	//                        Comparable<T> to = from;
-	//                        
-	//                        for (Object o : data) {
-	//                                T num = (T) o;
-	//                                if (from.compareTo(num) == 1) from = (Comparable<T>) num;
-	//                                else if (to.compareTo(num) == -1) to = (Comparable<T>) num;
-	//                        }
-	//                        
-	//                        double v0 = ((Number)from).doubleValue();
-	//                        double v1 = ((Number)to).doubleValue();
-	//                        int scale = (int)Math.floor(Math.log10(Math.min(Math.abs(v0), Math.abs(v1))));
-	//                        scale = scale - (scale %3);
-	//                        double factor = Math.pow(10, scale);
-	//                        if (scale > 3) {
-	//                                for (int i=0; i<data.length; i++) 
-	//                                        data[i] = (Double)data[i]/factor;
-	//                                v0 /= factor;
-	//                                v1 /= factor;
-	//                                
-	//                                numAxis.setLabel(numAxis.getLabel()+" * 1e"+scale);
-	//                        }
-	//                        
-	//                        
-	//                        numAxis.setLowerBound(v0);
-	//                        numAxis.setUpperBound(v1);
-	//                } else { // CategoryAxis
-	////                        CategoryAxis ca = (CategoryAxis) axis;
-	////                        // ensure there is enough space for the bars
-	////                        Set<Object> names = new HashSet<>();
-	////                        for (Object obj : data) {
-	////                                names.add(obj);
-	////                        }
-	////                        int n = names.size();
-	////                        double w = (axis.getWidth() - ca.getCategorySpacing()*(n-1))/n;
-	////                        if (w < MIN_BAR_WIDTH) {
-	////                                ca.setCa
-	////                        }
-	//                        
-	//                }
-	//        }
-
 
 	class MapSpec {
 		List<FieldInfo> xFields = new ArrayList<>();
@@ -517,39 +454,12 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 
-
-		//                Axis<?> axis = getChart().getYAxis();
-		//                if (axis instanceof NumberAxis) {
-		//                        NumberAxis y = (NumberAxis) axis;
-		//                         SeriesData sd = getFirst(sublists.get(0));
-		//                         double min =  ((Number) sd.points.get(0).y).doubleValue();
-		//                         for (SeriesDataPoint p : sd.points) {
-		//                                 double v = ((Number) p.y).doubleValue();
-		//                                 if (v < min) min = v;
-		//                         }
-		//                         double s0 = Math.floor(Math.log10(min));
-		//                         double s1 = Math.floor(s0/3)*3;
-		//                         double s2 = s1 -3;
-		//                         if (s2 > 0) {
-		//                                 System.out.println("Adjust axis format");
-		//                                 NumberFormat nf = NumberFormat.getInstance();
-		//                                 nf.setMaximumIntegerDigits(4);
-		//                                 NumberStringConverter nsc = new NumberStringConverter(nf);
-		//                                 y.setTickLabelFormatter(nsc);
-		//                         }
-		//                         
-		//                }
 		if(getChart() != null && getChart().getData() != null){
+			getChart().setLegendVisible(graphs.size() > 1);
 			getChart().getData().addAll(graphs);
 		}
-		//                updateAxes(graphs);
 	}
 
-
-	//        private SeriesData getFirst(Collection<SeriesData> collection) {
-	//                return collection.iterator().next();
-	//        }
-	//        
 	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<TableRow> list) {
 		List<SeriesData> all = new ArrayList<>();
 
@@ -607,7 +517,6 @@ public class ChartView extends CyclistViewBase {
 			sd.points.add(point);
 		}
 
-		System.out.println("attributes:"+map.keySet());
 		_lastSubLists.add(map);
 		return map.values();
 	}
@@ -618,20 +527,20 @@ public class ChartView extends CyclistViewBase {
 
 		if (data.points == null || data.points.size() == 0) return;
 
-		Object firstItem = data.points.get(0);
+		 SeriesDataPoint pt = data.points.get(0);
 		// convert x
 		switch (data.x.getClassification()) {
 		case C:
-			if (firstItem instanceof String) {
+			if (pt.x instanceof String) {
 				// ignore
-			} else if (firstItem instanceof Number) {
+			} else if (pt.x instanceof Number) {
 				for (SeriesDataPoint p : data.points) {
 					p.x = numFormater.format(p.x);
 				}
 			}
 			break;
 		case Cdate:
-			if(data.points.get(0) != null && data.points.get(0).x.getClass() == Date.class){
+			if(pt.x.getClass() == Date.class){
 				for (SeriesDataPoint p : data.points) {
 						p.x = ((Date)p.x).getTime();
 				}
@@ -645,16 +554,16 @@ public class ChartView extends CyclistViewBase {
 		// convert y
 		switch (data.y.getClassification()) {
 		case C:
-			if (firstItem instanceof String) {
+			if (pt.x instanceof String) {
 				// ignore
-			} else if (firstItem instanceof Number) {
+			} else if (pt.x instanceof Number) {
 				for (SeriesDataPoint p : data.points) {
 					p.y = numFormater.format(p.y);
 				}
 			}
 			break;
 		case Cdate:
-			if(data.points.get(0) != null && data.points.get(0).y.getClass() == Date.class){
+			if(pt.y.getClass() == Date.class){
 				for (SeriesDataPoint p : data.points) {
 						p.y = ((Date)p.y).getTime();
 				}
@@ -681,7 +590,6 @@ public class ChartView extends CyclistViewBase {
 		series.setName(label);
 		series.dataProperty().set(xyData);
 		return series;
-
 	}
 
 	private String createAttributesLabel(SeriesDataPoint p) {
@@ -742,10 +650,9 @@ public class ChartView extends CyclistViewBase {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createChart() {
-		System.out.println("create new chart");
-		Axis xAxis = createAxis(getXField(), _xArea.getFieldTitle(0));
+		_xAxis = createAxis(getXField(), _xArea.getFieldTitle(0), false);
 
-		Axis yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "");
+		_yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "", true);
 
 		determineViewType(getXField().getClassification(), getYField().getClassification()); 
 		switch (_viewType) {
@@ -753,20 +660,20 @@ public class ChartView extends CyclistViewBase {
 			setChart(null);
 			break;
 		case BAR:
-			BarChart bar = new BarChart<>(xAxis,  yAxis);
-			System.out.println("gaps: "+bar.getBarGap()+"  "+bar.getCategoryGap());
+			BarChart bar = new BarChart<>(_xAxis,  _yAxis);
+//			System.out.println("gaps: "+bar.getBarGap()+"  "+bar.getCategoryGap());
 			bar.setBarGap(1);
 			bar.setCategoryGap(4);
 			setChart(bar);
 			break;
 		case LINE:
-			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(xAxis, yAxis);
+			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(_xAxis, _yAxis);
 			lineChart.setCreateSymbols(false);
 			lineChart.getStyleClass().add("line-chart");
 			setChart(lineChart);
 			break;
 		case SCATTER_PLOT:
-			setChart(new ScatterChart<>(xAxis, yAxis));
+			setChart(new ScatterChart<>(_xAxis, _yAxis));
 			break;
 		case GANTT:
 			setChart(null);
@@ -782,7 +689,7 @@ public class ChartView extends CyclistViewBase {
 			getChart().setAnimated(false);
 			getChart().setHorizontalZeroLineVisible(false);
 			getChart().setVerticalZeroLineVisible(false);
-			System.out.println("zero _line: "+getChart().horizontalZeroLineVisibleProperty().get()+"  "+getChart().verticalZeroLineVisibleProperty().get());
+//			System.out.println("zero _line: "+getChart().horizontalZeroLineVisibleProperty().get()+"  "+getChart().verticalZeroLineVisibleProperty().get());
 			//                        getChart().setCache(true);
 			//                        _pane.setCenter(getChart());
 			_stackPane.getChildren().add(0, getChart());
@@ -794,9 +701,9 @@ public class ChartView extends CyclistViewBase {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Axis createAxis(Field field, String title) {
+	private Axis createAxis(Field field, String title, boolean y) {
 		Axis axis =  null;
-		System.out.println("field clasification: "+field.getClassification());
+//		System.out.println("field clasification: "+field.getClassification());
 
 		switch (field.getClassification()) {
 
@@ -806,7 +713,7 @@ public class ChartView extends CyclistViewBase {
 			break;
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
-			cd.forceZeroInRangeProperty().bind(forceZeroProperty());
+			cd.forceZeroInRangeProperty().bind(y ? _yForceZero : _xForceZero);
 			if(field.getRole() != Role.INT_TIME)
 			{
 				NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
@@ -821,14 +728,24 @@ public class ChartView extends CyclistViewBase {
 			axis = cd;
 			break;
 		case Qd:
-			NumberAxis t = new NumberAxis();
-			t.forceZeroInRangeProperty().bind(forceZeroProperty());
-			axis = t;
+			CyclistAxis ca = new CyclistAxis();
+			ca.setMode(CyclistAxis.Mode.LOG);
+			ca.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
+			ca.mode().bind( y ? _yAxisMode : _xAxisMode);
+			axis = ca;
+//    			NumberAxis t = new NumberAxis();
+//    			t.forceZeroInRangeProperty().bind(forceZeroProperty());
+//    			axis = t;
 			break;
 		case Qi:
-			NumberAxis a = new NumberAxis();
-			a.forceZeroInRangeProperty().bind(forceZeroProperty());
-			axis = a;
+			CyclistAxis cai = new CyclistAxis();
+			cai.setMode(CyclistAxis.Mode.LOG);
+			cai.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
+			cai.mode().bind( y ? _yAxisMode : _xAxisMode);
+			axis = cai;
+//    			NumberAxis a = new NumberAxis();
+//    			a.forceZeroInRangeProperty().bind(forceZeroProperty());
+//    			axis = a;
 		}
 
 		axis.setLabel(title);
@@ -969,31 +886,109 @@ public class ChartView extends CyclistViewBase {
 				invalidateChart();
 				fetchData();
 			}
-		});
+		});		
 
-
-		forceZeroProperty().addListener(new InvalidationListener() {
-
-			@Override
-			public void invalidated(Observable observable) {
-				// FIXME: seems to be a bug in JavaFX.
-				// The chart does not refresh itself if the axis forceRangeZero changes.
-				// This is a hack to force the chart to redraw.
-				if (getChart() != null) {
-					ObservableList<Series<Object, Object>> list = getChart().getData();
-					getChart().setData(null);
-					getChart().setData(list);
-				}
-			}
-		});
-		forceZeroProperty().set(false);
+//		_xForceZero.addListener(new InvalidationListener() {
+//			@Override
+//			public void invalidated(Observable observable) {
+//				// FIXME: seems to be a bug in JavaFX.
+//				// The chart does not refresh itself if the axis forceRangeZero changes.
+//				// This is a hack to force the chart to redraw.
+//				if (getChart() != null) {
+//					ObservableList<Series<Object, Object>> list = getChart().getData();
+//					getChart().setData(null);
+//					getChart().setData(list);
+//				}
+//			}
+//		});
 	}
 
 	private void setupActions() {
 		List<Node> actions = new ArrayList<>();
+		actions.add(createAxisOptions());
 		actions.add(createExportActions());
 		actions.add(createOptions());
 		addActions(actions);
+	}
+	
+	private Node createAxisOptions() {
+		final Button btn = new Button("Axis", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		btn.getStyleClass().add("flat-button");
+		
+		final ContextMenu menu = new ContextMenu();
+		btn.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				menu.show(btn, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		MenuItem item = new MenuItem("Y linear", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_yAxisMode.set(CyclistAxis.Mode.LINEAR);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistAxis.Mode.LINEAR));
+		menu.getItems().add(item);
+		
+		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_yAxisMode.set(CyclistAxis.Mode.LOG);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistAxis.Mode.LOG));
+		menu.getItems().add(item);
+		
+		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(_yForceZero);
+		menu.getItems().add(item);
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				_yForceZero.set(!_yForceZero.get());
+			}
+		});
+
+		
+		menu.getItems().add(new SeparatorMenuItem());
+
+		item = new MenuItem("X linear", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistAxis.Mode.LINEAR));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_xAxisMode.set(CyclistAxis.Mode.LINEAR);
+            }
+		});
+		menu.getItems().add(item);
+
+		item = new MenuItem("X log", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistAxis.Mode.LOG));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_xAxisMode.set(CyclistAxis.Mode.LOG);
+            }
+		});
+		menu.getItems().add(item);
+		
+		item = new MenuItem("X force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(_xForceZero);
+		menu.getItems().add(item);
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				_xForceZero.set(!_xForceZero.get());
+			}
+		});
+
+
+
+		return btn;
 	}
 	
 	private Node createOptions() {
@@ -1010,19 +1005,7 @@ public class ChartView extends CyclistViewBase {
 				createIndicator();
 			}
 		});
-
 		contextMenu.getItems().add(item);
-
-		final MenuItem forceZeroItem = new MenuItem("Force Zero", GlyphRegistry.get(AwesomeIcon.CHECK));
-		forceZeroItem.getGraphic().visibleProperty().bind(forceZeroProperty());
-		contextMenu.getItems().add(forceZeroItem);
-
-		forceZeroItem.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				setForceZero(!getForceZero());
-			}
-		});
 
 		MenuItem duplicateItem = new MenuItem("Duplicate plot");
 		duplicateItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -1043,23 +1026,23 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 
-		chartProperty().addListener(new InvalidationListener() {
+//		chartProperty().addListener(new InvalidationListener() {
+//
+//			@Override
+//			public void invalidated(Observable observable) {
+//				if(chartProperty().get() != null){
+//					Axis<?> yAxis = chartProperty().get().getYAxis();
+//					if (! (yAxis instanceof NumberAxis)){
+//						forceZeroItem.setVisible(false);
+//					} else{
+//						forceZeroItem.setVisible(true);
+//					}
+//				}
+//			}
+//		});
 
-			@Override
-			public void invalidated(Observable observable) {
-				if(chartProperty().get() != null){
-					Axis<?> yAxis = chartProperty().get().getYAxis();
-					if (! (yAxis instanceof NumberAxis)){
-						forceZeroItem.setVisible(false);
-					} else{
-						forceZeroItem.setVisible(true);
-					}
-				}
-			}
-		});
 
-
-		forceZeroProperty().set(false);
+//		forceZeroProperty().set(false);
 		return options;
 	}
 
@@ -1143,30 +1126,6 @@ public class ChartView extends CyclistViewBase {
 		_xArea = createControlArea(grid, "X", 0, 0, 1, DropArea.Policy.SINGLE, DropArea.AcceptedRoles.ALL);
 		_yArea = createControlArea(grid, "Y", 1, 0, 1, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.ALL);
 		_lodArea = createControlArea(grid, "Group by", 0, 2, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
-		//                _lodArea = createControlArea(grid, "LOD", 0, 3, 2, DropArea.Policy.MULTIPLE, DropArea.AcceptedRoles.DIMENSION);
-		//                _indicatorArea = createIndicatorArea(grid, "Ind", 1, 2, DropArea.Policy.MULTIPLE);
-		//                Button swapButton = new Button("", new ImageView(Resources.getIcon("swap")));
-		//                swapButton.getStyleClass().add("flat-button");
-		//                swapButton.setOnAction(new EventHandler<ActionEvent>() {
-		//                        
-		//                        @Override
-		//                        public void handle(ActionEvent arg0) {
-		//                                if(_xArea.getFields().size() == 1 && _lodArea.getFields().size() == 1){
-		//                                   Field lodField = _lodArea.getFields().get(0);
-		//                                   Field xField = _xArea.getFields().get(0);
-		//                                   if(lodField.getClassification() == Classification.C && xField.getClassification() == Classification.C ){
-		//                                	   _lodArea.getFields().removeAll(_lodArea.getFields());
-		//                                	   //_xArea.getChildren().removeAll(_xArea.getChildren());
-		//                                	   _xArea.getFields().removeAll(_xArea.getFields());
-		//                                	   _xArea.getFields().add(lodField);
-		//                                	   _lodArea.getFields().add(xField);
-		//                                   }
-		//                                   
-		//                                }
-		//                        }
-		//                });
-		//                
-		//                grid.add(swapButton, 2, 0, 1, 1);
 
 		return grid;
 	}
@@ -1211,7 +1170,7 @@ public class ChartView extends CyclistViewBase {
 		@Override
 		public void invalidated(Observable o) {
 			Filter f = (Filter) o;
-			System.out.println("filter changed: "+f.getName());
+//			System.out.println("filter changed: "+f.getName());
 			//If possible - take data directly from memory instead of quering the database.
 			if(handleLODFilters(f))
 			{
