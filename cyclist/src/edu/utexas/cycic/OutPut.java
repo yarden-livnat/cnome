@@ -2,9 +2,7 @@ package edu.utexas.cycic;
 
 import java.io.*;
 import java.util.ArrayList;
-
 import javafx.scene.control.Label;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -13,7 +11,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,85 +26,89 @@ public class OutPut {
 	 * simulation into a Cyclus input file. 
 	 */
 	public static void output(File file){
-		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
-			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("Simulation");
-			doc.appendChild(rootElement);
-			
-			// General Simulation Information
-			Element control = doc.createElement("control");
-			rootElement.appendChild(control);
-			controlSetup(doc, control);
-			
-			//Archetypes 
-			archetypeSetup(doc, rootElement);
-			
-			// Commodities
-			for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
-				commodityBuilder(doc, rootElement, commod);
-			}			
-			// Facilities
-			for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
-				Element facID = doc.createElement("facility");
-				facilityBuilder(doc, facID, facility);
-				rootElement.appendChild(facID);
-			}
-			// Regions
-			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
-				Element regionID = doc.createElement("region");
-				rootElement.appendChild(regionID);
-			
-				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
-				// Building the institutions within regions.
-				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
-					for (String instit: region.institutions){
-						if (institution.name == instit) {
-							Element institID = doc.createElement("institution");
-							regionID.appendChild(institID);
-							for(String facility: institution.availPrototypes) {
-								Element allowedProto = doc.createElement("availableprototype");
-								allowedProto.appendChild(doc.createTextNode(facility));
-								institID.appendChild(allowedProto);								
+		if(inputTest()){
+			try {
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
+				Document doc = docBuilder.newDocument();
+				Element rootElement = doc.createElement("Simulation");
+				doc.appendChild(rootElement);
+
+				// General Simulation Information
+				Element control = doc.createElement("control");
+				rootElement.appendChild(control);
+				controlSetup(doc, control);
+
+				//Archetypes 
+				archetypeSetup(doc, rootElement);
+
+				// Commodities
+				for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
+					commodityBuilder(doc, rootElement, commod);
+				}			
+				// Facilities
+				for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
+					Element facID = doc.createElement("facility");
+					facilityBuilder(doc, facID, facility);
+					rootElement.appendChild(facID);
+				}
+				// Regions
+				for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
+					Element regionID = doc.createElement("region");
+					rootElement.appendChild(regionID);
+
+					regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
+					// Building the institutions within regions.
+					for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
+						for (String instit: region.institutions){
+							if (institution.name == instit) {
+								Element institID = doc.createElement("institution");
+								regionID.appendChild(institID);
+								for(String facility: institution.availPrototypes) {
+									Element allowedProto = doc.createElement("availableprototype");
+									allowedProto.appendChild(doc.createTextNode(facility));
+									institID.appendChild(allowedProto);								
+								}
+								Element initFacList = doc.createElement("initialfacilitylist");
+								for(facilityItem facility: institution.availFacilities) {
+									Element entry = doc.createElement("entry");
+									Element initProto = doc.createElement("prototype");
+									initProto.appendChild(doc.createTextNode(facility.name));
+									entry.appendChild(initProto);
+									Element number = doc.createElement("number");
+									number.appendChild(doc.createTextNode(facility.number));
+									entry.appendChild(number);
+									initFacList.appendChild(entry);
+								}
+								institID.appendChild(initFacList);
+								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, "DeployInstit");
 							}
-							Element initFacList = doc.createElement("initialfacilitylist");
-							for(facilityItem facility: institution.availFacilities) {
-								Element entry = doc.createElement("entry");
-								Element initProto = doc.createElement("prototype");
-								initProto.appendChild(doc.createTextNode(facility.name));
-								entry.appendChild(initProto);
-								Element number = doc.createElement("number");
-								number.appendChild(doc.createTextNode(facility.number));
-								entry.appendChild(number);
-								initFacList.appendChild(entry);
-							}
-							institID.appendChild(initFacList);
-							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, "DeployInstit");
 						}
 					}
 				}
+
+				//Recipes
+				for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
+					recipeBuilder(doc, rootElement, recipe);
+				}
+
+				saveFile(doc, rootElement);
+				
+				System.out.println(xmlToString(doc));
+				
+				// Writing out the xml file
+				TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				Transformer transformer = transformerFactory.newTransformer();
+				DOMSource source = new DOMSource(doc);
+				StreamResult result = new StreamResult(file);
+
+				transformer.transform(source, result);
+
+			} catch (ParserConfigurationException pce){
+				pce.printStackTrace();
+			} catch (TransformerException tfe) {
+				tfe.printStackTrace();
 			}
-			
-			//Recipes
-			for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
-				recipeBuilder(doc, rootElement, recipe);
-			}
-			
-			saveFile(doc, rootElement);
-			
-			// Writing out the xml file
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(file);
-			
-			transformer.transform(source, result);
-			
-		} catch (ParserConfigurationException pce){
-			pce.printStackTrace();
-		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
 		}
 	}
 	
@@ -121,16 +122,17 @@ public class OutPut {
 	public static void controlSetup(Document doc, Element control){
 		
 		Element simDuration = doc.createElement("duration");
+		
 		simDuration.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.duration));
 		control.appendChild(simDuration);
-		
+
 		Element simStartMon = doc.createElement("startmonth");
 		simStartMon.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startMonth));
 		control.appendChild(simStartMon);
-		
+			
 		Element simStartYear = doc.createElement("startyear");
 		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
-		control.appendChild(simStartYear);
+		control.appendChild(simStartYear);	
 	}
 	
 	/**
@@ -141,6 +143,7 @@ public class OutPut {
 	public static void archetypeSetup(Document doc, Element rootElement){
 		Element archetypes = doc.createElement("archetypes");
 		rootElement.appendChild(archetypes);
+		
 		for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
@@ -447,6 +450,19 @@ public class OutPut {
 		return facElement;
 	}
 	
+	static String xmlToString(Document doc){
+		try {
+			  Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			  StreamResult result = new StreamResult(new StringWriter());
+			  DOMSource source = new DOMSource(doc);
+			  transformer.transform(source, result);
+			  return result.getWriter().toString();
+			} catch(TransformerException ex) {
+			  ex.printStackTrace();
+			  return null;
+			}
+	}
+	
 	static Element outputRegion(Document doc, regionNode region){
 		Element regionElement = doc.createElement("regionNode");
 		Element regionName = doc.createElement("name");
@@ -527,6 +543,107 @@ public class OutPut {
 			}
 		}
 
+	}
+	
+	public static Boolean inputTest(){
+		
+		if(CycicScenarios.workingCycicScenario.FacilityNodes.size() == 0){
+			//TODO
+		}
+		if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0){
+			//TODO
+		}
+		if(CycicScenarios.workingCycicScenario.institNodes.size() == 0){
+			//TODO
+		}
+		
+		if(CycicScenarios.workingCycicScenario.simulationData.duration.equalsIgnoreCase("")){
+			//TODO
+		}
+		if(CycicScenarios.workingCycicScenario.simulationData.startMonth.equalsIgnoreCase("")){
+			///TODO
+		}
+		if(CycicScenarios.workingCycicScenario.simulationData.startYear.equalsIgnoreCase("")){
+			///TODO
+		}
+		return true;
+	}
+	public static String xmlStringGen(){
+		if(inputTest()){
+			try {
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
+				Document doc = docBuilder.newDocument();
+				Element rootElement = doc.createElement("Simulation");
+				doc.appendChild(rootElement);
+
+				// General Simulation Information
+				Element control = doc.createElement("control");
+				rootElement.appendChild(control);
+				controlSetup(doc, control);
+
+				//Archetypes 
+				archetypeSetup(doc, rootElement);
+
+				// Commodities
+				for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
+					commodityBuilder(doc, rootElement, commod);
+				}			
+				// Facilities
+				for(facilityNode facility : CycicScenarios.workingCycicScenario.FacilityNodes){
+					Element facID = doc.createElement("facility");
+					facilityBuilder(doc, facID, facility);
+					rootElement.appendChild(facID);
+				}
+				// Regions
+				for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
+					Element regionID = doc.createElement("region");
+					rootElement.appendChild(regionID);
+
+					regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
+					// Building the institutions within regions.
+					for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
+						for (String instit: region.institutions){
+							if (institution.name == instit) {
+								Element institID = doc.createElement("institution");
+								regionID.appendChild(institID);
+								for(String facility: institution.availPrototypes) {
+									Element allowedProto = doc.createElement("availableprototype");
+									allowedProto.appendChild(doc.createTextNode(facility));
+									institID.appendChild(allowedProto);								
+								}
+								Element initFacList = doc.createElement("initialfacilitylist");
+								for(facilityItem facility: institution.availFacilities) {
+									Element entry = doc.createElement("entry");
+									Element initProto = doc.createElement("prototype");
+									initProto.appendChild(doc.createTextNode(facility.name));
+									entry.appendChild(initProto);
+									Element number = doc.createElement("number");
+									number.appendChild(doc.createTextNode(facility.number));
+									entry.appendChild(number);
+									initFacList.appendChild(entry);
+								}
+								institID.appendChild(initFacList);
+								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, "DeployInstit");
+							}
+						}
+					}
+				}
+
+				//Recipes
+				for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
+					recipeBuilder(doc, rootElement, recipe);
+				}
+
+				saveFile(doc, rootElement);
+				
+				return xmlToString(doc);
+			} catch (ParserConfigurationException pce){
+				pce.printStackTrace();
+				
+			}
+		}
+		return null;
 	}
 }
 

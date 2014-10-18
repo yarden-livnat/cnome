@@ -174,7 +174,7 @@ public class XMLReader {
 				} else if(json_pass.get("uitype") != null){
 					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
 				}
-				cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
+				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
 			combiner((ArrayList<Object>)dataArray.get(1), json);
 			try{
@@ -215,35 +215,35 @@ public class XMLReader {
 	
 	/**
 	 * 
-	 * @param json_pass
+	 * @param jsonPass
 	 * @param dataArray
 	 * @return
 	 */
-	static ArrayList<Object> cycicInfoControl(JsonObject json_pass, ArrayList<Object> dataArray){
+	static ArrayList<Object> cycicInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
 		if(dataArray.get(2) == null){
 			dataArray.set(2, "");
-			if(json_pass.get("uitype") != null){
-				dataArray.set(2, json_pass.get("uitype").toString().replace("\"", ""));
+			if(jsonPass.get("uitype") != null){
+				dataArray.set(2, jsonPass.get("uitype").toString().replace("\"", ""));
 			}
 		}
-		if(json_pass.get("units") != null){
-			dataArray.set(3, json_pass.get("units").toString());
+		if(jsonPass.get("units") != null){
+			dataArray.set(3, jsonPass.get("units").toString());
 		}
-		if(json_pass.get("range") != null){
-			dataArray.set(4, json_pass.get("range").toString());
+		if(jsonPass.get("range") != null){
+			dataArray.set(4, jsonPass.get("range").toString());
 		}
-		if(json_pass.get("default") != null){
+		if(jsonPass.get("default") != null){
 			dataArray.set(6, 1);
-			dataArray.set(5, json_pass.get("default").toString());
+			dataArray.set(5, jsonPass.get("default").toString());
 		}
-		if(json_pass.get("userlevel") != null){
-			dataArray.set(6, Integer.parseInt(json_pass.get("userlevel").toString()));
+		if(jsonPass.get("userlevel") != null){
+			dataArray.set(6, Integer.parseInt(jsonPass.get("userlevel").toString()));
 		}
-		if(json_pass.get("tooltip") != null){
-			dataArray.set(7, json_pass.get("tooltip").toString());
+		if(jsonPass.get("tooltip") != null){
+			dataArray.set(7, jsonPass.get("tooltip").toString());
 		}
-		if(json_pass.get("doc") != null){
-			dataArray.set(8, json_pass.get("doc").toString());
+		if(jsonPass.get("doc") != null){
+			dataArray.set(8, jsonPass.get("doc").toString());
 		}
 		return dataArray;
 	}
@@ -300,5 +300,12 @@ public class XMLReader {
 			}
 		}
 		return array;
+	}
+	
+	static ArrayList<Object> orMoreInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
+		
+		
+		return dataArray;
+		
 	}
 }

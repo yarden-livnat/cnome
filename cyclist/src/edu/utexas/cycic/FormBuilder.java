@@ -39,7 +39,7 @@ public class FormBuilder extends ViewBase {
 		
 		Button button = new Button();
 		button.setText(formNode.facilityType);
-		for(int i = 0; i < 11; i++){
+		for(int i = 0; i < 4; i++){
 			userLevelBox.getItems().add(String.format("%d", i));
 		}
 		userLevelBox.setValue(Integer.toString(userLevel));

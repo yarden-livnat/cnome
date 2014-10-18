@@ -2,7 +2,9 @@ package edu.utexas.cycic;
 
 import java.awt.Dialog;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -56,30 +58,6 @@ public class Cycic extends ViewBase{
 		if (monthList.size() == 0){
 			months();
 		}
-		String string;
-		for(int i = 0; i < XMLReader.facilityList.size(); i++){
-			StringBuilder sb = new StringBuilder();
-			StringBuilder sb1 = new StringBuilder();
-			Process proc;
-			try {
-				proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.facilityList.get(i)); 
-				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-				while((string = read.readLine()) != null){
-					sb.append(string);
-				}
-				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.facilityList.get(i));
-				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-				while((string = read1.readLine()) != null){
-					sb1.append(string);
-				}
-				facilityStructure test = new facilityStructure();
-				test.facilityName = XMLReader.facilityList.get(i).replace(":", " ").trim();
-				test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-				DataArrays.simFacilities.add(test);
-			} catch (Exception e) {
-				
-			}
-		}
 		if (CycicScenarios.cycicScenarios.size() < 1){
 			DataArrays scenario = new DataArrays();
 			workingScenario = scenario;
@@ -89,6 +67,7 @@ public class Cycic extends ViewBase{
 	}
 	public static final String TITLE = "Cycic";
 	static Pane pane = new Pane();
+	Pane nodesPane = new Pane();
 	static facilityNode workingNode = null;
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
@@ -138,7 +117,7 @@ public class Cycic extends ViewBase{
 				}
 			});
 			setText("+");
-			setStyle("-fx-font-size: 9;");
+			setStyle("-fx-font-size: 12;");
 		}
 	};
 	static VBox commodBox = new VBox(){
@@ -148,16 +127,8 @@ public class Cycic extends ViewBase{
 					getChildren().add(new Label(){
 						{
 							setText("Simulation Commodities");
-							setOnMouseClicked(new EventHandler<MouseEvent>(){
-								public void handle(MouseEvent event){
-									Dialogs.create()
-										.title("Help")
-										.message("Commodities facilitate the transfer of materials from one facility to another."
-												+ "Facilities with the same commodities are allowed to trade with each other.")
-										.showInformation();
-								}
-							});
-							setTooltip(new Tooltip("Commodities to be traded in the simulation"));
+							setTooltip(new Tooltip("Commodities facilitate the transfer of materials from one facility to another."
+									+ "Facilities with the same commodities are allowed to trade with each other."));
 							setFont(new Font("Times", 16));
 						}
 					});
@@ -171,6 +142,24 @@ public class Cycic extends ViewBase{
 			setStyle("-fx-border-style: solid;"
 	                + "-fx-border-width: 1;"
 	                + "-fx-border-color: black");
+			
+		}
+	};
+	GridPane archetypeGrid = new GridPane(){
+		{
+			add(new Label(){
+				{
+					setText("Add Available Archetypes");
+					setTooltip(new Tooltip("Use the drop down menu to select archetypes to add to the simulation."));
+					setFont(new Font("Times", 16));
+				}
+			}, 0, 0);
+			setStyle("-fx-border-style: solid;"
+	                + "-fx-border-width: 1;"
+	                + "-fx-border-color: black");
+			setVgap(5);
+			setHgap(5);
+			setPadding(new Insets(10, 10, 10, 10));
 		}
 	};
 	
@@ -231,10 +220,9 @@ public class Cycic extends ViewBase{
 		grid.setStyle("-fx-background-color: #d6d6d6;");
 		grid.setHgap(10);
 		grid.setVgap(5);
-		
+		createArchetypeBar(grid);
 		// Adding a new Facility //
 		Text scenetitle1 = new Text("Add Prototype");
-		scenetitle1.setFont(new Font(20));
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
 		grid.add(facName, 1, 0);
@@ -244,14 +232,15 @@ public class Cycic extends ViewBase{
 		grid.add(facNameField, 2, 0);
 		// Facility Type
 		final ComboBox<String> structureCB = new ComboBox<String>();
-		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
-			structureCB.getItems().add((String) DataArrays.simFacilities.get(i).facilityName);	
-		}
-		structureCB.valueProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				structureCB.setValue(newValue);
+		structureCB.setOnMousePressed(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent m){
+				structureCB.getItems().clear();	
+				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+					structureCB.getItems().add((String) DataArrays.simFacilities.get(i).facilityName);	
+				}
 			}
 		});
+
 		structureCB.setPromptText("Select Facility Archetype");
 		grid.add(structureCB, 3, 0);
 		//Submit Button
@@ -279,12 +268,6 @@ public class Cycic extends ViewBase{
 		
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
-		Pane nodesPane = new Pane();
-		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
-			FacilityCircle circle = new FacilityCircle();
-			buildDnDCircle(circle, i, DataArrays.simFacilities.get(i).facilityName);
-			nodesPane.getChildren().addAll(circle,circle.text);
-		}
 		scroll.setContent(nodesPane);
 		Button button1 = new Button("Cyclus -a");
 		button1.setOnAction(new EventHandler<ActionEvent>(){
@@ -311,7 +294,7 @@ public class Cycic extends ViewBase{
 		};
 		//ScrollPane commodScroll = new ScrollPane();
 		//commodScroll.setContent(commodBox); 
-		sideView.getChildren().addAll(simDetailBox, commodBox);
+		sideView.getChildren().addAll(simDetailBox, archetypeGrid, commodBox);
 		mainView.getChildren().addAll(sideView, cycicBox);
 		
 		setContent(mainView);
@@ -461,7 +444,10 @@ public class Cycic extends ViewBase{
 		months.put("December", "11");
 	}
 	public void details(){
-		
+		Label simDets = new Label("Simulation Details");
+		simDets.setTooltip(new Tooltip("The top level details of the simulation."));
+		simDets.setFont(new Font("Times", 16));
+		simInfo.add(simDets, 0, 0);
 		TextField duration = VisFunctions.numberField();
 		duration.setMaxWidth(150);
 		duration.setPromptText("Length of Simulation");
@@ -471,8 +457,8 @@ public class Cycic extends ViewBase{
 				Cycic.workingScenario.simulationData.duration = newValue;
 			}
 		});
-		simInfo.add(new Label("Duration (Months)"), 0, 0);
-		simInfo.add(duration, 1, 0);
+		simInfo.add(new Label("Duration (Months)"), 0, 1);
+		simInfo.add(duration, 1, 1);
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
@@ -488,8 +474,8 @@ public class Cycic extends ViewBase{
 			}
 		});
 		startMonth.setPromptText("Select Month");
-		simInfo.add(new Label("Start Month"), 0, 1);
-		simInfo.add(startMonth, 1, 1);
+		simInfo.add(new Label("Start Month"), 0, 2);
+		simInfo.add(startMonth, 1, 2);
 		
 		TextField startYear = VisFunctions.numberField();
 		startYear.setText(Cycic.workingScenario.simulationData.startYear);
@@ -500,50 +486,117 @@ public class Cycic extends ViewBase{
 		});
 		startYear.setPromptText("Starting Year");
 		startYear.setMaxWidth(150);
-		simInfo.add(new Label("Start Year"), 0, 2);
-		simInfo.add(startYear, 1, 2);
+		simInfo.add(new Label("Start Year"), 0, 3);
+		simInfo.add(startYear, 1, 3);
 				
 		TextArea description = new TextArea();
-		description.setMaxSize(250, 150);
+		description.setMaxSize(250, 50);
 		description.setWrapText(true);
 		description.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				Cycic.workingScenario.simulationData.description = newValue;
 			}
 		});
-		simInfo.add(new Label("Description"), 0, 3);
-		simInfo.add(description, 1, 3);
+		simInfo.add(new Label("Description"), 0, 4);
+		simInfo.add(description, 1, 4);
 		
 		TextArea notes = new TextArea();
-		notes.setMaxSize(250, 150);
+		notes.setMaxSize(250, 50);
 		notes.setWrapText(true);
 		notes.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				Cycic.workingScenario.simulationData.notes = newValue;
 			}
 		});
-		simInfo.add(new Label("Notes"), 0, 4);
-		simInfo.add(notes, 1, 4);
+		simInfo.add(new Label("Notes"), 0, 5);
+		simInfo.add(notes, 1, 5);
 		
 	
 		// Prints the Cyclus input associated with this simulator. 
-		Button output = new Button();
-		output.setText("Generate Cyclus Input");
+		Button output = new Button("Generate Cyclus Input");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-	              FileChooser fileChooser = new FileChooser();
-	              
-	              //Set extension filter
-	              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-	              fileChooser.getExtensionFilters().add(extFilter);
-	              fileChooser.setTitle("Please save as Cyclus input file.");
-	              
-	              //Show save file dialog
-	              File file = fileChooser.showSaveDialog(window);
+				FileChooser fileChooser = new FileChooser();
+
+				//Set extension filter
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+				fileChooser.getExtensionFilters().add(extFilter);
+				fileChooser.setTitle("Please save as Cyclus input file.");
+				fileChooser.setInitialFileName("*.xml");
+				//Show save file dialog
+				File file = fileChooser.showSaveDialog(window);
 				OutPut.output(file);
 			}
 		});
-		simInfo.add(output, 0, 5);
+		simInfo.add(output, 0, 6);
+		
+		Button runInput = new Button("RUN!");
+		runInput.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+				String cycicTemp = "cycic"+tempHash;
+				try {
+					File temp = File.createTempFile(cycicTemp, ".xml");
+					FileWriter fileOutput = new FileWriter(temp);
+					BufferedWriter buffOut = new BufferedWriter(fileOutput);
+					
+					Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				
+			}
+		});
+		runInput.setStyle("-fx-fill: GREEN;"
+		                + "-fx-border-width: 1;"
+		                + "-fx-border-color: black");
+		simInfo.add(runInput, 2,6);
+		
+	}
+	
+	public void createArchetypeBar(GridPane grid){
+		ComboBox<String> archetypes = new ComboBox<String>();
+		for(int i = 0; i < XMLReader.facilityList.size(); i++){
+			archetypes.getItems().add(XMLReader.facilityList.get(i));
+		}
+		
+		archetypes.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+					if(DataArrays.simFacilities.get(i).getName() == archetypes.getValue()){
+						return;
+					}
+				}
+				String string;
+				StringBuilder sb = new StringBuilder();
+				StringBuilder sb1 = new StringBuilder();
+				try {
+
+					Process proc;
+					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+archetypes.getValue()); 
+					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					while((string = read.readLine()) != null){
+						sb.append(string);
+					}
+					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+archetypes.getValue());
+					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+					while((string = read1.readLine()) != null){
+						sb1.append(string);
+					}
+					facilityStructure test = new facilityStructure();
+					test.facilityName = archetypes.getValue().replace(":", " ").trim();
+					test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.simFacilities.add(test);
+					FacilityCircle circle = new FacilityCircle();
+					buildDnDCircle(circle, DataArrays.simFacilities.size()-1, test.facilityName);
+					nodesPane.getChildren().addAll(circle,circle.text);
+				} catch (Exception eq) {
+					
+				}
+			}
+		});
+		archetypeGrid.add(new Label("Add Archetype to Simulation"), 0, 1);
+		archetypeGrid.add(archetypes, 1, 1);
 	}
 	
 }

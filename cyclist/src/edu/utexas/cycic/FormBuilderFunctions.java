@@ -415,6 +415,7 @@ public class FormBuilderFunctions {
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
 		cb.setPromptText("Select a Facility");
+		cb.setValue((String) defaultValue.get(0));
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();

@@ -36,7 +36,7 @@ public class RegionView extends ViewBase{
 	public RegionView(){
 		super();
 		TITLE = (String) RegionCorralView.workingRegion.name;
-		
+		workingRegion = RegionCorralView.workingRegion;
 		//Institution list view for the region.
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
