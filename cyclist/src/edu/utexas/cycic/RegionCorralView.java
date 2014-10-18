@@ -61,11 +61,12 @@ public class RegionCorralView extends ViewBase {
 							}
 						}
 						event.consume();
-						Optional<String> response =  Dialogs.create()
+						/*Optional<String> response =  Dialogs.create()
 								.title("Name Region")
 								.message("Enter Region Name")
 								.showTextInput();
-						region.name = response.get();
+						region.name = response.get();*/
+						region.name = "";
 						workingRegion = region;
 						FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
 						regionNode.regionCircle = RegionShape.addRegion((String)region.name, region);

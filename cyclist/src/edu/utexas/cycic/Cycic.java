@@ -88,10 +88,7 @@ public class Cycic extends ViewBase{
 		init();
 	}
 	public static final String TITLE = "Cycic";
-	static Pane pane = new Pane(){
-		{
-		}
-	};
+	static Pane pane = new Pane();
 	static facilityNode workingNode = null;
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
@@ -198,22 +195,21 @@ public class Cycic extends ViewBase{
 						}
 					}
 					event.consume();
-					Optional<String> response =  Dialogs.create()
+					/*Optional<String> response =  Dialogs.create()
 							.title("Name Facility")
 							.message("Enter Facility Name")
 							.showTextInput();
 					if(response.isPresent()){
-						facility.name = response.orElse("");
-						facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
-						facility.cycicCircle.setCenterX(event.getX());
-						facility.cycicCircle.setCenterY(event.getY());
-						facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
-						facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
-						facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
-						FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);
-					} else {
-						return;
-					}				}
+						facility.name = response.orElse("");*/
+					facility.name = "";
+					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
+					facility.cycicCircle.setCenterX(event.getX());
+					facility.cycicCircle.setCenterY(event.getY());
+					facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
+					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
+					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
+					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);			
+				}
 			}
 		});
 		setTitle(TITLE);

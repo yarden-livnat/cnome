@@ -180,7 +180,7 @@ public class XMLReader {
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
-				//ex.printStackTrace();
+				
 			}
 		} else {	
 			cycicResize(dataArray);

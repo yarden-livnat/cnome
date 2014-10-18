@@ -109,8 +109,6 @@ public class FormBuilderFunctions {
 
 				node.cycicCircle.tooltip.setText(newValue);
 				node.sorterCircle.tooltip.setText(newValue);
-				node.cycicCircle.rgbColor=VisFunctions.stringToColor(newValue);;
-				node.cycicCircle.setFill(Color.rgb(node.cycicCircle.rgbColor.get(0), node.cycicCircle.rgbColor.get(1), node.cycicCircle.rgbColor.get(2)));
 			}
 		});
 		return textField;
@@ -135,14 +133,6 @@ public class FormBuilderFunctions {
 
 				regionNode.regionCircle.name.equals(newValue);
 				regionNode.regionCircle.text.setText(newValue);
-				regionNode.regionCircle.rgbColor = VisFunctions.stringToColor(newValue);
-				regionNode.regionCircle.setFill(Color.rgb(regionNode.regionCircle.rgbColor.get(0), regionNode.regionCircle.rgbColor.get(1), regionNode.regionCircle.rgbColor.get(2)));
-				// Setting font color for visibility //
-				if(VisFunctions.colorTest(regionNode.regionCircle.rgbColor) == true){
-					regionNode.regionCircle.text.setTextFill(Color.BLACK);
-				}else{
-					regionNode.regionCircle.text.setTextFill(Color.WHITE);
-				}
 			}
 		});
 		return textField;
