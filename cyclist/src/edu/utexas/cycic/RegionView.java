@@ -80,13 +80,9 @@ public class RegionView extends ViewBase{
 			}
 		});*/
 		
-		Button button = new Button();
+		Label button = new Label(RegionCorralView.workingRegion.type);
 		button.setText(RegionCorralView.workingRegion.type);
-		button.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				System.out.println(workingRegion.regionData);
-			}
-		});
+
 		topGrid.add(button, 2, 0);
 		
 		// Code to add new institution to region.
@@ -245,15 +241,11 @@ public class RegionView extends ViewBase{
 						}
 					} else {
 						switch ((String) facArray.get(0)) {
-						/*case "Incommodity":
-							grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+columnNumber, rowNumber);
+						case "prototype":
+							grid.add(FormBuilderFunctions.comboBoxFac(dataArray), 1+columnNumber, rowNumber);
 							break;
-						case "Outcommodity":
-							grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;
-						case "Recipe":
-							grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+columnNumber, rowNumber);
-							break;*/
+						case "commodity":
+							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
