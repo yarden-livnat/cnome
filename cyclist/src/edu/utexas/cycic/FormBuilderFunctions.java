@@ -267,8 +267,8 @@ public class FormBuilderFunctions {
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
 
-				for (Label label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.getText());
+				for (CommodityNode label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.name.getText());
 				}
 				//cb.getItems().add("New Commodity");
 				
@@ -318,8 +318,8 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Label label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.getText());
+				for (CommodityNode label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.name.getText());
 				}
 				//cb.getItems().add("New Commodity");
 				
@@ -396,8 +396,8 @@ public class FormBuilderFunctions {
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
-				for (Label label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.getText());
+				for (CommodityNode label: DataArrays.CommoditiesList){
+					cb.getItems().add(label.name.getText());
 				}
 				//cb.getItems().add("New Commodity");
 			}

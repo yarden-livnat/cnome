@@ -117,6 +117,7 @@ public class InstitutionView extends ViewBase{
 						tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
 					}
 				}
+				tempInstit.type = (String) typeOptions.getValue();
 				FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
 				formBuilder(workingInstit.institStruct, workingInstit.institData);
 				DataArrays.institNodes.add(tempInstit);
@@ -147,59 +148,6 @@ public class InstitutionView extends ViewBase{
 			@SuppressWarnings("unchecked")
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				if (newValue == null){
-					
-				} else if(newValue == "New Institution"){
-					grid.getChildren().clear();
-					rowNumber = 1;
-					instituteNode tempInstit = new instituteNode();
-					/*Dialog dlg = new Dialog(grid, "Institution Name");
-					dlg.getActions().add(Dialog.Actions.OK);
-					GridPane dlgGrid = new GridPane();
-					TextField txtName = new TextField();
-					txtName.textProperty().addListener(new ChangeListener<String>(){
-						public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-							tempInstit.name = newValue;
-						}
-					});
-					dlgGrid.add(new Label("Name"), 0, 0);
-					dlgGrid.add(txtName, 1, 0);
-					ComboBox cbType = new ComboBox();
-					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-						cbType.getItems().add(DataArrays.simInstitutions.get(i).institName);
-					}
-					cbType.setOnAction(new EventHandler<Event>(){
-						public void handle(Event event) {
-							tempInstit.type = (String) cbType.getValue();
-							for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-								if (DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) cbType.getValue())){
-									tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
-								}
-							}			
-						}
-					});
-					dlgGrid.add(new Label("Type"), 0, 1);
-					dlgGrid.add(cbType, 1, 1);
-					dlg.setContent(dlgGrid);
-					dlg.show();*/
-					tempInstit.name = "";
-					workingInstit = tempInstit;
-					for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(structureCB.getValue())){
-							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
-						}
-					}
-					tempInstit.type = structureCB.getValue();
-					//System.out.println(workingInstit.institStruct);
-					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
-					formBuilder(workingInstit.institStruct, workingInstit.institData);
-					DataArrays.institNodes.add(tempInstit);
-					facilityList.getItems().clear();
-					prototypeList.getItems().clear();
-					Label institutionName = new Label("Name");
-					TextField nameTextField = FormBuilderFunctions.institNameBuilder(workingInstit);				
-					grid.add(institutionName, 0, 0);
-					grid.add(nameTextField, 1, 0);
-					typeLabel.setText(workingInstit.type);
 				} else {
 					rowNumber = 1;
 					grid.getChildren().clear();

@@ -31,7 +31,7 @@ public class OutPut {
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
 				Document doc = docBuilder.newDocument();
-				Element rootElement = doc.createElement("Simulation");
+				Element rootElement = doc.createElement("simulation");
 				doc.appendChild(rootElement);
 
 				// General Simulation Information
@@ -43,7 +43,7 @@ public class OutPut {
 				archetypeSetup(doc, rootElement);
 
 				// Commodities
-				for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
+				for(CommodityNode commod: CycicScenarios.workingCycicScenario.CommoditiesList){
 					commodityBuilder(doc, rootElement, commod);
 				}			
 				// Facilities
@@ -61,14 +61,9 @@ public class OutPut {
 					// Building the institutions within regions.
 					for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 						for (String instit: region.institutions){
-							if (institution.name == instit) {
+							if (institution.name.equalsIgnoreCase(instit)) {
 								Element institID = doc.createElement("institution");
 								regionID.appendChild(institID);
-								for(String facility: institution.availPrototypes) {
-									Element allowedProto = doc.createElement("availableprototype");
-									allowedProto.appendChild(doc.createTextNode(facility));
-									institID.appendChild(allowedProto);								
-								}
 								Element initFacList = doc.createElement("initialfacilitylist");
 								for(facilityItem facility: institution.availFacilities) {
 									Element entry = doc.createElement("entry");
@@ -81,7 +76,7 @@ public class OutPut {
 									initFacList.appendChild(entry);
 								}
 								institID.appendChild(initFacList);
-								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, "DeployInstit");
+								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.type.split(" ")[1]);
 							}
 						}
 					}
@@ -92,7 +87,7 @@ public class OutPut {
 					recipeBuilder(doc, rootElement, recipe);
 				}
 
-				saveFile(doc, rootElement);
+				//saveFile(doc, rootElement);
 				
 				System.out.println(xmlToString(doc));
 				
@@ -183,12 +178,14 @@ public class OutPut {
 	 * substructures built in this function.
 	 * @param commodity Label containing the commodity name.
 	 */
-	public static void commodityBuilder(Document doc, Element rootElement, Label commodity){
+	public static void commodityBuilder(Document doc, Element rootElement, CommodityNode commodity){
 		Element commod = doc.createElement("commodity");
 		Element commodName = doc.createElement("name");
-		commodName.appendChild(doc.createTextNode(commodity.getText()));
+		commodName.appendChild(doc.createTextNode(commodity.name.getText()));
 		commod.appendChild(commodName);
-		
+		Element commodPrior = doc.createElement("solution_priority");
+		commodPrior.appendChild(doc.createTextNode(commodity.priority.toString()));
+		commod.appendChild(commodPrior);
 		rootElement.appendChild(commod);
 	}
 	
@@ -212,7 +209,7 @@ public class OutPut {
 		recipeEle.appendChild(recipeBasis);
 		
 		for(isotopeData iso : recipe.Composition){
-			Element isotope = doc.createElement("isotope");
+			Element isotope = doc.createElement("nuclide");
 			recipeEle.appendChild(isotope);
 			
 			Element isoID = doc.createElement("id");
@@ -298,7 +295,6 @@ public class OutPut {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void facilityDataElement(Document doc, Element rootElement, ArrayList<Object> structArray, ArrayList<Object> dataArray){
-		System.out.println(structArray + " " + dataArray);
 		for (int i = 0; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
 				if (structArray.size() > 2 && !(structArray.get(2) instanceof ArrayList)){ 
@@ -513,7 +509,10 @@ public class OutPut {
 		NodeList commodityList = doc.getElementsByTagName("commodity");
 		for (int i = 0; i < commodityList.getLength(); i++){
 			Node commodity = commodityList.item(i);
-			Cycic.workingScenario.CommoditiesList.add(new Label(commodity.getTextContent()));
+			CommodityNode commod = new CommodityNode();
+			commod.name = new Label(commodity.getChildNodes().item(0).getTextContent());
+			commod.priority =  Double.parseDouble(commodity.getChildNodes().item(0).getTextContent());
+			Cycic.workingScenario.CommoditiesList.add(commod);
 		}		
 	}
 	
@@ -586,7 +585,7 @@ public class OutPut {
 				archetypeSetup(doc, rootElement);
 
 				// Commodities
-				for(Label commod: CycicScenarios.workingCycicScenario.CommoditiesList){
+				for(CommodityNode commod: CycicScenarios.workingCycicScenario.CommoditiesList){
 					commodityBuilder(doc, rootElement, commod);
 				}			
 				// Facilities

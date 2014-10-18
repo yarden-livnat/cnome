@@ -369,16 +369,27 @@ public class Cycic extends ViewBase{
 	public static void buildCommodPane(){
 		commodGrid.getChildren().clear();
 		for (int i = 0; i < Cycic.workingScenario.CommoditiesList.size(); i++){
+			CommodityNode commod = Cycic.workingScenario.CommoditiesList.get(i);
 			TextField commodity = new TextField();
-			commodity.setText(Cycic.workingScenario.CommoditiesList.get(i).getText());
+			commodity.setText(commod.name.getText());
 			commodGrid.add(commodity, 0, i );
 			final int index = i;
 			commodity.setPromptText("Enter Commodity Name");
 			commodity.textProperty().addListener(new ChangeListener<String>(){
 				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-					Cycic.workingScenario.CommoditiesList.get(index).setText(newValue);
+					commod.name.setText(newValue);
 				}
 			});
+			commodGrid.add(new Label("Priority"), 1, index);
+			TextField priority = VisFunctions.numberField();
+			priority.textProperty().addListener(new ChangeListener<String>(){
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+					commod.priority = Double.parseDouble(newValue);
+				}
+			});
+			priority.setPromptText("Enter Commodity Prioirty");
+			priority.setText("1");
+			commodGrid.add(priority, 2, index);
 			Button removeCommod = new Button();
 			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
 			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
@@ -387,7 +398,7 @@ public class Cycic extends ViewBase{
 					buildCommodPane();
 				}
 			});	
-			commodGrid.add(removeCommod, 1, index);
+			commodGrid.add(removeCommod, 3, index);
 		}
 	}
 	
@@ -396,15 +407,15 @@ public class Cycic extends ViewBase{
 	 * simulation.
 	 */
 	static public void addNewCommodity(){
-		Label commodity = new Label();
-		commodity.setText("");
+		CommodityNode commodity = new CommodityNode();
+		commodity.name.setText("");
 		Cycic.workingScenario.CommoditiesList.add(commodity);
 		TextField newCommod = new TextField();
 		newCommod.autosize();
 		newCommod.setPromptText("Enter Commodity Name");
 		newCommod.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				Cycic.workingScenario.CommoditiesList.get(Cycic.workingScenario.CommoditiesList.size()-1).setText(newValue);
+				commodity.name.setText(newValue);
 			}
 		});
 		buildCommodPane();
@@ -433,18 +444,18 @@ public class Cycic extends ViewBase{
 		monthList.add("November");
 		monthList.add("December");
 		
-		months.put("January", "0");
-		months.put("Febuary", "1");
-		months.put("March", "2");
-		months.put("April", "3");
-		months.put("May", "4");
-		months.put("June", "5");
-		months.put("July", "6");
-		months.put("August", "7");
-		months.put("September", "8");
-		months.put("October", "9");
-		months.put("November", "10");
-		months.put("December", "11");
+		months.put("January", "1");
+		months.put("Febuary", "2");
+		months.put("March", "3");
+		months.put("April", "4");
+		months.put("May", "5");
+		months.put("June", "6");
+		months.put("July", "7");
+		months.put("August", "8");
+		months.put("September", "9");
+		months.put("October", "10");
+		months.put("November", "11");
+		months.put("December", "12");
 	}
 	public void details(){
 		Label simDets = new Label("Simulation Details");
@@ -469,7 +480,7 @@ public class Cycic extends ViewBase{
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
-		Cycic.workingScenario.simulationData.startMonth = "0";
+		Cycic.workingScenario.simulationData.startMonth = "1";
 		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)));
 		startMonth.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -543,7 +554,6 @@ public class Cycic extends ViewBase{
         runRemote.setStyle("-fx-fill: green;"
                         + "-fx-border-width: 1;"
                         + "-fx-border-color: black");
-        simInfo.add(runRemote, 1, 6);
     
         Button runInput = new Button("Run Locally");
         runInput.setOnAction(new EventHandler<ActionEvent>(){
@@ -565,7 +575,10 @@ public class Cycic extends ViewBase{
         runInput.setStyle("-fx-fill: green;"
                         + "-fx-border-width: 1;"
                         + "-fx-border-color: black");
-        simInfo.add(runInput, 2,6);    
+        HBox runBox = new HBox();
+        runBox.setSpacing(5);
+        runBox.getChildren().addAll(runInput, runRemote);
+        simInfo.add(runBox, 1,6);    
     }
 
 	public void createArchetypeBar(GridPane grid){

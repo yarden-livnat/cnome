@@ -17,7 +17,7 @@ public class DataArrays{
 	
 	static ArrayList<nodeLink> Links = new ArrayList<nodeLink>();
 	
-	static ArrayList<Label> CommoditiesList = new ArrayList<Label>();
+	static ArrayList<CommodityNode> CommoditiesList = new ArrayList<CommodityNode>();
 	
 	static ArrayList<Nrecipe> Recipes = new ArrayList<Nrecipe>();
 	static ArrayList<Label> RecipesList = new ArrayList<Label>();
@@ -30,6 +30,11 @@ public class DataArrays{
 	static ArrayList<facilityStructure> simFacilities = new ArrayList<facilityStructure>();
 	static ArrayList<regionStructure> simRegions = new ArrayList<regionStructure>();
 	static ArrayList<institutionStructure> simInstitutions = new ArrayList<institutionStructure>();	
+}
+
+class CommodityNode {
+	Label name = new Label();
+	Double priority;
 }
 /**
  * 

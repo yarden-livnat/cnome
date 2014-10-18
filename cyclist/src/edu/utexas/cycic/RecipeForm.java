@@ -122,8 +122,8 @@ public class RecipeForm extends ViewBase{
 		Label basis = new Label("Basis");
 		recipeGrid.add(basis, 0, 1);
 		basisBox.getItems().clear();
-		basisBox.getItems().add("Atom");
-		basisBox.getItems().add("Mass");
+		basisBox.getItems().add("atom");
+		basisBox.getItems().add("mass");
 		basisBox.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				recipe.Basis = basisBox.getValue();
