@@ -217,7 +217,8 @@ public class Cycic extends ViewBase{
 		
 		// Temp Toolbar //
 		final GridPane grid = new GridPane();
-		grid.setStyle("-fx-background-color: #d6d6d6;");
+		grid.setStyle("-fx-background-color: #d6d6d6;"
+					+ "-fx-font-size: 14;");
 		grid.setHgap(10);
 		grid.setVgap(5);
 		createArchetypeBar(grid);
@@ -466,7 +467,7 @@ public class Cycic extends ViewBase{
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
-		
+		Cycic.workingScenario.simulationData.startMonth = "0";
 		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)));
 		startMonth.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -563,7 +564,7 @@ public class Cycic extends ViewBase{
 		archetypes.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
-					if(DataArrays.simFacilities.get(i).getName() == archetypes.getValue()){
+					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(archetypes.getValue().replace(":", " ").trim())){
 						return;
 					}
 				}
@@ -572,8 +573,7 @@ public class Cycic extends ViewBase{
 				StringBuilder sb1 = new StringBuilder();
 				try {
 
-					Process proc;
-					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+archetypes.getValue()); 
+					Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+archetypes.getValue()); 
 					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					while((string = read.readLine()) != null){
 						sb.append(string);

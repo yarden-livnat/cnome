@@ -188,6 +188,7 @@ public class InstitutionView extends ViewBase{
 							tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
 						}
 					}
+					tempInstit.type = structureCB.getValue();
 					//System.out.println(workingInstit.institStruct);
 					FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
 					formBuilder(workingInstit.institStruct, workingInstit.institData);
