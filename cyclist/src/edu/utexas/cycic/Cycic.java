@@ -530,7 +530,7 @@ public class Cycic extends ViewBase{
 		});
 		simInfo.add(output, 0, 6);
 		
-		Button runInput = new Button("RUN!");
+		Button runInput = new Button("Run Locally");
 		runInput.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
@@ -547,7 +547,7 @@ public class Cycic extends ViewBase{
 				
 			}
 		});
-		runInput.setStyle("-fx-fill: GREEN;"
+		runInput.setStyle("-fx-fill: green;"
 		                + "-fx-border-width: 1;"
 		                + "-fx-border-color: black");
 		simInfo.add(runInput, 2,6);
