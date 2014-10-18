@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -44,7 +42,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -63,11 +60,11 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.converter.TimeStringConverter;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
-
-import com.sun.xml.internal.org.jvnet.staxex.NamespaceContextEx.Binding;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -87,7 +84,6 @@ import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
 import edu.utah.sci.cyclist.core.ui.components.LineIndicator;
-import edu.utah.sci.cyclist.core.ui.components.LogAxis;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -118,29 +114,14 @@ public class ChartView extends CyclistViewBase {
 	private BooleanProperty _xForceZero = new SimpleBooleanProperty(false);
 	private BooleanProperty _yForceZero = new SimpleBooleanProperty(false);
 
-	private BooleanBinding 	_noChart = new BooleanBinding() {
-		{ super.bind(_chartProperty); }
-		@Override
-		protected boolean computeValue() {
-			return _chartProperty.get() == null;
-		}
-	};
+//	private BooleanBinding 	_noChart = new BooleanBinding() {
+//		{ super.bind(_chartProperty); }
+//		@Override
+//		protected boolean computeValue() {
+//			return _chartProperty.get() == null;
+//		}
+//	};
 	
-	private BooleanBinding _xLinearMode = new BooleanBinding() {
-		{super.bind(_xAxisMode); }
-		@Override
-		protected boolean computeValue() {
-			return _xAxisMode.get() == CyclistAxis.Mode.LINEAR;
-		}
-	};
-	
-	private BooleanBinding _yLinearMode = new BooleanBinding() {
-		{super.bind(_yAxisMode); }
-		@Override
-		protected boolean computeValue() {
-			return _xAxisMode.get() == CyclistAxis.Mode.LINEAR;
-		}
-	};
 	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
@@ -1062,7 +1043,7 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 
-		item.disableProperty().bind(_noChart);
+		item.disableProperty().bind(Bindings.isNull(_chartProperty));
 		contextMenu.getItems().add(item);
 		button.setOnMousePressed(new EventHandler<Event>() {
 			@Override
