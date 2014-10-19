@@ -45,6 +45,7 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
@@ -225,8 +226,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	}
 	
 	@Override
-	public void restore(IMemento memento, Model model) {	
-		super.restore(memento, model);
+	public void restore(IMemento memento, Context ctx) {	
+		super.restore(memento, ctx);
 		removeOldViews();
 		if(memento != null){
 			IMemento[] tools = memento.getChildren("Tool");
@@ -245,7 +246,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 					Tool tool = ToolsLibrary.createTool(toolName);
 					addTool(tool,x,y);
 					((Region)tool.getView()).setPrefSize(width, height);
-					tool.getPresenter(_localBus).restore(toolMemento, model);
+					tool.getPresenter(_localBus).restore(toolMemento, ctx);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -624,11 +625,10 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	 public Boolean getDirtyFlag(){
 		if(super.getDirtyFlag()){
 			return true;
-		}else{
-			for(Tool tool: _tools){
-				if(tool.getPresenter(_localBus).getDirtyFlag()){
-					return true;
-				}
+		}
+		for(Tool tool: _tools){
+			if(tool.getPresenter(_localBus).getDirtyFlag()){
+				return true;
 			}
 		}
 		return false;

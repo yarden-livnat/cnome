@@ -44,6 +44,7 @@ import javafx.scene.layout.VBox;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -270,6 +271,14 @@ public class ViewBase extends BorderPane implements View {
 	public void select() { 
 		if (_onSelectAction != null) 
 			_onSelectAction.call();
+	}
+	
+	public void save(IMemento memento) {
+		// allow a derived class to save its state
+	}
+	
+	public void restore(IMemento memento) {
+		// allow a derived class to restore its state
 	}
 	
 	protected void enableDragging(Boolean value) {

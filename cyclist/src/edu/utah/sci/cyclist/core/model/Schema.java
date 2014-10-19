@@ -23,6 +23,7 @@
 package edu.utah.sci.cyclist.core.model;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.Vector;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
@@ -31,13 +32,18 @@ import edu.utah.sci.cyclist.core.util.SQL;
 
 
 
-public class Schema {
+public class Schema implements Resource {
 
+	private String _id = UUID.randomUUID().toString();
 	private Table _table;
 	private Vector<Field> _fields = new Vector<Field>();
 	
 	public Schema(Table table) {
 		_table = table;
+	}
+	
+	public String getUID() {
+		return _id;
 	}
 	
 	public Table getTable() {
@@ -104,22 +110,21 @@ public class Schema {
 
 	// Save the schema
 	public void save(IMemento memento) {
-
-		// Create the child memento
 		for(Field field: _fields){
 			field.save(memento.createChild("field"));
 		}
 	}
 
 	// Restore the schema
-	public void restore(IMemento memento) {
-
+	public void restore(IMemento memento, Context ctx) {
+		_id = memento.getID();
+		
 		// Restore each field
 		IMemento[] list = memento.getChildren("field");
 		for(IMemento fieldMemento: list){
 			Field field = new Field();
 			field.setTable(_table);
-			field.restore(fieldMemento);
+			field.restore(fieldMemento, ctx);
 			addField(field);
 		}
 	}
@@ -127,14 +132,15 @@ public class Schema {
 	/*
 	 * Restores the schemas of tables, defined in the simulation configuration file.
 	 */
-	public void restoreSimulated(IMemento memento) {
+	public void restoreSimulated(IMemento memento, Context ctx) {
+		_id = memento.getID();
 
 		// Restore each field
 		IMemento[] list = memento.getChildren("field");
 		for(IMemento fieldMemento: list){
 			Field field = new Field();
 			field.setTable(_table);
-			field.createFromConfig(fieldMemento);
+			field.createFromConfig(fieldMemento, ctx);
 			addField(field);
 		}
 	}

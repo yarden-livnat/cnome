@@ -41,28 +41,32 @@ import javax.sql.DataSource;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
 
-public class CyclistDatasource implements DataSource {
+public class CyclistDatasource implements DataSource, Resource {
 	static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CyclistDatasource.class);
 
 	private Properties _properties = new Properties();
 	private transient PrintWriter _logger;
 	private String _url;
 	private boolean _ready = false;
+	private String _id = UUID.randomUUID().toString();
 	
 	// SQLite hack
-//	private boolean _isSQLite = false;
 	private final Semaphore _SQLiteSemaphore = new Semaphore(1, true);
 	private Connection _SQLiteConnection = null;
 	private static final String SQLITE_PREFIX = "jdbc:sqlite:/";
 	
 	
 	public CyclistDatasource() {
-		_properties.setProperty("uid", UUID.randomUUID().toString());
+//		_properties.setProperty("uid", UUID.randomUUID().toString());
 	}		
 
+	public String getUID() {
+		return _id;
+	}
+	
 	// Save this data source
 	public void save(IMemento memento) {
-				
+		memento.putString("UID", _id);
 		// Set the url
 		memento.putString("url", getURL());
 				
@@ -75,7 +79,9 @@ public class CyclistDatasource implements DataSource {
 	}
 	
 	// Restore this data source
-	public void restore(IMemento memento){
+	public void restore(IMemento memento, Context ctx){		
+		_id = memento.getString("UID");
+		ctx.put(_id, this);
 		
 		// Get all of the keys	
 		String[] keys = memento.getAttributeKeys();
@@ -140,10 +146,6 @@ public class CyclistDatasource implements DataSource {
 
 	public String getURL() {
 		return _url;
-	}
-
-	public String getUID(){
-		return (String) _properties.get("uid");
 	}
 	
 	public boolean isReady() {

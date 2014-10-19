@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
@@ -36,4 +37,7 @@ public interface CyclistView extends View {
 	
 	ObservableList<Filter> remoteFilters();
 	ObservableList<Filter> filters();
+	
+	void save(IMemento memento);
+	void restore(IMemento memento);
 }

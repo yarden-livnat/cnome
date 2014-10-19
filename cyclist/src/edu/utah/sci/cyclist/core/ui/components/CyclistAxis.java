@@ -72,7 +72,6 @@ public class CyclistAxis extends NumAxis {
 	@Override
 	protected Object autoRange(double minValue, double maxValue, double length, double labelSize) {
 		double[] range = (double [])super.autoRange(minValue, maxValue, length, labelSize);
-//		System.out.println("autoRange:"+range[0]+", "+range[1]);
 		if (getMode() == Mode.LOG) {		
 			if (range[1] < 1) {
 				range[1] = 1;
@@ -97,9 +96,9 @@ public class CyclistAxis extends NumAxis {
     			double upperBound = drange[1];
     			setLowerBound(lowerBound);
     			setUpperBound(upperBound);
-    			if (lowerBound< 1) {
-    				lowerBound = 1;
-    			}
+//    			if (lowerBound< 1) {
+//    				lowerBound = 1;
+//    			}
     			if (animate) {
     				System.out.println("setRange animate not implemented yet.");
     			}
@@ -203,10 +202,13 @@ public class CyclistAxis extends NumAxis {
 		if (getMode() == Mode.LINEAR)
 			return super.getDisplayPosition(value);
 		
+		if (value.doubleValue() == 0) return 0;
+		
+		double logValue = value.doubleValue() > 0 ? Math.log10(value.doubleValue()) : 0;
 		double lowerBound = getLowerBound();
 		double logLowerBound = Math.log10(lowerBound);
 		double delta = Math.log10(getUpperBound()) - logLowerBound ;
-		double deltaV = Math.log10(value.doubleValue()) - logLowerBound;
+		double deltaV = logValue - logLowerBound;
 		if (getSide().isVertical()) {
 			return (1. - ((deltaV) / delta)) * getHeight();
 		} else {

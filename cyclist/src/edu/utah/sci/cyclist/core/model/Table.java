@@ -55,7 +55,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 
-public class Table {
+public class Table implements Resource {
 
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
@@ -75,6 +75,7 @@ public class Table {
 		CHOSEN_MAX
 	}
 	
+	private String _id = UUID.randomUUID().toString();
 	private String _alias;
 	private String _name;
 	private Schema _schema = new Schema(this);
@@ -96,6 +97,7 @@ public class Table {
 	public Table() {
 		this("");
 	}
+	
 	public Table(String name) {
 		_name = name;
 		_alias = name;
@@ -115,28 +117,20 @@ public class Table {
         extractSchema();
 	}
 	
+	public String getUID() {
+		return _id;
+	};
+	
     // Save the table
 	public void save(IMemento memento) {
-		
-		// Set the name
 		memento.putString("name", getName());
-		
-		// Set the alias
 		memento.putString("alias", getAlias());
-			
-		// Save the schema
 		_schema.save(memento.createChild("Schema"));
-		
-		// Save the uid of the data source
-		memento.putString("datasource-uid", _datasource.getUID());
-		
-		// Save the location of the data source
+		if (_datasource != null)
+			memento.putString("datasource-uid", _datasource.getUID());
 		memento.putString("source-location", _sourceLocation.toString());
-		
-		// Save the subset
 		memento.putInteger("subset", _dataSubset);
-		
-		// Save the map
+
 		IMemento mapMemento = memento.createChild("property-map");
 
 		// Set things saved in the properties map
@@ -164,23 +158,16 @@ public class Table {
 	}
 	
 	// Restore the table
-	public void restore(IMemento memento, ObservableList<CyclistDatasource> sources){
-	
-		// Get the name
+	public void restore(IMemento memento, Context ctx ){
+		_id = memento.getString("UID");
+		ctx.put(_id, this);
+		
 		setName(memento.getString("name"));
-		
-		 // Get the alias
 		setAlias(memento.getString("alias"));
-		
-		// Get the number of rows
-//		_numRows = memento.getInteger("NumRows");
 
 		// Get the datasource
-		String datasourceUID = memento.getString("datasource-uid");
-		for(CyclistDatasource source: sources){
-			if(source.getUID().equals(datasourceUID))
-				setDataSource(source);
-		}
+		String datasourceId = memento.getString("datasource-uid");
+		setDataSource(ctx.get(datasourceId, CyclistDatasource.class));
 		
 		// Get the location of the data source
 		setSourceLocation(memento.getString("source-location"));
@@ -219,7 +206,7 @@ public class Table {
 		
 		// Restore the schema
 		Schema schema = new Schema(this);
-		schema.restore(memento.getChild("Schema"));
+		schema.restore(memento.getChild("Schema"), ctx);
 		setSchema(schema);
 //		extractSchema();
 		
@@ -256,13 +243,18 @@ public class Table {
 	 * Restores table from the simulation configuration file.
 	 * Restores only the information which is relevant to the simulation.
 	 */
-	public void restoreSimulated(IMemento memento){
+	public void restoreSimulated(IMemento memento, Context ctx){
+		_id = memento.getString("UID");
 		setName(memento.getString("name"));
+		if (_id == null) _id = getName();
+		ctx.put(_id, this);
+		System.out.println("restore table: "+_id);
+		
 		setDataSource(null);
 		
 		// Restore the schema
 		Schema schema = new Schema(this);
-		schema.restoreSimulated(memento.getChild("Schema"));
+		schema.restoreSimulated(memento.getChild("Schema"), ctx);
 		setSchema(schema);
 		_isStandardSimulation = true;
 	}

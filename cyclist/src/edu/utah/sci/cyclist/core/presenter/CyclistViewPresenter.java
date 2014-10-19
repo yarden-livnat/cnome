@@ -6,7 +6,6 @@ import java.util.List;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.notification.CyclistFilterNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
@@ -14,16 +13,15 @@ import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
 import edu.utah.sci.cyclist.core.event.notification.CyclistSimulationNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.model.Blob;
-import edu.utah.sci.cyclist.core.model.Field;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Filter;
-import edu.utah.sci.cyclist.core.model.Model;
+import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
 
-public class CyclistViewPresenter extends ViewPresenter {
+public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 	private SelectionModel<Table> _selectionModelTbl = new SelectionModel<Table>();
 	private SelectionModel<Simulation> _selectionModelSim = new SelectionModel<Simulation>();
 	private Boolean _dirtyFlag = false;
@@ -34,6 +32,12 @@ public class CyclistViewPresenter extends ViewPresenter {
 		addListeners();
 	}
 
+	@Override
+    public String getUID() {
+		// not used
+	    return null;
+    }
+	
 	public CyclistView getView() {
 		return (CyclistView) super.getView();
 	}
@@ -176,7 +180,6 @@ public class CyclistViewPresenter extends ViewPresenter {
 						removeSimulationData();
 					}
 				}
-			
 			});
 		}
 	}
@@ -189,46 +192,39 @@ public class CyclistViewPresenter extends ViewPresenter {
 	@Override
 	public void save(IMemento memento) {
 		super.save(memento);
-		//Tables
+		// Tables
+		IMemento group = memento.createChild("tables");
 		for (SelectionModel<Table>.Entry entry : getTableRecords()){
-			//Saves only the local (non-remote) tables
+			// save only the local (non-remote) tables
 			if(!entry.remote){
 				Table table = entry.item;
-				IMemento tableMemento = memento.createChild("Table");
-				tableMemento.putString("name", table.getName());
-				String dataSourceUid = table.getDataSource()!=null?table.getDataSource().getUID():"";
-				tableMemento.putString("dataSource", dataSourceUid);
-				//tableMemento.putString("uid", table.getProperty("uid").toString());
-			}
-			if(_selectionModelTbl.getSelected() != null){
-				memento.putString("selectedTable", _selectionModelTbl.getSelected().getName() );
-				String selectedTblDs = 
-						(_selectionModelTbl.getSelected().getDataSource()!=null) ? _selectionModelTbl.getSelected().getDataSource().getUID():"";
-				memento.putString("selectedTblDs", selectedTblDs);
+				group.createChild("local-table").putString("ref-uid", table.getUID());
 			}
 		}
+		if (_selectionModelTbl.getSelected() != null) {
+			memento.createChild("selected-table").putString("ref-uid", _selectionModelTbl.getSelected().getUID() );
+		}
+
 		//Simulations
+		group = memento.createChild("simulations");
 		for (SelectionModel<Simulation>.Entry entry : getSimulationRecords()){
 			//Saves only the local (non-remote) tables
 			if(!entry.remote){
 				Simulation simulation = entry.item;
-				IMemento simMemento = memento.createChild("Simulation");
-				simMemento.putString("id", simulation.getSimulationId().toString());
-			}
-			if(_selectionModelSim.getSelected() != null){
-				memento.putString("selectedSim", _selectionModelSim.getSelected().getSimulationId().toString());
+				group.createChild("simulation").putString("ref-uid", simulation.getUID());
 			}
 		}
-		//Filters
-		for(Filter filter :getView().filters() ){
-			IMemento filterMemento = memento.createChild("Filter");
-			filterMemento.putString("field", filter.getField().getName());
-			Table tbl = filter.getField().getTable();
-			filterMemento.putString("table", tbl.getName());
-			String tblDs = (tbl.getDataSource()!=null) ? tbl.getDataSource().getUID():"";
-			filterMemento.putString("tblDs", tblDs);
+		if(_selectionModelSim.getSelected() != null) {
+			memento.createChild("selected-simulation").putString("ref-uid", _selectionModelSim.getSelected().getUID());
 		}
 		
+		//Filters
+		group = memento.createChild("filters");
+		for(Filter filter :getView().filters() ){
+			filter.save(group.createChild("filter"));
+		}
+		
+		getView().save(memento.createChild("view"));
 		//All the changes are saved - dirty flag should be reset.
 		_dirtyFlag = false;
 	}
@@ -239,73 +235,58 @@ public class CyclistViewPresenter extends ViewPresenter {
 	 * And the last selected table and simulation.
 	 */
 	@Override
-	public void restore(IMemento memento, Model model) {	
-		super.restore(memento, model);
+	public void restore(IMemento memento, Context ctx) {	
+		super.restore(memento, ctx);
 		
-		//Clear the old data 
+		String ref;
+		IMemento node;
+		
+		// clear the old data 
 		//(If loading data after changing workspace there might be some old data from the previous ws)
 		clearData();
 		
-		
-		//Restore the non-remote tables
-		IMemento[] tables = memento.getChildren("Table");
-		for(IMemento table : tables){
-			String name = table.getString("name");
-			String dataSource = table.getString("dataSource");
-			Table tbl = findTable(name, dataSource, model.getTables());
-			if(tbl != null){
-				addTable(tbl, false, false, false);
-			}
-			
-		}
-		//Retore the selected table.
-		String selectedName = memento.getString("selectedTable");
-		String selectedTblDs = memento.getString("selectedTblDs");
-		for (SelectionModel<Table>.Entry entry : getTableRecords()){
-			Table table = entry.item;
-			if(table.getName().equals(selectedName)){
-				if(table.getDataSource() == null || table.getDataSource().getUID().equals(selectedTblDs)){
-					getSelectionModelTbl().itemSelected(table, true);
-				}
-			}
+		// restore local tables
+		IMemento group = memento.getChild("tables");
+		for(IMemento child :  group.getChildren("local-table")) {
+			System.out.println("lookup table: "+child.getString("ref-uid"));
+			Table table = ctx.get(child.getString("ref-uid"), Table.class);
+			addTable(table, false, false, false);	
 		}
 		
-		//Restore the non-remote simulations
-		IMemento[] simulations = memento.getChildren("Simulation");
-		for(IMemento simulation : simulations){
-			String id = simulation.getString("id");
-			Simulation sim = findSimulation(id, model.getSimulations());
-			if(sim != null){
+		// restore selected table.
+		node = memento.getChild("selected-table");
+		if (node != null ) {
+			Table table = ctx.get(node.getString("ref-uid"), Table.class);
+			getSelectionModelTbl().itemSelected(table, true);
+		}
+		
+		// restore the non-remote simulations
+		group = memento.getChild("simulations");
+		for (IMemento child : group.getChildren("simulation")) {
+			Simulation sim = ctx.get(child.getString("ref-uid"), Simulation.class);
+			if(sim != null) {
 				getView().addSimulation(sim, false /*remote*/, false /* active */);
 				getSelectionModelSim().addItem(sim, false /*remote*/, false /*active*/, false /*remoteActive*/);
 			}
 		}
 		
-		//Restore the selected simulation.
-		String selectedSim = memento.getString("selectedSim");
-		for (SelectionModel<Simulation>.Entry entry : getSimulationRecords()){
-			Simulation simulation = entry.item;
-			if(simulation.getSimulationId().toString().equals(selectedSim)){
-				getSelectionModelSim().itemSelected(simulation, true);
-			}
+		// restore the selected simulation.
+		node = memento.getChild("selected-simulation");
+		if (node != null) {
+			ref = node.getString("ref-uid");
+			Simulation sim = ctx.get(ref, Simulation.class);
+			getSelectionModelSim().itemSelected(sim, true);
 		}
 		
-		//restore local filters
-		IMemento[] filters = memento.getChildren("Filter");
-		for(IMemento filterData : filters){
-			String fieldName = filterData.getString("field");
-			String tableName = filterData.getString("table");
-			String tblDs = filterData.getString("tblDs");
-			Table table = findTable(tableName, tblDs, model.getTables());
-			if(table != null){
-				Field field = table.getSchema().getField(fieldName);
-			
-				Field fieldCopy = new Field(field);
-				Filter filter = new Filter(fieldCopy);
-				getView().addFilter(filter);
-			}
+		// restore local filters
+		group = memento.getChild("filters");
+		for(IMemento child :  group.getChildren("filter")) {
+			Filter filter = new Filter();
+			filter.restore(child, ctx);
+			getView().addFilter(filter);
 		}
 		
+		getView().restore(memento.createChild("view"));
 		//If the dirty flag was set during restore - reset it back to false.
 		_dirtyFlag = false;
 	}

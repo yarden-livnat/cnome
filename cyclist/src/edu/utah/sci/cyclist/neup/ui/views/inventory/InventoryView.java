@@ -19,6 +19,7 @@ import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -66,6 +67,7 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
@@ -418,9 +420,55 @@ public class InventoryView extends CyclistViewBase {
 	
 	private void setupActions() {
 		List<Node> actions = new ArrayList<>();
+		actions.add(createAxisOptions());
 		actions.add(createModeActions());
 		actions.add(createExportActions());
 		addActions(actions);
+	}
+	
+	private Node createAxisOptions() {
+		final Button btn = new Button("Axis", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		btn.getStyleClass().add("flat-button");
+		
+		final ContextMenu menu = new ContextMenu();
+		btn.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				menu.show(btn, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		MenuItem item = new MenuItem("Y linear", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_chart.axisMode().set(CyclistAxis.Mode.LINEAR);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LINEAR));
+		menu.getItems().add(item);
+		
+		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_chart.axisMode().set(CyclistAxis.Mode.LOG);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LOG));
+		menu.getItems().add(item);
+		
+		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(_chart.forceZero());
+		menu.getItems().add(item);
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				_chart.forceZero().set(!_chart.forceZero().get());
+			}
+		});
+		
+		return btn;
 	}
 	
 	private Node createModeActions() {

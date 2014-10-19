@@ -342,7 +342,7 @@ public class MainScreen extends VBox {
 
 	private Menu createRunMenu() {
 		Menu menu= new Menu("Run");
-		_runMenuItem = new MenuItem("Submit file", GlyphRegistry.get(AwesomeIcon.EXCHANGE));
+		_runMenuItem = new MenuItem("Submit file"/*, GlyphRegistry.get(AwesomeIcon.EXCHANGE))*/);
 		_runMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+R"));
 
 		menu.getItems().add(_runMenuItem);

@@ -48,13 +48,11 @@ public class TablePresenter extends CyclistViewPresenter {
 		SingleSelection<Table> selectionModelTbl = new SingleSelection<Table>();
 		SingleSelection<Simulation> selectionModelSim = new SingleSelection<Simulation>();
 		selectionModelTbl.setOnSelectItemAction(new Closure.V2<Table, Boolean>() {
-
 			@Override
 			public void call(Table table, Boolean value) {
 				getView().selectTable(table, value);
 				
-			}
-		
+			}	
 		});
 		
 		setSelectionModelTbl(selectionModelTbl);

@@ -35,6 +35,7 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 import org.apache.log4j.Logger;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 
@@ -69,6 +70,46 @@ public class CyclusService {
 		return _jobs;
 	}
 
+	public void save(IMemento memento) {
+		for (CyclusJob job : _jobs) {
+			IMemento j_memento = memento.createChild("job");
+			j_memento.putString("id", job.getId());
+			j_memento.putString("status", job.getStatus().toString());
+			j_memento.putString("alias", job.getAlias());
+			j_memento.putString("datafile", job.getDatafilePath());
+		}
+	}
+	
+	public void restore(IMemento memento) {
+		if (memento == null) return;
+		for (IMemento j_memento : memento.getChildren("job")) {
+			CyclusJob job = CyclusJob.restore(j_memento.getString("id"));
+			job.setStatus(j_memento.getString("status"));
+			job.setAlias(j_memento.getString("alias"));
+			job.setAlias(j_memento.getString("datafile"));
+			_jobs.add(job);
+			switch (job.getStatus()) {
+			case INIT:
+				// can not happen
+			case SUBMITTED:
+				poll(job);
+				break;
+			case COMPLETED:
+				break;
+			case FAILED:
+				// noting to do
+				break;
+			case LOADING:
+				// reload
+				loadData(job);
+				break;
+			case READY:
+				// nothing to do
+				break;
+			}
+		}
+	}
+	
     private void _submit(String path, Request request) {
         CyclusJob job = new CyclusJob(path);
 

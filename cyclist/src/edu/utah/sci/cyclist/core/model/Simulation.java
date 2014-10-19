@@ -66,6 +66,10 @@ public class Simulation {
 		return copy;
 	}
 	
+	public String getUID() {
+		return _simulationId.toString();
+	}
+	
 	public ObjectProperty<String> aliasProperty() {
 		return _aliasProperty;
 	}
@@ -106,23 +110,12 @@ public class Simulation {
 		return _duration;
 	}
 	
-    /**Save the simulation alias and its date of deletion
-     * 
-     * @param memento
-     */
-	public void save(IMemento memento, String date) {
-		memento.putString("simulation-id", getSimulationId().toString());
-		memento.putString("alias", getAlias());
-		memento.putString("date", date);
-	}
-	
-	
 	/** Save the simulation
 	 * 
 	 * @param memento
 	 */
 	public void save(IMemento memento) {
-		memento.putString("simulation-id", getSimulationId().toString());
+		memento.putString("UID", getUID());
 		memento.putString("datasource-uid", _datasource.getUID());
 		memento.putString("alias", getAlias());
 		memento.putInteger("startYear", _startYear);
@@ -144,15 +137,12 @@ public class Simulation {
 	 * @param memento
 	 * @param sources - the currently existing data sources in the model
 	 */
-	public void restore(IMemento memento, ObservableList<CyclistDatasource> sources){
-		setSimulationId(memento.getString("simulation-id"));
+	public void restore(IMemento memento, Context ctx){
+		setSimulationId(memento.getString("UID"));
+		ctx.put(getUID(), this);
 
 		// Get the datasource
-		String datasourceUID = memento.getString("datasource-uid");
-		for(CyclistDatasource source: sources){
-			if(source.getUID().equals(datasourceUID))
-				setDataSource(source);
-		}
+		setDataSource(ctx.get(memento.getString("datasource-uid"), CyclistDatasource.class));
 		
 		setAlias(memento.getString("alias"));
 		setStartYear(memento.getInteger("startYear"));

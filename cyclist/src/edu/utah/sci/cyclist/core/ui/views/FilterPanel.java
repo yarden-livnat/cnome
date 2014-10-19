@@ -83,6 +83,7 @@ public class FilterPanel extends TitledPanel {
 		//super(filter.getName());
 		super(getTitle(filter), GlyphRegistry.get(AwesomeIcon.FILTER));//"FontAwesome|FILTER"));
 		_filter = filter;
+		setListeners();
 		build();
 	}
 	
@@ -127,7 +128,29 @@ public class FilterPanel extends TitledPanel {
 		_closeAction.set(handler);
 	}
 	
-	
+	private void setListeners() {
+		_filter.selectedItems().addListener(new InvalidationListener() {
+			@Override
+			public void invalidated(Observable observable) {
+				_reportChange = false;
+				
+				boolean all = true;
+				int n = _cbBox.getChildren().size();
+				for (int i=1; i<n; i++) {
+					CheckBox cb = (CheckBox)_cbBox.getChildren().get(i);
+					boolean selected = _filter.selectedItems().contains(cb.getUserData());
+					cb.setSelected(selected);
+					if (!selected) all = false;
+				}
+				if (n > 0) {
+    				CheckBox cbAll = (CheckBox)_cbBox.getChildren().get(0);
+    				cbAll.setSelected(all);
+				}
+				
+				_reportChange = true;
+			}
+		});
+	}
 	
 	private void build() {
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
@@ -234,13 +257,11 @@ public class FilterPanel extends TitledPanel {
 			
 			@Override
 			public void invalidated(Observable arg0) {
-				populateValues();
-				
+				populateValues();	
 			}
 		});
 		
-		_valuesProperty.bind(_filter.valuesProperty());
-		
+		_valuesProperty.bind(_filter.valuesProperty());		
 		
 		if (!_filter.isValid()) {
 			Field field = _filter.getField();
@@ -258,28 +279,29 @@ public class FilterPanel extends TitledPanel {
 	private void populateValues() {
 		_cbBox.getChildren().clear();
 		if (_valuesProperty.get() != null) {
-			_cbBox.getChildren().add(createAllEntry());
+			_cbBox.getChildren().add(createAllEntry(_filter.selectedItems().size() == _filter.getValues().size()));
 			for (Object item: _valuesProperty.get()) {
 				_cbBox.getChildren().add(createEntry(item));
 			}
 		}
 	}
 	
-	private Node createAllEntry() {
+	private Node createAllEntry(boolean on) {
 		CheckBox cb = new CheckBox("All");
-		cb.setSelected(true);
+		cb.setSelected(on);
 		cb.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
 			@Override
 			public void changed(ObservableValue<? extends Boolean> arg0,
 					Boolean oldValue, Boolean newValue) {
-				
-				_reportChange = false;
-				for (Node node : _cbBox.getChildren()) {
-					((CheckBox) node).setSelected(newValue);
+				if (_reportChange) {
+    				_reportChange = false;
+    				for (Node node : _cbBox.getChildren()) {
+    					((CheckBox) node).setSelected(newValue);
+    				}
+    				_reportChange = true;
+    				_filter.selectAll(newValue);
 				}
-				_reportChange = true;
-				_filter.selectAll(newValue);
 			}
 		});
 		return cb;
@@ -288,13 +310,14 @@ public class FilterPanel extends TitledPanel {
 	private Node createEntry(final Object item) {
 		CheckBox cb = new CheckBox(item.toString());
 		cb.setSelected(_filter.isSelected(item));
+		cb.setUserData(item);
 		cb.selectedProperty().addListener(new ChangeListener<Boolean>() {
-
 			@Override
 			public void changed(ObservableValue<? extends Boolean> arg0,
 					Boolean oldValue, Boolean newValue) {
-				if (_reportChange)
-					_filter.selectValue(item, newValue);		
+				if (_reportChange) {
+					_filter.selectValue(item, newValue);
+				}
 			}
 		});
 		return cb;

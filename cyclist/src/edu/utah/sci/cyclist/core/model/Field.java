@@ -25,6 +25,9 @@ package edu.utah.sci.cyclist.core.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+
+import org.apache.log4j.Logger;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -38,10 +41,13 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
+import edu.utah.sci.cyclist.core.ui.views.ChartView;
 import edu.utah.sci.cyclist.core.util.SQL;
 
-public class Field {
-	
+public class Field implements Resource {
+	static Logger log = Logger.getLogger(Field.class);
+
+	private String _id = UUID.randomUUID().toString();
 	private String _name;
 	private String _semantic;
 	private DataType _dataType;
@@ -51,7 +57,7 @@ public class Field {
 	private MapProperty<Object,Object> _rangeValuesProperty= new SimpleMapProperty<>();
 	private Map<String, Object> _properties = new HashMap<>();
 	private Boolean _isHidden = false;
-	
+
 	public Field(){
 		this("");
 	}
@@ -77,6 +83,10 @@ public class Field {
 		_selected.set(true);
 	}
 
+	public String getUID() {
+		return _id;
+	}
+	
 	public ListProperty<Object> valuesProperty() {
 		return _valuesProperty;
 	}
@@ -190,7 +200,7 @@ public class Field {
 	
 	// Save this field
 	public void save(IMemento memento) {
-	
+		memento.putString("UID", getUID());
 		memento.putString("name", _name);
 		
 		IMemento dataMemento = memento.createChild("datatype");
@@ -204,33 +214,27 @@ public class Field {
 
 		memento.putBoolean("selected", _selected.get());
 		
+		memento.createChild("table").putString("ref-uid", getTable().getUID());
+		
 		// Set things saved in the properties map
 		Set<String> keys = _properties.keySet();
 		for(String key: keys){
-			
-			// Get the value associated with this key
 			Object value = _properties.get(key);
-
-			// Create an entry memento
 			IMemento entryMemento = memento.createChild("entry");
 			entryMemento.putString("key", key);
 			
-			// If the value is null, record it
 			if(value == null)
 				entryMemento.putTextData("null");	
 			else{
-
-				// Put the type of the class
 				entryMemento.putString("class", value.getClass().toString());
 
 				// Save integers or strings as strings
 				if(value.getClass().toString().equals(String.class.toString()) || 
 						value.getClass().toString().equals(Integer.class.toString()))
 					entryMemento.putTextData(value.toString());
-				// TODO/FIXME: save some sort of Factory-ID
 				else{
-
-					System.out.println("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
+					// TODO/FIXME: save some sort of Factory-ID
+					log.error("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
 					IMemento valueMemento = entryMemento.createChild("value");
 					valueMemento.putString("value-ID", value.toString());		
 				}
@@ -239,48 +243,46 @@ public class Field {
 	}
 	
 	// Restore this field
-	public void restore(IMemento memento) {
+	public void restore(IMemento memento, Context ctx) {
 		try{
-		// Get the name of the field
-		_name = memento.getString("name");
-		
-		IMemento dataMemento = memento.getChild("datatype");
-		DataType.Role role = dataMemento.getString("role")!= "" ? DataType.Role.valueOf(dataMemento.getString("role")):null;
-		DataType.Type type = DataType.Type.valueOf(dataMemento.getString("type"));
-		DataType.Interpretation interp = dataMemento.getString("interp")!= "" ? DataType.Interpretation.valueOf(dataMemento.getString("interp")):null;
-		DataType.Classification classification = DataType.Classification.valueOf(dataMemento.getString("classification"));
-		
-		_dataType = new DataType(role, type, interp, classification);
-
-		_semantic = memento.getString("semantic");
-		_selected.set(memento.getBoolean("selected"));
-				
-		// Get the entries in the field
-		IMemento[] entries = memento.getChildren("entry");
-		for(IMemento entry:entries){
-			
-			// Get the key of the object
-			String key = entry.getString("key");
-						
-			// Get the class of the object
-			String classType = entry.getString("class");
-							
-			// If we have a string
-			if(classType.equals(String.class.toString())){
-				String value = entry.getTextData();
-				set(key, value);
-			}
-			// If we have an Integer
-			else if(classType.equals(Integer.class.toString())){
-				Integer value = Integer.parseInt(entry.getTextData());
-				set(key, value);
-			}	
-			else{
-				System.out.println("Field:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
-			}	
-		}	
+			_id = memento.getString("UID");
+			_name = memento.getString("name");
+			if (_id == null) _id = _name;
+			ctx.put(_id, this);
+    		
+    		IMemento dataMemento = memento.getChild("datatype");
+    		DataType.Role role = dataMemento.getString("role")!= "" ? DataType.Role.valueOf(dataMemento.getString("role")) : null;
+    		DataType.Type type = DataType.Type.valueOf(dataMemento.getString("type"));
+    		DataType.Interpretation interp = dataMemento.getString("interp")!= "" ? DataType.Interpretation.valueOf(dataMemento.getString("interp")) : null;
+    		DataType.Classification classification = DataType.Classification.valueOf(dataMemento.getString("classification"));
+    		
+    		_dataType = new DataType(role, type, interp, classification);
+    
+    		_semantic = memento.getString("semantic");
+    		_selected.set(memento.getBoolean("selected"));
+    		String ref = memento.getChild("table").getString("ref-uid");
+    		setTable(ctx.get(ref, Table.class));
+    				
+    		// Get the entries in the field
+    		IMemento[] entries = memento.getChildren("entry");
+    		for(IMemento entry:entries) {
+    			String key = entry.getString("key");
+    			String classType = entry.getString("class");
+    							
+    			if(classType.equals(String.class.toString())){
+    				String value = entry.getTextData();
+    				set(key, value);
+    			}
+    			else if(classType.equals(Integer.class.toString())){
+    				Integer value = Integer.parseInt(entry.getTextData());
+    				set(key, value);
+    			}	
+    			else{
+    				System.out.println("Field:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
+    			}	
+    		}	
 		} catch(NullPointerException e){
-			
+			log.error("Error while restoring filed: "+_name);
 		}
 	}
 	
@@ -288,8 +290,11 @@ public class Field {
 	 * Restores fields from the simulation configuration file.
 	 * Restores only the information which is relevant to the simulation fields.
 	 */
-	public void createFromConfig(IMemento memento) {
+	public void createFromConfig(IMemento memento, Context ctx) {
+			_id = memento.getString("UID");
 			_name = memento.getString("name");
+			if (_id == null) _id = _name;
+			ctx.put(_id,  this);
 			_semantic = memento.getString("semantic");
 			if (_semantic == null) _semantic = _name;
 			_isHidden = memento.getBoolean("isHidden");

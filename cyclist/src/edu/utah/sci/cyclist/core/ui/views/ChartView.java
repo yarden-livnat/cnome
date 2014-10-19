@@ -67,6 +67,7 @@ import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -113,15 +114,6 @@ public class ChartView extends CyclistViewBase {
 	private ObjectProperty<CyclistAxis.Mode> _yAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
 	private BooleanProperty _xForceZero = new SimpleBooleanProperty(false);
 	private BooleanProperty _yForceZero = new SimpleBooleanProperty(false);
-
-//	private BooleanBinding 	_noChart = new BooleanBinding() {
-//		{ super.bind(_chartProperty); }
-//		@Override
-//		protected boolean computeValue() {
-//			return _chartProperty.get() == null;
-//		}
-//	};
-	
 	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
@@ -238,6 +230,33 @@ public class ChartView extends CyclistViewBase {
 	public void selectSimulation(Simulation sim, boolean active) {
 		super.selectSimulation(sim, active);	
 		updateFilters();
+	}
+	
+	@Override
+	public void save(IMemento memento) {
+		if (_xArea.getFields().size() > 0) {
+			IMemento xMemento = memento.createChild("xArea");
+			for (Field f : _xArea.getFields()) {
+				f.save(xMemento.createChild("field"));
+			}
+		}
+		if (_yArea.getFields().size() > 0) {
+			IMemento yMemento = memento.createChild("yArea");
+			for (Field f : _xArea.getFields()) {
+				f.save(yMemento.createChild("field"));
+			}
+		}
+		if (_lodArea.getFields().size() > 0) {
+			IMemento lodMemento = memento.createChild("lod");
+			for (Field f : _lodArea.getFields()) {
+				f.save(lodMemento.createChild("field"));
+			}
+		}
+	}
+
+	@Override
+	public void restore(IMemento memento) {
+		
 	}
 	
 	private void updateFilters() {
