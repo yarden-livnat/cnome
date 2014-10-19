@@ -1,22 +1,19 @@
 package edu.utah.sci.cyclist.core.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.MapProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
@@ -38,7 +35,7 @@ public class Filter implements Observable, Resource {
 	private ListProperty<Object> _values = new SimpleListProperty<>();
 	private List<InvalidationListener> _listeners = new ArrayList<>();
 	private MapProperty<Object, Object> _rangeValues = new SimpleMapProperty<>();
-	private Map<Object,Object> _selectedRangeValues = new HashMap<>();
+	private ObservableMap<Object,Object> _selectedRangeValues = FXCollections.observableHashMap();
 	private  Consumer<Void> _onDSUpdated = null;
 	private Boolean _dsChanged = true;
 	private boolean _allSelected = false;
@@ -76,30 +73,6 @@ public class Filter implements Observable, Resource {
 			}
 			
 			setupListeners();
-//			_field.valuesProperty().addListener((Observable o)-> {
-//				_selectedItems.clear();  //TBD - should clear the previous values???
-//				
-//				if (getValues() != null){
-//					_selectedItems.addAll(getValues());
-//				}
-//				else{
-//					resetFilterValues();
-//				}
-//				_values.set(getValues());
-//			});
-//			
-//			_field.rangeValuesProperty().addListener((Observable o)-> {
-//				_selectedRangeValues.clear();
-//				if (_field.getRangeValues() != null){	
-//					_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-//					_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-//				}else{
-//					resetFilterValues();
-//				}
-//				
-//				_rangeValues.set(_field.getRangeValues());
-//			});
-
 		}	
 	}
 	
@@ -119,15 +92,16 @@ public class Filter implements Observable, Resource {
 		});
 		
 		_field.rangeValuesProperty().addListener((Observable o)-> {
-			_selectedRangeValues.clear();
+//			_selectedRangeValues.clear();
 			if (_field.getRangeValues() != null){	
 				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
 				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
 			}else{
-				resetFilterValues();
+//				resetFilterValues();
 			}
 			
-			_rangeValues.set(_field.getRangeValues());
+//			_rangeValues.set(_field.getRangeValues());
+			_rangeValues.set(_selectedRangeValues);
 		});
 	}
 	
@@ -137,6 +111,7 @@ public class Filter implements Observable, Resource {
 	
 	public void save(IMemento memento) {
 		_field.save(memento.createChild("field"));
+		
 		IMemento group = memento.createChild("selected");
 		// TODO: can save the class only once
 		for (Object value : _selectedItems) {
@@ -147,10 +122,9 @@ public class Filter implements Observable, Resource {
 		
 		if (_field.getRangeValues() != null) {
     		group = memento.createChild("selected-range");
-    		saveObj(group.createChild("min"), _field.getRangeValues().get(NumericRangeValues.MIN));
-    		saveObj(group.createChild("max"), _field.getRangeValues().get(NumericRangeValues.MAX));
+    		saveObj(group.createChild("select-min"), _selectedRangeValues.get(NumericRangeValues.CHOSEN_MIN));
+    		saveObj(group.createChild("select-max"), _selectedRangeValues.get(NumericRangeValues.CHOSEN_MAX));
 		}
-
 	}
 	
 	private void saveObj(IMemento memento, Object value) {
@@ -212,16 +186,16 @@ public class Filter implements Observable, Resource {
 		if (group != null) {
 			if (_field.getRangeValues() != null) {
 				_rangeValues.set(_field.getRangeValues());
-				_selectedRangeValues.put(NumericRangeValues.MIN, restoreObj(group.getChild("min")));
-	    		_selectedRangeValues.put(NumericRangeValues.MAX, restoreObj(group.getChild("max")));
+				_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
+	    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
 	    		setupListeners();
 			} else {
 	    		_field.rangeValuesProperty().addListener(new InvalidationListener() {
 					@Override
 					public void invalidated(Observable observable) {
 						_rangeValues.set(_field.getRangeValues());
-						_selectedRangeValues.put(NumericRangeValues.MIN, restoreObj(group.getChild("min")));
-			    		_selectedRangeValues.put(NumericRangeValues.MAX, restoreObj(group.getChild("max")));
+						_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
+			    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
 			    		_field.rangeValuesProperty().removeListener(this);
 			    		setupListeners();
 					}
@@ -337,8 +311,8 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public void selectMinMaxValues(Object minValue, Object maxValue){
-		_selectedRangeValues.put(NumericRangeValues.MIN, minValue);
-		_selectedRangeValues.put(NumericRangeValues.MAX, maxValue);
+		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, minValue);
+		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, maxValue);
 		invalidate();
 	}
 	

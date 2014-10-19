@@ -368,8 +368,10 @@ public class FilterPanel extends TitledPanel {
 			
 			Double min = (Double) (_map.get(NumericRangeValues.MIN) != null ? _map.get(NumericRangeValues.MIN):0.0);
 			Double max = (Double) (_map.get(NumericRangeValues.MAX) != null ? _map.get(NumericRangeValues.MAX):0.0);
+			Double chosenMin = (Double) (_map.get(NumericRangeValues.CHOSEN_MIN) != null ? _map.get(NumericRangeValues.CHOSEN_MIN) : min);
+			Double chosenMax = (Double) (_map.get(NumericRangeValues.CHOSEN_MAX) != null ? _map.get(NumericRangeValues.CHOSEN_MAX) : max);
 			
-			final RangeSlider rangeSlider = new RangeSlider(min,max,min,max);
+			final RangeSlider rangeSlider = new RangeSlider(min,max,chosenMin,chosenMax);
 			rangeSlider.setShowTickLabels(true);
 			rangeSlider.setShowTickMarks(true);
 			//rangeSlider.setOrientation(Orientation.VERTICAL);

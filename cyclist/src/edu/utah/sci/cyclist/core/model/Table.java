@@ -248,7 +248,7 @@ public class Table implements Resource {
 		setName(memento.getString("name"));
 		if (_id == null) _id = getName();
 		ctx.put(_id, this);
-		System.out.println("restore table: "+_id);
+//		System.out.println("restore table: "+_id);
 		
 		setDataSource(null);
 		
