@@ -107,6 +107,10 @@ public class DataType {
 		return _classification;
 	}
 	
+	public void setClassification(Classification c) {
+		_classification = c;
+	}
+	
 	/**
 	 * 
 	 * @return

@@ -452,21 +452,25 @@ public class ChartView extends CyclistViewBase {
 
 		for (FieldInfo xInfo : spec.xFields) {
 			int ix = xInfo.index;
-
+//			boolean convert_x = "Nuclide".equals(xInfo.field.getSemantic());
 			for (FieldInfo yInfo : spec.yFields) {
 				int iy = yInfo.index;
+//				boolean convert_y = "Nuclide".equals(yInfo.field.getSemantic());
 
 				SeriesData series = new SeriesData();
 				series.x = xInfo.field;
 				series.y = yInfo.field;
 				for (TableRow row : list) {
 					SeriesDataPoint p = new SeriesDataPoint();
+//					p.x = convert_x ? row.value[ix].toString() : row.value[ix];
+//					p.y = convert_y ? row.value[iy].toString() : row.value[iy];
 					p.x = row.value[ix];
 					p.y = row.value[iy];
 					p.attribues = hasAttributes ? Arrays.copyOfRange(row.value, nx+ny, cols) : null;
 
 					series.points.add(p);
 				}
+				
 
 				all.add(series);
 			}
@@ -518,6 +522,10 @@ public class ChartView extends CyclistViewBase {
 				for (SeriesDataPoint p : data.points) {
 					p.x = numFormater.format(p.x);
 				}
+			} else {
+				for (SeriesDataPoint p : data.points) {
+					p.x = p.x.toString();
+				}
 			}
 			break;
 		case Cdate:
@@ -535,11 +543,15 @@ public class ChartView extends CyclistViewBase {
 		// convert y
 		switch (data.y.getClassification()) {
 		case C:
-			if (pt.x instanceof String) {
+			if (pt.y instanceof String) {
 				// ignore
-			} else if (pt.x instanceof Number) {
+			} else if (pt.y instanceof Number) {
 				for (SeriesDataPoint p : data.points) {
 					p.y = numFormater.format(p.y);
+				}
+			} else {
+				for (SeriesDataPoint p : data.points) {
+					p.y = p.y.toString();
 				}
 			}
 			break;
@@ -714,9 +726,6 @@ public class ChartView extends CyclistViewBase {
 			ca.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
 			ca.mode().bind( y ? _yAxisMode : _xAxisMode);
 			axis = ca;
-//    			NumberAxis t = new NumberAxis();
-//    			t.forceZeroInRangeProperty().bind(forceZeroProperty());
-//    			axis = t;
 			break;
 		case Qi:
 			CyclistAxis cai = new CyclistAxis();
@@ -724,9 +733,6 @@ public class ChartView extends CyclistViewBase {
 			cai.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
 			cai.mode().bind( y ? _yAxisMode : _xAxisMode);
 			axis = cai;
-//    			NumberAxis a = new NumberAxis();
-//    			a.forceZeroInRangeProperty().bind(forceZeroProperty());
-//    			axis = a;
 		}
 
 		axis.setLabel(title);
