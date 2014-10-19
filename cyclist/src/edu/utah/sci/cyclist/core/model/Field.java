@@ -288,7 +288,7 @@ public class Field {
 	 * Restores fields from the simulation configuration file.
 	 * Restores only the information which is relevant to the simulation fields.
 	 */
-	public void restoreSimulated(IMemento memento) {
+	public void createFromConfig(IMemento memento) {
 			_name = memento.getString("name");
 			_semantic = memento.getString("semantic");
 			if (_semantic == null) _semantic = _name;
@@ -299,6 +299,8 @@ public class Field {
 			DataType.Type type = DataType.Type.valueOf(dataTypeMemento.getString("type"));
 			DataType.Role role = dataTypeMemento.getString("role")!= "" ? DataType.Role.valueOf(dataTypeMemento.getString("role")):null;
 			_dataType = new DataType(type, role);
+			if ("Nuclide".equals(_semantic))
+				_dataType.setClassification(DataType.Classification.C);
 			if (_dataType.getRole() == Role.MEASURE){
 				set(FieldProperties.AGGREGATION_DEFAULT_FUNC, SQL.DEFAULT_FUNCTION);
 			}

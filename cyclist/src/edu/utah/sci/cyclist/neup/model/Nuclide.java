@@ -34,6 +34,25 @@ public class Nuclide implements CyclistData {
 		return String.valueOf(_id);
 	}
 
+//	@Override
+//    public int intValue() {
+//	   return _id;
+//    }
+//
+//	@Override
+//    public long longValue() {
+//	    return _id;
+//    }
+//
+//	@Override
+//    public float floatValue() {
+//	    return _id;
+//    }
+//
+//	@Override
+//    public double doubleValue() {
+//	    return _id;
+//	}	  
 	
 	static public Nuclide create(Integer nuc) {
 		try {

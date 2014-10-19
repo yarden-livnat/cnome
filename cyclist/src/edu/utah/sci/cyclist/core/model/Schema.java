@@ -134,7 +134,7 @@ public class Schema {
 		for(IMemento fieldMemento: list){
 			Field field = new Field();
 			field.setTable(_table);
-			field.restoreSimulated(fieldMemento);
+			field.createFromConfig(fieldMemento);
 			addField(field);
 		}
 	}
