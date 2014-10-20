@@ -22,6 +22,8 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import javafx.beans.property.StringProperty;
+import edu.utah.sci.cyclist.core.model.CyclusJob;
+import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -83,6 +85,8 @@ public class Cycic extends ViewBase{
 	static ToggleGroup opSwitch = new ToggleGroup();
 	static ToggleButton localToggle = new ToggleButton("Local");
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
+    static CyclusJob _remoteDashA;
+    private static Object monitor = new Object();
 	
 	/**
 	 * 
@@ -290,6 +294,7 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
+
 		Button cyclusALocal = new Button("Cyclus -a");
 		cyclusALocal.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
 		cyclusALocal.setOnAction(new EventHandler<ActionEvent>(){
@@ -339,7 +344,28 @@ public class Cycic extends ViewBase{
         };
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
-        
+		*/
+
+        Button button2 = new Button("Remote Arche");
+        button2.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                localToggle.setSelected(false);
+                CyclistController._cyclusService.submitCmd("cyclus", "-a");
+                _remoteDashA = CyclistController._cyclusService.latestJob();
+                _remoteDashA.statusProperty()
+                    .addListener(new ChangeListener<CyclusJob.Status>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Status> observable,
+                        Status oldValue, Status newValue) {
+                        if (newValue == Status.READY) {
+                            retrieveSchema();
+                        }
+                    }
+                });
+            }
+        });
+        grid.add(button2, 9, 0);
+
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
@@ -367,14 +393,18 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-	public void retrieveSchema(){
+    public void retrieveSchema() {
 		try {
 			String string;
+            Object[] schemaLines;
+            if (localToggle.isSelected()) {
             Process readproc = Runtime.getRuntime().exec("cyclus -a");
-            
             BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-			Object[] schemaLines = schema.lines().toArray();
-			schema.close();
+                schemaLines = schema.lines().toArray();
+                schema.close();
+            } else {
+                schemaLines = _remoteDashA.getStdout().split("\n");
+            }
 			DataArrays.simFacilities.clear();
 			DataArrays.simRegions.clear();
 			DataArrays.simInstitutions.clear();

@@ -21,7 +21,12 @@ import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
+<<<<<<< HEAD
 import javafx.beans.property.StringProperty;
+=======
+import edu.utah.sci.cyclist.core.model.CyclusJob;
+import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
+>>>>>>> f74014e07287389253c3fa27d8378a54083f1d85
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -83,6 +88,8 @@ public class Cycic extends ViewBase{
 	static ToggleGroup opSwitch = new ToggleGroup();
 	static ToggleButton localToggle = new ToggleButton("Local");
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
+    static CyclusJob _remoteDashA;
+    private static Object monitor = new Object();
 	
 	/**
 	 * 
@@ -290,6 +297,7 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
+
 		Button cyclusALocal = new Button("Cyclus -a");
 		cyclusALocal.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
 		cyclusALocal.setOnAction(new EventHandler<ActionEvent>(){
@@ -328,27 +336,47 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-<<<<<<< HEAD
 		grid.add(skins, 9, 0);
-		/*opSwitch.getToggles().addAll(localToggle, remoteToggle);
-		localToggle.setSelected(true);
-		grid.add(localToggle, 7, 0);
-		grid.add(remoteToggle, 8, 0);*/
-		
-=======
-
+<<<<<<< HEAD
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
             BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
             localToggle.setSelected(true);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | IOException e) {
             localToggle.setSelected(false);
         };
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
         
->>>>>>> 859e17640ce6b34413b49e96db6e6aea8b5c5e7a
+=======
+		/*opSwitch.getToggles().addAll(localToggle, remoteToggle);
+        localToggle.setSelected(true);
+		grid.add(localToggle, 7, 0);
+		grid.add(remoteToggle, 8, 0);
+		*/
+
+        Button button2 = new Button("Remote Arche");
+        button2.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                localToggle.setSelected(false);
+                CyclistController._cyclusService.submitCmd("cyclus", "-a");
+                _remoteDashA = CyclistController._cyclusService.latestJob();
+                _remoteDashA.statusProperty()
+                    .addListener(new ChangeListener<CyclusJob.Status>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Status> observable,
+                        Status oldValue, Status newValue) {
+                        if (newValue == Status.READY) {
+                            retrieveSchema();
+                        }
+                    }
+                });
+            }
+        });
+        grid.add(button2, 9, 0);
+
+>>>>>>> f74014e07287389253c3fa27d8378a54083f1d85
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
@@ -376,19 +404,26 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-	public void retrieveSchema(){
+    public void retrieveSchema() {
 		try {
 			String string;
 <<<<<<< HEAD
-			Process readproc = Runtime.getRuntime().exec("cyclus -a");
-			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-=======
             Process readproc = Runtime.getRuntime().exec("cyclus -a");
             
             BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
->>>>>>> 859e17640ce6b34413b49e96db6e6aea8b5c5e7a
 			Object[] schemaLines = schema.lines().toArray();
 			schema.close();
+=======
+            Object[] schemaLines;
+            if (localToggle.isSelected()) {
+                Process readproc = Runtime.getRuntime().exec("cyclus -a");
+                BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+                schemaLines = schema.lines().toArray();
+                schema.close();
+            } else {
+                schemaLines = _remoteDashA.getStdout().split("\n");
+            }
+>>>>>>> f74014e07287389253c3fa27d8378a54083f1d85
 			DataArrays.simFacilities.clear();
 			DataArrays.simRegions.clear();
 			DataArrays.simInstitutions.clear();
