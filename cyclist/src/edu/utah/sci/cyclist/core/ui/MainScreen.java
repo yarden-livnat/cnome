@@ -22,10 +22,9 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -51,12 +50,12 @@ import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.panels.FiltersListPanel;
+import edu.utah.sci.cyclist.core.ui.panels.InputPanel;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
-import edu.utah.sci.cyclist.core.ui.panels.InputPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -136,7 +135,7 @@ public class MainScreen extends VBox implements Resource {
 		return _jobsPanel;
 	}
 	
-	public Workspace getWorkSpace(){
+	public Workspace getWorkspace(){
 		for(Object obj : _workspacePane.getChildren()){
 			if (obj.getClass() == Workspace.class) {
 				return (Workspace)obj;
@@ -286,11 +285,16 @@ public class MainScreen extends VBox implements Resource {
 	}
 	
 	public void restore(IMemento memento, Context ctx) {
-		double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
-		_sp.setDividerPositions(pos);
-		
-		pos = parseArray(memento.getChild("tools-pos").getString("values"));
-		_toolsPane.setDividerPositions(pos);
+		final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
+		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
+
+		Platform.runLater(new Runnable() {	
+			@Override
+			public void run() {
+				_sp.setDividerPositions(pos);
+				_toolsPane.setDividerPositions(pos1);
+			}
+		});
 	}
 	
 	private double[] parseArray(String str) {

@@ -141,7 +141,8 @@ public class ViewBase extends BorderPane implements View, Resource {
 		setHeaderListeners();
 		
 		setTop(_header);
-		setListeners();
+		if (isDragginEnabled())
+			setListeners();
 	}
 	
 	public ViewBase clone() {
@@ -292,6 +293,10 @@ public class ViewBase extends BorderPane implements View, Resource {
 	
 	protected void enableDragging(Boolean value) {
 		_enableDragging = value;
+	}
+	
+	protected boolean isDragginEnabled() {
+		return _enableDragging;
 	}
 	
 	/*
