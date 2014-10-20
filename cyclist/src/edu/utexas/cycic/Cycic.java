@@ -333,7 +333,7 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		grid.add(skins, 9, 0);
+		grid.add(skins, 5, 1);
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
@@ -344,7 +344,7 @@ public class Cycic extends ViewBase{
         };
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
-		*/
+
 
         Button button2 = new Button("Remote Arche");
         button2.setOnAction(new EventHandler<ActionEvent>(){

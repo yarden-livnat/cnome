@@ -31,8 +31,8 @@ public class XMLReader {
 	static skinSet SC2 = new skinSet(){
 		{
 			name = "SC2";
-			images.put("reactor", new Image(new File("/home/robert/reactor.png").toURI().toString()));
-			images.put("facility", new Image(new File("/home/robert/sourceFacSC2.jpg").toURI().toString()));
+			images.put("reactor", new Image(new File("./skinImages/reactor.png").toURI().toString()));
+			images.put("facility", new Image(new File("./skinImages/sourceFacSC2.jpg").toURI().toString()));
 		}
 	};
 	
