@@ -24,6 +24,7 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
 import java.util.List;
+import java.util.UUID;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -46,11 +47,13 @@ import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.Context;
+import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
-public class ViewBase extends BorderPane implements View {
+public class ViewBase extends BorderPane implements View, Resource {
 	
 	public static final double EDGE_SIZE = 3;
 	
@@ -59,6 +62,8 @@ public class ViewBase extends BorderPane implements View {
 	private static final Cursor[] _cursor = {
 		Cursor.N_RESIZE, Cursor.S_RESIZE, Cursor.E_RESIZE, Cursor.W_RESIZE, Cursor.NW_RESIZE, Cursor.NE_RESIZE, Cursor.SW_RESIZE, Cursor.SE_RESIZE, Cursor.DEFAULT
 	};
+	
+	private String _uid = UUID.randomUUID().toString();
 	
 	private HBox _header;
 	private Spring _spring;
@@ -141,6 +146,10 @@ public class ViewBase extends BorderPane implements View {
 	
 	public ViewBase clone() {
 		return null;
+	}
+	
+	public String getUID() {
+		return _uid;
 	}
 	
 	public DnD.LocalClipboard getLocalClipboard() {
@@ -277,7 +286,7 @@ public class ViewBase extends BorderPane implements View {
 		// allow a derived class to save its state
 	}
 	
-	public void restore(IMemento memento) {
+	public void restore(IMemento memento, Context ctx) {
 		// allow a derived class to restore its state
 	}
 	

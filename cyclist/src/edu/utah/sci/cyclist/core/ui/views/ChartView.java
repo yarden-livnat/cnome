@@ -14,7 +14,6 @@ import java.util.Map;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -70,6 +69,7 @@ import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
@@ -242,7 +242,7 @@ public class ChartView extends CyclistViewBase {
 		}
 		if (_yArea.getFields().size() > 0) {
 			IMemento yMemento = memento.createChild("yArea");
-			for (Field f : _xArea.getFields()) {
+			for (Field f : _yArea.getFields()) {
 				f.save(yMemento.createChild("field"));
 			}
 		}
@@ -252,11 +252,64 @@ public class ChartView extends CyclistViewBase {
 				f.save(lodMemento.createChild("field"));
 			}
 		}
+		
+		// options
+		IMemento child = memento.createChild("axis-opt");
+		IMemento x = child.createChild("x");
+		x.putBoolean("mode", _xAxisMode.get() == CyclistAxis.Mode.LINEAR);
+		x.putBoolean("force-zero", _xForceZero.get());
+		
+		IMemento y = child.createChild("y");
+		y.putBoolean("mode", _yAxisMode.get() == CyclistAxis.Mode.LINEAR);
+		y.putBoolean("force-zero", _yForceZero.get());
 	}
 
 	@Override
-	public void restore(IMemento memento) {
+	public void restore(IMemento memento, Context ctx) {
+		boolean wasActive = _active;
+		_active = false;
 		
+		IMemento child = memento.getChild("xArea");
+		if (child != null) {
+			for (IMemento im : child.getChildren("field")) {
+				Field field = new Field();
+				field.restore(im, ctx);
+				_xArea.getFields().add(field);
+			}
+		}
+		
+		child = memento.getChild("yArea");
+		if (child != null) {
+			for (IMemento im : child.getChildren("field")) {
+				Field field = new Field();
+				field.restore(im, ctx);
+				_yArea.getFields().add(field);
+			}
+		}
+		
+		child = memento.getChild("lod");
+		if (child != null) {
+			for (IMemento im : child.getChildren("field")) {
+				Field field = new Field();
+				field.restore(im, ctx);
+				_lodArea.getFields().add(field);
+			}
+		}
+		
+		// options
+		child = memento.getChild("axis-opt");
+		if (child != null) {
+			IMemento x = child.getChild("x");
+			_xAxisMode.set( x.getBoolean("mode") ? CyclistAxis.Mode.LINEAR : CyclistAxis.Mode.LOG);
+			_xForceZero.set( x.getBoolean("force-zero"));
+			
+			IMemento y = child.getChild("y");
+			_yAxisMode.set( y.getBoolean("mode") ? CyclistAxis.Mode.LINEAR : CyclistAxis.Mode.LOG);
+			_yForceZero.set( y.getBoolean("force-zero"));
+		}
+		
+		if (wasActive)
+			setActive(true);
 	}
 	
 	private void updateFilters() {

@@ -4,12 +4,12 @@ import javafx.collections.ObservableList;
 
 import org.mo.closure.v1.Closure;
 
-import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.Filter;
+import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 
-public interface CyclistView extends View {
+public interface CyclistView extends View, Resource {
 	void setOnTableDrop(Closure.V1<Table> action);
 	void setOnTableRemoved(Closure.V1<Table> action);
 	void setOnTableSelectedAction(Closure.V2<Table, Boolean> action);
@@ -37,7 +37,4 @@ public interface CyclistView extends View {
 	
 	ObservableList<Filter> remoteFilters();
 	ObservableList<Filter> filters();
-	
-	void save(IMemento memento);
-	void restore(IMemento memento);
 }

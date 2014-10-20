@@ -286,7 +286,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 			getView().addFilter(filter);
 		}
 		
-		getView().restore(memento.createChild("view"));
+		getView().restore(memento.getChild("view"), ctx);
 		//If the dirty flag was set during restore - reset it back to false.
 		_dirtyFlag = false;
 	}

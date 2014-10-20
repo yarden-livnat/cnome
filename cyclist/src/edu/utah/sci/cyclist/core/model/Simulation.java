@@ -26,12 +26,12 @@ package edu.utah.sci.cyclist.core.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
 
 public class Simulation {
 
