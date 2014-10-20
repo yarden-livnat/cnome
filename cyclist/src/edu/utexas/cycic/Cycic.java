@@ -466,6 +466,7 @@ public class Cycic extends ViewBase{
 		duration.setMaxWidth(150);
 		duration.setPromptText("Length of Simulation");
 		duration.setText(Cycic.workingScenario.simulationData.duration);
+		Cycic.workingScenario.simulationData.duration = "0";
 		duration.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				Cycic.workingScenario.simulationData.duration = newValue;
@@ -490,9 +491,9 @@ public class Cycic extends ViewBase{
 		startMonth.setPromptText("Select Month");
 		simInfo.add(new Label("Start Month"), 0, 2);
 		simInfo.add(startMonth, 1, 2);
-		
 		TextField startYear = VisFunctions.numberField();
 		startYear.setText(Cycic.workingScenario.simulationData.startYear);
+		Cycic.workingScenario.simulationData.startYear = "0";
 		startYear.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				Cycic.workingScenario.simulationData.startYear = newValue;
@@ -530,16 +531,17 @@ public class Cycic extends ViewBase{
 		Button output = new Button("Generate Cyclus Input");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				FileChooser fileChooser = new FileChooser();
-
-				//Set extension filter
-				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-				fileChooser.getExtensionFilters().add(extFilter);
-				fileChooser.setTitle("Please save as Cyclus input file.");
-				fileChooser.setInitialFileName("*.xml");
-				//Show save file dialog
-				File file = fileChooser.showSaveDialog(window);
-				OutPut.output(file);
+				if(OutPut.inputTest()){
+					FileChooser fileChooser = new FileChooser();
+					//Set extension filter
+					FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+					fileChooser.getExtensionFilters().add(extFilter);
+					fileChooser.setTitle("Please save as Cyclus input file.");
+					fileChooser.setInitialFileName("*.xml");
+					//Show save file dialog
+					File file = fileChooser.showSaveDialog(window);
+					OutPut.output(file);
+				}
 			}
 		});
 		simInfo.add(output, 0, 6);
@@ -547,8 +549,10 @@ public class Cycic extends ViewBase{
         Button runRemote = new Button("Run Remotely");
         runRemote.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-                String cycicXml = OutPut.xmlStringGen();
-                CyclistController._cyclusService.submit(cycicXml);
+            	if(OutPut.inputTest()){
+            		String cycicXml = OutPut.xmlStringGen();
+            		CyclistController._cyclusService.submit(cycicXml);
+            	}
             }
         });
         runRemote.setStyle("-fx-fill: green;"
@@ -558,18 +562,19 @@ public class Cycic extends ViewBase{
         Button runInput = new Button("Run Locally");
         runInput.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-                String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-                String cycicTemp = "cycic"+tempHash;
-                try {
-                    File temp = File.createTempFile(cycicTemp, ".xml");
-                    FileWriter fileOutput = new FileWriter(temp);
-                    BufferedWriter buffOut = new BufferedWriter(fileOutput);
-                    
-                    Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-                
+                if(OutPut.inputTest()){
+                	String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+                	String cycicTemp = "cycic"+tempHash;
+                	try {
+                		File temp = File.createTempFile(cycicTemp, ".xml");
+                		FileWriter fileOutput = new FileWriter(temp);
+                		BufferedWriter buffOut = new BufferedWriter(fileOutput);
+
+                		Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
+                	} catch (Exception e1) {
+                		e1.printStackTrace();
+                	}
+                }   
             }
         });
         runInput.setStyle("-fx-fill: green;"

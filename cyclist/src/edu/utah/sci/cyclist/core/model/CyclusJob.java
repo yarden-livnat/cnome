@@ -39,6 +39,10 @@ public class CyclusJob {
 		return _inputFilePath;
 	}
 	
+	public String getStdout() {
+		return _info.getString("Stdout");
+	}
+	
 	public void setDatafilePath(String path) {
 		_datafilePath = path;
 	}

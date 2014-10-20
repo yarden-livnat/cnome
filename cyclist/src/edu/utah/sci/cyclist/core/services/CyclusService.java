@@ -1,5 +1,6 @@
 package edu.utah.sci.cyclist.core.services;
 
+import java.util.UUID;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -30,8 +31,15 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.log4j.Logger;
 
@@ -41,6 +49,7 @@ import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 
 public class CyclusService {
 	public static final String CLOUDIUS_URL = "http://cycrun.fuelcycle.org";
+	public static final String CLOUDIUS_SUBMIT_JOB = CLOUDIUS_URL + "/api/v1/job";
 	public static final String CLOUDIUS_SUBMIT = CLOUDIUS_URL + "/api/v1/job-infile";
 	public static final String CLOUDIUS_STATUS = CLOUDIUS_URL + "/api/v1/job-stat/";
 	public static final String CLOUDIUS_LOAD   = CLOUDIUS_URL + "/api/v1/job-outfiles/";
@@ -143,6 +152,19 @@ public class CyclusService {
             .bodyString(file, ContentType.DEFAULT_TEXT);
         this._submit(path, request);
     }
+
+    public void submitCmd(String cmd, String... args) {
+        String name = "cmd";
+        String uid = UUID.randomUUID().toString().replace("-", "");
+        String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
+        for (String arg : args) {
+            reqJSON += ", \"" + arg + "\"";
+        }
+        reqJSON += "]}";
+        Request request = Request.Post(CLOUDIUS_SUBMIT_JOB)
+            .bodyString(reqJSON, ContentType.APPLICATION_JSON);
+        this._submit(name, request);
+	}
 
     private void poll(final CyclusJob job) {
 		final PollService service = new PollService(job);
