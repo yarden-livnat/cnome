@@ -272,13 +272,22 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
-		Button button1 = new Button("Cyclus -a");
-		button1.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				retrieveSchema();
-			}
-		});
-		grid.add(button1, 6, 0);
+        Button button1 = new Button("Cyclus -a");
+        button1.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                retrieveSchema();
+            }
+        });
+        grid.add(button1, 6, 0);
+
+        Button button2 = new Button("Remote Arche");
+        button2.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                CyclistController._cyclusService.submitCmd("cyclus", "-a");
+            }
+        });
+        grid.add(button2, 7, 0);
+
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
