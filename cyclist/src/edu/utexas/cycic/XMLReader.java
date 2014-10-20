@@ -25,9 +25,41 @@ public class XMLReader {
 	/**
 	 * 
 	 */
+	skinSet SC2 = new skinSet(){
+		{
+			images.put("reactor", "reactorSC.png");
+			images.put("facility", "sourceSC.png");
+		}
+	};
+	
+	/**
+	 * 
+	 */
+	static ArrayList<String> blackList = new ArrayList<String>(){
+		{
+			add("agents:agents:Sink");
+			add("agents:agents:Source");
+			add("agents:agents:KFacility");
+			add("agents:agents:NullInst");
+			add("agents:agents:NullRegion");
+			add("agents:agents:Prey");
+			add("agents:agents:Predator");
+			add("stubs:StubFacility:StubFacility");
+			add("stubs:StubInst:StubInst");
+			add("stubs:StubRegion:StubRegion");
+			add("StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion");
+			add("StubFacility/cyclus/StubInst:StubInst:StubInst");
+			add("StubFacility:StubFacility:StubFacility");
+			
+		}
+	};
+	
+	/**
+	 * 
+	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
-			add(":Brightlite:ReactorFacility");
+			/*add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
 			add(":Brightlite:ReprocessFacility");
 			add(":cycaless:BatchReactor");
@@ -38,7 +70,7 @@ public class XMLReader {
 			add(":agents:Sink");
 			add(":agents:KFacility");
 			add(":agents:Prey");
-			add(":agents:Predator");
+			add(":agents:Predator");*/
 		}
 	};
 	
@@ -47,8 +79,8 @@ public class XMLReader {
 	 */
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
-			add(":cycamore:GrowthRegion");
-			add(":agents:NullRegion");
+			/*add(":cycamore:GrowthRegion");
+			add(":agents:NullRegion");*/
 			
 		}
 	};
@@ -58,42 +90,12 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			add(":cycaless:DeployInst");
+			/*add(":cycaless:DeployInst");
 			add(":cycamore:ManagerInst");
-			add(":agents:NullInst");
+			add(":agents:NullInst");*/
 		}
 	};
 	
-	/**
-	 * Test for schema
-	 */
-	static String test = "<interleave><element name=\"in_commods\"><oneOrMore><element name=\"val\">" +  
-			"<data type=\"token\" /></element></oneOrMore></element><element name=\"capacity\">"+
-			"<data type=\"double\" /></element><optional><element name=\"max_inv_size\"><data type=\"double\" />"+
-			"</element></optional></interleave>";
-	
-	/**
-	 * Test for annotations
-	 */
-	static String jsonTest = "{"+
-		"\"doc\" : \"A minimum implementation sink facility that accepts specified amounts of commodities from other agents\","+
-		"\"vars\" : {" +
-		"\"capacity\" : {" +
-        "\"doc\" : \"capacity the sink facility can accept at each time step\"," +
-        "\"index\" : 1, \"tooltip\" : \"sink capacity\", \"type\" : \"double\"}," +
-        "\"in_commods\" : {\"doc\" : \"commodities that the sink facility accepts\", \"index\" : 0," +
-        "\"schematype\" : \"token\", \"tooltip\" : \"input commodities\", \"type\" : [ \"std::vector\", \"std::string\" ]" +
-      	"}, \"inventory\" : {\"capacity\" : \"max_inv_size\", \"index\" : 3, \"type\" : \"cyclus::toolkit::ResourceBuff\"},"+
-      	"\"max_inv_size\" : {\"default\" : 1.000000000000000e+299, \"doc\" : \"total maximum inventory size of sink facility\","+
-        "\"index\" : 2, \"tooltip\" : \"sink maximum inventory size\", \"type\" : \"double\"}}}";
-	
-	/**
-	 * 
-	 */
-	static String deploy = "<oneOrMore><element name=\"buildorder\"><element name=\"prototype\"><data type=\"string\"/>" +           
-						"</element><element name=\"number\"><data type=\"nonNegativeInteger\"/></element><element name=\"date\">" +               
-						"<data type=\"nonNegativeInteger\"/></element></element></oneOrMore>";
-						
 	/**
 	 * 
 	 * @param xmlSchema
@@ -143,6 +145,33 @@ public class XMLReader {
 		return xmlschema;
 	}
 	
+	/**
+	 * 
+	 * @param jsonSchema
+	 * @return
+	 */
+	static String entityReader(String jsonSchema){
+		Reader schema = new StringReader(jsonSchema);
+		JsonReader jsonReader = Json.createReader(schema);
+		JsonObject jsonObject = jsonReader.readObject();
+		jsonReader.close();
+		JsonString string = jsonObject.getJsonString("entity");		
+		return string.toString();
+	}
+	
+	/**
+	 * 
+	 * @param jsonSchema
+	 * @return
+	 */
+	static String nicheReader(String jsonSchema){
+		Reader schema = new StringReader(jsonSchema);
+		JsonReader jsonReader = Json.createReader(schema);
+		JsonObject jsonObject = jsonReader.readObject();
+		jsonReader.close();
+		JsonString string = jsonObject.getJsonString("niche");		
+		return string.toString();
+	}
 	/**
 	 * 
 	 * @param dataArray

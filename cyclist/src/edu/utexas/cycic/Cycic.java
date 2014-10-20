@@ -7,10 +7,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.apache.log4j.Logger;
 import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -29,6 +32,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -48,10 +52,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
 import edu.utah.sci.cyclist.core.services.CyclusService;
 
 public class Cycic extends ViewBase{
+	static Logger log = Logger.getLogger(Cycic.class);
 	/**
 	 * Function for building the CYCIC Pane and GridPane of this view. 
 	 */
@@ -74,6 +78,9 @@ public class Cycic extends ViewBase{
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
 	static Window window;
+	static ToggleGroup opSwitch = new ToggleGroup();
+	static ToggleButton localToggle = new ToggleButton("Local");
+	static ToggleButton remoteToggle = new ToggleButton("Remote");
 	
 	/**
 	 * 
@@ -183,6 +190,7 @@ public class Cycic extends ViewBase{
 					for (int i = 0; i < DataArrays.simFacilities.size(); i++){
 						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
+							facility.niche = DataArrays.simFacilities.get(i).niche;
 						}
 					}
 					event.consume();
@@ -272,13 +280,30 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
-		Button button1 = new Button("Cyclus -a");
-		button1.setOnAction(new EventHandler<ActionEvent>(){
+		Button cyclusALocal = new Button("Cyclus -a");
+		cyclusALocal.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
+		cyclusALocal.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				retrieveSchema();
 			}
 		});
-		grid.add(button1, 6, 0);
+		grid.add(cyclusALocal, 6, 0);
+		
+		
+		ComboBox<String> skins = new ComboBox<String>();
+		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
+		}
+		skins.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				for()
+			}
+		});
+		/*opSwitch.getToggles().addAll(localToggle, remoteToggle);
+		localToggle.setSelected(true);
+		grid.add(localToggle, 7, 0);
+		grid.add(remoteToggle, 8, 0);
+		*/
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
@@ -308,25 +333,64 @@ public class Cycic extends ViewBase{
 	 */
 	public void retrieveSchema(){
 		try {
-			StringBuilder sb = new StringBuilder();
-			StringBuilder sb1 = new StringBuilder();
 			String string;
 			Process readproc = Runtime.getRuntime().exec("cyclus -a");
 			
 			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-			while(schema.readLine() != null){
-				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema ");
-				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-				while((string = read.readLine()) != null){
-					sb.append(string);
-				}
-				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations ");
+			Object[] schemaLines = schema.lines().toArray();
+			schema.close();
+			DataArrays.simFacilities.clear();
+			DataArrays.simRegions.clear();
+			DataArrays.simInstitutions.clear();
+			for(int i = 0; i < schemaLines.length; i++){
+				StringBuilder sb1 = new StringBuilder();
+				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations " + schemaLines[i]);
 				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
 				while((string = read1.readLine()) != null){
 					sb1.append(string);
-				}*/
+				}
+				boolean test = true;
+				for(int j = 0; j < XMLReader.blackList.size(); j++){
+					if(((String)schemaLines[i]).equalsIgnoreCase(XMLReader.blackList.get(j))){
+						test = false;
+					}
+				}
+				if(test == false){
+					continue;
+				}
+				switch(XMLReader.entityReader(sb1.toString()).replace("\"", "")){
+				case "facility":
+					facilityStructure node = new facilityStructure();
+					node.facAnnotations = sb1.toString();
+					node.facilityArch = schemaLines[i].toString();
+					node.niche = XMLReader.nicheReader(sb1.toString().replace("\"", ""));
+					node.facilityName = ((String) schemaLines[i]).replace(":", " ");
+					DataArrays.simFacilities.add(node);
+					log.info("Adding archetype "+schemaLines[i]);
+					break;
+				case "region":
+					log.info("Adding archetype "+schemaLines[i]);
+					regionStructure rNode = new regionStructure();
+					rNode.regionAnnotations = sb1.toString();
+					rNode.regionArch = schemaLines[1].toString();
+					rNode.regionName = ((String) schemaLines[i]).replace(":", " ");
+					DataArrays.simRegions.add(rNode);
+					break;
+				case "institution":
+					log.info("Adding archetype "+schemaLines[i]);
+					institutionStructure iNode = new institutionStructure();
+					iNode.institArch = schemaLines[i].toString();
+					iNode.institAnnotations = sb1.toString();
+					iNode.institName = ((String) schemaLines[i]).replace(":", " ");
+					DataArrays.simInstitutions.add(iNode);
+					break;
+				default:
+					log.error(schemaLines[i]+" is not of the 'facility', 'region' or 'institution' type. "
+							+ "Please check the entity value in the archetype annotation.");
+					break;
+				};	
 			}
-			System.out.println(sb.toString());
+			log.info("Schema discovery complete");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -554,10 +618,7 @@ public class Cycic extends ViewBase{
             		CyclistController._cyclusService.submit(cycicXml);
             	}
             }
-        });
-        runRemote.setStyle("-fx-fill: green;"
-                        + "-fx-border-width: 1;"
-                        + "-fx-border-color: black");
+        });;
     
         Button runInput = new Button("Run Locally");
         runInput.setOnAction(new EventHandler<ActionEvent>(){
@@ -577,9 +638,6 @@ public class Cycic extends ViewBase{
                 }   
             }
         });
-        runInput.setStyle("-fx-fill: green;"
-                        + "-fx-border-width: 1;"
-                        + "-fx-border-color: black");
         HBox runBox = new HBox();
         runBox.setSpacing(5);
         runBox.getChildren().addAll(runInput, runRemote);
@@ -588,41 +646,50 @@ public class Cycic extends ViewBase{
 
 	public void createArchetypeBar(GridPane grid){
 		ComboBox<String> archetypes = new ComboBox<String>();
-		for(int i = 0; i < XMLReader.facilityList.size(); i++){
-			archetypes.getItems().add(XMLReader.facilityList.get(i));
+		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+			archetypes.getItems().add(DataArrays.simFacilities.get(i).facilityName);
 		}
-		
+		archetypes.setOnMousePressed(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				archetypes.getItems().clear();
+				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+					archetypes.getItems().add(DataArrays.simFacilities.get(i).facilityName);
+				}
+			}
+		});
 		archetypes.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
-					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(archetypes.getValue().replace(":", " ").trim())){
-						return;
-					}
-				}
-				String string;
-				StringBuilder sb = new StringBuilder();
-				StringBuilder sb1 = new StringBuilder();
-				try {
+					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(archetypes.getValue())){
+						if(DataArrays.simFacilities.get(i).loaded == true){
+							return;
+						}
+						facilityStructure test = DataArrays.simFacilities.get(i);
+						String string;
+						StringBuilder sb = new StringBuilder();
+						try {
 
-					Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+archetypes.getValue()); 
-					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					while((string = read.readLine()) != null){
-						sb.append(string);
+							Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+test.facilityArch); 
+							BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+							while((string = read.readLine()) != null){
+								sb.append(string);
+							}
+							test.facSchema = sb.toString();
+							test.loaded = true;
+							test.facStruct = XMLReader.annotationReader(test.facAnnotations, XMLReader.readSchema(test.facSchema));
+							FacilityCircle circle = new FacilityCircle();
+							int pos = 0;
+							for(int k = 0; k < DataArrays.simFacilities.size(); k++){
+								if(DataArrays.simFacilities.get(k).loaded == true){
+									pos+=1;
+								}
+							}
+							buildDnDCircle(circle, pos-1, test.facilityName);
+							nodesPane.getChildren().addAll(circle,circle.text);
+						} catch (Exception eq) {
+							
+						}
 					}
-					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+archetypes.getValue());
-					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-					while((string = read1.readLine()) != null){
-						sb1.append(string);
-					}
-					facilityStructure test = new facilityStructure();
-					test.facilityName = archetypes.getValue().replace(":", " ").trim();
-					test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-					DataArrays.simFacilities.add(test);
-					FacilityCircle circle = new FacilityCircle();
-					buildDnDCircle(circle, DataArrays.simFacilities.size()-1, test.facilityName);
-					nodesPane.getChildren().addAll(circle,circle.text);
-				} catch (Exception eq) {
-					
 				}
 			}
 		});
