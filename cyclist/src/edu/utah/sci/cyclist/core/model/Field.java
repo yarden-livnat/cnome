@@ -22,27 +22,23 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
+
+import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
-import edu.utah.sci.cyclist.core.ui.views.ChartView;
 import edu.utah.sci.cyclist.core.util.SQL;
 
 public class Field implements Resource {
@@ -55,7 +51,7 @@ public class Field implements Resource {
 	private BooleanProperty _selected;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
-	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<Range>(new Range(0,0));
+	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<Range>(new Range(0, -1));
 	
 	private Map<String, Object> _properties = new HashMap<>();
 	private Boolean _isHidden = false;
@@ -89,6 +85,9 @@ public class Field implements Resource {
 		return _id;
 	}
 	
+	/*
+	 * Values
+	 */
 	public ListProperty<Object> valuesProperty() {
 		return _valuesProperty;
 	}
@@ -101,6 +100,9 @@ public class Field implements Resource {
 		return valuesProperty().get();
 	}
 	
+	/*
+	 * Range
+	 */
 	public ObjectProperty<Range> valueRangeProperty() {
 		return _valueRangeProperty;
 	}

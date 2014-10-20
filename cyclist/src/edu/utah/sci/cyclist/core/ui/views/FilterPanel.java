@@ -8,16 +8,13 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -43,12 +40,10 @@ import javafx.util.converter.NumberStringConverter;
 import org.controlsfx.control.RangeSlider;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Range;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -319,8 +314,10 @@ public class FilterPanel extends TitledPanel {
 	 * and creates a filter within that range */
 	private void createRange() {
 		
-		if (_cbBox != null) {
-			System.out.println("createRange ignored");
+		if (_rangeSlider != null) {
+			Range selected = _filter.getSelectedRange();
+			_rangeSlider.setLowValue(selected.min);
+			_rangeSlider.setHighValue(selected.max);
 			return;
 		}
 		double min  = 0;
@@ -451,8 +448,8 @@ public class FilterPanel extends TitledPanel {
 				Range range = _filter.getValueRange();
 				double min = (double) range.min;
 				double max = (double) range.max;
-				if (_rangeSlider.getLowValue() != min) _rangeSlider.setLowValue(min);
-				if (_rangeSlider.getHighValue() != max) _rangeSlider.setHighValue(max);
+				_rangeSlider.setMin(min);
+				_rangeSlider.setMax(max);
 			}
 		});
 	}
@@ -463,6 +460,8 @@ public class FilterPanel extends TitledPanel {
 	 * and the user can change the minimum and maximum values which are displayed */
 	private void populateRangeValues() {
 		Range range = _filter.getValueRange();
+		if (range.min > range.max)
+			range = new Range(0, 100);
 		_rangeSlider.setMin((double) range.min); 
 		_rangeSlider.setMax((double) range.max);
 	}		

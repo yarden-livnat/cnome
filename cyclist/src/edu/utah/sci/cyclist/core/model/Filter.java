@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -28,7 +27,7 @@ public class Filter implements Observable, Resource {
 	private String _id = UUID.randomUUID().toString();
 	
 	private boolean _valid = true;
-	private String _value = "1=1";  //Sqlite doesn't accept "where true" but accepts "where 1=1".
+	private String _toStringCache = "1=1";  //Sqlite doesn't accept "where true" but accepts "where 1=1".
 	private CyclistDatasource _ds = null;
 	private Field _field;
 	private DataType _dataType;
@@ -90,8 +89,8 @@ public class Filter implements Observable, Resource {
 				_selectedRange.set(_field.getValueRange());
 			} else {
 				_selectedItems.addAll(getValues() != null ? getValues() : new ArrayList<Object>());
-				_allSelected = true;
 			}
+			_allSelected = true;
 			setupListeners();
 		}	
 		if (isRange()) {
@@ -326,7 +325,7 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public boolean isRangeValid() {
-		Boolean reply =  /*_field.getRangeValues() != null &&*/ !_dsChanged;
+		Boolean reply =  _field.getValueRange().min <= _field.getValueRange().max && !_dsChanged;
 		_dsChanged = false;
 		return reply;
 	}
@@ -406,7 +405,7 @@ public class Filter implements Observable, Resource {
 	 */
 	private void resetFilterValues(){
 		if (_valid) {
-			_value = "1=1";
+			_toStringCache = "1=1";
 		}
 	}
 	
@@ -417,12 +416,12 @@ public class Filter implements Observable, Resource {
 	public String toString() {
 		if (!_valid) {
 			if (_allSelected) {
-    			_value = "1=1";
+    			_toStringCache = "1=1";
 			} else if (isRange()) {
 				String function = null;
 				String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
 				String str = name+" >=" + getSelectedRange().min + " AND " + name +" <=" + getSelectedRange().max;
-				_value = str;
+				_toStringCache = str;
 			} else {
 				StringBuilder builder = new StringBuilder();
 				if (_selectedItems.size() > 0) {
@@ -445,13 +444,13 @@ public class Filter implements Observable, Resource {
 					builder.append("1=0");
 				}
 			
-				_value = builder.toString();
+				_toStringCache = builder.toString();
 			}
 			_valid = true;
 		}
 		
-		System.out.println("filter to string:"+_value);
-		return _value;
+//		System.out.println("filter to string:"+_toStringCache);
+		return _toStringCache;
 	}
 	
 	public void setValid(Boolean isValid) {
