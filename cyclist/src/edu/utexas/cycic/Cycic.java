@@ -21,6 +21,7 @@ import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
+import edu.utah.sci.cyclist.core.model.CyclusJob;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -81,6 +82,7 @@ public class Cycic extends ViewBase{
 	static ToggleGroup opSwitch = new ToggleGroup();
 	static ToggleButton localToggle = new ToggleButton("Local");
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
+    static CyclusJob _remoteDashA;
 	
 	/**
 	 * 
@@ -327,6 +329,7 @@ public class Cycic extends ViewBase{
         button2.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
                 CyclistController._cyclusService.submitCmd("cyclus", "-a");
+                _remoteDashA = CyclistController._cyclusService.latestJob();
             }
         });
         grid.add(button2, 9, 0);
@@ -358,14 +361,23 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-	public void retrieveSchema(){
+    public void retrieveSchema() throws InterruptedException {
 		try {
 			String string;
-			Process readproc = Runtime.getRuntime().exec("cyclus -a");
-			
-			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-			Object[] schemaLines = schema.lines().toArray();
-			schema.close();
+            Object[] schemaLines;
+            if (localToggle.isSelected()) {
+                Process readproc = Runtime.getRuntime().exec("cyclus -a");
+                BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+                schemaLines = schema.lines().toArray();
+                schema.close();
+            } else {
+                while (!_remoteDashA.statusTextProperty().getValue().equals("complete")) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {};
+                }
+                schemaLines = _remoteDashA.getStdout().split("\n");
+            }
 			DataArrays.simFacilities.clear();
 			DataArrays.simRegions.clear();
 			DataArrays.simInstitutions.clear();

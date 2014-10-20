@@ -74,9 +74,13 @@ public class CyclusService {
 		});
 	}
 
-	public ListProperty<CyclusJob> jobs() {
-		return _jobs;
-	}
+    public ListProperty<CyclusJob> jobs() {
+        return _jobs;
+    }
+
+    public CyclusJob latestJob() {
+        return _jobs.getValue().get(_jobs.getValue().size() - 1);
+    }
 
     private void _submit(String path, Request request) {
         CyclusJob job = new CyclusJob(path);
