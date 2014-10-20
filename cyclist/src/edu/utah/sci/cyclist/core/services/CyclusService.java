@@ -31,8 +31,14 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.log4j.Logger;
@@ -68,9 +74,13 @@ public class CyclusService {
 		});
 	}
 
-	public ListProperty<CyclusJob> jobs() {
-		return _jobs;
-	}
+    public ListProperty<CyclusJob> jobs() {
+        return _jobs;
+    }
+
+    public CyclusJob latestJob() {
+        return _jobs.getValue().get(_jobs.getValue().size() - 1);
+    }
 
     private void _submit(String path, Request request) {
         CyclusJob job = new CyclusJob(path);
@@ -107,30 +117,16 @@ public class CyclusService {
     }
 
     public void submitCmd(String cmd, String... args) {
-		CyclusJob job = new CyclusJob("");
-
+        String name = "cmd";
         String uid = UUID.randomUUID().toString().replace("-", "");
         String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
         for (String arg : args) {
-            reqJSON += "\"" + arg + "\"";
+            reqJSON += ", \"" + arg + "\"";
         }
         reqJSON += "]}";
-
-		try {
-			InputStream stream = Request.Post(CLOUDIUS_SUBMIT_JOB)
-					.bodyString(reqJSON, ContentType.APPLICATION_JSON).execute()
-					.returnContent().asStream();
-			JsonReader reader = Json.createReader(stream);
-			JsonObject info = reader.readObject();
-			job.setInfo(info);
-			job.setStatus(Status.SUBMITTED);
-			_jobs.add(job);
-			poll(job);
-		} catch (ClientProtocolException e) {
-			log.error("Submit job communication error: "+ e.getMessage());
-		} catch (IOException e) {
-			log.error("submit job IO error: "+ e.getMessage());
-		}
+        Request request = Request.Post(CLOUDIUS_SUBMIT_JOB)
+            .bodyString(reqJSON, ContentType.APPLICATION_JSON);
+        this._submit(name, request);
 	}
 
     private void poll(final CyclusJob job) {
