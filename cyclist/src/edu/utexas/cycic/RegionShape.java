@@ -95,12 +95,14 @@ public class RegionShape extends Rectangle {
 		regionForm.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				CyclistController._presenter.addTool(new RegionViewTool());
+				rect.menuBar.setVisible(false);
 			}
 		});
 
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
 				deleteRegion(rect, region);
+				rect.menuBar.setVisible(false);
 			}
 		};
 		MenuItem delete = new MenuItem("Delete");

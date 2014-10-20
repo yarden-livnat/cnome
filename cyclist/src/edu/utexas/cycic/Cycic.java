@@ -21,6 +21,7 @@ import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -78,6 +79,7 @@ public class Cycic extends ViewBase{
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
 	static Window window;
+	ComboBox<String> skins = new ComboBox<String>();
 	static ToggleGroup opSwitch = new ToggleGroup();
 	static ToggleButton localToggle = new ToggleButton("Local");
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
@@ -193,6 +195,7 @@ public class Cycic extends ViewBase{
 							facility.niche = DataArrays.simFacilities.get(i).niche;
 						}
 					}
+					System.out.println(facility.niche);
 					event.consume();
 					/*Optional<String> response =  Dialogs.create()
 							.title("Name Facility")
@@ -206,6 +209,19 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle.setCenterY(event.getY());
 					facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
 					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
+					facility.cycicCircle.menu.setLayoutX(event.getX());
+					facility.cycicCircle.menu.setLayoutY(event.getY());
+					
+					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(skins.getValue())){
+							System.out.println("TEST");
+							facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.get(facility.niche));
+							facility.cycicCircle.image.setVisible(true);
+						}
+					}
+					facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);
+					facility.cycicCircle.image.setLayoutY(facility.cycicCircle.getCenterY()-60);
+					
 					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
 					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);			
 				}
@@ -290,26 +306,34 @@ public class Cycic extends ViewBase{
 		grid.add(cyclusALocal, 6, 0);
 		
 		
-		ComboBox<String> skins = new ComboBox<String>();
+
+		skins.getItems().add("None");
+		skins.setValue("None");
 		DataArrays.visualizationSkins.add(XMLReader.SC2);
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
 		}
 		skins.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
-					skinSet skin = DataArrays.visualizationSkins.get(i);
-					if(skin.name.equalsIgnoreCase(skins.getValue())){
-						for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
-							FacilityCircle testCircle = DataArrays.FacilityNodes.get(i).cycicCircle;
-
-							testCircle.image.setImage(new Image("reactor.png"));
-							/*try{
-								testCircle.image.setImage(new Image(skin.images.get(DataArrays.FacilityNodes.get(i).niche)));
-							} catch (Exception e1){
-								testCircle.image.setImage(new Image("~/reactor.png"));
-							}*/
-							testCircle.image.setVisible(true);
+				if(skins.getValue().equalsIgnoreCase("None")){
+					for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+						DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(false);
+						DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(100);
+					}
+				} else {
+					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+						skinSet skin = DataArrays.visualizationSkins.get(i);
+						if(skin.name.equalsIgnoreCase(skins.getValue())){
+							for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+								FacilityCircle testCircle = DataArrays.FacilityNodes.get(i).cycicCircle;
+								try{
+									testCircle.image.setImage(skin.images.get(DataArrays.FacilityNodes.get(i).niche));
+								} catch (Exception e1){
+									e1.printStackTrace();
+								}
+								testCircle.image.setVisible(true);
+								testCircle.setOpacity(0);
+							}
 						}
 					}
 				}
@@ -352,7 +376,6 @@ public class Cycic extends ViewBase{
 		try {
 			String string;
 			Process readproc = Runtime.getRuntime().exec("cyclus -a");
-			
 			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
 			Object[] schemaLines = schema.lines().toArray();
 			schema.close();
@@ -394,6 +417,14 @@ public class Cycic extends ViewBase{
 					regionStructure rNode = new regionStructure();
 					rNode.regionAnnotations = sb1.toString();
 					rNode.regionArch = schemaLines[1].toString();
+					String regString = "";
+					StringBuilder sb = new StringBuilder();
+					Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+schemaLines[i]); 
+					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					while((regString = read.readLine()) != null){
+						sb.append(regString);
+					}
+					rNode.regionStruct = XMLReader.annotationReader(rNode.regionAnnotations, XMLReader.readSchema(sb.toString()));
 					rNode.regionName = ((String) schemaLines[i]).replace(":", " ");
 					DataArrays.simRegions.add(rNode);
 					break;
@@ -402,6 +433,14 @@ public class Cycic extends ViewBase{
 					institutionStructure iNode = new institutionStructure();
 					iNode.institArch = schemaLines[i].toString();
 					iNode.institAnnotations = sb1.toString();
+					String instString = "";
+					StringBuilder sb2 = new StringBuilder();
+					Process proc2 = Runtime.getRuntime().exec("cyclus --agent-schema "+schemaLines[i]); 
+					BufferedReader read2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
+					while((instString = read2.readLine()) != null){
+						sb2.append(instString);
+					}
+					iNode.institStruct = XMLReader.annotationReader(iNode.institAnnotations, XMLReader.readSchema(sb2.toString()));
 					iNode.institName = ((String) schemaLines[i]).replace(":", " ");
 					DataArrays.simInstitutions.add(iNode);
 					break;

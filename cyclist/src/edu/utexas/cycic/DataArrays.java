@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.shape.Line;
 
 /**
@@ -263,5 +264,5 @@ class facilityNode{
 
 class skinSet{
 	String name; 
-	Map<String, String> images = new HashMap<String, String>();
+	Map<String, Image> images = new HashMap<String, Image>();
 }

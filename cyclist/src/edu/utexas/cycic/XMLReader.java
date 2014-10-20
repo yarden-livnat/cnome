@@ -1,9 +1,12 @@
 package edu.utexas.cycic;
 
+import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.scene.image.Image;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -28,8 +31,8 @@ public class XMLReader {
 	static skinSet SC2 = new skinSet(){
 		{
 			name = "SC2";
-			images.put("reactor", "~/reactorSC2.jpg");
-			images.put("facility", "~/sourceFacSC2.jpg");
+			images.put("reactor", new Image(new File("/home/robert/reactor.png").toURI().toString()));
+			images.put("facility", new Image(new File("/home/robert/sourceFacSC2.jpg").toURI().toString()));
 		}
 	};
 	
@@ -51,6 +54,7 @@ public class XMLReader {
 			add("StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion");
 			add("StubFacility/cyclus/StubInst:StubInst:StubInst");
 			add("StubFacility:StubFacility:StubFacility");
+			add(":cycamore:DeployInst");
 			
 		}
 	};
