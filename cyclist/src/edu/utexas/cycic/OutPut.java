@@ -63,7 +63,7 @@ public class OutPut {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
 
-				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
+				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.archetype.split(":")[2]);
 				// Building the institutions within regions.
 				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 					for (String instit: region.institutions){
@@ -82,7 +82,7 @@ public class OutPut {
 								initFacList.appendChild(entry);
 							}
 							institID.appendChild(initFacList);
-							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.type.split(" ")[1]);
+							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.archetype.split(":")[2]);
 						}
 					}
 				}
@@ -143,30 +143,30 @@ public class OutPut {
 		for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(facility.archetype.split(" ")[0]);
+			lib.setTextContent(facility.archetype.split(":")[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(facility.facilityType.split(" ")[1]);
+			name.setTextContent(facility.facilityType.split(":")[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}	
 		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(region.archetype.split(" ")[0]);
+			lib.setTextContent(region.archetype.split(":")[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(region.type.split(" ")[1]);
+			name.setTextContent(region.type.split(":")[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}
 		for(instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(instit.archetype.split(" ")[0]);
+			lib.setTextContent(instit.archetype.split(":")[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(instit.type.split(" ")[1]);
+			name.setTextContent(instit.type.split(":")[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}
@@ -239,7 +239,7 @@ public class OutPut {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void facilityBuilder(Document doc, Element rootElement, facilityNode facility){
-		String facType = facility.facilityType.split(" ")[1];
+		String facType = facility.archetype.split(":")[2];
 		String facName = (String) facility.name;
 		ArrayList<Object> facArray = facility.facilityStructure;
 		ArrayList<Object> dataArray = facility.facilityData;

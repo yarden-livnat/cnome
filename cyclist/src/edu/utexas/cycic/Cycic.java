@@ -399,6 +399,7 @@ public class Cycic extends ViewBase{
             Object[] schemaLines;
             if (localToggle.isSelected()) {
             Process readproc = Runtime.getRuntime().exec("cyclus -a");
+            
             BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
                 schemaLines = schema.lines().toArray();
                 schema.close();
