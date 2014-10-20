@@ -147,8 +147,8 @@ public class FieldGlyph extends HBox {
                 if (getOnFilterAction() != null) {
                         if(_currFilter != null){
                                 getOnFilterAction().handle(new FilterEvent(FilterEvent.DELETE, _currFilter));
-                                _field.rangeValuesProperty().unbind();
-                                _field.setRangeValues(null);
+                                _field.valuesProperty().unbind();
+                                _field.valueRangeProperty().unbind();
                         }
                         _currFilter = new Filter(_field);
                         getOnFilterAction().handle(new FilterEvent(FilterEvent.SHOW, _currFilter));

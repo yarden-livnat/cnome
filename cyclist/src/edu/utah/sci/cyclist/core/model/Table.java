@@ -50,6 +50,8 @@ import edu.utah.sci.cyclist.core.util.DataFactory;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 import edu.utah.sci.cyclist.core.util.SQL;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -784,12 +786,12 @@ public class Table implements Resource {
 	}
 	
 	
-	public Task<ObservableMap<Object,Object>> getFieldRange(final Field field) {
+	public Task<ObservableValue<Range>> getFieldRange(final Field field) {
 		CyclistDatasource ds = getDataSource();
 		return getFieldRange(ds, field);
 	}
 	
-	public Task<ObservableMap<Object,Object>> getFieldRange(CyclistDatasource ds, final Field field)
+	public Task<ObservableValue<Range>> getFieldRange(CyclistDatasource ds, final Field field)
 	{
 		return getFieldRange(ds, field, false);
 	}
@@ -798,25 +800,24 @@ public class Table implements Resource {
 	 * For a numeric field filter - gets the minimum and maximum values within its possible range, for any possible grouping.
 	 * It checks for the field SQL function and finds the values accordingly. 
 	 */
-	public Task<ObservableMap<Object, Object>> getFieldRange(CyclistDatasource externalDs, final Field field, boolean force) {
+	public Task<ObservableValue<Range>> getFieldRange(CyclistDatasource externalDs, final Field field, boolean force) {
 		final CyclistDatasource ds = getAvailableDataSource(externalDs, force);
 		
-		Task<ObservableMap<Object, Object>> task = new Task<ObservableMap<Object, Object>>() {
+		Task<ObservableValue<Range>> task = new Task<ObservableValue<Range>>() {
 			
 			@Override
-			protected ObservableMap<Object, Object> call() throws Exception {
-				Map<Object, Object> values = new HashMap<>();
+			protected ObservableValue<Range> call() throws Exception {
+				double min=0, max=0;
+
 				if (ds != null) {
 					try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
 						updateMessage("querying");
-						System.out.println("querying field range");
 						SQL.Functions function = SQL.Functions.VALUE;
 						if(field.getString(FieldProperties.AGGREGATION_FUNC) != null){
 							function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
 						}
 						String query = "";
 						Boolean checkForSum = false;
-						double min,max=0;
 						
 //						switch(function){
 //						case AVG:
@@ -862,9 +863,6 @@ public class Table implements Resource {
 								double negSum = rs.getDouble("neg_sum");
 								min= (negSum==0)?min:negSum;
 							}
-							
-							values.put(NumericRangeValues.MIN, min);
-							values.put(NumericRangeValues.MAX, max);
 						}
 					}catch(Exception e){
 						e.printStackTrace();
@@ -872,7 +870,14 @@ public class Table implements Resource {
 						ds.releaseConnection();
 					}
 				}
-				return FXCollections.observableMap(values);
+				final Range range = new Range(min, max);
+				ObservableValue<Range> res = new ObservableValueBase<Range>() {
+					@Override
+                    public Range getValue() {
+	                    return range;
+					}
+				};
+				return res;
 			}
 			
 		};

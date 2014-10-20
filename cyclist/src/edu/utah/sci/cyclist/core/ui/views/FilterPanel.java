@@ -46,6 +46,7 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
+import edu.utah.sci.cyclist.core.model.Range;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
@@ -57,13 +58,16 @@ public class FilterPanel extends TitledPanel {
 
 	private Filter _filter;
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
+	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<>();
 	private VBox _cbBox;
 	private ProgressIndicator _indicator;
 	private Button _closeButton;
 	private Task<?> _task;
 	private boolean _reportChange = true;
 	private BooleanProperty _highlight = new SimpleBooleanProperty(false);
-	MapProperty<Object, Object> _map = new SimpleMapProperty<>();
+//	MapProperty<Object, Object> _map = new SimpleMapProperty<>();
+	private RangeSlider _rangeSlider;
+
 	private ObjectProperty<EventHandler<ActionEvent>> _closeAction = new SimpleObjectProperty<>();
 			
 	
@@ -83,7 +87,6 @@ public class FilterPanel extends TitledPanel {
 		//super(filter.getName());
 		super(getTitle(filter), GlyphRegistry.get(AwesomeIcon.FILTER));//"FontAwesome|FILTER"));
 		_filter = filter;
-		setListeners();
 		build();
 	}
 	
@@ -126,30 +129,6 @@ public class FilterPanel extends TitledPanel {
 	
 	public void setOnClose(EventHandler<ActionEvent> handler) {
 		_closeAction.set(handler);
-	}
-	
-	private void setListeners() {
-		_filter.selectedItems().addListener(new InvalidationListener() {
-			@Override
-			public void invalidated(Observable observable) {
-				_reportChange = false;
-				
-				boolean all = true;
-				int n = _cbBox.getChildren().size();
-				for (int i=1; i<n; i++) {
-					CheckBox cb = (CheckBox)_cbBox.getChildren().get(i);
-					boolean selected = _filter.selectedItems().contains(cb.getUserData());
-					cb.setSelected(selected);
-					if (!selected) all = false;
-				}
-				if (n > 0) {
-    				CheckBox cbAll = (CheckBox)_cbBox.getChildren().get(0);
-    				cbAll.setSelected(all);
-				}
-				
-				_reportChange = true;
-			}
-		});
 	}
 	
 	private void build() {
@@ -220,31 +199,17 @@ public class FilterPanel extends TitledPanel {
 			}
 		});
 		
-		_filter.setOnDSUpdated((Void)->configure());
-		
-		
 		configure();
+		_filter.setOnDatasouceChanged((Void)->configure());	
+		_filter.setOnChanged((Void)->configure());
 	}
 	
 	private void configure() {
-				
-		switch (_filter.getClassification()) {
-		case C:
+		System.out.println("configure");
+		if (_filter.isRange())	
+			createRange();
+		else
 			createList();
-			break;
-		case Cdate:
-			createRange();
-			break;
-		case Qd:
-			createRange();
-			break;
-		case Qi:
-			if(_filter.getFilterType() == FilterType.RANGE){
-				createRange();
-			}else{
-				createList();
-			}
-		}
 	}
 	
 	private void createList() {
@@ -269,11 +234,36 @@ public class FilterPanel extends TitledPanel {
 			
 			Task<ObservableList<Object>> task = table.getFieldValues(_filter.getDatasource(),field);
 			setTask(task);
-
 			field.valuesProperty().bind(task.valueProperty());
+			Thread th = new Thread(task);
+			th.setDaemon(true);
+			th.start();
+			
 		} else {
 			populateValues();
 		}
+		
+		_filter.selectedItems().addListener(new InvalidationListener() {
+			@Override
+			public void invalidated(Observable observable) {
+				_reportChange = false;
+				
+				boolean all = true;
+				int n = _cbBox.getChildren().size();
+				for (int i=1; i<n; i++) {
+					CheckBox cb = (CheckBox)_cbBox.getChildren().get(i);
+					boolean selected = _filter.selectedItems().contains(cb.getUserData());
+					cb.setSelected(selected);
+					if (!selected) all = false;
+				}
+				if (n > 0) {
+    				CheckBox cbAll = (CheckBox)_cbBox.getChildren().get(0);
+    				cbAll.setSelected(all);
+				}
+				
+				_reportChange = true;
+			}
+		});
 	}
 	
 	private void populateValues() {
@@ -329,33 +319,138 @@ public class FilterPanel extends TitledPanel {
 	 * and creates a filter within that range */
 	private void createRange() {
 		
+		double min  = 0;
+		double max = 100;
+		
 		_cbBox = new VBox();
 		_cbBox.setSpacing(4);
 		_cbBox.setPrefSize(USE_COMPUTED_SIZE,USE_COMPUTED_SIZE);
 		setContent(_cbBox);
 		_cbBox.setPadding(new Insets(0,8,0,8));
 		
-		_map.addListener(new InvalidationListener() {
+		_rangeSlider = new RangeSlider(min, max, min, max);
+		_rangeSlider.setShowTickLabels(true);
+		_rangeSlider.setShowTickMarks(true);
+		//rangeSlider.setOrientation(Orientation.VERTICAL);
+		
+		double currentWidth = this.widthProperty().doubleValue();
+		_cbBox.setPrefWidth(0.95*currentWidth);
+		
+		double majorTicks = (_rangeSlider.getMax()-_rangeSlider.getMin())/4;
+		if(majorTicks > 0){
+			_rangeSlider.setMajorTickUnit(majorTicks);
+		}
+		
+		final HBox hbox = new HBox();
+		hbox.setSpacing(20);
+		final TextField minTxt = new TextField();
+		final TextField maxTxt = new TextField();
+		hbox.getChildren().addAll(minTxt, maxTxt);
+		
+		hbox.setPrefWidth(currentWidth);
+		hbox.setSpacing(currentWidth-120);
+		
+		minTxt.setPrefSize(80, 18);
+		maxTxt.setPrefSize(80, 18);
+		minTxt.setEditable(true);
+		maxTxt.setEditable(true);
+		minTxt.setAlignment(Pos.CENTER_LEFT);
+		maxTxt.setAlignment(Pos.CENTER_LEFT);
+		minTxt.setText(Double.toString(min));
+		maxTxt.setText(Double.toString(max));
+
+		_cbBox.getChildren().addAll(_rangeSlider,hbox);
+		
+		//Listen to the width property of the parent - so the slider width can be changed accordingly.
+		this.widthProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, 
+                    Number oldValue, Number newValue) {
+					double width = newValue.doubleValue();
+				    _cbBox.setPrefWidth(0.95*width);
+			}
+		});
+		
+		_cbBox.widthProperty().addListener(new ChangeListener<Number>() {
+			public void changed(ObservableValue<? extends Number> observable, 
+                    Number oldValue, Number newValue) {
+					double width = newValue.doubleValue();
+				    hbox.setPrefWidth(width);
+				    hbox.setSpacing(width-160);
+			}
+		});
 			
+		
+		// Change the filter's values according to the user new choice.
+		// Must use user's actions events since using the RangeSlider lowValueProperty and highValueProperty
+		// are changing too rapidly when sliding, and it causes a database driver exception.
+		_rangeSlider.setOnMouseReleased(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent e) {
+				_filter.selectRange(new Range(_rangeSlider.getLowValue(), _rangeSlider.getHighValue()));
+			}
+		}); 
+		
+		minTxt.setOnKeyReleased(new EventHandler<KeyEvent>() {
+			public void handle(KeyEvent e) {
+				if(!minTxt.getText().isEmpty()){
+					_filter.selectRange(new Range(_rangeSlider.getLowValue(), _rangeSlider.getHighValue()));
+				}
+			}
+		});
+		
+		maxTxt.setOnKeyReleased(new EventHandler<KeyEvent>() {
+			public void handle(KeyEvent e) {
+				if(!maxTxt.getText().isEmpty()){
+					_filter.selectRange(new Range(_rangeSlider.getLowValue(), _rangeSlider.getHighValue()));
+				}
+			}
+		});
+		
+		// Update the text field to show the current value on the slider. and vice versa
+		Bindings.bindBidirectional(minTxt.textProperty(), _rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
+		Bindings.bindBidirectional(maxTxt.textProperty(), _rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
+	
+		_valueRangeProperty.addListener(new InvalidationListener() {	
 			@Override
 			public void invalidated(Observable arg0) {
 				populateRangeValues();
 			}
 		});
 		
-		_map.bind(_filter.rangeValuesProperty());
+		_valueRangeProperty.bind(_filter.valueRangeProperty());
 		
 		if (!_filter.isRangeValid()) {
-			Field field = _filter.getField();
+			final Field field = _filter.getField();
 			Table table = field.getTable();
 			
-			Task<ObservableMap<Object,Object>> task = table.getFieldRange( _filter.getDatasource(), field);
+			Task<ObservableValue<Range>> task = table.getFieldRange( _filter.getDatasource(), field);
 			setTask(task);
-			field.rangeValuesProperty().bind(task.valueProperty());
+			task.valueProperty().addListener(new ChangeListener<ObservableValue<Range>>() {
+
+				@Override
+                public void changed(
+                        ObservableValue<? extends ObservableValue<Range>> observable,
+                        ObservableValue<Range> oldValue,
+                        ObservableValue<Range> newValue) {
+					if (newValue != null) {
+						field.setValueRange(newValue.getValue());
+	                }	                
+                }
+			});
 		}
 		else{
 			populateRangeValues();
 		}
+		
+		_filter.valueRangeProperty().addListener(new InvalidationListener() {		
+			@Override
+			public void invalidated(Observable observable) {
+				Range range = _filter.getValueRange();
+				double min = (double) range.min;
+				double max = (double) range.max;
+				if (_rangeSlider.getLowValue() != min) _rangeSlider.setLowValue(min);
+				if (_rangeSlider.getHighValue() != max) _rangeSlider.setHighValue(max);
+			}
+		});
 	}
 	
 	/* Name: populateRangeValues
@@ -363,101 +458,16 @@ public class FilterPanel extends TitledPanel {
 	 * In this case there would be a range slider which displays the possible values in the range 
 	 * and the user can change the minimum and maximum values which are displayed */
 	private void populateRangeValues() {
-		_cbBox.getChildren().clear();
-		if (_map.get() != null) {
-			
-			Double min = (Double) (_map.get(NumericRangeValues.MIN) != null ? _map.get(NumericRangeValues.MIN):0.0);
-			Double max = (Double) (_map.get(NumericRangeValues.MAX) != null ? _map.get(NumericRangeValues.MAX):0.0);
-			Double chosenMin = (Double) (_map.get(NumericRangeValues.CHOSEN_MIN) != null ? _map.get(NumericRangeValues.CHOSEN_MIN) : min);
-			Double chosenMax = (Double) (_map.get(NumericRangeValues.CHOSEN_MAX) != null ? _map.get(NumericRangeValues.CHOSEN_MAX) : max);
-			
-			final RangeSlider rangeSlider = new RangeSlider(min,max,chosenMin,chosenMax);
-			rangeSlider.setShowTickLabels(true);
-			rangeSlider.setShowTickMarks(true);
-			//rangeSlider.setOrientation(Orientation.VERTICAL);
-			
-			double currentWidth = this.widthProperty().doubleValue();
-			_cbBox.setPrefWidth(0.95*currentWidth);
-			
-			double majorTicks = (rangeSlider.getMax()-rangeSlider.getMin())/4;
-			if(majorTicks > 0){
-				rangeSlider.setMajorTickUnit(majorTicks);
-			}
-			final HBox hbox = new HBox();
-			hbox.setSpacing(20);
-			final TextField minTxt = new TextField();
-			final TextField maxTxt = new TextField();
-			hbox.getChildren().addAll(minTxt, maxTxt);
-			
-			 hbox.setPrefWidth(currentWidth);
-			 hbox.setSpacing(currentWidth-120);
-			
-			minTxt.setPrefSize(80, 18);
-			maxTxt.setPrefSize(80, 18);
-			minTxt.setEditable(true);
-			maxTxt.setEditable(true);
-			minTxt.setAlignment(Pos.CENTER_LEFT);
-			maxTxt.setAlignment(Pos.CENTER_LEFT);
-			minTxt.setText(Double.toString(min));
-			maxTxt.setText(Double.toString(max));
-
-			_cbBox.getChildren().addAll(rangeSlider,hbox);
-			
-			//Listen to the width property of the parent - so the slider width can be changed accordingly.
-			this.widthProperty().addListener(new ChangeListener<Number>() {
-				public void changed(ObservableValue<? extends Number> observable, 
-                        Number oldValue, Number newValue) {
-						double width = newValue.doubleValue();
-					    _cbBox.setPrefWidth(0.95*width);
-				}
-			});
-			
-			_cbBox.widthProperty().addListener(new ChangeListener<Number>() {
-				public void changed(ObservableValue<? extends Number> observable, 
-                        Number oldValue, Number newValue) {
-						double width = newValue.doubleValue();
-					    hbox.setPrefWidth(width);
-					    hbox.setSpacing(width-160);
-				}
-			});
-				
-			
-			// Change the filter's values according to the user new choice.
-			// Must use user's actions events since using the RangeSlider lowValueProperty and highValueProperty
-			// are changing too rapidly when sliding, and it causes a database driver exception.
-			rangeSlider.setOnMouseReleased(new EventHandler<MouseEvent>() {
-				public void handle(MouseEvent e) {
-					_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
-				}
-			}); 
-			
-			minTxt.setOnKeyReleased(new EventHandler<KeyEvent>() {
-				public void handle(KeyEvent e) {
-					if(!minTxt.getText().isEmpty()){
-						_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
-					}
-				}
-			});
-			
-			maxTxt.setOnKeyReleased(new EventHandler<KeyEvent>() {
-				public void handle(KeyEvent e) {
-					if(!maxTxt.getText().isEmpty()){
-						_filter.selectMinMaxValues(rangeSlider.getLowValue(),rangeSlider.getHighValue());
-					}
-				}
-			});
-			
-			// Update the text field to show the current value on the slider. and vice versa
-			Bindings.bindBidirectional(minTxt.textProperty(), rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
-			Bindings.bindBidirectional(maxTxt.textProperty(), rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
-				
-		}
-	}
+		Range range = _filter.getValueRange();
+		_rangeSlider.setMin((double) range.min); 
+		_rangeSlider.setMax((double) range.max);
+	}		
 	
 	/* Name: getTitle
 	 * Gets the filter name and function (if exists).
 	 * If the filter is connected to a field, and the field has an aggregation function
-	 * sets the filter panel header to display both the filter name and the function*/
+	 * sets the filter panel header to display both the filter name and the function
+	 */
 	
 	
 	private static String getTitle(Filter filter) {

@@ -4,23 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.DataType.Type;
-import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 
 public class Filter implements Observable, Resource {
 	
@@ -31,14 +32,17 @@ public class Filter implements Observable, Resource {
 	private CyclistDatasource _ds = null;
 	private Field _field;
 	private DataType _dataType;
-	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
 	private ListProperty<Object> _values = new SimpleListProperty<>();
+	private ObjectProperty<Range> _valueRange = new SimpleObjectProperty<>();
+	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
+	private ObjectProperty<Range> _selectedRange = new SimpleObjectProperty<>();
+	
 	private List<InvalidationListener> _listeners = new ArrayList<>();
-	private MapProperty<Object, Object> _rangeValues = new SimpleMapProperty<>();
-	private ObservableMap<Object,Object> _selectedRangeValues = FXCollections.observableHashMap();
 	private  Consumer<Void> _onDSUpdated = null;
 	private Boolean _dsChanged = true;
 	private boolean _allSelected = false;
+	private BooleanProperty _isRange = new SimpleBooleanProperty(false);
+	private Consumer<Void> _onChanged = null;
 	
 	// for restore
 	public Filter() {
@@ -53,55 +57,104 @@ public class Filter implements Observable, Resource {
 		init(auto);
 	}
 	
+	public void setOnChanged(Consumer<Void> action) {
+		_onChanged = action;
+	}
+	
 	public ObservableSet<Object> selectedItems() {
 		return _selectedItems;
 	}
 	private void init(boolean auto) {
 		_dataType = new DataType(_field.getDataType());
 		
+		switch (getClassification()) {
+		case C:
+			_isRange.set(false);
+			break;
+		case Cdate:
+			_isRange.set(true);
+			break;
+		case Qd:
+			_isRange.set(true);;
+			break;
+		case Qi:
+			if(getFilterType() == FilterType.RANGE){
+				_isRange.set(true);
+			}else{
+				_isRange.set(false);
+			}
+		}
+		
 		if (auto) {
-			if (getValues() != null) {
-				_selectedItems.addAll(getValues());
-				_values.set(getValues());
+			if (isRange()) {
+				_selectedRange.set(_field.getValueRange());
+			} else {
+				_selectedItems.addAll(getValues() != null ? getValues() : new ArrayList<Object>());
 				_allSelected = true;
 			}
-			
-			if(_field.getRangeValues() != null){
-				_rangeValues.set(_field.getRangeValues());
-				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-			}
-			
 			setupListeners();
 		}	
+		if (isRange()) {
+			_valueRange.bind(_field.valueRangeProperty());
+		} else {
+			_values.bind(_field.valuesProperty());
+		}
 	}
 	
-	private void setupListeners() {
-		_field.valuesProperty().addListener((Observable o)-> {
-			if (getValues() == null) {
-				System.out.println("filter: getValue() is null");
-			} else {
-    			_values.set(getValues());
-    			if (_allSelected) {
+	public BooleanProperty isRangeProperty() {
+		return _isRange;
+	}
+	
+	public boolean isRange() {
+		return _isRange.get();
+	}
+	
+	public ObjectProperty<Range> valueRangeProperty() {
+		return _valueRange;
+	}
+	
+	public Range getValueRange() {
+		return _valueRange.get();
+	}
+	
+	public Range getSelectedRange() {
+		return _valueRange.get();
+	}
+	
+	public void setSelectedRange(Range range) {
+		_selectedRange.set(range);
+	}
+	
+	private void setupListeners() {	
+		_values.addListener(new InvalidationListener() {	
+			@Override
+			public void invalidated(Observable observable) {
+				if (getValues() == null) return;
+				
+//				_values.addAll(getValues());
+				if (_allSelected) {
     				_selectedItems.addAll(getValues());
     			} else {
-    				_selectedItems.retainAll(getValues());
     			}	
     			invalidate();
+    			if (_onChanged != null)
+    				_onChanged.accept(null);
 			}
 		});
 		
-		_field.rangeValuesProperty().addListener((Observable o)-> {
-//			_selectedRangeValues.clear();
-			if (_field.getRangeValues() != null){	
-				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-			}else{
-//				resetFilterValues();
+		_valueRange.addListener(new InvalidationListener() {
+			@Override
+			public void invalidated(Observable observable) {
+//				_valueRange.set(getValueRange());
+				Range range = getValueRange();
+				Range selected = getSelectedRange();
+				_allSelected = range.min == selected.min && range.max == selected.max;
+				if (!_allSelected && (range.min > selected.min || range.max < selected.max)) {
+					setSelectedRange(new Range(Math.max(range.min,  selected.min), Math.min(range.max, selected.max)));
+				}
+				if (_onChanged != null)
+					_onChanged.accept(null);
 			}
-			
-//			_rangeValues.set(_field.getRangeValues());
-			_rangeValues.set(_selectedRangeValues);
 		});
 	}
 	
@@ -112,18 +165,20 @@ public class Filter implements Observable, Resource {
 	public void save(IMemento memento) {
 		_field.save(memento.createChild("field"));
 		
-		IMemento group = memento.createChild("selected");
-		// TODO: can save the class only once
-		for (Object value : _selectedItems) {
-			if (value instanceof Number || value instanceof String) {
-				saveObj(group.createChild("value"), value);		
-			} 
-		}
+		IMemento group;
 		
-		if (_field.getRangeValues() != null) {
-    		group = memento.createChild("selected-range");
-    		saveObj(group.createChild("select-min"), _selectedRangeValues.get(NumericRangeValues.CHOSEN_MIN));
-    		saveObj(group.createChild("select-max"), _selectedRangeValues.get(NumericRangeValues.CHOSEN_MAX));
+		if (isRange()) {
+			group = memento.createChild("selected-range");
+			group.putDouble("from", getSelectedRange().min);
+			group.putDouble("to", getSelectedRange().max);
+		} else {
+    		group = memento.createChild("selected");
+    		// TODO: can save the class only once
+    		for (Object value : _selectedItems) {
+    			if (value instanceof Number || value instanceof String) {
+    				saveObj(group.createChild("value"), value);		
+    			} 
+    		}
 		}
 	}
 	
@@ -151,61 +206,70 @@ public class Filter implements Observable, Resource {
 	
 	
 	public void restore(final IMemento memento, Context ctx) {
-		// a filter has a copy of a field thus it needs to create one not look it up in the context
+		System.out.println("filter restore");
+		// a filter owns its own copy of a field. 
+		// create a field instead of looking it up in the context
 		_field = new Field();
 		_field.restore(memento.getChild("field"), ctx);
 		
 		init(false);
-		if (getValues() != null) {
-			_values.set(getValues());
-			System.out.println("filter restore");
+		if (isRange()) {
+			IMemento group = memento.getChild("selected-range");
+			setSelectedRange(new Range(group.getDouble("from"), group.getDouble("to")));
+			if (_onChanged != null)
+				_onChanged.accept(null);
+			setupListeners();
+		} else {	
 			IMemento group = memento.getChild("selected");
 			for (IMemento ref : group.getChildren("value")) {
 				_selectedItems.add(restoreObj(ref));
 			}
+			if (_onChanged != null)
+				_onChanged.accept(null);
 			setupListeners();
-		} else {
-			_field.valuesProperty().addListener(new InvalidationListener() {		
-				@Override
-				public void invalidated(Observable observable) {
-					if (getValues() != null) {
-						System.out.println("filter restore");
-						_values.set(getValues());
-						IMemento group = memento.getChild("selected");
-						for (IMemento ref : group.getChildren("value")) {
-							_selectedItems.add(restoreObj(ref));
-						}
-						_field.valuesProperty().removeListener(this);
-						setupListeners();
-					}	
-				}
-			});
-		}
-		
-		IMemento group = memento.getChild("selected-range");
-		if (group != null) {
-			if (_field.getRangeValues() != null) {
-				_rangeValues.set(_field.getRangeValues());
-				_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
-	    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
-	    		setupListeners();
-			} else {
-	    		_field.rangeValuesProperty().addListener(new InvalidationListener() {
-					@Override
-					public void invalidated(Observable observable) {
-						_rangeValues.set(_field.getRangeValues());
-						_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
-			    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
-			    		_field.rangeValuesProperty().removeListener(this);
-			    		setupListeners();
-					}
-				});
-	    	}
-		}
+		} 
+//		else {
+//			_field.valuesProperty().addListener(new InvalidationListener() {		
+//				@Override
+//				public void invalidated(Observable observable) {
+//					if (getValues() != null) {
+//						System.out.println("filter restore");
+//						_values.set(getValues());
+//						IMemento group = memento.getChild("selected");
+//						for (IMemento ref : group.getChildren("value")) {
+//							_selectedItems.add(restoreObj(ref));
+//						}
+//						_field.valuesProperty().removeListener(this);
+//						setupListeners();
+//					}	
+//				}
+//			});
+//		}
+//		
+//		IMemento group = memento.getChild("selected-range");
+//		if (group != null) {
+//			if (_field.getRangeValues() != null) {
+//				_rangeValues.set(_field.getRangeValues());
+//				_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
+//	    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
+//	    		setupListeners();
+//			} else {
+//	    		_field.rangeValuesProperty().addListener(new InvalidationListener() {
+//					@Override
+//					public void invalidated(Observable observable) {
+//						_rangeValues.set(_field.getRangeValues());
+//						_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
+//			    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
+//			    		_field.rangeValuesProperty().removeListener(this);
+//			    		setupListeners();
+//					}
+//				});
+//	    	}
+//		}
 	}
 
 	
-	public void setOnDSUpdated(Consumer<Void> action){
+	public void setOnDatasouceChanged(Consumer<Void> action){
 		_onDSUpdated = action;
 	}
 	
@@ -262,7 +326,7 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public boolean isRangeValid() {
-		Boolean reply =  _field.getRangeValues() != null && !_dsChanged;
+		Boolean reply =  /*_field.getRangeValues() != null &&*/ !_dsChanged;
 		_dsChanged = false;
 		return reply;
 	}
@@ -273,10 +337,6 @@ public class Filter implements Observable, Resource {
 	
 	public ListProperty<Object> valuesProperty() {
 		return _values;
-	}
-	
-	public MapProperty<Object,Object> rangeValuesProperty() {
-		return _rangeValues;
 	}
 	
 	public ObservableSet<Object> getSelectedValues() {
@@ -310,9 +370,8 @@ public class Filter implements Observable, Resource {
 		invalidate();
 	}
 	
-	public void selectMinMaxValues(Object minValue, Object maxValue){
-		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, minValue);
-		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, maxValue);
+	public void selectRange(Range range) {
+		setSelectedRange(range);
 		invalidate();
 	}
 	
@@ -350,33 +409,18 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public boolean isActive() {
-		boolean active = true;
-		if (getValues() == null || _selectedItems.size() == getValues().size()) {
-			if(_selectedRangeValues.size() == 0) {
-				active = false;
-			}
-		} 
-		
-		return active;
-	}
-	
-	public boolean allValuesSelected() {
-		return _selectedItems.size() == getValues().size();
+		return _allSelected;
 	}
 	
 	public String toString() {
 		if (!_valid) {
-			if (getValues() == null || allValuesSelected()) {
-				if(_selectedRangeValues.size() > 0){
-//					String function = _field.getString(FieldProperties.AGGREGATION_FUNC);
-					String function = null;
-					String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
-					String str = name+" >=" + _selectedRangeValues.get(NumericRangeValues.MIN) + " AND " + name +" <=" + _selectedRangeValues.get(NumericRangeValues.MAX);
-					_value = str;
-					
-				}else{
-					_value = "1=1";
-				}
+			if (_allSelected) {
+    			_value = "1=1";
+			} else if (isRange()) {
+				String function = null;
+				String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
+				String str = name+" >=" + getSelectedRange().min + " AND " + name +" <=" + getSelectedRange().max;
+				_value = str;
 			} else {
 				StringBuilder builder = new StringBuilder();
 				if (_selectedItems.size() > 0) {
@@ -404,6 +448,7 @@ public class Filter implements Observable, Resource {
 			_valid = true;
 		}
 		
+		System.out.println("filter to string:"+_value);
 		return _value;
 	}
 	

@@ -22,6 +22,7 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +55,8 @@ public class Field implements Resource {
 	private BooleanProperty _selected;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
-	private MapProperty<Object,Object> _rangeValuesProperty= new SimpleMapProperty<>();
+	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<Range>(new Range(0,0));
+	
 	private Map<String, Object> _properties = new HashMap<>();
 	private Boolean _isHidden = false;
 
@@ -99,16 +101,16 @@ public class Field implements Resource {
 		return valuesProperty().get();
 	}
 	
-	public MapProperty<Object, Object> rangeValuesProperty() {
-		return _rangeValuesProperty;
+	public ObjectProperty<Range> valueRangeProperty() {
+		return _valueRangeProperty;
 	}
 	
-	public void setRangeValues(ObservableMap<Object, Object> rangeValues) {
-		rangeValuesProperty().set(rangeValues);
+	public Range getValueRange() {
+		return _valueRangeProperty.get();
 	}
 	
-	public ObservableMap<Object, Object> getRangeValues() {
-		return rangeValuesProperty().get();
+	public void setValueRange(Range range) {
+		_valueRangeProperty.set(range);
 	}
 	
 	public String getName() {
