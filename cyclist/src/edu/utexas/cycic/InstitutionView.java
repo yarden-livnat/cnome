@@ -43,7 +43,7 @@ public class InstitutionView extends ViewBase{
 	public InstitutionView(){
 		super();
 		// Ensures the temporary institution is initiated only once. 
-		if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
+		/*if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
 			String string;
 			for(int i = 0; i < XMLReader.institutionList.size(); i++){
 				StringBuilder sb = new StringBuilder();
@@ -68,7 +68,7 @@ public class InstitutionView extends ViewBase{
 					e.printStackTrace();
 				}
 			}
-		}
+		}*/
 		
 		// ListView for initial facilities in the institution.
 		final ListView<String> facilityList = new ListView<String>();
@@ -115,6 +115,7 @@ public class InstitutionView extends ViewBase{
 				for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 					if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) typeOptions.getValue())){
 						tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+						tempInstit.archetype = DataArrays.simInstitutions.get(i).institArch;
 					}
 				}
 				tempInstit.type = (String) typeOptions.getValue();

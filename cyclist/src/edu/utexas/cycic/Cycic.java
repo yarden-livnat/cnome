@@ -193,16 +193,10 @@ public class Cycic extends ViewBase{
 						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
 							facility.niche = DataArrays.simFacilities.get(i).niche;
+							facility.archetype = DataArrays.simFacilities.get(i).facilityArch;
 						}
 					}
-					System.out.println(facility.niche);
 					event.consume();
-					/*Optional<String> response =  Dialogs.create()
-							.title("Name Facility")
-							.message("Enter Facility Name")
-							.showTextInput();
-					if(response.isPresent()){
-						facility.name = response.orElse("");*/
 					facility.name = "";
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
@@ -214,9 +208,9 @@ public class Cycic extends ViewBase{
 					
 					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(skins.getValue())){
-							System.out.println("TEST");
 							facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.get(facility.niche));
 							facility.cycicCircle.image.setVisible(true);
+							facility.cycicCircle.setOpacity(0);
 						}
 					}
 					facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);
@@ -325,14 +319,9 @@ public class Cycic extends ViewBase{
 						skinSet skin = DataArrays.visualizationSkins.get(i);
 						if(skin.name.equalsIgnoreCase(skins.getValue())){
 							for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
-								FacilityCircle testCircle = DataArrays.FacilityNodes.get(i).cycicCircle;
-								try{
-									testCircle.image.setImage(skin.images.get(DataArrays.FacilityNodes.get(i).niche));
-								} catch (Exception e1){
-									e1.printStackTrace();
-								}
-								testCircle.image.setVisible(true);
-								testCircle.setOpacity(0);
+								DataArrays.FacilityNodes.get(j).cycicCircle.image.setImage(skin.images.get(DataArrays.FacilityNodes.get(j).niche));
+								DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(true);
+								DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(0);
 							}
 						}
 					}
@@ -692,6 +681,7 @@ public class Cycic extends ViewBase{
                 		BufferedWriter buffOut = new BufferedWriter(fileOutput);
 
                 		Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
+                		log.info("Cyclus run complete");
                 	} catch (Exception e1) {
                 		e1.printStackTrace();
                 	}

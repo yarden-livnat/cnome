@@ -143,7 +143,7 @@ public class OutPut {
 		for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(facility.facilityType.split(" ")[0]);
+			lib.setTextContent(facility.archetype.split(" ")[0]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
 			name.setTextContent(facility.facilityType.split(" ")[1]);
@@ -153,7 +153,7 @@ public class OutPut {
 		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(region.type.split(" ")[0]);
+			lib.setTextContent(region.archetype.split(" ")[0]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
 			name.setTextContent(region.type.split(" ")[1]);
@@ -163,7 +163,7 @@ public class OutPut {
 		for(instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(instit.type.split(" ")[0]);
+			lib.setTextContent(instit.archetype.split(" ")[0]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
 			name.setTextContent(instit.type.split(" ")[1]);

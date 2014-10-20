@@ -199,6 +199,7 @@ class regionNode{
 	String name = new String();
 	String type = new String();
 	String entity; 
+	String archetype;
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
 	ArrayList<Object> regionData  = new ArrayList<Object>();
 	ArrayList<String> institutions = new ArrayList<String>();
@@ -216,6 +217,7 @@ class instituteNode{
 	String name;
 	String type;
 	String entity;
+	String archetype;
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	ArrayList<facilityItem> availFacilities = new ArrayList<facilityItem>();
@@ -259,6 +261,7 @@ class facilityNode{
 	FacilityCircle cycicCircle = new FacilityCircle();
 	FacilityCircle sorterCircle = new FacilityCircle();
 	protected String niche;
+	public String archetype;
 }
 
 

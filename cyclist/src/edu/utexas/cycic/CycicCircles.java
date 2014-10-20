@@ -79,7 +79,7 @@ public class CycicCircles{
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.rgbColor=VisFunctions.stringToColor(parent.facilityType);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.8));
+		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
 			circle.text.setTextFill(Color.BLACK);

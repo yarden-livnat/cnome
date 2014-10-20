@@ -58,14 +58,10 @@ public class RegionCorralView extends ViewBase {
 						for (int i = 0; i < DataArrays.simRegions.size(); i++){
 							if(DataArrays.simRegions.get(i).regionName.equalsIgnoreCase(region.type)){
 								region.regionStruct = DataArrays.simRegions.get(i).regionStruct;
+								region.archetype = DataArrays.simRegions.get(i).regionArch;
 							}
 						}
 						event.consume();
-						/*Optional<String> response =  Dialogs.create()
-								.title("Name Region")
-								.message("Enter Region Name")
-								.showTextInput();
-						region.name = response.get();*/
 						region.name = "";
 						workingRegion = region;
 						FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
