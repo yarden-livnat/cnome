@@ -25,10 +25,11 @@ public class XMLReader {
 	/**
 	 * 
 	 */
-	skinSet SC2 = new skinSet(){
+	static skinSet SC2 = new skinSet(){
 		{
-			images.put("reactor", "reactorSC.png");
-			images.put("facility", "sourceSC.png");
+			name = "SC2";
+			images.put("reactor", "~/reactorSC2.jpg");
+			images.put("facility", "~/sourceFacSC2.jpg");
 		}
 	};
 	

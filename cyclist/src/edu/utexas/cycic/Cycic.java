@@ -292,14 +292,31 @@ public class Cycic extends ViewBase{
 		
 		
 		ComboBox<String> skins = new ComboBox<String>();
+		DataArrays.visualizationSkins.add(XMLReader.SC2);
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
 		}
 		skins.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				for()
+				for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+					skinSet skin = DataArrays.visualizationSkins.get(i);
+					if(skin.name.equalsIgnoreCase(skins.getValue())){
+						for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+							FacilityCircle testCircle = DataArrays.FacilityNodes.get(i).cycicCircle;
+
+							testCircle.image.setImage(new Image("reactor.png"));
+							/*try{
+								testCircle.image.setImage(new Image(skin.images.get(DataArrays.FacilityNodes.get(i).niche)));
+							} catch (Exception e1){
+								testCircle.image.setImage(new Image("~/reactor.png"));
+							}*/
+							testCircle.image.setVisible(true);
+						}
+					}
+				}
 			}
 		});
+		grid.add(skins, 9, 0);
 		/*opSwitch.getToggles().addAll(localToggle, remoteToggle);
 		localToggle.setSelected(true);
 		grid.add(localToggle, 7, 0);
@@ -373,7 +390,11 @@ public class Cycic extends ViewBase{
 					facilityStructure node = new facilityStructure();
 					node.facAnnotations = sb1.toString();
 					node.facilityArch = schemaLines[i].toString();
-					node.niche = XMLReader.nicheReader(sb1.toString().replace("\"", ""));
+					try{	
+						node.niche = XMLReader.nicheReader(node.facAnnotations).replace("\"", "");
+					} catch (Exception e) {
+						node.niche = "facility";
+					}
 					node.facilityName = ((String) schemaLines[i]).replace(":", " ");
 					DataArrays.simFacilities.add(node);
 					log.info("Adding archetype "+schemaLines[i]);
