@@ -47,7 +47,6 @@ import edu.utah.sci.cyclist.core.event.notification.SimpleEventBus;
 import edu.utah.sci.cyclist.core.event.notification.SimpleNotification;
 import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Filter;
-import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.tools.Tool;

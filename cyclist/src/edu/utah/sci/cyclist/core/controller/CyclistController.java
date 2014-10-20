@@ -56,16 +56,15 @@ import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
-import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
+import edu.utah.sci.cyclist.core.presenter.InputPresenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
-import edu.utah.sci.cyclist.core.presenter.InputPresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
@@ -553,8 +552,9 @@ public class CyclistController {
 		_presenter.save(memento.createChild("workspace"));
 		
 		//First save the main workspace
-		IMemento mainWs = memento.createChild("main-window");
-		saveMainScreen(mainWs);
+		IMemento mainWs = memento.createChild("main-window");	
+		saveMainScreen(mainWs.createChild("geom"));
+		_screen.save(mainWs);
 			
 		
 		try {
@@ -641,7 +641,8 @@ public class CyclistController {
 					
 					//Read the main workspace
 					IMemento mainWs = memento.getChild("main-window");
-					restoreMainScreen(mainWs);
+					restoreMainScreen(mainWs.getChild("geom"));
+					_screen.restore(mainWs, ctx);
 					
 					IMemento toolsRoot = memento.getChild("workspace");
 					if(toolsRoot != null){

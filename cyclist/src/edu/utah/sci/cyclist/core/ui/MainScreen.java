@@ -22,6 +22,10 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -41,6 +45,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.ToolsLibrary;
+import edu.utah.sci.cyclist.core.controller.IMemento;
+import edu.utah.sci.cyclist.core.model.Context;
+import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.panels.FiltersListPanel;
@@ -55,7 +62,7 @@ import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
-public class MainScreen extends VBox {
+public class MainScreen extends VBox implements Resource {
 	public static final String ID = "main-screen";
 	
 	private SplitPane _sp;
@@ -87,6 +94,12 @@ public class MainScreen extends VBox {
 	public Window getWindow() {
 		return getScene().getWindow();
 	}
+	
+	@Override
+    public String getUID() {
+		// not used
+	    return null;
+    }
 	
 	public ObservableList<String> selectWorkspace(ObservableList<String> list, int chosenIndex) {
 		WorkspaceWizard wizard = new WorkspaceWizard();
@@ -267,7 +280,28 @@ public class MainScreen extends VBox {
 		return _stageCloseProperty;
 	}
 	
+	public void save(IMemento memento) {
+		memento.createChild("sp-pos").putString("values", Arrays.toString(_sp.getDividerPositions()));
+		memento.createChild("tools-pos").putString("values", Arrays.toString(_toolsPane.getDividerPositions()));
+	}
 	
+	public void restore(IMemento memento, Context ctx) {
+		double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
+		_sp.setDividerPositions(pos);
+		
+		pos = parseArray(memento.getChild("tools-pos").getString("values"));
+		_toolsPane.setDividerPositions(pos);
+	}
+	
+	private double[] parseArray(String str) {
+		String[] fields = str.substring(1, str.length()-1).split(",");
+		double v[] = new double[fields.length];
+		for (int i=0; i<fields.length; i++) {
+			v[i] = Double.valueOf(fields[i]);
+		}
+		return v;
+		
+	}
 	private MenuBar createMenuBar(Stage stage) {
 		MenuBar menubar = new MenuBar();
 		

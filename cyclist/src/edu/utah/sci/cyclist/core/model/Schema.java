@@ -117,9 +117,7 @@ public class Schema implements Resource {
 
 	// Restore the schema
 	public void restore(IMemento memento, Context ctx) {
-		_id = memento.getID();
-		
-		// Restore each field
+			// Restore each field
 		IMemento[] list = memento.getChildren("field");
 		for(IMemento fieldMemento: list){
 			Field field = new Field();

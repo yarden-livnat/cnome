@@ -40,22 +40,21 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ObservableValueBase;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.core.controller.XMLMemento;
-import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.util.DataFactory;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 import edu.utah.sci.cyclist.core.util.SQL;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.ObservableValueBase;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.concurrent.Task;
 
 public class Table implements Resource {
 
@@ -125,6 +124,7 @@ public class Table implements Resource {
 	
     // Save the table
 	public void save(IMemento memento) {
+		memento.putString("uid", _id);
 		memento.putString("name", getName());
 		memento.putString("alias", getAlias());
 		_schema.save(memento.createChild("Schema"));
