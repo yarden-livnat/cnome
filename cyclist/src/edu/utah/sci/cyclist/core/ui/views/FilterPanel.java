@@ -319,6 +319,10 @@ public class FilterPanel extends TitledPanel {
 	 * and creates a filter within that range */
 	private void createRange() {
 		
+		if (_cbBox != null) {
+			System.out.println("createRange ignored");
+			return;
+		}
 		double min  = 0;
 		double max = 100;
 		

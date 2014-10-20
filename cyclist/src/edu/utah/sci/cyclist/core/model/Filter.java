@@ -118,7 +118,7 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public Range getSelectedRange() {
-		return _valueRange.get();
+		return _selectedRange.get();
 	}
 	
 	public void setSelectedRange(Range range) {
@@ -372,6 +372,8 @@ public class Filter implements Observable, Resource {
 	
 	public void selectRange(Range range) {
 		setSelectedRange(range);
+		Range value = getValueRange();
+		_allSelected = value.min == range.min && value.max == range.max;
 		invalidate();
 	}
 	
