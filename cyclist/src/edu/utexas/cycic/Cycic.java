@@ -22,6 +22,7 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
+import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -83,6 +84,7 @@ public class Cycic extends ViewBase{
 	static ToggleButton localToggle = new ToggleButton("Local");
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
     static CyclusJob _remoteDashA;
+    private static Object monitor = new Object();
 	
 	/**
 	 * 
@@ -320,7 +322,7 @@ public class Cycic extends ViewBase{
 		});
 		grid.add(skins, 9, 0);
 		/*opSwitch.getToggles().addAll(localToggle, remoteToggle);
-		localToggle.setSelected(true);
+        localToggle.setSelected(true);
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
 		*/
@@ -328,8 +330,19 @@ public class Cycic extends ViewBase{
         Button button2 = new Button("Remote Arche");
         button2.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
+                localToggle.setSelected(false);
                 CyclistController._cyclusService.submitCmd("cyclus", "-a");
                 _remoteDashA = CyclistController._cyclusService.latestJob();
+                _remoteDashA.statusProperty()
+                    .addListener(new ChangeListener<CyclusJob.Status>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Status> observable,
+                        Status oldValue, Status newValue) {
+                        if (newValue == Status.READY) {
+                            retrieveSchema();
+                        }
+                    }
+                });
             }
         });
         grid.add(button2, 9, 0);
@@ -361,7 +374,7 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-    public void retrieveSchema() throws InterruptedException {
+    public void retrieveSchema() {
 		try {
 			String string;
             Object[] schemaLines;
@@ -371,11 +384,6 @@ public class Cycic extends ViewBase{
                 schemaLines = schema.lines().toArray();
                 schema.close();
             } else {
-                while (!_remoteDashA.statusTextProperty().getValue().equals("complete")) {
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {};
-                }
                 schemaLines = _remoteDashA.getStdout().split("\n");
             }
 			DataArrays.simFacilities.clear();
