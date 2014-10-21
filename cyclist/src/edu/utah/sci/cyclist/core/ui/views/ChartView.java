@@ -486,8 +486,13 @@ public class ChartView extends CyclistViewBase {
 			System.out.println("no data");
 			return;
 		}
-
+		
 		System.out.println("data has "+list.size()+" rows");
+		if (list.size() > 5000) {
+			log.warn("Too many data points (>5000). Ignored");
+			return;
+		}
+
 		// separate to (x,y,attributes) lists
 		List<SeriesData> lists = splitToSeriesData(spec, list);
 

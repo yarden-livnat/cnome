@@ -61,9 +61,11 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Configuration;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
@@ -91,6 +93,9 @@ public class InventoryView extends CyclistViewBase {
 	private ObservableList<String> _nuclideFilterNames = FXCollections.observableArrayList();
 	private ObjectProperty<Predicate<Inventory>> _currentNuclideFilterProperty = new SimpleObjectProperty<>();
 	
+	private TitledPanel _agentListPanel;
+	private ChoiceBox<ChartType> _chartType;
+
 	private SimulationProxy _simProxy = null;
 		
 	private InventoryChart _chart = new InventoryChart();
@@ -240,6 +245,43 @@ public class InventoryView extends CyclistViewBase {
 		}
 	}
 	
+	@Override
+	public void save(IMemento memento) {
+		IMemento group = memento.createChild("agents");
+		for (AgentInfo info : _agents) {
+			IMemento child = group.createChild("agent");
+			child.putString("type", info.toString());
+			child.putString("name", info.value);
+		}
+		
+		memento.putString("chart-type", _chartType.getValue().toString());
+	}
+	
+	@Override 
+	public void restore(IMemento memento, Context ctx) {
+		IMemento group = memento.getChild("agents");
+		if (group != null) {
+    		for (IMemento child : group.getChildren("agent")) {
+    			addAgent(child.getString("type"), child.getString("name"));
+    		}
+    		
+    		_chartType.setValue(ChartType.valueOf(memento.getString("chart-type")));
+		}
+	}
+	
+	private void addAgent(String type, String name) {
+		AgentInfo info = new AgentInfo(type, name);	
+		AgentEntry entry = new AgentEntry(info);
+		_agentListPanel.getContent().getChildren().add(entry);
+		entry.setOnClose(item->{
+			_agents.remove(item.info);
+			_agentListPanel.getContent().getChildren().remove(item);
+			_chart.remove(item.info);
+		});
+		
+		addAgent(info);	
+	}
+	
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("inventory");
@@ -270,25 +312,25 @@ public class InventoryView extends CyclistViewBase {
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("ctrl");
 		
-		ChoiceBox<ChartType> type = new ChoiceBox<>();
-		type.getStyleClass().add("choice");
-		type.getItems().addAll(ChartType.values());
-		type.valueProperty().addListener(e->{
-			selectChartType(type.getValue());
+		_chartType = new ChoiceBox<>();
+		_chartType.getStyleClass().add("choice");
+		_chartType.getItems().addAll(ChartType.values());
+		_chartType.valueProperty().addListener(e->{
+			selectChartType(_chartType.getValue());
 		});
 		
-		type.setValue(ChartType.INVENTORY);
+		_chartType.setValue(ChartType.INVENTORY);
 		
-		vbox.getChildren().add(type);
+		vbox.getChildren().add(_chartType);
 		return vbox;
 	}
 	
 	public Node buildAgentCtrl() {		
-		TitledPanel panel = new TitledPanel("Agents");
-		panel.getStyleClass().add("agents-panel");
+		_agentListPanel = new TitledPanel("Agents");
+		_agentListPanel.getStyleClass().add("agents-panel");
 		
-		Node pane = panel.getPane();
-		panel.setFillWidth(true);
+		Node pane = _agentListPanel.getPane();
+		_agentListPanel.setFillWidth(true);
 		pane.setOnDragOver(e->{
 			DnD.LocalClipboard clipboard = getLocalClipboard();
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
@@ -313,21 +355,13 @@ public class InventoryView extends CyclistViewBase {
 					return;
 				}	
 			}
-			AgentInfo info = new AgentInfo(field, value);	
-			AgentEntry entry = new AgentEntry(info);
-			panel.getContent().getChildren().add(entry);
-			entry.setOnClose(item->{
-				_agents.remove(item.info);
-				panel.getContent().getChildren().remove(item);
-				_chart.remove(item.info);
-			});
 			
-			addAgent(info);	
+			addAgent(field, value);
 			e.setDropCompleted(true);
 			e.consume();
 		});
 		
-		return panel;
+		return _agentListPanel;
 	}
 
 	public Node buildNuclideCtrl() {
