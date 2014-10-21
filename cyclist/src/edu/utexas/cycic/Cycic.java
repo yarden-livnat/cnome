@@ -650,39 +650,41 @@ public class Cycic extends ViewBase{
 		});
 		simInfo.add(output, 0, 6);
 		
-        Button runRemote = new Button("Run Remotely");
-        runRemote.setOnAction(new EventHandler<ActionEvent>(){
+        Button runCyclus = new Button("Run Cyclus!");
+        runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-            	if(OutPut.inputTest()){
+                if(!OutPut.inputTest()){
+                    log.info("Cyclus Input Not Well Formed!");
+                    return;  // safety dance
+                }
+                if (localToggle.isSelected()) {
+                    // local execution
+                    String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+                    String cycicTemp = "cycic"+tempHash;
+                    try {
+                        File temp = File.createTempFile(cycicTemp, ".xml");
+                        FileWriter fileOutput = new FileWriter(temp);
+                        BufferedWriter buffOut = new BufferedWriter(fileOutput);
+                        Process p = Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp);
+                        p.waitFor();
+                        String line = null;
+                        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                        while ((line = input.readLine()) != null) {        
+                            log.info(line);
+                        }
+                        input.close();
+                        log.info("Cyclus run complete");
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // remote execution
             		String cycicXml = OutPut.xmlStringGen();
             		CyclistController._cyclusService.submit(cycicXml);
             	}
             }
         });;
-    
-        Button runInput = new Button("Run Locally");
-        runInput.setOnAction(new EventHandler<ActionEvent>(){
-            public void handle(ActionEvent e){
-                if(OutPut.inputTest()){
-                	String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-                	String cycicTemp = "cycic"+tempHash;
-                	try {
-                		File temp = File.createTempFile(cycicTemp, ".xml");
-                		FileWriter fileOutput = new FileWriter(temp);
-                		BufferedWriter buffOut = new BufferedWriter(fileOutput);
-
-                		Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
-                		log.info("Cyclus run complete");
-                	} catch (Exception e1) {
-                		e1.printStackTrace();
-                	}
-                }   
-            }
-        });
-        HBox runBox = new HBox();
-        runBox.setSpacing(5);
-        runBox.getChildren().addAll(runInput, runRemote);
-        simInfo.add(runBox, 1,6);    
+        simInfo.add(runCyclus, 1,6);    
     }
 
 	public void createArchetypeBar(GridPane grid){
