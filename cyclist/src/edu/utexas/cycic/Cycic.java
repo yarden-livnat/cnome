@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.controlsfx.dialog.Dialogs;
 
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -28,15 +29,20 @@ import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import javax.imageio.ImageIO;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+
 import javafx.geometry.Insets;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -48,6 +54,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -331,7 +338,15 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		grid.add(skins, 5, 1);
+		grid.add(skins, 0, 1);
+		
+		Button imageButton = new Button("Save fuel cycle image");
+		imageButton.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				export();
+			}
+		});
+		grid.add(imageButton, 1, 1);
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
@@ -401,7 +416,6 @@ public class Cycic extends ViewBase{
                 facilityStructure node = new facilityStructure();
                 node.facAnnotations = anno.toString();
                 node.facilityArch = spec;
-                System.out.println(spec);
                 node.niche = anno.getString("niche", "facility");
                 node.facStruct = XMLReader.annotationReader(anno.toString(), 
                     XMLReader.readSchema(schema));
@@ -414,7 +428,6 @@ public class Cycic extends ViewBase{
                 regionStructure rNode = new regionStructure();
                 rNode.regionAnnotations = anno.toString();
                 rNode.regionArch = spec;
-                System.out.println(spec);
                 rNode.regionStruct = XMLReader.annotationReader(anno.toString(),
                     XMLReader.readSchema(schema));
                 rNode.regionName = spec.replace(":", " ");
@@ -424,7 +437,6 @@ public class Cycic extends ViewBase{
                 log.info("Adding archetype "+spec);
                 institutionStructure iNode = new institutionStructure();
                 iNode.institArch = spec;
-                System.out.println(spec);
                 iNode.institAnnotations = anno.toString();
                 iNode.institStruct = XMLReader.annotationReader(anno.toString(),
                     XMLReader.readSchema(schema));
@@ -773,4 +785,21 @@ public class Cycic extends ViewBase{
 		archetypeGrid.add(archetypes, 1, 1);
 	}
 	
+	private void export() {
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image file (png, jpg, gif)", "*.png", "*.jpg", "'*.gif") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+		if (file != null) {
+			WritableImage image = pane.snapshot(new SnapshotParameters(), null);
+			String name = file.getName();
+			String ext = name.substring(name.indexOf(".")+1, name.length());
+		    try {
+		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
+		    } catch (IOException e) {
+		        log.error("Error writing image to file: "+e.getMessage());
+		    }
+		} else {
+			System.out.println("weird");
+		}
+	}
 }

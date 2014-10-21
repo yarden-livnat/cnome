@@ -160,9 +160,6 @@ public class OutPut {
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
 			String[] fullPath = region.archetype.split(":");
-			System.out.println(fullPath[0]);
-			System.out.println(fullPath[1]);
-			System.out.println(fullPath[2]);
 			
 			if(!fullPath[0].equalsIgnoreCase("")){
 				Element path = doc.createElement("path");
