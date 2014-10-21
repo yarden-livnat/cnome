@@ -7,12 +7,13 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
 
-public class CyclistAxis extends NumAxis {
+public class CyclistLogAxis extends CyclistNumberAxis {
 	public enum Mode {LINEAR, LOG}
+	public static final double EPS = 1e-1;
+	
+	private double _posMin = EPS;
 	
 	private ObjectProperty<Mode> _mode = new ObjectPropertyBase<Mode>(Mode.LINEAR) {
 		 @Override protected void invalidated() {
@@ -22,7 +23,7 @@ public class CyclistAxis extends NumAxis {
 
         @Override
         public Object getBean() {
-            return CyclistAxis.this;
+            return CyclistLogAxis.this;
         }
 
         @Override
@@ -44,8 +45,9 @@ public class CyclistAxis extends NumAxis {
 	}
 	
 	
-	public CyclistAxis() {
+	public CyclistLogAxis() {
 		super();
+		// A hack: JavaFX doesn't redraw if forceZeroInRange changes
 		forceZeroInRangeProperty().addListener(new InvalidationListener() {	
 			@Override
 			public void invalidated(Observable observable) {
@@ -55,7 +57,7 @@ public class CyclistAxis extends NumAxis {
 		});
 	}
 	
-	public CyclistAxis(double from, double to, double tickUnit) {
+	public CyclistLogAxis(double from, double to, double tickUnit) {
 		super(from, to, tickUnit);
 		
 		// A hack: JavaFX doesn't redraw if forceZeroInRange changes
@@ -69,43 +71,60 @@ public class CyclistAxis extends NumAxis {
 	}
 
 	
-	@Override
-	protected Object autoRange(double minValue, double maxValue, double length, double labelSize) {
-		double[] range = (double [])super.autoRange(minValue, maxValue, length, labelSize);
-//		System.out.println("autoRange:"+range[0]+", "+range[1]);
-		if (getMode() == Mode.LOG) {		
-			if (range[1] < 1) {
-				range[1] = 1;
-			}
-			if (isForceZeroInRange()) {
-            	range[0] = 1;
+	@Override public void invalidateRange(List<Number> data) {
+		if (getMode() == Mode.LOG) {
+            if (data.isEmpty()) {
+                _posMin = EPS;;
             } else {
-            	range[0] = Math.max(range[0], 1);
-            }
+                _posMin = Double.MAX_VALUE;
+                for(Number dataValue: data) {
+                	double v = dataValue.doubleValue();
+                	if (v >0) _posMin = Math.min(_posMin, v);
+                }
+                System.out.println("pos min:"+_posMin);
+           }
 		}
-        return range;  
+        super.invalidateRange(data);
     }
 	
-	@Override
-	protected void setRange(Object range, boolean animate) {
-		if (getMode() == Mode.LINEAR) {
-			super.setRange(range, animate);
-		} else {
-        	if (range != null) {
-        		double[] drange = (double[]) range;
-        		double lowerBound = drange[0];
-    			double upperBound = drange[1];
-    			setLowerBound(lowerBound);
-    			setUpperBound(upperBound);
-    			if (lowerBound< 1) {
-    				lowerBound = 1;
-    			}
-    			if (animate) {
-    				System.out.println("setRange animate not implemented yet.");
-    			}
-    		}
-		}
-	}
+//	@Override
+//	protected Object autoRange(double minValue, double maxValue, double length, double labelSize) {
+//		double[] range = (double []) super.autoRange(minValue, maxValue, length, labelSize);
+//		if (getMode() == Mode.LOG) {
+//			if (range[0] <= 0) range[0] = _minNotZero;
+//		}
+//			if (range[1] < 1) {
+//				range[1] = 1;
+//			}
+//			if (isForceZeroInRange()) {
+//            	range[0] = 1;
+//            } else {
+//            	range[0] = Math.max(range[0], 1);
+//            }
+//		}
+//        return range;  
+//    }
+	
+//	@Override
+//	protected void setRange(Object range, boolean animate) {
+//		if (getMode() == Mode.LINEAR) {
+//			super.setRange(range, animate);
+//		} else {
+//        	if (range != null) {
+//        		double[] drange = (double[]) range;
+//        		double lowerBound = drange[0];
+//    			double upperBound = drange[1];
+//    			setLowerBound(lowerBound);
+//    			setUpperBound(upperBound);
+////    			if (lowerBound< 1) {
+////    				lowerBound = 1;
+////    			}
+//    			if (animate) {
+//    				System.out.println("setRange animate not implemented yet.");
+//    			}
+//    		}
+//		}
+//	}
 
 //	@Override
 //	protected Object getRange() {
@@ -123,7 +142,7 @@ public class CyclistAxis extends NumAxis {
 		List<Number> tickPositions = new ArrayList<>();
 		if (range != null) {
 			double[] drange = (double[]) range;
-			double lowerBound = drange[0];
+			double lowerBound = _posMin;
 			double upperBound = drange[1];
 			int logLowerBound = (int) Math.floor(Math.log10(lowerBound));
 			int logUpperBound = (int) Math.floor(Math.log10(upperBound));
@@ -146,7 +165,7 @@ public class CyclistAxis extends NumAxis {
 		List<Number> minorTickMarksPositions = new ArrayList<>();
 		double[] drange = (double[]) getRange();
 		if (drange != null) {
-			double lowerBound = drange[0];
+			double lowerBound = _posMin;
 			double upperBound = drange[1];
 			int logLowerBound = (int) Math.floor(Math.log10(lowerBound));
 			int logUpperBound = (int) Math.floor(Math.log10(upperBound)+1);
@@ -189,7 +208,7 @@ public class CyclistAxis extends NumAxis {
 		if (getMode() == Mode.LINEAR)
 			return super.getValueForDisplay(displayPosition);
 		
-		double logLowerBound = Math.log10(getLowerBound());
+		double logLowerBound = Math.log10(_posMin); //getLowerBound());
 		double delta = Math.log10(getUpperBound()) - logLowerBound ;
 		if (getSide().isVertical()) {
 			return Math.pow(10, (((displayPosition - getHeight()) / -getHeight()) * delta) + logLowerBound);
@@ -203,10 +222,13 @@ public class CyclistAxis extends NumAxis {
 		if (getMode() == Mode.LINEAR)
 			return super.getDisplayPosition(value);
 		
-		double lowerBound = getLowerBound();
+		double v = Math.max(value.doubleValue(), _posMin); 
+		
+		double logValue = Math.log10(v);
+		double lowerBound = _posMin;
 		double logLowerBound = Math.log10(lowerBound);
 		double delta = Math.log10(getUpperBound()) - logLowerBound ;
-		double deltaV = Math.log10(value.doubleValue()) - logLowerBound;
+		double deltaV = logValue - logLowerBound;
 		if (getSide().isVertical()) {
 			return (1. - ((deltaV) / delta)) * getHeight();
 		} else {

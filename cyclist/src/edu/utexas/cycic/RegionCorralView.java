@@ -72,8 +72,8 @@ public class RegionCorralView extends ViewBase {
 						regionNode.regionCircle = RegionShape.addRegion((String)region.name, region);
 						regionNode.regionCircle.setX(event.getX());
 						regionNode.regionCircle.setY(event.getY());
-						regionNode.regionCircle.text.setLayoutX(event.getX()-regionNode.regionCircle.getWidth()*0.85);
-						regionNode.regionCircle.text.setLayoutY(event.getY()-regionNode.regionCircle.getHeight()*0.85);
+						regionNode.regionCircle.text.setLayoutX(event.getX()+regionNode.regionCircle.getHeight()*0.2);
+						regionNode.regionCircle.text.setLayoutY(event.getY()+regionNode.regionCircle.getHeight()*0.2);
 						DataArrays.regionNodes.add(region);
 						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
 					}

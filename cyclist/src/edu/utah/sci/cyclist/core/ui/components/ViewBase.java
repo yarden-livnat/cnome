@@ -24,6 +24,7 @@
 package edu.utah.sci.cyclist.core.ui.components;
 
 import java.util.List;
+import java.util.UUID;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -44,12 +45,15 @@ import javafx.scene.layout.VBox;
 
 import org.mo.closure.v1.Closure;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.Context;
+import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
-public class ViewBase extends BorderPane implements View {
+public class ViewBase extends BorderPane implements View, Resource {
 	
 	public static final double EDGE_SIZE = 3;
 	
@@ -58,6 +62,8 @@ public class ViewBase extends BorderPane implements View {
 	private static final Cursor[] _cursor = {
 		Cursor.N_RESIZE, Cursor.S_RESIZE, Cursor.E_RESIZE, Cursor.W_RESIZE, Cursor.NW_RESIZE, Cursor.NE_RESIZE, Cursor.SW_RESIZE, Cursor.SE_RESIZE, Cursor.DEFAULT
 	};
+	
+	private String _uid = UUID.randomUUID().toString();
 	
 	private HBox _header;
 	private Spring _spring;
@@ -135,11 +141,16 @@ public class ViewBase extends BorderPane implements View {
 		setHeaderListeners();
 		
 		setTop(_header);
-		setListeners();
+		if (isDragginEnabled())
+			setListeners();
 	}
 	
 	public ViewBase clone() {
 		return null;
+	}
+	
+	public String getUID() {
+		return _uid;
 	}
 	
 	public DnD.LocalClipboard getLocalClipboard() {
@@ -272,8 +283,20 @@ public class ViewBase extends BorderPane implements View {
 			_onSelectAction.call();
 	}
 	
+	public void save(IMemento memento) {
+		// allow a derived class to save its state
+	}
+	
+	public void restore(IMemento memento, Context ctx) {
+		// allow a derived class to restore its state
+	}
+	
 	protected void enableDragging(Boolean value) {
 		_enableDragging = value;
+	}
+	
+	protected boolean isDragginEnabled() {
+		return _enableDragging;
 	}
 	
 	/*
@@ -285,12 +308,10 @@ public class ViewBase extends BorderPane implements View {
 		_header.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-//				delta.x = getTranslateX() - event.getSceneX();
-//				delta.y = getTranslateY() - event.getSceneY();
 				delta.x = getLayoutX() - event.getSceneX();
 				delta.y = getLayoutY() - event.getSceneY();
-				select();select();
 				event.consume();
+				select();
 			}
 		});
 		
@@ -298,15 +319,6 @@ public class ViewBase extends BorderPane implements View {
 			@Override
 			public void handle(MouseEvent event) {
 				if (!_enableDragging) return;
-				
-//				Parent parent = view.getParent();
-//				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
-//				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
-//				System.out.println("parent maxY:"+parent.getLayoutBounds().getMaxY()+"  h:"+getHeight());
-//				System.out.println("delta.y: "+delta.y+"  event.sy: "+event.getSceneY()+"  maxY:"+maxY);
-//				System.out.println("x: "+Math.min(Math.max(0, delta.x + event.getSceneX()), maxX)+"  y:"+Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
-//				setTranslateX(Math.min(Math.max(0, delta.x+event.getSceneX()), maxX)) ;
-//				setTranslateY(Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
 
 				setLayoutX(delta.x+event.getSceneX()) ;
 				setLayoutY(delta.y+event.getSceneY());

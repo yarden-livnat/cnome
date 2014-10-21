@@ -2,17 +2,16 @@ package edu.utah.sci.cyclist.core.services;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -35,11 +34,13 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 import org.apache.log4j.Logger;
 
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 
 public class CyclusService {
 	public static final String CLOUDIUS_URL = "http://cycrun.fuelcycle.org";
+	public static final String CLOUDIUS_SUBMIT_JOB = CLOUDIUS_URL + "/api/v1/job";
 	public static final String CLOUDIUS_SUBMIT = CLOUDIUS_URL + "/api/v1/job-infile";
 	public static final String CLOUDIUS_STATUS = CLOUDIUS_URL + "/api/v1/job-stat/";
 	public static final String CLOUDIUS_LOAD   = CLOUDIUS_URL + "/api/v1/job-outfiles/";
@@ -69,6 +70,46 @@ public class CyclusService {
 		return _jobs;
 	}
 
+	public void save(IMemento memento) {
+		for (CyclusJob job : _jobs) {
+			IMemento j_memento = memento.createChild("job");
+			j_memento.putString("id", job.getId());
+			j_memento.putString("status", job.getStatus().toString());
+			j_memento.putString("alias", job.getAlias());
+			j_memento.putString("datafile", job.getDatafilePath());
+		}
+	}
+	
+	public void restore(IMemento memento) {
+		if (memento == null) return;
+		for (IMemento j_memento : memento.getChildren("job")) {
+			CyclusJob job = CyclusJob.restore(j_memento.getString("id"));
+			job.setStatus(j_memento.getString("status"));
+			job.setAlias(j_memento.getString("alias"));
+			job.setAlias(j_memento.getString("datafile"));
+			_jobs.add(job);
+			switch (job.getStatus()) {
+			case INIT:
+				// can not happen
+			case SUBMITTED:
+				poll(job);
+				break;
+			case COMPLETED:
+				break;
+			case FAILED:
+				// noting to do
+				break;
+			case LOADING:
+				// reload
+				loadData(job);
+				break;
+			case READY:
+				// nothing to do
+				break;
+			}
+		}
+	}
+	
     private void _submit(String path, Request request) {
         CyclusJob job = new CyclusJob(path);
 
@@ -102,6 +143,19 @@ public class CyclusService {
             .bodyString(file, ContentType.DEFAULT_TEXT);
         this._submit(path, request);
     }
+
+    public void submitCmd(String cmd, String... args) {
+        String name = "cmd";
+        String uid = UUID.randomUUID().toString().replace("-", "");
+        String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
+        for (String arg : args) {
+            reqJSON += ", \"" + arg + "\"";
+        }
+        reqJSON += "]}";
+        Request request = Request.Post(CLOUDIUS_SUBMIT_JOB)
+            .bodyString(reqJSON, ContentType.APPLICATION_JSON);
+        this._submit(name, request);
+	}
 
     private void poll(final CyclusJob job) {
 		final PollService service = new PollService(job);

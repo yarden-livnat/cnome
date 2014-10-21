@@ -33,6 +33,6 @@ public class Spring extends Region {
 		
 		setPrefWidth(10);
 		setMinWidth(1);
-		HBox.setHgrow(this, Priority.ALWAYS);
+		HBox.setHgrow(this, Priority.SOMETIMES);
 	}
 }

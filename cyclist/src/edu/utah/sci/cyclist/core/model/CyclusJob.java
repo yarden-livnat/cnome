@@ -13,6 +13,7 @@ import javax.json.JsonObject;
 public class CyclusJob {
 	public enum Status { INIT, SUBMITTED, COMPLETED, FAILED, LOADING, READY }
 	
+	private String _id;
 	private JsonObject _info;
 	private ObjectProperty<Status> _status = new SimpleObjectProperty<>(Status.INIT);
 	private ObjectProperty<LocalDateTime> _dateSumbitted = new SimpleObjectProperty<>();
@@ -26,8 +27,20 @@ public class CyclusJob {
 		_inputFilePath = path;
 	}	
 	
+	private CyclusJob() {}
+	
+	public static CyclusJob restore(String id) {
+		CyclusJob job = new CyclusJob();
+		job._id = id;
+		return job;
+	}
+
 	public String getPath() {
 		return _inputFilePath;
+	}
+	
+	public String getStdout() {
+		return _info.getString("Stdout");
 	}
 	
 	public void setDatafilePath(String path) {
@@ -46,6 +59,7 @@ public class CyclusJob {
 	
 	public void setInfo(JsonObject info) {
 		_info = info;
+		_id = _info.getString("Id");
 		if (getAlias() == null)
 			setAlias("#"+getId().substring(0,4));
 	}
@@ -69,7 +83,7 @@ public class CyclusJob {
 	}
 	
 	public String getId() {
-		return _info.getString("Id");
+		return _id; 
 	}
 	
 	public StringProperty aliasProperty() {
