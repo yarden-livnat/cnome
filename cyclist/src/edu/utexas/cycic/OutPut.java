@@ -577,11 +577,9 @@ public class OutPut {
 		}
 		if(scen.regionNodes.size() == 0){
 			errorLog += "Warning: There are no regions in your simulation. Please add a region to your simulation.\n";
-			errorTest = false;
 		}
 		if(scen.institNodes.size() == 0){
 			errorLog += "Warning: There are no institutions in your simulation. Please add an institution to your simulation.\n";
-			errorTest = false;
 		}
 		if(scen.simulationData.duration.equalsIgnoreCase("0")){
 			errorLog += "ERROR: Please add a duration to your cyclus simulation.\n";
