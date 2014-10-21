@@ -13,11 +13,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.imageio.ImageIO;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
@@ -59,16 +54,24 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
+
+import javax.imageio.ImageIO;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.RangeField;
-import edu.utah.sci.cyclist.core.ui.views.SimpleTableView;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.core.util.MementoUtils;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.Range;
@@ -1109,5 +1112,64 @@ public class FlowView extends CyclistViewBase {
 		_changingKid = false;
 	  }
 	});
+  }
+  
+  @Override
+  public void save(IMemento memento) {
+	  // time period
+	  memento.putString("time", _rangeField.getText());
+
+	  // senders / receivers
+	  IMemento group = memento.createChild("senders");
+	  for (FlowNode node : _line[0].getNodes()) {
+		  if (node.isExplicit()) {
+			  IMemento nodeMemento = group.createChild("sender");
+			  nodeMemento.putString("type", node.getType());
+			  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
+//			  nodeMemento.putInteger("direction", node.getDirection());
+		  }
+	  }
+	  
+	  group = memento.createChild("receivers");
+	  for (FlowNode node : _line[1].getNodes()) {
+		  if (node.isExplicit()) {
+			  IMemento nodeMemento = group.createChild("receiver");
+			  nodeMemento.putString("type", node.getType());
+			  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
+//			  nodeMemento.putInteger("direction", node.getDirection());
+		  }
+	  }
+  }
+  
+  @Override
+  public void restore(IMemento memento, Context ctx) {
+	  // time
+	  _rangeField.setText(memento.getString("time"));
+	  
+	  // senders
+	  IMemento group = memento.getChild("senders");
+	  if (group != null) {
+		  for (IMemento child : group.getChildren("sender")) {
+			  String type = child.getString("type");
+			  Object value = MementoUtils.restore(child.getChild("value"));
+			  
+			  FlowNode node = createNode(type, value, 0 /* sender */ , true /* explicit */);
+			  _line[0].addNode(node);
+			  queryMaterialFlow(node);
+		  }
+	  }
+	  
+	// receivers
+	  group = memento.getChild("receivers");
+	  if (group != null) {
+		  for (IMemento child : group.getChildren("receiver")) {
+			  String type = child.getString("type");
+			  Object value = MementoUtils.restore(child.getChild("value"));
+			  
+			  FlowNode node = createNode(type, value, 1 /* receiver */, true /* explicit */);
+			  _line[1].addNode(node);
+			  queryMaterialFlow(node);
+		  }
+	  }
   }
 }

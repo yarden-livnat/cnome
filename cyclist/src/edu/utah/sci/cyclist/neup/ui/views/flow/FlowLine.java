@@ -106,12 +106,6 @@ public class FlowLine  {
 		addListeners(node);
 		_nodes.add(node);
 		_parent.getChildren().add(node);
-		
-//		FlowInfo info = new FlowInfo(node);
-//		info.translateXProperty().bind(infoXProperty());
-//		info.translateYProperty().bind(node.translateYProperty());
-//		_infos.put(node, info);
-//		_parent.getChildren().add(info);
 	}
 
 	public void removeNode(FlowNode node) {
@@ -122,13 +116,6 @@ public class FlowLine  {
 		if (_nodes.isEmpty())
 			_choiceBox.setValue(null);
 	}
-
-//	public void removeNodes(Predicate<FlowNode> pred) {
-//		_nodes.stream()
-//			.filter(pred)
-//			.collect(Collectors.toList()).stream()
-//				.forEach(n->removeNode(n));
-//	}
 	
 	public ObservableList<FlowNode> getNodes() {
 		return _nodes;
