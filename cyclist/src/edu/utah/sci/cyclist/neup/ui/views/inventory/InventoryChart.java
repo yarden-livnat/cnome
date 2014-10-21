@@ -45,8 +45,8 @@ public class InventoryChart extends VBox {
 	private double _scale = 1;
 	private ChartType _type = ChartType.INVENTORY;
 	private int _upperBound = 0;
-	private ChartMode _mode = ChartMode.LINE;
-	private boolean _showTotal = false;
+	ObjectProperty<InventoryChart.ChartMode> _mode = new SimpleObjectProperty<>(InventoryChart.ChartMode.LINE);
+	private BooleanProperty _showTotal = new SimpleBooleanProperty(false);
 	
 	private Map<AgentInfo, ChartInfo> _items = new HashMap<>();
 	private XYChart.Series<Number, Number> _totalSeries = null;
@@ -89,7 +89,7 @@ public class InventoryChart extends VBox {
 		updateAll();
 	}
 	
-	public boolean getShowTotal() {
+	public BooleanProperty getShowTotal() {
 		return _showTotal;
 	}
 	
@@ -100,7 +100,7 @@ public class InventoryChart extends VBox {
 			_chart.getData().remove(_totalSeries);
 			_totalSeries = null;
 		}
-		_showTotal = show;
+		_showTotal.setValue(show);
 		
 	}
 	
@@ -174,7 +174,7 @@ public class InventoryChart extends VBox {
 		info.style = style;
 		_items.put(entry, info);
 		
-		if (_showTotal) {
+		if (_showTotal.getValue()) {
 			updateTotal();
 		} else if (scale > _scale) {
 //			updateScale(scale);
@@ -187,7 +187,7 @@ public class InventoryChart extends VBox {
 		series.nodeProperty().addListener(o->{
 			Path fillPath;
 			Path linePath;
-			switch (_mode) {
+			switch (_mode.getValue()) {
 			case LINE:	
 				Node node = series.getNode();
 				node.setStyle("-fx-stroke: "+style);
@@ -233,7 +233,7 @@ public class InventoryChart extends VBox {
 			_upperBound = Math.max(_upperBound, ci.last);
 		}
 		
-		if (_showTotal) {
+		if (_showTotal.getValue()) {
 			updateTotal();
 		} else if (s != _scale) {
 //			updateScale(s);
@@ -328,14 +328,14 @@ public class InventoryChart extends VBox {
 		series.getData().setAll(list);
 	}
 	
-	public ChartMode getMode(){
+	public ObjectProperty<InventoryChart.ChartMode> getMode(){
 		return _mode;
 	}
 
 			
 	public void setMode(ChartMode mode) {
-		_mode = mode;
-		switch (_mode) {
+		_mode.setValue(mode);
+		switch (_mode.getValue()) {
 		case LINE:
 			LineChart<Number, Number> lineChart = new LineChart<>(_xAxis, _yAxis);
 			lineChart.getStyleClass().add("chart");
@@ -343,7 +343,7 @@ public class InventoryChart extends VBox {
 			lineChart.setLegendVisible(false);
 			lineChart.setAnimated(false);
 			setChart(lineChart);
-			if (_showTotal) {
+			if (_showTotal.getValue()) {
 				updateTotal();
 			}
 			break;
@@ -353,7 +353,7 @@ public class InventoryChart extends VBox {
 			areaChart.setLegendVisible(false);
 			areaChart.setAnimated(false);
 			setChart(areaChart);
-			if (_showTotal) {
+			if (_showTotal.getValue()) {
 				updateTotal();
 			}
 			break;
@@ -397,7 +397,7 @@ public class InventoryChart extends VBox {
 		_yAxis.mode().bind(_axisMode);
 		_yAxis.forceZeroInRangeProperty().bind(_forceZero);
 		
-		setMode(_mode);
+		setMode(_mode.getValue());
 		
 		return _chart;
 	}
