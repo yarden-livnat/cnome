@@ -295,17 +295,6 @@ public class Cycic extends ViewBase{
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
 
-		Button cyclusALocal = new Button("Cyclus -a");
-		cyclusALocal.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
-		cyclusALocal.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				retrieveSchema();
-			}
-		});
-		grid.add(cyclusALocal, 6, 0);
-		
-		
-
 		skins.getItems().add("None");
 		skins.setValue("None");
 		DataArrays.visualizationSkins.add(XMLReader.SC2);
@@ -345,27 +334,6 @@ public class Cycic extends ViewBase{
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
 
-
-        Button button2 = new Button("Remote Arche");
-        button2.setOnAction(new EventHandler<ActionEvent>(){
-            public void handle(ActionEvent e){
-                localToggle.setSelected(false);
-                CyclistController._cyclusService.submitCmd("cyclus", "-a");
-                _remoteDashA = CyclistController._cyclusService.latestJob();
-                _remoteDashA.statusProperty()
-                    .addListener(new ChangeListener<CyclusJob.Status>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Status> observable,
-                        Status oldValue, Status newValue) {
-                        if (newValue == Status.READY) {
-                            retrieveSchema();
-                        }
-                    }
-                });
-            }
-        });
-        grid.add(button2, 9, 0);
-
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
@@ -393,19 +361,9 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-    public void retrieveSchema() {
+    public void retrieveSchema(Object[] schemaLines) {
 		try {
 			String string;
-            Object[] schemaLines;
-            if (localToggle.isSelected()) {
-            Process readproc = Runtime.getRuntime().exec("cyclus -a");
-            
-            BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-                schemaLines = schema.lines().toArray();
-                schema.close();
-            } else {
-                schemaLines = _remoteDashA.getStdout().split("\n");
-            }
 			DataArrays.simFacilities.clear();
 			DataArrays.simRegions.clear();
 			DataArrays.simInstitutions.clear();
@@ -478,9 +436,9 @@ public class Cycic extends ViewBase{
 				};	
 			}
 			log.info("Schema discovery complete");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
 		}
 	}
 	
@@ -781,7 +739,45 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		archetypeGrid.add(new Label("Add Archetype to Simulation"), 0, 1);
+
+        Button cyclusDashM = new Button("Discover Archetypes");
+        cyclusDashM.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
+        cyclusDashM.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                if (localToggle.isSelected()) {
+                    // Local metadata collection
+                    try {
+                        Process readproc = Runtime.getRuntime().exec("cyclus -a");
+                        BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+                        Object[] schemaLines = schema.lines().toArray();
+                        schema.close();
+                        retrieveSchema(schemaLines);
+                    } catch (IOException ex) {
+                        // TODO Auto-generated catch block
+                        ex.printStackTrace();
+                    }
+                } else {
+                    // Remote metadata collection
+                    CyclistController._cyclusService.submitCmd("cyclus", "-a");
+                    _remoteDashA = CyclistController._cyclusService.latestJob();
+                    _remoteDashA.statusProperty()
+                        .addListener(new ChangeListener<CyclusJob.Status>() {
+                        @Override
+                        public void changed(ObservableValue<? extends Status> observable,
+                            Status oldValue, Status newValue) {
+                            if (newValue == Status.READY) {
+                                Object[] schemaLines = _remoteDashA.getStdout()
+                                    .split("\n");
+                                retrieveSchema(schemaLines);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        archetypeGrid.add(cyclusDashM, 1, 0);
+
+        archetypeGrid.add(new Label("Add Archetype to Simulation"), 0, 1);
 		archetypeGrid.add(archetypes, 1, 1);
 	}
 	
