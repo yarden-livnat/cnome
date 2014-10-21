@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javafx.scene.image.Image;
 
@@ -46,6 +47,7 @@ public class XMLReader {
 			images.put("mine", new Image(new File("./skinImages/fuelcycle_mine.png").toURI().toString()));
 			images.put("reactor", new Image(new File("./skinImages/fuelcycle_rxtr.png").toURI().toString()));
 			images.put("sep", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
+		}
 	};
 	
 	/**
@@ -219,6 +221,24 @@ public class XMLReader {
 					}
 				} else if(json_pass.get("uitype") != null){
 					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
+				}
+				if(json_pass.get("default") instanceof JsonArray){
+					JsonArray array = json_pass.getJsonArray("default");
+					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+						String string = array.get(i+1).toString().replaceAll("\"", "");
+						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
+					}
+				} else if(json_pass.get("default") instanceof JsonObject){
+					JsonObject object = json_pass.getJsonObject("default");
+					Set<String> keys = object.keySet();
+					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+					}
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(5, keys.toArray()[0].toString());
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(1)).set(5, object.get(keys.toArray()[0]).toString());
+				} else if(json_pass.get("default") != null) {
+									
 				}
 				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
