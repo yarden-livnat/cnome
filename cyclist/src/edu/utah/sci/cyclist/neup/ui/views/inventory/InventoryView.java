@@ -78,6 +78,7 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.NuclideFiltersLibrary;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartMode;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartType;
 
 public class InventoryView extends CyclistViewBase {
@@ -99,6 +100,7 @@ public class InventoryView extends CyclistViewBase {
 	private SimulationProxy _simProxy = null;
 		
 	private InventoryChart _chart = new InventoryChart();
+	ComboBox<String> _filters = new ComboBox<>();
 	
 	
 	/**
@@ -255,6 +257,23 @@ public class InventoryView extends CyclistViewBase {
 		}
 		
 		memento.putString("chart-type", _chartType.getValue().toString());
+		
+		String nucId =  _filters.getValue();
+		if(nucId != null){
+			IMemento filter = memento.createChild("filter");
+			filter.putString("nuc-id", nucId);
+		}
+		
+		//axis options
+		IMemento axis = memento.createChild("axis-opt");
+		axis.putBoolean("mode", _chart.axisMode().get() == CyclistLogAxis.Mode.LINEAR);
+		axis.putBoolean("force-zero", _chart.forceZero().get());
+		
+		//chart options
+		IMemento chart = memento.createChild("chart-opt");
+		chart.putBoolean("mode", _chart.getMode() == ChartMode.LINE);
+		chart.putBoolean("total", _chart.getShowTotal());
+		
 	}
 	
 	@Override 
@@ -264,9 +283,22 @@ public class InventoryView extends CyclistViewBase {
     		for (IMemento child : group.getChildren("agent")) {
     			addAgent(child.getString("field"), child.getString("value"));
     		}
-    		
-    		_chartType.setValue(ChartType.valueOf(memento.getString("chart-type")));
 		}
+		
+		_chartType.setValue(ChartType.valueOf(memento.getString("chart-type")));
+		IMemento filter = memento.getChild("filter");
+		if(filter != null){
+			String nucId = filter.getString("nuc-id");
+			_filters.getSelectionModel().select(nucId);
+		}
+		
+		IMemento axis = memento.getChild("axis-opt");
+		_chart.axisMode().set( axis.getBoolean("mode") ? CyclistLogAxis.Mode.LINEAR : CyclistLogAxis.Mode.LOG);
+		_chart.forceZero().set( axis.getBoolean("force-zero"));
+		
+		IMemento chart = memento.getChild("chart-opt");
+		_chart.setMode(chart.getBoolean("mode")?ChartMode.LINE:ChartMode.STACKED);
+		_chart.setShowTotal(chart.getBoolean("total"));
 	}
 	
 	private void addAgent(String type, String name) {
@@ -371,18 +403,17 @@ public class InventoryView extends CyclistViewBase {
 		Text title = new Text("Nuclide");
 		title.getStyleClass().add("title");
 		
-		ComboBox<String> filters = new ComboBox<>();
-		filters.getStyleClass().add("nuclide");
+		_filters.getStyleClass().add("nuclide");
 		
-		filters.setPromptText("filter");
-		filters.setEditable(true);
-		filters.setItems(_nuclideFilterNames);
+		_filters.setPromptText("filter");
+		_filters.setEditable(true);
+		_filters.setItems(_nuclideFilterNames);
 		
-		filters.valueProperty().addListener(o->selectNuclideFilter(filters.getValue()));
+		_filters.valueProperty().addListener(o->selectNuclideFilter(_filters.getValue()));
 
 		vbox.getChildren().addAll(
 			title,
-			filters
+			_filters
 		);
 		;
 		return vbox;
