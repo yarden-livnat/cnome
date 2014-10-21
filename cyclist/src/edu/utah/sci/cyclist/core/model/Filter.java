@@ -31,7 +31,7 @@ public class Filter implements Observable, Resource {
 	private CyclistDatasource _ds = null;
 	private Field _field;
 	private DataType _dataType;
-	private ListProperty<Object> _values = new SimpleListProperty<>();
+	protected ListProperty<Object> _values = new SimpleListProperty<>();
 	private ObjectProperty<Range> _valueRange = new SimpleObjectProperty<>();
 	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
 	private ObjectProperty<Range> _selectedRange = new SimpleObjectProperty<>(Range.INVALID_RANGE);
@@ -87,10 +87,10 @@ public class Filter implements Observable, Resource {
 		if (auto) {
 			if (isRange()) {
 				_selectedRange.set(_field.getValueRange());
-				_allSelected = _field.getValueRange().isValid();
+				setAllSelected(_field.getValueRange().isValid());
 			} else {
 				_selectedItems.addAll(getValues() != null ? getValues() : new ArrayList<Object>());
-				_allSelected = true;
+				setAllSelected(true);
 			}
 			setupListeners();
 		}	
@@ -131,7 +131,6 @@ public class Filter implements Observable, Resource {
 			public void invalidated(Observable observable) {
 				if (getValues() == null) return;
 				
-//				_values.addAll(getValues());
 				if (_allSelected) {
     				_selectedItems.addAll(getValues());
     			} else {
@@ -147,7 +146,7 @@ public class Filter implements Observable, Resource {
 			public void invalidated(Observable observable) {
 				Range range = getValueRange();
 				Range selected = getSelectedRange();
-				_allSelected = range.min == selected.min && range.max == selected.max;
+				setAllSelected(range.min == selected.min && range.max == selected.max);
 				if (!selected.isValid()) {
 					setSelectedRange(range);
 				} else if (!_allSelected && (range.min > selected.min || range.max < selected.max)) {
@@ -295,7 +294,7 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public ObservableList<Object> getValues() {
-		return _field.getValues();
+		return _values.get(); // _field.getValues();
 	}
 	
 	public ListProperty<Object> valuesProperty() {
@@ -310,13 +309,17 @@ public class Filter implements Observable, Resource {
 		return _selectedItems.contains(value);
 	}
 	
+	public void setAllSelected(boolean value) {
+		_allSelected = value;
+	}
+	
 	public void selectValue(Object value, boolean select) {
 		if (select) {
 			_selectedItems.add(value);
 		} else {
 			_selectedItems.remove(value);
 		}
-		_allSelected = _selectedItems.size() == getValues().size();
+		setAllSelected(_selectedItems.size() == getValues().size());
 		invalidate();
 	}
 
@@ -324,11 +327,11 @@ public class Filter implements Observable, Resource {
 		if (value) {
 			if (_selectedItems.size() == getValues().size()) return;
 			_selectedItems.addAll(_values);
-			_allSelected = true;
+			setAllSelected(true);
 		} else {
 			if (_selectedItems.size() == 0) return;
 			_selectedItems.clear();
-			_allSelected = false;
+			setAllSelected(false);
 		}
 		invalidate();
 	}
@@ -336,7 +339,7 @@ public class Filter implements Observable, Resource {
 	public void selectRange(Range range) {
 		setSelectedRange(range);
 		Range value = getValueRange();
-		_allSelected = value.min == range.min && value.max == range.max;
+		setAllSelected(value.min == range.min && value.max == range.max);
 		invalidate();
 	}
 	
@@ -374,7 +377,7 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public boolean isActive() {
-		return _allSelected;
+		return !_allSelected;
 	}
 	
 	public String toString() {

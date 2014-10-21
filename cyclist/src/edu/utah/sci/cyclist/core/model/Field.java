@@ -231,17 +231,17 @@ public class Field implements Resource {
 				entryMemento.putTextData("null");	
 			else{
 				entryMemento.putString("class", value.getClass().toString());
-
-				// Save integers or strings as strings
-				if(value.getClass().toString().equals(String.class.toString()) || 
-						value.getClass().toString().equals(Integer.class.toString()))
-					entryMemento.putTextData(value.toString());
-				else{
-					// TODO/FIXME: save some sort of Factory-ID
-					log.error("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
-					IMemento valueMemento = entryMemento.createChild("value");
-					valueMemento.putString("value-ID", value.toString());		
-				}
+				entryMemento.putTextData(value.toString());
+//				// Save integers or strings as strings
+//				if(value.getClass().toString().equals(String.class.toString()) || 
+//						value.getClass().toString().equals(Integer.class.toString()))
+//					entryMemento.putTextData(value.toString());
+//				else{
+//					// TODO/FIXME: save some sort of Factory-ID
+//					log.error("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
+//					IMemento valueMemento = entryMemento.createChild("value");
+//					valueMemento.putString("value-ID", value.toString());		
+//				}
 			}
 		}
 	}
@@ -286,7 +286,7 @@ public class Field implements Resource {
     			}	
     		}	
 		} catch(NullPointerException e){
-			log.error("Error while restoring filed: "+_name);
+			log.error("Error while restoring field: "+_name);
 		}
 	}
 	

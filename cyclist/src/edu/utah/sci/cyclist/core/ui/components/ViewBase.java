@@ -308,12 +308,10 @@ public class ViewBase extends BorderPane implements View, Resource {
 		_header.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-//				delta.x = getTranslateX() - event.getSceneX();
-//				delta.y = getTranslateY() - event.getSceneY();
 				delta.x = getLayoutX() - event.getSceneX();
 				delta.y = getLayoutY() - event.getSceneY();
-				select();select();
 				event.consume();
+				select();
 			}
 		});
 		
@@ -321,15 +319,6 @@ public class ViewBase extends BorderPane implements View, Resource {
 			@Override
 			public void handle(MouseEvent event) {
 				if (!_enableDragging) return;
-				
-//				Parent parent = view.getParent();
-//				double maxX = parent.getLayoutBounds().getMaxX() - getWidth();				
-//				double maxY = parent.getLayoutBounds().getMaxY() - getHeight();
-//				System.out.println("parent maxY:"+parent.getLayoutBounds().getMaxY()+"  h:"+getHeight());
-//				System.out.println("delta.y: "+delta.y+"  event.sy: "+event.getSceneY()+"  maxY:"+maxY);
-//				System.out.println("x: "+Math.min(Math.max(0, delta.x + event.getSceneX()), maxX)+"  y:"+Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
-//				setTranslateX(Math.min(Math.max(0, delta.x+event.getSceneX()), maxX)) ;
-//				setTranslateY(Math.min(Math.max(0, delta.y+event.getSceneY()), maxY));
 
 				setLayoutX(delta.x+event.getSceneX()) ;
 				setLayoutY(delta.y+event.getSceneY());

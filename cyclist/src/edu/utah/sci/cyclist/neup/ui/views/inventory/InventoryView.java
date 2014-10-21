@@ -13,8 +13,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.imageio.ImageIO;
-
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
@@ -45,7 +43,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
@@ -58,6 +55,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
+import javax.imageio.ImageIO;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -67,7 +66,7 @@ import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
@@ -442,20 +441,20 @@ public class InventoryView extends CyclistViewBase {
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.axisMode().set(CyclistAxis.Mode.LINEAR);
+				_chart.axisMode().set(CyclistLogAxis.Mode.LINEAR);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistLogAxis.Mode.LINEAR));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.axisMode().set(CyclistAxis.Mode.LOG);
+				_chart.axisMode().set(CyclistLogAxis.Mode.LOG);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistLogAxis.Mode.LOG));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));

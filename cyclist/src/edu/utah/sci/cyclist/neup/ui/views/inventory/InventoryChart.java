@@ -25,7 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.model.Configuration;
-import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
@@ -45,7 +45,7 @@ public class InventoryChart extends VBox {
 	
 	private XYChart<Number, Number> _chart = null;
 	private NumberAxis _xAxis;
-	private NumberAxis _yAxis;
+	private CyclistLogAxis _yAxis;
 	private double _scale = 1;
 	private ChartType _type = ChartType.INVENTORY;
 	private int _upperBound = 0;
@@ -56,7 +56,7 @@ public class InventoryChart extends VBox {
 	private XYChart.Series<Number, Number> _totalSeries = null;
 	private String totalStyle = "#00000055; -fx-stroke-width: 1px; -fx-effect: dropshadow(gaussian, #c0c0c0, 2,1, 1,1)";
 	
-	private ObjectProperty<CyclistAxis.Mode> _axisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistLogAxis.Mode> _axisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
 	private BooleanProperty _forceZero = new SimpleBooleanProperty(false);
 	
 	public class ChartInfo {
@@ -72,7 +72,7 @@ public class InventoryChart extends VBox {
 		build();
 	}
 	
-	public ObjectProperty<CyclistAxis.Mode> axisMode() {
+	public ObjectProperty<CyclistLogAxis.Mode> axisMode() {
 		return _axisMode;
 	}
 	
@@ -390,12 +390,12 @@ public class InventoryChart extends VBox {
 		_xAxis.setLabel("time");
 		_xAxis.setAnimated(false);
 		
-//		_yAxis = new CyclistAxis();
-		_yAxis = new NumberAxis();
+		_yAxis = new CyclistLogAxis();
+//		_yAxis = new NumberAxis();
 		_yAxis.setLabel("Amount");
 		_yAxis.setAnimated(false);
-//		_yAxis.mode().bind(_axisMode);
-//		_yAxis.forceZeroInRangeProperty().bind(_forceZero);
+		_yAxis.mode().bind(_axisMode);
+		_yAxis.forceZeroInRangeProperty().bind(_forceZero);
 		
 		setMode(_mode);
 		

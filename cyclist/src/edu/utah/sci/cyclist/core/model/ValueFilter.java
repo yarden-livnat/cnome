@@ -6,25 +6,25 @@ import javafx.collections.ObservableList;
 public class ValueFilter extends Filter {
 	private String _name;
 	
-	private ObservableList<Object> _values = FXCollections.observableArrayList();
+//	private ListProperty<Object> _values = FXCollections.observableArrayList();
 	
 	public ValueFilter(Field field, Object value) {
 		super(field, false);
 		
-		_values.add(value);
+		_values.unbind();
+		_values.set(FXCollections.observableArrayList());
+		_values.get().add(value);
 		selectValue(value, true);
 		_name = getName()+"="+value.toString();
 	}
 	
-	public String getLabel() {
-		return _name;
-	}
-	public ObservableList<Object> getValues() {
-		return _values;
+	@Override
+	public void setAllSelected(boolean value) {
+		super.setAllSelected(false);
 	}
 	
-	public boolean allValuesSelected() {
-		return false;
+	public String getLabel() {
+		return _name;
 	}
 	
 }
