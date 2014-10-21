@@ -168,12 +168,11 @@ public class MainScreen extends VBox implements Resource {
 		_toolsPane.setOrientation(Orientation.VERTICAL);
 		_toolsPane.getItems().addAll(
 				_simulationPanel = new SimulationsPanel(),
-				_jobsPanel = new JobsPanel(),
 				_datasourcesPanel = new TablesPanel(),
 				_fieldsPanel = new SchemaPanel("Fields"),
-				
                 _toolsPanel = new ToolsPanel(),
                 _inputPanel = new InputPanel(),
+        		_jobsPanel = new JobsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);
 		_toolsPane.setDividerPositions(div);

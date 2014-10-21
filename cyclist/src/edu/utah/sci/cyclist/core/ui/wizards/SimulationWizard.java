@@ -86,7 +86,7 @@ import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
 public class SimulationWizard extends TilePane {
 
 	private static String SIMULATION_INFO_QUERY = "select initialYear, initialMonth, Duration from Info where SimID=?";
-	static Logger log = Logger.getLogger(SimulationWizard);
+	static Logger log = Logger.getLogger(SimulationWizard.class);
 	
 	// GUI elements
 	private Stage                       _dialog;
