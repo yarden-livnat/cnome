@@ -51,7 +51,7 @@ public class Field implements Resource {
 	private BooleanProperty _selected;
 	private ObjectProperty<Table> _tableProperty = new SimpleObjectProperty<>(); 
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
-	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<Range>(new Range(0, -1));
+	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<Range>(Range.INVALID_RANGE);
 	
 	private Map<String, Object> _properties = new HashMap<>();
 	private Boolean _isHidden = false;

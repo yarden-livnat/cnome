@@ -34,7 +34,7 @@ public class Filter implements Observable, Resource {
 	private ListProperty<Object> _values = new SimpleListProperty<>();
 	private ObjectProperty<Range> _valueRange = new SimpleObjectProperty<>();
 	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
-	private ObjectProperty<Range> _selectedRange = new SimpleObjectProperty<>();
+	private ObjectProperty<Range> _selectedRange = new SimpleObjectProperty<>(Range.INVALID_RANGE);
 	
 	private List<InvalidationListener> _listeners = new ArrayList<>();
 	private  Consumer<Void> _onDSUpdated = null;
@@ -87,10 +87,11 @@ public class Filter implements Observable, Resource {
 		if (auto) {
 			if (isRange()) {
 				_selectedRange.set(_field.getValueRange());
+				_allSelected = _field.getValueRange().isValid();
 			} else {
 				_selectedItems.addAll(getValues() != null ? getValues() : new ArrayList<Object>());
+				_allSelected = true;
 			}
-			_allSelected = true;
 			setupListeners();
 		}	
 		if (isRange()) {
@@ -144,11 +145,12 @@ public class Filter implements Observable, Resource {
 		_valueRange.addListener(new InvalidationListener() {
 			@Override
 			public void invalidated(Observable observable) {
-//				_valueRange.set(getValueRange());
 				Range range = getValueRange();
 				Range selected = getSelectedRange();
 				_allSelected = range.min == selected.min && range.max == selected.max;
-				if (!_allSelected && (range.min > selected.min || range.max < selected.max)) {
+				if (!selected.isValid()) {
+					setSelectedRange(range);
+				} else if (!_allSelected && (range.min > selected.min || range.max < selected.max)) {
 					setSelectedRange(new Range(Math.max(range.min,  selected.min), Math.min(range.max, selected.max)));
 				}
 				if (_onChanged != null)
@@ -227,44 +229,6 @@ public class Filter implements Observable, Resource {
 				_onChanged.accept(null);
 			setupListeners();
 		} 
-//		else {
-//			_field.valuesProperty().addListener(new InvalidationListener() {		
-//				@Override
-//				public void invalidated(Observable observable) {
-//					if (getValues() != null) {
-//						System.out.println("filter restore");
-//						_values.set(getValues());
-//						IMemento group = memento.getChild("selected");
-//						for (IMemento ref : group.getChildren("value")) {
-//							_selectedItems.add(restoreObj(ref));
-//						}
-//						_field.valuesProperty().removeListener(this);
-//						setupListeners();
-//					}	
-//				}
-//			});
-//		}
-//		
-//		IMemento group = memento.getChild("selected-range");
-//		if (group != null) {
-//			if (_field.getRangeValues() != null) {
-//				_rangeValues.set(_field.getRangeValues());
-//				_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
-//	    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
-//	    		setupListeners();
-//			} else {
-//	    		_field.rangeValuesProperty().addListener(new InvalidationListener() {
-//					@Override
-//					public void invalidated(Observable observable) {
-//						_rangeValues.set(_field.getRangeValues());
-//						_selectedRangeValues.put(NumericRangeValues.CHOSEN_MIN, restoreObj(group.getChild("select-min")));
-//			    		_selectedRangeValues.put(NumericRangeValues.CHOSEN_MAX, restoreObj(group.getChild("select-max")));
-//			    		_field.rangeValuesProperty().removeListener(this);
-//			    		setupListeners();
-//					}
-//				});
-//	    	}
-//		}
 	}
 
 	
@@ -325,9 +289,9 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public boolean isRangeValid() {
-		Boolean reply =  _field.getValueRange().min <= _field.getValueRange().max && !_dsChanged;
+		Boolean valid =  _field.getValueRange().isValid() && !_dsChanged;
 		_dsChanged = false;
-		return reply;
+		return valid;
 	}
 	
 	public ObservableList<Object> getValues() {

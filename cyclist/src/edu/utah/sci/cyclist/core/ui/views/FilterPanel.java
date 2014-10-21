@@ -315,9 +315,12 @@ public class FilterPanel extends TitledPanel {
 	private void createRange() {
 		
 		if (_rangeSlider != null) {
+			Range range = _filter.getValueRange();
+			_rangeSlider.setMin(range.min);
+			_rangeSlider.setMax(range.max);;
 			Range selected = _filter.getSelectedRange();
 			_rangeSlider.setLowValue(selected.min);
-			_rangeSlider.setHighValue(selected.max);
+			_rangeSlider.setHighValue(selected.max);	
 			return;
 		}
 		double min  = 0;
