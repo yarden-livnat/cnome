@@ -183,7 +183,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 
 				@Override
 				public void call(Simulation simulation) {
-					addLocalSimulation(simulation);
+					addLocalSimulation(simulation,true);
 					broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, simulation));
 				}
 
@@ -261,8 +261,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	 * Also broadcast the selected simulation to all the views under the workSpace.
 	 * @param Simulation sim - the selected simulation.
 	 **/
-	public void addFirstSelectedSimulation(Simulation sim){
-		addLocalSimulation(sim);
+	public void addFirstSelectedSimulation(Simulation sim,boolean select){
+		addLocalSimulation(sim,select);
 		broadcast(getLocalEventBus(), new CyclistSimulationNotification(CyclistNotifications.SIMULATION_ADD, sim));
 	}
 	

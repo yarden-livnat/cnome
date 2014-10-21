@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -283,11 +284,13 @@ public class CyclistController {
 					public void onChanged(ListChangeListener.Change<? extends Simulation> newList) {
 						if(newList != null)
 						{
+							List<Simulation> newSimulations = new ArrayList<>();
 							for(Simulation simulation:newList.getList()){
 								Simulation sim = simulation.clone();
 								Simulation existingSim = _model.simExists(simulation);
 								if(existingSim==null){
-									_model.getSimulations().add(sim);
+//									_model.getSimulations().add(sim);
+									newSimulations.add(sim);
 									_dirtyFlag = true;
 								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
 									existingSim.setAlias(simulation.getAlias());
@@ -295,7 +298,11 @@ public class CyclistController {
 									_dirtyFlag = true;
 								}
 							}
+							if(newSimulations.size()>0){
+								_model.getSimulations().addAll(newSimulations);
+							}
 							_model.setSelectedDatasource(wizard.getSelectedSource());
+							
 						}
 					}
 				});
@@ -322,17 +329,22 @@ public class CyclistController {
 								_dirtyFlag = true;
 							}
 							
+							List<Simulation> newSimulations = new ArrayList<Simulation>();
 							for(Simulation simulation:newList.getList()){
 								Simulation sim = simulation.clone();
 								Simulation existingSim = _model.simExists(simulation);
 								if(existingSim == null){
-									_model.getSimulations().add(sim);
+									newSimulations.add(sim);
+//									_model.getSimulations().add(sim);
 									_dirtyFlag = true;
 								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
 									existingSim.setAlias(simulation.getAlias());
 									_model.addNewSimALias(existingSim, "");
 									_dirtyFlag = true;
 								}
+							}
+							if(newSimulations.size()>0){
+								_model.getSimulations().addAll(newSimulations);
 							}
 							_model.setSelectedDatasource(ds);
 						}
@@ -486,9 +498,14 @@ public class CyclistController {
 						_presenter.removeSimulation(sim);
 						_model.markSimALiasAsRemoved(sim);
 					}
+					boolean select = true;
 					for(Simulation sim : listChange.getAddedSubList()){
 						_model.addNewSimALias(sim,"");
-						_presenter.addFirstSelectedSimulation(sim);
+						//If there are a few simulations added at the same time - select only the first.
+						_presenter.addFirstSelectedSimulation(sim,select);
+						if(select){
+							select = false;
+						}
 					}
 				}
 			}
