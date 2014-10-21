@@ -429,7 +429,7 @@ public class CyclistController {
 				
 				if(oldVal==null && newVal!=null){
 //					readSimulationsTables();
-					_presenter.addFirstSelectedSimulation(newVal);
+//					_presenter.addFirstSelectedSimulation(newVal);
 				}
 				_model.setLastSelectedSimulation(newVal);
 				_dirtyFlag = true;
@@ -475,6 +475,7 @@ public class CyclistController {
 					}
 					for(Simulation sim : listChange.getAddedSubList()){
 						_model.addNewSimALias(sim,"");
+						_presenter.addFirstSelectedSimulation(sim);
 					}
 				}
 			}

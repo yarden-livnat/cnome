@@ -10,8 +10,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
@@ -19,12 +17,10 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
-import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
@@ -330,6 +326,10 @@ public class InventoryChart extends VBox {
 		}
 		
 		series.getData().setAll(list);
+	}
+	
+	public ChartMode getMode(){
+		return _mode;
 	}
 
 			
