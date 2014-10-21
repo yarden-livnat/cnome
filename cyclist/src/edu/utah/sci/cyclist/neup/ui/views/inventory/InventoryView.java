@@ -250,8 +250,8 @@ public class InventoryView extends CyclistViewBase {
 		IMemento group = memento.createChild("agents");
 		for (AgentInfo info : _agents) {
 			IMemento child = group.createChild("agent");
-			child.putString("type", info.toString());
-			child.putString("name", info.value);
+			child.putString("field", info.field);
+			child.putString("value", info.value);
 		}
 		
 		memento.putString("chart-type", _chartType.getValue().toString());
@@ -262,7 +262,7 @@ public class InventoryView extends CyclistViewBase {
 		IMemento group = memento.getChild("agents");
 		if (group != null) {
     		for (IMemento child : group.getChildren("agent")) {
-    			addAgent(child.getString("type"), child.getString("name"));
+    			addAgent(child.getString("field"), child.getString("value"));
     		}
     		
     		_chartType.setValue(ChartType.valueOf(memento.getString("chart-type")));
