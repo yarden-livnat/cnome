@@ -23,6 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.core.event.Pair;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Range;
@@ -39,7 +40,7 @@ public class FlowChart extends VBox {
 	
 	private LineChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
-	private NumberAxis _yAxis;
+	private CyclistAxis _yAxis;
 	private double _scale = 1;
 	private boolean _opened = true;
 	private int _upperBound;
@@ -265,7 +266,7 @@ public class FlowChart extends VBox {
 		_xAxis.setLabel("time");
 		_xAxis.setAnimated(false);
 		
-		_yAxis = new NumberAxis();
+		_yAxis = new CyclistAxis(CyclistAxis.Mode.LINEAR);
 		_yAxis.setLabel("Cummulative");
 		_yAxis.setAnimated(false);
 		
@@ -279,10 +280,6 @@ public class FlowChart extends VBox {
 		_rec.heightProperty().bind(_yAxis.heightProperty());
 		_rec.setVisible(false);
 		
-//		_popup = new Label();
-//		_popup.getStyleClass().add("popup");
-//		_popup.setVisible(false);
-//		_popup.layoutXProperty().bind(_fromLine.startXProperty().add(10));
 		_glass = new Pane();
 		_glass.getChildren().addAll(/*_fromLine*/_rec/*, _popup*/);
 		

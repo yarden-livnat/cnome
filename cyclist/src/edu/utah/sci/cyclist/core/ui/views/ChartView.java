@@ -80,7 +80,7 @@ import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
-import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
@@ -110,8 +110,8 @@ public class ChartView extends CyclistViewBase {
     private Axis _xAxis = null;
 	@SuppressWarnings("rawtypes")
     private Axis _yAxis = null;
-	private ObjectProperty<CyclistLogAxis.Mode> _xAxisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
-	private ObjectProperty<CyclistLogAxis.Mode> _yAxisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistAxis.Mode> _xAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistAxis.Mode> _yAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
 	private BooleanProperty _xForceZero = new SimpleBooleanProperty(false);
 	private BooleanProperty _yForceZero = new SimpleBooleanProperty(false);
 	
@@ -256,11 +256,11 @@ public class ChartView extends CyclistViewBase {
 		// options
 		IMemento child = memento.createChild("axis-opt");
 		IMemento x = child.createChild("x");
-		x.putBoolean("mode", _xAxisMode.get() == CyclistLogAxis.Mode.LINEAR);
+		x.putBoolean("mode", _xAxisMode.get() == CyclistAxis.Mode.LINEAR);
 		x.putBoolean("force-zero", _xForceZero.get());
 		
 		IMemento y = child.createChild("y");
-		y.putBoolean("mode", _yAxisMode.get() == CyclistLogAxis.Mode.LINEAR);
+		y.putBoolean("mode", _yAxisMode.get() == CyclistAxis.Mode.LINEAR);
 		y.putBoolean("force-zero", _yForceZero.get());
 	}
 
@@ -300,11 +300,11 @@ public class ChartView extends CyclistViewBase {
 		child = memento.getChild("axis-opt");
 		if (child != null) {
 			IMemento x = child.getChild("x");
-			_xAxisMode.set( x.getBoolean("mode") ? CyclistLogAxis.Mode.LINEAR : CyclistLogAxis.Mode.LOG);
+			_xAxisMode.set( x.getBoolean("mode") ? CyclistAxis.Mode.LINEAR : CyclistAxis.Mode.LOG);
 			_xForceZero.set( x.getBoolean("force-zero"));
 			
 			IMemento y = child.getChild("y");
-			_yAxisMode.set( y.getBoolean("mode") ? CyclistLogAxis.Mode.LINEAR : CyclistLogAxis.Mode.LOG);
+			_yAxisMode.set( y.getBoolean("mode") ? CyclistAxis.Mode.LINEAR : CyclistAxis.Mode.LOG);
 			_yForceZero.set( y.getBoolean("force-zero"));
 		}
 		
@@ -331,16 +331,16 @@ public class ChartView extends CyclistViewBase {
 			if (_xAxis instanceof NumberAxis) {
 				((NumberAxis) _xAxis).forceZeroInRangeProperty().unbind();
 			}
-			if (_xAxis instanceof CyclistLogAxis) {
-				((CyclistLogAxis) _xAxis).mode().unbind();
-				((CyclistLogAxis) _xAxis).forceZeroInRangeProperty().unbind();
+			if (_xAxis instanceof CyclistAxis) {
+				((CyclistAxis) _xAxis).mode().unbind();
+				((CyclistAxis) _xAxis).forceZeroInRangeProperty().unbind();
 			}
 			if (_yAxis instanceof NumberAxis) {
 				((NumberAxis) _yAxis).forceZeroInRangeProperty().unbind();
 			}
-			if (_yAxis instanceof CyclistLogAxis) {
-				((CyclistLogAxis) _yAxis).mode().unbind();
-				((CyclistLogAxis) _yAxis).forceZeroInRangeProperty().unbind();
+			if (_yAxis instanceof CyclistAxis) {
+				((CyclistAxis) _yAxis).mode().unbind();
+				((CyclistAxis) _yAxis).forceZeroInRangeProperty().unbind();
 			}
 		}
 		setChart(null);
@@ -793,15 +793,15 @@ public class ChartView extends CyclistViewBase {
 			axis = cd;
 			break;
 		case Qd:
-			CyclistLogAxis ca = new CyclistLogAxis();
-			ca.setMode(CyclistLogAxis.Mode.LOG);
+			CyclistAxis ca = new CyclistAxis();
+			ca.setMode(CyclistAxis.Mode.LOG);
 			ca.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
 			ca.mode().bind( y ? _yAxisMode : _xAxisMode);
 			axis = ca;
 			break;
 		case Qi:
-			CyclistLogAxis cai = new CyclistLogAxis();
-			cai.setMode(CyclistLogAxis.Mode.LOG);
+			CyclistAxis cai = new CyclistAxis();
+			cai.setMode(CyclistAxis.Mode.LOG);
 			cai.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
 			cai.mode().bind( y ? _yAxisMode : _xAxisMode);
 			axis = cai;
@@ -986,20 +986,20 @@ public class ChartView extends CyclistViewBase {
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_yAxisMode.set(CyclistLogAxis.Mode.LINEAR);
+				_yAxisMode.set(CyclistAxis.Mode.LINEAR);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistLogAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistAxis.Mode.LINEAR));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_yAxisMode.set(CyclistLogAxis.Mode.LOG);
+				_yAxisMode.set(CyclistAxis.Mode.LOG);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistLogAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistAxis.Mode.LOG));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
@@ -1016,21 +1016,21 @@ public class ChartView extends CyclistViewBase {
 		menu.getItems().add(new SeparatorMenuItem());
 
 		item = new MenuItem("X linear", GlyphRegistry.get(AwesomeIcon.CHECK));
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistLogAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistAxis.Mode.LINEAR));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_xAxisMode.set(CyclistLogAxis.Mode.LINEAR);
+				_xAxisMode.set(CyclistAxis.Mode.LINEAR);
             }
 		});
 		menu.getItems().add(item);
 
 		item = new MenuItem("X log", GlyphRegistry.get(AwesomeIcon.CHECK));
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistLogAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistAxis.Mode.LOG));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_xAxisMode.set(CyclistLogAxis.Mode.LOG);
+				_xAxisMode.set(CyclistAxis.Mode.LOG);
             }
 		});
 		menu.getItems().add(item);

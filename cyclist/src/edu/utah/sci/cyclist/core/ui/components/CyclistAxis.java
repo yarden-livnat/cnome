@@ -9,7 +9,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 
 
-public class CyclistLogAxis extends CyclistNumberAxis {
+public class CyclistAxis extends CyclistNumberAxis {
 	public enum Mode {LINEAR, LOG}
 	public static final double EPS = 1e-1;
 	
@@ -23,7 +23,7 @@ public class CyclistLogAxis extends CyclistNumberAxis {
 
         @Override
         public Object getBean() {
-            return CyclistLogAxis.this;
+            return CyclistAxis.this;
         }
 
         @Override
@@ -45,8 +45,14 @@ public class CyclistLogAxis extends CyclistNumberAxis {
 	}
 	
 	
-	public CyclistLogAxis() {
+
+	public CyclistAxis() {
+		this(Mode.LINEAR);
+	}
+	
+	public CyclistAxis(Mode mode) {
 		super();
+		setMode(mode);
 		// A hack: JavaFX doesn't redraw if forceZeroInRange changes
 		forceZeroInRangeProperty().addListener(new InvalidationListener() {	
 			@Override
@@ -57,7 +63,7 @@ public class CyclistLogAxis extends CyclistNumberAxis {
 		});
 	}
 	
-	public CyclistLogAxis(double from, double to, double tickUnit) {
+	public CyclistAxis(double from, double to, double tickUnit) {
 		super(from, to, tickUnit);
 		
 		// A hack: JavaFX doesn't redraw if forceZeroInRange changes

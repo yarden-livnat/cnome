@@ -21,7 +21,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
-import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
@@ -41,7 +41,7 @@ public class InventoryChart extends VBox {
 	
 	private XYChart<Number, Number> _chart = null;
 	private NumberAxis _xAxis;
-	private CyclistLogAxis _yAxis;
+	private CyclistAxis _yAxis;
 	private double _scale = 1;
 	private ChartType _type = ChartType.INVENTORY;
 	private int _upperBound = 0;
@@ -52,7 +52,7 @@ public class InventoryChart extends VBox {
 	private XYChart.Series<Number, Number> _totalSeries = null;
 	private String totalStyle = "#00000055; -fx-stroke-width: 1px; -fx-effect: dropshadow(gaussian, #c0c0c0, 2,1, 1,1)";
 	
-	private ObjectProperty<CyclistLogAxis.Mode> _axisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistAxis.Mode> _axisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
 	private BooleanProperty _forceZero = new SimpleBooleanProperty(false);
 	
 	public class ChartInfo {
@@ -68,7 +68,7 @@ public class InventoryChart extends VBox {
 		build();
 	}
 	
-	public ObjectProperty<CyclistLogAxis.Mode> axisMode() {
+	public ObjectProperty<CyclistAxis.Mode> axisMode() {
 		return _axisMode;
 	}
 	
@@ -386,7 +386,7 @@ public class InventoryChart extends VBox {
 		_xAxis.setLabel("time");
 		_xAxis.setAnimated(false);
 		
-		_yAxis = new CyclistLogAxis();
+		_yAxis = new CyclistAxis();
 //		_yAxis = new NumberAxis();
 		_yAxis.setLabel("Amount");
 		_yAxis.setAnimated(false);
