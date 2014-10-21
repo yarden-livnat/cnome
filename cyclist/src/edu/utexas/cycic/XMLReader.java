@@ -40,12 +40,12 @@ public class XMLReader {
 	static skinSet DSARR = new skinSet(){
 		{
 			name = "DSARR";
-			images.put("abr", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
+			images.put("abr", new Image(new File("./skinImages/fuelcycle_abr.png").toURI().toString(), 100, 100, false, false));
 			images.put("facility", new Image(new File("./skinImages/fuelcycle_enr.png").toURI().toString()));
-			images.put("fuel fabrication", new Image(new File("./skinImages/fuelcycle_fab.png").toURI().toString()));
+			images.put("fuel fabrication", new Image(new File("./skinImages/fuelcycle_fab.png").toURI().toString(), 100, 100, false, false));
 			images.put("repository", new Image(new File("./skinImages/fuelcycle_geo.png").toURI().toString()));
 			images.put("mine", new Image(new File("./skinImages/fuelcycle_mine.png").toURI().toString()));
-			images.put("reactor", new Image(new File("./skinImages/fuelcycle_rxtr.png").toURI().toString()));
+			images.put("reactor", new Image(new File("./skinImages/fuelcycle_rxtr.png").toURI().toString(), true));
 			images.put("sep", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
 		}
 	};
