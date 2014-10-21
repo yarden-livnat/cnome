@@ -3,12 +3,15 @@ package edu.utah.sci.cyclist.core.ui.components;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TextField;
 import edu.utah.sci.cyclist.neup.model.Range;
 
 public class RangeField extends TextField {
+	static Logger log = Logger.getLogger(RangeField.class);
 	
 	private int _minValue = 0;
 	private int _maxValue = 100;
@@ -180,7 +183,7 @@ public class RangeField extends TextField {
     			_changing = false;
     		}
     	} catch (Exception e) {
-    		System.out.println("RangeField parse error");
+    		log.debug("RangeField parse error");
     	} finally {
     		_parsing = false;
     	}

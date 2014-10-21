@@ -9,7 +9,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 
 
-public class CyclistLogAxis extends CyclistNumberAxis {
+public class CyclistAxis extends CyclistNumberAxis {
 	public enum Mode {LINEAR, LOG}
 	public static final double EPS = 1e-1;
 	
@@ -23,7 +23,7 @@ public class CyclistLogAxis extends CyclistNumberAxis {
 
         @Override
         public Object getBean() {
-            return CyclistLogAxis.this;
+            return CyclistAxis.this;
         }
 
         @Override
@@ -45,8 +45,14 @@ public class CyclistLogAxis extends CyclistNumberAxis {
 	}
 	
 	
-	public CyclistLogAxis() {
+
+	public CyclistAxis() {
+		this(Mode.LINEAR);
+	}
+	
+	public CyclistAxis(Mode mode) {
 		super();
+		setMode(mode);
 		// A hack: JavaFX doesn't redraw if forceZeroInRange changes
 		forceZeroInRangeProperty().addListener(new InvalidationListener() {	
 			@Override
@@ -57,7 +63,7 @@ public class CyclistLogAxis extends CyclistNumberAxis {
 		});
 	}
 	
-	public CyclistLogAxis(double from, double to, double tickUnit) {
+	public CyclistAxis(double from, double to, double tickUnit) {
 		super(from, to, tickUnit);
 		
 		// A hack: JavaFX doesn't redraw if forceZeroInRange changes
@@ -81,58 +87,10 @@ public class CyclistLogAxis extends CyclistNumberAxis {
                 	double v = dataValue.doubleValue();
                 	if (v >0) _posMin = Math.min(_posMin, v);
                 }
-                System.out.println("pos min:"+_posMin);
            }
 		}
         super.invalidateRange(data);
     }
-	
-//	@Override
-//	protected Object autoRange(double minValue, double maxValue, double length, double labelSize) {
-//		double[] range = (double []) super.autoRange(minValue, maxValue, length, labelSize);
-//		if (getMode() == Mode.LOG) {
-//			if (range[0] <= 0) range[0] = _minNotZero;
-//		}
-//			if (range[1] < 1) {
-//				range[1] = 1;
-//			}
-//			if (isForceZeroInRange()) {
-//            	range[0] = 1;
-//            } else {
-//            	range[0] = Math.max(range[0], 1);
-//            }
-//		}
-//        return range;  
-//    }
-	
-//	@Override
-//	protected void setRange(Object range, boolean animate) {
-//		if (getMode() == Mode.LINEAR) {
-//			super.setRange(range, animate);
-//		} else {
-//        	if (range != null) {
-//        		double[] drange = (double[]) range;
-//        		double lowerBound = drange[0];
-//    			double upperBound = drange[1];
-//    			setLowerBound(lowerBound);
-//    			setUpperBound(upperBound);
-////    			if (lowerBound< 1) {
-////    				lowerBound = 1;
-////    			}
-//    			if (animate) {
-//    				System.out.println("setRange animate not implemented yet.");
-//    			}
-//    		}
-//		}
-//	}
-
-//	@Override
-//	protected Object getRange() {
-//		if (getMode() == Mode.LINEAR) 
-//			return super.getRange();
-//
-//		return new double[] { getLowerBound(), getUpperBound() };
-//	}
 
 	@Override
 	protected List<Number> calculateTickValues(double length, Object range) {

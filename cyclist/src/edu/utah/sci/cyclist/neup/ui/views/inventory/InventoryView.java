@@ -67,7 +67,7 @@ import edu.utah.sci.cyclist.core.model.Configuration;
 import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
@@ -264,7 +264,7 @@ public class InventoryView extends CyclistViewBase {
 		
 		//axis options
 		IMemento axis = memento.createChild("axis-opt");
-		axis.putBoolean("mode", _chart.axisMode().get() == CyclistLogAxis.Mode.LINEAR);
+		axis.putBoolean("mode", _chart.axisMode().get() == CyclistAxis.Mode.LINEAR);
 		axis.putBoolean("force-zero", _chart.forceZero().get());
 		
 		//chart options
@@ -291,7 +291,7 @@ public class InventoryView extends CyclistViewBase {
 		}
 		
 		IMemento axis = memento.getChild("axis-opt");
-		_chart.axisMode().set( axis.getBoolean("mode") ? CyclistLogAxis.Mode.LINEAR : CyclistLogAxis.Mode.LOG);
+		_chart.axisMode().set( axis.getBoolean("mode") ? CyclistAxis.Mode.LINEAR : CyclistAxis.Mode.LOG);
 		_chart.forceZero().set( axis.getBoolean("force-zero"));
 		
 		IMemento chart = memento.getChild("chart-opt");
@@ -504,20 +504,20 @@ public class InventoryView extends CyclistViewBase {
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.axisMode().set(CyclistLogAxis.Mode.LINEAR);
+				_chart.axisMode().set(CyclistAxis.Mode.LINEAR);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistLogAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LINEAR));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.axisMode().set(CyclistLogAxis.Mode.LOG);
+				_chart.axisMode().set(CyclistAxis.Mode.LOG);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistLogAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LOG));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));

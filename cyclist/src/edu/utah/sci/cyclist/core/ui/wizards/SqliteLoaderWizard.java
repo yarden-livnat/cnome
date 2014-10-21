@@ -69,6 +69,7 @@ import edu.utah.sci.cyclist.core.ui.components.UpdateDbDialog;
 import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
 
 public class SqliteLoaderWizard extends VBox {
+	static Logger log = Logger.getLogger(SqliteLoaderWizard.class);
 	
 	private Stage _dialog;
 	private String _fileName = "";
@@ -388,12 +389,12 @@ public class SqliteLoaderWizard extends VBox {
 			return simulations;
 			
 		}catch(SQLSyntaxErrorException e){
-			System.out.println("Table for SimId doesn't exist");
+			log.warn("Table for SimId doesn't exist");
 			setErrorDisplay();
 			return null;
 		}
 		catch (Exception e) {
-			System.out.println("Get simulation failed");
+			log.warn("Get simulation failed");
 			setErrorDisplay();
 			return null;
 		}finally{

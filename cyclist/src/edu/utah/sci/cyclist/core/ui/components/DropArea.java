@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
@@ -30,6 +32,7 @@ import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
 
 public class DropArea extends HBox implements Observable {
+	static Logger log = Logger.getLogger(DropArea.class);
 	
 	public enum Policy {SINGLE, MULTIPLE};
 	public enum AcceptedRoles{ALL,DIMENSION};
@@ -192,9 +195,9 @@ public class DropArea extends HBox implements Observable {
 				//}
 				if (field != null) {
 					if(_acceptedRoles == AcceptedRoles.DIMENSION && field.getRole() != Role.DIMENSION){
-						System.out.println("Cannot add non-discrete field to this drop area");
+						log.warn("Cannot add non-discrete field to this drop area");
 					} else if(isPreOccupiedField(field, event)){
-						System.out.println("Field already exists in another drop area");
+						log.warn("Field already exists in another drop area");
 					}else if (getFields().size() == 0) {
 						getFields().add(field);
 					} else if(_policy == Policy.SINGLE){
@@ -282,7 +285,6 @@ public class DropArea extends HBox implements Observable {
 									@Override
 									public void handle(DragEvent event) {
 //										glyph.setCursor(Cursor.DEFAULT);
-										System.out.println("Filter drag done:"+event.isAccepted()+"  compeleted:"+event.isDropCompleted()+"  mode:"+event.getTransferMode());
 										if (event.isAccepted() && event.getAcceptedTransferMode() == TransferMode.COPY) {
 											glyph.setVisible(true);
 											glyph.setManaged(true);

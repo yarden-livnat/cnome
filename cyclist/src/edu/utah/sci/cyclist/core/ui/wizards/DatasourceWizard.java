@@ -201,9 +201,7 @@ public class DatasourceWizard extends VBox {
 		ok.setPrefWidth(40);
 		ok.setOnAction(new EventHandler<ActionEvent>() {	
 							@Override
-							public void handle(ActionEvent arg0) {
-//								System.out.println("Create & return a new data source");
-								
+							public void handle(ActionEvent arg0) {								
 								CyclistDatasource ds = _currentPage.getDataSource();
 								ds.getProperties().setProperty("name", _nameField.getText());
 								selection.setValue(ds);
@@ -248,13 +246,9 @@ public class DatasourceWizard extends VBox {
 	}
 
 	private void testConnection(CyclistDatasource ds) {
-		//System.out.println("Test Connection");
-
 		try (Connection conn = ds.getConnection()) {
-			//System.out.println("connection ok");
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.CHECK));//"FontAwesome|OK"));
 		} catch (Exception e) {
-			//System.out.println("connection failed");
 			_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
 		}finally{
 			ds.releaseConnection();

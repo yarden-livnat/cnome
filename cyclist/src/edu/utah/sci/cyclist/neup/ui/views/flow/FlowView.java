@@ -195,10 +195,8 @@ public class FlowView extends CyclistViewBase {
     		for (Facility f : newValue.v1) {
     		  _facilities.put(f.getId(), f);
     		}
-//    		System.out.println("Flow: received "+newValue.v1.size()+" facilities");
     
     		updateSelectionCtrl(newValue.v2);
-//    	  _rangeField.setRange(new Range<Integer>(1, getCurrentSimulation().getDuration()));
 	  }
 	});
 	
@@ -228,7 +226,6 @@ public class FlowView extends CyclistViewBase {
 		  for (Facility f : newValue) {
 			_facilities.put(f.getId(), f);
 		  }
-		  System.out.println("Flow: received "+newValue.size()+" facilities");
 		}
 	  }
 	});
@@ -289,7 +286,6 @@ public class FlowView extends CyclistViewBase {
 
   private void timeChanged(Range<Integer> range) {
 	// connect explicit nodes
-	System.out.println("time changed");
 	List<FlowNode> list = new ArrayList<>();
 	for (FlowNode node : _line[SRC].getNodes()) {
 	  if (node.isExplicit())
@@ -342,7 +338,7 @@ public class FlowView extends CyclistViewBase {
 	if (line.getKind() == null) {
 	  line.setKind(field.getSemantic());
 	} else if (!line.getKind().equals(field.getSemantic())) {
-	  System.out.println("Error: REJECT node of this kind");
+	  log.info("Error: REJECT node of this kind");
 	  return;
 	}
 
@@ -440,7 +436,7 @@ public class FlowView extends CyclistViewBase {
 		  addToChart(entry, p.get());
 		  long t2 = System.currentTimeMillis();
 
-		  System.out.println("inventory processing: "+(t1-t0)/1000.0+"  "+(t2-t1)/1000.0);
+		  log.debug("inventory processing: "+(t1-t0)/1000.0+"  "+(t2-t1)/1000.0);
 		});
 
 	  } else {
@@ -481,7 +477,7 @@ public class FlowView extends CyclistViewBase {
 		long t = System.currentTimeMillis();
 		ObservableList<Inventory> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
 		long t1 = System.currentTimeMillis();
-		System.out.println("query Inventory: "+(t1-t)/1000.0);
+		log.debug("query Inventory: "+(t1-t)/1000.0);
 		return list;
 	  }	
 	};
@@ -503,7 +499,7 @@ public class FlowView extends CyclistViewBase {
 		long t = System.currentTimeMillis();
 		ObservableList<Transaction> list =  _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 		long t1 = System.currentTimeMillis();
-		System.out.println("query material flow: "+(t1-t)/1000.0);
+		log.debug("query material flow: "+(t1-t)/1000.0);
 		return list;
 	  }	
 	};
@@ -533,7 +529,7 @@ public class FlowView extends CyclistViewBase {
 		  long t = System.currentTimeMillis();
 		  ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 		  long t1 = System.currentTimeMillis();
-		  System.out.println("getTransaction: node="+node.getValue().toString()+" time:"+(t1-t)/1000.0);
+		  log.debug("getTransaction: node="+node.getValue().toString()+" time:"+(t1-t)/1000.0);
 		  map.put(node, list);
 		}
 
@@ -673,7 +669,7 @@ public class FlowView extends CyclistViewBase {
 						t->t.nucid == n  ;
 						updateTransactionsPredicate();
 	  } catch (Exception e)  {
-		System.out.println("*** TODO: Indicate to user iso was invalid number");
+		log.debug("*** TODO: Indicate to user iso was invalid number");
 	  }
 	}
   }
@@ -733,7 +729,6 @@ public class FlowView extends CyclistViewBase {
 		    try {
 		    	String name = file.getName();
 		    	String ext = name.substring(name.indexOf(".")+1, name.length());
-		    	System.out.println("name: "+name+"  ext:"+ext);
 		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
 		    } catch (IOException e) {
 		        log.error("Error writing image to file: "+e.getMessage());
@@ -860,6 +855,7 @@ public class FlowView extends CyclistViewBase {
 		  checkbox.setSelected(item.v2);
 		  list.add(checkbox);
 	  }
+	  _commodityVBox.getChildren().addAll(list);
   }
   
   private List<Pair<String, Boolean>> getCommoditySelection() {
