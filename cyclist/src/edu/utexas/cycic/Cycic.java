@@ -309,6 +309,7 @@ public class Cycic extends ViewBase{
 		skins.getItems().add("None");
 		skins.setValue("None");
 		DataArrays.visualizationSkins.add(XMLReader.SC2);
+		DataArrays.visualizationSkins.add(XMLReader.DSARR);
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
 		}
