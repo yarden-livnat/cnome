@@ -36,7 +36,6 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -101,7 +100,6 @@ public class InventoryView extends CyclistViewBase {
 		
 	private InventoryChart _chart = new InventoryChart();
 	ComboBox<String> _filters = new ComboBox<>();
-	
 	
 	/**
 	 * Constructor
@@ -271,8 +269,8 @@ public class InventoryView extends CyclistViewBase {
 		
 		//chart options
 		IMemento chart = memento.createChild("chart-opt");
-		chart.putBoolean("mode", _chart.getMode() == ChartMode.LINE);
-		chart.putBoolean("total", _chart.getShowTotal());
+		chart.putBoolean("mode", _chart.getMode().get() == ChartMode.LINE);
+		chart.putBoolean("total", _chart.getShowTotal().getValue());
 		
 	}
 	
@@ -543,7 +541,8 @@ public class InventoryView extends CyclistViewBase {
 		final ContextMenu contextMenu = new ContextMenu();
 		
 		// line chart
-		MenuItem item = new MenuItem("Line chart");
+		MenuItem item = new MenuItem("Line chart",GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.LINE));
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
@@ -563,7 +562,8 @@ public class InventoryView extends CyclistViewBase {
 //		contextMenu.getItems().add(item);
 		
 		// stacked chart
-		item = new MenuItem("Stacked chart");
+		item = new MenuItem("Stacked chart",GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.STACKED));
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
@@ -574,12 +574,12 @@ public class InventoryView extends CyclistViewBase {
 		
 		contextMenu.getItems().add(new SeparatorMenuItem());
 		
-		CheckMenuItem checked = new CheckMenuItem("Show total");
-		checked.setSelected(_chart.getShowTotal());
+		MenuItem checked = new MenuItem("Show total",GlyphRegistry.get(AwesomeIcon.CHECK));
+		checked.getGraphic().visibleProperty().bind(_chart.getShowTotal());
 		checked.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.setShowTotal(!_chart.getShowTotal());
+				_chart.setShowTotal(!_chart.getShowTotal().getValue());
             }
 		});
 		contextMenu.getItems().add(checked);
