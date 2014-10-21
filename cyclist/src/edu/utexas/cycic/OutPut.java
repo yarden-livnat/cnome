@@ -63,7 +63,7 @@ public class OutPut {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
 
-				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
+				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.archetype.split(":")[2]);
 				// Building the institutions within regions.
 				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 					for (String instit: region.institutions){
@@ -82,7 +82,7 @@ public class OutPut {
 								initFacList.appendChild(entry);
 							}
 							institID.appendChild(initFacList);
-							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.type.split(" ")[1]);
+							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.archetype.split(":")[2]);
 						}
 					}
 				}
@@ -142,31 +142,50 @@ public class OutPut {
 		
 		for(facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){
 			Element spec = doc.createElement("spec");
+			String[] fullPath = facility.archetype.split(":");
+			if(!fullPath[0].equalsIgnoreCase("")){
+				Element path = doc.createElement("path");
+				path.setTextContent(fullPath[0]);
+				spec.appendChild(path);
+			}
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(facility.facilityType.split(" ")[0]);
+			lib.setTextContent(fullPath[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(facility.facilityType.split(" ")[1]);
+			name.setTextContent(fullPath[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}	
 		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(region.type.split(" ")[0]);
+			String[] fullPath = region.archetype.split(":");
+			
+			if(!fullPath[0].equalsIgnoreCase("")){
+				Element path = doc.createElement("path");
+				path.setTextContent(fullPath[0]);
+				spec.appendChild(path);
+			}
+			lib.setTextContent(fullPath[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(region.type.split(" ")[1]);
+			name.setTextContent(fullPath[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}
 		for(instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
 			Element spec = doc.createElement("spec");
+			String[] fullPath = instit.archetype.split(":");
+			if(!fullPath[0].equalsIgnoreCase("")){
+				Element path = doc.createElement("path");
+				path.setTextContent(fullPath[0]);
+				spec.appendChild(path);
+			}
 			Element lib = doc.createElement("lib");
-			lib.setTextContent(instit.type.split(" ")[0]);
+			lib.setTextContent(fullPath[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(instit.type.split(" ")[1]);
+			name.setTextContent(fullPath[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}
@@ -239,7 +258,7 @@ public class OutPut {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void facilityBuilder(Document doc, Element rootElement, facilityNode facility){
-		String facType = facility.facilityType.split(" ")[1];
+		String facType = facility.archetype.split(":")[2];
 		String facName = (String) facility.name;
 		ArrayList<Object> facArray = facility.facilityStructure;
 		ArrayList<Object> dataArray = facility.facilityData;
@@ -550,16 +569,14 @@ public class OutPut {
 		String errorLog = "";
 		DataArrays scen = CycicScenarios.workingCycicScenario;
 		if(scen.FacilityNodes.size() == 0){
-			errorLog += "ERROR: There are no facilities in your simulation. Please add a facility to your simulation.\n";
+			errorLog += "Warning: There are no facilities in your simulation. Please add a facility to your simulation.\n";
 			errorTest = false;
 		}
 		if(scen.regionNodes.size() == 0){
-			errorLog += "ERROR: There are no regions in your simulation. Please add a region to your simulation.\n";
-			errorTest = false;
+			errorLog += "Warning: There are no regions in your simulation. Please add a region to your simulation.\n";
 		}
 		if(scen.institNodes.size() == 0){
-			errorLog += "ERROR: There are no institutions in your simulation. Please add an institution to your simulation.\n";
-			errorTest = false;
+			errorLog += "Warning: There are no institutions in your simulation. Please add an institution to your simulation.\n";
 		}
 		if(scen.simulationData.duration.equalsIgnoreCase("0")){
 			errorLog += "ERROR: Please add a duration to your cyclus simulation.\n";

@@ -1,5 +1,7 @@
 package edu.utexas.cycic;
 
+import java.io.File;
+
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
@@ -77,7 +79,7 @@ public class CycicCircles{
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.rgbColor=VisFunctions.stringToColor(parent.facilityType);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.8));
+		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(circle.rgbColor) == true){
 			circle.text.setTextFill(Color.BLACK);
@@ -103,7 +105,7 @@ public class CycicCircles{
 			public void handle(ActionEvent event) {
 				try{
 					CyclistController._presenter.addTool(new FormBuilderTool());
-					menu1.setVisible(false);
+					circle.menu.setVisible(false);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -118,26 +120,32 @@ public class CycicCircles{
 		delete.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				deleteNode(parent);
+				circle.menu.setVisible(false);
 			}
 		});
 		
 		final Menu clonesList = new Menu("Children");
 		
-		CustomMenuItem cloneNode = new CustomMenuItem(new Label("Add Child"));
+		/*CustomMenuItem cloneNode = new CustomMenuItem(new Label("Add Child"));
 		cloneNode.setHideOnClick(false);
 		cloneNode.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				Clones.addClone("", parent, parent.cycicCircle.childrenShow);
 			}
 		});
-		clonesList.getItems().add(cloneNode);
+		clonesList.getItems().add(cloneNode);*/
+		
+		circle.image.setLayoutX(circle.getCenterX()-60);
+		circle.image.setLayoutY(circle.getCenterY()-60);
+		
 		
 		MenuItem showImage = new MenuItem("Show Image");
 		showImage.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				circle.image.setVisible(true);
 				circle.image.toBack();
-				circle.setOpacity(0);			
+				circle.setOpacity(0);	
+				circle.menu.setVisible(false);
 			}
 		});
 		
@@ -146,7 +154,7 @@ public class CycicCircles{
 			public void handle(ActionEvent e){
 				circle.image.setVisible(false);
 				circle.setOpacity(100);
-			}
+				circle.menu.setVisible(false);			}
 		});
 		
 		menu1.getItems().addAll(facForm, clonesList, delete, showImage, hideImage);

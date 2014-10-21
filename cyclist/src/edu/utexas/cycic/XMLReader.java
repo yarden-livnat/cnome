@@ -1,9 +1,13 @@
 package edu.utexas.cycic;
 
+import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import javafx.scene.image.Image;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -25,9 +29,56 @@ public class XMLReader {
 	/**
 	 * 
 	 */
+	static skinSet SC2 = new skinSet(){
+		{
+			name = "SC2";
+			images.put("reactor", new Image(new File("./skinImages/reactorSC2.jpg").toURI().toString()));
+			images.put("facility", new Image(new File("./skinImages/sourceFacSC2.jpg").toURI().toString()));
+		}
+	};
+	
+	static skinSet DSARR = new skinSet(){
+		{
+			name = "DSARR";
+			images.put("abr", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
+			images.put("facility", new Image(new File("./skinImages/fuelcycle_enr.png").toURI().toString()));
+			images.put("fuel fabrication", new Image(new File("./skinImages/fuelcycle_fab.png").toURI().toString()));
+			images.put("repository", new Image(new File("./skinImages/fuelcycle_geo.png").toURI().toString()));
+			images.put("mine", new Image(new File("./skinImages/fuelcycle_mine.png").toURI().toString()));
+			images.put("reactor", new Image(new File("./skinImages/fuelcycle_rxtr.png").toURI().toString()));
+			images.put("sep", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
+		}
+	};
+	
+	/**
+	 * 
+	 */
+	static ArrayList<String> blackList = new ArrayList<String>(){
+		{
+			add("agents:agents:Sink");
+			add("agents:agents:Source");
+			add("agents:agents:KFacility");
+			add("agents:agents:NullInst");
+			add("agents:agents:NullRegion");
+			add("agents:agents:Prey");
+			add("agents:agents:Predator");
+			add("stubs:StubFacility:StubFacility");
+			add("stubs:StubInst:StubInst");
+			add("stubs:StubRegion:StubRegion");
+			add("StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion");
+			add("StubFacility/cyclus/StubInst:StubInst:StubInst");
+			add("StubFacility:StubFacility:StubFacility");
+			add(":cycamore:DeployInst");
+			
+		}
+	};
+	
+	/**
+	 * 
+	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
-			add(":Brightlite:ReactorFacility");
+			/*add(":Brightlite:ReactorFacility");
 			add(":Brightlite:FuelfabFacility");
 			add(":Brightlite:ReprocessFacility");
 			add(":cycaless:BatchReactor");
@@ -38,7 +89,7 @@ public class XMLReader {
 			add(":agents:Sink");
 			add(":agents:KFacility");
 			add(":agents:Prey");
-			add(":agents:Predator");
+			add(":agents:Predator");*/
 		}
 	};
 	
@@ -47,8 +98,8 @@ public class XMLReader {
 	 */
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
-			add(":cycamore:GrowthRegion");
-			add(":agents:NullRegion");
+			/*add(":cycamore:GrowthRegion");
+			add(":agents:NullRegion");*/
 			
 		}
 	};
@@ -58,42 +109,12 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			add(":cycaless:DeployInst");
+			/*add(":cycaless:DeployInst");
 			add(":cycamore:ManagerInst");
-			add(":agents:NullInst");
+			add(":agents:NullInst");*/
 		}
 	};
 	
-	/**
-	 * Test for schema
-	 */
-	static String test = "<interleave><element name=\"in_commods\"><oneOrMore><element name=\"val\">" +  
-			"<data type=\"token\" /></element></oneOrMore></element><element name=\"capacity\">"+
-			"<data type=\"double\" /></element><optional><element name=\"max_inv_size\"><data type=\"double\" />"+
-			"</element></optional></interleave>";
-	
-	/**
-	 * Test for annotations
-	 */
-	static String jsonTest = "{"+
-		"\"doc\" : \"A minimum implementation sink facility that accepts specified amounts of commodities from other agents\","+
-		"\"vars\" : {" +
-		"\"capacity\" : {" +
-        "\"doc\" : \"capacity the sink facility can accept at each time step\"," +
-        "\"index\" : 1, \"tooltip\" : \"sink capacity\", \"type\" : \"double\"}," +
-        "\"in_commods\" : {\"doc\" : \"commodities that the sink facility accepts\", \"index\" : 0," +
-        "\"schematype\" : \"token\", \"tooltip\" : \"input commodities\", \"type\" : [ \"std::vector\", \"std::string\" ]" +
-      	"}, \"inventory\" : {\"capacity\" : \"max_inv_size\", \"index\" : 3, \"type\" : \"cyclus::toolkit::ResourceBuff\"},"+
-      	"\"max_inv_size\" : {\"default\" : 1.000000000000000e+299, \"doc\" : \"total maximum inventory size of sink facility\","+
-        "\"index\" : 2, \"tooltip\" : \"sink maximum inventory size\", \"type\" : \"double\"}}}";
-	
-	/**
-	 * 
-	 */
-	static String deploy = "<oneOrMore><element name=\"buildorder\"><element name=\"prototype\"><data type=\"string\"/>" +           
-						"</element><element name=\"number\"><data type=\"nonNegativeInteger\"/></element><element name=\"date\">" +               
-						"<data type=\"nonNegativeInteger\"/></element></element></oneOrMore>";
-						
 	/**
 	 * 
 	 * @param xmlSchema
@@ -145,6 +166,33 @@ public class XMLReader {
 	
 	/**
 	 * 
+	 * @param jsonSchema
+	 * @return
+	 */
+	static String entityReader(String jsonSchema){
+		Reader schema = new StringReader(jsonSchema);
+		JsonReader jsonReader = Json.createReader(schema);
+		JsonObject jsonObject = jsonReader.readObject();
+		jsonReader.close();
+		JsonString string = jsonObject.getJsonString("entity");		
+		return string.toString();
+	}
+	
+	/**
+	 * 
+	 * @param jsonSchema
+	 * @return
+	 */
+	static String nicheReader(String jsonSchema){
+		Reader schema = new StringReader(jsonSchema);
+		JsonReader jsonReader = Json.createReader(schema);
+		JsonObject jsonObject = jsonReader.readObject();
+		jsonReader.close();
+		JsonString string = jsonObject.getJsonString("niche");		
+		return string.toString();
+	}
+	/**
+	 * 
 	 * @param dataArray
 	 * @param json
 	 */
@@ -173,6 +221,24 @@ public class XMLReader {
 					}
 				} else if(json_pass.get("uitype") != null){
 					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
+				}
+				if(json_pass.get("default") instanceof JsonArray){
+					JsonArray array = json_pass.getJsonArray("default");
+					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+						String string = array.get(i+1).toString().replaceAll("\"", "");
+						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
+					}
+				} else if(json_pass.get("default") instanceof JsonObject){
+					JsonObject object = json_pass.getJsonObject("default");
+					Set<String> keys = object.keySet();
+					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+					}
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(5, keys.toArray()[0].toString());
+					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(1)).set(5, object.get(keys.toArray()[0]).toString());
+				} else if(json_pass.get("default") != null) {
+									
 				}
 				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}

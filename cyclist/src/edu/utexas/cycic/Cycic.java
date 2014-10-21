@@ -1,5 +1,7 @@
 package edu.utexas.cycic;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.awt.Dialog;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,32 +9,52 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.apache.log4j.Logger;
 import org.controlsfx.dialog.Dialogs;
 
+import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
+import javafx.beans.property.StringProperty;
+import edu.utah.sci.cyclist.core.model.CyclusJob;
+import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import javax.imageio.ImageIO;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+
 import javafx.geometry.Insets;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -48,10 +70,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
 import edu.utah.sci.cyclist.core.services.CyclusService;
 
 public class Cycic extends ViewBase{
+	static Logger log = Logger.getLogger(Cycic.class);
 	/**
 	 * Function for building the CYCIC Pane and GridPane of this view. 
 	 */
@@ -74,6 +96,12 @@ public class Cycic extends ViewBase{
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
 	static Window window;
+	ComboBox<String> skins = new ComboBox<String>();
+	static ToggleGroup opSwitch = new ToggleGroup();
+	static ToggleButton localToggle = new ToggleButton("Local");
+	static ToggleButton remoteToggle = new ToggleButton("Remote");
+    static CyclusJob _remoteDashA;
+    private static Object monitor = new Object();
 	
 	/**
 	 * 
@@ -183,21 +211,30 @@ public class Cycic extends ViewBase{
 					for (int i = 0; i < DataArrays.simFacilities.size(); i++){
 						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
+							facility.niche = DataArrays.simFacilities.get(i).niche;
+							facility.archetype = DataArrays.simFacilities.get(i).facilityArch;
 						}
 					}
 					event.consume();
-					/*Optional<String> response =  Dialogs.create()
-							.title("Name Facility")
-							.message("Enter Facility Name")
-							.showTextInput();
-					if(response.isPresent()){
-						facility.name = response.orElse("");*/
 					facility.name = "";
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
 					facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
 					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
+					facility.cycicCircle.menu.setLayoutX(event.getX());
+					facility.cycicCircle.menu.setLayoutY(event.getY());
+					
+					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(skins.getValue())){
+							facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.get(facility.niche));
+							facility.cycicCircle.image.setVisible(true);
+							facility.cycicCircle.setOpacity(0);
+						}
+					}
+					facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);
+					facility.cycicCircle.image.setLayoutY(facility.cycicCircle.getCenterY()-60);
+					
 					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
 					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);			
 				}
@@ -272,13 +309,55 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
-		Button button1 = new Button("Cyclus -a");
-		button1.setOnAction(new EventHandler<ActionEvent>(){
+
+		skins.getItems().add("None");
+		skins.setValue("None");
+		DataArrays.visualizationSkins.add(XMLReader.SC2);
+		DataArrays.visualizationSkins.add(XMLReader.DSARR);
+		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
+		}
+		skins.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				retrieveSchema();
+				if(skins.getValue().equalsIgnoreCase("None")){
+					for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+						DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(false);
+						DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(100);
+					}
+				} else {
+					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+						skinSet skin = DataArrays.visualizationSkins.get(i);
+						if(skin.name.equalsIgnoreCase(skins.getValue())){
+							for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+								DataArrays.FacilityNodes.get(j).cycicCircle.image.setImage(skin.images.get(DataArrays.FacilityNodes.get(j).niche));
+								DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(true);
+								DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(0);
+							}
+						}
+					}
+				}
 			}
 		});
-		grid.add(button1, 6, 0);
+		grid.add(skins, 0, 1);
+		
+		Button imageButton = new Button("Save fuel cycle image");
+		imageButton.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				export();
+			}
+		});
+		grid.add(imageButton, 1, 1);
+        opSwitch.getToggles().addAll(localToggle, remoteToggle);
+        try {
+            Process readproc = Runtime.getRuntime().exec("cyclus -V");
+            BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+            localToggle.setSelected(true);
+        } catch (RuntimeException | IOException e) {
+            localToggle.setSelected(false);
+        };
+		grid.add(localToggle, 7, 0);
+		grid.add(remoteToggle, 8, 0);
+
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
 		HBox mainView = new HBox(){
@@ -306,31 +385,71 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-	public void retrieveSchema(){
-		try {
-			StringBuilder sb = new StringBuilder();
-			StringBuilder sb1 = new StringBuilder();
-			String string;
-			Process readproc = Runtime.getRuntime().exec("cyclus -a");
-			
-			BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-			while(schema.readLine() != null){
-				/*Process proc = Runtime.getRuntime().exec("cyclus --agent-schema ");
-				BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-				while((string = read.readLine()) != null){
-					sb.append(string);
-				}
-				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations ");
-				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-				while((string = read1.readLine()) != null){
-					sb1.append(string);
-				}*/
-			}
-			System.out.println(sb.toString());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    public void retrieveSchema(String rawMetadata) {
+        // rawMetadata is a JSON string.
+        Reader metaReader = new StringReader(rawMetadata);
+        JsonReader metaJsonReader = Json.createReader(metaReader);
+        JsonObject metadata = metaJsonReader.readObject();
+        metaJsonReader.close();
+        JsonObject schemas = metadata.getJsonObject("schema");
+        JsonObject annotations = metadata.getJsonObject("annotations");
+            
+        String string;
+        DataArrays.simFacilities.clear();
+        DataArrays.simRegions.clear();
+        DataArrays.simInstitutions.clear();
+        for(javax.json.JsonString specVal : metadata.getJsonArray("specs").getValuesAs(JsonString.class)){
+            String spec = specVal.getString();
+            boolean test = true;
+            for(int j = 0; j < XMLReader.blackList.size(); j++){
+                if(spec.equalsIgnoreCase(XMLReader.blackList.get(j))){
+                    test = false;
+                }
+            }
+            if(test == false){
+                continue;
+            }
+            String schema = schemas.getString(spec);
+            JsonObject anno = annotations.getJsonObject(spec);
+            switch(anno.getString("entity")){
+            case "facility":
+                facilityStructure node = new facilityStructure();
+                node.facAnnotations = anno.toString();
+                node.facilityArch = spec;
+                node.niche = anno.getString("niche", "facility");
+                node.facStruct = XMLReader.annotationReader(anno.toString(), 
+                    XMLReader.readSchema(schema));
+                node.facilityName = spec.replace(":", " ");
+                DataArrays.simFacilities.add(node);
+                log.info("Adding archetype "+spec);
+                break;
+            case "region":
+                log.info("Adding archetype "+spec);
+                regionStructure rNode = new regionStructure();
+                rNode.regionAnnotations = anno.toString();
+                rNode.regionArch = spec;
+                rNode.regionStruct = XMLReader.annotationReader(anno.toString(),
+                    XMLReader.readSchema(schema));
+                rNode.regionName = spec.replace(":", " ");
+                DataArrays.simRegions.add(rNode);
+                break;
+            case "institution":
+                log.info("Adding archetype "+spec);
+                institutionStructure iNode = new institutionStructure();
+                iNode.institArch = spec;
+                iNode.institAnnotations = anno.toString();
+                iNode.institStruct = XMLReader.annotationReader(anno.toString(),
+                    XMLReader.readSchema(schema));
+                iNode.institName = spec.replace(":", " ");
+                DataArrays.simInstitutions.add(iNode);
+                break;
+            default:
+                log.error(spec+" is not of the 'facility', 'region' or 'institution' type. "
+                    + "Please check the entity value in the archetype annotation.");
+            break;
+            };  
+        }
+        log.info("Schema discovery complete");
 	}
 	
 	/**
@@ -546,88 +665,141 @@ public class Cycic extends ViewBase{
 		});
 		simInfo.add(output, 0, 6);
 		
-        Button runRemote = new Button("Run Remotely");
-        runRemote.setOnAction(new EventHandler<ActionEvent>(){
+        Button runCyclus = new Button("Run Cyclus!");
+        runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-            	if(OutPut.inputTest()){
+                if(!OutPut.inputTest()){
+                    log.info("Cyclus Input Not Well Formed!");
+                    return;  // safety dance
+                }
+                if (localToggle.isSelected()) {
+                    // local execution
+                    String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+                    String cycicTemp = "cycic"+tempHash;
+                    try {
+                        File temp = File.createTempFile(cycicTemp, ".xml");
+                        FileWriter fileOutput = new FileWriter(temp);
+                        BufferedWriter buffOut = new BufferedWriter(fileOutput);
+                        Process p = Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp);
+                        p.waitFor();
+                        String line = null;
+                        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                        while ((line = input.readLine()) != null) {        
+                            log.info(line);
+                        }
+                        input.close();
+                        log.info("Cyclus run complete");
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // remote execution
             		String cycicXml = OutPut.xmlStringGen();
             		CyclistController._cyclusService.submit(cycicXml);
             	}
             }
-        });
-        runRemote.setStyle("-fx-fill: green;"
-                        + "-fx-border-width: 1;"
-                        + "-fx-border-color: black");
-    
-        Button runInput = new Button("Run Locally");
-        runInput.setOnAction(new EventHandler<ActionEvent>(){
-            public void handle(ActionEvent e){
-                if(OutPut.inputTest()){
-                	String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-                	String cycicTemp = "cycic"+tempHash;
-                	try {
-                		File temp = File.createTempFile(cycicTemp, ".xml");
-                		FileWriter fileOutput = new FileWriter(temp);
-                		BufferedWriter buffOut = new BufferedWriter(fileOutput);
-
-                		Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp); 
-                	} catch (Exception e1) {
-                		e1.printStackTrace();
-                	}
-                }   
-            }
-        });
-        runInput.setStyle("-fx-fill: green;"
-                        + "-fx-border-width: 1;"
-                        + "-fx-border-color: black");
-        HBox runBox = new HBox();
-        runBox.setSpacing(5);
-        runBox.getChildren().addAll(runInput, runRemote);
-        simInfo.add(runBox, 1,6);    
+        });;
+        simInfo.add(runCyclus, 1,6);    
     }
 
 	public void createArchetypeBar(GridPane grid){
 		ComboBox<String> archetypes = new ComboBox<String>();
-		for(int i = 0; i < XMLReader.facilityList.size(); i++){
-			archetypes.getItems().add(XMLReader.facilityList.get(i));
+		for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+			archetypes.getItems().add(DataArrays.simFacilities.get(i).facilityName);
 		}
-		
-		archetypes.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
+		archetypes.setOnMousePressed(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				archetypes.getItems().clear();
 				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
-					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(archetypes.getValue().replace(":", " ").trim())){
-						return;
-					}
-				}
-				String string;
-				StringBuilder sb = new StringBuilder();
-				StringBuilder sb1 = new StringBuilder();
-				try {
-
-					Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+archetypes.getValue()); 
-					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					while((string = read.readLine()) != null){
-						sb.append(string);
-					}
-					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+archetypes.getValue());
-					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-					while((string = read1.readLine()) != null){
-						sb1.append(string);
-					}
-					facilityStructure test = new facilityStructure();
-					test.facilityName = archetypes.getValue().replace(":", " ").trim();
-					test.facStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-					DataArrays.simFacilities.add(test);
-					FacilityCircle circle = new FacilityCircle();
-					buildDnDCircle(circle, DataArrays.simFacilities.size()-1, test.facilityName);
-					nodesPane.getChildren().addAll(circle,circle.text);
-				} catch (Exception eq) {
-					
+					archetypes.getItems().add(DataArrays.simFacilities.get(i).facilityName);
 				}
 			}
 		});
-		archetypeGrid.add(new Label("Add Archetype to Simulation"), 0, 1);
+		archetypes.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				for(int i = 0; i < DataArrays.simFacilities.size(); i++){
+					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(archetypes.getValue())){
+						if(DataArrays.simFacilities.get(i).loaded == true){
+							return;
+						}
+						facilityStructure test = DataArrays.simFacilities.get(i);
+						String string;
+						StringBuilder sb = new StringBuilder();
+						try {
+							test.loaded = true;
+							FacilityCircle circle = new FacilityCircle();
+							int pos = 0;
+							for(int k = 0; k < DataArrays.simFacilities.size(); k++){
+								if(DataArrays.simFacilities.get(k).loaded == true){
+									pos+=1;
+								}
+							}
+							buildDnDCircle(circle, pos-1, test.facilityName);
+							nodesPane.getChildren().addAll(circle,circle.text);
+						} catch (Exception eq) {
+							
+						}
+					}
+				}
+			}
+		});
+
+        Button cyclusDashM = new Button("Discover Archetypes");
+        cyclusDashM.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
+        cyclusDashM.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                if (localToggle.isSelected()) {
+                    // Local metadata collection
+                    try {
+                        Process readproc = Runtime.getRuntime().exec("cyclus -m");
+                        BufferedReader metaBuf = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+                        String line=null;
+                        String metadata = new String();
+                        while ((line = metaBuf.readLine()) != null) {metadata += line;}
+                        metaBuf.close();
+                        retrieveSchema(metadata);
+                    } catch (IOException ex) {
+                        // TODO Auto-generated catch block
+                        ex.printStackTrace();
+                    }
+                } else {
+                    // Remote metadata collection
+                    CyclistController._cyclusService.submitCmd("cyclus", "-m");
+                    _remoteDashA = CyclistController._cyclusService.latestJob();
+                    _remoteDashA.statusProperty()
+                        .addListener(new ChangeListener<CyclusJob.Status>() {
+                        @Override
+                        public void changed(ObservableValue<? extends Status> observable,
+                            Status oldValue, Status newValue) {
+                            if (newValue == Status.READY) {
+                                retrieveSchema(_remoteDashA.getStdout());
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        archetypeGrid.add(cyclusDashM, 1, 0);
+
+        archetypeGrid.add(new Label("Add Archetype to Simulation"), 0, 1);
 		archetypeGrid.add(archetypes, 1, 1);
 	}
 	
+	private void export() {
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image file (png, jpg, gif)", "*.png", "*.jpg", "'*.gif") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+		if (file != null) {
+			WritableImage image = pane.snapshot(new SnapshotParameters(), null);
+			String name = file.getName();
+			String ext = name.substring(name.indexOf(".")+1, name.length());
+		    try {
+		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
+		    } catch (IOException e) {
+		        log.error("Error writing image to file: "+e.getMessage());
+		    }
+		} else {
+			System.out.println("weird");
+		}
+	}
 }

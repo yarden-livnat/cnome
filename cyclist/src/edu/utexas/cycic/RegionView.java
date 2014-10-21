@@ -49,36 +49,6 @@ public class RegionView extends ViewBase{
 				}
 			}
 		});		
-		// Selection for new or currently built regions.
-		
-		/*structureCB.valueProperty().addListener(new ChangeListener<String>(){
-			@SuppressWarnings("unchecked")
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if (newValue == null){
-					
-				} else if(newValue == "New Region"){
-					grid.getChildren().clear();
-					rowNumber = 0;
-					CycicScenarios.workingCycicScenario.regionNodes.add(new regionNode());
-					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(CycicScenarios.workingCycicScenario.regionNodes.size()-1);
-					workingRegion.type = "GrowthRegion";
-					workingRegion.regionStruct = (ArrayList<Object>) CycicScenarios.workingCycicScenario.regionStructs.get(0);
-					FormBuilderFunctions.formArrayBuilder(workingRegion.regionStruct, workingRegion.regionData);
-					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
-					regionNode.regionCircle = RegionShape.addRegion("", workingRegion);
-					RegionCorralView.corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.menuBar, regionNode.regionCircle.text);
-				} else {
-					rowNumber = 0;
-					grid.getChildren().clear();
-					workingRegion = CycicScenarios.workingCycicScenario.regionNodes.get(structureCB.getItems().indexOf(newValue));
-					RegionCorralView.workingRegion = DataArrays.regionNodes.get(structureCB.getItems().indexOf(newValue));
-					for (int i = 0; i < workingRegion.institutions.size(); i++){
-						institList.getItems().add(workingRegion.institutions.get(i));
-					}
-					formBuilder(workingRegion.regionStruct, workingRegion.regionData);
-				}
-			}
-		});*/
 		
 		Label button = new Label(RegionCorralView.workingRegion.type);
 		button.setText(RegionCorralView.workingRegion.type);

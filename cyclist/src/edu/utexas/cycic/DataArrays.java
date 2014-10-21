@@ -1,8 +1,11 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.shape.Line;
 
 /**
@@ -24,6 +27,7 @@ public class DataArrays{
 	
 	static ArrayList<regionNode> regionNodes = new ArrayList<regionNode>();
 	static ArrayList<instituteNode> institNodes = new ArrayList<instituteNode>();
+	
 	static ArrayList<skinSet> visualizationSkins = new ArrayList<skinSet>();
 
 	static simInfo simulationData = new simInfo();
@@ -43,7 +47,12 @@ class CommodityNode {
  */
 class facilityStructure {
 	String facilityName;
+	String facilityArch;
+	String niche;
 	ArrayList<Object> facStruct = new ArrayList<Object>();
+	String facSchema;
+	String facAnnotations;
+	protected boolean loaded = false;
 	
 	String getName(){
 		return this.facilityName;
@@ -69,6 +78,9 @@ class facilityStructure {
  */
 class regionStructure {
 	String regionName;
+	String regionArch;
+	String regionSchema;
+	String regionAnnotations;
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
 	
 	String getName(){
@@ -95,8 +107,12 @@ class regionStructure {
  */
 class institutionStructure {
 	String institName;
+	String institArch;
+	String institSchema;
+	String institAnnotations;
 	ArrayList<Object> institStruct = new ArrayList<Object>();
 	
+	 
 	String getName(){
 		return this.institName;
 	}
@@ -182,6 +198,8 @@ class nodeLink {
 class regionNode{
 	String name = new String();
 	String type = new String();
+	String entity; 
+	String archetype;
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
 	ArrayList<Object> regionData  = new ArrayList<Object>();
 	ArrayList<String> institutions = new ArrayList<String>();
@@ -198,6 +216,8 @@ class regionNode{
 class instituteNode{
 	String name;
 	String type;
+	String entity;
+	String archetype;
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	ArrayList<facilityItem> availFacilities = new ArrayList<facilityItem>();
@@ -232,6 +252,7 @@ class simInfo{
 class facilityNode{
 	Object name;
 	String facilityType = "";
+	String entity; 
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
 	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
@@ -239,13 +260,12 @@ class facilityNode{
 	int parentIndex;
 	FacilityCircle cycicCircle = new FacilityCircle();
 	FacilityCircle sorterCircle = new FacilityCircle();
+	protected String niche;
+	public String archetype;
 }
 
 
 class skinSet{
-	String reactor;
-	String mine;
-	String generic;
-	String storage;
-	String facility;
+	String name; 
+	Map<String, Image> images = new HashMap<String, Image>();
 }
