@@ -1,5 +1,7 @@
 package edu.utexas.cycic;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.awt.Dialog;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -28,6 +30,12 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -362,85 +370,71 @@ public class Cycic extends ViewBase{
 	/**
 	 * 
 	 */
-    public void retrieveSchema(Object[] schemaLines) {
-		try {
-			String string;
-			DataArrays.simFacilities.clear();
-			DataArrays.simRegions.clear();
-			DataArrays.simInstitutions.clear();
-			for(int i = 0; i < schemaLines.length; i++){
-				StringBuilder sb1 = new StringBuilder();
-				Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations " + schemaLines[i]);
-				BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-				while((string = read1.readLine()) != null){
-					sb1.append(string);
-				}
-				boolean test = true;
-				for(int j = 0; j < XMLReader.blackList.size(); j++){
-					if(((String)schemaLines[i]).equalsIgnoreCase(XMLReader.blackList.get(j))){
-						test = false;
-					}
-				}
-				if(test == false){
-					continue;
-				}
-				switch(XMLReader.entityReader(sb1.toString()).replace("\"", "")){
-				case "facility":
-					facilityStructure node = new facilityStructure();
-					node.facAnnotations = sb1.toString();
-					node.facilityArch = schemaLines[i].toString();
-					try{	
-						node.niche = XMLReader.nicheReader(node.facAnnotations).replace("\"", "");
-					} catch (Exception e) {
-						node.niche = "facility";
-					}
-					node.facilityName = ((String) schemaLines[i]).replace(":", " ");
-					DataArrays.simFacilities.add(node);
-					log.info("Adding archetype "+schemaLines[i]);
-					break;
-				case "region":
-					log.info("Adding archetype "+schemaLines[i]);
-					regionStructure rNode = new regionStructure();
-					rNode.regionAnnotations = sb1.toString();
-					rNode.regionArch = schemaLines[1].toString();
-					String regString = "";
-					StringBuilder sb = new StringBuilder();
-					Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+schemaLines[i]); 
-					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					while((regString = read.readLine()) != null){
-						sb.append(regString);
-					}
-					rNode.regionStruct = XMLReader.annotationReader(rNode.regionAnnotations, XMLReader.readSchema(sb.toString()));
-					rNode.regionName = ((String) schemaLines[i]).replace(":", " ");
-					DataArrays.simRegions.add(rNode);
-					break;
-				case "institution":
-					log.info("Adding archetype "+schemaLines[i]);
-					institutionStructure iNode = new institutionStructure();
-					iNode.institArch = schemaLines[i].toString();
-					iNode.institAnnotations = sb1.toString();
-					String instString = "";
-					StringBuilder sb2 = new StringBuilder();
-					Process proc2 = Runtime.getRuntime().exec("cyclus --agent-schema "+schemaLines[i]); 
-					BufferedReader read2 = new BufferedReader(new InputStreamReader(proc2.getInputStream()));
-					while((instString = read2.readLine()) != null){
-						sb2.append(instString);
-					}
-					iNode.institStruct = XMLReader.annotationReader(iNode.institAnnotations, XMLReader.readSchema(sb2.toString()));
-					iNode.institName = ((String) schemaLines[i]).replace(":", " ");
-					DataArrays.simInstitutions.add(iNode);
-					break;
-				default:
-					log.error(schemaLines[i]+" is not of the 'facility', 'region' or 'institution' type. "
-							+ "Please check the entity value in the archetype annotation.");
-					break;
-				};	
-			}
-			log.info("Schema discovery complete");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-		}
+    public void retrieveSchema(String rawMetadata) {
+        // rawMetadata is a JSON string.
+        Reader metaReader = new StringReader(rawMetadata);
+        JsonReader metaJsonReader = Json.createReader(metaReader);
+        JsonObject metadata = metaJsonReader.readObject();
+        metaJsonReader.close();
+        JsonObject schemas = metadata.getJsonObject("schema");
+        JsonObject annotations = metadata.getJsonObject("annotations");
+            
+        String string;
+        DataArrays.simFacilities.clear();
+        DataArrays.simRegions.clear();
+        DataArrays.simInstitutions.clear();
+        for(javax.json.JsonString specVal : metadata.getJsonArray("specs").getValuesAs(JsonString.class)){
+            String spec = specVal.getString();
+            boolean test = true;
+            for(int j = 0; j < XMLReader.blackList.size(); j++){
+                if(spec.equalsIgnoreCase(XMLReader.blackList.get(j))){
+                    test = false;
+                }
+            }
+            if(test == false){
+                continue;
+            }
+            String schema = schemas.getString(spec);
+            JsonObject anno = annotations.getJsonObject(spec);
+            switch(anno.getString("entity")){
+            case "facility":
+                facilityStructure node = new facilityStructure();
+                node.facAnnotations = anno.toString();
+                node.facilityArch = spec;
+                node.niche = anno.getString("niche", "facility");
+                node.facStruct = XMLReader.annotationReader(anno.toString(), 
+                    XMLReader.readSchema(schema));
+                node.facilityName = spec.replace(":", " ");
+                DataArrays.simFacilities.add(node);
+                log.info("Adding archetype "+spec);
+                break;
+            case "region":
+                log.info("Adding archetype "+spec);
+                regionStructure rNode = new regionStructure();
+                rNode.regionAnnotations = anno.toString();
+                rNode.regionArch = spec;
+                rNode.regionStruct = XMLReader.annotationReader(anno.toString(),
+                    XMLReader.readSchema(schema));
+                rNode.regionName = spec.replace(":", " ");
+                DataArrays.simRegions.add(rNode);
+                break;
+            case "institution":
+                log.info("Adding archetype "+spec);
+                institutionStructure iNode = new institutionStructure();
+                iNode.institArch = spec;
+                iNode.institAnnotations = anno.toString();
+                iNode.institStruct = XMLReader.annotationReader(anno.toString(),
+                    XMLReader.readSchema(schema));
+                iNode.institName = spec.replace(":", " ");
+                DataArrays.simInstitutions.add(iNode);
+                break;
+            default:
+                log.error(spec+" is not of the 'facility', 'region' or 'institution' type. "
+                    + "Please check the entity value in the archetype annotation.");
+            break;
+            };  
+        }
+        log.info("Schema discovery complete");
 	}
 	
 	/**
@@ -715,15 +709,7 @@ public class Cycic extends ViewBase{
 						String string;
 						StringBuilder sb = new StringBuilder();
 						try {
-
-							Process proc = Runtime.getRuntime().exec("cyclus --agent-schema "+test.facilityArch); 
-							BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-							while((string = read.readLine()) != null){
-								sb.append(string);
-							}
-							test.facSchema = sb.toString();
 							test.loaded = true;
-							test.facStruct = XMLReader.annotationReader(test.facAnnotations, XMLReader.readSchema(test.facSchema));
 							FacilityCircle circle = new FacilityCircle();
 							int pos = 0;
 							for(int k = 0; k < DataArrays.simFacilities.size(); k++){
@@ -748,18 +734,20 @@ public class Cycic extends ViewBase{
                 if (localToggle.isSelected()) {
                     // Local metadata collection
                     try {
-                        Process readproc = Runtime.getRuntime().exec("cyclus -a");
-                        BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-                        Object[] schemaLines = schema.lines().toArray();
-                        schema.close();
-                        retrieveSchema(schemaLines);
+                        Process readproc = Runtime.getRuntime().exec("cyclus -m");
+                        BufferedReader metaBuf = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+                        String line=null;
+                        String metadata = new String();
+                        while ((line = metaBuf.readLine()) != null) {metadata += line;}
+                        metaBuf.close();
+                        retrieveSchema(metadata);
                     } catch (IOException ex) {
                         // TODO Auto-generated catch block
                         ex.printStackTrace();
                     }
                 } else {
                     // Remote metadata collection
-                    CyclistController._cyclusService.submitCmd("cyclus", "-a");
+                    CyclistController._cyclusService.submitCmd("cyclus", "-m");
                     _remoteDashA = CyclistController._cyclusService.latestJob();
                     _remoteDashA.statusProperty()
                         .addListener(new ChangeListener<CyclusJob.Status>() {
@@ -767,9 +755,7 @@ public class Cycic extends ViewBase{
                         public void changed(ObservableValue<? extends Status> observable,
                             Status oldValue, Status newValue) {
                             if (newValue == Status.READY) {
-                                Object[] schemaLines = _remoteDashA.getStdout()
-                                    .split("\n");
-                                retrieveSchema(schemaLines);
+                                retrieveSchema(_remoteDashA.getStdout());
                             }
                         }
                     });
