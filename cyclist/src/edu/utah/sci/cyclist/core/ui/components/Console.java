@@ -28,7 +28,8 @@ public class Console extends ScrollPane {
 	
 	private void build() {
 		getStyleClass().add("console");
-		setFitToWidth(true);
+        setFitToWidth(true);
+        setFitToHeight(true);
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		_text = new TextArea();
 		setContent(_text);
