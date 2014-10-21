@@ -91,7 +91,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 				getView().setOnSimulationDrop(new Closure.V1<Simulation>(){
 					@Override
 					public void call(Simulation simulation) {
-						addLocalSimulation(simulation);
+						addLocalSimulation(simulation,true);
 						_dirtyFlag = true;
 					}
 				});
@@ -331,9 +331,9 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 	 * 
 	 * @param - Simulation: The simulation to add locally.
 	 */
-	protected void addLocalSimulation(Simulation simulation){
-		getView().addSimulation(simulation, false /*remote*/, true /* active */);
-		getSelectionModelSim().addItem(simulation, false /*remote*/, true /*active*/, false /*remoteActive*/);
+	protected void addLocalSimulation(Simulation simulation, boolean select){
+		getView().addSimulation(simulation, false /*remote*/, select /* active */);
+		getSelectionModelSim().addItem(simulation, false /*remote*/, select /*active*/, false /*remoteActive*/);
 	}
 	
 	/*

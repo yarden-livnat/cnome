@@ -482,6 +482,7 @@ public class SimulationWizard extends TilePane {
 	private void updateSimulation() {
 		List<SimInfo> simulations = _simulationsTbl.getSelectionModel().getSelectedItems();
 		_selection.clear();
+		List<Simulation> selectedSimulations = new ArrayList<>();
 		if(simulations.size()>0){
 			for(SimInfo simInfo:simulations){
 				Blob simId = simInfo.getSimId();
@@ -493,9 +494,10 @@ public class SimulationWizard extends TilePane {
 				}
 				simulation.setAlias(alias);
 				fetchSimulationInfo(simulation);
-				_selection.add(simulation);
+				selectedSimulations.add(simulation);
 			}
 		}
+		_selection.addAll(selectedSimulations);
 	}
 	
 	private String getAlias(String simId){
