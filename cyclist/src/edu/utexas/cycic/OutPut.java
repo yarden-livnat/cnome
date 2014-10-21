@@ -160,30 +160,35 @@ public class OutPut {
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
 			String[] fullPath = region.archetype.split(":");
+			System.out.println(fullPath[0]);
+			System.out.println(fullPath[1]);
+			System.out.println(fullPath[2]);
+			
 			if(!fullPath[0].equalsIgnoreCase("")){
 				Element path = doc.createElement("path");
 				path.setTextContent(fullPath[0]);
 				spec.appendChild(path);
 			}
-			lib.setTextContent(region.archetype.split(":")[1]);
+			lib.setTextContent(fullPath[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(region.type.split(":")[2]);
+			name.setTextContent(fullPath[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}
 		for(instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
 			Element spec = doc.createElement("spec");
 			String[] fullPath = instit.archetype.split(":");
-			Element lib = doc.createElement("lib");
 			if(!fullPath[0].equalsIgnoreCase("")){
 				Element path = doc.createElement("path");
 				path.setTextContent(fullPath[0]);
 				spec.appendChild(path);
 			}
+			Element lib = doc.createElement("lib");
+			lib.setTextContent(fullPath[1]);
 			spec.appendChild(lib);
 			Element name = doc.createElement("name");
-			name.setTextContent(instit.type.split(":")[2]);
+			name.setTextContent(fullPath[2]);
 			spec.appendChild(name);
 			archetypes.appendChild(spec);
 		}

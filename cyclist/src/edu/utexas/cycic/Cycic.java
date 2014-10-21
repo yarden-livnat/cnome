@@ -401,6 +401,7 @@ public class Cycic extends ViewBase{
                 facilityStructure node = new facilityStructure();
                 node.facAnnotations = anno.toString();
                 node.facilityArch = spec;
+                System.out.println(spec);
                 node.niche = anno.getString("niche", "facility");
                 node.facStruct = XMLReader.annotationReader(anno.toString(), 
                     XMLReader.readSchema(schema));
@@ -413,6 +414,7 @@ public class Cycic extends ViewBase{
                 regionStructure rNode = new regionStructure();
                 rNode.regionAnnotations = anno.toString();
                 rNode.regionArch = spec;
+                System.out.println(spec);
                 rNode.regionStruct = XMLReader.annotationReader(anno.toString(),
                     XMLReader.readSchema(schema));
                 rNode.regionName = spec.replace(":", " ");
@@ -422,6 +424,7 @@ public class Cycic extends ViewBase{
                 log.info("Adding archetype "+spec);
                 institutionStructure iNode = new institutionStructure();
                 iNode.institArch = spec;
+                System.out.println(spec);
                 iNode.institAnnotations = anno.toString();
                 iNode.institStruct = XMLReader.annotationReader(anno.toString(),
                     XMLReader.readSchema(schema));
