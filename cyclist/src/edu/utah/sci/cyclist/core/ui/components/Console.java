@@ -33,7 +33,6 @@ public class Console extends ScrollPane {
 		setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
 		_text = new TextArea();
 		setContent(_text);
-        _text.setUpdatePolicy(ALWAYS_UPDATE);
 	}
 	
 	class CyclistAppender implements Appender {
@@ -65,6 +64,7 @@ public class Console extends ScrollPane {
                 @Override
                 public void run() {
                     _text.setText(_current);
+                    _text.end();
                 }
             });
         }
