@@ -35,7 +35,6 @@ public class FlowChart extends VBox {
 	private HBox _header;
 	private StackPane _stack;
 	private Pane _glass;
-//	private Label _popup;
 	private Rectangle _rec;
 	
 	private LineChart<Number, Number> _chart;
@@ -85,14 +84,14 @@ public class FlowChart extends VBox {
 	}
 	
 	private void selectChartType() {
-		double s = 1;
-		for (ChartInfo info : _info.values()) {
-			s = Math.max(s, computeScale(info.values));
-		}
-		if (s != _scale) {
-			_scale = s;
-			updateYAxis();
-		}
+//		double s = 1;
+//		for (ChartInfo info : _info.values()) {
+//			s = Math.max(s, computeScale(info.values));
+//		}
+//		if (s != _scale) {
+//			_scale = s;
+//			updateYAxis();
+//		}
 		updateAll();
 	}
 	
@@ -115,9 +114,9 @@ public class FlowChart extends VBox {
 
 		double scale = computeScale(values); // relative to the current chart type
 		
-		if (scale > _scale) {
-			updateScale(scale);
-		}
+//		if (scale > _scale) {
+//			updateScale(scale);
+//		}
 		updateSeries(series, values);
 
 		ChartInfo info = new ChartInfo();
@@ -149,10 +148,10 @@ public class FlowChart extends VBox {
 			s = Math.max(ci.scale, s);
 			_upperBound = Math.max(_upperBound, ci.last);
 		}
-		if (s != _scale) {
-			updateScale(s);
-			updateYAxis();
-		}
+//		if (s != _scale) {
+//			updateScale(s);
+//			updateYAxis();
+//		}
 		if (_info.isEmpty()) {
 			_rec.setVisible(false);
 		}
@@ -171,11 +170,11 @@ public class FlowChart extends VBox {
 	}
 
 	private void updateYAxis() {
-		String label = _scale == 1 ? "kg"
-				: _scale == 1000 ? "x 1000 kg"
-				: String.format("x %.0e kg", _scale);
-	
-		_yAxis.setLabel(label);
+//		String label = _scale == 1 ? "kg"
+//				: _scale == 1000 ? "x 1000 kg"
+//				: String.format("x %.0e kg", _scale);
+//	
+//		_yAxis.setLabel(label);
 	}
 
 	
@@ -266,7 +265,7 @@ public class FlowChart extends VBox {
 		_xAxis.setLabel("time");
 		_xAxis.setAnimated(false);
 		
-		_yAxis = new CyclistAxis(CyclistAxis.Mode.LINEAR);
+		_yAxis = new CyclistAxis(CyclistAxis.Mode.LOG);
 		_yAxis.setLabel("Cummulative");
 		_yAxis.setAnimated(false);
 		
