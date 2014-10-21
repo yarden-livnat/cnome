@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import org.apache.log4j.Logger;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -23,6 +25,7 @@ import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.DataType.Type;
 
 public class Filter implements Observable, Resource {
+	static Logger log = Logger.getLogger(Filter.class);
 	
 	private String _id = UUID.randomUUID().toString();
 	
@@ -199,14 +202,13 @@ public class Filter implements Observable, Resource {
 		} else if (cls.equals(Double.class.toString())) {
 			return Double.valueOf(str);
 		} else {
-			System.out.println("*** unknown value class: "+cls);
+			log.warn("*** unknown value class: "+cls);
 			return str;
 		}
 	}
 	
 	
 	public void restore(final IMemento memento, Context ctx) {
-		System.out.println("filter restore");
 		// a filter owns its own copy of a field. 
 		// create a field instead of looking it up in the context
 		_field = new Field();

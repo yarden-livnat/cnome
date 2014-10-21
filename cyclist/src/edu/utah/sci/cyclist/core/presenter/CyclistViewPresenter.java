@@ -248,7 +248,6 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		// restore local tables
 		IMemento group = memento.getChild("tables");
 		for(IMemento child :  group.getChildren("local-table")) {
-			System.out.println("lookup table: "+child.getString("ref-uid"));
 			Table table = ctx.get(child.getString("ref-uid"), Table.class);
 			addTable(table, false, false, false);	
 		}

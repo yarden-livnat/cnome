@@ -421,7 +421,7 @@ public class ChartView extends CyclistViewBase {
 						.aggregates(aggregators)
 						.grouping(grouping)
 						.filters(filtersList);
-//				System.out.println("Query: "+builder.toString());
+//				log.debug("Query: "+builder.toString());
 
 				List<Field> order = builder.getOrder();
 
@@ -483,11 +483,11 @@ public class ChartView extends CyclistViewBase {
 
 	private void assignData(MapSpec spec, ObservableList<TableRow> list) {
 		if (list.size() == 0) {
-			System.out.println("no data");
+			log.debug("no data");
 			return;
 		}
 		
-		System.out.println("data has "+list.size()+" rows");
+		log.debug("data has "+list.size()+" rows");
 		if (list.size() > 5000) {
 			log.warn("Too many data points (>5000). Ignored");
 			return;
@@ -731,7 +731,6 @@ public class ChartView extends CyclistViewBase {
 			break;
 		case BAR:
 			BarChart bar = new BarChart<>(_xAxis,  _yAxis);
-//			System.out.println("gaps: "+bar.getBarGap()+"  "+bar.getCategoryGap());
 			bar.setBarGap(1);
 			bar.setCategoryGap(4);
 			setChart(bar);
@@ -759,9 +758,6 @@ public class ChartView extends CyclistViewBase {
 			getChart().setAnimated(false);
 			getChart().setHorizontalZeroLineVisible(false);
 			getChart().setVerticalZeroLineVisible(false);
-//			System.out.println("zero _line: "+getChart().horizontalZeroLineVisibleProperty().get()+"  "+getChart().verticalZeroLineVisibleProperty().get());
-			//                        getChart().setCache(true);
-			//                        _pane.setCenter(getChart());
 			_stackPane.getChildren().add(0, getChart());
 		} else {
 			Text text = new Text("Unsupported fields combination");
@@ -773,7 +769,6 @@ public class ChartView extends CyclistViewBase {
 	@SuppressWarnings("rawtypes")
 	private Axis createAxis(Field field, String title, boolean y) {
 		Axis axis =  null;
-//		System.out.println("field clasification: "+field.getClassification());
 
 		switch (field.getClassification()) {
 
@@ -859,7 +854,7 @@ public class ChartView extends CyclistViewBase {
 					long t1 = System.currentTimeMillis();
 					assignData(_spec, newValue);
 					long t2 = System.currentTimeMillis();
-					System.out.println("assigned data: "+(t2-t1)/1000+"secs");
+					log.debug("assigned data: "+(t2-t1)/1000+"secs");
 				}
 			}
 		});
@@ -1234,7 +1229,6 @@ public class ChartView extends CyclistViewBase {
 		@Override
 		public void invalidated(Observable o) {
 			Filter f = (Filter) o;
-//			System.out.println("filter changed: "+f.getName());
 			//If possible - take data directly from memory instead of quering the database.
 			if(handleLODFilters(f))
 			{

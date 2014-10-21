@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.log4j.Logger;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -18,7 +20,10 @@ import edu.utah.sci.cyclist.core.util.SQLUtil;
 
 public class TableProxy {
 	
+	static Logger log = Logger.getLogger(TableProxy.class);
+	
 	private Table _table;
+	
 	
 	public TableProxy(Table table) {
 		_table = table;
@@ -62,7 +67,7 @@ public class TableProxy {
 				rows.add(row);
 			}
 		} catch (SQLException e) {
-			System.out.println("Error parsing sql meta data: "+e.getMessage());
+			log.error("Error parsing sql meta data: "+e.getMessage());
 		} finally {
 			ds.releaseConnection();
 		}

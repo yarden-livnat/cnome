@@ -158,10 +158,6 @@ public class InventoryChart extends VBox {
 			_upperBound = last;
 		}
 		
-//		for (Pair<Integer, Double> pt : entry.series) {
-//			System.out.format("(%d, %.2f) ",pt.v1, pt.v2);
-//		}
-//		System.out.println("----");
 		final String style = ColorUtil.toString(entry.color).substring(0, 7)+"aa";  // 'aa' is alpha
 		XYChart.Series<Number, Number> series = createSeries(entry.series, style);
 		double scale = computeScale(entry.series); // relative to the current chart type

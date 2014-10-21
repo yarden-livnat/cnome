@@ -17,6 +17,8 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class TaskControl extends HBox {
+	static Logger log = Logger.getLogger(TaskControl.class);
+	
 	static final Logger logger = LogManager.getLogger(TaskControl.class.getName());
 	private ObjectProperty<Task<?>> _taskProperty = new SimpleObjectProperty<>();
 	private Task<?> _task;
@@ -66,7 +68,7 @@ public class TaskControl extends HBox {
 			_indicator.setOnMouseClicked(new EventHandler<Event>() {
 				@Override
 				public void handle(Event event) {
-					System.out.println("Canceling task: "+_task.cancel());				
+					log.info("Canceling task: "+_task.cancel());				
 				}
 			});
 		

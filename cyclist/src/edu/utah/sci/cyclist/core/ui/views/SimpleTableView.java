@@ -355,7 +355,7 @@ public class SimpleTableView extends CyclistViewBase {
 		QueryBuilder builder = _currentTable.queryBuilder()
 			.filters(filtersList);
 		
-		System.out.println("TableView Query: "+builder.toString());
+		log.debug("TableView Query: "+builder.toString());
 		
 		return builder.toString();
 	}

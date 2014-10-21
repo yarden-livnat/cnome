@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -84,7 +86,8 @@ import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
 public class SimulationWizard extends TilePane {
 
 	private static String SIMULATION_INFO_QUERY = "select initialYear, initialMonth, Duration from Info where SimID=?";
-
+	static Logger log = Logger.getLogger(SimulationWizard);
+	
 	// GUI elements
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
@@ -146,8 +149,6 @@ public class SimulationWizard extends TilePane {
 		
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog) );	
-	
-		System.out.println("changed" + _sourcesView.getSelectionModel().selectedItemProperty()) ;
 	}
 	
 	// * * * Create scene creates the GUI * * * //
@@ -409,7 +410,7 @@ public class SimulationWizard extends TilePane {
 				_simulationsTbl.setItems(_simData);
 				
 			}catch(SQLSyntaxErrorException e){
-				System.out.println("Table for SimId doesn't exist");
+				log.warn("Table for SimId doesn't exist");
 			}
 			catch (Exception e) {
 				_status.setGraphic(GlyphRegistry.get(AwesomeIcon.WARNING));//"FontAwesome|WARNING"));
@@ -532,7 +533,7 @@ public class SimulationWizard extends TilePane {
 				sim.setDuration(rs.getInt(3));
 			}
 		} catch (SQLException e) {
-			System.out.println("Error fetching simulation information:"+e.getMessage());
+			log.warn("Error fetching simulation information:"+e.getMessage());
 		} finally {
 			sim.getDataSource().releaseConnection();
 		}

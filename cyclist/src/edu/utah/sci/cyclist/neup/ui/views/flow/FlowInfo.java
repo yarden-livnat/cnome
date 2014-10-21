@@ -59,16 +59,10 @@ public class FlowInfo extends Pane {
 		
 		XYChart.Series<String, Number> series = new XYChart.Series<>();
 		for (Object type : map.keySet()) {
-			System.out.println(type+":"+ map.get(type));
 			series.getData().add(new XYChart.Data<String, Number>(type.toString(), map.get(type)));
 		}
 		_chart.getData().clear();
 		_chart.getData().add(series);
-		
-//		for (Object type : map.keySet()) {
-//			Label l = new Label(String.format("%s: %.2e kg", type.toString(), map.get(type)));
-//			_vbox.getChildren().add(l);
-//		}
 	}
 	
 	private void init() {

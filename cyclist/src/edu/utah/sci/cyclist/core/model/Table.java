@@ -152,7 +152,7 @@ public class Table implements Resource {
 				entryMemento.putTextData((String)value);
 			else{
 
-				System.out.println("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
+				log.warn("Table:save() NEED TO CHECK FOR SAVE-ABLE OBJECTS!!");
 				IMemento valueMemento = entryMemento.createChild("value");
 				valueMemento.putString("value-ID", value.toString());		
 			}
@@ -202,7 +202,7 @@ public class Table implements Resource {
 				 setProperty(key, value);
 			}
 			else{
-				System.out.println("Table:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
+				log.warn("Table:load() NEED TO IMPLEMENT OBJECT FACTORIES!!");
 			}	
 		}
 		
@@ -233,7 +233,7 @@ public class Table implements Resource {
 				_schema.addField(field);
 			}
 		} catch (Exception e) {
-			System.out.println("Error while parsing schema: "+e.getMessage());
+			log.error("Error while parsing schema: "+e);
 		}finally{
 			_datasource.releaseConnection();
 		}
@@ -472,7 +472,7 @@ public class Table implements Resource {
 							
 							while (rs.next()) {
 								if (isCancelled()) {
-									System.out.println("task canceled");
+									log.info("task canceled");
 									stmt.cancel();
 									updateMessage("Canceled");
 									break;
@@ -484,7 +484,7 @@ public class Table implements Resource {
 							writeFieldValuesToCache(field.getName(), ds, values);
 							writeFieldValuesToFile(field.getName(), field.getType().toString(), field.getRole().toString(), ds, values);
 						} catch (SQLException e) {
-							System.out.println("task sql exception: "+e.getLocalizedMessage());
+							log.error("task sql exception: ",e);
 							updateMessage(e.getLocalizedMessage());
 							throw new Exception(e.getMessage(), e);
 						} finally {
@@ -638,7 +638,7 @@ public class Table implements Resource {
 		 StringBuilder sb = new StringBuilder(); 
 		 for(Object value:values){
 			 if (value == null) {
-				 System.out.println("*** Warning: field '"+fieldName+"' has a null value");
+				 log.warn("*** Warning: field '"+fieldName+"' has a null value");
 			 } else  {
 				 sb.append(value.toString()+";");
 			 }
@@ -843,12 +843,11 @@ public class Table implements Resource {
 						query = "SELECT MIN("+field.getName()+") AS min, MAX(" + field.getName() + ") AS max FROM "+ getName();
 						
 						log.debug("query: "+query);
-						System.out.println(query);
 						ResultSet rs = stmt.executeQuery(query);
 						
 						while (rs.next()) {
 							if (isCancelled()) {
-								System.out.println("task canceled");
+								log.info("task canceled");
 								updateMessage("Canceled");
 								break;
 							}
