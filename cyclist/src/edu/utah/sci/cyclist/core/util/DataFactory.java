@@ -50,6 +50,7 @@ class GenericFactory implements Function<String, Object> {
 		_class = Class.forName(className);
 	}
 	
+	// TODO: Maybe check if there is a fromString method?
 	public Object apply(String strValue) {
 		try {
 			return _class.getConstructor(String.class).newInstance(strValue);

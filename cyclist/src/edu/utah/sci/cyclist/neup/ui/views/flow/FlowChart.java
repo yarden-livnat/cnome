@@ -7,6 +7,8 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -40,12 +42,25 @@ public class FlowChart extends VBox {
 	private NumberAxis _yAxis;
 	private double _scale = 1;
 	private boolean _opened = true;
-	private String _type;
 	private int _upperBound;
 	private boolean _updating = false;
 	
 	private Map<InventoryEntry, ChartInfo> _info = new HashMap<>();
 	private ObjectProperty<Range<Integer>> _timeRangeProperty = new SimpleObjectProperty<>();
+	
+	private StringProperty _chartType = new SimpleStringProperty();
+	
+	public StringProperty chartType() {
+		return _chartType;
+	}
+	
+	public String getChartType() {
+		return _chartType.get();
+	}
+	
+	public void setChartType(String type) {
+		_chartType.set(type);
+	}
 	
 	public class ChartInfo {
 		public Label title;
@@ -58,14 +73,17 @@ public class FlowChart extends VBox {
 	public FlowChart() {
 		super();
 		build();
+		
+		chartType().addListener(e->{
+			selectChartType();
+		});
 	}
 	
 	public ObjectProperty<Range<Integer>> timeRangeProperty() {
 		return _timeRangeProperty;
 	}
 	
-	private void selectChartType(String value) {
-		_type = value;
+	private void selectChartType() {
 		double s = 1;
 		for (ChartInfo info : _info.values()) {
 			s = Math.max(s, computeScale(info.values));
@@ -163,7 +181,7 @@ public class FlowChart extends VBox {
 	
 	private double computeScale(Collection<Pair<Integer, Double>> values) {
 		double max = 0;
-		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
+		if (getChartType().equals(COMMULATIVE_CHART_LABEL)) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {
 				sum += Math.abs(value.v2);
@@ -184,7 +202,7 @@ public class FlowChart extends VBox {
 	private void updateSeries(XYChart.Series<Number, Number> series, Collection<Pair<Integer, Double>> values) {
 		series.getData().clear();
 
-		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
+		if (getChartType().equals(COMMULATIVE_CHART_LABEL)) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {
 				sum += value.v2/_scale;
@@ -237,9 +255,7 @@ public class FlowChart extends VBox {
 			_stack.setManaged(_opened);
 		});
 		
-		type.valueProperty().addListener(e->{
-			selectChartType(type.getValue());
-		});
+		type.valueProperty().bindBidirectional(chartType());
 		
 		type.setValue(COMMULATIVE_CHART_LABEL);
 	}

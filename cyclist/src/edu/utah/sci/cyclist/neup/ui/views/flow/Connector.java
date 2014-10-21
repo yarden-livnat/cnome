@@ -139,7 +139,7 @@ public class Connector extends Group {
 	private void computeAmount() {
 		if (_transactions.isEmpty()) return;
 		
-		_text.setText(String.format("%.2e%s [%d tx]", getTotal(), _units, _transactions.size()));
+		_text.setText(String.format("%.2e %s [%d]", getTotal(), _units, _transactions.size()));
 	}
 	
 	

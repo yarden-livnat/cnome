@@ -22,6 +22,8 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -104,7 +106,8 @@ public class FlowView extends CyclistViewBase {
   private Map<Integer, Facility> _facilities = new HashMap<>();
   private List<Connector> _connectors = new ArrayList<>();
   private Map<String, InventoryEntry> _selectedNodes = new HashMap<>();
-
+  private StringProperty _nuclideTextFilter = new SimpleStringProperty();
+  
   private SimulationProxy _simProxy = null;
   private int _targetLine = -1;
   private boolean _changingKid = false;
@@ -347,11 +350,9 @@ public class FlowView extends CyclistViewBase {
 	if (node == null) {
 	  node = createNode(field.getSemantic(), value, direction, explicit);
 	  line.addNode(node);
-	} else {
-	  if (node.isExplicit() || !explicit) {
+	} else if (node.isExplicit() || !explicit) {
 		// nothing to do here
 		return;
-	  }
 	}
 
 	node.setExplicit(explicit);
@@ -850,6 +851,27 @@ public class FlowView extends CyclistViewBase {
 	return _commodityVBox;
   }
 
+  private void restoreCommoditySelection(List<Pair<String, Boolean>> commodities) {
+	List<CheckBox> list = new ArrayList<CheckBox>();
+
+	  for (Pair<String, Boolean> item : commodities) {
+		  CheckBox checkbox = new CheckBox(item.v1);
+		  checkbox.selectedProperty().addListener(_commodityListener);
+		  checkbox.setSelected(item.v2);
+		  list.add(checkbox);
+	  }
+  }
+  
+  private List<Pair<String, Boolean>> getCommoditySelection() {
+	  List<Pair<String, Boolean>> list = new ArrayList<>();
+	  int n = _commodityVBox.getChildren().size();
+	  for (int i=1; i<n; i++) {
+		  CheckBox checkbox = (CheckBox) _commodityVBox.getChildren().get(i);
+		  list.add(new Pair<String, Boolean>(checkbox.getText(), checkbox.isSelected()));
+	  }
+	  return list;
+  }
+  
   private void updateSelectionCtrl(List<String> values) {
 	List<CheckBox> list = new ArrayList<CheckBox>();
 
@@ -934,6 +956,7 @@ public class FlowView extends CyclistViewBase {
 		);
 
 
+	entry.textProperty().bindBidirectional(_nuclideTextFilter);
 	entry.setOnAction(e->isoFilterChanged(entry.getText()));
 	return vbox;
   }
@@ -1116,60 +1139,93 @@ public class FlowView extends CyclistViewBase {
   
   @Override
   public void save(IMemento memento) {
+	  IMemento group;
+	  
 	  // time period
 	  memento.putString("time", _rangeField.getText());
 
+	  memento.putString("nuclide-filter", _nuclideTextFilter.get());
+	  
+	  memento.putString("chart-type", _chart.getChartType());
+	  
+	  List<Pair<String, Boolean>> commodities = getCommoditySelection();
+	  if (commodities.size() > 0) {
+		  group = memento.createChild("commodities");
+		  for (Pair<String, Boolean> pair : commodities) {
+			  IMemento child = group.createChild("entry");
+			  child.putString("name", pair.v1);
+			  child.putBoolean("selected", pair.v2);
+		  };
+	  }
+
 	  // senders / receivers
-	  IMemento group = memento.createChild("senders");
+	  group = memento.createChild("senders");
 	  for (FlowNode node : _line[0].getNodes()) {
-		  if (node.isExplicit()) {
-			  IMemento nodeMemento = group.createChild("sender");
-			  nodeMemento.putString("type", node.getType());
-			  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
-//			  nodeMemento.putInteger("direction", node.getDirection());
-		  }
+		  IMemento nodeMemento = group.createChild("node");
+		  nodeMemento.putString("type", node.getType());
+		  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
+		  nodeMemento.putBoolean("explicit", node.isExplicit());
+		  nodeMemento.putDouble("y", node.getTranslateY());
+		  nodeMemento.putBoolean("selected", node.isSelected());
 	  }
 	  
 	  group = memento.createChild("receivers");
 	  for (FlowNode node : _line[1].getNodes()) {
-		  if (node.isExplicit()) {
-			  IMemento nodeMemento = group.createChild("receiver");
-			  nodeMemento.putString("type", node.getType());
-			  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
-//			  nodeMemento.putInteger("direction", node.getDirection());
-		  }
+		  IMemento nodeMemento = group.createChild("node");
+		  nodeMemento.putString("type", node.getType());
+		  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
+		  nodeMemento.putBoolean("explicit", node.isExplicit());
+		  nodeMemento.putDouble("y", node.getTranslateY());
+		  nodeMemento.putBoolean("selected", node.isSelected());
 	  }
+	  
   }
   
   @Override
-  public void restore(IMemento memento, Context ctx) {
-	  // time
-	  _rangeField.setText(memento.getString("time"));
+  public void restore(IMemento memento, Context ctx) {  
+	  _nuclideTextFilter.set(memento.getString("nuclide-filter"));
 	  
-	  // senders
-	  IMemento group = memento.getChild("senders");
+	  IMemento group = memento.getChild("commodities");
 	  if (group != null) {
-		  for (IMemento child : group.getChildren("sender")) {
-			  String type = child.getString("type");
-			  Object value = MementoUtils.restore(child.getChild("value"));
-			  
-			  FlowNode node = createNode(type, value, 0 /* sender */ , true /* explicit */);
-			  _line[0].addNode(node);
-			  queryMaterialFlow(node);
+		  List<Pair<String, Boolean>> list = new ArrayList<>();
+		  for (IMemento child : group.getChildren("entry")) {
+			  list.add(new Pair<String, Boolean>(child.getString("name"), child.getBoolean("selected")));
 		  }
+		  restoreCommoditySelection(list);
 	  }
 	  
-	// receivers
-	  group = memento.getChild("receivers");
-	  if (group != null) {
-		  for (IMemento child : group.getChildren("receiver")) {
-			  String type = child.getString("type");
-			  Object value = MementoUtils.restore(child.getChild("value"));
-			  
-			  FlowNode node = createNode(type, value, 1 /* receiver */, true /* explicit */);
-			  _line[1].addNode(node);
-			  queryMaterialFlow(node);
-		  }
+	  String type = memento.getString("chart-type");
+	  if (type != null)
+		  _chart.setChartType(type);
+	  
+	  // restore nodes first
+	  List<FlowNode> nodes = new ArrayList<>();	  
+	  restoreLine(memento.getChild("senders"), 0, nodes);
+	  restoreLine(memento.getChild("receivers"), 1, nodes);
+
+	  // now we can set the time which will cause the queries to be fired. 
+	  _rangeField.set(memento.getString("time"));
+	  
+	  for (FlowNode node : nodes) {
+		  selectNode(node);
+	  }
+  }
+  
+  private void restoreLine(IMemento memento, int direction, List<FlowNode> list) {
+	  if (memento == null) return;
+	  
+	  for (IMemento child : memento.getChildren("node")) {
+		  String type = child.getString("type");
+		  Object value = MementoUtils.restore(child.getChild("value"));
+		  boolean explicit = child.getBoolean("explicit");
+		  boolean selected = child.getBoolean("selected");
+		  double y = child.getDouble("y");
+
+		  if (_line[direction].getKind() == null)
+			  _line[direction].setKind(type);
+		  FlowNode node = createNode(type, value, direction , explicit);
+		  _line[direction].addNode(node, y);
+		  if (selected) list.add(node);
 	  }
   }
 }

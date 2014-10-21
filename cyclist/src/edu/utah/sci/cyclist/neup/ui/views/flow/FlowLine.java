@@ -94,12 +94,17 @@ public class FlowLine  {
 	}
 	
 	public void addNode(final FlowNode node) {
-		double y = _line.getStartY();
-		if (_nodes.size() > 0) {
-			FlowNode last = _nodes.get(_nodes.size()-1);
-			y = last.getTranslateY()+last.getHeight()+SPACING;
+		addNode(node, -1);
+	}
+	
+	public void addNode(final FlowNode node, double y) {
+		if (y == -1) {
+			y = _line.getStartY();
+			if (_nodes.size() > 0) {
+				FlowNode last = _nodes.get(_nodes.size()-1);
+				y = last.getTranslateY()+last.getHeight()+SPACING;
+			}
 		}
-		
 		node.translateXProperty().bind(centerXProperty().subtract(node.widthProperty().divide(2)));
 		node.setTranslateY(y);
 		

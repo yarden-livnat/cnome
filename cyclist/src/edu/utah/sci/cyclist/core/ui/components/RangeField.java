@@ -47,9 +47,14 @@ public class RangeField extends TextField {
 		_mode = Mode.DURATION;
 		setRange(new Range<Integer>(1, 1));
 	}
-	
+
 	public Mode getMode() {
 		return _mode;
+	}
+
+	public void set(String str) {
+		setText(str);
+		parse();
 	}
 	
 	public void inc() {
