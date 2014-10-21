@@ -94,24 +94,23 @@ public class FlowLine  {
 	}
 	
 	public void addNode(final FlowNode node) {
-		double y = _line.getStartY();
-		if (_nodes.size() > 0) {
-			FlowNode last = _nodes.get(_nodes.size()-1);
-			y = last.getTranslateY()+last.getHeight()+SPACING;
+		addNode(node, -1);
+	}
+	
+	public void addNode(final FlowNode node, double y) {
+		if (y == -1) {
+			y = _line.getStartY();
+			if (_nodes.size() > 0) {
+				FlowNode last = _nodes.get(_nodes.size()-1);
+				y = last.getTranslateY()+last.getHeight()+SPACING;
+			}
 		}
-		
 		node.translateXProperty().bind(centerXProperty().subtract(node.widthProperty().divide(2)));
 		node.setTranslateY(y);
 		
 		addListeners(node);
 		_nodes.add(node);
 		_parent.getChildren().add(node);
-		
-//		FlowInfo info = new FlowInfo(node);
-//		info.translateXProperty().bind(infoXProperty());
-//		info.translateYProperty().bind(node.translateYProperty());
-//		_infos.put(node, info);
-//		_parent.getChildren().add(info);
 	}
 
 	public void removeNode(FlowNode node) {
@@ -122,13 +121,6 @@ public class FlowLine  {
 		if (_nodes.isEmpty())
 			_choiceBox.setValue(null);
 	}
-
-//	public void removeNodes(Predicate<FlowNode> pred) {
-//		_nodes.stream()
-//			.filter(pred)
-//			.collect(Collectors.toList()).stream()
-//				.forEach(n->removeNode(n));
-//	}
 	
 	public ObservableList<FlowNode> getNodes() {
 		return _nodes;

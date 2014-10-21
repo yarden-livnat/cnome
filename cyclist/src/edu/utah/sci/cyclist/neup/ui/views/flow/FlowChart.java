@@ -7,6 +7,8 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -21,6 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import edu.utah.sci.cyclist.core.event.Pair;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Range;
@@ -32,20 +35,32 @@ public class FlowChart extends VBox {
 	private HBox _header;
 	private StackPane _stack;
 	private Pane _glass;
-//	private Label _popup;
 	private Rectangle _rec;
 	
 	private LineChart<Number, Number> _chart;
 	private NumberAxis _xAxis;
-	private NumberAxis _yAxis;
+	private CyclistAxis _yAxis;
 	private double _scale = 1;
 	private boolean _opened = true;
-	private String _type;
 	private int _upperBound;
 	private boolean _updating = false;
 	
 	private Map<InventoryEntry, ChartInfo> _info = new HashMap<>();
 	private ObjectProperty<Range<Integer>> _timeRangeProperty = new SimpleObjectProperty<>();
+	
+	private StringProperty _chartType = new SimpleStringProperty();
+	
+	public StringProperty chartType() {
+		return _chartType;
+	}
+	
+	public String getChartType() {
+		return _chartType.get();
+	}
+	
+	public void setChartType(String type) {
+		_chartType.set(type);
+	}
 	
 	public class ChartInfo {
 		public Label title;
@@ -58,22 +73,25 @@ public class FlowChart extends VBox {
 	public FlowChart() {
 		super();
 		build();
+		
+		chartType().addListener(e->{
+			selectChartType();
+		});
 	}
 	
 	public ObjectProperty<Range<Integer>> timeRangeProperty() {
 		return _timeRangeProperty;
 	}
 	
-	private void selectChartType(String value) {
-		_type = value;
-		double s = 1;
-		for (ChartInfo info : _info.values()) {
-			s = Math.max(s, computeScale(info.values));
-		}
-		if (s != _scale) {
-			_scale = s;
-			updateYAxis();
-		}
+	private void selectChartType() {
+//		double s = 1;
+//		for (ChartInfo info : _info.values()) {
+//			s = Math.max(s, computeScale(info.values));
+//		}
+//		if (s != _scale) {
+//			_scale = s;
+//			updateYAxis();
+//		}
 		updateAll();
 	}
 	
@@ -96,9 +114,9 @@ public class FlowChart extends VBox {
 
 		double scale = computeScale(values); // relative to the current chart type
 		
-		if (scale > _scale) {
-			updateScale(scale);
-		}
+//		if (scale > _scale) {
+//			updateScale(scale);
+//		}
 		updateSeries(series, values);
 
 		ChartInfo info = new ChartInfo();
@@ -130,10 +148,10 @@ public class FlowChart extends VBox {
 			s = Math.max(ci.scale, s);
 			_upperBound = Math.max(_upperBound, ci.last);
 		}
-		if (s != _scale) {
-			updateScale(s);
-			updateYAxis();
-		}
+//		if (s != _scale) {
+//			updateScale(s);
+//			updateYAxis();
+//		}
 		if (_info.isEmpty()) {
 			_rec.setVisible(false);
 		}
@@ -147,23 +165,22 @@ public class FlowChart extends VBox {
 	
 	private void updateScale(double value) {
 		_scale = value;
-		System.out.println("scale: "+_scale);
 		updateYAxis();
 		updateAll();
 	}
 
 	private void updateYAxis() {
-		String label = _scale == 1 ? "kg"
-				: _scale == 1000 ? "x 1000 kg"
-				: String.format("x %.0e kg", _scale);
-	
-		_yAxis.setLabel(label);
+//		String label = _scale == 1 ? "kg"
+//				: _scale == 1000 ? "x 1000 kg"
+//				: String.format("x %.0e kg", _scale);
+//	
+//		_yAxis.setLabel(label);
 	}
 
 	
 	private double computeScale(Collection<Pair<Integer, Double>> values) {
 		double max = 0;
-		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
+		if (getChartType().equals(COMMULATIVE_CHART_LABEL)) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {
 				sum += Math.abs(value.v2);
@@ -184,7 +201,7 @@ public class FlowChart extends VBox {
 	private void updateSeries(XYChart.Series<Number, Number> series, Collection<Pair<Integer, Double>> values) {
 		series.getData().clear();
 
-		if (_type.equals(COMMULATIVE_CHART_LABEL)) {
+		if (getChartType().equals(COMMULATIVE_CHART_LABEL)) {
 			double sum = 0;
 			for (Pair<Integer, Double> value : values) {
 				sum += value.v2/_scale;
@@ -237,9 +254,7 @@ public class FlowChart extends VBox {
 			_stack.setManaged(_opened);
 		});
 		
-		type.valueProperty().addListener(e->{
-			selectChartType(type.getValue());
-		});
+		type.valueProperty().bindBidirectional(chartType());
 		
 		type.setValue(COMMULATIVE_CHART_LABEL);
 	}
@@ -250,7 +265,7 @@ public class FlowChart extends VBox {
 		_xAxis.setLabel("time");
 		_xAxis.setAnimated(false);
 		
-		_yAxis = new NumberAxis();
+		_yAxis = new CyclistAxis(CyclistAxis.Mode.LOG);
 		_yAxis.setLabel("Cummulative");
 		_yAxis.setAnimated(false);
 		
@@ -264,10 +279,6 @@ public class FlowChart extends VBox {
 		_rec.heightProperty().bind(_yAxis.heightProperty());
 		_rec.setVisible(false);
 		
-//		_popup = new Label();
-//		_popup.getStyleClass().add("popup");
-//		_popup.setVisible(false);
-//		_popup.layoutXProperty().bind(_fromLine.startXProperty().add(10));
 		_glass = new Pane();
 		_glass.getChildren().addAll(/*_fromLine*/_rec/*, _popup*/);
 		

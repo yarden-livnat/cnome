@@ -19,11 +19,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 
 public class SimulationTablesPostProcessor {
+	static Logger log = Logger.getLogger(SimulationTablesPostProcessor.class);
 	
 	//Calling external applications for post processing of sqlite database.
 	private static final String  EXTERNAL_APPS = "externalApps";
@@ -232,7 +234,7 @@ public class SimulationTablesPostProcessor {
 			return !rs.next();
 		}catch (SQLException e) {
 			// TODO: should NOT catch this rather let it propagate up
-			System.out.println("SQL error while testing if db needs post processing: "+e.getMessage());
+			log.error("SQL error while testing if db needs post processing: "+e.getMessage());
 			return false;
 		}finally{
 			ds.releaseConnection();
@@ -408,7 +410,7 @@ public class SimulationTablesPostProcessor {
 			}
 			return true;
 		} catch (SQLException e) {
-			System.out.println("Create additional table failed");
+			log.warn("Create additional table failed");
 			return false;
 		}finally{
 			try {

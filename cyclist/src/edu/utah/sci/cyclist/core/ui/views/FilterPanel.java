@@ -37,6 +37,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.converter.NumberStringConverter;
 
+import org.apache.log4j.Logger;
 import org.controlsfx.control.RangeSlider;
 
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -50,7 +51,8 @@ import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class FilterPanel extends TitledPanel {
-
+	static Logger log = Logger.getLogger(FilterPanel.class);
+	
 	private Filter _filter;
 	private ListProperty<Object> _valuesProperty = new SimpleListProperty<>();
 	private ObjectProperty<Range> _valueRangeProperty = new SimpleObjectProperty<>();
@@ -105,7 +107,7 @@ public class FilterPanel extends TitledPanel {
 				
 				@Override
 				public void handle(Event event) {
-					System.out.println("Canceling task: "+_task.cancel());				
+					log.info("Canceling task: "+_task.cancel());				
 				}
 			});
 		}
@@ -200,7 +202,6 @@ public class FilterPanel extends TitledPanel {
 	}
 	
 	private void configure() {
-		System.out.println("configure");
 		if (_filter.isRange())	
 			createRange();
 		else

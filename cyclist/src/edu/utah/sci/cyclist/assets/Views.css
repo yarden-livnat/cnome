@@ -387,7 +387,7 @@
 }
 
 .flow .fchart .range {
-	-fx-fill: #a0a0a0a0;
+	-fx-fill: #ccc5;
 }
 
 .flow .fchart .timeline {

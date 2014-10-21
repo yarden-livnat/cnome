@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.core.model.DataType;
 import edu.utah.sci.cyclist.core.model.DataType.Type;
 
 public class SQL {
+	static Logger log = Logger.getLogger(SQL.class);
 	
 	public static class Function {
 		private String _name;
@@ -133,7 +136,7 @@ public class SQL {
 			s = s.substring(0, s.indexOf("("));
 		DataType.Type result = _name2Field.get(s);
 		if (result == null || result == Type.NA)
-			System.out.println("**Unknown datatype:"+name);
+			log.warn("**Unknown datatype:"+name);
 		return result != null ? result : DataType.Type.NA;
 	}
 	
