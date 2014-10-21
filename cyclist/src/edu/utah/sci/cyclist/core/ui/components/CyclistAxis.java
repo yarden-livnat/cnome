@@ -187,6 +187,7 @@ public class CyclistAxis extends CyclistNumberAxis {
 		double logLowerBound = Math.log10(lowerBound);
 		double delta = Math.log10(getUpperBound()) - logLowerBound ;
 		double deltaV = logValue - logLowerBound;
+//		System.out.println("v "+value+"  "+  (1. - ((deltaV) / delta)) * getHeight());
 		if (getSide().isVertical()) {
 			return (1. - ((deltaV) / delta)) * getHeight();
 		} else {

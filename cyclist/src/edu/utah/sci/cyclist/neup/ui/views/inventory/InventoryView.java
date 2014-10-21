@@ -95,6 +95,7 @@ public class InventoryView extends CyclistViewBase {
 	
 	private TitledPanel _agentListPanel;
 	private ChoiceBox<ChartType> _chartType;
+	private boolean _lastForceZero = false;
 
 	private SimulationProxy _simProxy = null;
 		
@@ -470,6 +471,7 @@ public class InventoryView extends CyclistViewBase {
 		if (current != null) {
 			series.add(current);
 		}
+		
 		info.series = series;
 		if (info.active)
 			_chart.add(info);
@@ -522,6 +524,7 @@ public class InventoryView extends CyclistViewBase {
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.getGraphic().visibleProperty().bind(_chart.forceZero());
+		item.disableProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.STACKED));
 		menu.getItems().add(item);
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -547,6 +550,8 @@ public class InventoryView extends CyclistViewBase {
 			@Override
 			public void handle(ActionEvent event) {
 				_chart.setMode(InventoryChart.ChartMode.LINE);
+				if (!_lastForceZero)
+					_chart.forceZero().set(false);
 			}
 		});
 		contextMenu.getItems().add(item);
@@ -567,6 +572,9 @@ public class InventoryView extends CyclistViewBase {
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
+				_lastForceZero = _chart.forceZero().get();
+				if (!_lastForceZero) 
+					_chart.forceZero().set(true);
 				_chart.setMode(InventoryChart.ChartMode.STACKED);
 			}
 		});
@@ -731,10 +739,8 @@ public class InventoryView extends CyclistViewBase {
 					SimpleBooleanProperty running= (SimpleBooleanProperty) o;
 					if (running.get()) {
 						_animation.play();
-						log.info("Fetch invetory");
 					} else {
 						_animation.stop();
-						log.info("Fetch invetory completed");
 					}
 				});
 
