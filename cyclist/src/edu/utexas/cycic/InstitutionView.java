@@ -1,24 +1,15 @@
 package edu.utexas.cycic;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.controlsfx.dialog.Dialog;
-
-import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
-import edu.utah.sci.cyclist.core.event.ui.CyclistEvent;
-import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -30,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 /**
  * A view used to build and develop institutions for the simulation 
  * currently being built. 
