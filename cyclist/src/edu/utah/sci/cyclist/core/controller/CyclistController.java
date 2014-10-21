@@ -388,6 +388,19 @@ public class CyclistController {
 			}
 		});
 		
+		_screen.onSaveAs().set(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				FileChooser chooser = new FileChooser();
+				chooser.setInitialDirectory(new File(getLastChosenWorkDirectory()+"/.."));
+				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+				if (file != null) {
+					saveAs(file.getAbsolutePath());
+				}
+			}
+		});
+		
 		_screen.onQuit().set(new EventHandler<ActionEvent>() {
 
 			@Override
@@ -503,14 +516,17 @@ public class CyclistController {
 	}
 	
 	private void save() {	
-		IMemento child;
-		String currDirectory = getLastChosenWorkDirectory();
+		saveAs(getLastChosenWorkDirectory());
+	}
+	
+	private void saveAs(String workdir) {
 		
-		File saveDir = new File(currDirectory);
+		IMemento child;
+		File saveDir = new File(workdir);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
-		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
+		File saveFile = new File(workdir+"/"+SAVE_FILE);
 
 		XMLMemento memento = XMLMemento.createWriteRoot("root");
 			
