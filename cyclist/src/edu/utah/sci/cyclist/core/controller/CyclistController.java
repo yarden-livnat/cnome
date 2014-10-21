@@ -33,6 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -52,21 +54,21 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
+import edu.utah.sci.cyclist.core.presenter.InputPresenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
-import edu.utah.sci.cyclist.core.presenter.InputPresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
-import edu.utah.sci.cyclist.core.ui.components.SQLitePage;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
@@ -79,11 +81,13 @@ import edu.utah.sci.cyclist.core.util.StreamUtils;
 
 public class CyclistController {
 	
+	Logger log = Logger.getLogger(CyclistController.class);
+
 	private final EventBus _eventBus;
 	private MainScreen _screen;
 	public static WorkspacePresenter _presenter;
 	private Model _model = new Model();
-	private String SAVE_FILE = "save.xml";
+	private String SAVE_FILE = "workspace-config.xml";
 	private WorkDirectoryController _workDirectoryController;
 	private Boolean _dirtyFlag = false;
     public static CyclusService _cyclusService;
@@ -98,6 +102,12 @@ public class CyclistController {
 	public CyclistController(EventBus eventBus) {
 		this._eventBus = eventBus;
 		_cyclusService = new CyclusService();
+		_cyclusService.jobs().addListener(new InvalidationListener() {	
+			@Override
+			public void invalidated(Observable observable) {
+				_dirtyFlag = true;		
+			}
+		});
 		
 		// TODO: fix this hack. We need a better way of passing around the list of datasources
 		LoadSqlite.setSources(_model.getSources());
@@ -179,7 +189,7 @@ public class CyclistController {
 		
 		// do something?
 		//selectWorkspace();
-		load();
+		restore();
 	}
 	
 	/**
@@ -201,7 +211,7 @@ public class CyclistController {
 			public void onChanged(Change<? extends String> list ){
 				if(_workDirectoryController != null){
 					if(_workDirectoryController.handleWorkDirectoriesListChangedEvent(list)){
-						load();
+						restore();
 						
 						//Set all the views to match the new tables.
 						ObservableList<Field> emptyList = FXCollections.observableArrayList();
@@ -418,7 +428,7 @@ public class CyclistController {
 				//and each time a different simulation is selected - change the tables accordingly.
 				
 				if(oldVal==null && newVal!=null){
-					readSimulationsTables();
+//					readSimulationsTables();
 					_presenter.addFirstSelectedSimulation(newVal);
 				}
 				_model.setLastSelectedSimulation(newVal);
@@ -474,7 +484,6 @@ public class CyclistController {
 	
 		
 	private void quit() {
-		// TODO: check is we need to save  
 		if(_dirtyFlag || _presenter.getDirtyFlag()){
 			SaveWsWizard wizard = new SaveWsWizard();
 			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
@@ -492,19 +501,16 @@ public class CyclistController {
 		}
 	}
 	
-	private void save() {
-		
+	private void save() {	
+		IMemento child;
 		String currDirectory = getLastChosenWorkDirectory();
 		
-		// If the save directory does not exist, create it
 		File saveDir = new File(currDirectory);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
-		// The save file
 		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
 
-		// Create the root memento
 		XMLMemento memento = XMLMemento.createWriteRoot("root");
 			
 		// Save the data sources
@@ -522,8 +528,8 @@ public class CyclistController {
 		
 		//Save the last selected simulation
 		if(_model.getLastSelectedSimulation() != null && _model.getSimulations().size() >0){
-			IMemento selectedSim = memento.createChild("LastSelectedSimulation");
-			selectedSim.putString("simulation-id", _model.getLastSelectedSimulation().getSimulationId().toString());
+			child = memento.createChild("LastSelectedSimulation");
+			child.putString("UID", _model.getLastSelectedSimulation().getUID());
 		}
 		//Save the Simulations
 		for(Simulation simulation: _model.getSimulations()){
@@ -533,16 +539,22 @@ public class CyclistController {
 		//Save the simulations aliases
 		IMemento aliases = memento.createChild("Aliases");
 		for (Map.Entry<Simulation, String> entry : _model.getSimAliases().entrySet()){
-			IMemento alias = aliases.createChild("Alias");
+			IMemento a_memento = aliases.createChild("Alias");
 			Simulation sim = entry.getKey();
-			sim.save(alias,entry.getValue());
+			
+			a_memento.putString("alias", sim.getAlias());
+			a_memento.putString("simulation-id", sim.getSimulationId().toString());		
+			a_memento.putString("date", entry.getValue());
 		}
 		
-		_presenter.save(memento.createChild("Tools"));
+		_cyclusService.save(memento.createChild("Jobs"));
+		
+		_presenter.save(memento.createChild("workspace"));
 		
 		//First save the main workspace
-		IMemento mainWs = memento.createChild("mainWorkSpace");
-		saveMainScreen(mainWs);
+		IMemento mainWs = memento.createChild("main-window");	
+		saveMainScreen(mainWs.createChild("geom"));
+		_screen.save(mainWs);
 			
 		
 		try {
@@ -555,9 +567,8 @@ public class CyclistController {
 		
 	}
 	
-	// Load saved properties
-	private void load() {
-		
+	private void restore() {
+	
 		String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
 		
 		// Check if the save file exists
@@ -566,39 +577,40 @@ public class CyclistController {
 		//Clear the previous data
 		clearModel();
 			
+		Context ctx = new Context();
+		readSimulationsTables(ctx);
+		
 		// If we have a save file, read it in
-		if(saveFile.exists()){
-			
+		if(saveFile.exists()){			
 			Reader reader;
 			try {
 				reader = new FileReader(saveFile);
 				try {
 					// Create the root memento
 					XMLMemento memento = XMLMemento.createReadRoot(reader);
-					
+				
 					// Read in the data sources
 					IMemento[] sources = memento.getChildren("CyclistDatasource");
 					for(IMemento source: sources){
 						CyclistDatasource datasource = new CyclistDatasource();
-						datasource.restore(source);
+						datasource.restore(source, ctx);
 						_model.getSources().add(datasource);
 					}
 					
 					// Read in the tables
 					IMemento[] tables = memento.getChildren("Table");
-					//System.out.println("tables " + tables.length);
-					for(IMemento table: tables){
-						Table tbl = new Table();
-						tbl.restore(table, _model.getSources());
-						tbl.setLocalDatafile(getLastChosenWorkDirectory());
-						_model.getTables().add(tbl);
+					for(IMemento t_memento: tables){
+						Table table = new Table();
+						table.restore(t_memento, ctx);
+						table.setLocalDatafile(getLastChosenWorkDirectory());
+						_model.getTables().add(table);
 					}
 					
 					//Read the simulations
 					IMemento[] simulations = memento.getChildren("Simulation");
 					for(IMemento simulation:simulations){
 						Simulation sim = new Simulation();
-						sim.restore(simulation,_model.getSources());
+						sim.restore(simulation, ctx);
 						_model.getSimulations().add(sim);
 					}
 					
@@ -623,28 +635,29 @@ public class CyclistController {
 						}
 					}
 					
+					_cyclusService.restore(memento.getChild("Jobs"));
+					
 					_dirtyFlag = false;
 					
 					//Read the main workspace
-					IMemento mainWs = memento.getChild("mainWorkSpace");
-					loadMainScreen(mainWs);
+					IMemento mainWs = memento.getChild("main-window");
+					restoreMainScreen(mainWs.getChild("geom"));
+					_screen.restore(mainWs, ctx);
 					
-					IMemento toolsRoot = memento.getChild("Tools");
+					IMemento toolsRoot = memento.getChild("workspace");
 					if(toolsRoot != null){
-						_presenter.restore(toolsRoot,_model);
+						_presenter.restore(toolsRoot, ctx);
 					}
-					
-					
+								
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					log.error("Error during restore: "+e.getMessage());
 					e.printStackTrace();
 				}
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (FileNotFoundException e) {
+				log.error("Error during restore: "+e.getMessage());
+				e.printStackTrace();
 			} 		
 		}
-		//readSimulationsTables();
 	}
 	
 	/*
@@ -652,30 +665,25 @@ public class CyclistController {
 	 * The tables are loaded with a null database property.
 	 * The tables are added to the model tables list.
 	 */
-	private void readSimulationsTables(){
-		Logger log = Logger.getLogger(SQLitePage.class);
+	private void readSimulationsTables(Context ctx){
 		try {
 			InputStream in = Cyclist.class.getResourceAsStream(SIMULATIONS_TABLES_FILE);
 			File simulationsFile = StreamUtils.stream2file(in);
 			if(simulationsFile.exists()){
 				Reader reader = new FileReader(simulationsFile);
-				// Create the root memento
 				XMLMemento memento = XMLMemento.createReadRoot(reader);
 				
-				// Read in the data sources
-				IMemento[] tables = memento.getChildren("Table");
-				for(IMemento table:tables){
-					
-					Table tbl = new Table();
-					tbl.restoreSimulated(table);
-					tbl.setLocalDatafile(getLastChosenWorkDirectory());
-					_model.getSimulationsTablesDef().add(tbl);
-					_model.getTables().add(tbl);
+				// Restore tables
+				for(IMemento node: memento.getChildren("Table")){
+					Table table = new Table();
+					table.restoreSimulated(node, ctx);
+					table.setLocalDatafile(getLastChosenWorkDirectory());
+					_model.getSimulationsTablesDef().add(table);
+					_model.getTables().add(table);	
 				}
 			}
 		} catch (Exception e) {
 			log.info("Exception " + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 	
@@ -706,7 +714,7 @@ public class CyclistController {
 	 * Restores the data of the main window:size and location.
 	 * @param IMemento mainWs
 	 */
-	private void loadMainScreen(IMemento mainWs){
+	private void restoreMainScreen(IMemento mainWs){
 		double width = Double.parseDouble(mainWs.getString("width"));
 		double height = Double.parseDouble(mainWs.getString("height"));
 		double x = Double.parseDouble(mainWs.getString("x"));

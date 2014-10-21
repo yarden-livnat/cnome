@@ -28,9 +28,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
@@ -61,8 +58,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -279,24 +279,11 @@ public class SimpleTableView extends CyclistViewBase {
 		_simFilter = null;
 		if (getCurrentSimulation() != null) {
 			if (_simField != null) {
-				
-//				List<Object> simList = new ArrayList<>();
-//				simList.add(sim.getSimulationId());
-//				_simField.setValues(FXCollections.observableList(simList));
-				
-//				_simField.getValues().removeAll();
-//				_simField.getValues().add(sim.getSimulationId());
-						
-//				_simFilter = new Filter(_simField, false);
-//				_simFilter.selectValue(sim.getSimulationId(), true);
-				
 				_simFilter = new ValueFilter(_simField, sim.getSimulationId());
 			}
 		}
-		updateFilters();
-	
-				
-		if (_currentTable != null) {
+		
+		if (!updateFilters() && _currentTable != null) {
 			loadTable(false);
 		}
 
@@ -305,7 +292,7 @@ public class SimpleTableView extends CyclistViewBase {
 	/*
 	 * Updates the local filters data source, on a simulation change.
 	 */
-	private void updateFilters() {
+	private boolean updateFilters() {
 		CyclistDatasource ds = getAvailableDatasource();
 		
 		if (ds != null){
@@ -313,6 +300,7 @@ public class SimpleTableView extends CyclistViewBase {
 				filter.setDatasource(ds);
 			}
 		}
+		return ds!=null && filters().size() > 0; 
 	}
 	
 	private void loadTable(boolean updateColumns) {

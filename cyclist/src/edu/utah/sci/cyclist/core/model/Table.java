@@ -40,22 +40,23 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ObservableValueBase;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 import edu.utah.sci.cyclist.core.controller.XMLMemento;
-import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.util.DataFactory;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
 import edu.utah.sci.cyclist.core.util.SQL;
 import edu.utah.sci.cyclist.core.util.SQLUtil;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.concurrent.Task;
 
-public class Table {
+public class Table implements Resource {
 
 	public static final String DATA_SOURCE = "datasource";
 	public static final String REMOTE_TABLE_NAME = "remote-table-name";
@@ -75,6 +76,7 @@ public class Table {
 		CHOSEN_MAX
 	}
 	
+	private String _id = UUID.randomUUID().toString();
 	private String _alias;
 	private String _name;
 	private Schema _schema = new Schema(this);
@@ -96,6 +98,7 @@ public class Table {
 	public Table() {
 		this("");
 	}
+	
 	public Table(String name) {
 		_name = name;
 		_alias = name;
@@ -115,28 +118,21 @@ public class Table {
         extractSchema();
 	}
 	
+	public String getUID() {
+		return _id;
+	};
+	
     // Save the table
 	public void save(IMemento memento) {
-		
-		// Set the name
+		memento.putString("uid", _id);
 		memento.putString("name", getName());
-		
-		// Set the alias
 		memento.putString("alias", getAlias());
-			
-		// Save the schema
 		_schema.save(memento.createChild("Schema"));
-		
-		// Save the uid of the data source
-		memento.putString("datasource-uid", _datasource.getUID());
-		
-		// Save the location of the data source
+		if (_datasource != null)
+			memento.putString("datasource-uid", _datasource.getUID());
 		memento.putString("source-location", _sourceLocation.toString());
-		
-		// Save the subset
 		memento.putInteger("subset", _dataSubset);
-		
-		// Save the map
+
 		IMemento mapMemento = memento.createChild("property-map");
 
 		// Set things saved in the properties map
@@ -164,23 +160,16 @@ public class Table {
 	}
 	
 	// Restore the table
-	public void restore(IMemento memento, ObservableList<CyclistDatasource> sources){
-	
-		// Get the name
+	public void restore(IMemento memento, Context ctx ){
+		_id = memento.getString("UID");
+		ctx.put(_id, this);
+		
 		setName(memento.getString("name"));
-		
-		 // Get the alias
 		setAlias(memento.getString("alias"));
-		
-		// Get the number of rows
-//		_numRows = memento.getInteger("NumRows");
 
 		// Get the datasource
-		String datasourceUID = memento.getString("datasource-uid");
-		for(CyclistDatasource source: sources){
-			if(source.getUID().equals(datasourceUID))
-				setDataSource(source);
-		}
+		String datasourceId = memento.getString("datasource-uid");
+		setDataSource(ctx.get(datasourceId, CyclistDatasource.class));
 		
 		// Get the location of the data source
 		setSourceLocation(memento.getString("source-location"));
@@ -219,7 +208,7 @@ public class Table {
 		
 		// Restore the schema
 		Schema schema = new Schema(this);
-		schema.restore(memento.getChild("Schema"));
+		schema.restore(memento.getChild("Schema"), ctx);
 		setSchema(schema);
 //		extractSchema();
 		
@@ -256,13 +245,18 @@ public class Table {
 	 * Restores table from the simulation configuration file.
 	 * Restores only the information which is relevant to the simulation.
 	 */
-	public void restoreSimulated(IMemento memento){
+	public void restoreSimulated(IMemento memento, Context ctx){
+		_id = memento.getString("UID");
 		setName(memento.getString("name"));
+		if (_id == null) _id = getName();
+		ctx.put(_id, this);
+//		System.out.println("restore table: "+_id);
+		
 		setDataSource(null);
 		
 		// Restore the schema
 		Schema schema = new Schema(this);
-		schema.restoreSimulated(memento.getChild("Schema"));
+		schema.restoreSimulated(memento.getChild("Schema"), ctx);
 		setSchema(schema);
 		_isStandardSimulation = true;
 	}
@@ -792,12 +786,12 @@ public class Table {
 	}
 	
 	
-	public Task<ObservableMap<Object,Object>> getFieldRange(final Field field) {
+	public Task<ObservableValue<Range>> getFieldRange(final Field field) {
 		CyclistDatasource ds = getDataSource();
 		return getFieldRange(ds, field);
 	}
 	
-	public Task<ObservableMap<Object,Object>> getFieldRange(CyclistDatasource ds, final Field field)
+	public Task<ObservableValue<Range>> getFieldRange(CyclistDatasource ds, final Field field)
 	{
 		return getFieldRange(ds, field, false);
 	}
@@ -806,25 +800,24 @@ public class Table {
 	 * For a numeric field filter - gets the minimum and maximum values within its possible range, for any possible grouping.
 	 * It checks for the field SQL function and finds the values accordingly. 
 	 */
-	public Task<ObservableMap<Object, Object>> getFieldRange(CyclistDatasource externalDs, final Field field, boolean force) {
+	public Task<ObservableValue<Range>> getFieldRange(CyclistDatasource externalDs, final Field field, boolean force) {
 		final CyclistDatasource ds = getAvailableDataSource(externalDs, force);
 		
-		Task<ObservableMap<Object, Object>> task = new Task<ObservableMap<Object, Object>>() {
+		Task<ObservableValue<Range>> task = new Task<ObservableValue<Range>>() {
 			
 			@Override
-			protected ObservableMap<Object, Object> call() throws Exception {
-				Map<Object, Object> values = new HashMap<>();
+			protected ObservableValue<Range> call() throws Exception {
+				double min=0, max=0;
+
 				if (ds != null) {
 					try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()){
 						updateMessage("querying");
-						System.out.println("querying field range");
 						SQL.Functions function = SQL.Functions.VALUE;
 						if(field.getString(FieldProperties.AGGREGATION_FUNC) != null){
 							function = SQL.Functions.getEnum(field.getString(FieldProperties.AGGREGATION_FUNC));
 						}
 						String query = "";
 						Boolean checkForSum = false;
-						double min,max=0;
 						
 //						switch(function){
 //						case AVG:
@@ -870,9 +863,6 @@ public class Table {
 								double negSum = rs.getDouble("neg_sum");
 								min= (negSum==0)?min:negSum;
 							}
-							
-							values.put(NumericRangeValues.MIN, min);
-							values.put(NumericRangeValues.MAX, max);
 						}
 					}catch(Exception e){
 						e.printStackTrace();
@@ -880,7 +870,14 @@ public class Table {
 						ds.releaseConnection();
 					}
 				}
-				return FXCollections.observableMap(values);
+				final Range range = new Range(min, max);
+				ObservableValue<Range> res = new ObservableValueBase<Range>() {
+					@Override
+                    public Range getValue() {
+	                    return range;
+					}
+				};
+				return res;
 			}
 			
 		};

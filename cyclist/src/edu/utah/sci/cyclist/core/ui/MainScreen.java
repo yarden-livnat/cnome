@@ -22,6 +22,9 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui;
 
+import java.util.Arrays;
+
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -41,21 +44,24 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import edu.utah.sci.cyclist.ToolsLibrary;
+import edu.utah.sci.cyclist.core.controller.IMemento;
+import edu.utah.sci.cyclist.core.model.Context;
+import edu.utah.sci.cyclist.core.model.Resource;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.panels.FiltersListPanel;
+import edu.utah.sci.cyclist.core.ui.panels.InputPanel;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
-import edu.utah.sci.cyclist.core.ui.panels.InputPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
-public class MainScreen extends VBox {
+public class MainScreen extends VBox implements Resource {
 	public static final String ID = "main-screen";
 	
 	private SplitPane _sp;
@@ -87,6 +93,12 @@ public class MainScreen extends VBox {
 	public Window getWindow() {
 		return getScene().getWindow();
 	}
+	
+	@Override
+    public String getUID() {
+		// not used
+	    return null;
+    }
 	
 	public ObservableList<String> selectWorkspace(ObservableList<String> list, int chosenIndex) {
 		WorkspaceWizard wizard = new WorkspaceWizard();
@@ -123,7 +135,7 @@ public class MainScreen extends VBox {
 		return _jobsPanel;
 	}
 	
-	public Workspace getWorkSpace(){
+	public Workspace getWorkspace(){
 		for(Object obj : _workspacePane.getChildren()){
 			if (obj.getClass() == Workspace.class) {
 				return (Workspace)obj;
@@ -267,7 +279,33 @@ public class MainScreen extends VBox {
 		return _stageCloseProperty;
 	}
 	
+	public void save(IMemento memento) {
+		memento.createChild("sp-pos").putString("values", Arrays.toString(_sp.getDividerPositions()));
+		memento.createChild("tools-pos").putString("values", Arrays.toString(_toolsPane.getDividerPositions()));
+	}
 	
+	public void restore(IMemento memento, Context ctx) {
+		final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
+		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
+
+		Platform.runLater(new Runnable() {	
+			@Override
+			public void run() {
+				_sp.setDividerPositions(pos);
+				_toolsPane.setDividerPositions(pos1);
+			}
+		});
+	}
+	
+	private double[] parseArray(String str) {
+		String[] fields = str.substring(1, str.length()-1).split(",");
+		double v[] = new double[fields.length];
+		for (int i=0; i<fields.length; i++) {
+			v[i] = Double.valueOf(fields[i]);
+		}
+		return v;
+		
+	}
 	private MenuBar createMenuBar(Stage stage) {
 		MenuBar menubar = new MenuBar();
 		
@@ -342,7 +380,7 @@ public class MainScreen extends VBox {
 
 	private Menu createRunMenu() {
 		Menu menu= new Menu("Run");
-		_runMenuItem = new MenuItem("Submit file", GlyphRegistry.get(AwesomeIcon.EXCHANGE));
+		_runMenuItem = new MenuItem("Submit file"/*, GlyphRegistry.get(AwesomeIcon.EXCHANGE))*/);
 		_runMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+R"));
 
 		menu.getItems().add(_runMenuItem);

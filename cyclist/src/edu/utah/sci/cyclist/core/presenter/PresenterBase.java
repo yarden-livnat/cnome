@@ -40,5 +40,4 @@ public class PresenterBase implements Presenter {
 		notification.setSource(this);
 		bus.notify(notification);
 	}
-
 }

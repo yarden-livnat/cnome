@@ -1,40 +1,51 @@
 package edu.utah.sci.cyclist.core.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.DataType.FilterType;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.DataType.Type;
-import edu.utah.sci.cyclist.core.model.Table.NumericRangeValues;
 
-public class Filter implements Observable {
+public class Filter implements Observable, Resource {
+	
+	private String _id = UUID.randomUUID().toString();
 	
 	private boolean _valid = true;
-	private String _value = "1=1";  //Sqlite doesn't accept "where true" but accepts "where 1=1".
+	private String _toStringCache = "1=1";  //Sqlite doesn't accept "where true" but accepts "where 1=1".
 	private CyclistDatasource _ds = null;
 	private Field _field;
 	private DataType _dataType;
+	protected ListProperty<Object> _values = new SimpleListProperty<>();
+	private ObjectProperty<Range> _valueRange = new SimpleObjectProperty<>();
 	private ObservableSet<Object> _selectedItems = FXCollections.observableSet();
-	private ListProperty<Object> _values = new SimpleListProperty<>();
+	private ObjectProperty<Range> _selectedRange = new SimpleObjectProperty<>(Range.INVALID_RANGE);
+	
 	private List<InvalidationListener> _listeners = new ArrayList<>();
-	private MapProperty<Object, Object> _rangeValues = new SimpleMapProperty<>();
-	private Map<Object,Object> _selectedRangeValues = new HashMap<>();
 	private  Consumer<Void> _onDSUpdated = null;
 	private Boolean _dsChanged = true;
+	private boolean _allSelected = false;
+	private BooleanProperty _isRange = new SimpleBooleanProperty(false);
+	private Consumer<Void> _onChanged = null;
+	
+	// for restore
+	public Filter() {
+	}
 	
 	public Filter(Field field) {
 		this(field, true);
@@ -42,52 +53,185 @@ public class Filter implements Observable {
 	
 	public Filter(Field field, boolean auto){
 		_field = field;
-		_dataType = new DataType(field.getDataType());
-		
-		if (auto) {
-			/*if(_dataType.getRole() != Role.DIMENSION){
-				_field.set(FieldProperties.AGGREGATION_FUNC, field.getString(FieldProperties.AGGREGATION_DEFAULT_FUNC));
-			}*/
-			
-			if (getValues() != null) {
-				_selectedItems.addAll(getValues());
-				_values.set(getValues());
-			}
-			
-			if(_field.getRangeValues() != null){
-				_rangeValues.set(_field.getRangeValues());
-				_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-				_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-			}
-			
-			_field.valuesProperty().addListener((Observable o)-> {
-				_selectedItems.clear();  //TBD - should clear the previous values???
-				
-				if (getValues() != null){
-					_selectedItems.addAll(getValues());
-				}
-				else{
-					resetFilterValues();
-				}
-				_values.set(getValues());
-			});
-			
-			_field.rangeValuesProperty().addListener((Observable o)-> {
-				_selectedRangeValues.clear();
-				if (_field.getRangeValues() != null){	
-					_selectedRangeValues.put(NumericRangeValues.MIN, _field.getRangeValues().get(NumericRangeValues.MIN));
-					_selectedRangeValues.put(NumericRangeValues.MAX, _field.getRangeValues().get(NumericRangeValues.MAX));
-				}else{
-					resetFilterValues();
-				}
-				
-				_rangeValues.set(_field.getRangeValues());
-			});
-
-		}	
+		init(auto);
 	}
 	
-	public void setOnDSUpdated(Consumer<Void> action){
+	public void setOnChanged(Consumer<Void> action) {
+		_onChanged = action;
+	}
+	
+	public ObservableSet<Object> selectedItems() {
+		return _selectedItems;
+	}
+	private void init(boolean auto) {
+		_dataType = new DataType(_field.getDataType());
+		
+		switch (getClassification()) {
+		case C:
+			_isRange.set(false);
+			break;
+		case Cdate:
+			_isRange.set(true);
+			break;
+		case Qd:
+			_isRange.set(true);;
+			break;
+		case Qi:
+			if(getFilterType() == FilterType.RANGE){
+				_isRange.set(true);
+			}else{
+				_isRange.set(false);
+			}
+		}
+		
+		if (auto) {
+			if (isRange()) {
+				_selectedRange.set(_field.getValueRange());
+				setAllSelected(_field.getValueRange().isValid());
+			} else {
+				_selectedItems.addAll(getValues() != null ? getValues() : new ArrayList<Object>());
+				setAllSelected(true);
+			}
+			setupListeners();
+		}	
+		if (isRange()) {
+			_valueRange.bind(_field.valueRangeProperty());
+		} else {
+			_values.bind(_field.valuesProperty());
+		}
+	}
+	
+	public BooleanProperty isRangeProperty() {
+		return _isRange;
+	}
+	
+	public boolean isRange() {
+		return _isRange.get();
+	}
+	
+	public ObjectProperty<Range> valueRangeProperty() {
+		return _valueRange;
+	}
+	
+	public Range getValueRange() {
+		return _valueRange.get();
+	}
+	
+	public Range getSelectedRange() {
+		return _selectedRange.get();
+	}
+	
+	public void setSelectedRange(Range range) {
+		_selectedRange.set(range);
+	}
+	
+	private void setupListeners() {	
+		_values.addListener(new InvalidationListener() {	
+			@Override
+			public void invalidated(Observable observable) {
+				if (getValues() == null) return;
+				
+				if (_allSelected) {
+    				_selectedItems.addAll(getValues());
+    			} else {
+    			}	
+    			invalidate();
+    			if (_onChanged != null)
+    				_onChanged.accept(null);
+			}
+		});
+		
+		_valueRange.addListener(new InvalidationListener() {
+			@Override
+			public void invalidated(Observable observable) {
+				Range range = getValueRange();
+				Range selected = getSelectedRange();
+				setAllSelected(range.min == selected.min && range.max == selected.max);
+				if (!selected.isValid()) {
+					setSelectedRange(range);
+				} else if (!_allSelected && (range.min > selected.min || range.max < selected.max)) {
+					setSelectedRange(new Range(Math.max(range.min,  selected.min), Math.min(range.max, selected.max)));
+				}
+				if (_onChanged != null)
+					_onChanged.accept(null);
+			}
+		});
+	}
+	
+	public String getUID() {
+		return _id;
+	}
+	
+	public void save(IMemento memento) {
+		_field.save(memento.createChild("field"));
+		
+		IMemento group;
+		
+		if (isRange()) {
+			group = memento.createChild("selected-range");
+			group.putDouble("from", getSelectedRange().min);
+			group.putDouble("to", getSelectedRange().max);
+		} else {
+    		group = memento.createChild("selected");
+    		// TODO: can save the class only once
+    		for (Object value : _selectedItems) {
+    			if (value instanceof Number || value instanceof String) {
+    				saveObj(group.createChild("value"), value);		
+    			} 
+    		}
+		}
+	}
+	
+	private void saveObj(IMemento memento, Object value) {
+		memento.putString("class", value.getClass().toString());
+		memento.putTextData(value.toString());
+	}
+	
+	private Object restoreObj(IMemento memento) {
+		return createObj(memento.getString("class"), memento.getTextData());
+	}
+	
+	private Object createObj(String cls, String str) {
+		if (cls.equals(String.class.toString())) {
+			return str;
+		} else if (cls.equals(Integer.class.toString())) {
+			return Integer.valueOf(str);
+		} else if (cls.equals(Double.class.toString())) {
+			return Double.valueOf(str);
+		} else {
+			System.out.println("*** unknown value class: "+cls);
+			return str;
+		}
+	}
+	
+	
+	public void restore(final IMemento memento, Context ctx) {
+		System.out.println("filter restore");
+		// a filter owns its own copy of a field. 
+		// create a field instead of looking it up in the context
+		_field = new Field();
+		_field.restore(memento.getChild("field"), ctx);
+		
+		init(false);
+		if (isRange()) {
+			IMemento group = memento.getChild("selected-range");
+			setSelectedRange(new Range(group.getDouble("from"), group.getDouble("to")));
+			if (_onChanged != null)
+				_onChanged.accept(null);
+			setupListeners();
+		} else {	
+			IMemento group = memento.getChild("selected");
+			for (IMemento ref : group.getChildren("value")) {
+				_selectedItems.add(restoreObj(ref));
+			}
+			if (_onChanged != null)
+				_onChanged.accept(null);
+			setupListeners();
+		} 
+	}
+
+	
+	public void setOnDatasouceChanged(Consumer<Void> action){
 		_onDSUpdated = action;
 	}
 	
@@ -144,21 +288,17 @@ public class Filter implements Observable {
 	}
 	
 	public boolean isRangeValid() {
-		Boolean reply =  _field.getRangeValues() != null && !_dsChanged;
+		Boolean valid =  _field.getValueRange().isValid() && !_dsChanged;
 		_dsChanged = false;
-		return reply;
+		return valid;
 	}
 	
 	public ObservableList<Object> getValues() {
-		return _field.getValues();
+		return _values.get(); // _field.getValues();
 	}
 	
 	public ListProperty<Object> valuesProperty() {
 		return _values;
-	}
-	
-	public MapProperty<Object,Object> rangeValuesProperty() {
-		return _rangeValues;
 	}
 	
 	public ObservableSet<Object> getSelectedValues() {
@@ -169,12 +309,17 @@ public class Filter implements Observable {
 		return _selectedItems.contains(value);
 	}
 	
+	public void setAllSelected(boolean value) {
+		_allSelected = value;
+	}
+	
 	public void selectValue(Object value, boolean select) {
 		if (select) {
 			_selectedItems.add(value);
 		} else {
 			_selectedItems.remove(value);
 		}
+		setAllSelected(_selectedItems.size() == getValues().size());
 		invalidate();
 	}
 
@@ -182,16 +327,19 @@ public class Filter implements Observable {
 		if (value) {
 			if (_selectedItems.size() == getValues().size()) return;
 			_selectedItems.addAll(_values);
+			setAllSelected(true);
 		} else {
 			if (_selectedItems.size() == 0) return;
 			_selectedItems.clear();
+			setAllSelected(false);
 		}
 		invalidate();
 	}
 	
-	public void selectMinMaxValues(Object minValue, Object maxValue){
-		_selectedRangeValues.put(NumericRangeValues.MIN, minValue);
-		_selectedRangeValues.put(NumericRangeValues.MAX, maxValue);
+	public void selectRange(Range range) {
+		setSelectedRange(range);
+		Range value = getValueRange();
+		setAllSelected(value.min == range.min && value.max == range.max);
 		invalidate();
 	}
 	
@@ -224,38 +372,23 @@ public class Filter implements Observable {
 	 */
 	private void resetFilterValues(){
 		if (_valid) {
-			_value = "1=1";
+			_toStringCache = "1=1";
 		}
 	}
 	
 	public boolean isActive() {
-		boolean active = true;
-		if (getValues() == null || _selectedItems.size() == getValues().size()) {
-			if(_selectedRangeValues.size() == 0) {
-				active = false;
-			}
-		} 
-		
-		return active;
-	}
-	
-	public boolean allValuesSelected() {
-		return _selectedItems.size() == getValues().size();
+		return !_allSelected;
 	}
 	
 	public String toString() {
 		if (!_valid) {
-			if (getValues() == null || allValuesSelected()) {
-				if(_selectedRangeValues.size() > 0){
-//					String function = _field.getString(FieldProperties.AGGREGATION_FUNC);
-					String function = null;
-					String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
-					String str = name+" >=" + _selectedRangeValues.get(NumericRangeValues.MIN) + " AND " + name +" <=" + _selectedRangeValues.get(NumericRangeValues.MAX);
-					_value = str;
-					
-				}else{
-					_value = "1=1";
-				}
+			if (_allSelected) {
+    			_toStringCache = "1=1";
+			} else if (isRange()) {
+				String function = null;
+				String name = function != null? (function.indexOf(")") >-1 ? function.substring(0, function.indexOf(")"))+ " " +getName() +")" : function+"("+getName()+")") : getName();
+				String str = name+" >=" + getSelectedRange().min + " AND " + name +" <=" + getSelectedRange().max;
+				_toStringCache = str;
 			} else {
 				StringBuilder builder = new StringBuilder();
 				if (_selectedItems.size() > 0) {
@@ -278,12 +411,13 @@ public class Filter implements Observable {
 					builder.append("1=0");
 				}
 			
-				_value = builder.toString();
+				_toStringCache = builder.toString();
 			}
 			_valid = true;
 		}
 		
-		return _value;
+//		System.out.println("filter to string:"+_toStringCache);
+		return _toStringCache;
 	}
 	
 	public void setValid(Boolean isValid) {

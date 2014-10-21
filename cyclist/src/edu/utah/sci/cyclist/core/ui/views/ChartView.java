@@ -14,7 +14,6 @@ import java.util.Map;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -67,8 +66,10 @@ import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
@@ -79,7 +80,7 @@ import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
 import edu.utah.sci.cyclist.core.model.proxy.TableProxy;
-import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.DistanceIndicator;
 import edu.utah.sci.cyclist.core.ui.components.DropArea;
@@ -109,19 +110,10 @@ public class ChartView extends CyclistViewBase {
     private Axis _xAxis = null;
 	@SuppressWarnings("rawtypes")
     private Axis _yAxis = null;
-	private ObjectProperty<CyclistAxis.Mode> _xAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
-	private ObjectProperty<CyclistAxis.Mode> _yAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistLogAxis.Mode> _xAxisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistLogAxis.Mode> _yAxisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
 	private BooleanProperty _xForceZero = new SimpleBooleanProperty(false);
 	private BooleanProperty _yForceZero = new SimpleBooleanProperty(false);
-
-//	private BooleanBinding 	_noChart = new BooleanBinding() {
-//		{ super.bind(_chartProperty); }
-//		@Override
-//		protected boolean computeValue() {
-//			return _chartProperty.get() == null;
-//		}
-//	};
-	
 	
 	private ObservableList<Indicator> _indicators = FXCollections.observableArrayList();
 	private Map<Indicator, LineIndicator> _lineIndicators = new HashMap<>();
@@ -240,6 +232,86 @@ public class ChartView extends CyclistViewBase {
 		updateFilters();
 	}
 	
+	@Override
+	public void save(IMemento memento) {
+		if (_xArea.getFields().size() > 0) {
+			IMemento xMemento = memento.createChild("xArea");
+			for (Field f : _xArea.getFields()) {
+				f.save(xMemento.createChild("field"));
+			}
+		}
+		if (_yArea.getFields().size() > 0) {
+			IMemento yMemento = memento.createChild("yArea");
+			for (Field f : _yArea.getFields()) {
+				f.save(yMemento.createChild("field"));
+			}
+		}
+		if (_lodArea.getFields().size() > 0) {
+			IMemento lodMemento = memento.createChild("lod");
+			for (Field f : _lodArea.getFields()) {
+				f.save(lodMemento.createChild("field"));
+			}
+		}
+		
+		// options
+		IMemento child = memento.createChild("axis-opt");
+		IMemento x = child.createChild("x");
+		x.putBoolean("mode", _xAxisMode.get() == CyclistLogAxis.Mode.LINEAR);
+		x.putBoolean("force-zero", _xForceZero.get());
+		
+		IMemento y = child.createChild("y");
+		y.putBoolean("mode", _yAxisMode.get() == CyclistLogAxis.Mode.LINEAR);
+		y.putBoolean("force-zero", _yForceZero.get());
+	}
+
+	@Override
+	public void restore(IMemento memento, Context ctx) {
+		boolean wasActive = _active;
+		_active = false;
+		
+		IMemento child = memento.getChild("xArea");
+		if (child != null) {
+			for (IMemento im : child.getChildren("field")) {
+				Field field = new Field();
+				field.restore(im, ctx);
+				_xArea.getFields().add(field);
+			}
+		}
+		
+		child = memento.getChild("yArea");
+		if (child != null) {
+			for (IMemento im : child.getChildren("field")) {
+				Field field = new Field();
+				field.restore(im, ctx);
+				_yArea.getFields().add(field);
+			}
+		}
+		
+		child = memento.getChild("lod");
+		if (child != null) {
+			for (IMemento im : child.getChildren("field")) {
+				Field field = new Field();
+				field.restore(im, ctx);
+				_lodArea.getFields().add(field);
+			}
+		}
+		
+		// options
+		child = memento.getChild("axis-opt");
+		if (child != null) {
+			IMemento x = child.getChild("x");
+			_xAxisMode.set( x.getBoolean("mode") ? CyclistLogAxis.Mode.LINEAR : CyclistLogAxis.Mode.LOG);
+			_xForceZero.set( x.getBoolean("force-zero"));
+			
+			IMemento y = child.getChild("y");
+			_yAxisMode.set( y.getBoolean("mode") ? CyclistLogAxis.Mode.LINEAR : CyclistLogAxis.Mode.LOG);
+			_yForceZero.set( y.getBoolean("force-zero"));
+		}
+		
+		if (wasActive)
+			setActive(true);
+	}
+	
 	private void updateFilters() {
 		
 		CyclistDatasource ds = getAvailableDatasource();
@@ -259,16 +331,16 @@ public class ChartView extends CyclistViewBase {
 			if (_xAxis instanceof NumberAxis) {
 				((NumberAxis) _xAxis).forceZeroInRangeProperty().unbind();
 			}
-			if (_xAxis instanceof CyclistAxis) {
-				((CyclistAxis) _xAxis).mode().unbind();
-				((CyclistAxis) _xAxis).forceZeroInRangeProperty().unbind();
+			if (_xAxis instanceof CyclistLogAxis) {
+				((CyclistLogAxis) _xAxis).mode().unbind();
+				((CyclistLogAxis) _xAxis).forceZeroInRangeProperty().unbind();
 			}
 			if (_yAxis instanceof NumberAxis) {
 				((NumberAxis) _yAxis).forceZeroInRangeProperty().unbind();
 			}
-			if (_yAxis instanceof CyclistAxis) {
-				((CyclistAxis) _yAxis).mode().unbind();
-				((CyclistAxis) _yAxis).forceZeroInRangeProperty().unbind();
+			if (_yAxis instanceof CyclistLogAxis) {
+				((CyclistLogAxis) _yAxis).mode().unbind();
+				((CyclistLogAxis) _yAxis).forceZeroInRangeProperty().unbind();
 			}
 		}
 		setChart(null);
@@ -721,15 +793,15 @@ public class ChartView extends CyclistViewBase {
 			axis = cd;
 			break;
 		case Qd:
-			CyclistAxis ca = new CyclistAxis();
-			ca.setMode(CyclistAxis.Mode.LOG);
+			CyclistLogAxis ca = new CyclistLogAxis();
+			ca.setMode(CyclistLogAxis.Mode.LOG);
 			ca.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
 			ca.mode().bind( y ? _yAxisMode : _xAxisMode);
 			axis = ca;
 			break;
 		case Qi:
-			CyclistAxis cai = new CyclistAxis();
-			cai.setMode(CyclistAxis.Mode.LOG);
+			CyclistLogAxis cai = new CyclistLogAxis();
+			cai.setMode(CyclistLogAxis.Mode.LOG);
 			cai.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
 			cai.mode().bind( y ? _yAxisMode : _xAxisMode);
 			axis = cai;
@@ -914,20 +986,20 @@ public class ChartView extends CyclistViewBase {
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_yAxisMode.set(CyclistAxis.Mode.LINEAR);
+				_yAxisMode.set(CyclistLogAxis.Mode.LINEAR);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistLogAxis.Mode.LINEAR));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_yAxisMode.set(CyclistAxis.Mode.LOG);
+				_yAxisMode.set(CyclistLogAxis.Mode.LOG);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_yAxisMode, CyclistLogAxis.Mode.LOG));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
@@ -944,21 +1016,21 @@ public class ChartView extends CyclistViewBase {
 		menu.getItems().add(new SeparatorMenuItem());
 
 		item = new MenuItem("X linear", GlyphRegistry.get(AwesomeIcon.CHECK));
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistLogAxis.Mode.LINEAR));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_xAxisMode.set(CyclistAxis.Mode.LINEAR);
+				_xAxisMode.set(CyclistLogAxis.Mode.LINEAR);
             }
 		});
 		menu.getItems().add(item);
 
 		item = new MenuItem("X log", GlyphRegistry.get(AwesomeIcon.CHECK));
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_xAxisMode, CyclistLogAxis.Mode.LOG));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_xAxisMode.set(CyclistAxis.Mode.LOG);
+				_xAxisMode.set(CyclistLogAxis.Mode.LOG);
             }
 		});
 		menu.getItems().add(item);

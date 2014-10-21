@@ -111,11 +111,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	
 	public Workspace(boolean toplevel) {
 		super(toplevel);
-		build();
+		build(toplevel);
 		enableDragging(!toplevel);
 	}
 	
-	private void build() {
+	private void build(boolean toplevel) {
 		getStyleClass().add("workspace");
 		setTitle("Workspace");
 		setPadding(new Insets(5, 10, 5, 10));
@@ -155,7 +155,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 			}
 		});
 
-		setContent(sp2);
+		setContent(sp2, !toplevel);
 		
 		/*
 		 *  set up listeners
