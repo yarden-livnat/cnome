@@ -215,6 +215,12 @@ public class CyclistDatasource implements DataSource, Resource {
 	public void releaseConnection() {
 		if (isSQLite()) {
 //			System.out.println("sqlite: release");
+			try {
+				_SQLiteConnection.close();
+			} catch (SQLException e) {
+				System.out.println("Error while closing sqlite connection: "+e.getMessage());
+				e.printStackTrace();
+			}
 			_SQLiteSemaphore.release();
 		}
 	}

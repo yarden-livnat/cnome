@@ -860,6 +860,7 @@ public class FlowView extends CyclistViewBase {
 		  checkbox.setSelected(item.v2);
 		  list.add(checkbox);
 	  }
+	  _commodityVBox.getChildren().addAll(list);
   }
   
   private List<Pair<String, Boolean>> getCommoditySelection() {
