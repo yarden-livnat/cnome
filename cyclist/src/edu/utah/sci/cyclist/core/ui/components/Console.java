@@ -14,6 +14,7 @@ import org.apache.log4j.spi.LoggingEvent;
 
 public class Console extends ScrollPane {
 	private TextArea _text;
+    private String _current;
 	
 	public Console() {
 		super();
@@ -54,17 +55,17 @@ public class Console extends ScrollPane {
 			System.out.println("close");			
 		}
 
-		@Override
-		public void doAppend(LoggingEvent event) {
-			StringBuilder builder = new StringBuilder();
-			String msg = builder.append(_text.getText()).append(event.getMessage()).append("\n").toString();
-			Platform.runLater(new Runnable() {                          
+        @Override
+        public void doAppend(LoggingEvent event) {
+            StringBuilder builder = new StringBuilder();
+            _current = builder.append(_current).append(event.getMessage()).append("\n").toString();
+            Platform.runLater(new Runnable() {                          
                 @Override
                 public void run() {
-                	_text.setText(msg);
+                    _text.setText(_current);
                 }
-			});
-		}
+            });
+        }
 
 		@Override
 		public ErrorHandler getErrorHandler() {
