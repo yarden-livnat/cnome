@@ -194,8 +194,7 @@ public class Cycic extends ViewBase{
 	private void init(){
 		Resources1 resource = new Resources1();
 		File file = new File(resource.getCurrentPath());
-		String path = file.getParent();
-		System.out.println(path);
+		String path = "/" + file.getParent();
 		System.out.println(path+"/default-metadata.json");
 		try {
 			defaultJsonReader(path);
