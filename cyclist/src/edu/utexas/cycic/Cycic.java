@@ -193,10 +193,10 @@ public class Cycic extends ViewBase{
 	private void init(){
 		try {
 			defaultJsonReader();
+			log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
 		} catch (IOException e1) {
 			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
 		}
-		log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
