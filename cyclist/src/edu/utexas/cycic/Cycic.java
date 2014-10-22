@@ -332,7 +332,7 @@ public class Cycic extends ViewBase{
 						skinSet skin = DataArrays.visualizationSkins.get(i);
 						if(skin.name.equalsIgnoreCase(skins.getValue())){
 							for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
-								DataArrays.FacilityNodes.get(j).cycicCircle.image.setImage(skin.images.get(DataArrays.FacilityNodes.get(j).niche));
+								DataArrays.FacilityNodes.get(j).cycicCircle.image.setImage(skin.images.getOrDefault(DataArrays.FacilityNodes.get(j).niche, skin.images.get("facility")));
 								DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(true);
 								DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(0);
 							}
