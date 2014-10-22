@@ -135,7 +135,6 @@ public class Cycic extends ViewBase{
 			});
 			setText("+");
 			setStyle("-fx-font-size: 12;");
-            setTooltip(new Tooltip("Click here to add a commodity."));
 		}
 	};
 	static VBox commodBox = new VBox(){
@@ -145,10 +144,8 @@ public class Cycic extends ViewBase{
 					getChildren().add(new Label(){
 						{
 							setText("Simulation Commodities");
-                            setTooltip(new Tooltip("Commodities facilitate the transfer of \n" +
-                                                   "materials from one facility to another.\n" +
-                                                   "Facilities with the same commodities are\n" +
-                                                   "allowed to trade with each other."));
+							setTooltip(new Tooltip("Commodities facilitate the transfer of materials from one facility to another."
+									+ "Facilities with the same commodities are allowed to trade with each other."));
 							setFont(new Font("Times", 16));
 						}
 					});
@@ -187,6 +184,8 @@ public class Cycic extends ViewBase{
 	 * Initiates the Pane and GridPane.
 	 */
 	private void init(){
+		
+		
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
@@ -255,7 +254,6 @@ public class Cycic extends ViewBase{
 		Text scenetitle1 = new Text("Add Prototype");
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
-        facName.setTooltip(new Tooltip("Type the name of the new prototype."));
 		grid.add(facName, 1, 0);
 		// Name Field
 		final TextField facNameField = new TextField();
@@ -273,7 +271,6 @@ public class Cycic extends ViewBase{
 		});
 
 		structureCB.setPromptText("Select Facility Archetype");
-        structureCB.setTooltip(new Tooltip("Set the archetype for the new prototype."));
 		grid.add(structureCB, 3, 0);
 		//Submit Button
 		Button submit1 = new Button("Add");
@@ -296,7 +293,6 @@ public class Cycic extends ViewBase{
 				FormBuilderFunctions.formArrayBuilder(tempNode.facilityStructure, tempNode.facilityData);
 			}
 		});
-        submit1.setTooltip(new Tooltip("Add the prototype to the simulation."));
 		grid.add(submit1, 4, 0);
 		
 		ScrollPane scroll = new ScrollPane();
@@ -348,9 +344,7 @@ public class Cycic extends ViewBase{
         } catch (RuntimeException | IOException e) {
             localToggle.setSelected(false);
         };
-        localToggle.setTooltip(new Tooltip("Switch where Cyclus is executed."));
-        remoteToggle.setTooltip(new Tooltip("Switch where Cyclus is executed."));
-        grid.add(localToggle, 7, 0);
+		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
 
 		cycicBox.getChildren().addAll(grid, scroll, pane);
@@ -513,7 +507,6 @@ public class Cycic extends ViewBase{
 			});
 			priority.setPromptText("Enter Commodity Prioirty");
 			priority.setText("1");
-            priority.setTooltip(new Tooltip("Commodity priorities are used to break ties."));
 			commodGrid.add(priority, 2, index);
 			Button removeCommod = new Button();
 			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
@@ -523,7 +516,6 @@ public class Cycic extends ViewBase{
 					buildCommodPane();
 				}
 			});	
-            removeCommod.setTooltip(new Tooltip("Remove commodity."));
 			commodGrid.add(removeCommod, 3, index);
 		}
 	}

@@ -1,10 +1,13 @@
 package edu.utexas.cycic.presenter;
 
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
 import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
+import edu.utah.sci.cyclist.core.ui.View;
 import edu.utexas.cycic.CycicNotifications;
 import edu.utexas.cycic.RegionCorralView;
 

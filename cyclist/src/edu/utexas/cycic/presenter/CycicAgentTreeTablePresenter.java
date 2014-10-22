@@ -1,7 +1,10 @@
 package edu.utexas.cycic.presenter;
 
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
+import edu.utah.sci.cyclist.core.ui.View;
 
 public class CycicAgentTreeTablePresenter extends ViewPresenter{
 
