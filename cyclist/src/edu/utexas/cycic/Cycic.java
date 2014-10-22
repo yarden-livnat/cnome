@@ -363,6 +363,7 @@ public class Cycic extends ViewBase{
             localToggle.setSelected(true);
         } catch (RuntimeException | IOException e) {
             localToggle.setSelected(false);
+            remoteToggle.setSelected(true);
         };
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
