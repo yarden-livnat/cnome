@@ -193,9 +193,10 @@ public class Cycic extends ViewBase{
 	 */
 	private void init(){
 		Resources1 resource = new Resources1();
-		System.out.println(resource.getCurrentPath());
+		File file = new File(resource.getCurrentPath());
+		String path = file.getParent();
 		try {
-			defaultJsonReader();
+			defaultJsonReader(path);
 			log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
 		} catch (IOException e1) {
 			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
@@ -315,8 +316,7 @@ public class Cycic extends ViewBase{
 		
 		skins.getItems().add("Default Skin");
 		skins.setValue("Default Skin");
-		//DataArrays.visualizationSkins.add(XMLReader.SC2);
-		DataArrays.visualizationSkins.add(XMLReader.DSARR);
+		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
 		}
@@ -820,8 +820,8 @@ public class Cycic extends ViewBase{
 		}
 	}
 	
-	private void defaultJsonReader() throws IOException{
-	    BufferedReader reader = new BufferedReader( new FileReader ("default-metadata.json"));
+	private void defaultJsonReader(String path) throws IOException{
+	    BufferedReader reader = new BufferedReader( new FileReader (path + "/default-metadata.json"));
 	    String         line = null;
 	    StringBuilder  stringBuilder = new StringBuilder();
 	    String         ls = System.getProperty("line.separator");

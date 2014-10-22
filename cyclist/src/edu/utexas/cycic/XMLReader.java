@@ -34,19 +34,21 @@ public class XMLReader {
 			images.put("facility", new Image(new File("./skinImages/sourceFacSC2.jpg").toURI().toString()));
 		}
 	};
-	
-	static skinSet DSARR = new skinSet(){
-		{
-			name = "DSARR";
-			images.put("abr", new Image(new File("./skinImages/fuelcycle_abr.png").toURI().toString(), 100, 100, false, false));
-			images.put("facility", new Image(new File("./skinImages/fuelcycle_enr.png").toURI().toString()));
-			images.put("fuel fabrication", new Image(new File("./skinImages/fuelcycle_fab.png").toURI().toString(), 100, 100, false, false));
-			images.put("repository", new Image(new File("./skinImages/fuelcycle_geo.png").toURI().toString()));
-			images.put("mine", new Image(new File("./skinImages/fuelcycle_mine.png").toURI().toString()));
-			images.put("reactor", new Image(new File("./skinImages/fuelcycle_rxtr.png").toURI().toString(), true));
-			images.put("reprocessing", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
-		}
-	};
+	 public static skinSet loadSkin(String path){
+		skinSet skin = new skinSet(){
+			{
+				name = "DSARR";
+				images.put("abr", new Image(new File(path + "/skinImages/fuelcycle_abr.png").toURI().toString(), 100, 100, false, false));
+				images.put("facility", new Image(new File(path + "/skinImages/fuelcycle_enr.png").toURI().toString()));
+				images.put("fuel fabrication", new Image(new File(path + "/skinImages/fuelcycle_fab.png").toURI().toString(), 100, 100, false, false));
+				images.put("repository", new Image(new File(path + "/skinImages/fuelcycle_geo.png").toURI().toString()));
+				images.put("mine", new Image(new File(path + "/skinImages/fuelcycle_mine.png").toURI().toString()));
+				images.put("reactor", new Image(new File(path + "/skinImages/fuelcycle_rxtr.png").toURI().toString(), true));
+				images.put("reprocessing", new Image(new File(path + "/skinImages/fuelcycle_sep.png").toURI().toString()));
+			}
+		};
+		return skin;
+	}
 	
 	/**
 	 * 
