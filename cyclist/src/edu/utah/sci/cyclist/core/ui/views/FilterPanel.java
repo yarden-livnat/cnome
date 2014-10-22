@@ -2,6 +2,8 @@ package edu.utah.sci.cyclist.core.ui.views;
 
 
 import java.text.DecimalFormat;
+import java.util.Comparator;
+import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -15,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -230,6 +233,9 @@ public class FilterPanel extends TitledPanel {
 			
 			Task<ObservableList<Object>> task = table.getFieldValues(_filter.getDatasource(),field);
 			setTask(task);
+//			task.valueProperty().addListener(l->{
+//				
+//			});
 			field.valuesProperty().bind(task.valueProperty());
 			Thread th = new Thread(task);
 			th.setDaemon(true);
@@ -266,7 +272,13 @@ public class FilterPanel extends TitledPanel {
 		_cbBox.getChildren().clear();
 		if (_valuesProperty.get() != null) {
 			_cbBox.getChildren().add(createAllEntry(_filter.selectedItems().size() == _filter.getValues().size()));
-			for (Object item: _valuesProperty.get()) {
+			SortedList<Object> sorted = new SortedList<Object>(_valuesProperty.get(), new Comparator<Object>() {
+				@Override
+                public int compare(Object o1, Object o2) {
+					return o1.toString().compareToIgnoreCase(o2.toString());
+                }
+			});
+			for (Object item: sorted) {
 				_cbBox.getChildren().add(createEntry(item));
 			}
 		}
