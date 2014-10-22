@@ -134,6 +134,7 @@ public class RegionShape extends Rectangle {
 				}
 				
 				if(menuEvent.getClickCount() == 2){
+                    menuEvent.consume();
 					CyclistController._presenter.addTool(new RegionViewTool());
 				}
 				for(int i = 0; i < RegionCorralView.corralPane.getChildren().size(); i++){

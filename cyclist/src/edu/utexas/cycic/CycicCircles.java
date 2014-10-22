@@ -263,6 +263,7 @@ public class CycicCircles{
 					
 				}
 				if (event.getClickCount() >= 2){
+                    event.consume();
 					CyclistController._presenter.addTool(new FormBuilderTool());
 				} else if (event.getButton().equals(MouseButton.PRIMARY)){
 					for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
