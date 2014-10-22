@@ -346,7 +346,7 @@ public class Cycic extends ViewBase{
 		}, 0, 1);
 		grid.add(skins, 1, 1);
 		
-		Button imageButton = new Button("Save fuel cycle image");
+        Button imageButton = new Button("Save fuel cycle diagram");
 		imageButton.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				export();
