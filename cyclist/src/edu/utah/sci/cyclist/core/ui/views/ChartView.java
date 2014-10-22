@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WritableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -100,12 +101,11 @@ public class ChartView extends CyclistViewBase {
 	enum MarkType { TEXT, BAR, LINE, SHAPE, GANTT, NA }
 
 
-	private ViewType _viewType;
 	private boolean _active = true;
 
 	private TableProxy _tableProxy = null;
 	
-	private ObjectProperty<XYChart<Object,Object>> _chartProperty = new SimpleObjectProperty<>();
+	private ObjectProperty<XYChart<?,?>> _chartProperty = new SimpleObjectProperty<>();
 	@SuppressWarnings("rawtypes")
     private Axis _xAxis = null;
 	@SuppressWarnings("rawtypes")
@@ -121,7 +121,7 @@ public class ChartView extends CyclistViewBase {
 
 	private Closure.V0 _onDuplicate = null;
 	
-	private MapSpec _spec;
+	private Spec _currentSpec = null;
 
 	private BorderPane _pane;
 	private DropArea _xArea;
@@ -133,7 +133,6 @@ public class ChartView extends CyclistViewBase {
 	//        private DropArea _indicatorArea;
 
 	private ObjectProperty<Table> _currentTableProperty = new SimpleObjectProperty<>();
-	private ListProperty<TableRow> _items = new SimpleListProperty<>();
 
 	private StackPane _stackPane;
 	private Pane _glassPane;
@@ -174,7 +173,7 @@ public class ChartView extends CyclistViewBase {
 	public void setActive(boolean state) {
 		_active = state;
 		if (_active) {
-			invalidateChart();
+			//invalidateChart();
 			fetchData();
 		}
 	}
@@ -184,15 +183,16 @@ public class ChartView extends CyclistViewBase {
 	}
 
 
-	public ObjectProperty<XYChart<Object,Object>> chartProperty() {
+	public ObjectProperty<XYChart<?,?>> chartProperty() {
 		return _chartProperty;
 	}
 
-	public XYChart<Object,Object> getChart() {
+	@SuppressWarnings("rawtypes")
+    public XYChart getChart() {
 		return _chartProperty.get();
 	}
 
-	public void setChart(XYChart<Object,Object> chart) {
+	public void setChart(XYChart<?,?> chart) {
 		_chartProperty.set(chart);
 	}
 	public Table getCurrentTable() {
@@ -204,7 +204,7 @@ public class ChartView extends CyclistViewBase {
 	}
 	
 	public void removeSimulationData(){
-		invalidateChart();
+		releaseChart();
 	}
 
 	@Override
@@ -213,13 +213,13 @@ public class ChartView extends CyclistViewBase {
 
 		if (!active) {
 			if (table == getCurrentTable()) 
-				invalidateChart();
+				releaseChart();
 			return;
 		}
 
 		if (table != getCurrentTable()) {
 			_tableProxy = new TableProxy(table);
-			invalidateChart();
+			//invalidateChart();
 			_currentTableProperty.set(table);
 		}
 
@@ -312,6 +312,14 @@ public class ChartView extends CyclistViewBase {
 			setActive(true);
 	}
 	
+	private Field getXField() {
+		return _xArea.getFields().get(0);
+	}
+
+	private Field getYField() {
+		return _yArea.getFields().get(0);
+	}
+
 	private void updateFilters() {
 		
 		CyclistDatasource ds = getAvailableDatasource();
@@ -321,154 +329,152 @@ public class ChartView extends CyclistViewBase {
 			filter.setDatasource(ds);
 		}
 	}
-	
-	private void invalidateChart() {
-		if (_stackPane.getChildren().size() > 1) {
-			_stackPane.getChildren().remove(0);
-		}
-
-		if (getChart() != null) {
-			if (_xAxis instanceof NumberAxis) {
-				((NumberAxis) _xAxis).forceZeroInRangeProperty().unbind();
-			}
-			if (_xAxis instanceof CyclistAxis) {
-				((CyclistAxis) _xAxis).mode().unbind();
-				((CyclistAxis) _xAxis).forceZeroInRangeProperty().unbind();
-			}
-			if (_yAxis instanceof NumberAxis) {
-				((NumberAxis) _yAxis).forceZeroInRangeProperty().unbind();
-			}
-			if (_yAxis instanceof CyclistAxis) {
-				((CyclistAxis) _yAxis).mode().unbind();
-				((CyclistAxis) _yAxis).forceZeroInRangeProperty().unbind();
-			}
-		}
-		setChart(null);
-		setCurrentTask(null);
-	}
 
 	private void fetchData() {
-		if (!_active) return;
+		final Spec spec = determineSpec();
+		
+		if (!spec.valid) {
+			releaseChart();
+			return;
+		}
+		
+		QueryBuilder builder = createBuilder();
+		if (builder == null) {
+			releaseChart();
+			return;
+		}
+		
+		List<Field> order = builder.getOrder();
 
-		if (getCurrentTable() != null && _xArea.getFields().size() == 1 && _yArea.getFields().size() > 0) {
-			if (!_xArea.isValid() || !_yArea.isValid())
-				return;
+		for (Field field : _xArea.getFields()) {
+			spec.xFields.add(new FieldInfo(field, order.indexOf(field)));
+		}
+		for (Field field : _yArea.getFields()) {
+			spec.yFields.add(new FieldInfo(field, order.indexOf(field)));
+		}
 
-			if (getChart() == null) 
-				createChart();
+		for (Field field : _lodArea.getFields()) {
+			spec.lod.add(new FieldInfo(field, order.indexOf(field)));
+		}
+		
+        Simulation currentSim = getCurrentSimulation();
+		CyclistDatasource ds = currentSim != null ? currentSim.getDataSource() : null;
+		
+		Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
+			@Override
+			protected ObservableList<TableRow> call() throws Exception {
+				return _tableProxy.getRows(ds, builder.toString());
+			}
+		};
+		
+		task.valueProperty().addListener(o->{
+			ObjectProperty<ObservableList<TableRow>> op = (ObjectProperty<ObservableList<TableRow>>) o;			
+			ObservableList<TableRow> data = op.get();
+			if (data != null) {
+				processData(data, spec);
+			}
+		});
+		
+		setCurrentTask(task);
+		
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
+//		_items.bind(task.valueProperty());
+	}
+	
+	private QueryBuilder createBuilder() {
+		List<Field> fields = new ArrayList<>();
+		List<Field> aggregators = new ArrayList<>();
+		List<Field> grouping = new ArrayList<>();
 
-			if (getChart() != null) {
-				List<Field> fields = new ArrayList<>();
-				List<Field> aggregators = new ArrayList<>();
-				List<Field> grouping = new ArrayList<>();
+		Table table = getCurrentTable();
 
-				Table table = getCurrentTable();
-
-				int n = 0;
-				for (Field field : _xArea.getFields()) {
-					if (table.hasField(field)) {
-						if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
-							fields.add(field);
-						else
-							aggregators.add(field);
-						n++;
-					}
-				}
-
-				// is there at least one valid x field? 
-				if (n == 0) return;
-
-				n=0;
-				for (Field field : _yArea.getFields()) {
-					if (table.hasField(field)) {
-						if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
-							fields.add(field);
-						else
-							aggregators.add(field);
-						n++;
-					}
-				}
-
-				// is there at least one valid y field?
-				if (n == 0) return;
-
-				for (Field field : _lodArea.getFields()) {
-					if (table.hasField(field)) {
-						grouping.add(field);
-					}
-				}
-
-				List<Filter> filtersList = new ArrayList<Filter>();
-
-				//Check the filters current validity
-				for(Filter filter : filters()){
-					if(getCurrentTable().hasField(filter.getField())){
-						filtersList.add(filter);
-					}
-				}
-
-				//Check the remote filters current validity
-				for(Filter filter : remoteFilters()){
-					if(getCurrentTable().hasField(filter.getField())){
-						filtersList.add(filter);
-					}
-				}
-
-				// build the query
-				QueryBuilder builder = 
-						getCurrentTable().queryBuilder()
-						.fields(fields)
-						.aggregates(aggregators)
-						.grouping(grouping)
-						.filters(filtersList);
-//				log.debug("Query: "+builder.toString());
-
-				List<Field> order = builder.getOrder();
-
-				_spec = new MapSpec();
-				for (Field field : _xArea.getFields()) {
-					_spec.xFields.add(new FieldInfo(field, order.indexOf(field)));
-				}
-				for (Field field : _yArea.getFields()) {
-					_spec.yFields.add(new FieldInfo(field, order.indexOf(field)));
-				}
-
-				for (Field field : _lodArea.getFields()) {
-					_spec.lod.add(new FieldInfo(field, order.indexOf(field)));
-				}
-	            Simulation currentSim = getCurrentSimulation();
-				CyclistDatasource ds = currentSim != null ? currentSim.getDataSource() : null;
-				
-				Task<ObservableList<TableRow>> task = new Task<ObservableList<TableRow>>() {
-					@Override
-					protected ObservableList<TableRow> call() throws Exception {
-						return _tableProxy.getRows(ds, builder.toString());
-					}
-				};
-				
-				setCurrentTask(task);
-				
-				Thread th = new Thread(task);
-				th.setDaemon(true);
-				th.start();
-				
-				_items.bind(task.valueProperty());
+		int n = 0;
+		for (Field field : _xArea.getFields()) {
+			if (table.hasField(field)) {
+				if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
+					fields.add(field);
+				else
+					aggregators.add(field);
+				n++;
 			}
 		}
+
+		// is there at least one valid x field? 
+		if (n == 0) return null;
+
+		n=0;
+		for (Field field : _yArea.getFields()) {
+			if (table.hasField(field)) {
+				if (field.getRole() == Role.DIMENSION || field.getRole() == Role.INT_TIME)
+					fields.add(field);
+				else
+					aggregators.add(field);
+				n++;
+			}
+		}
+
+		// is there at least one valid y field?
+		if (n == 0) return null;
+
+		for (Field field : _lodArea.getFields()) {
+			if (table.hasField(field)) {
+				grouping.add(field);
+			}
+		}
+
+		List<Filter> filtersList = new ArrayList<Filter>();
+
+		//Check the filters current validity
+		for(Filter filter : filters()){
+			if(getCurrentTable().hasField(filter.getField())){
+				filtersList.add(filter);
+			}
+		}
+
+		//Check the remote filters current validity
+		for(Filter filter : remoteFilters()){
+			if(getCurrentTable().hasField(filter.getField())){
+				filtersList.add(filter);
+			}
+		}
+
+		// build the query
+		QueryBuilder builder = 
+				getCurrentTable().queryBuilder()
+				.fields(fields)
+				.aggregates(aggregators)
+				.grouping(grouping)
+				.filters(filtersList);
+
+		return builder;
 	}
-
-	class MapSpec {
-		List<FieldInfo> xFields = new ArrayList<>();
-		List<FieldInfo> yFields = new ArrayList<>();
-		List<FieldInfo> color = new ArrayList<>();
-		List<FieldInfo> lod = new ArrayList<>();
-		int cols;
-
-		public int numX() { return xFields.size(); }
-		public int numY() { return yFields.size(); }
-		public int cols() { return numX() + numY() + color.size()+lod.size(); }
+		
+	private void processData(List<TableRow> data, Spec spec) {
+		if (!compatible(spec, _currentSpec)) {
+			releaseChart();
+			setChart(createChart(spec), spec);
+		}		
+		assignData(data, spec);
 	}
-
+		
+	private boolean compatible(Spec spec, Spec current) {
+		return current != null 
+				&& spec.type == current.type 
+				&& compatible(spec.x, current.x) 
+				&& compatible(spec.y, current.y);
+	}
+	
+	private boolean compatible(AxisSpec spec, AxisSpec current) {
+		return spec.classification == current.classification
+				|| (spec.classification == Classification.Qd 
+					&& current.classification == Classification.Qi)
+				|| (spec.classification == Classification.Qi 
+						&& current.classification == Classification.Qd);
+	}
+	
 	class SeriesDataPoint {
 		Object x;
 		Object y;
@@ -481,306 +487,315 @@ public class ChartView extends CyclistViewBase {
 		List<SeriesDataPoint> points = new ArrayList<>();
 	}
 
-	private void assignData(MapSpec spec, ObservableList<TableRow> list) {
+	private void assignData(List<TableRow> list, Spec spec) {
+//		System.out.println("data has "+list.size()+" rows");
 		if (list.size() == 0) {
 			log.debug("no data");
+			getChart().getData().clear();
 			return;
 		}
 		
 		log.debug("data has "+list.size()+" rows");
-		if (list.size() > 5000) {
-			log.warn("Too many data points (>5000). Ignored");
-			return;
-		}
-
-		// separate to (x,y,attributes) lists
-		List<SeriesData> lists = splitToSeriesData(spec, list);
-
-		// separate to sublists based on attributes
-		List<Collection<SeriesData>> sublists = new ArrayList<>();
-		for (SeriesData sd : lists) {
-			sublists.add(createSubList(sd));
-		}
-
-		// create visual representation
-		List<XYChart.Series<Object, Object>> graphs = new ArrayList<>();
-		for (Collection<SeriesData> collection : sublists) {
-			for (SeriesData sd : collection) {
-				convertData(sd, spec);
-
-				graphs.add(createChartSeries(sd, spec));
+//		if (list.size() > 5000) {
+//			log.warn("Too many data points (>5000). Ignored");
+//			return;
+//		}
+		
+		Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> map = split(list, spec);
+		
+		int c = _currentSpec.map.size();
+		int r = 0;
+		int n = 0;
+		// remove current series that are not part of the new data
+		for (MultiKey key : _currentSpec.map.keySet()) {
+			if (!map.containsKey(key)) {
+				getChart().getData().remove(_currentSpec.map.get(key));
+				r++;
 			}
 		}
-
-		if(getChart() != null && getChart().getData() != null){
-			getChart().setLegendVisible(graphs.size() > 1);
-			getChart().getData().addAll(graphs);
-		}
+		
+		for (MultiKey key : map.keySet()) {							
+			XYChart.Series<Object, Object> series = _currentSpec.map.get(key);
+			if (series == null) {
+				series = new XYChart.Series<Object, Object>();
+				series.setName(createLabel(key));
+				getChart().getData().add(series);
+				n++;
+			}
+			ObservableList<XYChart.Data<Object, Object>> data = map.get(key);
+			series.setData(data);
+			spec.map.put(key, series);
+					}
+		log.debug(" p: "+c+"  r:"+r+"  n:"+n);
+		getChart().setLegendVisible(map.size() > 1);
+		_currentSpec = spec;
 	}
+	
+	private String createLabel(MultiKey key) {
+		// key = x, y, attributes
+		int n =key.size();
+		
+		if (n==2) return "";
+		if (n==3) return key.getKey(2).toString();
 
-	private List<SeriesData> splitToSeriesData(MapSpec spec, ObservableList<TableRow> list) {
-		List<SeriesData> all = new ArrayList<>();
+		StringBuilder builder = new StringBuilder("[").append(key.getKey(2));
+		for (int i=3; i<n; i++)
+			builder.append(",").append(key.getKey(i));
+		builder.append("]");
+		return builder.toString();
+	}
+	
+	private Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> split(List<TableRow> list, Spec spec) {
+		Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> map = new HashMap<>();
 
 		int nx = spec.numX();
 		int ny = spec.numY();
 		int cols = spec.cols();
 
-		boolean hasAttributes = cols > nx+ny;
-
 		for (FieldInfo xInfo : spec.xFields) {
 			int ix = xInfo.index;
-//			boolean convert_x = "Nuclide".equals(xInfo.field.getSemantic());
+			Classification cx = xInfo.field.getClassification();
+
 			for (FieldInfo yInfo : spec.yFields) {
 				int iy = yInfo.index;
-//				boolean convert_y = "Nuclide".equals(yInfo.field.getSemantic());
+				Classification cy = yInfo.field.getClassification();
 
-				SeriesData series = new SeriesData();
-				series.x = xInfo.field;
-				series.y = yInfo.field;
 				for (TableRow row : list) {
-					SeriesDataPoint p = new SeriesDataPoint();
-//					p.x = convert_x ? row.value[ix].toString() : row.value[ix];
-//					p.y = convert_y ? row.value[iy].toString() : row.value[iy];
-					p.x = row.value[ix];
-					p.y = row.value[iy];
-					p.attribues = hasAttributes ? Arrays.copyOfRange(row.value, nx+ny, cols) : null;
-
-					series.points.add(p);
+					// pt
+					XYChart.Data<Object, Object> pt = createPoint(row.value[ix], row.value[iy], cx, cy);
+					
+					// key
+					Object [] index = Arrays.copyOfRange(row.value, nx+ny-2, cols); // copy two extra to the left. 
+					index[0] = xInfo.field.getName();
+					index[1] = yInfo.field.getName();
+					
+					MultiKey key = new MultiKey(index, false);
+					ObservableList<XYChart.Data<Object, Object>> series = map.get(key);
+					if (series == null) {
+						series = FXCollections.observableArrayList();
+						map.put(key, series);
+					}
+					series.add(pt);
 				}
+			}
+		}
+		return map;
+	}
+	
+	private XYChart.Data<Object, Object> createPoint(Object x, Object y, Classification cx, Classification cy) {
+		x = convert(x, cx);
+		y = convert(y, cy);
+		XYChart.Data<Object, Object> pt = new XYChart.Data<Object, Object>(x, y);
+		return pt;
+	}
+
+	NumberFormat numFormater = NumberFormat.getInstance();
+	private Object convert(Object v, Classification c) {
+		switch (c) {
+		case C:
+			if (v instanceof String) {
+				// ignore
+			} else if (v instanceof Number) {
+				v = numFormater.format(v);
+			} else {
+				v = v.toString();
+			}
+			break;
+		case Cdate:
+			if (v.getClass() == Date.class) {
+				v = ((Date)v).getTime();
+			}
+			break;
+		case Qi:
+		case Qd:
+			// ignore
+		}
+		return v;
+	}	
+
+    private void releaseChart() {
+		
+		if (_stackPane.getChildren().size() > 1) {
+			_stackPane.getChildren().remove(0);
+		}
+
+		setCurrentTask(null);
+		if (getChart() == null) return;
+		
+		if (_xAxis instanceof NumberAxis) {
+			((NumberAxis) _xAxis).forceZeroInRangeProperty().unbind();
+		} else if (_xAxis instanceof CyclistAxis) {
+			((CyclistAxis) _xAxis).mode().unbind();
+			((CyclistAxis) _xAxis).forceZeroInRangeProperty().unbind();
+		}
+		
+		if (_yAxis instanceof NumberAxis) {
+			((NumberAxis) _yAxis).forceZeroInRangeProperty().unbind();
+		} else  if (_yAxis instanceof CyclistAxis) {
+			((CyclistAxis) _yAxis).mode().unbind();
+			((CyclistAxis) _yAxis).forceZeroInRangeProperty().unbind();
+		}
+		
+		setChart(null, null);
+	}
+	
+	class AxisSpec {
+		Classification classification;
+		Role role;
+		BooleanProperty forceZero;
+		ObjectProperty<CyclistAxis.Mode> mode;
+		String label;
+	}
+	
+	class Spec {
+		AxisSpec x = new AxisSpec();
+		AxisSpec y = new AxisSpec();
+		
+		List<FieldInfo> xFields = new ArrayList<>();
+		List<FieldInfo> yFields = new ArrayList<>();
+		List<FieldInfo> lod = new ArrayList<>();
+		
+		ViewType type = ViewType.NA;
+		int cols;	
+		boolean valid = true;
+		
+		public int numX() { return xFields.size(); }
+		public int numY() { return yFields.size(); }
+		public int cols() { return numX() + numY() +lod.size(); }
+		
+		Map<MultiKey, XYChart.Series<Object, Object>> map = new HashMap<>();
+	}
+	
+	private Spec determineSpec() {
+		Spec spec = new Spec();
+		
+		spec.valid =
+				_active &&
+				getCurrentTable() != null &&
+				_xArea.getFields().size() == 1 && 
+				_yArea.getFields().size() > 0 &&
+				_xArea.isValid() &&
+				_yArea.isValid();
 				
-
-				all.add(series);
-			}
+		if (spec.valid) {
+    		spec.x.classification = getXField().getClassification();
+    		spec.x.role = getXField().getRole();
+    		spec.x.forceZero = _xForceZero;
+    		spec.x.mode = _xAxisMode;
+    		spec.x.label = _xArea.getFieldTitle(0);
+    		
+    		spec.y.classification = getYField().getClassification();
+    		spec.y.role = getYField().getRole();
+    		spec.y.forceZero = _yForceZero;
+    		spec.y.mode = _yAxisMode;
+    		spec.y.label = _yArea.getFieldTitle(0);
+    		
+    		spec.type = determineViewType(spec.x.classification, spec.y.classification);
+    		switch (spec.type) {
+    		case CROSS_TAB:
+    		case GANTT:
+    		case NA:
+    			spec.valid = false;
+    			break;
+    		case BAR:
+    		case LINE:
+    		case SCATTER_PLOT:
+    			spec.valid = true;
+    			break;
+    		}
 		}
-		return all;
+		
+		return spec;
 	}
-
-
-	private Collection<SeriesData> createSubList(SeriesData data) {        
-		if (data.points == null || data.points.size() == 0 ||data.points.get(0).attribues == null) {
-			List<SeriesData> result = new ArrayList<>();
-			result.add(data);
-			return result;
-		}
-
-		Map<MultiKey, SeriesData> map = new HashMap<>();
-		_lastSubLists.clear();
-
-		for (SeriesDataPoint point : data.points) {
-			MultiKey key = new MultiKey(point.attribues, false);
-			SeriesData sd = map.get(key);
-			if (sd == null) {
-				sd = new SeriesData();
-				sd.x = data.x;
-				sd.y = data.y;
-
-				map.put(key, sd);
-			}
-			sd.points.add(point);
-		}
-
-		_lastSubLists.add(map);
-		return map.values();
-	}
-
-
-	private void convertData(SeriesData data, MapSpec spec) {
-		NumberFormat numFormater = NumberFormat.getInstance();
-
-		if (data.points == null || data.points.size() == 0) return;
-
-		 SeriesDataPoint pt = data.points.get(0);
-		// convert x
-		switch (data.x.getClassification()) {
-		case C:
-			if (pt.x instanceof String) {
-				// ignore
-			} else if (pt.x instanceof Number) {
-				for (SeriesDataPoint p : data.points) {
-					p.x = numFormater.format(p.x);
-				}
-			} else {
-				for (SeriesDataPoint p : data.points) {
-					p.x = p.x.toString();
-				}
-			}
-			break;
-		case Cdate:
-			if(pt.x.getClass() == Date.class){
-				for (SeriesDataPoint p : data.points) {
-						p.x = ((Date)p.x).getTime();
-				}
-			}
-			break;
-		case Qi:
-		case Qd:
-			// ignore
-		}
-
-		// convert y
-		switch (data.y.getClassification()) {
-		case C:
-			if (pt.y instanceof String) {
-				// ignore
-			} else if (pt.y instanceof Number) {
-				for (SeriesDataPoint p : data.points) {
-					p.y = numFormater.format(p.y);
-				}
-			} else {
-				for (SeriesDataPoint p : data.points) {
-					p.y = p.y.toString();
-				}
-			}
-			break;
-		case Cdate:
-			if(pt.y.getClass() == Date.class){
-				for (SeriesDataPoint p : data.points) {
-						p.y = ((Date)p.y).getTime();
-				}
-			}
-			break;
-		case Qi:
-		case Qd:
-			// ignore
-		}                                
-	}
-
-	private XYChart.Series<Object, Object> createChartSeries(SeriesData sd, MapSpec spec) {
-		ObservableList<XYChart.Data<Object, Object>> xyData = FXCollections.observableArrayList();
-		for (SeriesDataPoint p : sd.points) {
-			xyData.add(new XYChart.Data<Object, Object>(p.x, p.y, p.attribues));
-		}
-
-		XYChart.Series<Object, Object> series = new XYChart.Series<Object, Object>();
-		SeriesDataPoint p = sd.points.get(0);
-		String label = "";
-		if (p.attribues != null && p.attribues.length > 0) {
-			label = createAttributesLabel(p);
-		}
-		series.setName(label);
-		series.dataProperty().set(xyData);
-		return series;
-	}
-
-	private String createAttributesLabel(SeriesDataPoint p) {
-
-		int n = p.attribues.length;
-		if (n==1)
-			return p.attribues[0].toString();
-
-		StringBuilder builder = new StringBuilder("[").append(p.attribues[0]);
-		for (int i=1; i<n; i++)
-			builder.append(",").append(p.attribues[i]);
-		builder.append("]");
-		return builder.toString();
-	}
-
-	private Field getXField() {
-		return _xArea.getFields().get(0);
-	}
-
-	private Field getYField() {
-		return _yArea.getFields().get(0);
-	}
-
-	private boolean isPaneType(Classification x, Classification y, Classification c1, Classification c2) {
+	
+	private boolean match(Classification x, Classification y, Classification c1, Classification c2) {
 		return (x == c1 && y == c2) || (x==c2 && y==c1); 
 	}
-
-	private void determineViewType(Classification x, Classification y) {
-
-		if (isPaneType(x, y, Classification.C, Classification.C)) {
-			_viewType = ViewType.CROSS_TAB;
-			//                        _markType = MarkType.TEXT;
-		} else if (isPaneType(x, y, Classification.Qd, Classification.C)) {
-			_viewType = ViewType.BAR;
-			//                        _markType = MarkType.BAR;
-		} else if (isPaneType(x, y, Classification.Qd, Classification.Cdate)) {
-			_viewType = ViewType.LINE;
-			//                        _markType = MarkType.LINE;
-		} else if (isPaneType(x, y, Classification.Qd, Classification.Qd)) {
-			_viewType = ViewType.SCATTER_PLOT;
-			//                        _markType = MarkType.SHAPE;
-		} else if (isPaneType(x, y, Classification.Qi, Classification.C)) {
-			_viewType = ViewType.BAR;
-			//                        _markType = MarkType.BAR;
-		} else if (isPaneType(x, y, Classification.Qi, Classification.Qd)) {
-			_viewType = ViewType.LINE;
-			//                        _markType = MarkType.LINE;
-		} else if (isPaneType(x, y, Classification.Qi, Classification.Qi)) {
-			_viewType = ViewType.SCATTER_PLOT;
-			//                        _markType = MarkType.SHAPE;
-		} else if (isPaneType(x, y, Classification.C, Classification.Cdate)) {
-			_viewType = ViewType.SCATTER_PLOT;
+	
+	private ViewType determineViewType(Classification x, Classification y) {
+		ViewType type;
+		if (match(x, y, Classification.C, Classification.C)) {
+			type = ViewType.CROSS_TAB;
+		} else if (match(x, y, Classification.Qd, Classification.C)) {
+			type = ViewType.BAR;
+		} else if (match(x, y, Classification.Qd, Classification.Cdate)) {
+			type = ViewType.LINE;
+		} else if (match(x, y, Classification.Qd, Classification.Qd)) {
+			type = ViewType.SCATTER_PLOT;
+		} else if (match(x, y, Classification.Qi, Classification.C)) {
+			type = ViewType.BAR;
+		} else if (match(x, y, Classification.Qi, Classification.Qd)) {
+			type = ViewType.LINE;
+		} else if (match(x, y, Classification.Qi, Classification.Qi)) {
+			type = ViewType.SCATTER_PLOT;
+		} else if (match(x, y, Classification.C, Classification.Cdate)) {
+			type = ViewType.SCATTER_PLOT;
 		} else {
-			_viewType = ViewType.NA;
-			//                        _markType = MarkType.NA;
+			type = ViewType.NA;
 		}
+		return type;
 	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void createChart() {
-		_xAxis = createAxis(getXField(), _xArea.getFieldTitle(0), false);
-
-		_yAxis = createAxis(getYField(), _yArea.getFields().size() == 1 ? _yArea.getFieldTitle(0) : "", true);
-
-		determineViewType(getXField().getClassification(), getYField().getClassification()); 
-		switch (_viewType) {
-		case CROSS_TAB:
-			setChart(null);
-			break;
-		case BAR:
-			BarChart bar = new BarChart<>(_xAxis,  _yAxis);
-			bar.setBarGap(1);
-			bar.setCategoryGap(4);
-			setChart(bar);
-			break;
-		case LINE:
-			LineChart<Object,Object> lineChart = new LineChart<Object, Object>(_xAxis, _yAxis);
-			lineChart.setCreateSymbols(false);
-			lineChart.getStyleClass().add("line-chart");
-			setChart(lineChart);
-			break;
-		case SCATTER_PLOT:
-			setChart(new ScatterChart<>(_xAxis, _yAxis));
-			break;
-		case GANTT:
-			setChart(null);
-			break;
-		case NA:
-			setChart(null);
-
-		}
-
-		// chart.setLegendVisible(false);
-		               
-		if (getChart() != null) {
-			getChart().setAnimated(false);
-			getChart().setHorizontalZeroLineVisible(false);
-			getChart().setVerticalZeroLineVisible(false);
-			_stackPane.getChildren().add(0, getChart());
+	
+	private void setChart(XYChart<?, ?> chart, Spec spec) {
+		System.out.println("replace chart ("+(chart!=null)+") spec: "+spec != null);
+		if (chart != null) {
+			_stackPane.getChildren().add(0, chart);
+			_currentSpec = spec != null? spec : new Spec();
+			setChart(chart);
 		} else {
 			Text text = new Text("Unsupported fields combination");
-			_stackPane.getChildren().add(0, text);
-			//_pane.setCenter(text);
+			_stackPane.getChildren().add(0, text);			
+			_currentSpec = new Spec();
 		}
 	}
-
-	@SuppressWarnings("rawtypes")
-	private Axis createAxis(Field field, String title, boolean y) {
-		Axis axis =  null;
-
-		switch (field.getClassification()) {
-
+	
+    private XYChart<?, ?> createChart(Spec spec) {
+		Axis<?> x = createAxis(spec.x);
+		Axis<?> y = createAxis(spec.y);
+		XYChart<?, ?> chart = null;
+		
+		switch (spec.type) {
+		case CROSS_TAB:
+			break;
+		case BAR:
+			BarChart<?, ?> bar = new BarChart<>(x, y);
+			bar.setBarGap(1);
+			bar.setCategoryGap(4);
+			chart = bar;
+			break;
+		case LINE:
+			LineChart<?,?> lineChart = new LineChart<>(x, y);
+			lineChart.setCreateSymbols(false);
+			lineChart.getStyleClass().add("line-chart");
+			chart = lineChart;
+			break;
+		case SCATTER_PLOT:
+			chart = new ScatterChart<>(x, y);
+			break;
+		case GANTT:
+			break;
+		case NA:
+		}
+		
+		if (chart != null) {
+			chart.setAnimated(false);
+			chart.setHorizontalZeroLineVisible(false);
+			chart.setVerticalZeroLineVisible(false);
+		}
+		return chart;
+	}
+	
+    private Axis<?> createAxis(AxisSpec spec) {
+        Axis<?> axis = null;
+		
+		switch (spec.classification) {
 		case C:
-			CategoryAxis c = new CategoryAxis();
-			axis = c;
+			axis = new CategoryAxis();
 			break;
 		case Cdate:
 			NumberAxis cd = new NumberAxis();
-			cd.forceZeroInRangeProperty().bind(y ? _yForceZero : _xForceZero);
-			if(field.getRole() != Role.INT_TIME)
-			{
+			cd.forceZeroInRangeProperty().bind(spec.forceZero);
+			if(spec.role!= Role.INT_TIME) {
 				NumberAxis.DefaultFormatter f = new NumberAxis.DefaultFormatter(cd) {
 					TimeStringConverter converter = new TimeStringConverter("dd-MM-yyyy");
 					@Override
@@ -793,25 +808,17 @@ public class ChartView extends CyclistViewBase {
 			axis = cd;
 			break;
 		case Qd:
+		case Qi:
 			CyclistAxis ca = new CyclistAxis();
-			ca.setMode(CyclistAxis.Mode.LOG);
-			ca.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
-			ca.mode().bind( y ? _yAxisMode : _xAxisMode);
+			ca.forceZeroInRangeProperty().bind(spec.forceZero);
+			ca.mode().bind(spec.mode);
 			axis = ca;
 			break;
-		case Qi:
-			CyclistAxis cai = new CyclistAxis();
-			cai.setMode(CyclistAxis.Mode.LOG);
-			cai.forceZeroInRangeProperty().bind(y? _yForceZero: _xForceZero);
-			cai.mode().bind( y ? _yAxisMode : _xAxisMode);
-			axis = cai;
 		}
-
-		axis.setLabel(title);
-
+		
+		axis.setLabel(spec.label);
 		return axis;
 	}
-
 	
 	long t0;
 
@@ -843,21 +850,24 @@ public class ChartView extends CyclistViewBase {
 		// add actions
 		setupActions();
 
-		_items.addListener(new ChangeListener<ObservableList<TableRow>>() {
-
-			@Override
-			public void changed(
-					ObservableValue<? extends ObservableList<TableRow>> observable,
-							ObservableList<TableRow> oldValue, ObservableList<TableRow> newValue) {
-
-				if (newValue != null) {
-					long t1 = System.currentTimeMillis();
-					assignData(_spec, newValue);
-					long t2 = System.currentTimeMillis();
-					log.debug("assigned data: "+(t2-t1)/1000+"secs");
-				}
-			}
-		});
+//		_items.addListener(new ChangeListener<ObservableList<TableRow>>() {
+//
+//			@Override
+//			public void changed(
+//					ObservableValue<? extends ObservableList<TableRow>> observable,
+//							ObservableList<TableRow> oldValue, ObservableList<TableRow> newValue) {
+//
+//				if (newValue != null) {
+//					invalidateChart();
+//					createChart();
+//					
+//					long t1 = System.currentTimeMillis();
+//					assignData(_spec, newValue);
+//					long t2 = System.currentTimeMillis();
+//					log.debug("assigned data: "+(t2-t1)/1000+"secs");
+//				}
+//			}
+//		});
 
 		_indicators.addListener(new ListChangeListener<Indicator>() {
 			@Override
@@ -924,7 +934,7 @@ public class ChartView extends CyclistViewBase {
 				}
 
 				if (update) {
-					invalidateChart();
+					//invalidateChart();
 					fetchData();
 				}
 			}
@@ -942,24 +952,10 @@ public class ChartView extends CyclistViewBase {
 						filter.addListener(_filterListener);
 					}
 				}
-				invalidateChart();
+				//invalidateChart();
 				fetchData();
 			}
 		});		
-
-//		_xForceZero.addListener(new InvalidationListener() {
-//			@Override
-//			public void invalidated(Observable observable) {
-//				// FIXME: seems to be a bug in JavaFX.
-//				// The chart does not refresh itself if the axis forceRangeZero changes.
-//				// This is a hack to force the chart to redraw.
-//				if (getChart() != null) {
-//					ObservableList<Series<Object, Object>> list = getChart().getData();
-//					getChart().setData(null);
-//					getChart().setData(list);
-//				}
-//			}
-//		});
 	}
 
 	private void setupActions() {
@@ -1044,8 +1040,6 @@ public class ChartView extends CyclistViewBase {
 				_xForceZero.set(!_xForceZero.get());
 			}
 		});
-
-
 
 		return btn;
 	}
@@ -1229,12 +1223,12 @@ public class ChartView extends CyclistViewBase {
 		@Override
 		public void invalidated(Observable o) {
 			Filter f = (Filter) o;
-			//If possible - take data directly from memory instead of quering the database.
-			if(handleLODFilters(f))
+			//If possible - take data directly from memory instead of querying the database.
+			if (handleLODFilters(f))
 			{
 				f.setValid(true);
-			}else{
-				invalidateChart();
+			} else {
+				//invalidateChart();
 				fetchData();
 			}
 		}
@@ -1244,7 +1238,7 @@ public class ChartView extends CyclistViewBase {
 
 		@Override
 		public void invalidated(Observable observable) {                        
-			invalidateChart();
+			//invalidateChart();
 			DropArea area = (DropArea) observable;
 			if (getCurrentTable() == null) {
 				if (area.getFields().size() == 1) {
@@ -1358,37 +1352,36 @@ public class ChartView extends CyclistViewBase {
 			return false;
 		}
 
-		if(_lastSubLists != null){
-			getChart().getData().clear();
-			List<XYChart.Series<Object, Object>> graphs = new ArrayList<>();
-
-			for (Map<MultiKey, SeriesData> map : _lastSubLists) {
-
-				//First check that all the selected items in the filter exist in "_lastSubLists", otherwise - need to fetch them with SQL query.
-				//It happens when a filter based on LOD field has one or more unchecked items and then a filter based on non-LOD field is applied.
-				// It queries the database and the returned results are missing the LOD unchecked values.
-				if(!filterItemsExistInMap(currentFilter, map)){
-					return false;
-				}
-
-
-				for (Map.Entry<MultiKey, SeriesData> entry : map.entrySet()) {
-					Boolean addValues = true;
-					MultiKey key = entry.getKey();
-					if(isKeyInFilter(key,filters())){
-						addValues = isKeyInFilter(key,remoteFilters());
-					}else{
-						addValues = false;
-					}
-					if(addValues){
-						convertData(entry.getValue(), _spec);
-						graphs.add(createChartSeries(entry.getValue(), _spec));
-					}
-				}
-				getChart().getData().addAll(graphs);
-			}
-			return true;
-		}
+//		if(_lastSubLists != null){
+//			getChart().getData().clear();
+//			List<XYChart.Series<Object, Object>> graphs = new ArrayList<>();
+//
+//			for (Map<MultiKey, SeriesData> map : _lastSubLists) {
+//
+//				//First check that all the selected items in the filter exist in "_lastSubLists", otherwise - need to fetch them with SQL query.
+//				//It happens when a filter based on LOD field has one or more unchecked items and then a filter based on non-LOD field is applied.
+//				// It queries the database and the returned results are missing the LOD unchecked values.
+//				if(!filterItemsExistInMap(currentFilter, map)){
+//					return false;
+//				}
+//
+//				for (Map.Entry<MultiKey, SeriesData> entry : map.entrySet()) {
+//					Boolean addValues = true;
+//					MultiKey key = entry.getKey();
+//					if (isKeyInFilter(key,filters())){
+//						addValues = isKeyInFilter(key,remoteFilters());
+//					} else {
+//						addValues = false;
+//					}
+//					if(addValues){
+//						convertData(entry.getValue(), _currentSpec);
+//						graphs.add(createChartSeries(entry.getValue(), _currentSpec));
+//					}
+//				}
+//				getChart().getData().addAll(graphs);
+//			}
+//			return true;
+//		}
 		return false;
 	}
 
