@@ -155,7 +155,20 @@
 		<mkdir dir="deploy/dist" />
 		<mkdir dir="deploy/dist/libs" />
 		<mkdir dir="deploy/dist/externalApps" />
-		
+		<mkdir dir="deploy/dist/skinImages" />
+
+		<copy todir="deploy/dist">
+			<fileset dir="${basedir}\cyclist\">
+				<filename name="default-metadata.json"/>	
+			</fileset>
+		</copy>
+
+		<copy todir="deploy/dist/skinImages">
+			<fileset dir="${basedir}\cyclist\skinImages">
+				<filename name="*"/>
+			</fileset>
+		</copy>
+
 		<copy todir="deploy/dist/libs">
 			<fileset dir="deploy/externalLibs">
 				<include name="*" />

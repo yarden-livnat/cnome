@@ -1,34 +1,34 @@
 package edu.utexas.cycic.presenter;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
-import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
+import org.mo.closure.v1.Closure;
+
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.presenter.PresenterBase;
 import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
-import edu.utah.sci.cyclist.core.ui.views.ChartView;
-import edu.utexas.cycic.CycicNotifications;
+import edu.utah.sci.cyclist.core.ui.View;
 
 
-public class InstitutionViewPresenter extends PresenterBase {
+public class InstitutionViewPresenter extends ViewPresenter {
 	
 	public InstitutionViewPresenter(EventBus bus) {
 		super(bus);
 	}
-	
-	
-	public void newInstitution(ComboBox<String>	cb){
-		cb.valueProperty().addListener(new ChangeListener<String>(){
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if(newValue == "New Institution"){
-					CyclistNotification notification = new CyclistNotification(CycicNotifications.NEW_INSTIT);
-					broadcast(notification);
-				}
-			}
-		});
-	
-	}
+
+    public View getView() {
+        return (View) super.getView();
+    }
+
+    public void setView(View view) {
+        super.setView(view);
+
+            getView().setOnSelectAction(new Closure.V0() {
+                @Override 
+                public void call() {
+                	onViewSelected(getView()); 
+                }
+            });
+    }
+
+    public void onViewSelected(View view) {
+        super.onViewSelected(view);
+    }    
 }

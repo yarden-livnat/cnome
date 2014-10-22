@@ -1,4 +1,3 @@
-
 /*
  * --- Workspace
  */
@@ -65,6 +64,7 @@
 	-fx-background-color: -fx-text-box-border, -fx-control-inner-background;	
     -fx-background-insets: 1, 2;
     -fx-background-radius: 2, 2;
+    -fx-font-family: monospace;
 }
  
  .console .text-area:focused {

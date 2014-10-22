@@ -1,30 +1,30 @@
 package edu.utexas.cycic;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.awt.Dialog;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
-import javafx.beans.property.StringProperty;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import javafx.beans.value.ChangeListener;
@@ -35,11 +35,9 @@ import javafx.event.EventHandler;
 
 import javax.imageio.ImageIO;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
@@ -49,11 +47,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -70,7 +66,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import edu.utah.sci.cyclist.core.services.CyclusService;
 
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
@@ -197,6 +192,15 @@ public class Cycic extends ViewBase{
 	 * Initiates the Pane and GridPane.
 	 */
 	private void init(){
+		Resources1 resource = new Resources1();
+		File file = new File(resource.getCurrentPath());
+		String path = "/" + file.getParent();
+		try {
+			defaultJsonReader(path);
+			log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
+		} catch (IOException e1) {
+			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
+		}
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
@@ -262,7 +266,7 @@ public class Cycic extends ViewBase{
 		grid.setVgap(5);
 		createArchetypeBar(grid);
 		// Adding a new Facility //
-		Text scenetitle1 = new Text("Add Prototype");
+		Label scenetitle1 = new Label("Add Prototype");
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
 		grid.add(facName, 1, 0);
@@ -309,17 +313,16 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
-
-		skins.getItems().add("None");
-		skins.setValue("None");
-		DataArrays.visualizationSkins.add(XMLReader.SC2);
-		DataArrays.visualizationSkins.add(XMLReader.DSARR);
+		
+		skins.getItems().add("Default Skin");
+		skins.setValue("Default Skin");
+		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
 		}
 		skins.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				if(skins.getValue().equalsIgnoreCase("None")){
+				if(skins.getValue().equalsIgnoreCase("Default Skin")){
 					for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
 						DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(false);
 						DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(100);
@@ -338,15 +341,21 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		grid.add(skins, 0, 1);
+		grid.add(new Label("Node Skins"){
+			{
+				setTooltip(new Tooltip("Use this drop down to select the skin set to use for your nodes."));
+				setFont(new Font("Time", 14));
+			}
+		}, 0, 1);
+		grid.add(skins, 1, 1);
 		
-		Button imageButton = new Button("Save fuel cycle image");
+        Button imageButton = new Button("Save fuel cycle diagram");
 		imageButton.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				export();
 			}
 		});
-		grid.add(imageButton, 1, 1);
+		grid.add(imageButton, 2, 1);
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
@@ -354,6 +363,7 @@ public class Cycic extends ViewBase{
             localToggle.setSelected(true);
         } catch (RuntimeException | IOException e) {
             localToggle.setSelected(false);
+            remoteToggle.setSelected(true);
         };
 		grid.add(localToggle, 7, 0);
 		grid.add(remoteToggle, 8, 0);
@@ -410,6 +420,14 @@ public class Cycic extends ViewBase{
                 continue;
             }
             String schema = schemas.getString(spec);
+            String pattern1 = "<!--.*?-->";
+            Pattern p = Pattern.compile(pattern1, Pattern.DOTALL);
+            schema = p.matcher(schema).replaceAll("");
+            if(schema.length() > 12){
+            	if(!schema.substring(0, 12).equals("<interleave>")){
+                	schema = "<interleave>" + schema + "</interleave>"; 
+                }
+            }
             JsonObject anno = annotations.getJsonObject(spec);
             switch(anno.getString("entity")){
             case "facility":
@@ -799,7 +817,21 @@ public class Cycic extends ViewBase{
 		        log.error("Error writing image to file: "+e.getMessage());
 		    }
 		} else {
-			System.out.println("weird");
+			System.out.println("File did not generate correctly.");
 		}
+	}
+	
+	private void defaultJsonReader(String path) throws IOException{
+	    BufferedReader reader = new BufferedReader( new FileReader (path + "/default-metadata.json"));
+	    String         line = null;
+	    StringBuilder  stringBuilder = new StringBuilder();
+	    String         ls = System.getProperty("line.separator");
+
+	    while( ( line = reader.readLine() ) != null ) {
+	        stringBuilder.append( line );
+	        stringBuilder.append( ls );
+	    }
+	    reader.close();
+		retrieveSchema(stringBuilder.toString());
 	}
 }
