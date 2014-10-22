@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.core.util;
 
+import org.controlsfx.glyphfont.FontAwesome;
+
 import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
@@ -9,6 +11,7 @@ public class GlyphRegistry {
 	public final static String FONT_AWESOME_TTF_PATH = "assets/fontawesome-webfont.ttf";
     public final static String DEFAULT_ICON_SIZE = "14.0";
     public final static String DEFAULT_FONT_SIZE = "1em";
+    public final static AwesomeIcon DEFAULT_UNKNOWN_ICON = AwesomeIcon.QUESTION_CIRCLE;
 
     static {
     	Font.loadFont(Cyclist.class.getResource(FONT_AWESOME_TTF_PATH).toExternalForm(), 10.0);
@@ -23,7 +26,7 @@ public class GlyphRegistry {
 	}
 	
 	static public Label get(AwesomeIcon iconName, String size) {
-		return get(iconName.toString(),  size);
+		return get(iconName != null ? iconName.toString(): DEFAULT_UNKNOWN_ICON.toString(),  size);
 	}
 	
 	static public Label get(String name, String size) {

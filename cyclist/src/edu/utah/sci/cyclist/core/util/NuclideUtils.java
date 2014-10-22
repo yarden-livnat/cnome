@@ -294,7 +294,7 @@ public class NuclideUtils {
 
 				// Figure out if we are meta-stable or not
 				String end_char = nucstr.substring(nucstr.length() - 1);
-				if (end_char == "M")
+				if ("M".endsWith(end_char))
 					newnuc = (10000 * anum) + 1;
 				else if (DIGITS.contains(end_char))
 					newnuc = (10000 * anum);

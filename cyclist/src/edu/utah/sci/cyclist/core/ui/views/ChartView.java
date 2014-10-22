@@ -492,6 +492,7 @@ public class ChartView extends CyclistViewBase {
 		if (list.size() == 0) {
 			log.debug("no data");
 			getChart().getData().clear();
+			_currentSpec = spec;
 			return;
 		}
 		
@@ -615,11 +616,13 @@ public class ChartView extends CyclistViewBase {
 
     private void releaseChart() {
 		
-		if (_stackPane.getChildren().size() > 1) {
-			_stackPane.getChildren().remove(0);
-		}
-
-		setCurrentTask(null);
+    	// TODO: sometimes a Text msg gets left out. For now, remove all.
+//		if (_stackPane.getChildren().size() > 1) {
+//			_stackPane.getChildren().remove(0);
+//		}
+    	_stackPane.getChildren().clear();
+		
+    	setCurrentTask(null);
 		if (getChart() == null) return;
 		
 		if (_xAxis instanceof NumberAxis) {
@@ -738,6 +741,8 @@ public class ChartView extends CyclistViewBase {
 	
 	private void setChart(XYChart<?, ?> chart, Spec spec) {
 		System.out.println("replace chart ("+(chart!=null)+") spec: "+spec != null);
+		// for now ensure there are not othe children
+		_stackPane.getChildren().clear();
 		if (chart != null) {
 			_stackPane.getChildren().add(0, chart);
 			_currentSpec = spec != null? spec : new Spec();
