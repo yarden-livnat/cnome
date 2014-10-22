@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
@@ -191,6 +192,8 @@ public class Cycic extends ViewBase{
 	 * Initiates the Pane and GridPane.
 	 */
 	private void init(){
+		Resources1 resource = new Resources1();
+		System.out.println(resource.getCurrentPath());
 		try {
 			defaultJsonReader();
 			log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
