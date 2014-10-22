@@ -1,5 +1,9 @@
 package edu.utexas.cycic;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.BufferedReader;
@@ -11,7 +15,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
+
 import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
@@ -31,6 +37,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -184,8 +191,12 @@ public class Cycic extends ViewBase{
 	 * Initiates the Pane and GridPane.
 	 */
 	private void init(){
-		
-		
+		try {
+			defaultJsonReader();
+		} catch (IOException e1) {
+			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
+		}
+		log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
@@ -240,7 +251,7 @@ public class Cycic extends ViewBase{
 		cycicBox.autosize();
 		Cycic.pane.autosize();
 		Cycic.pane.setId("cycicPane");
-		Cycic.pane.setPrefSize(1000, 600);
+		Cycic.pane.setPrefSize(1100, 700);
 		Cycic.pane.setStyle("-fx-background-color: white;");
 		
 		// Temp Toolbar //
@@ -407,8 +418,6 @@ public class Cycic extends ViewBase{
                 	schema = "<interleave>" + schema + "</interleave>"; 
                 }
             }
-            
-            System.out.println(schema);
             JsonObject anno = annotations.getJsonObject(spec);
             switch(anno.getString("entity")){
             case "facility":
@@ -798,9 +807,21 @@ public class Cycic extends ViewBase{
 		        log.error("Error writing image to file: "+e.getMessage());
 		    }
 		} else {
-			System.out.println("weird");
+			System.out.println("File did not generate correctly.");
 		}
 	}
 	
-	
+	private void defaultJsonReader() throws IOException{
+	    BufferedReader reader = new BufferedReader( new FileReader ("default-metadata.json"));
+	    String         line = null;
+	    StringBuilder  stringBuilder = new StringBuilder();
+	    String         ls = System.getProperty("line.separator");
+
+	    while( ( line = reader.readLine() ) != null ) {
+	        stringBuilder.append( line );
+	        stringBuilder.append( ls );
+	    }
+	    reader.close();
+		retrieveSchema(stringBuilder.toString());
+	}
 }
