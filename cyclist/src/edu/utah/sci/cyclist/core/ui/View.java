@@ -26,7 +26,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
+import org.mo.closure.v1.Closure;
+
 public interface View {
 	ObjectProperty<EventHandler<ActionEvent>> onMinmaxProperty();
 	ObjectProperty<EventHandler<ActionEvent>> onCloseProperty();
+    void setOnSelectAction(Closure.V0 action);
 }
