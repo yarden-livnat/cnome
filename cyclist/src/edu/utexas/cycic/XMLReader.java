@@ -18,6 +18,8 @@ import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import jdk.internal.org.xml.sax.SAXParseException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -46,7 +48,7 @@ public class XMLReader {
 			images.put("repository", new Image(new File("./skinImages/fuelcycle_geo.png").toURI().toString()));
 			images.put("mine", new Image(new File("./skinImages/fuelcycle_mine.png").toURI().toString()));
 			images.put("reactor", new Image(new File("./skinImages/fuelcycle_rxtr.png").toURI().toString(), true));
-			images.put("sep", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
+			images.put("reprocessing", new Image(new File("./skinImages/fuelcycle_sep.png").toURI().toString()));
 		}
 	};
 	
@@ -69,7 +71,8 @@ public class XMLReader {
 			add("StubFacility/cyclus/StubInst:StubInst:StubInst");
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycamore:DeployInst");
-			
+			add(":cycamore:BatchReactor");
+			add(":cycaless:BatchReactor");
 		}
 	};
 	
@@ -127,7 +130,6 @@ public class XMLReader {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			InputSource is = new InputSource(new StringReader(xmlSchema));
 			Document doc = dBuilder.parse(is);
-			
 			NodeList top = doc.getChildNodes();
 			if(top.item(0).getNodeName() == "interleave"){
 				for(int i = 0; i < top.getLength(); i++){

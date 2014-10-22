@@ -2,29 +2,22 @@ package edu.utexas.cycic;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.awt.Dialog;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
-import java.util.stream.Stream;
-
+import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
-import org.controlsfx.dialog.Dialogs;
-
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
-import javafx.beans.property.StringProperty;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import javafx.beans.value.ChangeListener;
@@ -35,12 +28,9 @@ import javafx.event.EventHandler;
 
 import javax.imageio.ImageIO;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonValue;
-
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -49,11 +39,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -70,7 +58,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import edu.utah.sci.cyclist.core.services.CyclusService;
 
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
@@ -410,6 +397,16 @@ public class Cycic extends ViewBase{
                 continue;
             }
             String schema = schemas.getString(spec);
+            String pattern1 = "<!--.*?-->";
+            Pattern p = Pattern.compile(pattern1, Pattern.DOTALL);
+            schema = p.matcher(schema).replaceAll("");
+            if(schema.length() > 12){
+            	if(!schema.substring(0, 12).equals("<interleave>")){
+                	schema = "<interleave>" + schema + "</interleave>"; 
+                }
+            }
+            
+            System.out.println(schema);
             JsonObject anno = annotations.getJsonObject(spec);
             switch(anno.getString("entity")){
             case "facility":
