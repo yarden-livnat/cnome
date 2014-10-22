@@ -21,7 +21,7 @@ public class InstitutionViewPresenter extends ViewPresenter {
         super.setView(view);
 
             getView().setOnSelectAction(new Closure.V0() {
-                @Override
+                @Override 
                 public void call() {
                 	onViewSelected(getView()); 
                 }
