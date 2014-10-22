@@ -593,7 +593,7 @@ public class OutPut {
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder docBuilder= docFactory.newDocumentBuilder();
 				Document doc = docBuilder.newDocument();
-				Element rootElement = doc.createElement("Simulation");
+				Element rootElement = doc.createElement("simulation");
 				doc.appendChild(rootElement);
 
 				// General Simulation Information
