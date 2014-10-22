@@ -251,7 +251,7 @@ public class Cycic extends ViewBase{
 		cycicBox.autosize();
 		Cycic.pane.autosize();
 		Cycic.pane.setId("cycicPane");
-		Cycic.pane.setPrefSize(1100, 700);
+		Cycic.pane.setPrefSize(1000, 600);
 		Cycic.pane.setStyle("-fx-background-color: white;");
 		
 		// Temp Toolbar //
@@ -262,7 +262,7 @@ public class Cycic extends ViewBase{
 		grid.setVgap(5);
 		createArchetypeBar(grid);
 		// Adding a new Facility //
-		Text scenetitle1 = new Text("Add Prototype");
+		Label scenetitle1 = new Label("Add Prototype");
 		grid.add(scenetitle1, 0, 0);
 		Label facName = new Label("Name");
 		grid.add(facName, 1, 0);
@@ -309,10 +309,10 @@ public class Cycic extends ViewBase{
 		ScrollPane scroll = new ScrollPane();
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
-
-		skins.getItems().add("None");
-		skins.setValue("None");
-		DataArrays.visualizationSkins.add(XMLReader.SC2);
+		
+		skins.getItems().add("Default Skin");
+		skins.setValue("Default Skin");
+		//DataArrays.visualizationSkins.add(XMLReader.SC2);
 		DataArrays.visualizationSkins.add(XMLReader.DSARR);
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
@@ -338,7 +338,13 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		grid.add(skins, 0, 1);
+		grid.add(new Label("Node Skins"){
+			{
+				setTooltip(new Tooltip("Use this drop down to select the skin set to use for your nodes."));
+				setFont(new Font("Time", 14));
+			}
+		}, 0, 1);
+		grid.add(skins, 1, 1);
 		
 		Button imageButton = new Button("Save fuel cycle image");
 		imageButton.setOnAction(new EventHandler<ActionEvent>(){
@@ -346,7 +352,7 @@ public class Cycic extends ViewBase{
 				export();
 			}
 		});
-		grid.add(imageButton, 1, 1);
+		grid.add(imageButton, 2, 1);
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
