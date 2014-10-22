@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -619,18 +620,13 @@ public class OutPut {
 					Element regionID = doc.createElement("region");
 					rootElement.appendChild(regionID);
 
-					regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.type.split(" ")[1]);
+					regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.archetype.split(":")[2]);
 					// Building the institutions within regions.
 					for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
 						for (String instit: region.institutions){
-							if (institution.name == instit) {
+							if (institution.name.equalsIgnoreCase(instit)) {
 								Element institID = doc.createElement("institution");
 								regionID.appendChild(institID);
-								for(String facility: institution.availPrototypes) {
-									Element allowedProto = doc.createElement("availableprototype");
-									allowedProto.appendChild(doc.createTextNode(facility));
-									institID.appendChild(allowedProto);								
-								}
 								Element initFacList = doc.createElement("initialfacilitylist");
 								for(facilityItem facility: institution.availFacilities) {
 									Element entry = doc.createElement("entry");
@@ -643,7 +639,7 @@ public class OutPut {
 									initFacList.appendChild(entry);
 								}
 								institID.appendChild(initFacList);
-								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, "DeployInstit");
+								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.archetype.split(":")[2]);
 							}
 						}
 					}
@@ -654,12 +650,17 @@ public class OutPut {
 					recipeBuilder(doc, rootElement, recipe);
 				}
 
-				saveFile(doc, rootElement);
+				// Writing out the xml file
+				TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				Transformer transformer = transformerFactory.newTransformer();
+				DOMSource source = new DOMSource(doc);
 				
 				return xmlToString(doc);
 			} catch (ParserConfigurationException pce){
-				pce.printStackTrace();
-				
+				pce.printStackTrace();				
+			} catch (TransformerConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return null;
