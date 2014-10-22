@@ -36,7 +36,6 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -61,12 +60,14 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.model.Configuration;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
-import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.Spring;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
@@ -76,6 +77,7 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.NuclideFiltersLibrary;
 import edu.utah.sci.cyclist.neup.model.proxy.SimulationProxy;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartMode;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartType;
 
 public class InventoryView extends CyclistViewBase {
@@ -91,10 +93,14 @@ public class InventoryView extends CyclistViewBase {
 	private ObservableList<String> _nuclideFilterNames = FXCollections.observableArrayList();
 	private ObjectProperty<Predicate<Inventory>> _currentNuclideFilterProperty = new SimpleObjectProperty<>();
 	
+	private TitledPanel _agentListPanel;
+	private ChoiceBox<ChartType> _chartType;
+	private boolean _lastForceZero = false;
+
 	private SimulationProxy _simProxy = null;
 		
 	private InventoryChart _chart = new InventoryChart();
-	
+	ComboBox<String> _filters = new ComboBox<>();
 	
 	/**
 	 * Constructor
@@ -240,6 +246,73 @@ public class InventoryView extends CyclistViewBase {
 		}
 	}
 	
+	@Override
+	public void save(IMemento memento) {
+		IMemento group = memento.createChild("agents");
+		for (AgentInfo info : _agents) {
+			IMemento child = group.createChild("agent");
+			child.putString("field", info.field);
+			child.putString("value", info.value);
+		}
+		
+		memento.putString("chart-type", _chartType.getValue().toString());
+		
+		String nucId =  _filters.getValue();
+		if(nucId != null){
+			IMemento filter = memento.createChild("filter");
+			filter.putString("nuc-id", nucId);
+		}
+		
+		//axis options
+		IMemento axis = memento.createChild("axis-opt");
+		axis.putBoolean("mode", _chart.axisMode().get() == CyclistAxis.Mode.LINEAR);
+		axis.putBoolean("force-zero", _chart.forceZero().get());
+		
+		//chart options
+		IMemento chart = memento.createChild("chart-opt");
+		chart.putBoolean("mode", _chart.getMode().get() == ChartMode.LINE);
+		chart.putBoolean("total", _chart.getShowTotal().getValue());
+		
+	}
+	
+	@Override 
+	public void restore(IMemento memento, Context ctx) {
+		IMemento group = memento.getChild("agents");
+		if (group != null) {
+    		for (IMemento child : group.getChildren("agent")) {
+    			addAgent(child.getString("field"), child.getString("value"));
+    		}
+		}
+		
+		_chartType.setValue(ChartType.valueOf(memento.getString("chart-type")));
+		IMemento filter = memento.getChild("filter");
+		if(filter != null){
+			String nucId = filter.getString("nuc-id");
+			_filters.getSelectionModel().select(nucId);
+		}
+		
+		IMemento axis = memento.getChild("axis-opt");
+		_chart.axisMode().set( axis.getBoolean("mode") ? CyclistAxis.Mode.LINEAR : CyclistAxis.Mode.LOG);
+		_chart.forceZero().set( axis.getBoolean("force-zero"));
+		
+		IMemento chart = memento.getChild("chart-opt");
+		_chart.setMode(chart.getBoolean("mode")?ChartMode.LINE:ChartMode.STACKED);
+		_chart.setShowTotal(chart.getBoolean("total"));
+	}
+	
+	private void addAgent(String type, String name) {
+		AgentInfo info = new AgentInfo(type, name);	
+		AgentEntry entry = new AgentEntry(info);
+		_agentListPanel.getContent().getChildren().add(entry);
+		entry.setOnClose(item->{
+			_agents.remove(item.info);
+			_agentListPanel.getContent().getChildren().remove(item);
+			_chart.remove(item.info);
+		});
+		
+		addAgent(info);	
+	}
+	
 	private void build() {
 		setTitle(TITLE);
 		getStyleClass().add("inventory");
@@ -270,25 +343,25 @@ public class InventoryView extends CyclistViewBase {
 		VBox vbox = new VBox();
 		vbox.getStyleClass().add("ctrl");
 		
-		ChoiceBox<ChartType> type = new ChoiceBox<>();
-		type.getStyleClass().add("choice");
-		type.getItems().addAll(ChartType.values());
-		type.valueProperty().addListener(e->{
-			selectChartType(type.getValue());
+		_chartType = new ChoiceBox<>();
+		_chartType.getStyleClass().add("choice");
+		_chartType.getItems().addAll(ChartType.values());
+		_chartType.valueProperty().addListener(e->{
+			selectChartType(_chartType.getValue());
 		});
 		
-		type.setValue(ChartType.INVENTORY);
+		_chartType.setValue(ChartType.INVENTORY);
 		
-		vbox.getChildren().add(type);
+		vbox.getChildren().add(_chartType);
 		return vbox;
 	}
 	
 	public Node buildAgentCtrl() {		
-		TitledPanel panel = new TitledPanel("Agents");
-		panel.getStyleClass().add("agents-panel");
+		_agentListPanel = new TitledPanel("Agents");
+		_agentListPanel.getStyleClass().add("agents-panel");
 		
-		Node pane = panel.getPane();
-		panel.setFillWidth(true);
+		Node pane = _agentListPanel.getPane();
+		_agentListPanel.setFillWidth(true);
 		pane.setOnDragOver(e->{
 			DnD.LocalClipboard clipboard = getLocalClipboard();
 			if (clipboard.hasContent(DnD.VALUE_FORMAT)) {
@@ -313,21 +386,13 @@ public class InventoryView extends CyclistViewBase {
 					return;
 				}	
 			}
-			AgentInfo info = new AgentInfo(field, value);	
-			AgentEntry entry = new AgentEntry(info);
-			panel.getContent().getChildren().add(entry);
-			entry.setOnClose(item->{
-				_agents.remove(item.info);
-				panel.getContent().getChildren().remove(item);
-				_chart.remove(item.info);
-			});
 			
-			addAgent(info);	
+			addAgent(field, value);
 			e.setDropCompleted(true);
 			e.consume();
 		});
 		
-		return panel;
+		return _agentListPanel;
 	}
 
 	public Node buildNuclideCtrl() {
@@ -337,18 +402,17 @@ public class InventoryView extends CyclistViewBase {
 		Text title = new Text("Nuclide");
 		title.getStyleClass().add("title");
 		
-		ComboBox<String> filters = new ComboBox<>();
-		filters.getStyleClass().add("nuclide");
+		_filters.getStyleClass().add("nuclide");
 		
-		filters.setPromptText("filter");
-		filters.setEditable(true);
-		filters.setItems(_nuclideFilterNames);
+		_filters.setPromptText("filter");
+		_filters.setEditable(true);
+		_filters.setItems(_nuclideFilterNames);
 		
-		filters.valueProperty().addListener(o->selectNuclideFilter(filters.getValue()));
+		_filters.valueProperty().addListener(o->selectNuclideFilter(_filters.getValue()));
 
 		vbox.getChildren().addAll(
 			title,
-			filters
+			_filters
 		);
 		;
 		return vbox;
@@ -407,6 +471,7 @@ public class InventoryView extends CyclistViewBase {
 		if (current != null) {
 			series.add(current);
 		}
+		
 		info.series = series;
 		if (info.active)
 			_chart.add(info);
@@ -441,24 +506,25 @@ public class InventoryView extends CyclistViewBase {
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.axisMode().set(CyclistLogAxis.Mode.LINEAR);
+				_chart.axisMode().set(CyclistAxis.Mode.LINEAR);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistLogAxis.Mode.LINEAR));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LINEAR));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y log", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.axisMode().set(CyclistLogAxis.Mode.LOG);
+				_chart.axisMode().set(CyclistAxis.Mode.LOG);
             }
 		});
-		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistLogAxis.Mode.LOG));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LOG));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
 		item.getGraphic().visibleProperty().bind(_chart.forceZero());
+		item.disableProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.STACKED));
 		menu.getItems().add(item);
 		item.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -478,11 +544,14 @@ public class InventoryView extends CyclistViewBase {
 		final ContextMenu contextMenu = new ContextMenu();
 		
 		// line chart
-		MenuItem item = new MenuItem("Line chart");
+		MenuItem item = new MenuItem("Line chart",GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.LINE));
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
 				_chart.setMode(InventoryChart.ChartMode.LINE);
+				if (!_lastForceZero)
+					_chart.forceZero().set(false);
 			}
 		});
 		contextMenu.getItems().add(item);
@@ -498,10 +567,14 @@ public class InventoryView extends CyclistViewBase {
 //		contextMenu.getItems().add(item);
 		
 		// stacked chart
-		item = new MenuItem("Stacked chart");
+		item = new MenuItem("Stacked chart",GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.STACKED));
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
+				_lastForceZero = _chart.forceZero().get();
+				if (!_lastForceZero) 
+					_chart.forceZero().set(true);
 				_chart.setMode(InventoryChart.ChartMode.STACKED);
 			}
 		});
@@ -509,12 +582,12 @@ public class InventoryView extends CyclistViewBase {
 		
 		contextMenu.getItems().add(new SeparatorMenuItem());
 		
-		CheckMenuItem checked = new CheckMenuItem("Show total");
-		checked.setSelected(_chart.getShowTotal());
+		MenuItem checked = new MenuItem("Show total",GlyphRegistry.get(AwesomeIcon.CHECK));
+		checked.getGraphic().visibleProperty().bind(_chart.getShowTotal());
 		checked.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
             public void handle(ActionEvent event) {
-				_chart.setShowTotal(!_chart.getShowTotal());
+				_chart.setShowTotal(!_chart.getShowTotal().getValue());
             }
 		});
 		contextMenu.getItems().add(checked);
@@ -666,10 +739,8 @@ public class InventoryView extends CyclistViewBase {
 					SimpleBooleanProperty running= (SimpleBooleanProperty) o;
 					if (running.get()) {
 						_animation.play();
-						log.info("Fetch invetory");
 					} else {
 						_animation.stop();
-						log.info("Fetch invetory completed");
 					}
 				});
 

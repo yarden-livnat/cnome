@@ -15,12 +15,8 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
-import javafx.stage.Window;
 
 import org.apache.log4j.Logger;
-import org.controlsfx.control.action.Action;
-import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.core.model.Blob;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -28,7 +24,8 @@ import edu.utah.sci.cyclist.core.model.Progress;
 import edu.utah.sci.cyclist.core.model.Simulation;
 
 public class LoadSqlite {
-
+	static Logger log = Logger.getLogger(LoadSqlite.class);
+	
 	private static ObservableList<CyclistDatasource> _dsList;
 	
 	LoadSqlite() {	
@@ -136,10 +133,10 @@ public class LoadSqlite {
 			}
     			
 		}catch(SQLSyntaxErrorException e){
-			System.out.println("Table for SimId doesn't exist: "+e.getMessage());
+			log.warn("Table for SimId doesn't exist: "+e.getMessage());
 		}
 		catch (Exception e) {
-			System.out.println("Get simulation failed: "+e.getMessage());
+			log.warn("Get simulation failed: " + e.getMessage());
 		}finally{
 			ds.releaseConnection();
 		}

@@ -51,8 +51,10 @@ public class CyclistDatasource implements DataSource, Resource {
 	private String _id = UUID.randomUUID().toString();
 	
 	// SQLite hack
-	private final Semaphore _SQLiteSemaphore = new Semaphore(1, true);
-	private Connection _SQLiteConnection = null;
+	static private final Semaphore _SQLiteSemaphore = new Semaphore(1, true);
+	static private Connection _SQLiteConnection = null;
+	static private Thread _currentThread = null;
+	
 	private static final String SQLITE_PREFIX = "jdbc:sqlite:/";
 	
 	
@@ -214,37 +216,42 @@ public class CyclistDatasource implements DataSource, Resource {
 	
 	public void releaseConnection() {
 		if (isSQLite()) {
-//			System.out.println("sqlite: release");
+			if (_currentThread != Thread.currentThread()) {
+				log.warn("SQLite: wrong thread close connection: ignored");
+				return;
+			}
+			try {
+				_SQLiteConnection.close();
+				_SQLiteConnection = null;
+			} catch (SQLException e) {
+				log.warn("Error while closing sqlite connection: ",e);
+				e.printStackTrace();
+			}
 			_SQLiteSemaphore.release();
 		}
 	}
 	
 	private Connection getSQLiteConnection() throws SQLException {
-		try {
-			//If file doesn't exist the sqlite driver, creates one, and returns it without any error.
-			//In order to show an error, when non-existing file is chosen - have to check the existence of the file.
-			File file = new File(_url.replace(SQLITE_PREFIX, ""));
-			if(!file.exists()){
-				throw new SQLException();
-			}
-			_SQLiteSemaphore.acquire();
-//			if (_SQLiteConnection == null) 
-				_SQLiteConnection =  DriverManager.getConnection(_url, _properties);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//If file doesn't exist the sqlite driver, creates one, and returns it without any error.
+		//In order to show an error, when non-existing file is chosen - have to check the existence of the file.
+		File file = new File(_url.replace(SQLITE_PREFIX, ""));
+		if (!file.exists()) {
+			throw new SQLException("SQLite: no such file ["+_url+"]");
 		}
+		
+		try {		
+			_SQLiteSemaphore.acquire();
+		} catch (InterruptedException e) { //InterruptedException
+			// ignore. Thread was waiting on the semaphore
+		}
+		
+		try {
+			_SQLiteConnection =  DriverManager.getConnection(_url, _properties);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new SQLException("SQLite getConnection failed", e);
+		}
+		_currentThread = Thread.currentThread();
 		return _SQLiteConnection;
 	}
-	
-	
-//	private void initSQLite(Connection connection) {
-//		try (Statement stmt = connection.createStatement()) {
-//			boolean ok = stmt.execute("PRAGMA journal_mode = WAL");
-//			System.out.println("SQLite PRAGMA statement: "+ok);
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
  }

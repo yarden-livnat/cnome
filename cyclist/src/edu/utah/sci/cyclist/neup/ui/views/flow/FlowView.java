@@ -13,11 +13,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.imageio.ImageIO;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
@@ -27,6 +22,8 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -59,16 +56,24 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
+
+import javax.imageio.ImageIO;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.RangeField;
-import edu.utah.sci.cyclist.core.ui.views.SimpleTableView;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utah.sci.cyclist.core.util.MementoUtils;
 import edu.utah.sci.cyclist.neup.model.Facility;
 import edu.utah.sci.cyclist.neup.model.Inventory;
 import edu.utah.sci.cyclist.neup.model.Range;
@@ -101,7 +106,8 @@ public class FlowView extends CyclistViewBase {
   private Map<Integer, Facility> _facilities = new HashMap<>();
   private List<Connector> _connectors = new ArrayList<>();
   private Map<String, InventoryEntry> _selectedNodes = new HashMap<>();
-
+  private StringProperty _nuclideTextFilter = new SimpleStringProperty();
+  
   private SimulationProxy _simProxy = null;
   private int _targetLine = -1;
   private boolean _changingKid = false;
@@ -189,10 +195,8 @@ public class FlowView extends CyclistViewBase {
     		for (Facility f : newValue.v1) {
     		  _facilities.put(f.getId(), f);
     		}
-//    		System.out.println("Flow: received "+newValue.v1.size()+" facilities");
     
     		updateSelectionCtrl(newValue.v2);
-//    	  _rangeField.setRange(new Range<Integer>(1, getCurrentSimulation().getDuration()));
 	  }
 	});
 	
@@ -222,7 +226,6 @@ public class FlowView extends CyclistViewBase {
 		  for (Facility f : newValue) {
 			_facilities.put(f.getId(), f);
 		  }
-		  System.out.println("Flow: received "+newValue.size()+" facilities");
 		}
 	  }
 	});
@@ -283,7 +286,6 @@ public class FlowView extends CyclistViewBase {
 
   private void timeChanged(Range<Integer> range) {
 	// connect explicit nodes
-	System.out.println("time changed");
 	List<FlowNode> list = new ArrayList<>();
 	for (FlowNode node : _line[SRC].getNodes()) {
 	  if (node.isExplicit())
@@ -336,7 +338,7 @@ public class FlowView extends CyclistViewBase {
 	if (line.getKind() == null) {
 	  line.setKind(field.getSemantic());
 	} else if (!line.getKind().equals(field.getSemantic())) {
-	  System.out.println("Error: REJECT node of this kind");
+	  log.info("Error: REJECT node of this kind");
 	  return;
 	}
 
@@ -344,11 +346,9 @@ public class FlowView extends CyclistViewBase {
 	if (node == null) {
 	  node = createNode(field.getSemantic(), value, direction, explicit);
 	  line.addNode(node);
-	} else {
-	  if (node.isExplicit() || !explicit) {
+	} else if (node.isExplicit() || !explicit) {
 		// nothing to do here
 		return;
-	  }
 	}
 
 	node.setExplicit(explicit);
@@ -436,7 +436,7 @@ public class FlowView extends CyclistViewBase {
 		  addToChart(entry, p.get());
 		  long t2 = System.currentTimeMillis();
 
-		  System.out.println("inventory processing: "+(t1-t0)/1000.0+"  "+(t2-t1)/1000.0);
+		  log.debug("inventory processing: "+(t1-t0)/1000.0+"  "+(t2-t1)/1000.0);
 		});
 
 	  } else {
@@ -477,7 +477,7 @@ public class FlowView extends CyclistViewBase {
 		long t = System.currentTimeMillis();
 		ObservableList<Inventory> list = _simProxy.getInventory(node.getType(), node.getValue().toString());
 		long t1 = System.currentTimeMillis();
-		System.out.println("query Inventory: "+(t1-t)/1000.0);
+		log.debug("query Inventory: "+(t1-t)/1000.0);
 		return list;
 	  }	
 	};
@@ -499,7 +499,7 @@ public class FlowView extends CyclistViewBase {
 		long t = System.currentTimeMillis();
 		ObservableList<Transaction> list =  _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 		long t1 = System.currentTimeMillis();
-		System.out.println("query material flow: "+(t1-t)/1000.0);
+		log.debug("query material flow: "+(t1-t)/1000.0);
 		return list;
 	  }	
 	};
@@ -529,7 +529,7 @@ public class FlowView extends CyclistViewBase {
 		  long t = System.currentTimeMillis();
 		  ObservableList<Transaction> list = _simProxy.getTransactions(node.getType(), node.getValue().toString(), getTimeRange(), node.isSRC());
 		  long t1 = System.currentTimeMillis();
-		  System.out.println("getTransaction: node="+node.getValue().toString()+" time:"+(t1-t)/1000.0);
+		  log.debug("getTransaction: node="+node.getValue().toString()+" time:"+(t1-t)/1000.0);
 		  map.put(node, list);
 		}
 
@@ -669,7 +669,7 @@ public class FlowView extends CyclistViewBase {
 						t->t.nucid == n  ;
 						updateTransactionsPredicate();
 	  } catch (Exception e)  {
-		System.out.println("*** TODO: Indicate to user iso was invalid number");
+		log.debug("*** TODO: Indicate to user iso was invalid number");
 	  }
 	}
   }
@@ -729,7 +729,6 @@ public class FlowView extends CyclistViewBase {
 		    try {
 		    	String name = file.getName();
 		    	String ext = name.substring(name.indexOf(".")+1, name.length());
-		    	System.out.println("name: "+name+"  ext:"+ext);
 		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
 		    } catch (IOException e) {
 		        log.error("Error writing image to file: "+e.getMessage());
@@ -847,6 +846,28 @@ public class FlowView extends CyclistViewBase {
 	return _commodityVBox;
   }
 
+  private void restoreCommoditySelection(List<Pair<String, Boolean>> commodities) {
+	List<CheckBox> list = new ArrayList<CheckBox>();
+
+	  for (Pair<String, Boolean> item : commodities) {
+		  CheckBox checkbox = new CheckBox(item.v1);
+		  checkbox.selectedProperty().addListener(_commodityListener);
+		  checkbox.setSelected(item.v2);
+		  list.add(checkbox);
+	  }
+	  _commodityVBox.getChildren().addAll(list);
+  }
+  
+  private List<Pair<String, Boolean>> getCommoditySelection() {
+	  List<Pair<String, Boolean>> list = new ArrayList<>();
+	  int n = _commodityVBox.getChildren().size();
+	  for (int i=1; i<n; i++) {
+		  CheckBox checkbox = (CheckBox) _commodityVBox.getChildren().get(i);
+		  list.add(new Pair<String, Boolean>(checkbox.getText(), checkbox.isSelected()));
+	  }
+	  return list;
+  }
+  
   private void updateSelectionCtrl(List<String> values) {
 	List<CheckBox> list = new ArrayList<CheckBox>();
 
@@ -931,6 +952,7 @@ public class FlowView extends CyclistViewBase {
 		);
 
 
+	entry.textProperty().bindBidirectional(_nuclideTextFilter);
 	entry.setOnAction(e->isoFilterChanged(entry.getText()));
 	return vbox;
   }
@@ -1109,5 +1131,97 @@ public class FlowView extends CyclistViewBase {
 		_changingKid = false;
 	  }
 	});
+  }
+  
+  @Override
+  public void save(IMemento memento) {
+	  IMemento group;
+	  
+	  // time period
+	  memento.putString("time", _rangeField.getText());
+
+	  memento.putString("nuclide-filter", _nuclideTextFilter.get());
+	  
+	  memento.putString("chart-type", _chart.getChartType());
+	  
+	  List<Pair<String, Boolean>> commodities = getCommoditySelection();
+	  if (commodities.size() > 0) {
+		  group = memento.createChild("commodities");
+		  for (Pair<String, Boolean> pair : commodities) {
+			  IMemento child = group.createChild("entry");
+			  child.putString("name", pair.v1);
+			  child.putBoolean("selected", pair.v2);
+		  };
+	  }
+
+	  // senders / receivers
+	  group = memento.createChild("senders");
+	  for (FlowNode node : _line[0].getNodes()) {
+		  IMemento nodeMemento = group.createChild("node");
+		  nodeMemento.putString("type", node.getType());
+		  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
+		  nodeMemento.putBoolean("explicit", node.isExplicit());
+		  nodeMemento.putDouble("y", node.getTranslateY());
+		  nodeMemento.putBoolean("selected", node.isSelected());
+	  }
+	  
+	  group = memento.createChild("receivers");
+	  for (FlowNode node : _line[1].getNodes()) {
+		  IMemento nodeMemento = group.createChild("node");
+		  nodeMemento.putString("type", node.getType());
+		  MementoUtils.save(nodeMemento.createChild("value"), node.getValue());
+		  nodeMemento.putBoolean("explicit", node.isExplicit());
+		  nodeMemento.putDouble("y", node.getTranslateY());
+		  nodeMemento.putBoolean("selected", node.isSelected());
+	  }
+	  
+  }
+  
+  @Override
+  public void restore(IMemento memento, Context ctx) {  
+	  _nuclideTextFilter.set(memento.getString("nuclide-filter"));
+	  
+	  IMemento group = memento.getChild("commodities");
+	  if (group != null) {
+		  List<Pair<String, Boolean>> list = new ArrayList<>();
+		  for (IMemento child : group.getChildren("entry")) {
+			  list.add(new Pair<String, Boolean>(child.getString("name"), child.getBoolean("selected")));
+		  }
+		  restoreCommoditySelection(list);
+	  }
+	  
+	  String type = memento.getString("chart-type");
+	  if (type != null)
+		  _chart.setChartType(type);
+	  
+	  // restore nodes first
+	  List<FlowNode> nodes = new ArrayList<>();	  
+	  restoreLine(memento.getChild("senders"), 0, nodes);
+	  restoreLine(memento.getChild("receivers"), 1, nodes);
+
+	  // now we can set the time which will cause the queries to be fired. 
+	  _rangeField.set(memento.getString("time"));
+	  
+	  for (FlowNode node : nodes) {
+		  selectNode(node);
+	  }
+  }
+  
+  private void restoreLine(IMemento memento, int direction, List<FlowNode> list) {
+	  if (memento == null) return;
+	  
+	  for (IMemento child : memento.getChildren("node")) {
+		  String type = child.getString("type");
+		  Object value = MementoUtils.restore(child.getChild("value"));
+		  boolean explicit = child.getBoolean("explicit");
+		  boolean selected = child.getBoolean("selected");
+		  double y = child.getDouble("y");
+
+		  if (_line[direction].getKind() == null)
+			  _line[direction].setKind(type);
+		  FlowNode node = createNode(type, value, direction , explicit);
+		  _line[direction].addNode(node, y);
+		  if (selected) list.add(node);
+	  }
   }
 }

@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import edu.utah.sci.cyclist.core.model.Simulation;
@@ -17,6 +19,8 @@ import edu.utah.sci.cyclist.neup.model.Range;
 import edu.utah.sci.cyclist.neup.model.Transaction;
 
 public class SimulationProxy {
+	static Logger log = Logger.getLogger(SimulationProxy.class);
+	
 	private Simulation _sim;
 	private ObservableList<Facility> _facilities;
 	
@@ -129,7 +133,7 @@ public class SimulationProxy {
 			_sim.getDataSource().releaseConnection();
 		}
 		
-		System.out.println("retrieived "+list.size()+" transactions");
+		log.debug("retrieived "+list.size()+" transactions");
 		return  FXCollections.observableList(list);
 	}
 	
@@ -137,7 +141,6 @@ public class SimulationProxy {
 		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
-		System.out.println("query: "+query);
 		long t0 = System.currentTimeMillis();
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -155,7 +158,7 @@ public class SimulationProxy {
 				}
 				long t2 = System.currentTimeMillis();
 				
-				System.out.println("Inventory size:"+list.size()+"  timing: "+(t2-t0)/1000.0+"sec, execute:"+(t1-t0)/1000.0+"sec, "+(t2-t1)/(float)(list.size())+" ms/item");
+				log.debug("Inventory size:"+list.size()+"  timing: "+(t2-t0)/1000.0+"sec, execute:"+(t1-t0)/1000.0+"sec, "+(t2-t1)/(float)(list.size())+" ms/item");
 			}
 		} finally {
 			_sim.getDataSource().releaseConnection();
@@ -168,7 +171,7 @@ public class SimulationProxy {
 		List<Inventory> list = new ArrayList<>();
 		
 		String query = String.format(INVENTORY_QUERY, type);
-		System.out.println("query: "+query);
+		log.debug("query: "+query);
 		try (Connection conn = _sim.getDataSource().getConnection()) {
 			try (PreparedStatement stmt = conn.prepareStatement(query)) {
 //				stmt.setString(1, _sim.getSimulationId());

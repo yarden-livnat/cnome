@@ -10,8 +10,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
@@ -19,13 +17,11 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import edu.utah.sci.cyclist.core.event.Pair;
-import edu.utah.sci.cyclist.core.model.Configuration;
-import edu.utah.sci.cyclist.core.ui.components.CyclistLogAxis;
+import edu.utah.sci.cyclist.core.ui.components.CyclistAxis;
 import edu.utah.sci.cyclist.core.util.ColorUtil;
 import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryView.AgentInfo;
 
@@ -45,18 +41,18 @@ public class InventoryChart extends VBox {
 	
 	private XYChart<Number, Number> _chart = null;
 	private NumberAxis _xAxis;
-	private CyclistLogAxis _yAxis;
+	private CyclistAxis _yAxis;
 	private double _scale = 1;
 	private ChartType _type = ChartType.INVENTORY;
 	private int _upperBound = 0;
-	private ChartMode _mode = ChartMode.LINE;
-	private boolean _showTotal = false;
+	ObjectProperty<InventoryChart.ChartMode> _mode = new SimpleObjectProperty<>(InventoryChart.ChartMode.LINE);
+	private BooleanProperty _showTotal = new SimpleBooleanProperty(false);
 	
 	private Map<AgentInfo, ChartInfo> _items = new HashMap<>();
 	private XYChart.Series<Number, Number> _totalSeries = null;
 	private String totalStyle = "#00000055; -fx-stroke-width: 1px; -fx-effect: dropshadow(gaussian, #c0c0c0, 2,1, 1,1)";
 	
-	private ObjectProperty<CyclistLogAxis.Mode> _axisMode = new SimpleObjectProperty<>(CyclistLogAxis.Mode.LINEAR);
+	private ObjectProperty<CyclistAxis.Mode> _axisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
 	private BooleanProperty _forceZero = new SimpleBooleanProperty(false);
 	
 	public class ChartInfo {
@@ -72,7 +68,7 @@ public class InventoryChart extends VBox {
 		build();
 	}
 	
-	public ObjectProperty<CyclistLogAxis.Mode> axisMode() {
+	public ObjectProperty<CyclistAxis.Mode> axisMode() {
 		return _axisMode;
 	}
 	
@@ -93,7 +89,7 @@ public class InventoryChart extends VBox {
 		updateAll();
 	}
 	
-	public boolean getShowTotal() {
+	public BooleanProperty getShowTotal() {
 		return _showTotal;
 	}
 	
@@ -104,7 +100,7 @@ public class InventoryChart extends VBox {
 			_chart.getData().remove(_totalSeries);
 			_totalSeries = null;
 		}
-		_showTotal = show;
+		_showTotal.setValue(show);
 		
 	}
 	
@@ -162,10 +158,6 @@ public class InventoryChart extends VBox {
 			_upperBound = last;
 		}
 		
-//		for (Pair<Integer, Double> pt : entry.series) {
-//			System.out.format("(%d, %.2f) ",pt.v1, pt.v2);
-//		}
-//		System.out.println("----");
 		final String style = ColorUtil.toString(entry.color).substring(0, 7)+"aa";  // 'aa' is alpha
 		XYChart.Series<Number, Number> series = createSeries(entry.series, style);
 		double scale = computeScale(entry.series); // relative to the current chart type
@@ -178,7 +170,7 @@ public class InventoryChart extends VBox {
 		info.style = style;
 		_items.put(entry, info);
 		
-		if (_showTotal) {
+		if (_showTotal.getValue()) {
 			updateTotal();
 		} else if (scale > _scale) {
 //			updateScale(scale);
@@ -191,7 +183,7 @@ public class InventoryChart extends VBox {
 		series.nodeProperty().addListener(o->{
 			Path fillPath;
 			Path linePath;
-			switch (_mode) {
+			switch (_mode.getValue()) {
 			case LINE:	
 				Node node = series.getNode();
 				node.setStyle("-fx-stroke: "+style);
@@ -237,7 +229,7 @@ public class InventoryChart extends VBox {
 			_upperBound = Math.max(_upperBound, ci.last);
 		}
 		
-		if (_showTotal) {
+		if (_showTotal.getValue()) {
 			updateTotal();
 		} else if (s != _scale) {
 //			updateScale(s);
@@ -331,11 +323,15 @@ public class InventoryChart extends VBox {
 		
 		series.getData().setAll(list);
 	}
+	
+	public ObjectProperty<InventoryChart.ChartMode> getMode(){
+		return _mode;
+	}
 
 			
 	public void setMode(ChartMode mode) {
-		_mode = mode;
-		switch (_mode) {
+		_mode.setValue(mode);
+		switch (_mode.getValue()) {
 		case LINE:
 			LineChart<Number, Number> lineChart = new LineChart<>(_xAxis, _yAxis);
 			lineChart.getStyleClass().add("chart");
@@ -343,7 +339,7 @@ public class InventoryChart extends VBox {
 			lineChart.setLegendVisible(false);
 			lineChart.setAnimated(false);
 			setChart(lineChart);
-			if (_showTotal) {
+			if (_showTotal.getValue()) {
 				updateTotal();
 			}
 			break;
@@ -353,7 +349,7 @@ public class InventoryChart extends VBox {
 			areaChart.setLegendVisible(false);
 			areaChart.setAnimated(false);
 			setChart(areaChart);
-			if (_showTotal) {
+			if (_showTotal.getValue()) {
 				updateTotal();
 			}
 			break;
@@ -390,14 +386,14 @@ public class InventoryChart extends VBox {
 		_xAxis.setLabel("time");
 		_xAxis.setAnimated(false);
 		
-		_yAxis = new CyclistLogAxis();
+		_yAxis = new CyclistAxis();
 //		_yAxis = new NumberAxis();
 		_yAxis.setLabel("Amount");
 		_yAxis.setAnimated(false);
 		_yAxis.mode().bind(_axisMode);
 		_yAxis.forceZeroInRangeProperty().bind(_forceZero);
 		
-		setMode(_mode);
+		setMode(_mode.getValue());
 		
 		return _chart;
 	}
