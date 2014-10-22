@@ -195,7 +195,6 @@ public class Cycic extends ViewBase{
 		Resources1 resource = new Resources1();
 		File file = new File(resource.getCurrentPath());
 		String path = "/" + file.getParent();
-		System.out.println(path+"/default-metadata.json");
 		try {
 			defaultJsonReader(path);
 			log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
@@ -823,7 +822,6 @@ public class Cycic extends ViewBase{
 	
 	private void defaultJsonReader(String path) throws IOException{
 	    BufferedReader reader = new BufferedReader( new FileReader (path + "/default-metadata.json"));
-	    System.out.println(path+"/default-metadata.json");
 	    String         line = null;
 	    StringBuilder  stringBuilder = new StringBuilder();
 	    String         ls = System.getProperty("line.separator");
