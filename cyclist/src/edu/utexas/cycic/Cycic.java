@@ -319,7 +319,7 @@ public class Cycic extends ViewBase{
 		}
 		skins.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				if(skins.getValue().equalsIgnoreCase("None")){
+				if(skins.getValue().equalsIgnoreCase("Default Skin")){
 					for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
 						DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(false);
 						DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(100);
