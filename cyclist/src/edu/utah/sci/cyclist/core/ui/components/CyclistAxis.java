@@ -82,16 +82,37 @@ public class CyclistAxis extends CyclistNumberAxis {
             if (data.isEmpty()) {
                 _posMin = EPS;;
             } else {
+            	double min = Double.MAX_VALUE;
+            	double max = Double.MIN_VALUE;
                 _posMin = Double.MAX_VALUE;
                 for(Number dataValue: data) {
                 	double v = dataValue.doubleValue();
+                	min = Math.min(min, v);
+                	max = Math.max(max, v);
                 	if (v >0) _posMin = Math.min(_posMin, v);
                 }
+    			// System.out.println("range invalidated: #pts: "+data.size()+", "+min+", "+max);
+
            }
 		}
         super.invalidateRange(data);
     }
 
+
+	@Override protected Object autoRange(double minValue, double maxValue, double length, double labelSize) {
+//		if (getMode() == Mode.LOG) {
+//			System.out.println("****\nauto: "+minValue+"  "+maxValue+"  "+length+"  "+labelSize);
+//		}
+		double [] range = (double[]) super.autoRange(minValue, maxValue, length, labelSize);
+//		if (getMode() == Mode.LOG) {
+//    		System.out.print("   after:");
+//    		for (int i=0; i<range.length; i++) 
+//    			System.out.print(range[i]+" ");
+//    		System.out.println();
+//		}
+		return range;
+	}
+	
 	@Override
 	protected List<Number> calculateTickValues(double length, Object range) {
 		if (getMode() == Mode.LINEAR) 
@@ -180,14 +201,17 @@ public class CyclistAxis extends CyclistNumberAxis {
 		if (getMode() == Mode.LINEAR)
 			return super.getDisplayPosition(value);
 		
-		double v = Math.max(value.doubleValue(), _posMin); 
+		double min = isForceZeroInRange() ? Math.min(EPS, _posMin): _posMin;
 		
+		double v = Math.max(value.doubleValue(), min);
 		double logValue = Math.log10(v);
-		double lowerBound = _posMin;
+		
+		double lowerBound = min;
 		double logLowerBound = Math.log10(lowerBound);
+		
 		double delta = Math.log10(getUpperBound()) - logLowerBound ;
 		double deltaV = logValue - logLowerBound;
-//		System.out.println("v "+value+"  "+  (1. - ((deltaV) / delta)) * getHeight());
+		// System.out.println(String.format("v: %8.2f   p: %8.2f   dv/d: %.2f ", v, (1. - (deltaV / delta)) * getHeight(), deltaV/delta));
 		if (getSide().isVertical()) {
 			return (1. - ((deltaV) / delta)) * getHeight();
 		} else {

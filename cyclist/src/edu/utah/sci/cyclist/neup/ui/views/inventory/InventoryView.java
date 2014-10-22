@@ -96,6 +96,7 @@ public class InventoryView extends CyclistViewBase {
 	private TitledPanel _agentListPanel;
 	private ChoiceBox<ChartType> _chartType;
 	private boolean _lastForceZero = false;
+	private CyclistAxis.Mode _saveAxisMode;
 
 	private SimulationProxy _simProxy = null;
 		
@@ -520,6 +521,7 @@ public class InventoryView extends CyclistViewBase {
             }
 		});
 		item.getGraphic().visibleProperty().bind(Bindings.equal(_chart.axisMode(), CyclistAxis.Mode.LOG));
+		item.disableProperty().bind(Bindings.equal(_chart.getMode(), InventoryChart.ChartMode.STACKED));
 		menu.getItems().add(item);
 		
 		item = new MenuItem("Y force zero", GlyphRegistry.get(AwesomeIcon.CHECK));
@@ -552,6 +554,8 @@ public class InventoryView extends CyclistViewBase {
 				_chart.setMode(InventoryChart.ChartMode.LINE);
 				if (!_lastForceZero)
 					_chart.forceZero().set(false);
+				if (_saveAxisMode == CyclistAxis.Mode.LOG)
+					_chart.axisMode().set(CyclistAxis.Mode.LOG);
 			}
 		});
 		contextMenu.getItems().add(item);
@@ -575,6 +579,7 @@ public class InventoryView extends CyclistViewBase {
 				_lastForceZero = _chart.forceZero().get();
 				if (!_lastForceZero) 
 					_chart.forceZero().set(true);
+				_saveAxisMode = _chart.axisMode().get();
 				_chart.setMode(InventoryChart.ChartMode.STACKED);
 			}
 		});

@@ -148,7 +148,7 @@ public class MainScreen extends VBox implements Resource {
 	
 	private void build(Stage stage){
 		getStyleClass().add("main-screen");
-		double[] div = {0.2, 0.4, 0.8, 1.0};
+		double[] div = {0.1, 0.4, 0.7, 0.8, 0.95, 0.97};
 		
 		double [] mainDividers = {TOOLS_WIDTH/600.0};
 		
@@ -288,16 +288,16 @@ public class MainScreen extends VBox implements Resource {
 	}
 	
 	public void restore(IMemento memento, Context ctx) {
-		final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
-		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
-
-		Platform.runLater(new Runnable() {	
-			@Override
-			public void run() {
-				_sp.setDividerPositions(pos);
-				_toolsPane.setDividerPositions(pos1);
-			}
-		});
+//		final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
+//		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
+//
+//		Platform.runLater(new Runnable() {	
+//			@Override
+//			public void run() {
+//				_sp.setDividerPositions(pos);
+//				_toolsPane.setDividerPositions(pos1);
+//			}
+//		});
 	}
 	
 	private double[] parseArray(String str) {
