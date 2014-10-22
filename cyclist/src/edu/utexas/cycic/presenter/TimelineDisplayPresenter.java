@@ -9,5 +9,21 @@ public class TimelineDisplayPresenter extends ViewPresenter {
 	public TimelineDisplayPresenter(EventBus bus) {
 		super(bus);
 	}
-	
+    public View getView() {
+        return (View) super.getView();
+    }
+
+    public void setView(View view) {
+        super.setView(view);
+
+            getView().setOnSelectAction(new Closure.V0() {
+                @Override
+                public void call() {
+                    onViewSelected(getView());              }
+            });
+    }
+
+    public void onViewSelected(View view) {
+        super.onViewSelected(view);
+    }    
 }
