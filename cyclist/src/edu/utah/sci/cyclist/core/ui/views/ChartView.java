@@ -511,19 +511,22 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 		
+		List<XYChart.Series<Object, Object>> add = new ArrayList<>();
+		
 		for (MultiKey key : map.keySet()) {							
 			XYChart.Series<Object, Object> series = _currentSpec.map.get(key);
 			if (series == null) {
 				series = new XYChart.Series<Object, Object>();
 				series.setName(createLabel(key));
-				getChart().getData().add(series);
+				add.add(series);
 				n++;
 			}
 			ObservableList<XYChart.Data<Object, Object>> data = map.get(key);
 			series.setData(data);
 			spec.map.put(key, series);
-					}
+		}
 		log.debug(" p: "+c+"  r:"+r+"  n:"+n);
+		getChart().getData().addAll(add);
 		getChart().setLegendVisible(map.size() > 1);
 		_currentSpec = spec;
 	}
