@@ -1,6 +1,7 @@
 package edu.utah.sci.cyclist.core.ui.views;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ import edu.utah.sci.cyclist.core.model.DataType.Role;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Indicator;
+import edu.utah.sci.cyclist.core.model.Schema;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.model.TableRow;
@@ -356,6 +358,7 @@ public class ChartView extends CyclistViewBase {
 			spec.lod.add(new FieldInfo(field, order.indexOf(field)));
 		}
 		
+		System.out.println("query: "+builder.toString());
         Simulation currentSim = getCurrentSimulation();
 		CyclistDatasource ds = currentSim != null ? currentSim.getDataSource() : null;
 		
@@ -486,7 +489,8 @@ public class ChartView extends CyclistViewBase {
 		List<SeriesDataPoint> points = new ArrayList<>();
 	}
 
-	private void assignData(List<TableRow> list, Spec spec) {
+	@SuppressWarnings("unchecked")
+    private void assignData(List<TableRow> list, Spec spec) {
 //		System.out.println("data has "+list.size()+" rows");
 		if (list.size() == 0) {
 			log.debug("no data");
@@ -501,36 +505,37 @@ public class ChartView extends CyclistViewBase {
 //			return;
 //		}
 		
-		Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> map = split(list, spec);
+		Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> dataMap = split(list, spec);
 		
-		int c = _currentSpec.map.size();
+		int c = _currentSpec.seriesMap.size();
 		int r = 0;
 		int n = 0;
 		// remove current series that are not part of the new data
-		for (MultiKey key : _currentSpec.map.keySet()) {
-			if (!map.containsKey(key)) {
-				getChart().getData().remove(_currentSpec.map.get(key));
+		for (MultiKey key : _currentSpec.seriesMap.keySet()) {
+			if (!dataMap.containsKey(key)) {
+				getChart().getData().remove(_currentSpec.seriesMap.get(key));
 				r++;
 			}
 		}
 		
 		List<XYChart.Series<Object, Object>> add = new ArrayList<>();
 		
-		for (MultiKey key : map.keySet()) {							
-			XYChart.Series<Object, Object> series = _currentSpec.map.get(key);
+		for (MultiKey key : dataMap.keySet()) {							
+			XYChart.Series<Object, Object> series = _currentSpec.seriesMap.get(key);
 			if (series == null) {
 				series = new XYChart.Series<Object, Object>();
 				series.setName(createLabel(key));
 				add.add(series);
 				n++;
 			}
-			ObservableList<XYChart.Data<Object, Object>> data = map.get(key);
+			ObservableList<XYChart.Data<Object, Object>> data = dataMap.get(key);
 			series.setData(data);
-			spec.map.put(key, series);
+			spec.seriesMap.put(key, series);			
 		}
+		spec.dataMap = dataMap;
 		log.debug(" p: "+c+"  r:"+r+"  n:"+n);
 		getChart().getData().addAll(add);
-		getChart().setLegendVisible(map.size() > 1);
+		getChart().setLegendVisible(dataMap.size() > 1);
 		_currentSpec = spec;
 	}
 	
@@ -653,6 +658,7 @@ public class ChartView extends CyclistViewBase {
 		setChart(null, null);
 	}
 	
+    
 	class AxisSpec {
 		Classification classification;
 		Role role;
@@ -677,7 +683,8 @@ public class ChartView extends CyclistViewBase {
 		public int numY() { return yFields.size(); }
 		public int cols() { return numX() + numY() +lod.size(); }
 		
-		Map<MultiKey, XYChart.Series<Object, Object>> map = new HashMap<>();
+		Map<MultiKey, XYChart.Series<Object, Object>> seriesMap = new HashMap<>();
+		Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> dataMap = new HashMap<>();
 	}
 	
 	private Spec determineSpec() {
@@ -1116,23 +1123,34 @@ public class ChartView extends CyclistViewBase {
 	}
 
 	private Node createExportActions() {
-		final Button button = new Button("Export", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
-		button.getStyleClass().add("flat-button");
-
-		// create menu
 		final ContextMenu contextMenu = new ContextMenu();
 		
-		// csv chart
+		// screen shot
 		MenuItem item = new MenuItem("Plot");
 		item.setOnAction(new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
-				export();
+				exportScreenshot();
+			}
+		});
+		item.disableProperty().bind(Bindings.isNull(_chartProperty));
+		contextMenu.getItems().add(item);
+		
+		// csv
+		item = new MenuItem("csv");
+		item.setOnAction(new EventHandler<ActionEvent>() {		
+			@Override
+			public void handle(ActionEvent event) {
+				exportCSV();
 			}
 		});
 
 		item.disableProperty().bind(Bindings.isNull(_chartProperty));
 		contextMenu.getItems().add(item);
+		
+		final Button button = new Button("Export", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		button.getStyleClass().add("flat-button");
+		
 		button.setOnMousePressed(new EventHandler<Event>() {
 			@Override
 			public void handle(Event event) {
@@ -1140,22 +1158,68 @@ public class ChartView extends CyclistViewBase {
 			}
 		});
 		
+		
 		return button;
 	}
 	
-	private void export() {
+	private void exportScreenshot() {
 		FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Image file (png, jpg, gif)", "*.png", "*.jpg", "'*.gif") );
 		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
 		if (file != null) {
 			WritableImage image = _chartProperty.get().snapshot(new SnapshotParameters(), null);
 			String name = file.getName();
-			String ext = name.substring(name.indexOf(",")+1, name.length()-1);
+			String ext = name.substring(name.indexOf(".")+1, name.length());
 		    try {
 		        ImageIO.write(SwingFXUtils.fromFXImage(image, null), ext, file);
 		    } catch (IOException e) {
 		        log.error("Error writing image to file: "+e.getMessage());
 		    }
+		}
+	}
+	
+	private void exportCSV() {
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("CSV file (*.csv)", "*.csv") );
+		File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+		if (file != null) {
+			try {
+	            FileWriter f = new FileWriter(file);
+	            
+	            if (_currentSpec.valid) {
+    	            // header
+    	            f.write(_currentSpec.xFields.get(0).field.getName());
+    	            for (FieldInfo info : _currentSpec.yFields) {
+    	            	f.write(", ");
+    	            	f.write(info.field.getName());
+    	            }
+    	            for (FieldInfo info : _currentSpec.lod) {
+    	            	f.write(",");
+    	            	f.write(info.field.getName());
+    	            }
+    	            f.write("\n");
+    	           
+    	            if (_currentSpec.dataMap.size() > 0) {
+    	            	for (MultiKey multikey : _currentSpec.dataMap.keySet()) {
+    	            		StringBuilder sb = new StringBuilder();
+    	            		for (int i=2; i<multikey.size(); i++) {
+    	            			sb.append(",").append(multikey.getKey(i).toString());
+    	            		}
+    	            		String str = sb.append("\n").toString();
+    	            		for (XYChart.Data<Object, Object> value : _currentSpec.dataMap.get(multikey)) {
+    	            			f.write(value.getXValue().toString());
+    	            			f.write(",");
+    	            			f.write(value.getYValue().toString());
+    	            			f.write(str);
+    	            		}
+    	            	}		
+    	            }
+
+	            }
+    			f.close();
+			} catch (IOException e) {
+	            log.error("Error: Can not write to file ["+e.getMessage()+"]");
+            }
 		}
 	}
 	
@@ -1238,11 +1302,12 @@ public class ChartView extends CyclistViewBase {
 
 		@Override
 		public void invalidated(Observable o) {
-			Filter f = (Filter) o;
+			Filter filter = (Filter) o;
+			
 			//If possible - take data directly from memory instead of querying the database.
-			if (handleLODFilters(f))
-			{
-				f.setValid(true);
+			if(filter.getField().getClassification() != Classification.C || !isInLodArea(filter.getField())) {
+				invalidateLODFilters(filter);
+				filter.setValid(true);
 			} else {
 				//invalidateChart();
 				fetchData();
@@ -1312,11 +1377,13 @@ public class ChartView extends CyclistViewBase {
 	/* Name: "isInLodArea"
 	 * Checks that the field is from the LOD drop area (physically contained or has the same name and table as the field in the lod area  */
 	private Boolean isInLodArea(Field field){
+		if (_lodArea.getFields().contains(field)) return true;
+		
+		if (_xArea.getFields().contains(field) || _yArea.getFields().contains(field)) return false;
+		
+		
 		for(Field lodField : _lodArea.getFields()){
-			if(_xArea.getFields().contains(field) || _yArea.getFields().contains(field))
-			{
-				return false;
-			}else if (_lodArea.getFields().contains(field) || (lodField.getName().equals(field.getName()) && lodField.getTable().getName().equals(field.getTable().getName())) ){
+			if (lodField.getName().equals(field.getName()) && lodField.getTable().getName().equals(field.getTable().getName())) {
 				return true;
 			}
 		}
@@ -1341,6 +1408,22 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 		return true;
+	}
+	
+	private boolean invalidateLODFilters(Filter ref) {
+		//Set all the LOD filters validity to false - to include them in the query.
+		//Since they are not build with the query builder, their validity is not set automatically.
+		for(Filter filter : filters()){
+			if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+				filter.setValid(false);
+			}
+		}
+		for(Filter filter : remoteFilters()){
+			if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+				filter.setValid(false);
+			}
+		}
+		return false;
 	}
 
 	/* Name: "handleLODFilters"
@@ -1401,6 +1484,20 @@ public class ChartView extends CyclistViewBase {
 		return false;
 	}
 
+//	private boolean handleLOD(Filter filter) {
+//		// location of the filter in the map
+//		int i = 0;
+//		for (FieldInfo info : _currentSpec.lod) {
+//			if (info.field == filter.getField()) break;
+//			i++;
+//		}
+//		i += 2; // skip x and y keys
+//		
+//		for (MultiKey multikey : _currentSpec.seriesMap.keySet()) {
+////			if (multikey.getKey(i))
+//		}
+//		
+//	}
 	/* Name: "isKeyInFilter"
 	 * parameter: MultiKey, key to check if included in the filters list.
 	 * parameter: List<Filter>, List of the currently applied filters.
