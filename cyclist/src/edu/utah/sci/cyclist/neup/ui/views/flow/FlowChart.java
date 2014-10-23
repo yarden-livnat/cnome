@@ -267,6 +267,7 @@ public class FlowChart extends VBox {
 		
 		_yAxis = new CyclistAxis(CyclistAxis.Mode.LOG);
 		_yAxis.setLabel("Cummulative");
+		_yAxis.setForceZeroInRange(false);
 		_yAxis.setAnimated(false);
 		
 		_chart = new LineChart<>(_xAxis, _yAxis);

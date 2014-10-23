@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,14 +14,11 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WritableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -515,19 +511,22 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 		
+		List<XYChart.Series<Object, Object>> add = new ArrayList<>();
+		
 		for (MultiKey key : map.keySet()) {							
 			XYChart.Series<Object, Object> series = _currentSpec.map.get(key);
 			if (series == null) {
 				series = new XYChart.Series<Object, Object>();
 				series.setName(createLabel(key));
-				getChart().getData().add(series);
+				add.add(series);
 				n++;
 			}
 			ObservableList<XYChart.Data<Object, Object>> data = map.get(key);
 			series.setData(data);
 			spec.map.put(key, series);
-					}
+		}
 		log.debug(" p: "+c+"  r:"+r+"  n:"+n);
+		getChart().getData().addAll(add);
 		getChart().setLegendVisible(map.size() > 1);
 		_currentSpec = spec;
 	}

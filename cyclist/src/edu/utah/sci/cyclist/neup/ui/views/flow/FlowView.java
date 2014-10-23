@@ -166,11 +166,14 @@ public class FlowView extends CyclistViewBase {
 	Simulation currentSim = getCurrentSimulation();
 	if (currentSim == null) {
 	  _simProxy = null;
+	  _facilities = new HashMap<>();
+	  updateSelectionCtrl(new ArrayList<String>());
+	  return;
 	}
 	_simProxy = new SimulationProxy(currentSim);
 
 	if (_simProxy != null)
-	 fetchInfo();
+		fetchInfo();
   }
 
   private void fetchInfo() {
@@ -204,64 +207,6 @@ public class FlowView extends CyclistViewBase {
 	th.setDaemon(true);
 	th.start();
   }
-
-  private void fetchFacilities() {
-	// fetch facilities from the simulation
-	Task<ObservableList<Facility>> task = new Task<ObservableList<Facility>>() {
-	  @Override
-	  protected ObservableList<Facility> call() throws Exception {
-		return _simProxy.getFacilities();
-	  }
-	};
-
-	task.valueProperty().addListener( new ChangeListener<ObservableList<Facility>>() {
-	  @Override
-	  public void changed(
-		  ObservableValue<? extends ObservableList<Facility>> observable,
-			  ObservableList<Facility> oldValue,
-			  ObservableList<Facility> newValue) 
-	  {
-		if (newValue != null) {
-		  _facilities = new HashMap<>();
-		  for (Facility f : newValue) {
-			_facilities.put(f.getId(), f);
-		  }
-		}
-	  }
-	});
-
-	Thread th = new Thread(task);
-	th.setDaemon(true);
-	th.start();
-  }
-
-  private void fetchFilterValues() {
-	// fetch facilities from the simulation
-	Task<ObservableList<String>> task = new Task<ObservableList<String>>() {
-	  @Override
-	  protected ObservableList<String> call() throws Exception { 
-		return _simProxy.getCommodities();
-	  }
-	};
-
-	task.valueProperty().addListener( new ChangeListener<ObservableList<String>>() {
-	  @Override
-	  public void changed(
-		  ObservableValue<? extends ObservableList<String>> observable,
-			  ObservableList<String> oldList,
-			  ObservableList<String> newList) 
-	  {
-		if (newList != null) {
-		  updateSelectionCtrl(newList);
-		}
-	  }
-	});
-
-	Thread th = new Thread(task);
-	th.setDaemon(true);
-	th.start();
-  }
-
   private void updateTransactionsPredicate() {
 	_transactionsPredicateProperty.set(_commodityPredicate.and(_isoPredicate));
 	updateTotal();
@@ -881,10 +826,11 @@ public class FlowView extends CyclistViewBase {
 	  if (values.contains(checkbox.getText())) {
 		checkbox.setDisable(false);
 		values.remove(checkbox.getText());
+		 list.add(checkbox);
 	  } else {
-		checkbox.setDisable(true);
+		  checkbox.selectedProperty().removeListener(_commodityListener);
+//		checkbox.setDisable(true);
 	  }
-	  list.add(checkbox);
 	}
 
 	// create new checkboxes
