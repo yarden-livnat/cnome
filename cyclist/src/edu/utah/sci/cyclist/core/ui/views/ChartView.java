@@ -67,6 +67,7 @@ import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.Context;
+import edu.utah.sci.cyclist.core.model.CyclistData;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.DataType.Classification;
 import edu.utah.sci.cyclist.core.model.DataType.Role;
@@ -102,8 +103,10 @@ public class ChartView extends CyclistViewBase {
 	private TableProxy _tableProxy = null;
 	
 	private ObjectProperty<XYChart<?,?>> _chartProperty = new SimpleObjectProperty<>();
+	
 	@SuppressWarnings("rawtypes")
     private Axis _xAxis = null;
+	
 	@SuppressWarnings("rawtypes")
     private Axis _yAxis = null;
 	private ObjectProperty<CyclistAxis.Mode> _xAxisMode = new SimpleObjectProperty<>(CyclistAxis.Mode.LINEAR);
@@ -590,6 +593,7 @@ public class ChartView extends CyclistViewBase {
 	}
 
 	NumberFormat numFormater = NumberFormat.getInstance();
+	
 	private Object convert(Object v, Classification c) {
 		switch (c) {
 		case C:
@@ -608,7 +612,15 @@ public class ChartView extends CyclistViewBase {
 			break;
 		case Qi:
 		case Qd:
-			// ignore
+			if (v instanceof Number) {
+				// ignore
+			} else if (v instanceof CyclistData) {
+				v = ((CyclistData)v).toNumber();
+			} else {
+				// Data can not be visualize 
+				// Don't throw an exception
+				return 0;
+			}
 		}
 		return v;
 	}	

@@ -219,7 +219,7 @@ public class CyclistController {
 						_screen.getFieldsPanel().setFields(emptyList);
 						
 //						//Set the workspace to display the new path at the title.
-//						Workspace workspace = _screen.getWorkSpace();
+//						Workspace workspace = _screen.getWorkspace();
 //						if(workspace != null){
 //							workspace.setWorkDirPath(getLastChosenWorkDirectory());
 //						}

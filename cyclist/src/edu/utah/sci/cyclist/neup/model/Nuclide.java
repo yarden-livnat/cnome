@@ -30,6 +30,12 @@ public class Nuclide implements CyclistData {
 		return _name;
 	}
 
+	@Override
+	public Number toNumber() {
+		return _id;
+	}
+	
+	@Override
 	public String sqlValue() {
 		return String.valueOf(_id);
 	}
