@@ -253,6 +253,7 @@ public class Field implements Resource {
 			_name = memento.getString("name");
 			if (_id == null) _id = _name;
 			ctx.put(_id, this);
+			System.out.println("restore "+_name);
     		
     		IMemento dataMemento = memento.getChild("datatype");
     		DataType.Role role = dataMemento.getString("role")!= "" ? DataType.Role.valueOf(dataMemento.getString("role")) : null;
@@ -271,13 +272,13 @@ public class Field implements Resource {
     		IMemento[] entries = memento.getChildren("entry");
     		for(IMemento entry:entries) {
     			String key = entry.getString("key");
-    			String classType = entry.getString("class");
+    			String cls = entry.getString("class");
     							
-    			if(classType.equals(String.class.toString())){
+    			if((String.class.toString().equals(cls))){
     				String value = entry.getTextData();
     				set(key, value);
     			}
-    			else if(classType.equals(Integer.class.toString())){
+    			else if(Integer.class.toString().equals(cls)){
     				Integer value = Integer.parseInt(entry.getTextData());
     				set(key, value);
     			}	

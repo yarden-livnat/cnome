@@ -1,8 +1,9 @@
-	package edu.utah.sci.cyclist.core.presenter;
+package edu.utah.sci.cyclist.core.presenter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.core.controller.IMemento;
@@ -22,54 +23,56 @@ import edu.utah.sci.cyclist.core.ui.CyclistView;
 import edu.utah.sci.cyclist.core.ui.View;
 
 public class CyclistViewPresenter extends ViewPresenter implements Resource  {
+	static Logger log = Logger.getLogger(CyclistViewPresenter.class);
+
 	private SelectionModel<Table> _selectionModelTbl = new SelectionModel<Table>();
 	private SelectionModel<Simulation> _selectionModelSim = new SelectionModel<Simulation>();
 	private Boolean _dirtyFlag = false;
-	
+
 	public CyclistViewPresenter(EventBus bus) {
 		super(bus);
-		
+
 		addListeners();
 	}
 
 	@Override
-    public String getUID() {
+	public String getUID() {
 		// not used
-	    return null;
-    }
-	
+		return null;
+	}
+
 	public CyclistView getView() {
 		return (CyclistView) super.getView();
 	}
-	
+
 	public void setView(View view) {
 		super.setView(view);
-		
+
 		if (view != null && view instanceof CyclistView) {
 			getView().setOnTableSelectedAction(new Closure.V2<Table, Boolean>() {
-				
+
 				@Override
 				public void call(Table table, Boolean active) {
 					getSelectionModelTbl().itemSelected(table, active);
 					_dirtyFlag = true;
 				}
 			});
-			
+
 			getView().setOnSimulationSelectedAction(new Closure.V2<Simulation, Boolean>() {
-				
+
 				@Override
 				public void call(Simulation simulation, Boolean active) {
 					getSelectionModelSim().itemSelected(simulation, active);
 					_dirtyFlag = true;
 				}
 			});
-			
+
 			getView().setOnSelectAction(new Closure.V0() {
 				@Override
 				public void call() {
 					onViewSelected(getView());				}
 			});
-			
+
 			getView().setOnShowFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
@@ -77,7 +80,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 					broadcast(new CyclistFilterNotification(CyclistNotifications.SHOW_FILTER, filter));
 				}
 			});
-			
+
 			getView().setOnRemoveFilter(new Closure.V1<Filter>() {
 				@Override
 				public void call(Filter filter) {
@@ -85,7 +88,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 					broadcast(new CyclistFilterNotification(CyclistNotifications.REMOVE_FILTER, filter));
 				}
 			});
-			
+
 			//If none of the subclasses has set its specific action for simulation dropping - set a general action.
 			if(getView().getOnSimulationDrop() == null){
 				getView().setOnSimulationDrop(new Closure.V1<Simulation>(){
@@ -108,15 +111,15 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 			}
 		}
 	}
-	
+
 	public void onViewSelected(View view) {
 		super.onViewSelected(view);
-		
+
 		Table table = getSelectionModelTbl().getSelected();
 		if (table != null)
 			broadcast(new CyclistTableNotification(CyclistNotifications.DATASOURCE_FOCUS, table));
 	}
-	
+
 	public void setRemoteTables(List<SelectionModel<Table>.Entry> list) {
 		for (SelectionModel<Table>.Entry record : list) {
 			// infom the view but let the selection model determine if it should be active
@@ -125,48 +128,48 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		}
 		getSelectionModelTbl().setRemoteItems(list);
 	}
-	
+
 	public void addRemoteFilters(List<Filter> filters) {
 		getView().remoteFilters().addAll(filters);
 	}
-	
+
 	public void addTable(Table table, boolean remote, boolean active, boolean remoteActive) {
 		getView().addTable(table, remote, false);
 		getSelectionModelTbl().addItem(table, remote, active, remoteActive);
 		_dirtyFlag = true;
 	}
-	
-	
+
+
 	public void removeTable(Table table) {
 		getSelectionModelTbl().removeItem(table);
 		getView().removeTable(table);
 		_dirtyFlag = true;
 	}
-	
+
 	public List<SelectionModel<Table>.Entry> getTableRecords() {
 		return _selectionModelTbl.getItemRecords();
 	}
-	
+
 	public SelectionModel<Table> getSelectionModelTbl() {
 		return _selectionModelTbl;
 	}
-	
+
 	public void setSelectionModelTbl(SelectionModel<Table> model) {
 		_selectionModelTbl = model;
-		
+
 	}
-	
+
 	public SelectionModel<Simulation> getSelectionModelSim() {
 		return _selectionModelSim;
 	}
-	
+
 	public List<SelectionModel<Simulation>.Entry> getSimulationRecords() {
 		return _selectionModelSim.getItemRecords();
 	}
-	
+
 	public void setSelectionModelSim(SelectionModel<Simulation> model) {
 		_selectionModelSim = model;
-		
+
 		//If none of the subclasses set its specific action - set a general action.
 		if(_selectionModelSim.getOnSelectItemAction() == null){
 			_selectionModelSim.setOnSelectItemAction(new Closure.V2<Simulation, Boolean>() {
@@ -183,7 +186,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 			});
 		}
 	}
-	
+
 	/**
 	 * Saves the data specific to cyclic view presenter 
 	 * (E.g tables and simulations which have been dropped to the view header)
@@ -217,18 +220,18 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		if(_selectionModelSim.getSelected() != null) {
 			memento.createChild("selected-simulation").putString("ref-uid", _selectionModelSim.getSelected().getUID());
 		}
-		
+
 		//Filters
 		group = memento.createChild("filters");
 		for(Filter filter :getView().filters() ){
 			filter.save(group.createChild("filter"));
 		}
-		
+
 		getView().save(memento.createChild("view"));
 		//All the changes are saved - dirty flag should be reset.
 		_dirtyFlag = false;
 	}
-	
+
 	/**
 	 * Restores the data specific to cyclic view presenter 
 	 * (E.g tables and simulations which have been dropped to the view header)
@@ -237,59 +240,79 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 	@Override
 	public void restore(IMemento memento, Context ctx) {	
 		super.restore(memento, ctx);
-		
+
 		String ref;
 		IMemento node;
-		
+
 		// clear the old data 
 		//(If loading data after changing workspace there might be some old data from the previous ws)
 		clearData();
-		
+
 		// restore local tables
 		IMemento group = memento.getChild("tables");
-		for(IMemento child :  group.getChildren("local-table")) {
-			Table table = ctx.get(child.getString("ref-uid"), Table.class);
-			addTable(table, false, false, false);	
+		if (group != null) {
+			for(IMemento child :  group.getChildren("local-table")) {
+				Table table = ctx.get(child.getString("ref-uid"), Table.class);
+				if (table != null) {
+					addTable(table, false, false, false);
+				} else {
+					log.error("Can not find local table ref-uid: "+child.getString("ref-uid"));
+				}
+			}
 		}
-		
+
 		// restore selected table.
 		node = memento.getChild("selected-table");
 		if (node != null ) {
 			Table table = ctx.get(node.getString("ref-uid"), Table.class);
-			getSelectionModelTbl().itemSelected(table, true);
-		}
-		
-		// restore the non-remote simulations
-		group = memento.getChild("simulations");
-		for (IMemento child : group.getChildren("simulation")) {
-			Simulation sim = ctx.get(child.getString("ref-uid"), Simulation.class);
-			if(sim != null) {
-				getView().addSimulation(sim, false /*remote*/, false /* active */);
-				getSelectionModelSim().addItem(sim, false /*remote*/, false /*active*/, false /*remoteActive*/);
+			if (table != null) {
+				getSelectionModelTbl().itemSelected(table, true);
+			} else {
+				log.error("Can not find table ref-uid: "+node.getString("ref-uid"));
 			}
 		}
-		
+
+		// restore the non-remote simulations
+		group = memento.getChild("simulations");
+		if (group != null) {
+			for (IMemento child : group.getChildren("simulation")) {
+				Simulation sim = ctx.get(child.getString("ref-uid"), Simulation.class);
+				if(sim != null) {
+					getView().addSimulation(sim, false /*remote*/, false /* active */);
+					getSelectionModelSim().addItem(sim, false /*remote*/, false /*active*/, false /*remoteActive*/);
+				} else {
+					log.error("Can not find simulation ref-uid: "+child.getString("ref-uid"));
+				}
+			}
+		}
+
 		// restore the selected simulation.
 		node = memento.getChild("selected-simulation");
 		if (node != null) {
 			ref = node.getString("ref-uid");
 			Simulation sim = ctx.get(ref, Simulation.class);
-			getSelectionModelSim().itemSelected(sim, true);
+			if (sim != null) {
+				getSelectionModelSim().itemSelected(sim, true);
+			} else {
+				log.error("Can not find simulation ref-uid: "+ref);
+			}
 		}
-		
+
 		// restore local filters
 		group = memento.getChild("filters");
-		for(IMemento child :  group.getChildren("filter")) {
-			Filter filter = new Filter();
-			filter.restore(child, ctx);
-			getView().addFilter(filter);
+		if (group != null) {
+			for(IMemento child :  group.getChildren("filter")) {
+				Filter filter = new Filter();
+				filter.restore(child, ctx);
+				getView().addFilter(filter);
+			}
 		}
-		
+
 		getView().restore(memento.getChild("view"), ctx);
 		//If the dirty flag was set during restore - reset it back to false.
 		_dirtyFlag = false;
 	}
-	
+
 	/*
 	 * Returns the dirty flag - which signals whether or not there were changes in the view.
 	 * @return Boolean - the flag value.
@@ -298,7 +321,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 	public Boolean getDirtyFlag(){
 		return _dirtyFlag;
 	}
-	
+
 	/*
 	 * Sets the dirty flag - which signals whether or not there were changes in the view.
 	 * @param Boolean - the flag value.
@@ -306,8 +329,8 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 	public void setDirtyFlag(Boolean flag){
 		_dirtyFlag = flag;
 	}
-	
-	
+
+
 	/*
 	 * For each view under the workspace - add the remote simulations inherited from the workspace.
 	 * Then call the selectionModel to decide whether to select the simulation button or not.
@@ -322,7 +345,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		}
 		getSelectionModelSim().setRemoteItems(list);
 	}
-	
+
 	/*
 	 * Add a local simulation to the view. 
 	 * (i.e. a simulation which was dropped directly to the current view). 
@@ -334,21 +357,21 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		getView().addSimulation(simulation, false /*remote*/, select /* active */);
 		getSelectionModelSim().addItem(simulation, false /*remote*/, select /*active*/, false /*remoteActive*/);
 	}
-	
+
 	/*
 	 * Update the view data after a new simulation has been selected.
 	 * Mainly for the different views to implement, depending on the data the specific view consumes.
 	 */
 	protected void updateSimulationData(){	
 	}
-	
+
 	/*
 	 * Update the view data after a simulation has been removed.
 	 * Mainly for the different views to implement, depending on the data the specific view consumes.
 	 */
 	protected void removeSimulationData(){	
 	}
-	
+
 	/*
 	 * Add a remote simulation to the view.
 	 * (i.e. a simulation which was inherited from the workspace.). 
@@ -361,7 +384,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		getView().addSimulation(simulation, true, /*remote*/ false /*active*/);
 		getSelectionModelSim().addItem(simulation, true, /*remote*/ true, /*active*/ false /*remote active*/);
 	}
-	
+
 	public void removeSimulation(Simulation simulation) {
 		getSelectionModelSim().removeItem(simulation);
 		getView().removeSimulation(simulation);
@@ -369,53 +392,53 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 
 	private void addListeners() {
 		addNotificationHandler(CyclistNotifications.ADD_REMOTE_FILTER, new CyclistNotificationHandler() {
-			
+
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistFilterNotification notification = (CyclistFilterNotification) event;
 				getView().remoteFilters().add(notification.getFilter());
 			}
 		});
-		
+
 		addNotificationHandler(CyclistNotifications.REMOVE_REMOTE_FILTER, new CyclistNotificationHandler() {
-			
+
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistFilterNotification notification = (CyclistFilterNotification) event;
 				getView().remoteFilters().remove(notification.getFilter());
 			}
 		});
-		
+
 		addNotificationHandler(CyclistNotifications.SIMULATION_ADD, new CyclistNotificationHandler() {
-			
+
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
 				addRemoteSimulation(notification.getSimulation());
 			}
 		});
-		
+
 		addNotificationHandler(CyclistNotifications.SIMULATION_REMOVE, new CyclistNotificationHandler() {
-			
+
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
 				removeSimulation(notification.getSimulation());			
 			}
 		});
-		
-		
+
+
 		addNotificationHandler(CyclistNotifications.SIMULATION_SELECTED, new CyclistNotificationHandler() {
-			
+
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
 				getSelectionModelSim().selectItem(notification.getSimulation(), true);
 			}
 		});
-		
+
 		addNotificationHandler(CyclistNotifications.SIMULATION_UNSELECTED, new CyclistNotificationHandler() {
-			
+
 			@Override
 			public void handle(CyclistNotification event) {
 				CyclistSimulationNotification notification = (CyclistSimulationNotification) event;
@@ -423,7 +446,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 			}
 		});
 	}
-	
+
 	/*
 	 * Finds a table in a given tables list list which matches the specified name and data source.
 	 * @param: String tableName
@@ -439,7 +462,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 						if(tbl.getDataSource() != null && tbl.getDataSource().getUID().equals(dataSource)){
 							return tbl;
 						}
-					//Find a table without a data source.
+						//Find a table without a data source.
 					} else if((dataSource == null || dataSource.isEmpty()) && tbl.getDataSource() == null){
 						return tbl;
 					}
@@ -448,7 +471,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Finds a simulation in a given simulations list, which matches the specified simulation id.
 	 * @param : simulationAlias
@@ -459,13 +482,13 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 		{
 			for(Simulation sim: simulationsList){
 				if(sim.getSimulationId().toString().equals(simulationId)){
-						return sim;
+					return sim;
 				}
 			}
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Clears the old data from the tool bar.
 	 * (E.g data that was inserted by another workspace etc.)
@@ -478,7 +501,7 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 				removeSimulation(entry.item);
 			}
 		}
-		
+
 		//Clear old tables
 		List<SelectionModel<Table>.Entry> tblEntries = new ArrayList<SelectionModel<Table>.Entry>(getSelectionModelTbl().getEntries());
 		for(SelectionModel<Table>.Entry entry : tblEntries){
@@ -486,6 +509,6 @@ public class CyclistViewPresenter extends ViewPresenter implements Resource  {
 				removeTable(entry.item);
 			}
 		}
-		
+
 	}
 }

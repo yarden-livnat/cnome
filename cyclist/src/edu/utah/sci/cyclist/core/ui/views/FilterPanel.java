@@ -423,8 +423,8 @@ public class FilterPanel extends TitledPanel {
 		});
 		
 		// Update the text field to show the current value on the slider. and vice versa
-		Bindings.bindBidirectional(minTxt.textProperty(), _rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
-		Bindings.bindBidirectional(maxTxt.textProperty(), _rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
+		Bindings.bindBidirectional(minTxt.textProperty(), _rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E00"));
+		Bindings.bindBidirectional(maxTxt.textProperty(), _rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E00"));
 	
 		_valueRangeProperty.addListener(new InvalidationListener() {	
 			@Override
@@ -476,6 +476,7 @@ public class FilterPanel extends TitledPanel {
 	 * and the user can change the minimum and maximum values which are displayed */
 	private void populateRangeValues() {
 		Range range = _filter.getValueRange();
+		log.debug("FilterPanel populateValueRange "+range.min+","+range.max);
 		if (range.min > range.max)
 			range = new Range(0, 100);
 		_rangeSlider.setMin((double) range.min); 
