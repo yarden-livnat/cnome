@@ -409,6 +409,8 @@ public class CyclistController {
 				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
 				if (file != null) {
 					saveAs(file.getAbsolutePath());
+					//Display the new directory in the work directories dialog.
+					_workDirectoryController.addNewDir(file.getAbsolutePath());
 				}
 			}
 		});
