@@ -1,9 +1,6 @@
 package edu.utexas.cycic;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.BufferedReader;
@@ -62,7 +59,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -183,7 +179,7 @@ public class Cycic extends ViewBase{
 	                + "-fx-border-width: 1;"
 	                + "-fx-border-color: black");
 			setVgap(5);
-			setHgap(5);
+			setHgap(10);
 			setPadding(new Insets(10, 10, 10, 10));
 		}
 	};

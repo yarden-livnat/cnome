@@ -601,7 +601,7 @@ public class OutPut {
 				Element control = doc.createElement("control");
 				rootElement.appendChild(control);
 				controlSetup(doc, control);
-
+				
 				//Archetypes 
 				archetypeSetup(doc, rootElement);
 

@@ -79,7 +79,9 @@ public class SimulationProxy {
 							rs.getInt("InstitutionId"), rs.getInt("RegionId"));
 					list.add(f);
 				}
-			}		
+			}	
+		} catch (SQLException e) {
+			log.error("fetchFacilities ",e);
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}
@@ -99,6 +101,8 @@ public class SimulationProxy {
 					list.add(rs.getString("Commodity"));
 				}
 			}
+		} catch (SQLException e) {
+			log.error("getCommodities ",e);
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}
@@ -128,7 +132,9 @@ public class SimulationProxy {
 					
 					list.add(tr);
 				}
-			}		
+			}
+		} catch (SQLException e) {
+			log.error("getTransactions ",e);
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}
@@ -160,6 +166,8 @@ public class SimulationProxy {
 				
 				log.debug("Inventory size:"+list.size()+"  timing: "+(t2-t0)/1000.0+"sec, execute:"+(t1-t0)/1000.0+"sec, "+(t2-t1)/(float)(list.size())+" ms/item");
 			}
+		} catch (SQLException e) {
+			log.error("getInventory ",e);
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}
@@ -187,6 +195,8 @@ public class SimulationProxy {
 					list.add(i);
 				}
 			}
+		} catch (SQLException e) {
+			log.error("getInventory2 ",e);
 		} finally {
 			_sim.getDataSource().releaseConnection();
 		}

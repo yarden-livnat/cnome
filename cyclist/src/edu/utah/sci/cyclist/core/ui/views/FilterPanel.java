@@ -2,6 +2,8 @@ package edu.utah.sci.cyclist.core.ui.views;
 
 
 import java.text.DecimalFormat;
+import java.util.Comparator;
+import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -15,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -230,6 +233,9 @@ public class FilterPanel extends TitledPanel {
 			
 			Task<ObservableList<Object>> task = table.getFieldValues(_filter.getDatasource(),field);
 			setTask(task);
+//			task.valueProperty().addListener(l->{
+//				
+//			});
 			field.valuesProperty().bind(task.valueProperty());
 			Thread th = new Thread(task);
 			th.setDaemon(true);
@@ -266,7 +272,13 @@ public class FilterPanel extends TitledPanel {
 		_cbBox.getChildren().clear();
 		if (_valuesProperty.get() != null) {
 			_cbBox.getChildren().add(createAllEntry(_filter.selectedItems().size() == _filter.getValues().size()));
-			for (Object item: _valuesProperty.get()) {
+			SortedList<Object> sorted = new SortedList<Object>(_valuesProperty.get(), new Comparator<Object>() {
+				@Override
+                public int compare(Object o1, Object o2) {
+					return o1.toString().compareToIgnoreCase(o2.toString());
+                }
+			});
+			for (Object item: sorted) {
 				_cbBox.getChildren().add(createEntry(item));
 			}
 		}
@@ -411,8 +423,8 @@ public class FilterPanel extends TitledPanel {
 		});
 		
 		// Update the text field to show the current value on the slider. and vice versa
-		Bindings.bindBidirectional(minTxt.textProperty(), _rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
-		Bindings.bindBidirectional(maxTxt.textProperty(), _rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E0"));
+		Bindings.bindBidirectional(minTxt.textProperty(), _rangeSlider.lowValueProperty(), new EmptyStrNumberStringConverter("0.####E00"));
+		Bindings.bindBidirectional(maxTxt.textProperty(), _rangeSlider.highValueProperty(), new EmptyStrNumberStringConverter("0.####E00"));
 	
 		_valueRangeProperty.addListener(new InvalidationListener() {	
 			@Override
@@ -464,6 +476,7 @@ public class FilterPanel extends TitledPanel {
 	 * and the user can change the minimum and maximum values which are displayed */
 	private void populateRangeValues() {
 		Range range = _filter.getValueRange();
+		log.debug("FilterPanel populateValueRange "+range.min+","+range.max);
 		if (range.min > range.max)
 			range = new Range(0, 100);
 		_rangeSlider.setMin((double) range.min); 

@@ -161,7 +161,7 @@ public class Table implements Resource {
 	
 	// Restore the table
 	public void restore(IMemento memento, Context ctx ){
-		_id = memento.getString("UID");
+		_id = memento.getString("uid");
 		ctx.put(_id, this);
 		
 		setName(memento.getString("name"));

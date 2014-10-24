@@ -27,6 +27,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
+import org.apache.log4j.Logger;
+
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -67,7 +69,8 @@ import edu.utah.sci.cyclist.core.util.SimulationTablesPostProcessor;
  * Also controls the creation/editing of data sources.
  */
 public class DatatableWizard extends TilePane {
-
+	static Logger log = Logger.getLogger(DatatableWizard.class);
+	
 	// GUI elements
 	private Stage                       _dialog;
 	private ListView<CyclistDatasource> _sourcesView;
@@ -126,7 +129,7 @@ public class DatatableWizard extends TilePane {
 		_dialog.initModality(Modality.WINDOW_MODAL);
 		_dialog.setScene( createScene(_dialog, tableProperty) );	
 	
-		System.out.println("changed" + _sourcesView.getSelectionModel().selectedItemProperty()) ;
+		log.debug("changed" + _sourcesView.getSelectionModel().selectedItemProperty()) ;
 	}
 	
 	// * * * Create scene creates the GUI * * * //

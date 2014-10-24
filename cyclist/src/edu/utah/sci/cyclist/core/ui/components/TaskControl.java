@@ -55,7 +55,9 @@ public class TaskControl extends HBox {
 				public void handle(WorkerStateEvent event) {
 					_status.setVisible(true);
 					_status.setManaged(true);
-					if (_task.getException() != null) {
+					if (_task == null) {
+						log.debug("task in null in handle onFail");
+					} else if (_task.getException() != null) {
 						String error = _task.getException().getLocalizedMessage();	
 						if (error == null) error = "unknown error";
 						int n = error.indexOf("\n");
