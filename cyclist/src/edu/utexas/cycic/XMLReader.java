@@ -269,7 +269,7 @@ public class XMLReader {
 	 * @return
 	 */
 	static ArrayList<Object> cycicResize(ArrayList<Object> dataArray){
-		while(dataArray.size() < 9){
+		while(dataArray.size() < 10){
 			if(dataArray.size() == 6){
 				dataArray.add(0);
 			}
@@ -311,6 +311,9 @@ public class XMLReader {
 		if(jsonPass.get("doc") != null){
 			dataArray.set(8, jsonPass.get("doc").toString());
 		}
+		if(jsonPass.get("uilabel") != null){
+			dataArray.set(9, jsonPass.get("uilabel").toString().replaceAll("\"", ""));
+		} 
 		return dataArray;
 	}
 	
