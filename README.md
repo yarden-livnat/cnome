@@ -11,6 +11,14 @@ Cyclist is a visual interface companion for the Cyclus project. It provides an i
 | JavaFX  | 8.0     | (JavaFX is part of Java 8)
 | Ant     | 1.9+    | http://ant.apache.org/bindownload.cgi
 
+#### Getting Java8 on Ubuntu
+
+```
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+```
+
 ### Deployment
 
 Cyclist can be deployed as a jar file with an associated library directory or as a standalone application that includes 
