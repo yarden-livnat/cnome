@@ -358,7 +358,6 @@ public class ChartView extends CyclistViewBase {
 			spec.lod.add(new FieldInfo(field, order.indexOf(field)));
 		}
 		
-		System.out.println("query: "+builder.toString());
         Simulation currentSim = getCurrentSimulation();
 		CyclistDatasource ds = currentSim != null ? currentSim.getDataSource() : null;
 		
@@ -369,7 +368,7 @@ public class ChartView extends CyclistViewBase {
 			}
 		};
 		
-		task.valueProperty().addListener(o->{
+		task.valueProperty().addListener( o->{
 			ObjectProperty<ObservableList<TableRow>> op = (ObjectProperty<ObservableList<TableRow>>) o;			
 			ObservableList<TableRow> data = op.get();
 			if (data != null) {
@@ -1297,15 +1296,13 @@ public class ChartView extends CyclistViewBase {
 		_distanceIndicators.clear();
 	}
 
-
 	private InvalidationListener _filterListener = new InvalidationListener() {
-
 		@Override
 		public void invalidated(Observable o) {
-			Filter filter = (Filter) o;
-			
-			//If possible - take data directly from memory instead of querying the database.
-			if(filter.getField().getClassification() != Classification.C || !isInLodArea(filter.getField())) {
+			Filter filter = (Filter) o;		
+			// LOD filters only show/hide data. No need to fetch new data
+			// TODO: why the check for classification == C?
+			if(filter.getField().getClassification() != Classification.C || isInLodArea(filter.getField())) {
 				invalidateLODFilters(filter);
 				filter.setValid(true);
 			} else {
@@ -1321,11 +1318,11 @@ public class ChartView extends CyclistViewBase {
 		public void invalidated(Observable observable) {                        
 			//invalidateChart();
 			DropArea area = (DropArea) observable;
-			if (getCurrentTable() == null) {
-				if (area.getFields().size() == 1) {
-					if (getOnTableDrop() != null)
-						getOnTableDrop().call(area.getFields().get(0).getTable());
-				}
+			if (getCurrentTable() == null
+				&& area.getFields().size() == 1
+				&& getOnTableDrop() != null)
+			{
+				getOnTableDrop().call(area.getFields().get(0).getTable());
 			}
 			updatePreOccupiedFields(area);
 			fetchData();
@@ -1374,41 +1371,26 @@ public class ChartView extends CyclistViewBase {
 		}
 	}
 
-	/* Name: "isInLodArea"
-	 * Checks that the field is from the LOD drop area (physically contained or has the same name and table as the field in the lod area  */
-	private Boolean isInLodArea(Field field){
-		if (_lodArea.getFields().contains(field)) return true;
-		
-		if (_xArea.getFields().contains(field) || _yArea.getFields().contains(field)) return false;
-		
-		
-		for(Field lodField : _lodArea.getFields()){
-			if (lodField.getName().equals(field.getName()) && lodField.getTable().getName().equals(field.getTable().getName())) {
-				return true;
-			}
-		}
-		return false;
-	}
 
-	/* Name: "filterItemsExistInMap"
-	 * Checks that all the selected values of a given filter appear as keys in the given map */
-	private Boolean filterItemsExistInMap(Filter currentFilter, Map<MultiKey, SeriesData> map ){
-
-		for(Object item:currentFilter.getSelectedValues()){
-			String filterItem = item.toString();
-			Boolean filterWasFound = false;
-			for ( MultiKey key : map.keySet() ) {
-				if(Arrays.asList(key.getKeys()).contains(filterItem)){ 
-					filterWasFound = true;
-					break;
-				}
-			}
-			if(!filterWasFound){
-				return false;
-			}
-		}
-		return true;
-	}
+//	/* Name: "filterItemsExistInMap"
+//	 * Checks that all the selected values of a given filter appear as keys in the given map */
+//	private Boolean filterItemsExistInMap(Filter currentFilter, Map<MultiKey, SeriesData> map ){
+//
+//		for(Object item:currentFilter.getSelectedValues()){
+//			String filterItem = item.toString();
+//			Boolean filterWasFound = false;
+//			for ( MultiKey key : map.keySet() ) {
+//				if(Arrays.asList(key.getKeys()).contains(filterItem)){ 
+//					filterWasFound = true;
+//					break;
+//				}
+//			}
+//			if(!filterWasFound){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 	
 	private boolean invalidateLODFilters(Filter ref) {
 		//Set all the LOD filters validity to false - to include them in the query.
@@ -1426,30 +1408,47 @@ public class ChartView extends CyclistViewBase {
 		return false;
 	}
 
+	/* 
+	 * Contained or has the same name and table as a field in the lod area  
+	 */
+	private Boolean isInLodArea(Field field){
+		if (_lodArea.getFields().contains(field)) return true;
+		
+		if (_xArea.getFields().contains(field) || _yArea.getFields().contains(field)) return false;
+		
+		
+		for(Field lodField : _lodArea.getFields()) {
+			if (lodField.getName().equals(field.getName()) && lodField.getTable().getName().equals(field.getTable().getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/* Name: "handleLODFilters"
 	 * When a filter based on a LOD field is applied, no need to query the database again
 	 * Since the data already exists and organized by keys based on the LOD field, it's enough to hide/unhide the data   
 	 * under the corresponding key */ 
-	private Boolean handleLODFilters(Filter currentFilter){
-
-		//Verify that the filter which has been updated is category and if from a LOD field.
-		//Otherwise - return false and fetch the data with the SQL query.
-		if(currentFilter.getField().getClassification() != Classification.C || !isInLodArea(currentFilter.getField())){
-
-			//Set all the LOD filters validity to false - to include them in the query.
-			//Since they are not build with the query builder, their validity is not set automatically.
-			for(Filter filter : filters()){
-				if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
-					filter.setValid(false);
-				}
-			}
-			for(Filter filter : remoteFilters()){
-				if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
-					filter.setValid(false);
-				}
-			}
-			return false;
-		}
+//	private Boolean handleLODFilters(Filter currentFilter){
+//
+//		//Verify that the filter which has been updated is category and if from a LOD field.
+//		//Otherwise - return false and fetch the data with the SQL query.
+//		if(currentFilter.getField().getClassification() != Classification.C || !isInLodArea(currentFilter.getField())){
+//
+//			//Set all the LOD filters validity to false - to include them in the query.
+//			//Since they are not build with the query builder, their validity is not set automatically.
+//			for(Filter filter : filters()){
+//				if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+//					filter.setValid(false);
+//				}
+//			}
+//			for(Filter filter : remoteFilters()){
+//				if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+//					filter.setValid(false);
+//				}
+//			}
+//			return false;
+//		}
 
 //		if(_lastSubLists != null){
 //			getChart().getData().clear();
@@ -1481,8 +1480,8 @@ public class ChartView extends CyclistViewBase {
 //			}
 //			return true;
 //		}
-		return false;
-	}
+//		return false;
+//	}
 
 //	private boolean handleLOD(Filter filter) {
 //		// location of the filter in the map
@@ -1498,33 +1497,33 @@ public class ChartView extends CyclistViewBase {
 //		}
 //		
 //	}
-	/* Name: "isKeyInFilter"
-	 * parameter: MultiKey, key to check if included in the filters list.
-	 * parameter: List<Filter>, List of the currently applied filters.
-	 * Gets a key and checks if it appears in the filters list */ 
-	private Boolean isKeyInFilter(MultiKey key, List<Filter> filters ) {
-		for(Filter filter : filters){
-			Boolean filterFound=false;
-			//ignores filters which are not in the LOD area or are not under C classification.
-			if(!(filter.getField().getClassification() == Classification.C) || !isInLodArea(filter.getField())){
-				continue;
-			}
-			for(Object item: filter.getSelectedValues()){
-				String filterKey = item.toString();
-				if(Arrays.asList(key.getKeys()).contains(filterKey)){
-					filterFound=true;
-					break;
-				}
-			}
-			//If none of the current filter values exists in the tested points series - it is no use to continue to check the other filters
-			//Just return false, so the calling method continues to the next set of points.
-			if(!filterFound){
-				return false;
-			}
-		}
-		return true;
-
-	}
+//	/* Name: "isKeyInFilter"
+//	 * parameter: MultiKey, key to check if included in the filters list.
+//	 * parameter: List<Filter>, List of the currently applied filters.
+//	 * Gets a key and checks if it appears in the filters list */ 
+//	private Boolean isKeyInFilter(MultiKey key, List<Filter> filters ) {
+//		for(Filter filter : filters){
+//			Boolean filterFound=false;
+//			//ignores filters which are not in the LOD area or are not under C classification.
+//			if(!(filter.getField().getClassification() == Classification.C) || !isInLodArea(filter.getField())){
+//				continue;
+//			}
+//			for(Object item: filter.getSelectedValues()){
+//				String filterKey = item.toString();
+//				if(Arrays.asList(key.getKeys()).contains(filterKey)){
+//					filterFound=true;
+//					break;
+//				}
+//			}
+//			//If none of the current filter values exists in the tested points series - it is no use to continue to check the other filters
+//			//Just return false, so the calling method continues to the next set of points.
+//			if(!filterFound){
+//				return false;
+//			}
+//		}
+//		return true;
+//
+//	}
 
 
 	/*Name: setAreaFiltersListeners 
@@ -1536,7 +1535,6 @@ public class ChartView extends CyclistViewBase {
 
 			@Override
 			public void handle(FilterEvent event) {
-
 				Filter filter = event.getFilter();
 				if(event.getEventType() == FilterEvent.DELETE){
 					filters().remove(filter);
