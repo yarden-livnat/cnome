@@ -352,6 +352,7 @@ public class Cycic extends ViewBase{
 			}
 		});
 		grid.add(imageButton, 2, 1);
+		opSwitch.getToggles().clear();
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
@@ -478,18 +479,20 @@ public class Cycic extends ViewBase{
 		circle.setFill(Color.web("#CF5300"));
 		circle.setCenterX(45+(i*90));
 		circle.setCenterY(50);
-		circle.text.setText(name);
+		circle.text.setText(name.split(" ")[2]);
 		circle.text.setWrapText(true);
 		circle.text.setMaxWidth(60);
 		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
 		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
 		circle.text.setTextAlignment(TextAlignment.CENTER);
 		circle.text.setMouseTransparent(true);
+		circle.text.setMaxWidth(circle.getRadius()*1.4);
+		circle.text.setMaxHeight(circle.getRadius()*1.2);
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
 				ClipboardContent content = new ClipboardContent();				
-				content.put(DnD.VALUE_FORMAT, circle.text.getText());
+				content.put(DnD.VALUE_FORMAT, name);
 				db.setContent(content);
 				e.consume();
 			}
@@ -527,7 +530,21 @@ public class Cycic extends ViewBase{
 			removeCommod.setGraphic(GlyphRegistry.get(AwesomeIcon.TRASH_ALT, "10px"));
 			removeCommod.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent e){
+					String commod = Cycic.workingScenario.CommoditiesList.get(index).name.getText();
 					Cycic.workingScenario.CommoditiesList.remove(index);
+					for(facilityNode facility: DataArrays.FacilityNodes){
+						for(int i =0; i < facility.cycicCircle.incommods.size(); i++){
+							if(facility.cycicCircle.incommods.get(i) == commod){
+								facility.cycicCircle.incommods.remove(i);
+							}
+						}
+						for(int i =0; i < facility.cycicCircle.outcommods.size(); i++){
+							if(facility.cycicCircle.outcommods.get(i) == commod){
+								facility.cycicCircle.outcommods.remove(i);
+							}
+						}
+					}
+					VisFunctions.marketHide();
 					buildCommodPane();
 				}
 			});	

@@ -124,16 +124,8 @@ public class CycicCircles{
 			}
 		});
 		
-		final Menu clonesList = new Menu("Children");
+		final Menu changeNiche = new Menu("Change Niche");
 		
-		/*CustomMenuItem cloneNode = new CustomMenuItem(new Label("Add Child"));
-		cloneNode.setHideOnClick(false);
-		cloneNode.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				Clones.addClone("", parent, parent.cycicCircle.childrenShow);
-			}
-		});
-		clonesList.getItems().add(cloneNode);*/
 		
 		circle.image.setLayoutX(circle.getCenterX()-60);
 		circle.image.setLayoutY(circle.getCenterY()-60);
@@ -157,7 +149,7 @@ public class CycicCircles{
 				circle.menu.setVisible(false);			}
 		});
 		
-		menu1.getItems().addAll(facForm, clonesList, delete, showImage, hideImage);
+		menu1.getItems().addAll(facForm, changeNiche, delete, showImage, hideImage);
 		circle.menu.getMenus().add(menu1);
 		circle.menu.setLayoutX(circle.getCenterX());
 		circle.menu.setLayoutY(circle.getCenterY());
@@ -294,6 +286,18 @@ public class CycicCircles{
 					db.setContent(content);
 					event.consume();
 				}
+			}
+		});
+		
+		circle.setOnMouseEntered(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				circle.setRadius(52);
+			}
+		});
+		
+		circle.setOnMouseExited(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				circle.setRadius(45);
 			}
 		});
 		

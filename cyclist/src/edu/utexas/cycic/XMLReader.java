@@ -211,35 +211,7 @@ public class XMLReader {
 			}
 			cycicResize(dataArray);
 			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" ){
-				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-				if(json_pass.get("uitype") instanceof JsonArray){
-					JsonArray array = json_pass.getJsonArray("uitype");
-					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-						String string = array.get(i+1).toString().replaceAll("\"", "");
-						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
-						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
-					}
-				} else if(json_pass.get("uitype") != null){
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, json_pass.get("uitype").toString().replace("\"", ""));
-				}
-				if(json_pass.get("default") instanceof JsonArray){
-					JsonArray array = json_pass.getJsonArray("default");
-					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-						String string = array.get(i+1).toString().replaceAll("\"", "");
-						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
-						((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
-					}
-				} else if(json_pass.get("default") instanceof JsonObject){
-					JsonObject object = json_pass.getJsonObject("default");
-					Set<String> keys = object.keySet();
-					for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-						cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
-					}
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(5, keys.toArray()[0].toString());
-					((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(1)).set(5, object.get(keys.toArray()[0]).toString());
-				} else if(json_pass.get("default") != null) {
-									
-				}
+				orMoreInfoControl(json_pass, dataArray);
 				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
 			combiner((ArrayList<Object>)dataArray.get(1), json);
@@ -371,7 +343,67 @@ public class XMLReader {
 		return array;
 	}
 	
+	/**
+	 * 
+	 * @param jsonPass
+	 * @param dataArray
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	static ArrayList<Object> orMoreInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
+		cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
+		
+		if(jsonPass.get("uitype") instanceof JsonArray){
+			JsonArray array = jsonPass.getJsonArray("uitype");
+			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+				String string = array.get(i+1).toString().replaceAll("\"", "");
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
+			}
+		} else if(jsonPass.get("uitype") != null){
+			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, jsonPass.get("uitype").toString().replace("\"", ""));
+		}
+		
+		if(jsonPass.get("uilabel") instanceof JsonArray){
+			JsonArray array = jsonPass.getJsonArray("uilabel");
+			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+				String string = array.get(i+1).toString().replaceAll("\"", "");
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(9, string);
+			}
+		} else if(jsonPass.get("uilabel") != null){
+			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(9, jsonPass.get("uilabel").toString().replace("\"", ""));
+		}
+		
+		if(jsonPass.get("tooltip") instanceof JsonArray){
+			JsonArray array = jsonPass.getJsonArray("tooltip");
+			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+				String string = array.get(i+1).toString().replaceAll("\"", "");
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(7, string);
+			}
+		} else if(jsonPass.get("tooltip") != null){
+			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(7, jsonPass.get("tooltip").toString().replace("\"", ""));
+		}
+		
+		if(jsonPass.get("default") instanceof JsonArray){
+			JsonArray array = jsonPass.getJsonArray("default");
+			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+				String string = array.get(i+1).toString().replaceAll("\"", "");
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
+			}
+		} else if(jsonPass.get("default") instanceof JsonObject){
+			JsonObject object = jsonPass.getJsonObject("default");
+			Set<String> keys = object.keySet();
+			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+			}
+			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(5, keys.toArray()[0].toString());
+			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(1)).set(5, object.get(keys.toArray()[0]).toString());
+		} else if(jsonPass.get("default") != null) {
+							
+		}
 		
 		
 		return dataArray;

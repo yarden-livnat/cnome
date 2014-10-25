@@ -265,27 +265,33 @@ public class FormBuilderFunctions {
 		cb.setMinWidth(80);
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
+				for(facilityNode facility: DataArrays.FacilityNodes){
+					for(int i =0; i < facility.cycicCircle.incommods.size(); i++){
+						if(facility.cycicCircle.incommods.get(i) == cb.getValue()){
+							facility.cycicCircle.incommods.remove(i);
+						}
+					}
+				}
 				cb.getItems().clear();
 
-				for (CommodityNode label: DataArrays.CommoditiesList){
+				for(CommodityNode label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.name.getText());
 				}
-				//cb.getItems().add("New Commodity");
+				cb.getItems().add("New Commodity");
 				
-				if ( defaultValue.get(0) != "") {
+				if(!defaultValue.get(0).equals("")) {
 					cb.setValue((String) defaultValue.get(0));
 				}
 			}
 		});
-		if ( defaultValue.get(0) != "") {
+		if(defaultValue.get(0) != "") {
 			cb.setValue((String) defaultValue.get(0));
 		}
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-
 				if (newValue == "New Commodity"){
-					// Tell Commodity Window to add a new commodity 
+					Cycic.addNewCommodity();
 				} else {
 					facNode.cycicCircle.incommods.add(newValue);
 					defaultValue.set(0, newValue);
@@ -311,17 +317,24 @@ public class FormBuilderFunctions {
 	 * @return ComboBox containing all of the commodities currently linked to markets, with the value shown being the current outcommodity for the facNode.
 	 */
 	static ComboBox<String> comboBoxOutCommod(final facilityNode facNode, final ArrayList<Object> defaultValue){
-		// Create and fill the comboBox
+		///TODO Fix quick hack.
 		final ComboBox<String> cb = new ComboBox<String>();
 		cb.setMinWidth(80);
 				
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
+				for(facilityNode facility: DataArrays.FacilityNodes){
+					for(int i =0; i < facility.cycicCircle.outcommods.size(); i++){
+						if(facility.cycicCircle.outcommods.get(i) == cb.getValue()){
+							facility.cycicCircle.outcommods.remove(i);
+						}
+					}
+				}
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.name.getText());
 				}
-				//cb.getItems().add("New Commodity");
+				cb.getItems().add("New Commodity");
 				
 				if (defaultValue.get(0) != "") {
 					cb.setValue((String) defaultValue.get(0));
@@ -335,7 +348,7 @@ public class FormBuilderFunctions {
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				if (newValue == "New Commodity"){
-					// Tell Commodity Window to add a new commodity 
+					Cycic.addNewCommodity(); 
 				} else {
 					facNode.cycicCircle.outcommods.add(newValue);
 					defaultValue.set(0, newValue);
