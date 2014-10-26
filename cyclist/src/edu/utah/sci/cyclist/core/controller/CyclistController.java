@@ -45,7 +45,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -175,7 +174,7 @@ public class CyclistController {
         ToolsPresenter tp = new ToolsPresenter(_eventBus);
         tp.setPanel(screen.getToolsPanel());
         tp.setFactories(Arrays.asList(ToolsLibrary.factories));
-
+       
         // InputLibrary panel
         InputPresenter ip = new InputPresenter(_eventBus);
         ip.setPanel(screen.getInputPanel());
@@ -407,13 +406,16 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				FileChooser chooser = new FileChooser();
 				chooser.setInitialDirectory(new File(getLastChosenWorkDirectory()+"/.."));
-//				DirectoryChooser chooser = new DirectoryChooser();
 				File dir = new File(getLastChosenWorkDirectory());
-				String parent = dir.getParent();
+				String parent="";
+				if(!dir.exists()){
+					parent = _workDirectoryController.DEFAULT_WORKSPACE;
+				}else{
+					parent = dir.getParent();
+				}
 				chooser.setInitialDirectory(new File(parent));
 //				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("directories", "*") );
 				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
-//				File file = chooser.showDialog(Cyclist.cyclistStage);
 				if (file != null) {
 					saveAs(file.getAbsolutePath());
 					//Display the new directory in the work directories dialog.
