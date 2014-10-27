@@ -209,7 +209,12 @@ public class FormBuilder extends ViewBase {
 					}
 				} else if ((int) facArray.get(6) <= userLevel){
 					// Adding the label
-					Label name = new Label((String) facArray.get(0));
+					Label name = new Label();
+					if(facArray.get(9) != null){
+						name.setText((String) facArray.get(9));
+					} else {
+						name.setText((String) facArray.get(0));	
+					}
 					name.setTooltip(new Tooltip((String) facArray.get(7)));
 					grid.add(name, columnNumber, rowNumber);
 					// Setting up the input type for the label
