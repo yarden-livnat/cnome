@@ -200,7 +200,8 @@ public class WorkDirectoryController {
 			IMemento rootWorkDirectories = memento.getChild("workDirectories");
 			if(rootWorkDirectories != null){
 				IMemento[] workDirectories = rootWorkDirectories.getChildren("workDirectory");
-				
+				//For windows environment - replace backslash with slash.
+				dirPath = dirPath.replace("\\", "/");
 				int id = getDirId(dirPath,workDirectories);
 				//If this directory already exists - just make it the chosen directory
 				if(id>-1){

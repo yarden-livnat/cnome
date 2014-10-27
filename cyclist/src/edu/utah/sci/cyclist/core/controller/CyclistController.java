@@ -45,6 +45,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -402,18 +403,20 @@ public class CyclistController {
 
 			@Override
 			public void handle(ActionEvent event) {
-				FileChooser chooser = new FileChooser();
+//				FileChooser chooser = new FileChooser();
+				DirectoryChooser chooser = new DirectoryChooser();
 				chooser.setInitialDirectory(new File(getLastChosenWorkDirectory()+"/.."));
 				File dir = new File(getLastChosenWorkDirectory());
 				String parent="";
 				if(!dir.exists()){
-					parent = _workDirectoryController.DEFAULT_WORKSPACE;
+					parent = WorkDirectoryController.DEFAULT_WORKSPACE;
 				}else{
 					parent = dir.getParent();
 				}
 				chooser.setInitialDirectory(new File(parent));
 //				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("directories", "*") );
-				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+//				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+				File file = chooser.showDialog(Cyclist.cyclistStage);
 				if (file != null) {
 					saveAs(file.getAbsolutePath());
 					//Display the new directory in the work directories dialog.
