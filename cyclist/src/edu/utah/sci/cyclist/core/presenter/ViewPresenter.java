@@ -53,8 +53,7 @@ public class ViewPresenter extends PresenterBase {
 	public void setView(View view) {
 		_view = view;
 		if (_view != null) {
-			view.onCloseProperty().set(new EventHandler<ActionEvent>() {
-				
+			view.onCloseProperty().set(new EventHandler<ActionEvent>() {			
 				@Override
 				public void handle(ActionEvent event) {
 					broadcast(new SimpleNotification(CyclistNotifications.REMOVE_VIEW, getId()));

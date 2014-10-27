@@ -161,7 +161,12 @@ public class ChartView extends CyclistViewBase {
 		}
 
 		getFiltersArea().copy(other.getFiltersArea());
-	}
+	
+		_xAxisMode.set(other._xAxisMode.get());
+		_xForceZero.set(other._xForceZero.get());
+		_yAxisMode.set(other._yAxisMode.get());
+		_yForceZero.set(other._yForceZero.get());
+		}
 
 	public void setActive(boolean state) {
 		_active = state;
