@@ -128,8 +128,6 @@ public class CyclistController {
 		{
 			_workDirectoryController.restoreGeneralConfigFile();
 		}
-		
-//		load();
 	}
 
 	/**
