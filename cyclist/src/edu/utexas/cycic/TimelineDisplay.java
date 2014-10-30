@@ -151,6 +151,15 @@ public class TimelineDisplay extends ViewBase {
 		final CheckComboBox<String> checkBox = new CheckComboBox<String>(displayType);
 		checkBox.setMaxWidth(200);
 		checkBox.setMinWidth(200);
+		// for controlsfx 8.20.8
+//		checkBox.getCheckModel().getCheckedItems().addListener(new ListChangeListener<String>() {
+//			public void onChanged(ListChangeListener.Change<? extends String> c) {
+//				System.out.println(checkBox.getCheckModel().getCheckedItems());
+//				setPane();
+//
+//			}
+//		});
+		// for controlsfx 8.0.6
 		checkBox.getCheckModel().getSelectedItems().addListener(new ListChangeListener<String>() {
 			public void onChanged(ListChangeListener.Change<? extends String> c) {
 				System.out.println(checkBox.getCheckModel().getSelectedItems());
@@ -158,7 +167,7 @@ public class TimelineDisplay extends ViewBase {
 
 			}
 		});
-
+		
 		interAction.getChildren().add(checkBox);
 		interAction.getChildren().add(minField);
 		interAction.getChildren().add(maxField);

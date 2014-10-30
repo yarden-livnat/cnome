@@ -103,7 +103,7 @@ public class CyclistViewBase extends ViewBase implements CyclistView {
 	 */
 	public CyclistViewBase(boolean toplevel) {
 		super(toplevel);
-		getStyleClass().add("view");
+//		getStyleClass().add("view");
 		
 		_taskControl = new TaskControl();
 				
