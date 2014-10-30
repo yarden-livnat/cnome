@@ -14,6 +14,6 @@
 	<classpathentry kind="lib" path="lib/httpclient-4.3.5.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/fluent-hc-4.3.5.jar"/>
-	<classpathentry kind="lib" path="lib/controlsfx-8.0.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Robert/cyclist2/cyclist/lib/controlsfx-8.20.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

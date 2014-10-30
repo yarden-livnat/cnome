@@ -160,9 +160,9 @@ public class TimelineDisplay extends ViewBase {
 //			}
 //		});
 		// for controlsfx 8.0.6
-		checkBox.getCheckModel().getSelectedItems().addListener(new ListChangeListener<String>() {
+		checkBox.getCheckModel().getCheckedItems().addListener(new ListChangeListener<String>() {
 			public void onChanged(ListChangeListener.Change<? extends String> c) {
-				System.out.println(checkBox.getCheckModel().getSelectedItems());
+				System.out.println(checkBox.getCheckModel().getCheckedItems());
 				setPane();
 
 			}
