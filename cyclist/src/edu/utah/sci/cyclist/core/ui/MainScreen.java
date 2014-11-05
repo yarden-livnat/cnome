@@ -221,6 +221,7 @@ public class MainScreen extends VBox implements Resource {
 	private MenuItem _simulationMenuItem;
 	private MenuItem _sqliteLoaderMenuItem;
 	private MenuItem _runMenuItem;
+	private MenuItem _preferencesMenuItem;
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
@@ -255,6 +256,10 @@ public class MainScreen extends VBox implements Resource {
 	
 	public ObjectProperty<Boolean> editDataSourceProperty() {
 		return _datasourcesPanel.editTableProperty();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onSetPreferences() {
+		return _preferencesMenuItem.onActionProperty();
 	}
 
 	
@@ -334,6 +339,8 @@ public class MainScreen extends VBox implements Resource {
 		
 		_saveAsMenuItem = new MenuItem("Save As", GlyphRegistry.get(AwesomeIcon.SAVE));
 		
+		_preferencesMenuItem = new MenuItem("Preferences", GlyphRegistry.get(AwesomeIcon.COG));
+		
 		// -- Quit
 		_quitMenuItem = new MenuItem("Quit", GlyphRegistry.get(AwesomeIcon.SIGN_OUT));
 		_quitMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+Q"));
@@ -345,7 +352,9 @@ public class MainScreen extends VBox implements Resource {
 					_workspaceMenuItem, 
 					_saveMenuItem,
 					_saveAsMenuItem,
-					new SeparatorMenuItem(), 
+					new SeparatorMenuItem(),
+					_preferencesMenuItem,
+					new SeparatorMenuItem(),
 					_quitMenuItem);
 		return fileMenu;
 	}

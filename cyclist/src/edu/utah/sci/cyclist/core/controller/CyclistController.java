@@ -60,6 +60,7 @@ import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
+import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
@@ -74,6 +75,7 @@ import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
@@ -425,6 +427,21 @@ public class CyclistController {
 			}
 		});
 		
+		_screen.onSetPreferences().set(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				final PreferencesWizard wizard = new PreferencesWizard();
+				ObjectProperty<Boolean> selection = wizard.show(_screen.getWindow());
+				selection.addListener(new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+							_dirtyFlag = true;
+					}
+				});
+			}
+		});
+		
 		_screen.onQuit().set(new EventHandler<ActionEvent>() {
 
 			@Override
@@ -593,6 +610,9 @@ public class CyclistController {
 			a_memento.putString("date", entry.getValue());
 		}
 		
+		//Save the preferences.
+		Preferences.getInstance().save(memento.createChild("Preferences"));
+		
 		_cyclusService.save(memento.createChild("Jobs"));
 		
 		_presenter.save(memento.createChild("workspace"));
@@ -680,6 +700,9 @@ public class CyclistController {
 							}
 						}
 					}
+					
+					//Read the preferences.
+					Preferences.getInstance().restore(memento.getChild("Preferences"));
 					
 					_cyclusService.restore(memento.getChild("Jobs"));
 					
@@ -771,6 +794,7 @@ public class CyclistController {
 		stage.setX(x);
 		stage.setY(y);
 	}
+	
 	
 	/*
 	 * Clears the model from an old data.
