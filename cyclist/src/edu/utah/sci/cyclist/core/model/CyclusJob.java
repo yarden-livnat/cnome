@@ -22,10 +22,16 @@ public class CyclusJob {
 	private String _inputFilePath = "";
 	private String _datafilePath = "";
 	private StringProperty _statusTextProperty = new SimpleStringProperty();
+	private String _serverUrl = "";
 	
 	public CyclusJob(String path) {
+		this(path, Preferences.getInstance().getServerUrl());
+	}
+	
+	public CyclusJob(String path, String serverUrl ){
 		_inputFilePath = path;
-	}	
+		_serverUrl = serverUrl;
+	}
 	
 	private CyclusJob() {}
 	
@@ -34,7 +40,15 @@ public class CyclusJob {
 		job._id = id;
 		return job;
 	}
-
+	
+	public String getServerUrl(){
+		return _serverUrl;
+	}
+	
+	public void setServerUrl(String serverUrl){
+		_serverUrl = serverUrl;
+	}
+	
 	public String getPath() {
 		return _inputFilePath;
 	}

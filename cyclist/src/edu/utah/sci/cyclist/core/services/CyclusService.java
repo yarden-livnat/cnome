@@ -37,17 +37,18 @@ import org.apache.log4j.Logger;
 import edu.utah.sci.cyclist.core.controller.IMemento;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
+import edu.utah.sci.cyclist.core.model.Preferences;
 
 public class CyclusService {
-	public static final String CLOUDIUS_URL = "http://cycrun.fuelcycle.org";
-	public static final String CLOUDIUS_SUBMIT_JOB = CLOUDIUS_URL + "/api/v1/job";
-	public static final String CLOUDIUS_SUBMIT = CLOUDIUS_URL + "/api/v1/job-infile";
-	public static final String CLOUDIUS_STATUS = CLOUDIUS_URL + "/api/v1/job-stat/";
-	public static final String CLOUDIUS_LOAD   = CLOUDIUS_URL + "/api/v1/job-outfiles/";
+	public static final String SUBMIT_JOB_PATH = "/api/v1/job";
+	public static final String SUBMIT_PATH = "/api/v1/job-infile";
+	public static final String STATUS_PATH = "/api/v1/job-stat/";
+	public static final String LOAD_PATH  =  "/api/v1/job-outfiles/";
 	
 	private ListProperty<CyclusJob> _jobs = new SimpleListProperty<>(FXCollections.observableArrayList());
 	private Map<String, ScheduledService<JobStatus>> _running = new HashMap<>();
 	static Logger log = Logger.getLogger(CyclusService.class);
+	Preferences _preferences = Preferences.getInstance();
 
 	public CyclusService() {
 		_jobs.addListener(new ListChangeListener<CyclusJob>() {
@@ -81,6 +82,7 @@ public class CyclusService {
 			j_memento.putString("status", job.getStatus().toString());
 			j_memento.putString("alias", job.getAlias());
 			j_memento.putString("datafile", job.getDatafilePath());
+			j_memento.putString("url", job.getServerUrl());
 		}
 	}
 	
@@ -90,7 +92,13 @@ public class CyclusService {
 			CyclusJob job = CyclusJob.restore(j_memento.getString("id"));
 			job.setStatus(j_memento.getString("status"));
 			job.setAlias(j_memento.getString("alias"));
-			job.setAlias(j_memento.getString("datafile"));
+			job.setDatafilePath(j_memento.getString("datafile"));
+			String serverUrl = j_memento.getString("url");
+			if(serverUrl == null){
+				job.setServerUrl(Preferences.CLOUDIUS_URL);
+			}else{
+				job.setServerUrl(serverUrl);
+			}
 			_jobs.add(job);
 			switch (job.getStatus()) {
 			case INIT:
@@ -114,7 +122,7 @@ public class CyclusService {
 		}
 	}
 	
-    private void _submit(String path, Request request) {
+    private void _submit(String path, Request request, String serverUrl) {
         CyclusJob job = new CyclusJob(path);
 
         try {
@@ -133,32 +141,35 @@ public class CyclusService {
     }
 
     public void submit(File file) {
-        String path = file.getAbsolutePath();
-        Request request = Request.Post(CLOUDIUS_SUBMIT)
+        String serverUrl = _preferences.getServerUrl();
+    	String path = file.getAbsolutePath();
+        Request request = Request.Post(serverUrl + SUBMIT_PATH)
             .bodyFile(file, ContentType.DEFAULT_TEXT);
-        this._submit(path, request);
+        this._submit(path, request,serverUrl);
     }
 
     public void submit(String file) {
         // file is a string of XML here that represents an input file,
         // rather than a file path
+    	String serverUrl = _preferences.getServerUrl();
         String path = "cycic.xml";
-        Request request = Request.Post(CLOUDIUS_SUBMIT)
+        Request request = Request.Post(serverUrl+ SUBMIT_PATH)
             .bodyString(file, ContentType.DEFAULT_TEXT);
-        this._submit(path, request);
+        this._submit(path, request,serverUrl);
     }
 
     public void submitCmd(String cmd, String... args) {
-        String name = "cmd";
+    	String serverUrl = _preferences.getServerUrl();
+    	String name = "cmd";
         String uid = UUID.randomUUID().toString().replace("-", "");
         String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
         for (String arg : args) {
             reqJSON += ", \"" + arg + "\"";
         }
         reqJSON += "]}";
-        Request request = Request.Post(CLOUDIUS_SUBMIT_JOB)
+        Request request = Request.Post(serverUrl+SUBMIT_JOB_PATH)
             .bodyString(reqJSON, ContentType.APPLICATION_JSON);
-        this._submit(name, request);
+        this._submit(name, request,serverUrl);
 	}
 
     private void poll(final CyclusJob job) {
@@ -218,7 +229,7 @@ public class CyclusService {
 				try {
 					Path dir = createSaveDirectory(job.getId());
 
-					InputStream input = Request.Get(CyclusService.CLOUDIUS_LOAD + job.getId())
+					InputStream input = Request.Get(job.getServerUrl()+ CyclusService.LOAD_PATH + job.getId())
 							.connectTimeout(1000).socketTimeout(100000)
 							.execute().returnContent().asStream();
 					saveZipStream(input, dir);
@@ -285,7 +296,7 @@ class PollService extends ScheduledService<JobStatus> {
 				InputStream stream;
 				try {
 					stream = Request
-							.Get(CyclusService.CLOUDIUS_STATUS + _job.getId())
+							.Get(_job.getServerUrl()+ CyclusService.STATUS_PATH + _job.getId())
 							.connectTimeout(1000).socketTimeout(1000)
 							.execute()
 							.returnContent().asStream();
