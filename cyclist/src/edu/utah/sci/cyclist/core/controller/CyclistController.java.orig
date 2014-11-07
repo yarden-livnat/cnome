@@ -65,12 +65,9 @@ import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
-<<<<<<< HEAD:cnome/src/edu/utah/sci/cyclist/core/controller/CyclistController.java
-import edu.utexas.cycic.tools.FormBuilderTool;
-import edu.utexas.cycic.tools.FormBuilderToolFactory;
-=======
+//import edu.utexas.cycic.tools.FormBuilderTool;
+//import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import edu.utah.sci.cyclist.core.util.StreamUtils;
->>>>>>> 313e1b8a6c1057077a2424cccb9da60e0ddd447b:cyclist/src/edu/utah/sci/cyclist/core/controller/CyclistController.java
 
 
 public class CyclistController {
