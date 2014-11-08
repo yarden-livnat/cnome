@@ -204,6 +204,7 @@ public class FilterPanel extends TitledPanel {
 	}
 	
 	private void configure() {
+		System.out.println("FilterPaneL: configure");
 		if (_filter.isRange())	
 			createRange();
 		else
@@ -220,13 +221,17 @@ public class FilterPanel extends TitledPanel {
 			
 			@Override
 			public void invalidated(Observable arg0) {
+				System.out.println("FilterPanel: valuesProperty invalidated. call populateValues");
 				populateValues();	
 			}
 		});
 		
+		System.out.println("FilterPanel: bind");
 		_valuesProperty.bind(_filter.valuesProperty());		
+		System.out.println("FilterPanel: after bind");
 		
 		if (!_filter.isValid()) {
+			System.out.println("FilterPanel: filter is not valid. Fetch data");
 			Field field = _filter.getField();
 			Table table = field.getTable();
 			
@@ -241,6 +246,7 @@ public class FilterPanel extends TitledPanel {
 			th.start();
 			
 		} else {
+			System.out.println("FilterPanel: filter is valid: populateValues()");
 			populateValues();
 		}
 		
@@ -278,6 +284,7 @@ public class FilterPanel extends TitledPanel {
                 }
 			});
 			for (Object item: sorted) {
+				System.out.println("FilterPanel: populate value:"+item.toString());
 				_cbBox.getChildren().add(createEntry(item));
 			}
 		}
