@@ -642,6 +642,9 @@ public class CyclistController {
 		
 		//Clear the previous data
 		clearModel();
+		
+		//Clears the main workspace.
+		_presenter.clearWorkspace();
 			
 		Context ctx = new Context();
 		readSimulationsTables(ctx);

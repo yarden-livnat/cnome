@@ -227,8 +227,6 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	@Override
 	public void restore(IMemento memento, Context ctx) {	
 		super.restore(memento, ctx);
-		removeOldViews();
-		removeOldFilters();
 		if(memento != null){
 			IMemento[] tools = memento.getChildren("Tool");
 			for(IMemento toolMemento : tools)
@@ -255,6 +253,15 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		}
 		//Reset the dirty flag after restore.
 		setDirtyFlag(false);
+	}
+	
+	/*
+	 * Clears all the existing views and filters of the workspace.
+	 * (For example when changing between workspaces).
+	 */
+	public void clearWorkspace(){
+		removeOldViews();
+		removeOldFilters();
 	}
 	
 	/** Handles the special case when the first simulation is selected in the simulation panel.
@@ -627,6 +634,10 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		 List<ViewPresenter> presenters = new ArrayList<>(_presenters);
 		 for (ViewPresenter presenter : presenters) {
 			 removeView(presenter.getId());
+			 //If the presenter itself is a workspace - clear it's contents as well.
+			 if(presenter instanceof WorkspacePresenter){
+				 ((WorkspacePresenter) presenter).clearWorkspace();
+			 }
 		 }
 	 }
 	 
