@@ -48,6 +48,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.WorkDirectoryController;
 
 public class WorkspaceWizard extends VBox {
 	
@@ -121,8 +122,16 @@ public class WorkspaceWizard extends VBox {
 				
 				if (cb.getValue() != null && cb.getValue() != "") {
 					File dir = new File(cb.getValue());
-					if(dir.isDirectory())
-						chooser.setInitialDirectory(dir);									
+					if(dir.isDirectory()){
+						String parent= dir.getParent();
+						if(parent.isEmpty()){
+							parent = WorkDirectoryController.DEFAULT_WORKSPACE;
+						}
+						File parentDir = new File(parent);
+						if(parentDir != null){
+							chooser.setInitialDirectory(parentDir);
+						}
+					}
 				}
 				File dir = chooser.showDialog(dialog);
 				if(dir != null)
