@@ -53,6 +53,11 @@
 				<filename name="controlsfx-8.20.8.jar"/>	
 			</fileset>
 		</copy>
+                <copy todir="deploy/externalLibs">
+                        <fileset dir="${basedir}\cyclist\lib">
+                                <filename name="openjfx-dialogs-1.0.2.jar"/>
+                        </fileset>
+                </copy>
 		<copy todir="deploy/externalLibs">
 			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="log4j-1.2.16.jar"/>	

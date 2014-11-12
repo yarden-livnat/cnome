@@ -128,7 +128,7 @@ public class CyclistController {
 		if (!defaultWs.exists())	
 			defaultWs.mkdir();
 		
-		if(_workDirectoryController.initGeneralConfigFile())
+		if (_workDirectoryController.initGeneralConfigFile())
 		{
 			_workDirectoryController.restoreGeneralConfigFile();
 		}
