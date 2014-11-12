@@ -123,7 +123,7 @@ public class CyclusService {
 	}
 	
     private void _submit(String path, Request request, String serverUrl) {
-        CyclusJob job = new CyclusJob(path);
+        CyclusJob job = new CyclusJob(path,serverUrl);
 
         try {
             InputStream stream = request.execute().returnContent().asStream();
@@ -140,8 +140,7 @@ public class CyclusService {
         }
     }
 
-    public void submit(File file) {
-        String serverUrl = _preferences.getServerUrl();
+    public void submit(File file, String serverUrl) {
     	String path = file.getAbsolutePath();
         Request request = Request.Post(serverUrl + SUBMIT_PATH)
             .bodyFile(file, ContentType.DEFAULT_TEXT);
@@ -151,7 +150,7 @@ public class CyclusService {
     public void submit(String file) {
         // file is a string of XML here that represents an input file,
         // rather than a file path
-    	String serverUrl = _preferences.getServerUrl();
+    	String serverUrl = Preferences.CLOUDIUS_URL;
         String path = "cycic.xml";
         Request request = Request.Post(serverUrl+ SUBMIT_PATH)
             .bodyString(file, ContentType.DEFAULT_TEXT);
@@ -159,7 +158,7 @@ public class CyclusService {
     }
 
     public void submitCmd(String cmd, String... args) {
-    	String serverUrl = _preferences.getServerUrl();
+    	String serverUrl = Preferences.CLOUDIUS_URL;
     	String name = "cmd";
         String uid = UUID.randomUUID().toString().replace("-", "");
         String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
