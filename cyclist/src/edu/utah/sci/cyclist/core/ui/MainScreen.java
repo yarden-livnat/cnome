@@ -243,6 +243,7 @@ public class MainScreen extends VBox implements Resource {
 	private MenuItem _simulationMenuItem;
 	private MenuItem _sqliteLoaderMenuItem;
 	private MenuItem _runMenuItem;
+	private MenuItem _manageMenuItem;
 	private Menu     _runOnMenu;
 	private MenuItem _runOnOtherItem;
 	private MenuItem _preferencesMenuItem;
@@ -277,6 +278,10 @@ public class MainScreen extends VBox implements Resource {
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onRun() {
 		return _runMenuItem.onActionProperty();
+	}
+	
+	public ObjectProperty<EventHandler<ActionEvent>> onManage() {
+		return _manageMenuItem.onActionProperty();
 	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onRunOnOther() {
@@ -437,8 +442,10 @@ public class MainScreen extends VBox implements Resource {
 	    _runOnOtherItem = new MenuItem("other...");
 		   
 		_runOnMenu.getItems().add(_runOnOtherItem);
+		
+		_manageMenuItem = new MenuItem("Manage list");
 
-		menu.getItems().addAll(_runMenuItem,_runOnMenu);
+		menu.getItems().addAll(_runMenuItem,_runOnMenu,_manageMenuItem);
 	
 		return menu;
 	}

@@ -75,6 +75,7 @@ import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.RemoteServerWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
@@ -376,6 +377,32 @@ public class CyclistController {
 			}
 		});
 		
+		_screen.onManage().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				ManageRemoteServersWizard wizard = new ManageRemoteServersWizard(_model.getRemoteServersList());
+				ObservableList<String> deletedServers = wizard.show(_screen.getParent().getScene().getWindow());
+				deletedServers.addListener(new ListChangeListener<String>() {
+					@Override
+					public void onChanged(ListChangeListener.Change<? extends String> listChange) {
+						List<MenuItem> items = new ArrayList<MenuItem>();
+						for(String server:listChange.getList()){
+							_model.getRemoteServersList().remove(server);
+							for(MenuItem item : _screen.getRemoteServers()){
+								if(item.getText().equals(server)){
+									items.add(item);
+								}
+							}
+						}
+						for(MenuItem item : items){
+							_screen.getRemoteServers().remove(item);
+						}
+					}
+				});
+				
+			}
+		});
+		
 		_screen.onRunOnOther().set(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -388,6 +415,7 @@ public class CyclistController {
 							if(_model.addNewRemoteServer(newVal)){
 								MenuItem item = new MenuItem(newVal);
 								_screen.getRemoteServers().add(item);
+								_dirtyFlag = true;
 								item.fire();
 							}else{
 								//Item already exists
