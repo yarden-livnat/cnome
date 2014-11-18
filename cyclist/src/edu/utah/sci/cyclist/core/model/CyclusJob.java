@@ -25,7 +25,7 @@ public class CyclusJob {
 	private String _serverUrl = "";
 	
 	public CyclusJob(String path) {
-		this(path, Preferences.getInstance().getServerUrl());
+		this(path, Preferences.getInstance().getDefaultServer());
 	}
 	
 	public CyclusJob(String path, String serverUrl ){

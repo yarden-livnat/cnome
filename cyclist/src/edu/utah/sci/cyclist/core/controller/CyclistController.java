@@ -75,7 +75,9 @@ import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.RemoteServerWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
@@ -359,12 +361,75 @@ public class CyclistController {
 		_screen.onRun().set(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				String server = "";
+				if(event.getSource() instanceof MenuItem){
+					server = (String) ((MenuItem)event.getSource()).getUserData();
+					if(server.isEmpty()){
+						server = Preferences.getInstance().getDefaultServer();
+					}
+				}
 				FileChooser chooser = new FileChooser();
 				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Cyclus files (*.xml)", "*.xml") );
 				File file = chooser.showOpenDialog(Cyclist.cyclistStage);
 				if (file != null) {
-					_cyclusService.submit(file);
+					_cyclusService.submit(file, server);
 				}
+			}
+		});
+		
+		_screen.onManage().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				ManageRemoteServersWizard wizard = new ManageRemoteServersWizard(_model.getRemoteServersList());
+				ObservableList<String> deletedServers = wizard.show(_screen.getParent().getScene().getWindow());
+				deletedServers.addListener(new ListChangeListener<String>() {
+					@Override
+					public void onChanged(ListChangeListener.Change<? extends String> listChange) {
+						List<MenuItem> items = new ArrayList<MenuItem>();
+						for(String server:listChange.getList()){
+							_model.getRemoteServersList().remove(server);
+							for(MenuItem item : _screen.getRemoteServers()){
+								if(item.getText().equals(server)){
+									items.add(item);
+								}
+							}
+						}
+						for(MenuItem item : items){
+							_screen.getRemoteServers().remove(item);
+						}
+					}
+				});
+				
+			}
+		});
+		
+		_screen.onRunOnOther().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				RemoteServerWizard wizard = new RemoteServerWizard();
+				ObjectProperty<String> selection = wizard.show(_screen.getParent().getScene().getWindow());
+				selection.addListener(new ChangeListener<String>(){
+					@Override
+					public void changed(ObservableValue<? extends String> arg0, String oldVal,String newVal) {
+						if(!newVal.isEmpty()){
+							if(_model.addNewRemoteServer(newVal)){
+								MenuItem item = new MenuItem(newVal);
+								_screen.getRemoteServers().add(item);
+								_dirtyFlag = true;
+								item.fire();
+							}else{
+								//Item already exists
+								for(MenuItem menuItem :_screen.getRemoteServers()){
+									if(menuItem.getText().equals(newVal)){
+										menuItem.fire();
+										break;
+									}
+								}
+							}
+							
+						}
+					}
+				});
 			}
 		});
 		
@@ -613,6 +678,9 @@ public class CyclistController {
 		//Save the preferences.
 		Preferences.getInstance().save(memento.createChild("Preferences"));
 		
+		//Save the remote servers
+		saveRemoteServers(memento);
+		
 		_cyclusService.save(memento.createChild("Jobs"));
 		
 		_presenter.save(memento.createChild("workspace"));
@@ -645,6 +713,8 @@ public class CyclistController {
 		
 		//Clears the main workspace.
 		_presenter.clearWorkspace();
+		
+		_screen.getRemoteServers().clear();
 			
 		Context ctx = new Context();
 		readSimulationsTables(ctx);
@@ -706,6 +776,9 @@ public class CyclistController {
 					
 					//Read the preferences.
 					Preferences.getInstance().restore(memento.getChild("Preferences"));
+					
+					//Read the remote servers
+					restoreRemoteServers(memento);
 					
 					_cyclusService.restore(memento.getChild("Jobs"));
 					
@@ -807,6 +880,39 @@ public class CyclistController {
 		_model.getTables().clear();
 		_model.getSimulations().clear();
 		_model.setSelectedDatasource(null);
+		_model.getRemoteServersList().clear();
+	}
+	
+	/*
+	 * Saves the list of remote servers from the model.
+	 * @param IMemento memento
+	 */
+	private void saveRemoteServers(IMemento memento){
+		IMemento remotes = memento.createChild("remote-servers");
+		for(String remote : _model.getRemoteServersList()){
+			IMemento server = remotes.createChild("Server");
+			server.putString("address", remote);
+		}
+	}
+	
+	/*
+	 * Restores the list of remote servers.
+	 * Adds the list to the model and creates corresponding menu items in the main screen menu.
+	 * @param IMemento memento.
+	 */
+	private void restoreRemoteServers(IMemento memento){
+		IMemento remotesTitle = memento.getChild("remote-servers");
+		if(remotesTitle != null){
+			IMemento[] servers = remotesTitle.getChildren("Server");
+			if(servers != null){
+				for(IMemento server : servers){
+					String address = server.getString("address");
+					_model.addNewRemoteServer(address);
+					MenuItem item = new MenuItem(address);
+					_screen.getRemoteServers().add(item);
+				}
+			}
+		}
 	}
 	
 	
