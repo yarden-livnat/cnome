@@ -113,7 +113,8 @@ public class CycicCircles{
 		};
 		facForm.setOnAction(circleAction);
 		
-
+		circle.image.setLayoutX(circle.getCenterX()-60);
+		circle.image.setLayoutY(circle.getCenterY()-60);
 		
 		MenuItem delete = new MenuItem("Delete");
 		
@@ -125,11 +126,6 @@ public class CycicCircles{
 		});
 		
 		final Menu changeNiche = new Menu("Change Niche");
-		
-		
-		circle.image.setLayoutX(circle.getCenterX()-60);
-		circle.image.setLayoutY(circle.getCenterY()-60);
-		
 		
 		MenuItem showImage = new MenuItem("Show Image");
 		showImage.setOnAction(new EventHandler<ActionEvent>(){
