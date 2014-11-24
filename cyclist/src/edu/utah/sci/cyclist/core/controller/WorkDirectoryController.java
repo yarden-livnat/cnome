@@ -176,6 +176,62 @@ public class WorkDirectoryController {
 		
 	}
 	
+	/*
+	 * Add a new directory, not through the workspace wizard.
+	 * For example - when calling "save as" which creates a workspace directory without the workspace wizard.
+	 * Looks for the new directory in the existing directories: if exists, just changes the current directory to be this directory.
+	 * If not exist : create a new entry in the configuration file which saves the workspaces directories.
+	 * @param String dirPath - the path to the new directory.
+	 */
+	public void addNewDir(String dirPath){
+		// The user general config  file
+		File saveFile = new File(CONFIG_FILE);
+	
+		//If the config file doesn't exist create a new file.
+		if (!saveFile.exists()){
+			initGeneralConfigFile();
+		}
+		FileReader reader=null;
+		try {
+			reader = new FileReader(saveFile);
+			// Create the root memento
+			XMLMemento memento = XMLMemento.createReadRoot(reader);
+			// Read in the data sources
+			IMemento rootWorkDirectories = memento.getChild("workDirectories");
+			if(rootWorkDirectories != null){
+				IMemento[] workDirectories = rootWorkDirectories.getChildren("workDirectory");
+				
+				int id = getDirId(dirPath,workDirectories);
+				//If this directory already exists - just make it the chosen directory
+				if(id>-1){
+					rootWorkDirectories.putInteger("lastChosenId", id);
+					_lastChosenIndex= _workdirectories.indexOf(dirPath);
+				}else{  //A new directory
+					WorkDirectory workDirectory = new WorkDirectory(_lastId,dirPath);
+					workDirectory.save(rootWorkDirectories.createChild("workDirectory"));
+					rootWorkDirectories.putInteger("lastChosenId", _lastId);
+					_lastId++;
+					//A new work directory is always added to index 0;
+					_workdirectories.add(0,dirPath);
+					_lastChosenIndex=0;
+				}
+				memento.save(new PrintWriter(saveFile));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(reader!= null){
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/**
 	 * returns list of all the existing workspaces..
 	 * 
@@ -195,4 +251,23 @@ public class WorkDirectoryController {
 	{
 		return _lastChosenIndex;
 	}
+	
+	/*
+	 * Gets a directory id in the workspaces list, from the configuration file.
+	 * Compares the path of the specified directory to the existing directories.
+	 * @param String path - the path to look for in the directories list.
+	 * @param  IMemento[] workDirectories - list of existing directories.
+	 * @return int - the id of the directory if found, -1 if not found.
+	 */
+	private int getDirId(String path, IMemento[] workDirectories){
+		for(IMemento dir:workDirectories){
+			String dirPath= dir.getString("path");
+			if(dirPath.equals(path)){
+				String id =  dir.getString("id");
+				return Integer.parseInt(id);
+			}
+		}
+		return -1;
+	}
+	
 }

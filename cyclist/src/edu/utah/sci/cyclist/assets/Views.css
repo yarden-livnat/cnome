@@ -43,8 +43,8 @@
  * Workspace
  */
 .workspace-pane {
-	-fx-background-color: #ffffff;
-	-fx-border-width: 0;
+	-fx-background-color: #f0f0f0;
+	-fx-border-width: 5;
 }
 
 .element-label {
@@ -81,17 +81,18 @@
 	-fx-spacing: 5;
 	-fx-background-color: #ffffff;
 	-fx-background-radius: 5;
-	-fx-effect: dropshadow( gaussian , rgba(0.8,0.8,0.8,0.4) , 8, 0.0 , 0 , 3 );
+	/*-fx-effect: dropshadow( gaussian , rgba(0.8,0.8,0.8,0.4) , 8, 0.0 , 0 , 3 );*/
 	-fx-border-color: #d0d0d0;
 	-fx-border-width: 2px;
 }
 
 .view .header {
 	-fx-padding: 1, 2, 0, 2;
-	-fx-background-color: lightblue ; /* #e0e0e0;*/
+	-fx-background-color: lightcyan ; /* #e0e0e0;*/
 	-fx-font-weight: bold;
 
 }
+
 
 .view .chart-view {
 	-fx-background-color: #ffffff;
@@ -103,6 +104,14 @@
     -fx-background-color: transparent;
     -fx-padding: 0.166667em 0.333333em 0.166667em 0.333333em; /* 2 4 2 4 */
     -fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+.workspace {
+	-fx-effect: dropshadow( gaussian , rgba(0.8,0.8,0.8,0.4) , 8, 0.0 , 0 , 3 );
+}
+
+.workspace > .header {
+	-fx-background-color: lightgray ;	
 }
 
 .line-chart .chart-series-line {
