@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.controlsfx.control.action.AbstractAction;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.dialog.Dialog;
+import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.Resources1;
@@ -39,6 +43,7 @@ import javax.json.JsonString;
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -51,6 +56,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
@@ -80,6 +86,9 @@ public class Cycic extends ViewBase{
 		}
 		init();
 	}
+	/**
+	 * 
+	 */
 	public static final String TITLE = "Cycic";
 	static Pane pane = new Pane();
 	Pane nodesPane = new Pane();
@@ -197,6 +206,32 @@ public class Cycic extends ViewBase{
 		} catch (IOException e1) {
 			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
 		}
+		pane.setOnMouseClicked(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				if(e.getButton().equals(MouseButton.SECONDARY)){
+					ColorPicker cP = new ColorPicker();
+					cP.setOnAction(new EventHandler<ActionEvent>(){
+						public void handle(ActionEvent e){
+							String background = "-fx-background-color: #";
+							background += cP.getValue().toString().substring(2, 8);
+							System.out.println(background);
+							pane.setStyle(background);
+						}
+					});
+					Dialog dg = new Dialog(window, "Pick a color!");
+					final AbstractAction actionLogin = new AbstractAction("Okay") {
+					    // This method is called when the login button is clicked ...
+					    public void handle(ActionEvent ae) {
+					        Dialog d = (Dialog) ae.getSource();
+					        d.hide();
+					    }
+					};
+					dg.setContent(cP);
+					dg.getActions().add(actionLogin);
+					dg.show();
+				}
+			}
+		});
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
@@ -249,10 +284,11 @@ public class Cycic extends ViewBase{
 		
 		VBox cycicBox = new VBox();
 		cycicBox.autosize();
-		Cycic.pane.autosize();
-		Cycic.pane.setId("cycicPane");
-		Cycic.pane.setPrefSize(1000, 600);
-		Cycic.pane.setStyle("-fx-background-color: black;");
+
+		pane.autosize();
+		pane.setId("cycicPane");
+		pane.setPrefSize(1000, 600);
+		pane.setStyle("-fx-background-color: white;");
 		
 		// Temp Toolbar //
 		final GridPane grid = new GridPane();
