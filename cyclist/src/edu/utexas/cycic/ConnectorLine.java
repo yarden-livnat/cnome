@@ -1,32 +1,45 @@
 package edu.utexas.cycic;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class ConnectorLine extends Line {
+	{
+		setStroke(Color.WHITE);
+	}
 	Line right = new Line(){
 		{
 			setStrokeWidth(2);
+			setStroke(Color.WHITE);
 		}
 	};
 	Line left = new Line(){
 		{
 			setStrokeWidth(2);
+			setStroke(Color.WHITE);
 		}
 	};
 	
 	Line right1 = new Line(){
 		{
 			setStrokeWidth(2);
+			setStroke(Color.WHITE);
 		}
 	};
 	Line left1 = new Line(){
 		{
 			setStrokeWidth(2);
+			setStroke(Color.WHITE);
 		}
 	};
-	
-	Text text = new Text();
+	Text text = new Text(){
+		{
+			setFill(Color.WHITE);
+			setFont(new Font(20));
+		}
+	};
 	public void updatePosition(){
 		double x1 = getEndX();
 		double y1 = getEndY();
@@ -59,7 +72,7 @@ public class ConnectorLine extends Line {
 		left.setEndY((y1 + (y2-y1)*0.71)+5.0*(x2-x1)/Math.sqrt(Math.pow((y2-y1), 2)+Math.pow(x2-x1, 2)));
 		
 		text.setX(x1 + (x2-x1)*0.55+10.0*(y2-y1)/Math.sqrt(Math.pow((y2-y1), 2)+Math.pow(x2-x1, 2)));
-		text.setY(y1 + (y2-y1)*0.55-10.0*(x2-x1)/Math.sqrt(Math.pow((y2-y1), 2)+Math.pow(x2-x1, 2)));
+		text.setY(y1 + (y2-y1)*0.55+10.0*(x2-x1)/Math.sqrt(Math.pow((y2-y1), 2)+Math.pow(x2-x1, 2)));
 	}
 
 }

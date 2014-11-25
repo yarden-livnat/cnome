@@ -252,7 +252,7 @@ public class Cycic extends ViewBase{
 		Cycic.pane.autosize();
 		Cycic.pane.setId("cycicPane");
 		Cycic.pane.setPrefSize(1000, 600);
-		Cycic.pane.setStyle("-fx-background-color: white;");
+		Cycic.pane.setStyle("-fx-background-color: black;");
 		
 		// Temp Toolbar //
 		final GridPane grid = new GridPane();
@@ -312,6 +312,7 @@ public class Cycic extends ViewBase{
 		
 		skins.getItems().add("Default Skin");
 		skins.setValue("Default Skin");
+		DataArrays.visualizationSkins.add(XMLReader.SC2);
 		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
