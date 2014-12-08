@@ -34,34 +34,7 @@ public class InstitutionView extends ViewBase{
 	 */
 	public InstitutionView(){
 		super();
-		// Ensures the temporary institution is initiated only once. 
-		/*if (CycicScenarios.workingCycicScenario.simInstitutions.size() < 1) {
-			String string;
-			for(int i = 0; i < XMLReader.institutionList.size(); i++){
-				StringBuilder sb = new StringBuilder();
-				StringBuilder sb1 = new StringBuilder();
-				Process proc;
-				try {
-					proc = Runtime.getRuntime().exec("cyclus --agent-schema "+XMLReader.institutionList.get(i)); 
-					BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					while((string = read.readLine()) != null){
-						sb.append(string);
-					}
-					Process proc1 = Runtime.getRuntime().exec("cyclus --agent-annotations "+XMLReader.institutionList.get(i));
-					BufferedReader read1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-					while((string = read1.readLine()) != null){
-						sb1.append(string);
-					}
-					institutionStructure test = new institutionStructure();
-					test.institName = XMLReader.institutionList.get(i).replace(":", " ").trim();
-					test.institStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-					DataArrays.simInstitutions.add(test);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}*/
-		
+	
 		// ListView for initial facilities in the institution.
 		final ListView<String> facilityList = new ListView<String>();
 		facilityList.setOrientation(Orientation.VERTICAL);

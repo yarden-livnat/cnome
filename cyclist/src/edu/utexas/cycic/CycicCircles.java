@@ -2,6 +2,8 @@ package edu.utexas.cycic;
 
 import java.io.File;
 
+import org.controlsfx.dialog.Dialogs;
+
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
@@ -33,6 +35,7 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Window;
 
 /**
  * The class used to build a new Prototype Facility node.
@@ -45,6 +48,7 @@ public class CycicCircles{
 	protected static double mousex;
 	protected static double x;
 	protected static double y;
+	static Window window;
 	
 	/**
 	 * Function to build a prototype facility node. This node will contain
@@ -113,7 +117,8 @@ public class CycicCircles{
 		};
 		facForm.setOnAction(circleAction);
 		
-
+		circle.image.setLayoutX(circle.getCenterX()-60);
+		circle.image.setLayoutY(circle.getCenterY()-60);
 		
 		MenuItem delete = new MenuItem("Delete");
 		
@@ -125,11 +130,14 @@ public class CycicCircles{
 		});
 		
 		final Menu changeNiche = new Menu("Change Niche");
-		
-		
-		circle.image.setLayoutX(circle.getCenterX()-60);
-		circle.image.setLayoutY(circle.getCenterY()-60);
-		
+		changeNiche.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				Dialogs.create()
+					.owner(window)
+					.message("MESSAGE")
+					.showInformation();
+			}
+		});
 		
 		MenuItem showImage = new MenuItem("Show Image");
 		showImage.setOnAction(new EventHandler<ActionEvent>(){

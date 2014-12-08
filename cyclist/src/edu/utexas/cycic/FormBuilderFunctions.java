@@ -1,11 +1,13 @@
 package edu.utexas.cycic;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -15,6 +17,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 /**
  * This class is built to handle all of the functions used in building the forms for CYCIC. 
@@ -448,6 +452,44 @@ public class FormBuilderFunctions {
 	
 	/**
 	 * 
+	 * @param dataArray
+	 * @return
+	 */
+	static TextField fileTextField(ArrayList<Object> dataArray){
+		TextField textField = new TextField();
+		textField.setText((String) dataArray.get(0)); 
+		textField.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				dataArray.set(0, newValue);
+			}
+		});
+		return textField;
+	}
+	
+	/**
+	 * 
+	 * @param textField
+	 * @return
+	 */
+	static Button fileChooserButton(TextField textField){
+		Button button = new Button("Choose File");
+		Window window = null;
+		
+		FileChooser fileChooser = new FileChooser();
+		//Set extension filter
+		/*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+		fileChooser.getExtensionFilters().add(extFilter);
+		fileChooser.setTitle("Please save as Cyclus input file.");
+		fileChooser.setInitialFileName("*.xml");*/
+		//Show save file dialog
+		File file = fileChooser.showSaveDialog(window);
+		textField.setText(file.getAbsolutePath());
+		
+		return button;
+	}
+	
+	/**
+	 * 
 	 * @param grid
 	 * @param formNode
 	 * @param facArray
@@ -457,22 +499,27 @@ public class FormBuilderFunctions {
 	 * @return
 	 */
 	static GridPane cycicTypeTest(GridPane grid, facilityNode formNode, ArrayList<Object> facArray, ArrayList<Object> dataArray, int col, int row){
+		col = 1+col;
 		switch ((String) facArray.get(2).toString().toLowerCase()) {
 		case "incommodity":
-			grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), 1+col, row);
+			grid.add(FormBuilderFunctions.comboBoxInCommod(formNode, dataArray), col, row);
 			break;
 		case "outcommodity":
-			grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), 1+col, row);
+			grid.add(FormBuilderFunctions.comboBoxOutCommod(formNode, dataArray), col, row);
 			break;
 		case "inrecipe": case "outrecipe": case "recipe":
-			grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), 1+col, row);
+			grid.add(FormBuilderFunctions.recipeComboBox(formNode, dataArray), col, row);
 			break;
 		case "commodity":
-			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+col, row);
+			grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), col, row);
 			break;
 		case "prototype":
-			grid.add(comboBoxFac(dataArray), 1+col, row);
+			grid.add(comboBoxFac(dataArray), col, row);
 			break;
+		case "fileChooser":
+			TextField fileField = fileTextField(dataArray);
+			grid.add(fileField, col, row);
+			grid.add(fileChooserButton(fileField), col+1, row);
 		default:
 			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+col, row);
 			break;
