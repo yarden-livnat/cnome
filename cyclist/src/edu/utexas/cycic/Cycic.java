@@ -14,11 +14,7 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.controlsfx.control.action.AbstractAction;
-import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.Dialogs;
-
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.Resources1;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -219,15 +215,15 @@ public class Cycic extends ViewBase{
 						}
 					});
 					Dialog dg = new Dialog(window, "Pick a color!");
-					final AbstractAction actionLogin = new AbstractAction("Okay") {
+					/*final AbstractAction actionLogin = new AbstractAction("Okay") {
 					    // This method is called when the login button is clicked ...
 					    public void handle(ActionEvent ae) {
 					        Dialog d = (Dialog) ae.getSource();
 					        d.hide();
 					    }
-					};
+					};*/
 					dg.setContent(cP);
-					dg.getActions().add(actionLogin);
+					//dg.getActions().add(actionLogin);
 					dg.show();
 				}
 			}
