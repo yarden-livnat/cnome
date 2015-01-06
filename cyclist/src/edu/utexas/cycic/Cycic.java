@@ -14,9 +14,7 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.Resources1;
@@ -218,7 +216,7 @@ public class Cycic extends ViewBase{
 						}
 					});
 					Dialog dg = new Dialog(window, "Pick a color!");
-					/*final Action actionLogin = new Action("Okay") {
+					/*final AbstractAction actionLogin = new AbstractAction("Okay") {
 					    // This method is called when the login button is clicked ...
 					    public void handle(ActionEvent ae) {
 					        Dialog d = (Dialog) ae.getSource();
@@ -226,7 +224,7 @@ public class Cycic extends ViewBase{
 					    }
 					};*/
 					dg.setContent(cP);
-					dg.getActions().add(Dialog.ACTION_OK);
+					//dg.getActions().add(actionLogin);
 					dg.show();
 				}
 			}
@@ -283,6 +281,7 @@ public class Cycic extends ViewBase{
 		
 		VBox cycicBox = new VBox();
 		cycicBox.autosize();
+
 		pane.autosize();
 		pane.setId("cycicPane");
 		pane.setPrefSize(1000, 600);
@@ -346,6 +345,7 @@ public class Cycic extends ViewBase{
 		
 		skins.getItems().add("Default Skin");
 		skins.setValue("Default Skin");
+		DataArrays.visualizationSkins.add(XMLReader.SC2);
 		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);

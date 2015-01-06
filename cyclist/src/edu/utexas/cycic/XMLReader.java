@@ -30,10 +30,16 @@ public class XMLReader {
 	static skinSet SC2 = new skinSet(){
 		{
 			name = "SC2";
-			images.put("reactor", new Image(new File("./skinImages/reactorSC2.jpg").toURI().toString()));
-			images.put("facility", new Image(new File("./skinImages/sourceFacSC2.jpg").toURI().toString()));
+			images.put("reactor", new Image(new File("skinImages/reactor.png").toURI().toString()));
+			images.put("facility", new Image(new File("skinImages/sourceFacSC2.jpg").toURI().toString()));
 		}
 	};
+	
+	/**
+	 * 
+	 * @param path
+	 * @return
+	 */
 	 public static skinSet loadSkin(String path){
 		skinSet skin = new skinSet(){
 			{
