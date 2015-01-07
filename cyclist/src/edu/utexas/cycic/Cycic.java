@@ -14,10 +14,8 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.controlsfx.control.action.AbstractAction;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.Dialog;
-import org.controlsfx.dialog.Dialogs;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.Resources1;
@@ -39,6 +37,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.swing.AbstractAction;
 
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
