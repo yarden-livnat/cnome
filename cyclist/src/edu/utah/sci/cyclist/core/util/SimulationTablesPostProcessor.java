@@ -52,7 +52,7 @@ public class SimulationTablesPostProcessor {
 	private static final String FACILITIES_TABLE_UPDATE = "replace into Facilities(SimID,AgentId,Spec,Prototype,InstitutionId,RegionId,EnterTime,ExitTime,Lifetime) "+
 														  "select f.SimId, f.AgentId, f.Spec, f.Prototype, i.AgentId, " +
 														  "cast(-1 as INTEGER), f.EnterTime, f.ExitTime, f.Lifetime from Agents as f, Agents as i " +
-														  "where f.Kind = 'Facility' and i.Kind = 'Inst' and f.ParentId = i.AgentId;";
+														  "where f.Kind = 'Facility' and i.Kind = 'Inst' and f.ParentId = i.AgentId and f.SimId = i.SimId";
 
 	private static final String FACILITIES_TABLE_INDEX = "create index if not exists Facilities_idx on Facilities (SimId ASC, AgentId ASC);";
 	private static final String UPDATED_INDICATION_TABLE_CREATE = "create table if not exists UpdatedIndication (flag INTEGER DEFAULT 1)";

@@ -8,7 +8,6 @@ import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.FieldProperties;
 import edu.utah.sci.cyclist.core.model.Filter;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.model.DataType.Role;
 
 public class QueryBuilder {
 	

@@ -355,9 +355,9 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 							    currentSim != null ? currentSim.getDataSource() : null;
 		
 		if (currentSim != null)
-		for (Filter filter : filters()) {
-			filter.setDatasource(ds);
-		}
+			for (Filter filter : filters()) {
+				filter.setDatasource(ds);
+			}
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

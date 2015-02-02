@@ -50,9 +50,14 @@
 				</copy>
 		<copy todir="deploy/externalLibs">
 			<fileset dir="${basedir}\cyclist\lib">
-				<filename name="controlsfx-8.0.6.jar"/>	
+				<filename name="controlsfx-8.20.8.jar"/>	
 			</fileset>
 		</copy>
+                <copy todir="deploy/externalLibs">
+                        <fileset dir="${basedir}\cyclist\lib">
+                                <filename name="openjfx-dialogs-1.0.2.jar"/>
+                        </fileset>
+                </copy>
 		<copy todir="deploy/externalLibs">
 			<fileset dir="${basedir}\cyclist\lib">
 				<filename name="log4j-1.2.16.jar"/>	
@@ -110,7 +115,7 @@
 		<copy todir="deploy/build/libs">
 			<fileset dir="deploy/externalLibs">
 				<include name="commons-logging.jar"/>
-				<include name="controlsfx-8.0.6.jar"/>
+				<include name="controlsfx-8.20.8.jar"/>
 				<include name="log4j-1.2.16.jar"/>
 				<include name="mysql-connector-java-5.1.18-bin.jar"/>
 				<include name="commons-collections-3.2.1.jar"/>

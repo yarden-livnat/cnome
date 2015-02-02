@@ -258,11 +258,15 @@ public class SimpleTableView extends CyclistViewBase {
 		if (active) {
 			_currentTable = table;	
 			_simField = table.getField(SIMULATION_FIELD_NAME);
+			Simulation sim = getCurrentSimulation(); 
+			if(sim != null){
+				_simFilter = new ValueFilter(_simField, sim.getSimulationId());
+			}
 		} else {
 			_currentTable = null;
 			_simField = null;
 		}
-		
+
 		loadTable(true);
 	}
 	

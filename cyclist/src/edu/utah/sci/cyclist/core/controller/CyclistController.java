@@ -45,6 +45,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -59,6 +60,7 @@ import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
+import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
@@ -73,6 +75,9 @@ import edu.utah.sci.cyclist.core.ui.MainScreen;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
+import edu.utah.sci.cyclist.core.ui.wizards.RemoteServerWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
@@ -124,7 +129,7 @@ public class CyclistController {
 		if (!defaultWs.exists())	
 			defaultWs.mkdir();
 		
-		if(_workDirectoryController.initGeneralConfigFile())
+		if (_workDirectoryController.initGeneralConfigFile())
 		{
 			_workDirectoryController.restoreGeneralConfigFile();
 		}
@@ -356,12 +361,75 @@ public class CyclistController {
 		_screen.onRun().set(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				String server = "";
+				if(event.getSource() instanceof MenuItem){
+					server = (String) ((MenuItem)event.getSource()).getUserData();
+					if(server.isEmpty()){
+						server = Preferences.getInstance().getDefaultServer();
+					}
+				}
 				FileChooser chooser = new FileChooser();
 				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("Cyclus files (*.xml)", "*.xml") );
 				File file = chooser.showOpenDialog(Cyclist.cyclistStage);
 				if (file != null) {
-					_cyclusService.submit(file);
+					_cyclusService.submit(file, server);
 				}
+			}
+		});
+		
+		_screen.onManage().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				ManageRemoteServersWizard wizard = new ManageRemoteServersWizard(_model.getRemoteServersList());
+				ObservableList<String> deletedServers = wizard.show(_screen.getParent().getScene().getWindow());
+				deletedServers.addListener(new ListChangeListener<String>() {
+					@Override
+					public void onChanged(ListChangeListener.Change<? extends String> listChange) {
+						List<MenuItem> items = new ArrayList<MenuItem>();
+						for(String server:listChange.getList()){
+							_model.getRemoteServersList().remove(server);
+							for(MenuItem item : _screen.getRemoteServers()){
+								if(item.getText().equals(server)){
+									items.add(item);
+								}
+							}
+						}
+						for(MenuItem item : items){
+							_screen.getRemoteServers().remove(item);
+						}
+					}
+				});
+				
+			}
+		});
+		
+		_screen.onRunOnOther().set(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				RemoteServerWizard wizard = new RemoteServerWizard();
+				ObjectProperty<String> selection = wizard.show(_screen.getParent().getScene().getWindow());
+				selection.addListener(new ChangeListener<String>(){
+					@Override
+					public void changed(ObservableValue<? extends String> arg0, String oldVal,String newVal) {
+						if(!newVal.isEmpty()){
+							if(_model.addNewRemoteServer(newVal)){
+								MenuItem item = new MenuItem(newVal);
+								_screen.getRemoteServers().add(item);
+								_dirtyFlag = true;
+								item.fire();
+							}else{
+								//Item already exists
+								for(MenuItem menuItem :_screen.getRemoteServers()){
+									if(menuItem.getText().equals(newVal)){
+										menuItem.fire();
+										break;
+									}
+								}
+							}
+							
+						}
+					}
+				});
 			}
 		});
 		
@@ -402,23 +470,40 @@ public class CyclistController {
 
 			@Override
 			public void handle(ActionEvent event) {
-				FileChooser chooser = new FileChooser();
+//				FileChooser chooser = new FileChooser();
+				DirectoryChooser chooser = new DirectoryChooser();
 				chooser.setInitialDirectory(new File(getLastChosenWorkDirectory()+"/.."));
 				File dir = new File(getLastChosenWorkDirectory());
 				String parent="";
 				if(!dir.exists()){
-					parent = _workDirectoryController.DEFAULT_WORKSPACE;
+					parent = WorkDirectoryController.DEFAULT_WORKSPACE;
 				}else{
 					parent = dir.getParent();
 				}
 				chooser.setInitialDirectory(new File(parent));
 //				chooser.getExtensionFilters().add( new FileChooser.ExtensionFilter("directories", "*") );
-				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+//				File file = chooser.showSaveDialog(Cyclist.cyclistStage);
+				File file = chooser.showDialog(Cyclist.cyclistStage);
 				if (file != null) {
 					saveAs(file.getAbsolutePath());
 					//Display the new directory in the work directories dialog.
 					_workDirectoryController.addNewDir(file.getAbsolutePath());
 				}
+			}
+		});
+		
+		_screen.onSetPreferences().set(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				final PreferencesWizard wizard = new PreferencesWizard();
+				ObjectProperty<Boolean> selection = wizard.show(_screen.getWindow());
+				selection.addListener(new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal, Boolean newVal) {
+							_dirtyFlag = true;
+					}
+				});
 			}
 		});
 		
@@ -590,6 +675,12 @@ public class CyclistController {
 			a_memento.putString("date", entry.getValue());
 		}
 		
+		//Save the preferences.
+		Preferences.getInstance().save(memento.createChild("Preferences"));
+		
+		//Save the remote servers
+		saveRemoteServers(memento);
+		
 		_cyclusService.save(memento.createChild("Jobs"));
 		
 		_presenter.save(memento.createChild("workspace"));
@@ -619,6 +710,11 @@ public class CyclistController {
 		
 		//Clear the previous data
 		clearModel();
+		
+		//Clears the main workspace.
+		_presenter.clearWorkspace();
+		
+		_screen.getRemoteServers().clear();
 			
 		Context ctx = new Context();
 		readSimulationsTables(ctx);
@@ -677,6 +773,12 @@ public class CyclistController {
 							}
 						}
 					}
+					
+					//Read the preferences.
+					Preferences.getInstance().restore(memento.getChild("Preferences"));
+					
+					//Read the remote servers
+					restoreRemoteServers(memento);
 					
 					_cyclusService.restore(memento.getChild("Jobs"));
 					
@@ -769,6 +871,7 @@ public class CyclistController {
 		stage.setY(y);
 	}
 	
+	
 	/*
 	 * Clears the model from an old data.
 	 */
@@ -777,6 +880,39 @@ public class CyclistController {
 		_model.getTables().clear();
 		_model.getSimulations().clear();
 		_model.setSelectedDatasource(null);
+		_model.getRemoteServersList().clear();
+	}
+	
+	/*
+	 * Saves the list of remote servers from the model.
+	 * @param IMemento memento
+	 */
+	private void saveRemoteServers(IMemento memento){
+		IMemento remotes = memento.createChild("remote-servers");
+		for(String remote : _model.getRemoteServersList()){
+			IMemento server = remotes.createChild("Server");
+			server.putString("address", remote);
+		}
+	}
+	
+	/*
+	 * Restores the list of remote servers.
+	 * Adds the list to the model and creates corresponding menu items in the main screen menu.
+	 * @param IMemento memento.
+	 */
+	private void restoreRemoteServers(IMemento memento){
+		IMemento remotesTitle = memento.getChild("remote-servers");
+		if(remotesTitle != null){
+			IMemento[] servers = remotesTitle.getChildren("Server");
+			if(servers != null){
+				for(IMemento server : servers){
+					String address = server.getString("address");
+					_model.addNewRemoteServer(address);
+					MenuItem item = new MenuItem(address);
+					_screen.getRemoteServers().add(item);
+				}
+			}
+		}
 	}
 	
 	
