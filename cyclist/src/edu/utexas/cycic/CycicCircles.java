@@ -31,6 +31,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -190,66 +191,90 @@ public class CycicCircles{
 		
 		// To allow the facilityCircle to be moved through the pane and setting bounding regions.
 		circle.onMouseDraggedProperty().set(new EventHandler<MouseEvent>(){
-			@Override
+			
+			Line line = new Line();
 			public void handle(MouseEvent event){
-				circle.setCenterX(mousex+x);
-				circle.setCenterY(mousey+y);
-				
-				if(circle.getCenterX() <= Cycic.pane.getLayoutBounds().getMinX()+circle.getRadius()){
-					circle.setCenterX(Cycic.pane.getLayoutBounds().getMinX()+circle.getRadius());
-				}
-				if(circle.getCenterY() <= Cycic.pane.getLayoutBounds().getMinY()+circle.getRadius()){
-					circle.setCenterY(Cycic.pane.getLayoutBounds().getMinY()+circle.getRadius());
-				}
-				if(circle.getCenterY() >= Cycic.pane.getLayoutBounds().getMaxY()-circle.getRadius()){
-					circle.setCenterY(Cycic.pane.getLayoutBounds().getMaxY()-circle.getRadius());
-				}
-				if(circle.getCenterX() >= Cycic.pane.getLayoutBounds().getMaxX()-circle.getRadius()){
-					circle.setCenterX(Cycic.pane.getLayoutBounds().getMaxX()-circle.getRadius());
-				}
-				
-				circle.menu.setLayoutX(circle.getCenterX());
-				circle.menu.setLayoutY(circle.getCenterY());
-				
-				circle.image.setLayoutX(circle.getCenterX()-60);
-				circle.image.setLayoutY(circle.getCenterY()-50);
-				
-				circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
-				circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
-				
-				for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
-					if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
-						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
-						CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
-						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+				if(event.isShiftDown() == true){
+					Cycic.pane.getChildren().remove(line);		
+					/*DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+					clipboard.put(DnD.TOOL_FORMAT, Tool.class, new FormBuilderTool());
+					
+					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
+					//Dragboard db = circle.startDragAndDrop(TransferMode.NONE);
+					ClipboardContent content = new ClipboardContent();				
+					content.put(DnD.TOOL_FORMAT, "Facility Form");
+					db.setContent(content);*/
+
+					Cycic.pane.getChildren().add(line);
+					line.setEndX(event.getX());
+					line.setEndY(event.getY());
+					line.setStartX(circle.getCenterX());
+					line.setStartY(circle.getCenterY());
+					
+				} else {
+					circle.setCenterX(mousex+x);
+					circle.setCenterY(mousey+y);
+
+					if(circle.getCenterX() <= Cycic.pane.getLayoutBounds().getMinX()+circle.getRadius()){
+						circle.setCenterX(Cycic.pane.getLayoutBounds().getMinX()+circle.getRadius());
 					}
-					if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
-						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
-						CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
-						CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+					if(circle.getCenterY() <= Cycic.pane.getLayoutBounds().getMinY()+circle.getRadius()){
+						circle.setCenterY(Cycic.pane.getLayoutBounds().getMinY()+circle.getRadius());
 					}
-				}
-				for(int i = 0; i < circle.childrenLinks.size(); i++){
-					circle.childrenLinks.get(i).line.setStartX(circle.getCenterX());
-					circle.childrenLinks.get(i).line.setStartY(circle.getCenterY());
-					circle.childrenList.get(i).setCenterX(mousex-circle.childrenDeltaX.get(i)+x);
-					circle.childrenList.get(i).setCenterY(mousey-circle.childrenDeltaY.get(i)+y);
-					circle.childrenLinks.get(i).line.setEndX(circle.childrenList.get(i).getCenterX());
-					circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
-					circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
-					circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-					circle.childrenList.get(i).text.setLayoutX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
-					circle.childrenList.get(i).text.setLayoutY(circle.childrenList.get(i).getCenterY()-circle.childrenList.get(i).getRadius()*0.6);
-					for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
-						if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
-							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
-							CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
-							CycicScenarios.workingCycicScenario.Links.get(ii).line.updatePosition();
+					if(circle.getCenterY() >= Cycic.pane.getLayoutBounds().getMaxY()-circle.getRadius()){
+						circle.setCenterY(Cycic.pane.getLayoutBounds().getMaxY()-circle.getRadius());
+					}
+					if(circle.getCenterX() >= Cycic.pane.getLayoutBounds().getMaxX()-circle.getRadius()){
+						circle.setCenterX(Cycic.pane.getLayoutBounds().getMaxX()-circle.getRadius());
+					}
+
+					circle.menu.setLayoutX(circle.getCenterX());
+					circle.menu.setLayoutY(circle.getCenterY());
+
+					circle.image.setLayoutX(circle.getCenterX()-60);
+					circle.image.setLayoutY(circle.getCenterY()-50);
+
+					circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
+					circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+
+					for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
+						if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
+							CycicScenarios.workingCycicScenario.Links.get(i).line.setStartX(circle.getCenterX());
+							CycicScenarios.workingCycicScenario.Links.get(i).line.setStartY(circle.getCenterY());
+							CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
+						}
+						if(CycicScenarios.workingCycicScenario.Links.get(i).target == circle){
+							CycicScenarios.workingCycicScenario.Links.get(i).line.setEndX(circle.getCenterX());
+							CycicScenarios.workingCycicScenario.Links.get(i).line.setEndY(circle.getCenterY());
+							CycicScenarios.workingCycicScenario.Links.get(i).line.updatePosition();
 						}
 					}
+					for(int i = 0; i < circle.childrenLinks.size(); i++){
+						circle.childrenLinks.get(i).line.setStartX(circle.getCenterX());
+						circle.childrenLinks.get(i).line.setStartY(circle.getCenterY());
+						circle.childrenList.get(i).setCenterX(mousex-circle.childrenDeltaX.get(i)+x);
+						circle.childrenList.get(i).setCenterY(mousey-circle.childrenDeltaY.get(i)+y);
+						circle.childrenLinks.get(i).line.setEndX(circle.childrenList.get(i).getCenterX());
+						circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
+						circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
+						circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
+						circle.childrenList.get(i).text.setLayoutX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
+						circle.childrenList.get(i).text.setLayoutY(circle.childrenList.get(i).getCenterY()-circle.childrenList.get(i).getRadius()*0.6);
+						for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
+							if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
+								CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
+								CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartY(circle.childrenList.get(i).getCenterY());
+								CycicScenarios.workingCycicScenario.Links.get(ii).line.updatePosition();
+							}
+						}
+					}
+					mousex = event.getX();
+					mousey = event.getY();
+				}	
+				event.consume();
+				if(event.isConsumed()){
+					Cycic.pane.getChildren().remove(line);	
 				}
-				mousex = event.getX();
-				mousey = event.getY();
 			}
 		});
 		// Double click functionality to show/hide children. As well as a bloom feature to show which node is selected.
@@ -258,6 +283,7 @@ public class CycicCircles{
 			public void handle(MouseEvent event){
 				if(event.getButton().equals(MouseButton.SECONDARY)){
 					circle.menu.setVisible(true);
+					event.consume();
 				}
 				if(event.isAltDown() && event.isControlDown()){
 					
@@ -281,21 +307,30 @@ public class CycicCircles{
 		Cycic.workingScenario.FacilityNodes.add(parent);
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
-		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
+		/*circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
 				if(event.isShiftDown() == true){
-					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
+					System.out.print("YAY");
+					/*DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
 					clipboard.put(DnD.TOOL_FORMAT, Tool.class, new FormBuilderTool());
 					
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
+					//Dragboard db = circle.startDragAndDrop(TransferMode.NONE);
 					ClipboardContent content = new ClipboardContent();				
 					content.put(DnD.TOOL_FORMAT, "Facility Form");
 					db.setContent(content);
+					Line line = new Line();
+					Cycic.pane.getChildren().add(line);
+					line.setEndX(event.getX());
+					line.setEndY(event.getY());
+					line.setStartX(circle.getCenterX());
+					line.setStartY(circle.getCenterY());
 					event.consume();
+					Cycic.pane.getChildren().remove(line);
 				}
 			}
-		});
+		});*/
 		
 		circle.setOnMouseEntered(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
