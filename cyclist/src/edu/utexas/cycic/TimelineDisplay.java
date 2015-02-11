@@ -15,6 +15,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBoxBuilder;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
@@ -68,7 +70,8 @@ public class TimelineDisplay extends ViewBase {
 	static ArrayList <Object> timelineDB= new ArrayList<>();
 
 	static ArrayList<instituteNode> displayNodes = new ArrayList <>();
-	static ArrayList <String> institutionList = new ArrayList<>();
+	// name, arch
+	static ArrayList <Object> institutionList = new ArrayList<>();
 	
 	
 	//what
@@ -76,7 +79,7 @@ public class TimelineDisplay extends ViewBase {
 	//start of the stage
 	
 	private Scene addNewScene;
-	private Scene detailScene;
+	//private Scene detailScene;
 	private Stage stage; 
 
 	private Scene formatMainScene (final Stage s) {
@@ -84,19 +87,61 @@ public class TimelineDisplay extends ViewBase {
 		final TextField nameText = new TextField();
 		final TextField startText = new TextField();
 		final TextField endText = new TextField();
-		final ArrayList <String> parentNodeName = new ArrayList <>();
+		final String [] inputData;
+		/*inputData format
+		 * name facility name
+		 * institution name
+		 * deployed (true or false)
+		 * facilityType
+		 * startTime (if deployed)
+		 */
+		inputData = new String [5];
 		
 		final ComboBox facility = new ComboBox();
-		facility.getItems().add(FXCollections.observableArrayList(institutionList));
+		final ComboBox facilityType = new ComboBox();
+		final VBox checkTime = new VBox();
+		
+		
+		for (int i = 0; i < institutionList.size(); i ++) {
+			facility.getItems().add(((ArrayList<Object>) institutionList.get(i)).get(0));
+		}
 		facility.valueProperty().addListener(new ChangeListener<String>(){
 
 			@Override
 			public void changed(ObservableValue<? extends String> arg0,
 					String arg1, String arg2) {
 				// TODO Auto-generated method stub
+				inputData[1] = arg2;
+				//detailScene = createSubScene(inputData[2]); 
+				//stage.setScene (detailScene);
 				
-				detailScene = createSubScene(arg2);
-				stage.setScene (detailScene);
+				for (int i = 0; i < institutionList.size(); i++) {
+					if (((String) ((ArrayList<Object>) institutionList.get(i)).get(0)).equalsIgnoreCase(arg2)) {
+						checkTime.getChildren().clear();
+						inputData[2] = Boolean.toString(false);
+						
+						if (((String) ((ArrayList<Object>) institutionList.get(i)).get(1)).equalsIgnoreCase("DEPLOYEDINSTITUTION")){
+							checkTime.getChildren().clear();
+							inputData[2] = Boolean.toString(true);
+						}
+					}
+				}
+				
+				
+			}
+			
+		} );
+		
+		facilityType.getItems().add("Reactor");
+		facilityType.getItems().add("Sink Facility");
+		facilityType.getItems().add("Enrichment");
+		facilityType.valueProperty().addListener(new ChangeListener<String>(){
+
+			@Override
+			public void changed(ObservableValue<? extends String> arg0,
+					String arg1, String arg2) {
+				// TODO Auto-generated method stub
+				inputData[3] = arg2;
 				
 				
 			}
@@ -122,37 +167,22 @@ public class TimelineDisplay extends ViewBase {
 		        .children(facility)
 		        .build()
 		      ,
-		      	
+		      new Label("Facility Type"),
+		      HBoxBuilder.create().spacing(5)
+		      .children(facilityType).build(),
+		     HBoxBuilder.create()
+		     .spacing(5)
+		     .children(checkTime).build(),
 		      ButtonBuilder.create()
 		        .text("add")
 		        .defaultButton(true)
 		        .onMouseClicked(new EventHandler<MouseEvent>(){
 					@Override
 					public void handle(MouseEvent event){
-						System.out.println(nameText.getText());
-						if (!(isInteger(startText.getText())&&isInteger(endText.getText())
-								&&(Integer.parseInt(startText.getText())<Integer.parseInt(endText.getText())))){
-							
-							Stage eventDialogStage = new Stage();
-							
-							Dialogs.create()
-					        .owner(eventDialogStage)
-					        .title("Error")
-					        .masthead(null)
-					        .message("check entry format")
-					        .showInformation();
-							
-						} else {
-							ArrayList <Object> newElement = new ArrayList <>();
-							newElement.add(nameText.getText());
-							newElement.add(startText.getText());
-							newElement.add(endText.getText());
-							ArrayList <Object> eventArray = new ArrayList <>();
-							newElement.add(eventArray);
-							getDB.add(newElement);
+						
 							s.hide();
 							setPane();
-						}
+
 						
 						
 					}
@@ -172,33 +202,11 @@ public class TimelineDisplay extends ViewBase {
 		    );
 		    
 		    
+		    
 		    return new Scene(layout);
 		  }
 
-	
-	
-	private Scene createSubScene (String choice) {
-		VBox layout = new VBox(10);
-		layout.setStyle("-fx-background-color: azure; -fx-padding: 10;");
-		if (choice.equalsIgnoreCase("DEPLOYEDINSITUTION")) {
-			layout.getChildren().setAll(
-				LabelBuilder.create()
-					.text(choice)
-					.style("-fx-font-weight: bold;")
-					.build(),
-				ChoiceBoxBuilder.<String>create().items(FXCollections.observableArrayList(
-						))
-			)
-			
-		} else {
-			
-		}
-		
-		
-		
-		
-		return new Scene (layout);
-	}
+	/*
 	void dbInit() {
 		/*
 		 * db structure 
@@ -215,11 +223,12 @@ public class TimelineDisplay extends ViewBase {
 	/*	for(int i = 0; i < DataArrays.simFacilities.size(); i++){
 			type.add((String) DataArrays.simFacilities.get(i).facilityName);	
 		}*/
-		institutionList.clear();
+	/*	institutionList.clear();
 		institutionList.add("insitution A");
 		institutionList.add("InstitutionB");
 		institutionList.add("InstitutionC");
-		
+		*/
+		/*
 		for (int i = 0; i<institutionList.size();i++) {
 			ArrayList <Object> element = new ArrayList <>();
 			element.add(institutionList.get(i));
@@ -234,14 +243,15 @@ public class TimelineDisplay extends ViewBase {
 						ArrayList <Object>event = new ArrayList <>();
 						eventGeneration (event, individualElement.get(0));
 					*/	
-						
+		/*				
 					}
 				}
 			}
-			
-			timelineDB.add(element);
-		}
+			*/
+		//	timelineDB.add(element);
+/*		}
 	}
+	*/
 	static GridPane outputPanel=new GridPane(){
 		{
 			setWidth(740);
@@ -313,6 +323,12 @@ public class TimelineDisplay extends ViewBase {
 	};
 
 	private void init (){
+		for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
+			ArrayList <Object> temp = new ArrayList <>();
+				temp.add(DataArrays.simInstitutions.get(i).institStruct);
+				temp.add( DataArrays.simInstitutions.get(i).institArch);
+		}
+		
 	/*	ArrayList <Object> structureOrder = new ArrayList<>();
 		ArrayList <Object> displayData = new ArrayList<>();
 
@@ -487,7 +503,7 @@ public class TimelineDisplay extends ViewBase {
 	   * This method is initizalize the display panel 
 	   */
 	protected void setPane () {
-		dbInit();
+		//dbInit();
 		outputPanel.getChildren().clear();
 		namePanel.getChildren().clear();
 		tlp.getChildren().clear();
