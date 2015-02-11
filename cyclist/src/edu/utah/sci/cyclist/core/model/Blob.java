@@ -24,6 +24,13 @@ public class Blob {
 		return value;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj instanceof Blob) return this.value.equals(obj.toString());
+		return false;
+	}
+	
 	private String decode(byte[] data) {
 		int n = data.length;
 		char[] hex = new char[2*n+3];

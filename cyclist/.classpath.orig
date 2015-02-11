@@ -10,15 +10,14 @@
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.5-pre1.jar" sourcepath="/Users/yarden/.m2/repository/org/xerial/sqlite-jdbc/3.8.5-pre1/sqlite-jdbc-3.8.5-pre1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.3.5.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/fluent-hc-4.3.5.jar"/>
-	<classpathentry kind="lib" path="lib/controlsfx-8.0.6.jar"/>
+	<classpathentry kind="lib" path="lib/controlsfx-8.20.8.jar"/>
 <<<<<<< HEAD
-	<classpathentry kind="lib" path="lib/openjfx-dialogs-1.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/controlsfx-8.0.4-dev.jar"/>
 =======
->>>>>>> upstream/master
+	<classpathentry kind="lib" path="lib/openjfx-dialogs-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
+>>>>>>> 037e2914c9b53fed828d5fc1d13217c67c5e0437
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -227,7 +227,6 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	@Override
 	public void restore(IMemento memento, Context ctx) {	
 		super.restore(memento, ctx);
-		removeOldViews();
 		if(memento != null){
 			IMemento[] tools = memento.getChildren("Tool");
 			for(IMemento toolMemento : tools)
@@ -254,6 +253,15 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		}
 		//Reset the dirty flag after restore.
 		setDirtyFlag(false);
+	}
+	
+	/*
+	 * Clears all the existing views and filters of the workspace.
+	 * (For example when changing between workspaces).
+	 */
+	public void clearWorkspace(){
+		removeOldViews();
+		removeOldFilters();
 	}
 	
 	/** Handles the special case when the first simulation is selected in the simulation panel.
@@ -415,11 +423,7 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 			@Override
 			public void handle(CyclistNotification event) {
 				Filter filter = ((CyclistFilterNotification)event).getFilter();
-				FilterPresenter presenter = getFilterPresenter(filter);
-				if (presenter != null) {
-					_filterPresenters.remove(presenter);
-					getWorkspace().removePanel(presenter.getPanel());
-				}
+				removeFilterFromPanel(filter);
 			}
 		});
 	
@@ -576,6 +580,33 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		 }
 	 }
 	 
+	 /* 
+	  * Removes the panel of a specified filter from the filters panel.
+	  * @param Filter filter - the filter to be removed.
+	  */
+	 private void removeFilterFromPanel(Filter filter){
+		FilterPresenter presenter = getFilterPresenter(filter);
+		if (presenter != null) {
+			_filterPresenters.remove(presenter);
+			getWorkspace().removePanel(presenter.getPanel());
+		}
+	 }
+	 
+	 /*
+	  * Iterates the local filters of the given view, 
+	  * for each of them - remove from the filters panel.
+	  * @param ViewBase view - the view which holds the list of filters to remove.
+	  */
+	 private void removeViewFilters(ViewBase view){
+		if(view instanceof CyclistViewBase){
+			CyclistViewBase cyclistView = (CyclistViewBase)view;
+			List<Filter> filters = cyclistView.filters();
+			for(Filter filter:filters){
+				removeFilterFromPanel(filter);
+			}
+		}
+	 }
+	 
 	 /*
 	  * Removes a view from the workspace.
 	  * @param: String id - the id of the view to be removed.
@@ -584,8 +615,10 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		 for (ViewPresenter presenter : _presenters) {
 				if (presenter.getId().equals(id)) {
 					_presenters.remove(presenter);
-					getWorkspace().removeView((ViewBase)presenter.getView());
+					ViewBase view = (ViewBase)presenter.getView();
+					getWorkspace().removeView(view);
 					removePresenterIdFromEventBus(id);
+					removeViewFilters(view);
 					break;
 				}
 		}
@@ -601,7 +634,25 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 		 List<ViewPresenter> presenters = new ArrayList<>(_presenters);
 		 for (ViewPresenter presenter : presenters) {
 			 removeView(presenter.getId());
+			 //If the presenter itself is a workspace - clear it's contents as well.
+			 if(presenter instanceof WorkspacePresenter){
+				 ((WorkspacePresenter) presenter).clearWorkspace();
+			 }
 		 }
+	 }
+	 
+	 /*
+	  * Clears old filters before restoring the new ones.
+	  * (For example when changing the work directory - 
+	  * have to clear the old work directory filters, before loading the filters of the current one.
+	  */
+	 private void removeOldFilters(){
+		 List<Filter> filters = getView().filters();
+		 for(Filter filter: filters){
+			 removeFilterFromPanel(filter);
+		 }
+		 filters.clear();
+		 
 	 }
 
 	 /* 

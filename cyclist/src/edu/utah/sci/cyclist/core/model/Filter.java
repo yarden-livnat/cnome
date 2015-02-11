@@ -238,7 +238,7 @@ public class Filter implements Observable, Resource {
 	}
 	
 	public void setDatasource(CyclistDatasource ds) {
-		if (_ds == ds) return;
+//		if (_ds == ds) return;
 		
 		_ds = ds;
 		_dsChanged = true;
