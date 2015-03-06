@@ -7,36 +7,36 @@ import javafx.scene.text.Text;
 
 public class ConnectorLine extends Line {
 	{
-		setStroke(Color.WHITE);
+		setStroke(Color.BLACK);
 	}
 	Line right = new Line(){
 		{
 			setStrokeWidth(2);
-			setStroke(Color.WHITE);
+			setStroke(Color.BLACK);
 		}
 	};
 	Line left = new Line(){
 		{
 			setStrokeWidth(2);
-			setStroke(Color.WHITE);
+			setStroke(Color.BLACK);
 		}
 	};
 	
 	Line right1 = new Line(){
 		{
 			setStrokeWidth(2);
-			setStroke(Color.WHITE);
+			setStroke(Color.BLACK);
 		}
 	};
 	Line left1 = new Line(){
 		{
 			setStrokeWidth(2);
-			setStroke(Color.WHITE);
+			setStroke(Color.BLACK);
 		}
 	};
 	Text text = new Text(){
 		{
-			setFill(Color.WHITE);
+			setFill(Color.BLACK);
 			setFont(new Font(20));
 		}
 	};
@@ -74,5 +74,15 @@ public class ConnectorLine extends Line {
 		text.setX(x1 + (x2-x1)*0.55+10.0*(y2-y1)/Math.sqrt(Math.pow((y2-y1), 2)+Math.pow(x2-x1, 2)));
 		text.setY(y1 + (y2-y1)*0.55+10.0*(x2-x1)/Math.sqrt(Math.pow((y2-y1), 2)+Math.pow(x2-x1, 2)));
 	}
-
+	public void updateColor(Color color){
+		this.setStroke(color);
+		right1.setStroke(color);
+		right.setStroke(color);
+		left1.setStroke(color);
+		left.setStroke(color);
+		text.setFill(color);
+	}
+	public void hideText(){
+		Cycic.pane.getChildren().remove(text);
+	}
 }

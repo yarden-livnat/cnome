@@ -155,7 +155,8 @@ public class VisFunctions {
 		link.line.updatePosition();
 		CycicScenarios.workingCycicScenario.Links.add(link);
 		Cycic.pane.getChildren().addAll(link.line, link.line.left, link.line.right);
-		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1, link.line.text);
+		Cycic.pane.getChildren().addAll(link.line.left1, link.line.right1);
+		Cycic.pane.getChildren().add(link.line.text);
 		link.line.toBack();
 	}
 

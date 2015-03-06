@@ -187,6 +187,7 @@ class nodeLink {
 	Object source;
 	Object target;
 	ConnectorLine line = new ConnectorLine();
+	
 }
 
 /**

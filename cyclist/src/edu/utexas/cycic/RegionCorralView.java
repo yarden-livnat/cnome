@@ -43,8 +43,14 @@ import edu.utexas.cycic.tools.RegionViewTool;
 
 public class RegionCorralView extends ViewBase {
 
+	/**
+	 * 
+	 */
 	static regionNode workingRegion = null; 
 
+	/**
+	 * 
+	 */
 	static Pane corralPane = new Pane(){
 		{
 			setPrefHeight(375);
@@ -83,17 +89,31 @@ public class RegionCorralView extends ViewBase {
 		}
 	};
 
+	/**
+	 * 
+	 */
 	static GridPane regionCorralGrid = new GridPane(){
 		{
 			setHgap(10);
 			setVgap(5);
 		}
 	};
+	
+	/**
+	 * 
+	 */
 	static HBox unassociatedFacilityList = new HBox(10);
 	
+	/**
+	 * 
+	 */
 	public static void addUnassInstit(){
 		unassociatedFacilityList.getChildren().add(new Circle());
 	}
+	
+	/**
+	 * 
+	 */
 	public RegionCorralView() {
 		
 		if (DataArrays.simRegions.size() < 1) {
@@ -113,10 +133,10 @@ public class RegionCorralView extends ViewBase {
 					while((string = read1.readLine()) != null){
 						sb1.append(string);
 					}
-					regionStructure test = new regionStructure();
-					test.regionName = XMLReader.regionList.get(i).replace(":", " ").trim();
-					test.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
-					DataArrays.simRegions.add(test);
+					regionStructure tempRegion = new regionStructure();
+					tempRegion.regionName = XMLReader.regionList.get(i).replace(":", " ").trim();
+					tempRegion.regionStruct = XMLReader.annotationReader(sb1.toString(), XMLReader.readSchema(sb.toString()));
+					DataArrays.simRegions.add(tempRegion);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -131,7 +151,7 @@ public class RegionCorralView extends ViewBase {
 		final TextField regionText = new TextField();
 		regionCorralGrid.add(regionText, 1, 0);
 
-		final ComboBox typeOptions = new ComboBox();
+		final ComboBox<String> typeOptions = new ComboBox<String>();
 		typeOptions.getItems().clear();
 		for(int i = 0; i < DataArrays.simRegions.size(); i++){
 			typeOptions.getItems().add(DataArrays.simRegions.get(i).regionName);
@@ -177,26 +197,6 @@ public class RegionCorralView extends ViewBase {
 		}
 		scroll.setContent(nodesPane);
 
-		/* Create content of RegionCorral footer 
-
-		Label unassociatedInstitutions = new Label("Unassociated Institutions:"){
-			{
-				setFont(new Font(12));
-			}
-		};
-		regionCorralGrid.add(unassociatedInstitutions, 4, 1);
-		
-	
-		HBox unassociatedInstitList = new HBox(10);
-
-		ScrollPane root2 = new ScrollPane(){
-			{
-				setMinHeight(50);
-				setMaxHeight(50);
-			}
-		};
-		root2.setContent(unassociatedInstitList);
-		regionCorralGrid.add(root2, 5, 1);*/
 		regionCorralGrid.autosize();
 
 		/* Place RegionCorralView header, corralPane, and footer on main corralVBox */
@@ -205,7 +205,7 @@ public class RegionCorralView extends ViewBase {
 		mainCorralVBox.getChildren().addAll(regionCorralGrid, scroll, corralPane);
 		setContent(mainCorralVBox);
 
-		EventHandler addRegion = new EventHandler<MouseEvent>(){
+		EventHandler<MouseEvent> addRegion = new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent event) {
 				final regionNode region = new regionNode();
 				region.type = (String) typeOptions.getValue();

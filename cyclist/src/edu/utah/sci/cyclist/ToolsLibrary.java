@@ -68,7 +68,7 @@ public class ToolsLibrary {
         new InstitutionViewToolFactory(),
         new RecipeFormToolFactory(),
         new RegionCorralViewToolFactory(),
-        //new TimelineDisplayToolFactory()
+        new TimelineDisplayToolFactory()
     };
     
 	public static ToolFactory findFactory(String name) {
