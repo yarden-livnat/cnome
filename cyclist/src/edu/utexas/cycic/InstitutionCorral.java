@@ -17,10 +17,14 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 /**
  * A view used to build and develop institutions for the simulation 
@@ -28,11 +32,55 @@ import edu.utah.sci.cyclist.core.ui.components.ViewBase;
  * @author Robert
  *
  */
-public class InstitutionView extends ViewBase{
+public class InstitutionCorral extends ViewBase{
+	/**
+	 * 
+	 */
+	static instituteNode workingInstitution = null;
+	
+	/**
+	 * 
+	 */
+	static Pane institutionPane = new Pane();
+	{
+		setPrefHeight(375);
+		setPrefWidth(630);
+		setOnDragDropped(new EventHandler<DragEvent>(){
+			public void handle(DragEvent event){
+				if(event.getDragboard().hasContent(DnD.VALUE_FORMAT)){
+					instituteNode institute = new instituteNode();
+					institute.type = event.getDragboard().getContent(DnD.VALUE_FORMAT).toString();
+					institute.type.trim();
+					for (int i = 0; i < DataArrays.simInstitutions.size(); i++){
+						if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(institute.type)){
+							institute.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+							institute.archetype = DataArrays.simInstitutions.get(i).institArch;
+						}
+					}
+					event.consume();
+					institute.name = "";
+					workingInstitution = institute;
+					FormBuilderFunctions.formArrayBuilder(institute.institStruct, institute.institData);
+					regionNode.regionCircle = RegionShape.addRegion((String)institute.name, institute);
+					regionNode.regionCircle.setX(event.getX());
+					regionNode.regionCircle.setY(event.getY());
+					regionNode.regionCircle.text.setLayoutX(event.getX()+regionNode.regionCircle.getHeight()*0.2);
+					regionNode.regionCircle.text.setLayoutY(event.getY()+regionNode.regionCircle.getHeight()*0.2);
+					DataArrays.regionNodes.add(institute);
+					institutionPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+				}
+			}
+		});
+		setOnDragOver(new EventHandler <DragEvent>(){
+			public void handle(DragEvent event){
+				event.acceptTransferModes(TransferMode.ANY);
+			}
+		});
+	}
 	/**
 	 * Initiates a new window for building and modifying institutions. 
 	 */
-	public InstitutionView(){
+	public InstitutionCorral(){
 		super();
 	
 		// ListView for initial facilities in the institution.

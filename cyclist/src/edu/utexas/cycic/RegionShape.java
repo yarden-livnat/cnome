@@ -218,7 +218,6 @@ public class RegionShape extends Rectangle {
 
 				menuBar.setLayoutX(getX()+getHeight()*0.2);
 				menuBar.setLayoutY(getY()+getHeight()*0.2);
-
 			}
 		});
 

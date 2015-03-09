@@ -207,26 +207,40 @@ public class Cycic extends ViewBase{
 		pane.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				if(e.getButton().equals(MouseButton.SECONDARY)){
-					ColorPicker cP = new ColorPicker();
-					cP.setOnAction(new EventHandler<ActionEvent>(){
-						public void handle(ActionEvent e){
-							String background = "-fx-background-color: #";
-							background += cP.getValue().toString().substring(2, 8);
-							System.out.println(background);
-							pane.setStyle(background);
-						}
-					});
-					Dialog dg = new Dialog(window, "Pick a color!");
-					/*final AbstractAction actionLogin = new AbstractAction("Okay") {
+					if (e.isShiftDown() == true){
+						ColorPicker cP = new ColorPicker();
+						cP.setOnAction(new EventHandler<ActionEvent>(){
+							public void handle(ActionEvent e){
+								for(nodeLink node: DataArrays.Links){
+									node.line.updateColor(cP.getValue());
+								}
+							}
+						});
+						Dialog dg = new Dialog(window, "Pick a color!");
+						dg.setContent(cP);
+						dg.show();
+					} else {
+						ColorPicker cP = new ColorPicker();
+						cP.setOnAction(new EventHandler<ActionEvent>(){
+							public void handle(ActionEvent e){
+								String background = "-fx-background-color: #";
+								background += cP.getValue().toString().substring(2, 8);
+								System.out.println(background);
+								pane.setStyle(background);
+							}
+						});
+						Dialog dg = new Dialog(window, "Pick a color!");
+						/*final AbstractAction actionLogin = new AbstractAction("Okay") {
 					    // This method is called when the login button is clicked ...
 					    public void handle(ActionEvent ae) {
 					        Dialog d = (Dialog) ae.getSource();
 					        d.hide();
 					    }
 					};*/
-					dg.setContent(cP);
-					//dg.getActions().add(actionLogin);
-					dg.show();
+						dg.setContent(cP);
+						//dg.getActions().add(actionLogin);
+						dg.show();
+					}
 				}
 			}
 		});

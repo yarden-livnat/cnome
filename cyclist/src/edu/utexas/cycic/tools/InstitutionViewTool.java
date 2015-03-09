@@ -5,7 +5,7 @@ import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.View;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utexas.cycic.InstitutionView;
+import edu.utexas.cycic.InstitutionCorral;
 import edu.utexas.cycic.presenter.InstitutionViewPresenter;
 
 public class InstitutionViewTool implements Tool {
@@ -30,7 +30,7 @@ public class InstitutionViewTool implements Tool {
 	@Override
 	public View getView() {
 		if (_view == null) 
-			_view = new InstitutionView();
+			_view = new InstitutionCorral();
 		return _view;
 	}
 

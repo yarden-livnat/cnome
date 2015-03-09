@@ -85,4 +85,7 @@ public class ConnectorLine extends Line {
 	public void hideText(){
 		Cycic.pane.getChildren().remove(text);
 	}
+	public void showText(){
+		Cycic.pane.getChildren().add(text);
+	}
 }
