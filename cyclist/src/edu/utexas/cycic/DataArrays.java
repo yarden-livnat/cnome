@@ -222,7 +222,7 @@ class instituteNode{
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	ArrayList<facilityItem> availFacilities = new ArrayList<facilityItem>();
-	ArrayList<String> availPrototypes = new ArrayList<String>();
+	InstitutionShape institutionShape = new InstitutionShape();
 }
 
 /**

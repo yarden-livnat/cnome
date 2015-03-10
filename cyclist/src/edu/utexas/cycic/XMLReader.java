@@ -85,18 +85,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> facilityList = new ArrayList<String>(){
 		{
-			/*add(":Brightlite:ReactorFacility");
-			add(":Brightlite:FuelfabFacility");
-			add(":Brightlite:ReprocessFacility");
-			add(":cycaless:BatchReactor");
-			add(":cycamore:EnrichmentFacility");
-			add(":cycamore:Sink");
-			add(":cycamore:Source");
-			add(":agents:Source");
-			add(":agents:Sink");
-			add(":agents:KFacility");
-			add(":agents:Prey");
-			add(":agents:Predator");*/
+			
 		}
 	};
 	
@@ -105,9 +94,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> regionList = new ArrayList<String>(){
 		{
-			/*add(":cycamore:GrowthRegion");
-			add(":agents:NullRegion");*/
-			
+		
 		}
 	};
 	
@@ -116,9 +103,7 @@ public class XMLReader {
 	 */
 	static ArrayList<String> institutionList = new ArrayList<String>(){
 		{
-			/*add(":cycaless:DeployInst");
-			add(":cycamore:ManagerInst");
-			add(":agents:NullInst");*/
+
 		}
 	};
 	

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.tools.Tool;
+import edu.utexas.cycic.tools.InstitutionViewTool;
 import edu.utexas.cycic.tools.RegionViewTool;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,7 +44,7 @@ public class InstitutionShape extends Ellipse {
 	static InstitutionShape addInst(final String name, final instituteNode instit) {
 		final InstitutionShape institution = new InstitutionShape();
 		
-		InstitutionCorral.workingInstitution = instit;
+		InstitutionCorralView.workingInstitution = instit;
 		
 		// Set properties of regionNode
 		instit.name = name;
@@ -145,14 +146,14 @@ public class InstitutionShape extends Ellipse {
 			public void handle(MouseEvent e){
 				if(e.isShiftDown() == true){
 
-					InstitutionCorral.workingInstitution = instit;
+					InstitutionCorralView.workingInstitution = instit;
 					
 					DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-					clipboard.put(DnD.TOOL_FORMAT, Tool.class, new RegionViewTool());
+					clipboard.put(DnD.TOOL_FORMAT, Tool.class, new InstitutionViewTool());
 					
 					Dragboard db = institution.startDragAndDrop(TransferMode.COPY);
 					ClipboardContent content = new ClipboardContent();				
-					content.put( DnD.TOOL_FORMAT, "Region View");
+					content.put( DnD.TOOL_FORMAT, "Institution View");
 					db.setContent(content);
 					
 					e.consume();
@@ -165,7 +166,7 @@ public class InstitutionShape extends Ellipse {
 
 	static void deleteInstitution(InstitutionShape circle, instituteNode instit){
 		DataArrays.institNodes.remove(instit);
-		InstitutionCorral.institutionPane.getChildren().removeAll(circle, circle.menuBar, circle.text);
+		InstitutionCorralView.institutionPane.getChildren().removeAll(circle, circle.menuBar, circle.text);
 	};
 
 	{
@@ -188,17 +189,17 @@ public class InstitutionShape extends Ellipse {
 				setLayoutX(x+event.getX());
 				setLayoutY(y+event.getY());
 
-				if(tempX <= InstitutionCorral.institutionPane.getLayoutBounds().getMinX()){
-					setLayoutX(InstitutionCorral.institutionPane.getLayoutBounds().getMinX());
+				if(tempX <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinX()){
+					setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMinX());
 				}
-				if(tempY <= InstitutionCorral.institutionPane.getLayoutBounds().getMinY()){
-					setLayoutY(InstitutionCorral.institutionPane.getLayoutBounds().getMinY());
+				if(tempY <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinY()){
+					setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMinY());
 				}
-				if(tempY >= InstitutionCorral.institutionPane.getLayoutBounds().getMaxY()-getRadiusY()){
-					setLayoutY(InstitutionCorral.institutionPane.getLayoutBounds().getMaxY()-getRadiusY());
+				if(tempY >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-getRadiusY()){
+					setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-getRadiusY());
 				}
-				if(tempX >= InstitutionCorral.institutionPane.getLayoutBounds().getMaxX()-getRadiusX()){
-					setLayoutX(InstitutionCorral.institutionPane.getLayoutBounds().getMaxX()-getRadiusX());
+				if(tempX >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-getRadiusX()){
+					setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-getRadiusX());
 				}
 
 				text.setLayoutX(getLayoutX()+getRadiusX()*0.2);

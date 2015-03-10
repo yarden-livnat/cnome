@@ -1,36 +1,20 @@
 package edu.utexas.cycic;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import org.controlsfx.dialog.Dialogs;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
@@ -39,7 +23,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utexas.cycic.tools.RegionViewTool;
 
 public class RegionCorralView extends ViewBase {
 
@@ -160,6 +143,7 @@ public class RegionCorralView extends ViewBase {
 
 		final Button corralButton = new Button();
 		corralButton.setText("Add");
+		/** TODO THIS BUTTON DOES NOTHING AT ALL */
 		regionCorralGrid.add(corralButton, 3, 0);
 
 		final Label regionPrototypeLabel = new Label("Region Prototypes:");
