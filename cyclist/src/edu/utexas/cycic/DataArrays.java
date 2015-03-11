@@ -233,7 +233,12 @@ class instituteNode{
  */
 class facilityItem{
 	String name;
-	String number;	
+	String number;
+	
+	facilityItem(String name, int number){
+		this.name = name;
+		this.number = Integer.toString(number);
+	}
 }
 
 /**

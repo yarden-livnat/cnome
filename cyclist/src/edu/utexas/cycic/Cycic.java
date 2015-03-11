@@ -234,7 +234,6 @@ public class Cycic extends ViewBase{
 							public void handle(ActionEvent e){
 								String background = "-fx-background-color: #";
 								background += cP.getValue().toString().substring(2, 8);
-								System.out.println(background);
 								pane.setStyle(background);
 							}
 						});

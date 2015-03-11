@@ -15,6 +15,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -25,6 +26,28 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 
 public class InstitutionShape extends Ellipse {
+	{
+		setOnDragOver(new EventHandler <DragEvent>(){
+			public void handle(DragEvent event){
+				event.acceptTransferModes(TransferMode.ANY);
+			}
+		});
+		setOnDragDropped(new EventHandler <DragEvent>(){
+			public void handle(DragEvent event){
+				if(event.getDragboard().hasContent(CycICDnD.UNASSOC_FAC)){
+					String facName = event.getDragboard().getContent(CycICDnD.UNASSOC_FAC).toString();
+					for(facilityItem fac: institBackTrace.availFacilities){
+						if(facName.equalsIgnoreCase(fac.name)){
+							fac.number+=1;
+						} else {
+							facilityItem temp_fac = new facilityItem(facName, 1);
+							institBackTrace.availFacilities.add(temp_fac);
+						}		
+					}
+				}
+			}
+		});
+	}
 	protected static double mousey;
 	protected static double mousex;
 	protected static double x;
@@ -34,16 +57,15 @@ public class InstitutionShape extends Ellipse {
 	Object name;
 	Label text = new Label("");
 	MenuBar menuBar = new MenuBar();
+	static instituteNode institBackTrace;
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
-	ListView<String> facilityList = new ListView<String>();
-	ListView<String> institutionList = new ListView<String>();
-	{
-		setId("this");
-	}
+	
+
 
 	static InstitutionShape addInst(final String name, final instituteNode instit) {
 		final InstitutionShape institution = new InstitutionShape();
 		
+		institBackTrace = instit;
 		InstitutionCorralView.workingInstitution = instit;
 		
 		// Set properties of regionNode

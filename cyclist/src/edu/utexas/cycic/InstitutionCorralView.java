@@ -5,16 +5,12 @@ import java.io.InputStreamReader;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -35,6 +31,11 @@ public class InstitutionCorralView extends ViewBase{
 	 * 
 	 */
 	static instituteNode workingInstitution = null;
+	
+	/**
+	 * 
+	 */
+	MemoryScroll facilityScroll = new MemoryScroll(30, 45, 45);
 	
 	/**
 	 * 
@@ -170,23 +171,18 @@ public class InstitutionCorralView extends ViewBase{
 			instit.text.setLayoutY(instit.getLayoutY()-instit.getRadiusY()*0.7);	
 			instit.text.setTextAlignment(TextAlignment.CENTER);
 			instit.text.setMouseTransparent(true);
-			instit.setOnDragDetected(new EventHandler<MouseEvent>(){
-				public void handle(MouseEvent e){
-					Dragboard db = instit.startDragAndDrop(TransferMode.COPY);
-					ClipboardContent content = new ClipboardContent();				
-					content.put(DnD.VALUE_FORMAT, instit.text.getText());
-					db.setContent(content);
-					e.consume();
-				}
-			});
 			nodesPane.getChildren().addAll(instit,instit.text);
 		}
 		scroll.setContent(nodesPane);
 		
 		VBox institBox = new VBox();
 		institBox.autosize();
-		institBox.getChildren().addAll(topGrid, scroll, institutionPane);		
-		setContent(institBox);
+		institBox.getChildren().addAll(topGrid, scroll, institutionPane);	
+		
+		
+		HBox corralBox = new HBox();
+		corralBox.getChildren().addAll(institBox, facilityScroll);
+		setContent(corralBox);
 
 	}
 	
