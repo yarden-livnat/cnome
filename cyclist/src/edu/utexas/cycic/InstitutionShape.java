@@ -36,14 +36,27 @@ public class InstitutionShape extends Ellipse {
 			public void handle(DragEvent event){
 				if(event.getDragboard().hasContent(CycICDnD.UNASSOC_FAC)){
 					String facName = event.getDragboard().getContent(CycICDnD.UNASSOC_FAC).toString();
-					for(facilityItem fac: institBackTrace.availFacilities){
-						if(facName.equalsIgnoreCase(fac.name)){
-							fac.number+=1;
-						} else {
-							facilityItem temp_fac = new facilityItem(facName, 1);
-							institBackTrace.availFacilities.add(temp_fac);
-						}		
+					System.out.println(facName);
+					if(institBackTrace.availFacilities.size() > 0){
+						for(facilityItem fac: institBackTrace.availFacilities){
+							System.out.println(facName + "	" + fac.name);
+							if(facName.equalsIgnoreCase(fac.name)){
+								fac.number+=1;
+								System.out.println("ADDED  " + fac.name);
+							} else {
+								facilityItem temp_fac = new facilityItem(facName, 1);
+								institBackTrace.availFacilities.add(temp_fac);
+								System.out.println("ADDED  " + temp_fac.name);
+							}		
+						}
+					} else {
+						facilityItem temp_fac = new facilityItem(facName, 1);
+						institBackTrace.availFacilities.add(temp_fac);
+						System.out.println("ADDED  " + temp_fac.name);
 					}
+					event.consume();
+				} else {
+					event.consume();
 				}
 			}
 		});

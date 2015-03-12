@@ -67,6 +67,8 @@ public class InstitutionCorralView extends ViewBase{
 					institute.institutionShape.text.setLayoutY(event.getY()+institute.institutionShape.getRadiusY()*0.2);
 					DataArrays.institNodes.add(institute);
 					institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
+				} else {
+					event.consume();
 				}
 			}
 		});
@@ -139,10 +141,19 @@ public class InstitutionCorralView extends ViewBase{
 			}
 		});
 		
+		Button updateScroll = new Button("UPDATES!");
+		
+		updateScroll.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				facilityScroll.updateFac();
+			}
+		});
+		
 		topGrid.add(new Label("New Institution"), 0, 0);
 		topGrid.add(institName, 1, 0);
 		topGrid.add(typeOptions, 2, 0);
 		topGrid.add(institButton, 3, 0);
+		topGrid.add(updateScroll, 4, 0);
 		
 				
 		
