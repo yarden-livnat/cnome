@@ -48,10 +48,31 @@ public class InstitutionView extends ViewBase {
 
 		VBox regionGridBox = new VBox();
 		regionGridBox.getChildren().addAll(topGrid, grid);		
+		
+		ListView<String> facilityList = new ListView<String>(){
+			{
+				setOrientation(Orientation.VERTICAL);
+				setOnMousePressed(new EventHandler<MouseEvent>(){
+					public void handle(MouseEvent event){
+						if (event.isSecondaryButtonDown()){
+							workingInstitution.availFacilities.remove(getSelectionModel().getSelectedItem());
+							getItems().remove(getSelectionModel().getSelectedItem());
+						}
+					}
+				});
+				for(facilityItem fac: workingInstitution.availFacilities){
+					getItems().add(fac.name + " - " + fac.number);
+				}
+			}
+		};
 
-
+		VBox listBox = new VBox();
+		listBox.getChildren().addAll(new Label("Initial Facilities"), facilityList);
+		HBox overView = new HBox();
+		overView.getChildren().addAll(listBox, regionGridBox);
+		
 		setTitle(TITLE);
-		setContent(regionGridBox);
+		setContent(overView);
 		setPrefSize(600,400);		
 		formBuilder(InstitutionCorralView.workingInstitution.institStruct, InstitutionCorralView.workingInstitution.institData);
 

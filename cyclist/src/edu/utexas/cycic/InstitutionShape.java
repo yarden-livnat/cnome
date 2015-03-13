@@ -34,25 +34,25 @@ public class InstitutionShape extends Ellipse {
 		});
 		setOnDragDropped(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
+				boolean test = false;
 				if(event.getDragboard().hasContent(CycICDnD.UNASSOC_FAC)){
 					String facName = event.getDragboard().getContent(CycICDnD.UNASSOC_FAC).toString();
-					System.out.println(facName);
 					if(institBackTrace.availFacilities.size() > 0){
 						for(facilityItem fac: institBackTrace.availFacilities){
-							System.out.println(facName + "	" + fac.name);
 							if(facName.equalsIgnoreCase(fac.name)){
-								fac.number+=1;
-								System.out.println("ADDED  " + fac.name);
-							} else {
+								int temp  = Integer.parseInt(fac.number);
+								temp += 1;
+								fac.number = String.valueOf(temp);
+								test = true;
+							}
+							if (test == false){
 								facilityItem temp_fac = new facilityItem(facName, 1);
 								institBackTrace.availFacilities.add(temp_fac);
-								System.out.println("ADDED  " + temp_fac.name);
-							}		
+							}
 						}
 					} else {
 						facilityItem temp_fac = new facilityItem(facName, 1);
 						institBackTrace.availFacilities.add(temp_fac);
-						System.out.println("ADDED  " + temp_fac.name);
 					}
 					event.consume();
 				} else {
