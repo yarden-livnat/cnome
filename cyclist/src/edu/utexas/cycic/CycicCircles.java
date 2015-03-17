@@ -1,40 +1,21 @@
 package edu.utexas.cycic;
 
-import java.io.File;
-
-import org.controlsfx.dialog.Dialogs;
+import java.util.Optional;
 
 import edu.utah.sci.cyclist.core.controller.CyclistController;
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.event.notification.EventBus;
-import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
-import edu.utah.sci.cyclist.core.tools.Tool;
-import edu.utah.sci.cyclist.core.ui.MainScreen;
-import edu.utah.sci.cyclist.core.ui.View;
-import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utexas.cycic.tools.FormBuilderTool;
-import edu.utexas.cycic.tools.FormBuilderToolFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.VPos;
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Window;
 
@@ -130,16 +111,20 @@ public class CycicCircles{
 			}
 		});
 		
-		final Menu changeNiche = new Menu("Change Niche");
+		MenuItem changeNiche = new MenuItem("Change Niche");
 		changeNiche.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				Dialogs.create()
-					.owner(window)
-					.message("MESSAGE")
-					.showInformation();
+				/** TODO CHANGE NICHE OF CIRCLE */
+				TextInputDialog dg = new TextInputDialog("Test");
+				dg.setContentText("ADSFA");
+				Optional<String> result = dg.showAndWait();
+				if (result.isPresent()){
+				    System.out.println("Your name: " + result.get());
+				}
+				circle.menu.setVisible(false);
 			}
 		});
-		
+
 		MenuItem showImage = new MenuItem("Show Image");
 		showImage.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){

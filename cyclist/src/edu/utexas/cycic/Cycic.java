@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.controlsfx.dialog.Dialog;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.Resources1;
@@ -41,8 +40,11 @@ import javax.swing.AbstractAction;
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -101,6 +103,7 @@ public class Cycic extends ViewBase{
     static CyclusJob _remoteDashA;
     private static Object monitor = new Object();
 	
+    
 	/**
 	 * 
 	 */
@@ -191,6 +194,7 @@ public class Cycic extends ViewBase{
 		}
 	};
 	
+
 	/**
 	 * Initiates the Pane and GridPane.
 	 */
@@ -207,26 +211,38 @@ public class Cycic extends ViewBase{
 		pane.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				if(e.getButton().equals(MouseButton.SECONDARY)){
-					ColorPicker cP = new ColorPicker();
-					cP.setOnAction(new EventHandler<ActionEvent>(){
-						public void handle(ActionEvent e){
-							String background = "-fx-background-color: #";
-							background += cP.getValue().toString().substring(2, 8);
-							System.out.println(background);
-							pane.setStyle(background);
-						}
-					});
-					Dialog dg = new Dialog(window, "Pick a color!");
-					/*final AbstractAction actionLogin = new AbstractAction("Okay") {
-					    // This method is called when the login button is clicked ...
-					    public void handle(ActionEvent ae) {
-					        Dialog d = (Dialog) ae.getSource();
-					        d.hide();
-					    }
-					};*/
-					dg.setContent(cP);
-					//dg.getActions().add(actionLogin);
-					dg.show();
+					/** TODO Turn this into a menu. Should menu move with cursor or rebuild menu each time? 
+					 * Also this should save the previous color and cancel should return you to that color.*/
+					
+					if (e.isShiftDown() == true){
+						ColorPicker cP = new ColorPicker();
+						cP.setOnAction(new EventHandler<ActionEvent>(){
+							public void handle(ActionEvent e){
+								for(nodeLink node: DataArrays.Links){
+									node.line.updateColor(cP.getValue());
+								}
+							}
+						});
+						Dialog dg = new Dialog();
+						ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+						dg.getDialogPane().setContent(cP);
+						dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+						dg.show();
+					} else {
+						ColorPicker cP = new ColorPicker();
+						cP.setOnAction(new EventHandler<ActionEvent>(){
+							public void handle(ActionEvent e){
+								String background = "-fx-background-color: #";
+								background += cP.getValue().toString().substring(2, 8);
+								pane.setStyle(background);
+							}
+						});
+						Dialog dg = new Dialog();
+						ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+						dg.getDialogPane().setContent(cP);
+						dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+						dg.show();
+					}
 				}
 			}
 		});

@@ -37,6 +37,7 @@ public class FacilityCircle extends Circle {
 	Object name; 
 	Boolean childrenShow;
 	Tooltip tooltip = new Tooltip();
+	String niche; 
 	{
 		setId("cycicNode");
 	}
