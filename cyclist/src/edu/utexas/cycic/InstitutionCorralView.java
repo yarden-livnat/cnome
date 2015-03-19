@@ -35,7 +35,7 @@ public class InstitutionCorralView extends ViewBase{
 	/**
 	 * 
 	 */
-	MemoryScroll facilityScroll = new MemoryScroll(30, 45, 45);
+	MemoryScroll facilityScroll = new MemoryScroll(35, 35, 65);
 	
 	/**
 	 * 
@@ -182,7 +182,7 @@ public class InstitutionCorralView extends ViewBase{
 			instit.text.setLayoutY(instit.getLayoutY()-instit.getRadiusY()*0.7);	
 			instit.text.setTextAlignment(TextAlignment.CENTER);
 			instit.text.setMouseTransparent(true);
-			nodesPane.getChildren().addAll(instit,instit.text);
+			nodesPane.getChildren().addAll(instit, instit.text);
 		}
 		scroll.setContent(nodesPane);
 		

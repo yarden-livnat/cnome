@@ -8,16 +8,21 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 public class MemoryScroll extends ScrollPane {
 	double currentY;
+	double baseY;
 	double currentX;
+	double baseX;
 	double increment;
 	
 	public MemoryScroll(double x, double y, double increment){
 		this.currentX = x;
+		this.baseX = x;
 		this.currentY = y;
+		this.baseY= y;
 		this.increment = increment;
 	}
 	
@@ -27,6 +32,8 @@ public class MemoryScroll extends ScrollPane {
 	
 	void updateFac(){
 		boolean test;
+		currentX = baseX;
+		currentY = baseY;
 		this.getChildren().clear();
 		for(facilityNode fac:DataArrays.FacilityNodes){
 			test = false;
@@ -39,20 +46,22 @@ public class MemoryScroll extends ScrollPane {
 			}
 			if(test == false){
 				FacilityCircle circle = new FacilityCircle();
-				circle.setRadius(20);
+				circle.setRadius(30);
 				circle.setStroke(Color.BLACK);
-				circle.setFill(Color.web("#CF5300"));
+				circle.rgbColor=VisFunctions.stringToColor(fac.facilityType);
+				circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
 				circle.setCenterX(currentX);
 				circle.setCenterY(currentY);
 				circle.text.setText(fac.cycicCircle.text.getText());
 				circle.text.setWrapText(true);
-				circle.text.setMaxWidth(60);
+				circle.text.setMaxWidth(25);
 				circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
 				circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
 				circle.text.setTextAlignment(TextAlignment.CENTER);
 				circle.text.setMouseTransparent(true);
 				circle.text.setMaxWidth(circle.getRadius()*1.4);
 				circle.text.setMaxHeight(circle.getRadius()*1.2);
+				circle.text.toFront();
 				circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 					public void handle(MouseEvent e){
 						Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
@@ -62,7 +71,7 @@ public class MemoryScroll extends ScrollPane {
 						e.consume();
 					}
 				});
-				this.getChildren().addAll(circle, circle.text);
+				getChildren().addAll(circle.text, circle);
 				currentY += increment;
 			}
 		}
