@@ -1,35 +1,58 @@
 package edu.utexas.cycic;
 
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import java.util.ArrayList;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-public class MemoryScroll extends ScrollPane {
+
+public class MemoryScroll extends Pane{
 	double currentY;
 	double baseY;
 	double currentX;
 	double baseX;
 	double increment;
-	
-	public MemoryScroll(double x, double y, double increment){
+	ArrayList<String> nodeList;
+	ScrollPane scroll = new ScrollPane();
+	HBox textBox = new HBox();
+	TextField text = new TextField(){
+		{
+			textProperty().addListener(new ChangeListener<String>(){         
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+					for(int i = 0; i < nodeList.size(); i++){
+						if(nodeList.get(i).matches(newValue)){
+							/** TODO SOMETIME SOMETHING UPDATE FORM */
+						}
+					}
+				}
+			});
+		}
+	};
+
+	public MemoryScroll(double x, double y, double increment, ArrayList<String> list){
 		this.currentX = x;
 		this.baseX = x;
 		this.currentY = y;
 		this.baseY= y;
 		this.increment = increment;
+		textBox.getChildren().addAll(new Label("Search"), text);
 	}
-	
+
 	public MemoryScroll(){
-		
 	}
-	
+
 	void updateFac(){
 		boolean test;
 		currentX = baseX;
@@ -46,10 +69,10 @@ public class MemoryScroll extends ScrollPane {
 			}
 			if(test == false){
 				FacilityCircle circle = new FacilityCircle();
-				circle.setRadius(30);
+				circle.setRadius(60);
 				circle.setStroke(Color.BLACK);
 				circle.rgbColor=VisFunctions.stringToColor(fac.facilityType);
-				circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
+				circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 1.0));
 				circle.setCenterX(currentX);
 				circle.setCenterY(currentY);
 				circle.text.setText(fac.cycicCircle.text.getText());
@@ -77,3 +100,4 @@ public class MemoryScroll extends ScrollPane {
 		}
 	}
 }
+
