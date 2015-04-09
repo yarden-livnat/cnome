@@ -392,9 +392,13 @@ public class Table implements Resource {
 	public Field getField(int index) {
 		return _schema.getField(index);
 	}
-
+	
 	public Field getField(String name) {
 		return _schema.getField(name);
+	}
+	
+	public Field getField(String name, Boolean casesensitive) {
+		return _schema.getField(name, casesensitive);
 	}
 	
 	public void setFieldSelected(int index, boolean selected){
