@@ -42,6 +42,7 @@ public class Model {
 	private List<Table> _simulationTablesDef = new ArrayList<>();
 	private Simulation _lastPanelSelectedSimulation = null;
 	private Map<Simulation,String>_simulationsAliases = new HashMap<>();
+	private List<String> _remoteServersList = new ArrayList<String>();
 	/**
 	 * getTables
 	 * @return
@@ -168,6 +169,25 @@ public class Model {
 			Date date = new Date();
 			_simulationsAliases.put(simulation, dateFormat.format(date));
 		}
+	}
+	
+	/*
+	 * Adds a new remote server address to the list of remote server, if not exists yet.
+	 * @param String remoteServer - the remote server to add
+	 * @return false - if not added (because it already exists), true - if added.
+	 */
+	public Boolean addNewRemoteServer(String remoteServer){
+		for(String remote:_remoteServersList){
+			if(remoteServer.equals(remote)){
+				return false;
+			}
+		}
+		_remoteServersList.add(remoteServer);
+		return true;
+	}
+	
+	public List<String> getRemoteServersList(){
+		return _remoteServersList;
 	}
 	
 }
