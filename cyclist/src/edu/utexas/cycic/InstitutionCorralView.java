@@ -35,7 +35,7 @@ public class InstitutionCorralView extends ViewBase{
 	/**
 	 * 
 	 */
-	MemoryScroll facilityScroll = new MemoryScroll(30, 45, 45);
+	MemoryScroll facilityScroll = new MemoryScroll(35, 35, 65);
 	
 	/**
 	 * 
@@ -67,6 +67,8 @@ public class InstitutionCorralView extends ViewBase{
 					institute.institutionShape.text.setLayoutY(event.getY()+institute.institutionShape.getRadiusY()*0.2);
 					DataArrays.institNodes.add(institute);
 					institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
+				} else {
+					event.consume();
 				}
 			}
 		});
@@ -139,10 +141,19 @@ public class InstitutionCorralView extends ViewBase{
 			}
 		});
 		
+		Button updateScroll = new Button("UPDATES!");
+		
+		updateScroll.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				facilityScroll.updateFac();
+			}
+		});
+		
 		topGrid.add(new Label("New Institution"), 0, 0);
 		topGrid.add(institName, 1, 0);
 		topGrid.add(typeOptions, 2, 0);
 		topGrid.add(institButton, 3, 0);
+		topGrid.add(updateScroll, 4, 0);
 		
 				
 		
@@ -171,7 +182,7 @@ public class InstitutionCorralView extends ViewBase{
 			instit.text.setLayoutY(instit.getLayoutY()-instit.getRadiusY()*0.7);	
 			instit.text.setTextAlignment(TextAlignment.CENTER);
 			instit.text.setMouseTransparent(true);
-			nodesPane.getChildren().addAll(instit,instit.text);
+			nodesPane.getChildren().addAll(instit, instit.text);
 		}
 		scroll.setContent(nodesPane);
 		

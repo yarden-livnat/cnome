@@ -176,26 +176,14 @@ public class CycicCircles{
 		
 		// To allow the facilityCircle to be moved through the pane and setting bounding regions.
 		circle.onMouseDraggedProperty().set(new EventHandler<MouseEvent>(){
-			
-			Line line = new Line();
 			public void handle(MouseEvent event){
+				Line line = new Line();
 				if(event.isShiftDown() == true){
-					Cycic.pane.getChildren().remove(line);		
-					/*DnD.LocalClipboard clipboard = DnD.getInstance().createLocalClipboard();
-					clipboard.put(DnD.TOOL_FORMAT, Tool.class, new FormBuilderTool());
-					
-					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
-					//Dragboard db = circle.startDragAndDrop(TransferMode.NONE);
-					ClipboardContent content = new ClipboardContent();				
-					content.put(DnD.TOOL_FORMAT, "Facility Form");
-					db.setContent(content);*/
-
 					Cycic.pane.getChildren().add(line);
 					line.setEndX(event.getX());
 					line.setEndY(event.getY());
 					line.setStartX(circle.getCenterX());
 					line.setStartY(circle.getCenterY());
-					
 				} else {
 					circle.setCenterX(mousex+x);
 					circle.setCenterY(mousey+y);
@@ -255,11 +243,11 @@ public class CycicCircles{
 					}
 					mousex = event.getX();
 					mousey = event.getY();
-				}	
-				event.consume();
-				if(event.isConsumed()){
-					Cycic.pane.getChildren().remove(line);	
 				}
+				event.consume();
+				/*if(event.isConsumed()){
+					Cycic.pane.getChildren().remove(line);	
+				}*/
 			}
 		});
 		// Double click functionality to show/hide children. As well as a bloom feature to show which node is selected.
