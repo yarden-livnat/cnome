@@ -74,9 +74,14 @@ public class XMLReader {
 			add("StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion");
 			add("StubFacility/cyclus/StubInst:StubInst:StubInst");
 			add("StubFacility:StubFacility:StubFacility");
-			add(":cycamore:DeployInst");
-			add(":cycamore:BatchReactor");
 			add(":cycaless:BatchReactor");
+			add(":cycamore:DeployInst");
+			add(":cycamore:FuelFab");
+			//add(":cycamore:GrowthRegion");
+			//add(":cycamore:ManagerInst");
+			add(":cycamore:Reactor");
+			add(":cycamore:Separations");
+			add(":cycamore:BatchReactor");
 		}
 	};
 	
