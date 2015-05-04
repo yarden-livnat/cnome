@@ -377,7 +377,6 @@ public class XMLReader {
 		} else if(jsonPass.get("tooltip") != null){
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(7, jsonPass.get("tooltip").toString().replace("\"", ""));
 		}
-		
 		/*if(jsonPass.get("default") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("default");
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
