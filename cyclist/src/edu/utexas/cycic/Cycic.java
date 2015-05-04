@@ -479,6 +479,7 @@ public class Cycic extends ViewBase{
             JsonObject anno = annotations.getJsonObject(spec);
             switch(anno.getString("entity")){
             case "facility":
+                log.info("Adding archetype "+spec);
                 facilityStructure node = new facilityStructure();
                 node.facAnnotations = anno.toString();
                 node.facilityArch = spec;
@@ -487,7 +488,6 @@ public class Cycic extends ViewBase{
                     XMLReader.readSchema(schema));
                 node.facilityName = spec.replace(":", " ");
                 DataArrays.simFacilities.add(node);
-                log.info("Adding archetype "+spec);
                 break;
             case "region":
                 log.info("Adding archetype "+spec);

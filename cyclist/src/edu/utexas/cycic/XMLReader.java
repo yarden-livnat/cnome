@@ -75,12 +75,6 @@ public class XMLReader {
 			add("StubFacility/cyclus/StubInst:StubInst:StubInst");
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
-			add(":cycamore:DeployInst");
-			add(":cycamore:FuelFab");
-			//add(":cycamore:GrowthRegion");
-			//add(":cycamore:ManagerInst");
-			add(":cycamore:Reactor");
-			add(":cycamore:Separations");
 			add(":cycamore:BatchReactor");
 		}
 	};
@@ -195,6 +189,7 @@ public class XMLReader {
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
 		JsonObject json_pass;
+		System.out.println(dataArray);
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
 				combiner((ArrayList<Object>)dataArray.get(i), json);
@@ -292,6 +287,7 @@ public class XMLReader {
 	 * @return
 	 */
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
+		System.out.println(node);
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++){
 			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
@@ -382,7 +378,7 @@ public class XMLReader {
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(7, jsonPass.get("tooltip").toString().replace("\"", ""));
 		}
 		
-		if(jsonPass.get("default") instanceof JsonArray){
+		/*if(jsonPass.get("default") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("default");
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				String string = array.get(i+1).toString().replaceAll("\"", "");
@@ -399,8 +395,7 @@ public class XMLReader {
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(1)).set(5, object.get(keys.toArray()[0]).toString());
 		} else if(jsonPass.get("default") != null) {
 							
-		}
-		
+		}*/
 		
 		return dataArray;
 		
