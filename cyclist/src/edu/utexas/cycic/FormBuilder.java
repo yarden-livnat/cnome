@@ -152,6 +152,8 @@ public class FormBuilder extends ViewBase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(GridPane grid, ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		//System.out.println(dataArray);
+		//System.out.println(facArray);
 		for (int i = 0; i < facArray.size(); i++){
 			if (facArray.get(i) instanceof ArrayList && facArray.get(0) instanceof ArrayList) {
 				formBuilder(grid, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -184,7 +186,7 @@ public class FormBuilder extends ViewBase {
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
-							grid.add(arrayListRemove(grid, dataArray, ii), columnNumber-1, rowNumber);
+							grid.add(arrayListRemove(grid, dataArray, ii), columnNumber+2, rowNumber);
 							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
@@ -237,7 +239,7 @@ public class FormBuilder extends ViewBase {
 						FormBuilderFunctions.cycicTypeTest(grid, formNode, facArray, dataArray, columnNumber, rowNumber);
 					}
 					columnEnd = 2 + columnNumber;
-					grid.add(FormBuilderFunctions.unitsBuilder((String)facArray.get(3)), columnEnd+1, rowNumber);
+					grid.add(FormBuilderFunctions.unitsBuilder((String)facArray.get(3)), columnEnd, rowNumber);
 					columnEnd = 0;
 					rowNumber += 1;
 				}

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javafx.scene.image.Image;
@@ -13,6 +14,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -189,7 +191,7 @@ public class XMLReader {
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
 		JsonObject json_pass;
-		System.out.println(dataArray);
+		//System.out.println(dataArray);
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
 				combiner((ArrayList<Object>)dataArray.get(i), json);
@@ -287,10 +289,72 @@ public class XMLReader {
 	 * @return
 	 */
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
-		System.out.println(node);
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++){
-			if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
+			switch (nodes.item(i).getNodeName()) {
+			case "oneOrMore":
+			case "zeroOrMore":
+				try{
+					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
+						ArrayList<Object> newArray = new ArrayList<Object>();
+						newArray = nodeListener(nodes.item(i), newArray);
+						array.add(newArray);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				ArrayList<Object> newArray = new ArrayList<Object>();
+				newArray = nodeListener(nodes.item(i), newArray);
+				array.add(newArray);
+				array.add(nodes.item(i).getNodeName());
+				break;
+			case "element":
+				if(nodes.item(i).getChildNodes().getLength() > 3){
+					try{
+						if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
+							ArrayList<Object> eleArray = new ArrayList<Object>();
+							eleArray = nodeListener(nodes.item(i), eleArray);
+							array.add(eleArray);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					ArrayList<Object> eleArray2 = new ArrayList<Object>();
+					eleArray2 = nodeListener(nodes.item(i), eleArray2);
+					array.add(eleArray2);
+					array.add(nodes.item(i).getNodeName());
+					break;
+				} else {
+					ArrayList<Object> newArray1 = new ArrayList<Object>();
+					for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
+						if (nodes.item(i).getAttributes().item(j).getNodeName() == "name"){
+							newArray1.add(nodes.item(i).getAttributes().item(j).getNodeValue());
+						}
+					}
+					array.add(nodeListener(nodes.item(i), newArray1));
+					break;
+				}
+			case "optional":
+				Node newNode = nodes.item(i).getChildNodes().item(1);
+				ArrayList<Object> newArray11 = new ArrayList<Object>();
+				for(int j = 0; j < newNode.getAttributes().getLength(); j++){
+					if (newNode.getAttributes().item(j).getNodeName() == "name"){
+						newArray11.add(newNode.getAttributes().item(j).getNodeValue());
+					}
+				}
+				array.add(nodeListener(newNode, newArray11));
+				break;
+			case "data":
+				for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
+					if(nodes.item(i).getAttributes().item(j).getNodeName() == "type"){
+						array.add(1, nodes.item(i).getAttributes().item(j).getNodeValue());
+					}
+				}
+			default: 
+				break;
+			}
+			
+			/*if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
 				try{
 					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
 						ArrayList<Object> newArray = new ArrayList<Object>();
@@ -330,7 +394,7 @@ public class XMLReader {
 						array.add(1, nodes.item(i).getAttributes().item(j).getNodeValue());
 					}
 				}
-			}
+			}*/
 		}
 		return array;
 	}
@@ -344,10 +408,13 @@ public class XMLReader {
 	@SuppressWarnings("unchecked")
 	static ArrayList<Object> orMoreInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
 		cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-		
 		if(jsonPass.get("uitype") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uitype");
+			//System.out.println(array);
+			//System.out.println(dataArray);
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
+				//System.out.println(array.get(i+1));
+				//System.out.println(((ArrayList<Object>) dataArray.get(1)).get(i));
 				String string = array.get(i+1).toString().replaceAll("\"", "");
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
 				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
@@ -356,7 +423,7 @@ public class XMLReader {
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, jsonPass.get("uitype").toString().replace("\"", ""));
 		}
 		
-		if(jsonPass.get("uilabel") instanceof JsonArray){
+		/*if(jsonPass.get("uilabel") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uilabel");
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				String string = array.get(i+1).toString().replaceAll("\"", "");

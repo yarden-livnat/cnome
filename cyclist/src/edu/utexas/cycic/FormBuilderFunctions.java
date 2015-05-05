@@ -523,7 +523,7 @@ public class FormBuilderFunctions {
 			grid.add(fileField, col, row);
 			grid.add(fileChooserButton(fileField), col+1, row);
 		default:
-			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+col, row);
+			grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), col, row);
 			break;
 		}
 		return grid;
