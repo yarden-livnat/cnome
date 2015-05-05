@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -35,7 +36,12 @@ public class InstitutionCorralView extends ViewBase{
 	/**
 	 * 
 	 */
-	MemoryScroll facilityScroll = new MemoryScroll(35, 35, 65);
+	ArrayList<String> prototypeList;
+	
+	/**
+	 * 
+	 */
+	MemoryScroll facilityScroll = new MemoryScroll(35, 35, 65, prototypeList);
 	
 	/**
 	 * 

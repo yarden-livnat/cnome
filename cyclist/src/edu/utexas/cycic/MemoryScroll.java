@@ -18,15 +18,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 
-public class MemoryScroll extends Pane{
+public class MemoryScroll extends ScrollPane{
 	double currentY;
 	double baseY;
 	double currentX;
 	double baseX;
 	double increment;
 	ArrayList<String> nodeList;
-	ScrollPane scroll = new ScrollPane();
-	HBox textBox = new HBox();
+	Pane pane = new Pane();
+	HBox textBox = new HBox(5);
 	TextField text = new TextField(){
 		{
 			textProperty().addListener(new ChangeListener<String>(){         
@@ -47,7 +47,12 @@ public class MemoryScroll extends Pane{
 		this.currentY = y;
 		this.baseY= y;
 		this.increment = increment;
+		this.setContent(pane);
 		textBox.getChildren().addAll(new Label("Search"), text);
+		textBox.setLayoutX(pane.getLayoutX()+pane.getWidth()-40);
+		textBox.setLayoutY(pane.getLayoutY());
+		textBox.setMaxWidth(40);
+		pane.getChildren().add(textBox);
 	}
 
 	public MemoryScroll(){
@@ -94,7 +99,7 @@ public class MemoryScroll extends Pane{
 						e.consume();
 					}
 				});
-				getChildren().addAll(circle.text, circle);
+				pane.getChildren().addAll(circle.text, circle);
 				currentY += increment;
 			}
 		}
