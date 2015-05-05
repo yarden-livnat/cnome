@@ -12,12 +12,11 @@
 	<classpathentry kind="lib" path="lib/httpcore-4.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/fluent-hc-4.3.5.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/controlsfx-8.20.8.jar"/>
 <<<<<<< HEAD
-	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 =======
 	<classpathentry kind="lib" path="lib/openjfx-dialogs-1.0.2.jar"/>
->>>>>>> c9daa8d3c407c12fc940a99980f41bb74fab23c7
+>>>>>>> be5e10bbabb92ad489be8550943cf2251516bd16
 	<classpathentry kind="output" path="bin"/>
 </classpath>

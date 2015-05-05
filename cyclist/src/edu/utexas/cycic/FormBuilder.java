@@ -237,7 +237,7 @@ public class FormBuilder extends ViewBase {
 						FormBuilderFunctions.cycicTypeTest(grid, formNode, facArray, dataArray, columnNumber, rowNumber);
 					}
 					columnEnd = 2 + columnNumber;
-					grid.add(FormBuilderFunctions.unitsBuilder((String)facArray.get(3)), columnEnd, rowNumber);
+					grid.add(FormBuilderFunctions.unitsBuilder((String)facArray.get(3)), columnEnd+1, rowNumber);
 					columnEnd = 0;
 					rowNumber += 1;
 				}

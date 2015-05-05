@@ -809,23 +809,6 @@
     "buildorder": "build_sched_"
    }
   }, 
-  ":cycamore:BatchReactor": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader", 
-    "cyclus::toolkit::AgentManaged", 
-    "cyclus::toolkit::CommodityProducer"
-   ], 
-   "doc": "A reactor facility that has three storage areas that hold batches of materials: reserves, core, and storage. It can manage multiple input-output commodity pairs.", 
-   "entity": "facility", 
-   "name": "cycamore::BatchReactor", 
-   "parents": ["cyclus::Facility", "cyclus::toolkit::CommodityProducer"], 
-   "vars": {}
-  }, 
   ":cycamore:DeployInst": {
    "all_parents": [
     "cyclus::Agent", 
@@ -1927,399 +1910,6 @@
     }
    }
   }, 
-  "build/lib/cyclus/Brightlite:Brightlite:FuelfabFacility": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader"
-   ], 
-   "doc": "A fuelfab facility is provided as a skeleton for the design of new facility agents.", 
-   "entity": "facility", 
-   "name": "fuelfab::FuelfabFacility", 
-   "niche": "fuel fabrication", 
-   "parents": ["cyclus::Facility"], 
-   "vars": {
-    "fissle_stream": {
-     "index": 1, 
-     "type": "std::string", 
-     "uilabel": "Fissle Stream", 
-     "uitype": "incommodity"
-    }, 
-    "in_commods": {
-     "doc": "A list of the commodities that this facility can recieve", 
-     "index": 3, 
-     "tooltip": "input commodities", 
-     "type": ["std::map", "std::string", "double"], 
-     "uitype": ["oneOrMore", "incommodity", "double"]
-    }, 
-    "maximum_storage": {
-     "default": 9.999999999999999e+59, 
-     "index": 0, 
-     "tooltip": "maximum storage capacity of the facility", 
-     "type": "double"
-    }, 
-    "non_fissle_stream": {
-     "index": 2, 
-     "type": "std::string", 
-     "uilabel": "Nonfissle Stream", 
-     "uitype": "incommodity"
-    }, 
-    "out_commod": {
-     "doc": "commodity that the brightlite supplies", 
-     "index": 4, 
-     "tooltip": "output commodity", 
-     "type": "std::string", 
-     "uitype": "outcommodity"
-    }
-   }
-  }, 
-  "build/lib/cyclus/Brightlite:Brightlite:ReactorFacility": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader"
-   ], 
-   "doc": "A reactor facility is provided as a skeleton for the design of new facility agents.", 
-   "entity": "facility", 
-   "name": "reactor::ReactorFacility", 
-   "niche": "reactor", 
-   "parents": ["cyclus::Facility"], 
-   "vars": {
-    "CR_fissile": {
-     "index": 30, 
-     "tooltip": "List of fissile isotopes for conversion ratio calculation.", 
-     "type": ["std::vector", "std::string"], 
-     "units": "NUCID", 
-     "userlevel": 3
-    }, 
-    "CR_lower": {
-     "default": 70, 
-     "index": 31, 
-     "tooltip": "Lower bound of the fission product mass number for conversion ratio calculation.", 
-     "type": "int", 
-     "userlevel": 3
-    }, 
-    "CR_target": {
-     "default": -1, 
-     "index": 33, 
-     "tooltip": "Target for conversion ratio.", 
-     "type": "double", 
-     "userlevel": 3
-    }, 
-    "CR_upper": {
-     "default": 160, 
-     "index": 32, 
-     "tooltip": "Upper bound of the fission product mass number for conversion ratio calculation.", 
-     "type": "int", 
-     "userlevel": 3
-    }, 
-    "DA_mode": {
-     "default": 0, 
-     "index": 27, 
-     "tooltip": "Disadvantage calculation. 0:Off, 1:On", 
-     "type": "int", 
-     "userlevel": 2
-    }, 
-    "SS_tolerance": {
-     "default": 0.010, 
-     "index": 1, 
-     "tooltip": "The steady state calculation tolerance for the code", 
-     "type": "double", 
-     "userlevel": 3
-    }, 
-    "batches": {
-     "default": 3, 
-     "index": 11, 
-     "tooltip": "number of batches", 
-     "type": "int", 
-     "userlevel": 1
-    }, 
-    "burnupcalc_timestep": {
-     "default": 10, 
-     "index": 25, 
-     "tooltip": "Timestep [days] for the burnup calculation.", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "core_mass": {
-     "index": 16, 
-     "tooltip": "Total mass of the core.", 
-     "type": "double", 
-     "units": "kgIHM", 
-     "userlevel": 0
-    }, 
-    "cylindrical_delta": {
-     "default": 5, 
-     "index": 19, 
-     "tooltip": "Delta to be used for cylindrical flux calculation.", 
-     "type": "double", 
-     "userlevel": 3
-    }, 
-    "disadv_a": {
-     "default": 0.40950, 
-     "index": 2, 
-     "tooltip": "Fuel pin radius used for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm", 
-     "userlevel": 3
-    }, 
-    "disadv_b": {
-     "default": 0.707490, 
-     "index": 3, 
-     "tooltip": "Moderator radius used for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm", 
-     "userlevel": 3
-    }, 
-    "disadv_fuel_sigs": {
-     "default": 0.430, 
-     "index": 6, 
-     "tooltip": "Fuel macroscopic scattering cross-section for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "disadv_mod_siga": {
-     "default": 0.2220, 
-     "index": 4, 
-     "tooltip": "Moderator macroscopic abs cross-section for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "disadv_mod_sigs": {
-     "default": 3.440, 
-     "index": 5, 
-     "tooltip": "Moderator macroscopic scattering cross-section for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "efficiency": {
-     "default": 0.330, 
-     "index": 17, 
-     "tooltip": "Thermal to electric conversion rate.", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "flux_mode": {
-     "default": 1, 
-     "index": 26, 
-     "tooltip": "Flux calculation method. 1:Uniform, 2:Inv.Neut.Prod, 3:Cylindrical", 
-     "type": "int", 
-     "userlevel": 2
-    }, 
-    "fuel_Sig_tr": {
-     "default": 0.120, 
-     "index": 24, 
-     "tooltip": "Macroscopic transport cross section of the fuel.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "fuel_area": {
-     "default": 4197, 
-     "index": 18, 
-     "tooltip": "Total area of the fuel in core. Used for cylindrical flux calculation.", 
-     "type": "double", 
-     "units": "cm2", 
-     "userlevel": 3
-    }, 
-    "generated_power": {
-     "index": 15, 
-     "tooltip": "Electrical production.", 
-     "type": "double", 
-     "units": "MWe", 
-     "userlevel": 0
-    }, 
-    "in_commods": {
-     "doc": "commodity that the brightlite reactor consumes", 
-     "index": 7, 
-     "schematype": "token", 
-     "tooltip": "input commodity", 
-     "type": ["std::vector", "std::string"], 
-     "uitype": ["oneOrMore", "incommodity"]
-    }, 
-    "interpol_pairs": {
-     "default": {"BURNUP": 42}, 
-     "index": 10, 
-     "tooltip": [
-      "interpolation pairs used for the library", 
-      "Interpolation metric", 
-      "Interpolation values"
-     ], 
-     "type": ["std::map", "std::string", "double"], 
-     "uitype": ["oneOrMore", "string", "double"], 
-     "userlevel": 2
-    }, 
-    "inventory": {
-     "capacity": "max_inv_size", 
-     "index": 28, 
-     "type": "cyclus::toolkit::ResourceBuff"
-    }, 
-    "libraries": {
-     "doc": "the reactor's burnup & criticality behavior to use", 
-     "index": 9, 
-     "tooltip": "reactor libraries to load", 
-     "type": ["std::vector", "std::string"], 
-     "userlevel": 0
-    }, 
-    "max_inv_size": {
-     "default": 1.000000000000000e+299, 
-     "doc": "total maximum inventory size of the reactor", 
-     "index": 13, 
-     "tooltip": "reactor maximum inventory size", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "mod_Sig_a": {
-     "default": 0.02220, 
-     "index": 20, 
-     "tooltip": "Macroscopic absorption cross section of the moderator.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "mod_Sig_f": {
-     "default": 0.0, 
-     "index": 22, 
-     "tooltip": "Macroscopic fission cross section of the moderator.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "mod_Sig_tr": {
-     "default": 3.460, 
-     "index": 21, 
-     "tooltip": "Macroscopic transport cross section of the moderator.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "mod_thickness": {
-     "default": 50, 
-     "index": 23, 
-     "tooltip": "Radial thickness of the moderator used for cylindrical flux calculation.", 
-     "type": "double", 
-     "units": "cm", 
-     "userlevel": 3
-    }, 
-    "nonleakage": {
-     "default": 0.980, 
-     "doc": "Varies from 0 - 1.", 
-     "index": 12, 
-     "tooltip": "Non-leakage probability", 
-     "type": "double", 
-     "userlevel": 1
-    }, 
-    "out_commod": {
-     "doc": "commodity that the brightlite supplies", 
-     "index": 8, 
-     "tooltip": "output commodity", 
-     "type": "std::string", 
-     "uilabel": "Output", 
-     "uitype": "outcommodity"
-    }, 
-    "outage_time": {
-     "default": 28, 
-     "index": 34, 
-     "label": "Outage Period", 
-     "tooltip": "The amount of time the reactor is offline to load new fuel and shuffle older fuel", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "reactor_life": {
-     "default": 480, 
-     "index": 29, 
-     "tooltip": "Time before reactor is shutdown after startup.", 
-     "type": "int", 
-     "units": "months", 
-     "userlevel": 1
-    }, 
-    "target_burnup": {
-     "default": 0, 
-     "index": 14, 
-     "tooltip": "Target burnup", 
-     "type": "double", 
-     "units": "MWd/kgIHM", 
-     "userlevel": 0
-    }, 
-    "tolerance": {
-     "default": 0.010, 
-     "index": 0, 
-     "tooltip": "The blending convergence requirement for the code", 
-     "type": "double", 
-     "userlevel": 3
-    }
-   }
-  }, 
-  "build/lib/cyclus/Brightlite:Brightlite:ReprocessFacility": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader"
-   ], 
-   "doc": "A reprocess facility is provided as a skeleton for the design of new facility agents.", 
-   "entity": "facility", 
-   "name": "reprocess::ReprocessFacility", 
-   "niche": "reprocessing", 
-   "parents": ["cyclus::Facility"], 
-   "vars": {
-    "commod_out": {
-     "index": 1, 
-     "tooltip": "output commodity", 
-     "type": ["std::vector", "std::string"], 
-     "uitype": ["oneOrMore", "outcommodity"]
-    }, 
-    "in_commod": {
-     "doc": "commodity that the brightlite reprocess facility consumes", 
-     "index": 0, 
-     "schematype": "token", 
-     "tooltip": "input commodity", 
-     "type": ["std::vector", "std::string"], 
-     "uitype": ["oneOrMore", "incommodity"]
-    }, 
-    "input_capacity": {
-     "default": 150.10, 
-     "index": 4, 
-     "tooltip": "Conversion efficiency.", 
-     "type": "double"
-    }, 
-    "input_inventory": {
-     "capacity": "max_inv_size", 
-     "index": 6, 
-     "type": "cyclus::toolkit::ResourceBuff"
-    }, 
-    "max_inv_size": {
-     "default": 1.000000000000000e+299, 
-     "doc": "total maximum inventory size of the reactor", 
-     "index": 3, 
-     "tooltip": "reactor maximum inventory size", 
-     "type": "double"
-    }, 
-    "output_capacity": {
-     "default": 10, 
-     "index": 5, 
-     "tooltip": "Total conversion capacity.", 
-     "type": "double"
-    }, 
-    "repro_input_path": {"index": 2, "tooltip": "Efficiency input file", "type": "std::string"}, 
-    "waste_inventory": {
-     "capacity": "max_inv_size", 
-     "index": 7, 
-     "type": "cyclus::toolkit::ResourceBuff"
-    }
-   }
-  }, 
   "stubs:StubFacility:StubFacility": {
    "all_parents": [
     "cyclus::Agent", 
@@ -2365,9 +1955,9 @@
   }
  }, 
  "schema": {
-  ":Brightlite:FuelfabFacility": "<interleave>\n<optional>\n    <element name=\"maximum_storage\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<element name=\"fissle_stream\">\n    <data type=\"string\" />\n</element>\n<element name=\"non_fissle_stream\">\n    <data type=\"string\" />\n</element>\n<element name=\"in_commods\">\n    <oneOrMore>\n        <element name=\"key\">\n            <data type=\"string\" />\n        </element>\n        <element name=\"val\">\n            <data type=\"double\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"out_commod\">\n    <data type=\"string\" />\n</element>\n</interleave>\n", 
-  ":Brightlite:ReactorFacility": "<interleave>\n<optional>\n    <element name=\"tolerance\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"SS_tolerance\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_a\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_b\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_mod_siga\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_mod_sigs\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_fuel_sigs\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<element name=\"in_commods\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"token\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"out_commod\">\n    <data type=\"string\" />\n</element>\n<element name=\"libraries\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"string\" />\n        </element>\n    </oneOrMore>\n</element>\n<optional>\n    <element name=\"interpol_pairs\">\n        <oneOrMore>\n            <element name=\"key\">\n                <data type=\"string\" />\n            </element>\n            <element name=\"val\">\n                <data type=\"double\" />\n            </element>\n        </oneOrMore>\n    </element>\n</optional>\n<optional>\n    <element name=\"batches\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"nonleakage\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"max_inv_size\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"target_burnup\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<element name=\"generated_power\">\n    <data type=\"double\" />\n</element>\n<element name=\"core_mass\">\n    <data type=\"double\" />\n</element>\n<optional>\n    <element name=\"efficiency\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"fuel_area\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"cylindrical_delta\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_Sig_a\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_Sig_tr\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_Sig_f\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_thickness\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"fuel_Sig_tr\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"burnupcalc_timestep\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"flux_mode\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"DA_mode\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"reactor_life\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<element name=\"CR_fissile\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"string\" />\n        </element>\n    </oneOrMore>\n</element>\n<optional>\n    <element name=\"CR_lower\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"CR_upper\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"CR_target\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"outage_time\">\n        <data type=\"double\" />\n    </element>\n</optional>\n</interleave>\n", 
-  ":Brightlite:ReprocessFacility": "<interleave>\n<element name=\"in_commod\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"token\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"commod_out\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"string\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"repro_input_path\">\n    <data type=\"string\" />\n</element>\n<optional>\n    <element name=\"max_inv_size\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"input_capacity\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"output_capacity\">\n        <data type=\"double\" />\n    </element>\n</optional>\n</interleave>\n", 
+  ":Brightlite:FuelfabFacility": "<interleave>\n    <optional>\n        <element name=\"maximum_storage\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"fissle_stream\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"non_fissle_stream\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"in_commods\">\n        <oneOrMore>\n            <element name=\"key\">\n                <data type=\"string\"/>\n            </element>\n            <element name=\"val\">\n                <data type=\"double\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"out_commod\">\n        <data type=\"string\"/>\n    </element>\n</interleave>\n", 
+  ":Brightlite:ReactorFacility": "<interleave>\n    <optional>\n        <element name=\"tolerance\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"SS_tolerance\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_a\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_b\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_mod_siga\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_mod_sigs\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_fuel_sigs\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"in_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"out_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"libraries\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"interpol_pairs\">\n            <oneOrMore>\n                <element name=\"key\">\n                    <data type=\"string\"/>\n                </element>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"batches\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"nonleakage\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"target_burnup\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"generated_power\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"core_mass\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"efficiency\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fuel_area\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"cylindrical_delta\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_Sig_a\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_Sig_tr\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_Sig_f\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_thickness\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fuel_Sig_tr\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"burnupcalc_timestep\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"flux_mode\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"DA_mode\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"reactor_life\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"CR_fissile\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"CR_lower\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"CR_upper\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"CR_target\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"outage_time\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
+  ":Brightlite:ReprocessFacility": "<interleave>\n    <element name=\"in_commod\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"commod_out\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"repro_input_path\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"input_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"output_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   ":agents:KFacility": "<interleave>\n    <element name=\"in_commod\">\n        <data type=\"token\"/>\n    </element>\n    <element name=\"out_commod\">\n        <data type=\"token\"/>\n    </element>\n    <element name=\"recipe_name\">\n        <data type=\"token\"/>\n    </element>\n    <element name=\"in_capacity\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"out_capacity\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"current_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"k_factor_in\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"k_factor_out\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
   ":agents:NullInst": "<text/>", 
   ":agents:NullRegion": "<text/>", 
@@ -2377,14 +1967,13 @@
   ":agents:Source": "<interleave>\n    <element name=\"commod\">\n        <data type=\"token\"/>\n    </element>\n    <optional>\n        <element name=\"recipe_name\">\n            <data type=\"token\"/>\n        </element>\n    </optional>\n    <element name=\"capacity\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
   ":cycaless:BatchReactor": "  <!-- cyclus::Material In/Out  -->           \n  <element name=\"fuel\">                     \n  <oneOrMore>                                 \n    <element name=\"incommodity\"><text/></element>\n    <element name=\"inrecipe\"><text/></element>\n    <element name=\"outcommodity\"><text/></element>\n    <element name=\"outrecipe\"><text/></element>\n  </oneOrMore>                                \n  </element>                                  \n  <!-- Facility Parameters -->                \n  <interleave>                                \n  <element name=\"processtime\">              \n    <data type=\"nonNegativeInteger\"/>       \n  </element>                                  \n  <element name=\"nbatches\">                 \n    <data type=\"nonNegativeInteger\"/>       \n  </element>                                  \n  <element name =\"batchsize\">               \n    <data type=\"double\"/>                   \n  </element>                                  \n  <optional>                                  \n    <element name =\"refueltime\">            \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"orderlookahead\">        \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"norder\">                \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"nreload\">               \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"initial_condition\">     \n      <optional>                              \n        <element name =\"reserves\">          \n         <element name =\"nbatches\">         \n          <data type=\"nonNegativeInteger\"/> \n         </element>                           \n         <element name =\"commodity\">        \n          <data type=\"string\"/>             \n         </element>                           \n         <element name =\"recipe\">           \n          <data type=\"string\"/>             \n         </element>                           \n        </element>                            \n      </optional>                             \n      <optional>                              \n        <element name =\"core\">              \n        <element name =\"nbatches\">          \n          <data type=\"nonNegativeInteger\"/> \n        </element>                            \n        <element name =\"commodity\">         \n          <data type=\"string\"/>             \n        </element>                            \n        <element name =\"recipe\">            \n          <data type=\"string\"/>             \n        </element>                            \n        </element>                            \n      </optional>                             \n      <optional>                              \n        <element name =\"storage\">           \n        <element name =\"nbatches\">          \n          <data type=\"nonNegativeInteger\"/> \n        </element>                            \n        <element name =\"commodity\">         \n          <data type=\"string\"/>             \n        </element>                            \n        <element name =\"recipe\">            \n          <data type=\"string\"/>             \n        </element>                            \n        </element>                            \n      </optional>                             \n    </element>                                \n  </optional>                                 \n                                              \n  <!-- Recipe Changes  -->                    \n  <optional>                                  \n  <element name=\"recipe_change\">            \n  <oneOrMore>                                 \n   <element name=\"incommodity\">             \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"new_recipe\">              \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"time\">                    \n     <data type=\"nonNegativeInteger\"/>      \n   </element>                                 \n  </oneOrMore>                                \n  </element>                                  \n  </optional>                                 \n  </interleave>                               \n                                              \n  <!-- Power Production  -->                  \n  <element name=\"commodity_production\">     \n   <element name=\"commodity\">               \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"capacity\">                \n     <data type=\"double\"/>                  \n   </element>                                 \n   <element name=\"cost\">                    \n     <data type=\"double\"/>                  \n   </element>                                 \n  </element>                                  \n                                              \n  <!-- Trade Preferences  -->                 \n  <optional>                                  \n  <element name=\"commod_pref\">              \n  <oneOrMore>                                 \n   <element name=\"incommodity\">             \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"preference\">              \n     <data type=\"double\"/>                  \n   </element>                                 \n  </oneOrMore>                                \n  </element>                                  \n  </optional>                                 \n                                              \n  <!-- Trade Preference Changes  -->          \n  <optional>                                  \n  <element name=\"pref_change\">              \n  <oneOrMore>                                 \n   <element name=\"incommodity\">             \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"new_pref\">                \n     <data type=\"double\"/>                  \n   </element>                                 \n   <element name=\"time\">                    \n     <data type=\"nonNegativeInteger\"/>      \n   </element>                                 \n  </oneOrMore>                                \n  </element>                                  \n  </optional>                                 \n", 
   ":cycaless:DeployInst": "<element name=\"buildorder\">            \n<oneOrMore>                               \n  <element name=\"prototype\">           \n    <data type=\"string\"/>              \n  </element>                             \n  <element name=\"number\">              \n    <data type=\"nonNegativeInteger\"/>  \n  </element>                             \n  <element name=\"date\">                \n    <data type=\"nonNegativeInteger\"/>  \n  </element>                             \n</oneOrMore>                              \n</element>                               \n", 
-  ":cycamore:BatchReactor": "  <!-- cyclus::Material In/Out  -->           \n  <oneOrMore>                                 \n  <element name=\"fuel\">                     \n    <element name=\"incommodity\"><text/></element>\n    <element name=\"inrecipe\"><text/></element>\n    <element name=\"outcommodity\"><text/></element>\n    <element name=\"outrecipe\"><text/></element>\n  </element>                                  \n  </oneOrMore>                                \n  <!-- Facility Parameters -->                \n  <interleave>                                \n  <element name=\"processtime\">              \n    <data type=\"nonNegativeInteger\"/>       \n  </element>                                  \n  <element name=\"nbatches\">                 \n    <data type=\"nonNegativeInteger\"/>       \n  </element>                                  \n  <element name =\"batchsize\">               \n    <data type=\"double\"/>                   \n  </element>                                  \n  <optional>                                  \n    <element name =\"refueltime\">            \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"orderlookahead\">        \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"norder\">                \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"nreload\">               \n      <data type=\"nonNegativeInteger\"/>     \n    </element>                                \n  </optional>                                 \n  <optional>                                  \n    <element name =\"initial_condition\">     \n      <optional>                              \n        <element name =\"reserves\">          \n         <element name =\"nbatches\">         \n          <data type=\"nonNegativeInteger\"/> \n         </element>                           \n         <element name =\"commodity\">        \n          <data type=\"string\"/>             \n         </element>                           \n         <element name =\"recipe\">           \n          <data type=\"string\"/>             \n         </element>                           \n        </element>                            \n      </optional>                             \n      <optional>                              \n        <element name =\"core\">              \n        <element name =\"nbatches\">          \n          <data type=\"nonNegativeInteger\"/> \n        </element>                            \n        <element name =\"commodity\">         \n          <data type=\"string\"/>             \n        </element>                            \n        <element name =\"recipe\">            \n          <data type=\"string\"/>             \n        </element>                            \n        </element>                            \n      </optional>                             \n      <optional>                              \n        <element name =\"storage\">           \n        <element name =\"nbatches\">          \n          <data type=\"nonNegativeInteger\"/> \n        </element>                            \n        <element name =\"commodity\">         \n          <data type=\"string\"/>             \n        </element>                            \n        <element name =\"recipe\">            \n          <data type=\"string\"/>             \n        </element>                            \n        </element>                            \n      </optional>                             \n    </element>                                \n  </optional>                                 \n                                              \n  <!-- Recipe Changes  -->                    \n  <optional>                                  \n  <oneOrMore>                                 \n  <element name=\"recipe_change\">            \n   <element name=\"incommodity\">             \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"new_recipe\">              \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"time\">                    \n     <data type=\"nonNegativeInteger\"/>      \n   </element>                                 \n  </element>                                  \n  </oneOrMore>                                \n  </optional>                                 \n  </interleave>                               \n                                              \n  <!-- Power Production  -->                  \n  <element name=\"commodity_production\">     \n   <element name=\"commodity\">               \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"capacity\">                \n     <data type=\"double\"/>                  \n   </element>                                 \n   <element name=\"cost\">                    \n     <data type=\"double\"/>                  \n   </element>                                 \n  </element>                                  \n                                              \n  <!-- Trade Preferences  -->                 \n  <optional>                                  \n  <oneOrMore>                                 \n  <element name=\"commod_pref\">              \n   <element name=\"incommodity\">             \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"preference\">              \n     <data type=\"double\"/>                  \n   </element>                                 \n  </element>                                  \n  </oneOrMore>                                \n  </optional>                                 \n                                              \n  <!-- Trade Preference Changes  -->          \n  <optional>                                  \n  <oneOrMore>                                 \n  <element name=\"pref_change\">              \n   <element name=\"incommodity\">             \n     <data type=\"string\"/>                  \n   </element>                                 \n   <element name=\"new_pref\">                \n     <data type=\"double\"/>                  \n   </element>                                 \n   <element name=\"time\">                    \n     <data type=\"nonNegativeInteger\"/>      \n   </element>                                 \n  </element>                                  \n  </oneOrMore>                                \n  </optional>                                 \n", 
   ":cycamore:DeployInst": "<interleave>\n    <element name=\"prototypes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"build_times\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"int\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"n_build\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"int\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"lifetimes\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n</interleave>\n", 
   ":cycamore:Enrichment": "<interleave>\n    <element name=\"feed_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"product_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"feed_recipe\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"tails_commod\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"tails_assay\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"swu_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_feed_inventory\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_enrich\">\n            <data type=\"double\">\n                <param name=\"minInclusive\">\n                    0\n                </param>\n                <param name=\"maxInclusive\">\n                    1\n                </param>\n            </data>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"initial_feed\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"order_prefs\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   ":cycamore:FuelFab": "<interleave>\n    <element name=\"fill_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"fill_recipe\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"fill_pref\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"fill_size\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"fiss_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"fiss_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fiss_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"fiss_size\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"topup_commod\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_pref\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"spectrum\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"outcommod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"throughput\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
   ":cycamore:GrowthRegion": "<interleave>\n    <element name=\"commodity_name\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"demand_types\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"demand_params\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"demand_times\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"int\"/>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
   ":cycamore:ManagerInst": "<interleave>\n    <element name=\"prototypes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
-  ":cycamore:Reactor": "<interleave>\n    <optional>\n        <element name=\"power_cap\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"power_name\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"n_assem_batch\">\n        <data type=\"int\"/>\n    </element>\n    <element name=\"assem_size\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"n_assem_core\">\n        <data type=\"int\"/>\n    </element>\n    <optional>\n        <element name=\"n_assem_spent\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"n_assem_fresh\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"cycle_time\">\n        <data type=\"int\"/>\n    </element>\n    <element name=\"refuel_time\">\n        <data type=\"int\"/>\n    </element>\n    <optional>\n        <element name=\"cycle_step\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"fuel_incommods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_inrecipes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_outrecipes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_outcommods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"fuel_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_times\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_commods\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_values\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_times\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_commods\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_in\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_out\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"discharged\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"res_indexes\">\n            <oneOrMore>\n                <element name=\"key\">\n                    <data type=\"int\"/>\n                </element>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n</interleave>\n", 
-  ":cycamore:Separations": "<interleave>\n    <element name=\"throughput\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"feed_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"feed_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"feed_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"feedbuf_size\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"leftoverbuf_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"leftover_commod\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"streams\">\n        <oneOrMore>\n            <element name=\"commod\">\n                <data type=\"string\"/>\n            </element>\n            <element name=\"info\">\n                <element name=\"buf_size\">\n                    <data type=\"double\"/>\n                </element>\n                <element name=\"efficiencies\">\n                    <oneOrMore>\n                        <element name=\"comp\">\n                            <data type=\"string\"/>\n                        </element>\n                        <element name=\"eff\">\n                            <data type=\"double\"/>\n                        </element>\n                    </oneOrMore>\n                </element>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
+  ":cycamore:Reactor": "<interleave>\n    <optional>\n        <element name=\"power_cap\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"power_name\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"n_assem_batch\">\n        <data type=\"int\"/>\n    </element>\n    <element name=\"assem_size\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"n_assem_core\">\n        <data type=\"int\"/>\n    </element>\n    <optional>\n        <element name=\"n_assem_spent\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"n_assem_fresh\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"cycle_time\">\n        <data type=\"int\"/>\n    </element>\n    <element name=\"refuel_time\">\n        <data type=\"int\"/>\n    </element>\n    <optional>\n        <element name=\"cycle_step\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"fuel_incommods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_inrecipes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_outrecipes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_outcommods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"fuel_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_times\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_commods\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_values\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_times\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_commods\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_in\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_out\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"discharged\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"res_indexes\">\n            <oneOrMore>\n                <element name=\"item\">\n                    <interleave>\n                        <element name=\"key\">\n                            <data type=\"int\"/>\n                        </element>\n                        <element name=\"val\">\n                            <data type=\"int\"/>\n                        </element>\n                    </interleave>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n</interleave>\n", 
+  ":cycamore:Separations": "<interleave>\n    <element name=\"throughput\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"feed_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"feed_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"feed_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"feedbuf_size\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"leftoverbuf_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"leftover_commod\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"streams\">\n        <oneOrMore>\n            <element name=\"item\">\n                <interleave>\n                    <element name=\"commod\">\n                        <data type=\"string\"/>\n                    </element>\n                    <element name=\"info\">\n                        <interleave>\n                            <element name=\"buf_size\">\n                                <data type=\"double\"/>\n                            </element>\n                            <element name=\"efficiencies\">\n                                <oneOrMore>\n                                    <element name=\"item\">\n                                        <interleave>\n                                            <element name=\"comp\">\n                                                <data type=\"string\"/>\n                                            </element>\n                                            <element name=\"eff\">\n                                                <data type=\"double\"/>\n                                            </element>\n                                        </interleave>\n                                    </element>\n                                </oneOrMore>\n                            </element>\n                        </interleave>\n                    </element>\n                </interleave>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
   ":cycamore:Sink": "<interleave>\n    <element name=\"in_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_name\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   ":cycamore:Source": "<interleave>\n    <element name=\"outcommod\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"outrecipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"throughput\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"inventory_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   "StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion": "<text/>", 
@@ -2397,9 +1986,6 @@
   "agents:agents:Prey": "<interleave>\n    <element name=\"commod\">\n        <data type=\"token\"/>\n    </element>\n    <optional>\n        <element name=\"birth_freq\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"nchildren\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"age\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"dead\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"birth_and_death\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   "agents:agents:Sink": "<interleave>\n    <optional>\n        <element name=\"recipe_name\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"in_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"capacity\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   "agents:agents:Source": "<interleave>\n    <element name=\"commod\">\n        <data type=\"token\"/>\n    </element>\n    <optional>\n        <element name=\"recipe_name\">\n            <data type=\"token\"/>\n        </element>\n    </optional>\n    <element name=\"capacity\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
-  "build/lib/cyclus/Brightlite:Brightlite:FuelfabFacility": "<interleave>\n<optional>\n    <element name=\"maximum_storage\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<element name=\"fissle_stream\">\n    <data type=\"string\" />\n</element>\n<element name=\"non_fissle_stream\">\n    <data type=\"string\" />\n</element>\n<element name=\"in_commods\">\n    <oneOrMore>\n        <element name=\"key\">\n            <data type=\"string\" />\n        </element>\n        <element name=\"val\">\n            <data type=\"double\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"out_commod\">\n    <data type=\"string\" />\n</element>\n</interleave>\n", 
-  "build/lib/cyclus/Brightlite:Brightlite:ReactorFacility": "<interleave>\n<optional>\n    <element name=\"tolerance\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"SS_tolerance\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_a\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_b\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_mod_siga\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_mod_sigs\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"disadv_fuel_sigs\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<element name=\"in_commods\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"token\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"out_commod\">\n    <data type=\"string\" />\n</element>\n<element name=\"libraries\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"string\" />\n        </element>\n    </oneOrMore>\n</element>\n<optional>\n    <element name=\"interpol_pairs\">\n        <oneOrMore>\n            <element name=\"key\">\n                <data type=\"string\" />\n            </element>\n            <element name=\"val\">\n                <data type=\"double\" />\n            </element>\n        </oneOrMore>\n    </element>\n</optional>\n<optional>\n    <element name=\"batches\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"nonleakage\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"max_inv_size\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"target_burnup\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<element name=\"generated_power\">\n    <data type=\"double\" />\n</element>\n<element name=\"core_mass\">\n    <data type=\"double\" />\n</element>\n<optional>\n    <element name=\"efficiency\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"fuel_area\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"cylindrical_delta\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_Sig_a\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_Sig_tr\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_Sig_f\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"mod_thickness\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"fuel_Sig_tr\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"burnupcalc_timestep\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"flux_mode\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"DA_mode\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"reactor_life\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<element name=\"CR_fissile\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"string\" />\n        </element>\n    </oneOrMore>\n</element>\n<optional>\n    <element name=\"CR_lower\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"CR_upper\">\n        <data type=\"int\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"CR_target\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"outage_time\">\n        <data type=\"double\" />\n    </element>\n</optional>\n</interleave>\n", 
-  "build/lib/cyclus/Brightlite:Brightlite:ReprocessFacility": "<interleave>\n<element name=\"in_commod\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"token\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"commod_out\">\n    <oneOrMore>\n        <element name=\"val\">\n            <data type=\"string\" />\n        </element>\n    </oneOrMore>\n</element>\n<element name=\"repro_input_path\">\n    <data type=\"string\" />\n</element>\n<optional>\n    <element name=\"max_inv_size\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"input_capacity\">\n        <data type=\"double\" />\n    </element>\n</optional>\n<optional>\n    <element name=\"output_capacity\">\n        <data type=\"double\" />\n    </element>\n</optional>\n</interleave>\n", 
   "stubs:StubFacility:StubFacility": "<text/>", 
   "stubs:StubInst:StubInst": "<text/>", 
   "stubs:StubRegion:StubRegion": "<text/>"
@@ -2417,7 +2003,6 @@
   ":agents:Source", 
   ":cycaless:BatchReactor", 
   ":cycaless:DeployInst", 
-  ":cycamore:BatchReactor", 
   ":cycamore:DeployInst", 
   ":cycamore:Enrichment", 
   ":cycamore:FuelFab", 
@@ -2437,9 +2022,6 @@
   "agents:agents:Prey", 
   "agents:agents:Sink", 
   "agents:agents:Source", 
-  "build/lib/cyclus/Brightlite:Brightlite:FuelfabFacility", 
-  "build/lib/cyclus/Brightlite:Brightlite:ReactorFacility", 
-  "build/lib/cyclus/Brightlite:Brightlite:ReprocessFacility", 
   "stubs:StubFacility:StubFacility", 
   "stubs:StubInst:StubInst", 
   "stubs:StubRegion:StubRegion"
