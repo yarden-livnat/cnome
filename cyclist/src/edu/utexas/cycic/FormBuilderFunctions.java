@@ -482,8 +482,14 @@ public class FormBuilderFunctions {
 		fileChooser.setTitle("Please save as Cyclus input file.");
 		fileChooser.setInitialFileName("*.xml");*/
 		//Show save file dialog
-		File file = fileChooser.showSaveDialog(window);
-		textField.setText(file.getAbsolutePath());
+		button.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				File file = fileChooser.showOpenDialog(window);
+				textField.setText(file.getAbsolutePath());
+				textField.setText("ADFASDF");
+			}
+		});
+		
 		
 		return button;
 	}
@@ -518,7 +524,7 @@ public class FormBuilderFunctions {
 		case "prototype":
 			grid.add(comboBoxFac(dataArray), col, row);
 			break;
-		case "fileChooser":
+		case "filechooser":
 			TextField fileField = fileTextField(dataArray);
 			grid.add(fileField, col, row);
 			grid.add(fileChooserButton(fileField), col+1, row);

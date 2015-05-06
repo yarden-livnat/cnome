@@ -174,7 +174,7 @@ public class InstitutionView extends ViewBase {
 							columnEnd = 2 + columnNumber;
 						}
 					} else {
-						switch ((String) facArray.get(0)) {
+						switch ((String) facArray.get(2).toString().toLowerCase()) {
 						case "prototype":
 							grid.add(FormBuilderFunctions.comboBoxFac(dataArray), 1+columnNumber, rowNumber);
 							break;

@@ -190,7 +190,9 @@ public class XMLReader {
 	 */
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
-		JsonObject json_pass;
+		System.out.println("test");
+		System.out.println(dataArray);
+		JsonObject json_pass;		
 		//System.out.println(dataArray);
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
@@ -203,11 +205,13 @@ public class XMLReader {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
 			cycicResize(dataArray);
-			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" ){
+			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" || dataArray.get(2) == "interleave"){
 				orMoreInfoControl(json_pass, dataArray);
 				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
+			System.out.println("TEST");
 			combiner((ArrayList<Object>)dataArray.get(1), json);
+			System.out.println("TEST1");
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
@@ -226,6 +230,7 @@ public class XMLReader {
 				//ex.printStackTrace();
 			}	
 		}
+		System.out.println("test1");
 	}
 	
 	/**
@@ -293,6 +298,8 @@ public class XMLReader {
 		for (int i = 0; i < nodes.getLength(); i++){
 			switch (nodes.item(i).getNodeName()){
 			case "oneOrMore":
+			case "item":
+			case "interleave":
 			case "zeroOrMore":
 				try{
 					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
@@ -309,33 +316,14 @@ public class XMLReader {
 				array.add(nodes.item(i).getNodeName());
 				break;
 			case "element":
-				if(nodes.item(i).getChildNodes().getLength() > 3){
-					try{
-						if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
-							ArrayList<Object> eleArray = new ArrayList<Object>();
-							eleArray = nodeListener(nodes.item(i), eleArray);
-							array.add(eleArray);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
+				ArrayList<Object> newArray1 = new ArrayList<Object>();	
+				for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
+					if (nodes.item(i).getAttributes().item(j).getNodeName() == "name"){
+						newArray1.add(nodes.item(i).getAttributes().item(j).getNodeValue());
 					} 
-					ArrayList<Object> eleArray2 = new ArrayList<Object>();
-					eleArray2 = nodeListener(nodes.item(i), eleArray2);
-					array.add(eleArray2);
-					array.add(nodes.item(i).getNodeName());
-					System.out.println(array);
-					break;
-				} else {
-					ArrayList<Object> newArray1 = new ArrayList<Object>();
-					for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
-						if (nodes.item(i).getAttributes().item(j).getNodeName() == "name"){
-							newArray1.add(nodes.item(i).getAttributes().item(j).getNodeValue());
-						}
-					}
-					array.add(nodeListener(nodes.item(i), newArray1));
-					System.out.println(array);
-					break;
 				}
+				array.add(nodeListener(nodes.item(i), newArray1));
+				break;
 			case "optional":
 				Node newNode = nodes.item(i).getChildNodes().item(1);
 				ArrayList<Object> newArray11 = new ArrayList<Object>();
@@ -370,8 +358,8 @@ public class XMLReader {
 		cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 		if(jsonPass.get("uitype") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uitype");
-			//System.out.println(array);
-			//System.out.println(dataArray);
+			System.out.println(array);
+			System.out.println(dataArray);
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				//System.out.println(array.get(i+1));
 				//System.out.println(((ArrayList<Object>) dataArray.get(1)).get(i));
@@ -383,7 +371,7 @@ public class XMLReader {
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, jsonPass.get("uitype").toString().replace("\"", ""));
 		}
 		
-		/*if(jsonPass.get("uilabel") instanceof JsonArray){
+		if(jsonPass.get("uilabel") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uilabel");
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				String string = array.get(i+1).toString().replaceAll("\"", "");
@@ -422,7 +410,6 @@ public class XMLReader {
 		} else if(jsonPass.get("default") != null) {
 							
 		}*/
-		
 		return dataArray;
 		
 	}
