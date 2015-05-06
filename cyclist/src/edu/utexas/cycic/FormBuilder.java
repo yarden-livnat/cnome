@@ -10,12 +10,15 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -152,8 +155,8 @@ public class FormBuilder extends ViewBase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(GridPane grid, ArrayList<Object> facArray, ArrayList<Object> dataArray){
-		//System.out.println(dataArray);
-		//System.out.println(facArray);
+		System.out.println(facArray);
+		System.out.println(dataArray);
 		for (int i = 0; i < facArray.size(); i++){
 			if (facArray.get(i) instanceof ArrayList && facArray.get(0) instanceof ArrayList) {
 				formBuilder(grid, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -218,6 +221,17 @@ public class FormBuilder extends ViewBase {
 						name.setText((String) facArray.get(0));	
 					}
 					name.setTooltip(new Tooltip((String) facArray.get(7)));
+					name.setOnMouseClicked(new EventHandler<MouseEvent>(){
+						public void handle(MouseEvent e){
+							if(e.getClickCount() == 2){
+								Dialog dg = new Dialog();
+								ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+								dg.setContentText((String) facArray.get(8));
+								dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+								dg.show();
+							}
+						}
+					});
 					grid.add(name, columnNumber, rowNumber);
 					// Setting up the input type for the label
 					if (facArray.get(4) != null){
