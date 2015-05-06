@@ -291,7 +291,7 @@ public class XMLReader {
 	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
 		NodeList nodes = node.getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++){
-			switch (nodes.item(i).getNodeName()) {
+			switch (nodes.item(i).getNodeName()){
 			case "oneOrMore":
 			case "zeroOrMore":
 				try{
@@ -318,11 +318,12 @@ public class XMLReader {
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}
+					} 
 					ArrayList<Object> eleArray2 = new ArrayList<Object>();
 					eleArray2 = nodeListener(nodes.item(i), eleArray2);
 					array.add(eleArray2);
 					array.add(nodes.item(i).getNodeName());
+					System.out.println(array);
 					break;
 				} else {
 					ArrayList<Object> newArray1 = new ArrayList<Object>();
@@ -332,6 +333,7 @@ public class XMLReader {
 						}
 					}
 					array.add(nodeListener(nodes.item(i), newArray1));
+					System.out.println(array);
 					break;
 				}
 			case "optional":
@@ -353,48 +355,6 @@ public class XMLReader {
 			default: 
 				break;
 			}
-			
-			/*if(nodes.item(i).getNodeName() == "oneOrMore" || nodes.item(i).getNodeName() == "zeroOrMore"){
-				try{
-					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
-						ArrayList<Object> newArray = new ArrayList<Object>();
-						newArray = nodeListener(nodes.item(i), newArray);
-						array.add(newArray);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				ArrayList<Object> newArray = new ArrayList<Object>();
-				newArray = nodeListener(nodes.item(i), newArray);
-				array.add(newArray);
-				array.add(nodes.item(i).getNodeName());
-			}
-			if(nodes.item(i).getNodeName() == "element"){
-				ArrayList<Object> newArray = new ArrayList<Object>();
-				for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
-					if (nodes.item(i).getAttributes().item(j).getNodeName() == "name"){
-						newArray.add(nodes.item(i).getAttributes().item(j).getNodeValue());
-					}
-				}
-				array.add(nodeListener(nodes.item(i), newArray));
-			}
-			if(nodes.item(i).getNodeName() == "optional"){
-				Node newNode = nodes.item(i).getChildNodes().item(1);
-				ArrayList<Object> newArray = new ArrayList<Object>();
-				for(int j = 0; j < newNode.getAttributes().getLength(); j++){
-					if (newNode.getAttributes().item(j).getNodeName() == "name"){
-						newArray.add(newNode.getAttributes().item(j).getNodeValue());
-					}
-				}
-				array.add(nodeListener(newNode, newArray));
-			}
-			if(nodes.item(i).getNodeName() == "data"){
-				for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
-					if(nodes.item(i).getAttributes().item(j).getNodeName() == "type"){
-						array.add(1, nodes.item(i).getAttributes().item(j).getNodeValue());
-					}
-				}
-			}*/
 		}
 		return array;
 	}
