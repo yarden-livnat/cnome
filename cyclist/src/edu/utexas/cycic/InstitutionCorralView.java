@@ -7,11 +7,18 @@ import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -42,6 +49,11 @@ public class InstitutionCorralView extends ViewBase{
 	 * 
 	 */
 	MemoryScroll facilityScroll = new MemoryScroll(35, 35, 65, prototypeList);
+	
+	/**
+	 * 
+	 */
+	Menu instMenu = new Menu();
 	
 	/**
 	 * 
@@ -81,6 +93,44 @@ public class InstitutionCorralView extends ViewBase{
 		setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
 				event.acceptTransferModes(TransferMode.ANY);
+			}
+		});
+		setOnMouseClicked(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				if(e.getButton().equals(MouseButton.SECONDARY)){
+					/** TODO Turn this into a menu. Should menu move with cursor or rebuild menu each time? 
+					 * Also this should save the previous color and cancel should return you to that color.*/
+					
+					if (e.isShiftDown() == true){
+						ColorPicker cP = new ColorPicker();
+						cP.setOnAction(new EventHandler<ActionEvent>(){
+							public void handle(ActionEvent e){
+								for(nodeLink node: DataArrays.Links){
+									node.line.updateColor(cP.getValue());
+								}
+							}
+						});
+						Dialog dg = new Dialog();
+						ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+						dg.getDialogPane().setContent(cP);
+						dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+						dg.show();
+					} else {
+						ColorPicker cP = new ColorPicker();
+						cP.setOnAction(new EventHandler<ActionEvent>(){
+							public void handle(ActionEvent e){
+								String background = "-fx-background-color: #";
+								background += cP.getValue().toString().substring(2, 8);
+								institutionPane.setStyle(background);
+							}
+						});
+						Dialog dg = new Dialog();
+						ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+						dg.getDialogPane().setContent(cP);
+						dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+						dg.show();
+					}
+				}
 			}
 		});
 	}
@@ -147,7 +197,7 @@ public class InstitutionCorralView extends ViewBase{
 			}
 		});
 		
-		Button updateScroll = new Button("UPDATES!");
+		Button updateScroll = new Button("Update Facilities List");
 		
 		updateScroll.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){

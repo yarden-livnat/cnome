@@ -268,6 +268,9 @@ public class XMLReader {
 		if(jsonPass.get("range") != null){
 			dataArray.set(4, jsonPass.get("range").toString());
 		}
+		if(jsonPass.get("categorical") != null){
+			dataArray.set(4, jsonPass.get("categorical").toString());
+		}
 		if(jsonPass.get("default") != null){
 			dataArray.set(6, 1);
 			dataArray.set(5, jsonPass.get("default").toString());
