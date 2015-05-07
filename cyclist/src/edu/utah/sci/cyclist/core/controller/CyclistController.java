@@ -29,6 +29,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -98,7 +102,7 @@ public class CyclistController {
 	private Boolean _dirtyFlag = false;
     public static CyclusService _cyclusService;
 	
-	private static final String SIMULATIONS_TABLES_FILE = "assets/SimulationTablesDef.xml";
+	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
 	
 	/**
 	 * Constructor
@@ -812,20 +816,22 @@ public class CyclistController {
 	 */
 	private void readSimulationsTables(Context ctx){
 		try {
-			InputStream in = Cyclist.class.getResourceAsStream(SIMULATIONS_TABLES_FILE);
-			File simulationsFile = StreamUtils.stream2file(in);
-			if(simulationsFile.exists()){
-				Reader reader = new FileReader(simulationsFile);
-				XMLMemento memento = XMLMemento.createReadRoot(reader);
-				
-				// Restore tables
-				for(IMemento node: memento.getChildren("Table")){
-					Table table = new Table();
-					table.restoreSimulated(node, ctx);
-					table.setLocalDatafile(getLastChosenWorkDirectory());
-					_model.getSimulationsTablesDef().add(table);
-					_model.getTables().add(table);	
-				}
+			Path path = FileSystems.getDefault().getPath(WorkDirectoryController.CYCLIST_DIR, SIMULATIONS_TABLES_FILE);
+			if (!Files.exists(path)) {
+				InputStream in = Cyclist.class.getResourceAsStream("assets/"+SIMULATIONS_TABLES_FILE);
+				Files.copy(in, path);
+			}
+			File simulationsFile = path.toFile();
+			Reader reader = new FileReader(simulationsFile);
+			XMLMemento memento = XMLMemento.createReadRoot(reader);
+			
+			// Restore tables
+			for(IMemento node: memento.getChildren("Table")){
+				Table table = new Table();
+				table.restoreSimulated(node, ctx);
+				table.setLocalDatafile(getLastChosenWorkDirectory());
+				_model.getSimulationsTablesDef().add(table);
+				_model.getTables().add(table);	
 			}
 		} catch (Exception e) {
 			log.info("Exception " + e.getMessage());

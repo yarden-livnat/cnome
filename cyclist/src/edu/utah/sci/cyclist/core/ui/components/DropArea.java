@@ -194,19 +194,22 @@ public class DropArea extends HBox implements Observable {
 					}
 				//}
 				if (field != null) {
-					if(_acceptedRoles == AcceptedRoles.DIMENSION && field.getRole() != Role.DIMENSION){
+					if(_acceptedRoles == AcceptedRoles.DIMENSION && (field.getRole() != Role.DIMENSION && field.getRole() != Role.INT_TIME)){
 						log.warn("Cannot add non-discrete field to this drop area");
+						status = false;
 					} else if(isPreOccupiedField(field, event)){
 						log.warn("Field already exists in another drop area");
+						status = false;
 					}else if (getFields().size() == 0) {
 						getFields().add(field);
+						status = true;
 					} else if(_policy == Policy.SINGLE){
 						getFields().set(0, field);
+						status = true;
 					} else {
 						getFields().add(field);
-					}
-					
-					status = true;			
+						status = true;
+					}			
 				}
 				
 				event.setDropCompleted(status);
