@@ -83,6 +83,7 @@ public class FormBuilderFunctions {
 	static TextField textFieldBuilder(final ArrayList<Object> facArray, final ArrayList<Object> defaultValue){
 		
 		TextField textField = new TextField();
+		textField.setMaxWidth(150);
 		textField.setText(defaultValue.get(0).toString());
 		if(facArray.get(1) != null){
 			textField.setPromptText(facArray.get(1).toString());

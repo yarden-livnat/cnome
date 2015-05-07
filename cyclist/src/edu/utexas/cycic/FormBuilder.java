@@ -74,7 +74,8 @@ public class FormBuilder extends ViewBase {
 		
 		VBox formGrid = new VBox();
 		ScrollPane scroll = new ScrollPane();
-		scroll.setMaxHeight(400);
+		scroll.setMaxHeight(600);
+		scroll.setPrefWidth(getWidth());
 		scroll.setContent(grid);
 		formGrid.getChildren().addAll(topGrid, scroll);
 		

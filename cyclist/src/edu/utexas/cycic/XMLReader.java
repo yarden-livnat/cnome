@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import javafx.scene.image.Image;
 
 import javax.json.Json;
@@ -14,7 +11,6 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -80,6 +76,9 @@ public class XMLReader {
 			add(":cycamore:BatchReactor");
 			//add(":cycamore:Reactor");
 			//add(":cycamore:Separations");
+			add(":cycamore:Source");
+			add(":cycamore:Sink");
+			add(":cycamore:Enrichment");
 		}
 	};
 	
@@ -209,20 +208,25 @@ public class XMLReader {
 				ex.printStackTrace();
 			}
 		} else if(dataArray.get(1) instanceof ArrayList){
-			//System.out.println(dataArray.get(1));
-			//System.out.println(json);
-			if(json.get((String)dataArray.get(0)) instanceof JsonString){
+			if(json == null){
+				cycicResize(dataArray);
+				combiner((ArrayList<Object>)dataArray.get(1), json);
+				return;
+			} else if(json.get((String)dataArray.get(0)) instanceof JsonString){
 				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
 			} else {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
-			System.out.println(json_pass);
+			//System.out.println(json_pass);
 			cycicResize(dataArray);
 			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore"){
 				orMoreInfoControl(json_pass, dataArray);
-				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
-			combiner((ArrayList<Object>)dataArray.get(1), json_pass);
+			if(json_pass == null){
+				combiner((ArrayList<Object>)dataArray.get(1), json);
+			} else {
+				combiner((ArrayList<Object>)dataArray.get(1), json_pass);
+			}
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
@@ -230,7 +234,6 @@ public class XMLReader {
 			}
 		} else {
 			cycicResize(dataArray);
-			System.out.println(json);
 			if(json == null){
 				return;
 			} else if(json.get((String)dataArray.get(0)) instanceof JsonString){
@@ -238,6 +241,7 @@ public class XMLReader {
 			}else {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
+			System.out.println(json_pass);
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
