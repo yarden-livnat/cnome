@@ -78,6 +78,8 @@ public class XMLReader {
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
 			add(":cycamore:BatchReactor");
+			//add(":cycamore:Reactor");
+			//add(":cycamore:Separations");
 		}
 	};
 	
@@ -190,47 +192,58 @@ public class XMLReader {
 	 */
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
-		System.out.println("test");
+		//System.out.println("test");
 		System.out.println(dataArray);
+		System.out.println(json);
 		JsonObject json_pass;		
-		//System.out.println(dataArray);
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
 				combiner((ArrayList<Object>)dataArray.get(i), json);
 			}
+		}else if(dataArray.get(0) == "item"){
+			orMoreInfoControl(json, dataArray);
+			combiner((ArrayList<Object>)dataArray.get(1), json);
+			try{
+				cycicInfoControl(json, dataArray);
+			} catch (Exception ex){
+				ex.printStackTrace();
+			}
 		} else if(dataArray.get(1) instanceof ArrayList){
+			//System.out.println(dataArray.get(1));
+			//System.out.println(json);
 			if(json.get((String)dataArray.get(0)) instanceof JsonString){
 				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
 			} else {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
+			System.out.println(json_pass);
 			cycicResize(dataArray);
-			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore" || dataArray.get(2) == "interleave"){
+			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore"){
 				orMoreInfoControl(json_pass, dataArray);
 				//cycicInfoControl(json_pass, (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
 			}
-			System.out.println("TEST");
-			combiner((ArrayList<Object>)dataArray.get(1), json);
-			System.out.println("TEST1");
+			combiner((ArrayList<Object>)dataArray.get(1), json_pass);
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
-				
+				ex.printStackTrace();
 			}
-		} else {	
+		} else {
 			cycicResize(dataArray);
-			if(json.get((String)dataArray.get(0)) instanceof JsonString){
+			System.out.println(json);
+			if(json == null){
+				return;
+			} else if(json.get((String)dataArray.get(0)) instanceof JsonString){
 				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
-			} else {
+			}else {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
-				//ex.printStackTrace();
-			}	
+				ex.printStackTrace();
+			}
 		}
-		System.out.println("test1");
 	}
 	
 	/**
@@ -242,6 +255,11 @@ public class XMLReader {
 		while(dataArray.size() < 10){
 			if(dataArray.size() == 6){
 				dataArray.add(0);
+			}
+			if(dataArray.size() == 3){
+				if(dataArray.get(2) == null){
+					dataArray.set(2, dataArray.get(1));
+				}
 			}
 			dataArray.add(null);
 		}

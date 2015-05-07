@@ -73,7 +73,10 @@ public class FormBuilder extends ViewBase {
 		grid.setStyle("-fx-background-color: silver;");
 		
 		VBox formGrid = new VBox();
-		formGrid.getChildren().addAll(topGrid, grid);
+		ScrollPane scroll = new ScrollPane();
+		scroll.setMaxHeight(400);
+		scroll.setContent(grid);
+		formGrid.getChildren().addAll(topGrid, scroll);
 		
 		// This is a quick hack. 
 		setOnMousePressed(new EventHandler<MouseEvent>(){
