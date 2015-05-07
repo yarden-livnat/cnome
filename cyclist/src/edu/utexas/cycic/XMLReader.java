@@ -74,8 +74,11 @@ public class XMLReader {
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
 			add(":cycamore:BatchReactor");
-			//add(":cycamore:Reactor");
+			add(":cycamore:Reactor");
 			//add(":cycamore:Separations");
+			add(":cycamore:Sink");
+			add(":cycamore:Source");
+			add("commodconverter:CommodConverter:CommodConverter");
 		}
 	};
 	
@@ -187,7 +190,6 @@ public class XMLReader {
 	 */
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
-		//System.out.println("test");
 		//System.out.println(dataArray);
 		//System.out.println(json);
 		JsonObject json_pass;		
@@ -309,7 +311,6 @@ public class XMLReader {
 		for (int i = 0; i < nodes.getLength(); i++){
 			switch (nodes.item(i).getNodeName()){
 			case "oneOrMore":
-			case "item":
 			case "interleave":
 			case "zeroOrMore":
 				try{
@@ -370,15 +371,13 @@ public class XMLReader {
         if(jsonPass == null){
         } else if(jsonPass.get("uitype") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uitype");
-            //System.out.println(array);
-            //System.out.println(dataArray);
-			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-				//System.out.println(array.get(i+1));
-				//System.out.println(((ArrayList<Object>) dataArray.get(1)).get(i));
+            System.out.println(array);
+            System.out.println(dataArray);
+			/*for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				String string = array.get(i+1).toString().replaceAll("\"", "");
-				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
+				//cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
 				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
-			}
+			}*/
         } else if(jsonPass.get("uitype") != null){
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, jsonPass.get("uitype").toString().replace("\"", ""));
 		}
@@ -426,5 +425,25 @@ public class XMLReader {
 		}*/
 		return dataArray;
 		
+	}
+
+	static ArrayList<Object> annotationBuilder(JsonArray alias, JsonArray type, JsonArray annotations, ArrayList<Object> facArray){
+		switch (type.getJsonString(0).toString()){
+		case "std::map":
+			ArrayList<Object> array_1 = new ArrayList<Object>();
+			ArrayList<Object> array_2 = new ArrayList<Object>();
+			ArrayList<Object> structArray = new ArrayList<Object>();
+			structArray.add(array_1);
+			structArray.add(array_2);
+			facArray.add(array_1);
+		case "std::string":
+			
+		case "std::pair":
+			
+		case "int":
+		
+		case "double":
+		}
+		return facArray;		
 	}
 }

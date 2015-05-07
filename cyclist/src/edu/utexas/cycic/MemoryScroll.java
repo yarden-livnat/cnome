@@ -48,11 +48,11 @@ public class MemoryScroll extends ScrollPane{
 		this.baseY= y;
 		this.increment = increment;
 		this.setContent(pane);
-		//textBox.getChildren().addAll(new Label("Search"), text);
-		//textBox.setLayoutX(pane.getLayoutX()+pane.getWidth()-40);
-		//textBox.setLayoutY(pane.getLayoutY());
-		//textBox.setMaxWidth(40);
-		//pane.getChildren().add(textBox);
+		textBox.getChildren().addAll(new Label("Search"), text);
+		textBox.setLayoutX(pane.getLayoutX()+pane.getWidth()-40);
+		textBox.setLayoutY(pane.getLayoutY());
+		textBox.setMaxWidth(40);
+		pane.getChildren().add(textBox);
 	}
 
 	public MemoryScroll(){
@@ -73,6 +73,7 @@ public class MemoryScroll extends ScrollPane{
 				}
 			}
 			if(test == false){
+				System.out.println("ASDFA");
 				FacilityCircle circle = new FacilityCircle();
 				circle.setRadius(60);
 				circle.setStroke(Color.BLACK);
@@ -99,7 +100,7 @@ public class MemoryScroll extends ScrollPane{
 						e.consume();
 					}
 				});
-				pane.getChildren().addAll(circle.text, circle);
+				this.pane.getChildren().addAll(circle.text, circle);
 				currentY += increment;
 			}
 		}

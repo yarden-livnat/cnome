@@ -46,6 +46,9 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -213,7 +216,7 @@ public class Cycic extends ViewBase{
 				if(e.getButton().equals(MouseButton.SECONDARY)){
 					/** TODO Turn this into a menu. Should menu move with cursor or rebuild menu each time? 
 					 * Also this should save the previous color and cancel should return you to that color.*/
-					
+
 					if (e.isShiftDown() == true){
 						ColorPicker cP = new ColorPicker();
 						cP.setOnAction(new EventHandler<ActionEvent>(){
