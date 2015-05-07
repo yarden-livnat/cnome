@@ -74,8 +74,8 @@ public class FormBuilder extends ViewBase {
 		
 		VBox formGrid = new VBox();
 		ScrollPane scroll = new ScrollPane();
+		scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 		scroll.setMaxHeight(600);
-		scroll.setPrefWidth(getWidth());
 		scroll.setContent(grid);
 		formGrid.getChildren().addAll(topGrid, scroll);
 		
@@ -159,8 +159,6 @@ public class FormBuilder extends ViewBase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(GridPane grid, ArrayList<Object> facArray, ArrayList<Object> dataArray){
-		System.out.println(facArray);
-		System.out.println(dataArray);
 		for (int i = 0; i < facArray.size(); i++){
 			if (facArray.get(i) instanceof ArrayList && facArray.get(0) instanceof ArrayList) {
 				formBuilder(grid, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));

@@ -76,9 +76,6 @@ public class XMLReader {
 			add(":cycamore:BatchReactor");
 			//add(":cycamore:Reactor");
 			//add(":cycamore:Separations");
-			add(":cycamore:Source");
-			add(":cycamore:Sink");
-			add(":cycamore:Enrichment");
 		}
 	};
 	
@@ -151,7 +148,6 @@ public class XMLReader {
 		jsonReader.close();
 		JsonObject vars = jsonObject.getJsonObject("vars");
 		for(int i = 0; i < xmlschema.size(); i++){
-			//System.out.println(xmlschema);
 			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
 		}
 		return xmlschema;
@@ -192,20 +188,12 @@ public class XMLReader {
 	@SuppressWarnings("unchecked")
 	static void combiner(ArrayList<Object> dataArray, JsonObject json){
 		//System.out.println("test");
-		System.out.println(dataArray);
-		System.out.println(json);
+		//System.out.println(dataArray);
+		//System.out.println(json);
 		JsonObject json_pass;		
 		if(dataArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < dataArray.size(); i++){
 				combiner((ArrayList<Object>)dataArray.get(i), json);
-			}
-		}else if(dataArray.get(0) == "item"){
-			orMoreInfoControl(json, dataArray);
-			combiner((ArrayList<Object>)dataArray.get(1), json);
-			try{
-				cycicInfoControl(json, dataArray);
-			} catch (Exception ex){
-				ex.printStackTrace();
 			}
 		} else if(dataArray.get(1) instanceof ArrayList){
 			if(json == null){
@@ -217,9 +205,8 @@ public class XMLReader {
 			} else {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
-			//System.out.println(json_pass);
 			cycicResize(dataArray);
-			if(dataArray.get(2) == "oneOrMore" || dataArray.get(2) == "zeroOrMore"){
+			if(dataArray.get(2).toString().equalsIgnoreCase("oneormore") || dataArray.get(2).toString().equalsIgnoreCase("zeroormore")){
 				orMoreInfoControl(json_pass, dataArray);
 			}
 			if(json_pass == null){
@@ -230,7 +217,7 @@ public class XMLReader {
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex){
-				ex.printStackTrace();
+				//ex.printStackTrace();
 			}
 		} else {
 			cycicResize(dataArray);
@@ -245,7 +232,7 @@ public class XMLReader {
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				//ex.printStackTrace();
 			}
 		}
 	}
@@ -262,7 +249,7 @@ public class XMLReader {
 			}
 			if(dataArray.size() == 3){
 				if(dataArray.get(2) == null){
-					dataArray.set(2, dataArray.get(1));
+					//dataArray.set(2, dataArray.get(1));
 				}
 			}
 			dataArray.add(null);

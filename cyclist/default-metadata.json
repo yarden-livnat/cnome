@@ -318,7 +318,6 @@
      "type": "double"
     }, 
     "recipe_name": {
-     "default": "", 
      "doc": "Name of recipe to request.If empty, sink requests material no particular composition.", 
      "index": 0, 
      "tooltip": "input/request recipe name", 
@@ -356,7 +355,6 @@
      "uitype": "outcommodity"
     }, 
     "recipe_name": {
-     "default": "", 
      "doc": "Recipe name for source facility's commodity.If empty, source supplies material with requested compositions.", 
      "index": 1, 
      "schematype": "token", 
@@ -953,9 +951,9 @@
       ["std::pair", "double", ["std::map", "int", "double"]]
      ], 
      "uitype": [
-      "oneormore", 
-      "outcommodity", 
-      ["pair", "double", ["oneormore", "nuclide", "double"]]
+      "oneormore", ["item", [ 
+      "outcommodity",
+      ["pair", "double", ["oneormore", ["item", ["nuclide", "double"]]]]]]
      ]
     }, 
     "throughput": {
