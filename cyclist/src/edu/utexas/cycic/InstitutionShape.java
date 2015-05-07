@@ -93,8 +93,8 @@ public class InstitutionShape extends Ellipse {
 		
 		institution.name = name;
 		institution.text.setText(name);
-		institution.text.setLayoutX(institution.getLayoutX()+institution.getRadiusX()*0.2);
-		institution.text.setLayoutY(institution.getLayoutY()+institution.getRadiusY()*0.2);	
+		institution.text.setLayoutX(institution.getLayoutX()-institution.getRadiusX()*0.5);
+		institution.text.setLayoutY(institution.getLayoutY()-institution.getRadiusY()*0.5);	
 		institution.text.setMaxWidth(institution.getRadiusX()*0.8);
 		institution.text.setMaxHeight(institution.getRadiusY()*0.8);
 		institution.text.setMouseTransparent(true);

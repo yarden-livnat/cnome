@@ -27,28 +27,6 @@ public class InstitutionView extends ViewBase {
 		workingInstitution = InstitutionCorralView.workingInstitution;
 		//Institution list view for the region.
 
-		Label button = new Label(InstitutionCorralView.workingInstitution.type);
-		button.setText(InstitutionCorralView.workingInstitution.type);
-
-		topGrid.add(button, 2, 0);
-
-		// Setting up the view visuals.
-		topGrid.setHgap(10);
-		topGrid.setVgap(2);
-
-		topGrid.add(new Label("Name"), 0, 4);
-		topGrid.add(FormBuilderFunctions.institNameBuilder(InstitutionCorralView.workingInstitution), 1, 4);
-
-		grid.autosize();
-		grid.setAlignment(Pos.BASELINE_CENTER);
-		grid.setVgap(10);
-		grid.setHgap(5);
-		grid.setPadding(new Insets(5, 5, 5, 5));
-		grid.setStyle("-fx-background-color: silver;");
-
-		VBox regionGridBox = new VBox();
-		regionGridBox.getChildren().addAll(topGrid, grid);		
-		
 		ListView<String> facilityList = new ListView<String>(){
 			{
 				setOrientation(Orientation.VERTICAL);
@@ -65,6 +43,62 @@ public class InstitutionView extends ViewBase {
 				}
 			}
 		};
+		
+		topGrid.add(new Label(InstitutionCorralView.workingInstitution.type), 2, 0);
+
+		// Setting up the view visuals.
+		topGrid.setHgap(10);
+		topGrid.setVgap(2);
+
+		topGrid.add(new Label("Name"), 0, 0);
+		topGrid.add(FormBuilderFunctions.institNameBuilder(InstitutionCorralView.workingInstitution), 1, 0);
+		
+		topGrid.add(new Label("Prototype"), 0, 2);
+		ComboBox<String> protoName = new ComboBox<String>();
+		protoName.setOnMouseClicked(new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent e){
+				protoName.getItems().clear();
+				for(facilityNode fac:DataArrays.FacilityNodes){
+					protoName.getItems().add((String) fac.name);
+				}
+			}
+		});
+		topGrid.add(protoName, 1, 2);
+		topGrid.add(new Label("Number"), 2, 2);
+		TextField protoNumber = new TextField(){
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+			
+			public void replaceSelection(String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceSelection(text);
+				}
+			}
+		};
+		topGrid.add(protoNumber, 3, 2);
+		Button protoButton = new Button("Add");
+		protoButton.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				facilityItem fac = new facilityItem(protoName.getValue(), Integer.parseInt(protoNumber.getText()));
+				workingInstitution.availFacilities.add(fac);
+				facilityList.getItems().add(fac.name + " - " + fac.number);
+			}
+		});
+		topGrid.add(protoButton, 4, 2);
+		grid.autosize();
+		grid.setAlignment(Pos.BASELINE_CENTER);
+		grid.setVgap(10);
+		grid.setHgap(5);
+		grid.setPadding(new Insets(5, 5, 5, 5));
+		grid.setStyle("-fx-background-color: silver;");
+
+		VBox regionGridBox = new VBox();
+		regionGridBox.getChildren().addAll(topGrid, grid);		
+		
+
 
 		VBox listBox = new VBox();
 		listBox.getChildren().addAll(new Label("Initial Facilities"), facilityList);

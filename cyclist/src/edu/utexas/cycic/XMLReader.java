@@ -228,7 +228,6 @@ public class XMLReader {
 			}else {
 				json_pass = json.getJsonObject((String)dataArray.get(0));
 			}
-			System.out.println(json_pass);
 			try{
 				cycicInfoControl(json_pass, dataArray);
 			} catch (Exception ex) {

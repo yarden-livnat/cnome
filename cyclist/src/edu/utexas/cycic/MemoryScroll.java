@@ -48,11 +48,11 @@ public class MemoryScroll extends ScrollPane{
 		this.baseY= y;
 		this.increment = increment;
 		this.setContent(pane);
-		textBox.getChildren().addAll(new Label("Search"), text);
-		textBox.setLayoutX(pane.getLayoutX()+pane.getWidth()-40);
-		textBox.setLayoutY(pane.getLayoutY());
-		textBox.setMaxWidth(40);
-		pane.getChildren().add(textBox);
+		//textBox.getChildren().addAll(new Label("Search"), text);
+		//textBox.setLayoutX(pane.getLayoutX()+pane.getWidth()-40);
+		//textBox.setLayoutY(pane.getLayoutY());
+		//textBox.setMaxWidth(40);
+		//pane.getChildren().add(textBox);
 	}
 
 	public MemoryScroll(){

@@ -155,6 +155,7 @@ public class FormBuilderFunctions {
 		textName.textProperty().addListener(new ChangeListener<String>(){         
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				node.name = newValue;
+				node.institutionShape.text.setText(newValue);
 			}
 		});
 		return textName;

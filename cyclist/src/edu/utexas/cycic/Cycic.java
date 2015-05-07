@@ -286,6 +286,8 @@ public class Cycic extends ViewBase{
 					
 					facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
 					FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);			
+				} else {
+					event.consume();
 				}
 			}
 		});
@@ -407,7 +409,7 @@ public class Cycic extends ViewBase{
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
             Process readproc = Runtime.getRuntime().exec("cyclus -V");
-            BufferedReader schema = new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+            new BufferedReader(new InputStreamReader(readproc.getInputStream()));
             localToggle.setSelected(true);
         } catch (RuntimeException | IOException e) {
             localToggle.setSelected(false);
@@ -432,8 +434,7 @@ public class Cycic extends ViewBase{
 		                + "-fx-border-color: black");
 			}
 		};
-		//ScrollPane commodScroll = new ScrollPane();
-		//commodScroll.setContent(commodBox); 
+
 		sideView.getChildren().addAll(simDetailBox, archetypeGrid, commodBox);
 		mainView.getChildren().addAll(sideView, cycicBox);
 		
@@ -452,7 +453,6 @@ public class Cycic extends ViewBase{
         JsonObject schemas = metadata.getJsonObject("schema");
         JsonObject annotations = metadata.getJsonObject("annotations");
             
-        String string;
         DataArrays.simFacilities.clear();
         DataArrays.simRegions.clear();
         DataArrays.simInstitutions.clear();
@@ -761,7 +761,7 @@ public class Cycic extends ViewBase{
                     try {
                         File temp = File.createTempFile(cycicTemp, ".xml");
                         FileWriter fileOutput = new FileWriter(temp);
-                        BufferedWriter buffOut = new BufferedWriter(fileOutput);
+                        new BufferedWriter(fileOutput);
                         Process p = Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp);
                         p.waitFor();
                         String line = null;
@@ -805,8 +805,7 @@ public class Cycic extends ViewBase{
 							return;
 						}
 						facilityStructure test = DataArrays.simFacilities.get(i);
-						String string;
-						StringBuilder sb = new StringBuilder();
+						new StringBuilder();
 						try {
 							test.loaded = true;
 							FacilityCircle circle = new FacilityCircle();

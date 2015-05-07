@@ -14,13 +14,7 @@ public class InstitutionCorralViewPresenter extends ViewPresenter {
 	
 	public void addNotificationHandlers(){
 		
-		/*addNotificationHandler(CycicNotifications.NEW_INSTIT, new CyclistNotificationHandler(){
-			@Override
-			public void handle(CyclistNotification event) {				
-				RegionCorralView.addUnassInstit();
-			}
-		});*/	
-		
+	
 	}
 
     public View getView() {
