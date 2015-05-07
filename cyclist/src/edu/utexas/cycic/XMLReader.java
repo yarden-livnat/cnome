@@ -359,10 +359,11 @@ public class XMLReader {
 	@SuppressWarnings("unchecked")
 	static ArrayList<Object> orMoreInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
 		cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-		if(jsonPass.get("uitype") instanceof JsonArray){
+        if(jsonPass == null){
+        } else if(jsonPass.get("uitype") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uitype");
-			System.out.println(array);
-			System.out.println(dataArray);
+            //System.out.println(array);
+            //System.out.println(dataArray);
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				//System.out.println(array.get(i+1));
 				//System.out.println(((ArrayList<Object>) dataArray.get(1)).get(i));
@@ -370,11 +371,12 @@ public class XMLReader {
 				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
 				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
 			}
-		} else if(jsonPass.get("uitype") != null){
+        } else if(jsonPass.get("uitype") != null){
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, jsonPass.get("uitype").toString().replace("\"", ""));
 		}
 		
-		if(jsonPass.get("uilabel") instanceof JsonArray){
+        if(jsonPass == null){
+        } else if(jsonPass.get("uilabel") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("uilabel");
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				String string = array.get(i+1).toString().replaceAll("\"", "");
@@ -385,7 +387,8 @@ public class XMLReader {
 			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(9, jsonPass.get("uilabel").toString().replace("\"", ""));
 		}
 		
-		if(jsonPass.get("tooltip") instanceof JsonArray){
+        if(jsonPass == null){
+        } else if(jsonPass.get("tooltip") instanceof JsonArray){
 			JsonArray array = jsonPass.getJsonArray("tooltip");
 			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
 				String string = array.get(i+1).toString().replaceAll("\"", "");
