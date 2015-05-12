@@ -491,7 +491,7 @@ public class Cycic extends ViewBase{
                 node.niche = anno.getString("niche", "facility");
                 JsonObject vars = anno.getJsonObject("vars");
                 ArrayList<Object> test1 = new ArrayList<Object>();
-                node.facStruct = XMLReader.nodeBuilder(vars, test1);
+                node.facStruct = XMLReader.nodeBuilder(vars, test1, XMLReader.readSchema_new(schema));
                 node.facilityName = spec.replace(":", " ");
                 DataArrays.simFacilities.add(node);
                 break;
