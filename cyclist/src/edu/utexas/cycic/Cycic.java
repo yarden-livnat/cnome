@@ -460,7 +460,7 @@ public class Cycic extends ViewBase{
         DataArrays.simRegions.clear();
         DataArrays.simInstitutions.clear();
         for(javax.json.JsonString specVal : metadata.getJsonArray("specs").getValuesAs(JsonString.class)){
-            String spec = specVal.getString();
+        	String spec = specVal.getString();
             boolean test = true;
             for(int j = 0; j < XMLReader.blackList.size(); j++){
                 if(spec.equalsIgnoreCase(XMLReader.blackList.get(j))){
@@ -470,6 +470,8 @@ public class Cycic extends ViewBase{
             if(test == false){
                 continue;
             }
+            
+            
             String schema = schemas.getString(spec);
             String pattern1 = "<!--.*?-->";
             Pattern p = Pattern.compile(pattern1, Pattern.DOTALL);
@@ -487,8 +489,9 @@ public class Cycic extends ViewBase{
                 node.facAnnotations = anno.toString();
                 node.facilityArch = spec;
                 node.niche = anno.getString("niche", "facility");
-                node.facStruct = XMLReader.annotationReader(anno.toString(), 
-                    XMLReader.readSchema(schema));
+                JsonObject vars = anno.getJsonObject("vars");
+                ArrayList<Object> test1 = new ArrayList<Object>();
+                node.facStruct = XMLReader.nodeBuilder(vars, test1);
                 node.facilityName = spec.replace(":", " ");
                 DataArrays.simFacilities.add(node);
                 break;
@@ -898,6 +901,7 @@ public class Cycic extends ViewBase{
 	        stringBuilder.append( ls );
 	    }
 	    reader.close();
+	    
 		retrieveSchema(stringBuilder.toString());
 	}
 }

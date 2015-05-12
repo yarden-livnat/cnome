@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+
 import javafx.scene.image.Image;
 
 import javax.json.Json;
@@ -11,6 +14,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -74,10 +79,11 @@ public class XMLReader {
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
 			add(":cycamore:BatchReactor");
-			add(":cycamore:Reactor");
-			//add(":cycamore:Separations");
+			//add(":cycamore:Reactor");
+			add(":cycamore:Separations");
+			add(":cycamore:FuelFab");
 			add(":cycamore:Sink");
-			add(":cycamore:Source");
+			//add(":cycamore:Source");
 			add("commodconverter:CommodConverter:CommodConverter");
 		}
 	};
@@ -258,6 +264,20 @@ public class XMLReader {
 		return dataArray;
 	}
 	
+	/**
+	 * 
+	 * @param dataArray
+	 * @return
+	 */
+	static ArrayList<Object> cycicResizeNew(ArrayList<Object> dataArray){
+		while(dataArray.size() < 10){
+			if(dataArray.size() == 6){
+				dataArray.add(0);
+			}
+			dataArray.add(null);
+		}
+		return dataArray;
+	}
 	
 	/**
 	 * 
@@ -427,23 +447,208 @@ public class XMLReader {
 		
 	}
 
-	static ArrayList<Object> annotationBuilder(JsonArray alias, JsonArray type, JsonArray annotations, ArrayList<Object> facArray){
-		switch (type.getJsonString(0).toString()){
-		case "std::map":
-			ArrayList<Object> array_1 = new ArrayList<Object>();
-			ArrayList<Object> array_2 = new ArrayList<Object>();
-			ArrayList<Object> structArray = new ArrayList<Object>();
-			structArray.add(array_1);
-			structArray.add(array_2);
-			facArray.add(array_1);
-		case "std::string":
-			
-		case "std::pair":
-			
-		case "int":
-		
-		case "double":
+	static ArrayList<Object> nodeBuilder(JsonObject anno, ArrayList<Object> facArray){
+		System.out.println("nodeStart");
+		Set<String> vars = anno.keySet();
+		Iterator<String> iterator = vars.iterator();
+		while(iterator.hasNext()){
+			String var = iterator.next();	
+			System.out.println(var);
+			JsonObject anno1 = anno.getJsonObject(var);
+			System.out.println(anno1);
+			ValueType test = anno1.get("type").getValueType();
+			if(test == ValueType.ARRAY){
+				JsonArray type = anno1.getJsonArray("type");
+				JsonArray alias = anno1.getJsonArray("alias");
+				JsonArray uitype = anno1.getJsonArray("uitype");
+				ArrayList<Object> newArray = new ArrayList<Object>();
+				newArray = annotationBuilder(type, alias, uitype, newArray);
+				System.out.println(newArray);
+				facArray.add(newArray);
+			} else {
+				JsonString type = anno1.getJsonString("type");
+				JsonString alias = anno1.getJsonString("alias");
+				JsonString uitype = anno1.getJsonString("uitype");
+				String alias_s, uitype_s;
+				ArrayList<Object> newArray = new ArrayList<Object>();
+				if(alias == null){
+					alias_s = var;
+				} else {
+					alias_s = alias.toString();
+				}
+				if (uitype == null){
+					uitype_s = type.toString();
+				} else {
+					uitype_s = uitype.toString();
+				}
+				newArray = stringAnnotation(type.toString(), alias_s, uitype_s, newArray);
+				System.out.println(newArray);
+				facArray.add(newArray);
+			}
 		}
+		System.out.println("nodeEnd");
+		return facArray;
+	}
+	
+	/**
+	 * 
+	 * @param type
+	 * @param alias
+	 * @param uitype
+	 * @param facArray
+	 * @return
+	 */
+	static ArrayList<Object> annotationBuilder(JsonArray type, JsonArray alias, JsonArray uitype, ArrayList<Object> facArray){
+		System.out.println("annoStart");
+		System.out.println(type);
+		switch (type.getJsonString(0).toString().replaceAll("\"", "")){
+		case "std::map":
+			System.out.println("Map");
+			ArrayList<Object> structArray = new ArrayList<Object>();
+			for(int i = 1; i < type.size(); i++){
+				if(type.get(i) instanceof JsonArray){
+					ArrayList<Object> tempArray = new ArrayList<Object>();
+					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i), tempArray);
+					structArray.add(tempArray);
+				} else {
+					ArrayList<Object> tempArray = new ArrayList<Object>();
+					String alias_s, uitype_s;
+					ArrayList<Object> newArray = new ArrayList<Object>();
+					if(alias == null){
+						alias_s = "key";
+					} else {
+						alias_s = alias.getString(i);
+					}
+					if (uitype == null){
+						uitype_s = type.getString(i);
+					} else {
+						uitype_s = uitype.getString(i);
+					}
+					newArray = stringAnnotation(type.getString(i), alias_s, uitype_s, newArray);
+					System.out.println(newArray);
+					facArray.add(newArray);
+					structArray.add(tempArray);
+				}
+			}
+			if(alias == null){
+				facArray.add("Map");		
+			} else {
+				facArray.add((JsonArray)alias.getJsonString(0));		
+			}
+			facArray.add(structArray);
+			break;
+		case "std::pair":
+			System.out.println("Pair");
+			ArrayList<Object> structArrayPair = new ArrayList<Object>();
+			for(int i = 1; i < type.size(); i++){
+				if(type.get(i) instanceof JsonArray){
+					ArrayList<Object> tempArray = new ArrayList<Object>();
+					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i), tempArray);
+					structArrayPair.add(tempArray);
+				} else {
+					ArrayList<Object> tempArray = new ArrayList<Object>();
+					tempArray = stringAnnotation(type.getJsonString(i).toString(), alias.getJsonString(i).toString(), uitype.getJsonString(i).toString(), tempArray);
+					structArrayPair.add(tempArray);
+				}
+			}
+			facArray.add(alias.get(0));
+			facArray.add(structArrayPair);
+			break;
+		case "std::vector":
+			System.out.println("Vector");
+			ArrayList<Object> structArrayVector = new ArrayList<Object>();
+			if(type.get(1) instanceof JsonArray){
+				ArrayList<Object> tempArray = new ArrayList<Object>();
+				tempArray = annotationBuilder(type.getJsonArray(1), alias.getJsonArray(1), uitype.getJsonArray(1), tempArray);
+				structArrayVector.add(tempArray);
+			} else {
+				System.out.println("Something "  + uitype);
+				ArrayList<Object> tempArray = new ArrayList<Object>();
+				String alias_s, uitype_s;
+				ArrayList<Object> newArray = new ArrayList<Object>();
+				if(alias == null){
+					alias_s = "var";
+				} else {
+					alias_s = alias.toString();
+				}
+				if (uitype == null){
+					uitype_s = type.toString();
+				} else {
+					uitype_s = uitype.toString();
+				}
+				newArray = stringAnnotation(type.toString(), alias_s, uitype_s, newArray);
+				System.out.println(newArray);
+				facArray.add(newArray);
+				structArrayVector.add(tempArray);
+			}
+			if(alias == null){
+				facArray.add("vector");
+			} else {
+				facArray.add(alias.get(0));
+			}
+			facArray.add(structArrayVector);
+			break;
+		case "cyclus::toolkit::ResBuf":
+			System.out.println("ResBuff");
+			ArrayList<Object> structArrayResBuf = new ArrayList<Object>();
+			if(type.get(1) instanceof JsonArray){
+				ArrayList<Object> tempArray = new ArrayList<Object>();
+				tempArray = annotationBuilder(type.getJsonArray(1), alias.getJsonArray(1), uitype.getJsonArray(1), tempArray);
+				structArrayResBuf.add(tempArray);
+			} else {
+				System.out.println("Something "  + uitype);
+				ArrayList<Object> tempArray = new ArrayList<Object>();
+				String alias_s, uitype_s;
+				ArrayList<Object> newArray = new ArrayList<Object>();
+				if(alias == null){
+					alias_s = "Material";
+				} else {
+					alias_s = alias.toString();
+				}
+				if (uitype == null){
+					uitype_s = type.toString();
+				} else {
+					uitype_s = uitype.toString();
+				}
+				newArray = stringAnnotation(type.toString(), alias_s, uitype_s, newArray);
+				System.out.println(newArray);
+				facArray.add(newArray);
+				structArrayResBuf.add(tempArray);
+			}
+			if(alias == null){
+				facArray.add("vector");
+			} else {
+				facArray.add(alias.get(0));
+			}
+			facArray.add(structArrayResBuf);
+			break;
+		case "std::string":
+		case "int":
+		case "double":
+			System.out.println("singles");
+			ArrayList<Object> tempArray = new ArrayList<Object>();
+			tempArray = stringAnnotation(type.getJsonString(0).toString(), alias.getJsonString(0).toString(), uitype.getJsonString(0).toString(), tempArray);
+			break;
+		default : 
+			System.out.println("Default");
+			System.out.println("HEY RADIO YOU FORGOT " + type.getJsonString(0).toString());
+			break;
+		}
+		System.out.println("annoEnd");
 		return facArray;		
+	}
+	
+	static ArrayList<Object> stringAnnotation(String type, String alias, String uitype, ArrayList<Object> facArray){
+		System.out.println("String1");
+		cycicResizeNew(facArray);
+		facArray.set(0, alias);
+		facArray.set(1, type);
+		if(uitype == null){
+			facArray.set(2, type);
+		} else {
+			facArray.set(2, uitype.toString().replaceAll("\"", ""));
+		}
+		System.out.println("String2");
+		return facArray;
 	}
 }

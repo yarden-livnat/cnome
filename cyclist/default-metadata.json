@@ -1164,7 +1164,8 @@
      "default": [], 
      "doc": "The preference for each type of fresh fuel requested corresponding to each input commodity (same order).  If no preferences are specified, zero is used for all fuel requests (default).", 
      "index": 14, 
-     "type": ["std::vector", "double"]
+     "type": ["std::vector", "double"],
+	"uitype": ["oneormore", "double"]
     }, 
     "n_assem_batch": {
      "doc": "Number of assemblies that constitute a single batch.This is the number of assemblies discharged from the core fully burned each cycle.Batch size is equivalent to ``n_assem_batch / n_assem_core``.", 
@@ -1329,7 +1330,6 @@
      "type": "double", 
      "units": "kg"
     }, 
-    "streams": "streams_", 
     "streams_": {
      "alias": [
       ["streams", "item"], 
@@ -2016,16 +2016,6 @@
   "stubs:StubRegion:StubRegion": "<text/>"
  }, 
  "specs": [
-  ":Brightlite:FuelfabFacility", 
-  ":Brightlite:ReactorFacility", 
-  ":Brightlite:ReprocessFacility", 
-  ":agents:KFacility", 
-  ":agents:NullInst", 
-  ":agents:NullRegion", 
-  ":agents:Predator", 
-  ":agents:Prey", 
-  ":agents:Sink", 
-  ":agents:Source", 
   ":cycamore:DeployInst", 
   ":cycamore:Enrichment", 
   ":cycamore:FuelFab", 

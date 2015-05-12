@@ -266,16 +266,5 @@ public class InstitutionCorralView extends ViewBase{
 	static instituteNode workingInstit;
 	public static String TITLE;
 
-	/**
-	 * This function takes a constructed data array and it's corresponding 
-	 * institution structure array and creates a form for the structure 
-	 * and data arrays.
-	 * @param facArray This is the structure of the data array. Included 
-	 * in this array should be all of the information needed to fully 
-	 * describe the data structure of a institution.
-	 * @param dataArray The empty data array that is associated with 
-	 * this institution. It should be built to match the structure
-	 * of the institution structure passed to the form. 
-	 */
 
 }

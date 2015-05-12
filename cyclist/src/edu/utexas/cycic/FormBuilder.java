@@ -37,7 +37,7 @@ public class FormBuilder extends ViewBase {
 		super();
 		formNode = Cycic.workingNode;
 		TITLE = (String) Cycic.workingNode.name;
-		
+		System.out.println(formNode.facilityStructure);
 		formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 		
 		Button button = new Button();
