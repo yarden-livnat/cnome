@@ -144,6 +144,41 @@ public class XMLReader {
 		return schema;
 	}
 	
+	
+	/**
+	 * 
+	 * @param xmlSchema
+	 * @return
+	 */
+	static ArrayList<Object> readSchema_new(String xmlSchema){
+		ArrayList<Object> schema = new ArrayList<Object>();
+		try{
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			InputSource is = new InputSource(new StringReader(xmlSchema));
+			Document doc = dBuilder.parse(is);
+			NodeList top = doc.getChildNodes();
+			NodeList node = top.item(0).getChildNodes();
+			for(int i = 0; i < node.getLength(); i++){
+				switch (node.item(i).getNodeName()){
+				case "optional":
+					
+					break;
+				default:
+					for(int j = 0; j < node.item(i).getAttributes().getLength(); j++){
+						if (node.item(i).getAttributes().item(j).getNodeName() == "name"){
+							schema.add(node.item(i).getAttributes().item(j).getNodeValue());
+						} 
+					}
+				}
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return schema;
+	}
+	
 	/**
 	 * 
 	 * @param jsonSchema
