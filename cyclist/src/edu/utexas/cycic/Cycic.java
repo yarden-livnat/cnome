@@ -489,9 +489,9 @@ public class Cycic extends ViewBase{
                 node.facAnnotations = anno.toString();
                 node.facilityArch = spec;
                 node.niche = anno.getString("niche", "facility");
-                JsonObject vars = anno.getJsonObject("vars");
-                ArrayList<Object> test1 = new ArrayList<Object>();
-                node.facStruct = XMLReader.nodeBuilder(vars, test1, XMLReader.readSchema_new(schema));
+                JsonObject facVars = anno.getJsonObject("vars");
+                ArrayList<Object> facArray = new ArrayList<Object>();
+                node.facStruct = XMLReader.nodeBuilder(facVars, facArray, XMLReader.readSchema_new(schema));
                 node.facilityName = spec.replace(":", " ");
                 DataArrays.simFacilities.add(node);
                 break;
@@ -500,8 +500,9 @@ public class Cycic extends ViewBase{
                 regionStructure rNode = new regionStructure();
                 rNode.regionAnnotations = anno.toString();
                 rNode.regionArch = spec;
-                rNode.regionStruct = XMLReader.annotationReader(anno.toString(),
-                    XMLReader.readSchema(schema));
+                JsonObject regionVars = anno.getJsonObject("vars");
+                ArrayList<Object> regionArray = new ArrayList<Object>();
+                rNode.regionStruct = XMLReader.nodeBuilder(regionVars, regionArray, XMLReader.readSchema_new(schema));
                 rNode.regionName = spec.replace(":", " ");
                 DataArrays.simRegions.add(rNode);
                 break;
@@ -510,8 +511,9 @@ public class Cycic extends ViewBase{
                 institutionStructure iNode = new institutionStructure();
                 iNode.institArch = spec;
                 iNode.institAnnotations = anno.toString();
-                iNode.institStruct = XMLReader.annotationReader(anno.toString(),
-                    XMLReader.readSchema(schema));
+                JsonObject instVars = anno.getJsonObject("vars");
+                ArrayList<Object> instArray = new ArrayList<Object>();
+                iNode.institStruct = XMLReader.nodeBuilder(instVars, instArray, XMLReader.readSchema_new(schema));
                 iNode.institName = spec.replace(":", " ");
                 DataArrays.simInstitutions.add(iNode);
                 break;

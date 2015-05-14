@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-
 import javafx.scene.image.Image;
 
 import javax.json.Json;
@@ -14,7 +11,6 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -79,12 +75,6 @@ public class XMLReader {
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
 			add(":cycamore:BatchReactor");
-			//add(":cycamore:Reactor");
-			//add(":cycamore:Separations");
-			//add(":cycamore:FuelFab");
-			//add(":cycamore:Sink");
-			//add(":cycamore:Source");
-			//add(":cycamore:Enrichment");
 			add("commodconverter:CommodConverter:CommodConverter");
 		}
 	};
@@ -115,36 +105,6 @@ public class XMLReader {
 
 		}
 	};
-	
-	/**
-	 * 
-	 * @param xmlSchema
-	 * @return
-	 */
-	static ArrayList<Object> readSchema(String xmlSchema){
-		ArrayList<Object> schema = new ArrayList<Object>();
-		try{
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			InputSource is = new InputSource(new StringReader(xmlSchema));
-			Document doc = dBuilder.parse(is);
-			NodeList top = doc.getChildNodes();
-			if(top.item(0).getNodeName() == "interleave"){
-				for(int i = 0; i < top.getLength(); i++){
-					System.out.println(top.item(i));
-					schema = nodeListener(top.item(i), schema);			
-				}
-			} else {
-				for(int i = 0; i < doc.getChildNodes().getLength(); i++){
-					schema = nodeListener(doc, schema);
-				}
-			}
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return schema;
-	}
 	
 	
 	/**
@@ -191,24 +151,6 @@ public class XMLReader {
 	/**
 	 * 
 	 * @param jsonSchema
-	 * @param xmlschema
-	 * @return
-	 */
-	static ArrayList<Object> annotationReader(String jsonSchema, ArrayList<Object> xmlschema){
-		Reader schema = new StringReader(jsonSchema);
-		JsonReader jsonReader = Json.createReader(schema);
-		JsonObject jsonObject = jsonReader.readObject();
-		jsonReader.close();
-		JsonObject vars = jsonObject.getJsonObject("vars");
-		for(int i = 0; i < xmlschema.size(); i++){
-			combiner((ArrayList<Object>)xmlschema.get(i), vars);		
-		}
-		return xmlschema;
-	}
-	
-	/**
-	 * 
-	 * @param jsonSchema
 	 * @return
 	 */
 	static String entityReader(String jsonSchema){
@@ -233,61 +175,7 @@ public class XMLReader {
 		JsonString string = jsonObject.getJsonString("niche");		
 		return string.toString();
 	}
-	/**
-	 * 
-	 * @param dataArray
-	 * @param json
-	 */
-	@SuppressWarnings("unchecked")
-	static void combiner(ArrayList<Object> dataArray, JsonObject json){
-		//System.out.println(dataArray);
-		//System.out.println(json);
-		JsonObject json_pass;		
-		if(dataArray.get(0) instanceof ArrayList){
-			for(int i = 0; i < dataArray.size(); i++){
-				combiner((ArrayList<Object>)dataArray.get(i), json);
-			}
-		} else if(dataArray.get(1) instanceof ArrayList){
-			if(json == null){
-				cycicResize(dataArray);
-				combiner((ArrayList<Object>)dataArray.get(1), json);
-				return;
-			} else if(json.get((String)dataArray.get(0)) instanceof JsonString){
-				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
-			} else {
-				json_pass = json.getJsonObject((String)dataArray.get(0));
-			}
-			cycicResize(dataArray);
-			if(dataArray.get(2).toString().equalsIgnoreCase("oneormore") || dataArray.get(2).toString().equalsIgnoreCase("zeroormore")){
-				orMoreInfoControl(json_pass, dataArray);
-			}
-			if(json_pass == null){
-				combiner((ArrayList<Object>)dataArray.get(1), json);
-			} else {
-				combiner((ArrayList<Object>)dataArray.get(1), json_pass);
-			}
-			try{
-				cycicInfoControl(json_pass, dataArray);
-			} catch (Exception ex){
-				//ex.printStackTrace();
-			}
-		} else {
-			cycicResize(dataArray);
-			if(json == null){
-				return;
-			} else if(json.get((String)dataArray.get(0)) instanceof JsonString){
-				json_pass = json.getJsonObject(json.getJsonString((String)dataArray.get(0)).toString().replaceAll("\"", ""));
-			}else {
-				json_pass = json.getJsonObject((String)dataArray.get(0));
-			}
-			try{
-				cycicInfoControl(json_pass, dataArray);
-			} catch (Exception ex) {
-				//ex.printStackTrace();
-			}
-		}
-	}
-	
+
 	/**
 	 * 
 	 * @param dataArray
@@ -308,173 +196,8 @@ public class XMLReader {
 		return dataArray;
 	}
 	
-	/**
-	 * 
-	 * @param dataArray
-	 * @return
-	 */
-	static ArrayList<Object> cycicResizeNew(ArrayList<Object> dataArray){
-		while(dataArray.size() < 10){
-			if(dataArray.size() == 6){
-				dataArray.add(0);
-			}
-			dataArray.add(null);
-		}
-		return dataArray;
-	}
 	
-	/**
-	 * 
-	 * @param jsonPass
-	 * @param dataArray
-	 * @return
-	 */
-	static ArrayList<Object> cycicInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
-		if(dataArray.get(2) == null){
-			dataArray.set(2, "");
-			if(jsonPass.get("uitype") != null){
-				dataArray.set(2, jsonPass.get("uitype").toString().replace("\"", ""));
-			}
-		}
-		if(jsonPass.get("units") != null){
-			dataArray.set(3, jsonPass.get("units").toString());
-		}
-		if(jsonPass.get("range") != null){
-			dataArray.set(4, jsonPass.get("range").toString());
-		}
-		if(jsonPass.get("categorical") != null){
-			dataArray.set(4, jsonPass.get("categorical").toString());
-		}
-		if(jsonPass.get("default") != null){
-			dataArray.set(6, 1);
-			dataArray.set(5, jsonPass.get("default").toString());
-		}
-		if(jsonPass.get("userlevel") != null){
-			dataArray.set(6, Integer.parseInt(jsonPass.get("userlevel").toString()));
-		}
-		if(jsonPass.get("tooltip") != null){
-			dataArray.set(7, jsonPass.get("tooltip").toString());
-		}
-		if(jsonPass.get("doc") != null){
-			dataArray.set(8, jsonPass.get("doc").toString());
-		}
-		if(jsonPass.get("uilabel") != null){
-			dataArray.set(9, jsonPass.get("uilabel").toString().replaceAll("\"", ""));
-		} 
-		return dataArray;
-	}
-	
-	/**
-	 * 
-	 * @param node
-	 * @param array
-	 * @return
-	 */
-	static ArrayList<Object> nodeListener(Node node, ArrayList<Object> array){
-		NodeList nodes = node.getChildNodes();
-		for (int i = 0; i < nodes.getLength(); i++){
-			switch (nodes.item(i).getNodeName()){
-			case "oneOrMore":
-			case "interleave":
-			case "zeroOrMore":
-				try{
-					if(nodes.item(i).getParentNode().getParentNode().getNodeName().equalsIgnoreCase("config")){
-						ArrayList<Object> newArray = new ArrayList<Object>();
-						newArray = nodeListener(nodes.item(i), newArray);
-						array.add(newArray);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				ArrayList<Object> newArray = new ArrayList<Object>();
-				newArray = nodeListener(nodes.item(i), newArray);
-				array.add(newArray);
-				array.add(nodes.item(i).getNodeName());
-				break;
-			case "element":
-				ArrayList<Object> newArray1 = new ArrayList<Object>();	
-				for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
-					if (nodes.item(i).getAttributes().item(j).getNodeName() == "name"){
-						newArray1.add(nodes.item(i).getAttributes().item(j).getNodeValue());
-					} 
-				}
-				array.add(nodeListener(nodes.item(i), newArray1));
-				break;
-			case "optional":
-				Node newNode = nodes.item(i).getChildNodes().item(1);
-				ArrayList<Object> newArray11 = new ArrayList<Object>();
-				for(int j = 0; j < newNode.getAttributes().getLength(); j++){
-					if (newNode.getAttributes().item(j).getNodeName() == "name"){
-						newArray11.add(newNode.getAttributes().item(j).getNodeValue());
-					}
-				}
-				array.add(nodeListener(newNode, newArray11));
-				break;
-			case "data":
-				for(int j = 0; j < nodes.item(i).getAttributes().getLength(); j++){
-					if(nodes.item(i).getAttributes().item(j).getNodeName() == "type"){
-						array.add(1, nodes.item(i).getAttributes().item(j).getNodeValue());
-					}
-				}
-			default: 
-				break;
-			}
-		}
-		return array;
-	}
-	
-	/**
-	 * 
-	 * @param jsonPass
-	 * @param dataArray
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	static ArrayList<Object> orMoreInfoControl(JsonObject jsonPass, ArrayList<Object> dataArray){
-		cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0));
-        if(jsonPass == null){
-        } else if(jsonPass.get("uitype") instanceof JsonArray){
-			JsonArray array = jsonPass.getJsonArray("uitype");
-            System.out.println(array);
-            System.out.println(dataArray);
-			/*for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-				String string = array.get(i+1).toString().replaceAll("\"", "");
-				//cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
-				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(2, string);
-			}*/
-        } else if(jsonPass.get("uitype") != null){
-			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(2, jsonPass.get("uitype").toString().replace("\"", ""));
-		}
-		
-        if(jsonPass == null){
-        } else if(jsonPass.get("uilabel") instanceof JsonArray){
-			JsonArray array = jsonPass.getJsonArray("uilabel");
-			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-				String string = array.get(i+1).toString().replaceAll("\"", "");
-				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
-				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(9, string);
-			}
-		} else if(jsonPass.get("uilabel") != null){
-			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(9, jsonPass.get("uilabel").toString().replace("\"", ""));
-		}
-		
-        if(jsonPass == null){
-        } else if(jsonPass.get("tooltip") instanceof JsonArray){
-			JsonArray array = jsonPass.getJsonArray("tooltip");
-			for(int i = 0; i < ((ArrayList<Object>) dataArray.get(1)).size(); i++){
-				String string = array.get(i+1).toString().replaceAll("\"", "");
-				cycicResize((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i));
-				((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(i)).set(7, string);
-			}
-		} else if(jsonPass.get("tooltip") != null){
-			((ArrayList<Object>) ((ArrayList<Object>) dataArray.get(1)).get(0)).set(7, jsonPass.get("tooltip").toString().replace("\"", ""));
-		}
-		return dataArray;
-		
-	}
-
 	static ArrayList<Object> nodeBuilder(JsonObject anno, ArrayList<Object> facArray, ArrayList<String> vars){
-		System.out.println("nodeStart");
 		for(int i = 0; i < vars.size(); i++){
 			String var = vars.get(i);	
 			System.out.println(var);
@@ -485,14 +208,35 @@ public class XMLReader {
 				JsonArray type = anno1.getJsonArray("type");
 				JsonArray alias = anno1.getJsonArray("alias");
 				JsonArray uitype = anno1.getJsonArray("uitype");
+				JsonArray units = anno1.getJsonArray("units");
+				JsonArray range = anno1.getJsonArray("range");
+				if(range == null){
+					range = anno1.getJsonArray("categorical");
+				}
+				JsonArray defType = anno1.getJsonArray("default");
+				JsonArray userLevel = anno1.getJsonArray("userlevel");
+				JsonArray tooltip = anno1.getJsonArray("tooltip");
+				JsonArray doc = anno1.getJsonArray("doc");
+				JsonArray uilabel = anno1.getJsonArray("uilabel");
 				ArrayList<Object> newArray = new ArrayList<Object>();
-				newArray = annotationBuilder(type, alias, uitype, newArray);
+				newArray = annotationBuilder(type, alias, uitype, units, range, defType, 
+						userLevel, tooltip, doc, uilabel, newArray);
 				System.out.println(newArray);
 				facArray.add(newArray);
 			} else {
 				JsonString type = anno1.getJsonString("type");
 				JsonString alias = anno1.getJsonString("alias");
 				JsonString uitype = anno1.getJsonString("uitype");
+				String units = anno1.getString("units");
+				String range = anno1.getString("range");
+				if(range == null){
+					range = anno1.getString("categorical");
+				}
+				String defType = anno1.getString("default");
+				String userLevel = anno1.getString("userlevel");
+				String tooltip = anno1.getString("tooltip");
+				String doc = anno1.getString("doc");
+				String uilabel = anno1.getString("uilabel");
 				String alias_s, uitype_s;
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				if(alias == null){
@@ -505,12 +249,13 @@ public class XMLReader {
 				} else {
 					uitype_s = uitype.toString();
 				}
-				newArray = stringAnnotation(type.toString(), alias_s, uitype_s, newArray);
+				newArray = stringAnnotationReq(type.toString(), alias_s, uitype_s, newArray);
+				newArray = stringAnnotationCos(units, range, defType, uilabel, newArray);
+				newArray = stringAnnotationHelp(userLevel, tooltip, doc, newArray);
 				System.out.println(newArray);
 				facArray.add(newArray);
 			}
 		}
-		System.out.println("nodeEnd");
 		return facArray;
 	}
 	
@@ -522,33 +267,25 @@ public class XMLReader {
 	 * @param facArray
 	 * @return
 	 */
-	static ArrayList<Object> annotationBuilder(JsonArray type, JsonArray alias, JsonArray uitype, ArrayList<Object> facArray){
-		System.out.println("annoStart");
-		System.out.println(type);
+	static ArrayList<Object> annotationBuilder(JsonArray type, JsonArray alias, JsonArray uitype, JsonArray units,
+			JsonArray range, JsonArray defType, JsonArray userLevel, JsonArray tooltip, JsonArray doc, JsonArray uilabel,
+			ArrayList<Object> facArray){
 		switch (type.getJsonString(0).toString().replaceAll("\"", "")){
 		case "std::map":
-			System.out.println("Map");
 			ArrayList<Object> structArray = new ArrayList<Object>();
 			for(int i = 1; i < type.size(); i++){
 				if(type.get(i) instanceof JsonArray){
 					ArrayList<Object> tempArray = new ArrayList<Object>();
-					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i), tempArray);
+					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i),
+							units.getJsonArray(i), range.getJsonArray(i), defType.getJsonArray(i), userLevel.getJsonArray(i),
+							tooltip.getJsonArray(i), doc.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArray.add(tempArray);
 				} else {
 					String alias_s, uitype_s;
 					ArrayList<Object> newArray = new ArrayList<Object>();
-					if(alias == null){
-						alias_s = "key";
-					} else {
-						alias_s = alias.getString(i);
-					}
-					if (uitype == null){
-						uitype_s = type.getString(i);
-					} else {
-						uitype_s = uitype.getString(i);
-					}
-					newArray = stringAnnotation(type.getString(i), alias_s, uitype_s, newArray);
-					System.out.println(newArray);
+					alias_s = aliasTest(alias, i);
+					uitype_s = uitypeTest(uitype, type, i);
+					newArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, newArray);
 					structArray.add(newArray);
 				}
 			}
@@ -563,27 +300,21 @@ public class XMLReader {
 			cycicResize(facArray);
 			break;
 		case "std::pair":
-			System.out.println("Pair");
 			ArrayList<Object> structArrayPair = new ArrayList<Object>();
 			for(int i = 1; i < type.size(); i++){
 				if(type.get(i) instanceof JsonArray){
 					ArrayList<Object> tempArray = new ArrayList<Object>();
-					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i), tempArray);
+					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i),
+							units.getJsonArray(i), range.getJsonArray(i), defType.getJsonArray(i), userLevel.getJsonArray(i),
+							tooltip.getJsonArray(i), doc.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArrayPair.add(tempArray);
 				} else {
 					ArrayList<Object> tempArray = new ArrayList<Object>();
-					String alias_s, uitype_s;
-					if(alias == null){
-						alias_s = "key";
-					} else {
-						alias_s = alias.getString(i);
-					}
-					if (uitype == null){
-						uitype_s = type.getString(i);
-					} else {
-						uitype_s = uitype.getString(i);
-					}
-					tempArray = stringAnnotation(type.getString(i), alias_s, uitype_s, tempArray);
+					String alias_s, uitype_s, unit_s, range_s, defType_s, uiLabel_s;
+					alias_s = aliasTest(alias, i);
+					uitype_s = uitypeTest(uitype, type, i);
+					unit_s = unitsTest(units, i);
+					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
 					structArrayPair.add(tempArray);
 				}
 			}
@@ -600,22 +331,16 @@ public class XMLReader {
 			ArrayList<Object> structArrayVector = new ArrayList<Object>();
 			if(type.get(1) instanceof JsonArray){
 				ArrayList<Object> tempArray = new ArrayList<Object>();
-				tempArray = annotationBuilder(type.getJsonArray(1), alias.getJsonArray(1), uitype.getJsonArray(1), tempArray);
+				tempArray = annotationBuilder(type.getJsonArray(1), alias.getJsonArray(1), uitype.getJsonArray(1),
+						units.getJsonArray(1), range.getJsonArray(1), defType.getJsonArray(1), userLevel.getJsonArray(1), 
+						tooltip.getJsonArray(1), doc.getJsonArray(1), uilabel.getJsonArray(1), tempArray);
 				structArrayVector.add(tempArray);
 			} else {
 				String alias_s, uitype_s;
 				ArrayList<Object> newArray = new ArrayList<Object>();
-				if(alias == null){
-					alias_s = "var";
-				} else {
-					alias_s = alias.getString(1);
-				}
-				if (uitype == null){
-					uitype_s = type.getString(1);
-				} else {
-					uitype_s = uitype.getString(1);
-				}
-				newArray = stringAnnotation(type.getString(1), alias_s, uitype_s, newArray);
+				alias_s = aliasTest(alias);
+				uitype_s = uitypeTest(uitype, type);
+				newArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, newArray);
 				structArrayVector.add(newArray);
 			}
 			if(alias == null){
@@ -630,22 +355,19 @@ public class XMLReader {
 		case "std::string":
 		case "int":
 		case "double":
-			System.out.println("singles");
 			ArrayList<Object> tempArray = new ArrayList<Object>();
-			tempArray = stringAnnotation(type.getJsonString(0).toString(), alias.getJsonString(0).toString(), uitype.getJsonString(0).toString(), tempArray);
+			tempArray = stringAnnotationReq(type.getJsonString(0).toString(), alias.getJsonString(0).toString(), uitype.getJsonString(0).toString(), tempArray);
 			break;
 		default : 
 			System.out.println("Default");
 			System.out.println("HEY RADIO YOU FORGOT " + type.getJsonString(0).toString());
 			break;
 		}
-		System.out.println("annoEnd");
 		return facArray;		
 	}
 	
-	static ArrayList<Object> stringAnnotation(String type, String alias, String uitype, ArrayList<Object> facArray){
-		System.out.println("String1");
-		cycicResizeNew(facArray);
+	static ArrayList<Object> stringAnnotationReq(String type, String alias, String uitype, ArrayList<Object> facArray){
+		cycicResize(facArray);
 		facArray.set(0, alias);
 		facArray.set(1, type);
 		if(uitype == null){
@@ -653,7 +375,226 @@ public class XMLReader {
 		} else {
 			facArray.set(2, uitype.toString().replaceAll("\"", ""));
 		}
-		System.out.println("String2");
 		return facArray;
+	}
+	
+	static ArrayList<Object> stringAnnotationCos(String units, String range, String defType, String uilabel, ArrayList<Object> facArray){
+		facArray.set(3, units);
+		facArray.set(4, range);
+		facArray.set(5, defType);
+		if(defType != null){
+			facArray.set(6, 1);
+		}
+		facArray.set(9, uilabel);
+		return facArray;
+	}
+	
+	static ArrayList<Object> stringAnnotationHelp(String userLevel, String tooltip, String doc, ArrayList<Object> facArray){
+		if(userLevel != null){
+			facArray.set(6, userLevel);
+		}
+		facArray.set(7, tooltip);
+		facArray.set(8, doc);
+		return facArray;
+	}
+	
+	static String aliasTest(JsonArray alias){
+		String alias_string;
+		if(alias == null){
+			alias_string = "key";
+		} else {
+			alias_string = alias.getString(1);
+		}
+		return alias_string;
+	}
+	
+	static String aliasTest(JsonArray alias, int i){
+		String alias_string;
+		if(alias == null){
+			alias_string = "key";
+		} else {
+			alias_string = alias.getString(i);
+		}
+		return alias_string;
+	}
+	
+	static String uitypeTest(JsonArray uitype, JsonArray type){
+		String uitype_s;
+		if (uitype == null){
+			uitype_s = type.getString(1);
+		} else {
+			uitype_s = uitype.getString(1);
+		}
+		return uitype_s;
+	}
+	
+	static String uitypeTest(JsonArray uitype, JsonArray type, int i){
+		String uitype_s;
+		if (uitype == null){
+			uitype_s = type.getString(i);
+		} else {
+			uitype_s = uitype.getString(i);
+		}
+		return uitype_s;
+	}
+	
+	static String defaultTest(JsonArray defType){
+		String defType_s; 
+		if(defType == null){
+			defType_s = null;
+		} else {
+			defType_s = defType.getString(1);
+		}
+		return defType_s;
+	}
+	
+	static String defaultTest(JsonArray defType, int i){
+		String defType_s; 
+		if(defType == null){
+			defType_s = null;
+		} else {
+			defType_s = defType.getString(i);
+		}
+		return defType_s;
+	}
+	
+	static String tooltipTest(JsonArray tooltip){
+		String tooltip_s; 
+		if(tooltip == null){
+			tooltip_s = null;
+		} else {
+			tooltip_s = tooltip.getString(1);
+		}
+		return tooltip_s;
+	}
+	
+	static String tooltipTest(JsonArray tooltip, int i){
+		String tooltip_s; 
+		if(tooltip == null){
+			tooltip_s = null;
+		} else {
+			tooltip_s = tooltip.getString(i);
+		}
+		return tooltip_s;
+	}
+	
+	static String helpTest(JsonArray help){
+		String help_s; 
+		if(help == null){
+			help_s = null;
+		} else {
+			help_s = help.getString(1);
+		}
+		return help_s;
+	}
+	
+	static String helpTest(JsonArray help, int i){
+		String help_s; 
+		if(help == null){
+			help_s = null;
+		} else {
+			help_s = help.getString(i);
+		}
+		return help_s;
+	}
+	
+	static String userLevelTest(JsonArray userLevel){
+		String userLevel_s; 
+		if(userLevel == null){
+			userLevel_s = null;
+		} else {
+			userLevel_s = userLevel.getString(1);
+		}
+		return userLevel_s;
+	}
+	
+	static String userLevelTest(JsonArray userLevel, int i){
+		String userLevel_s; 
+		if(userLevel == null){
+			userLevel_s = null;
+		} else {
+			userLevel_s = userLevel.getString(i);
+		}
+		return userLevel_s;
+	}
+	
+	static String unitsTest(JsonArray units){
+		String units_s; 
+		if(units == null){
+			units_s = null;
+		} else {
+			units_s = units.getString(1);
+		}
+		return units_s;
+	}
+	
+	static String unitsTest(JsonArray units, int i){
+		String units_s; 
+		if(units == null){
+			units_s = null;
+		} else {
+			units_s = units.getString(i);
+		}
+		return units_s;
+	}
+	
+	static String labelTest(JsonArray uilabel){
+		String label_s; 
+		if(uilabel == null){
+			label_s = null;
+		} else {
+			label_s = uilabel.getString(1);
+		}
+		return label_s;
+	}
+	
+	static String labelTest(JsonArray uilabel, int i){
+		String label_s; 
+		if(uilabel == null){
+			label_s = null;
+		} else {
+			label_s = uilabel.getString(i);
+		}
+		return label_s;
+	}
+	
+	static String rangeTest(JsonArray range){
+		String range_s; 
+		if(range == null){
+			range_s = null;
+		} else {
+			range_s = range.getString(1);
+		}
+		return range_s;
+	}
+	
+	static String rangeTest(JsonArray range, int i){
+		String range_s; 
+		if(range == null){
+			range_s = null;
+		} else {
+			range_s = range.getString(i);
+		}
+		return range_s;
+	}
+	
+	static String categoricalTest(JsonArray categorical){
+		String categorical_s; 
+		if(categorical == null){
+			categorical_s = null;
+		} else {
+			categorical_s = categorical.getString(1);
+		}
+		return categorical_s;
+	}
+	
+	static String categoricalTest(JsonArray categorical, int i){
+		String categorical_s; 
+		if(categorical == null){
+			categorical_s = null;
+		} else {
+			categorical_s = categorical.getString(i);
+		}
+		return categorical_s;
 	}
 }

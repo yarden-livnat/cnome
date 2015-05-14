@@ -380,7 +380,7 @@ public class FormBuilderFunctions {
 	 */
 	static ComboBox<String> recipeComboBox(facilityNode facNode, final ArrayList<Object> defaultValue){
 		final ComboBox<String> cb = new ComboBox<String>();
-		
+		cb.setPromptText("Select a recipe");
 		cb.setValue((String) defaultValue.get(0));
 		
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
