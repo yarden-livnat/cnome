@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+
 import javafx.scene.image.Image;
 
 import javax.json.Json;
@@ -75,6 +76,8 @@ public class XMLReader {
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
 			add(":cycamore:BatchReactor");
+			add(":cycamore:DeployInst");
+			add(":cycamore:Separations");
 			add("commodconverter:CommodConverter:CommodConverter");
 		}
 	};
@@ -224,20 +227,21 @@ public class XMLReader {
 				System.out.println(newArray);
 				facArray.add(newArray);
 			} else {
+				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
+				int userLevel_s;
 				JsonString type = anno1.getJsonString("type");
 				JsonString alias = anno1.getJsonString("alias");
 				JsonString uitype = anno1.getJsonString("uitype");
-				String units = anno1.getString("units");
-				String range = anno1.getString("range");
-				if(range == null){
-					range = anno1.getString("categorical");
+				units_s = (anno1.getJsonString("units") != null) ? anno1.getString("units") : null;
+				range_s = (anno1.getJsonString("range") != null) ? anno1.getString("range") : null;
+				if(range_s == null){
+					range_s = (anno1.getJsonString("categorical") != null) ? anno1.getString("categorical") : null;
 				}
-				String defType = anno1.getString("default");
-				String userLevel = anno1.getString("userlevel");
-				String tooltip = anno1.getString("tooltip");
-				String doc = anno1.getString("doc");
-				String uilabel = anno1.getString("uilabel");
-				String alias_s, uitype_s;
+				defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
+				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
+				tooltip_s = (anno1.getJsonString("tooltip") != null) ? anno1.getString("tooltip") : null;
+				doc_s = (anno1.getJsonString("doc") != null) ? anno1.getString("doc") : null;
+				uilabel_s = (anno1.getJsonString("uilabel") != null) ? anno1.getString("uilabel") : null;
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				if(alias == null){
 					alias_s = var;
@@ -250,10 +254,11 @@ public class XMLReader {
 					uitype_s = uitype.toString();
 				}
 				newArray = stringAnnotationReq(type.toString(), alias_s, uitype_s, newArray);
-				newArray = stringAnnotationCos(units, range, defType, uilabel, newArray);
-				newArray = stringAnnotationHelp(userLevel, tooltip, doc, newArray);
+				newArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, newArray);
+				newArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, newArray);
 				System.out.println(newArray);
 				facArray.add(newArray);
+				
 			}
 		}
 		return facArray;
@@ -281,12 +286,23 @@ public class XMLReader {
 							tooltip.getJsonArray(i), doc.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArray.add(tempArray);
 				} else {
-					String alias_s, uitype_s;
-					ArrayList<Object> newArray = new ArrayList<Object>();
+					String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
+					int userLevel_s;
+					ArrayList<Object> tempArray = new ArrayList<Object>();
 					alias_s = aliasTest(alias, i);
 					uitype_s = uitypeTest(uitype, type, i);
-					newArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, newArray);
-					structArray.add(newArray);
+					units_s = unitsTest(units, i);
+					range_s = rangeTest(range, i);
+					defType_s = defaultTest(defType, i);
+					userLevel_s = userLevelTest(userLevel, i);
+					tooltip_s = tooltipTest(tooltip, i);
+					doc_s = helpTest(doc, i);
+					uilabel_s = labelTest(uilabel, i);
+					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
+					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
+					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
+					structArray.add(tempArray);
+					
 				}
 			}
 			if(alias == null){
@@ -310,11 +326,20 @@ public class XMLReader {
 					structArrayPair.add(tempArray);
 				} else {
 					ArrayList<Object> tempArray = new ArrayList<Object>();
-					String alias_s, uitype_s, unit_s, range_s, defType_s, uiLabel_s;
+					String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
+					int userLevel_s;
 					alias_s = aliasTest(alias, i);
 					uitype_s = uitypeTest(uitype, type, i);
-					unit_s = unitsTest(units, i);
+					units_s = unitsTest(units, i);
+					range_s = rangeTest(range, i);
+					defType_s = defaultTest(defType, i);
+					userLevel_s = userLevelTest(userLevel, i);
+					tooltip_s = tooltipTest(tooltip, i);
+					doc_s = helpTest(doc, i);
+					uilabel_s = labelTest(uilabel, i);
 					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
+					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
+					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
 					structArrayPair.add(tempArray);
 				}
 			}
@@ -336,12 +361,22 @@ public class XMLReader {
 						tooltip.getJsonArray(1), doc.getJsonArray(1), uilabel.getJsonArray(1), tempArray);
 				structArrayVector.add(tempArray);
 			} else {
-				String alias_s, uitype_s;
-				ArrayList<Object> newArray = new ArrayList<Object>();
+				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
+				int userLevel_s;
+				ArrayList<Object> tempArray = new ArrayList<Object>();
 				alias_s = aliasTest(alias);
 				uitype_s = uitypeTest(uitype, type);
-				newArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, newArray);
-				structArrayVector.add(newArray);
+				units_s = unitsTest(units);
+				range_s = rangeTest(range);
+				defType_s = defaultTest(defType);
+				userLevel_s = userLevelTest(userLevel);
+				tooltip_s = tooltipTest(tooltip);
+				doc_s = helpTest(doc);
+				uilabel_s = labelTest(uilabel);
+				tempArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, tempArray);
+				tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
+				tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
+				structArrayVector.add(tempArray);
 			}
 			if(alias == null){
 				facArray.add("vector");
@@ -356,7 +391,20 @@ public class XMLReader {
 		case "int":
 		case "double":
 			ArrayList<Object> tempArray = new ArrayList<Object>();
-			tempArray = stringAnnotationReq(type.getJsonString(0).toString(), alias.getJsonString(0).toString(), uitype.getJsonString(0).toString(), tempArray);
+			String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
+			int userLevel_s;
+			alias_s = aliasTest(alias);
+			uitype_s = uitypeTest(uitype, type);
+			units_s = unitsTest(units);
+			range_s = rangeTest(range);
+			defType_s = defaultTest(defType);
+			userLevel_s = userLevelTest(userLevel);
+			tooltip_s = tooltipTest(tooltip);
+			doc_s = helpTest(doc);
+			uilabel_s = labelTest(uilabel);
+			tempArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, tempArray);
+			tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
+			tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
 			break;
 		default : 
 			System.out.println("Default");
@@ -389,10 +437,8 @@ public class XMLReader {
 		return facArray;
 	}
 	
-	static ArrayList<Object> stringAnnotationHelp(String userLevel, String tooltip, String doc, ArrayList<Object> facArray){
-		if(userLevel != null){
-			facArray.set(6, userLevel);
-		}
+	static ArrayList<Object> stringAnnotationHelp(int userLevel, String tooltip, String doc, ArrayList<Object> facArray){
+		facArray.set(6, userLevel);
 		facArray.set(7, tooltip);
 		facArray.set(8, doc);
 		return facArray;
@@ -498,22 +544,22 @@ public class XMLReader {
 		return help_s;
 	}
 	
-	static String userLevelTest(JsonArray userLevel){
-		String userLevel_s; 
+	static int userLevelTest(JsonArray userLevel){
+		int userLevel_s; 
 		if(userLevel == null){
-			userLevel_s = null;
+			userLevel_s = 0;
 		} else {
-			userLevel_s = userLevel.getString(1);
+			userLevel_s = userLevel.getInt(1);
 		}
 		return userLevel_s;
 	}
 	
-	static String userLevelTest(JsonArray userLevel, int i){
-		String userLevel_s; 
+	static int userLevelTest(JsonArray userLevel, int i){
+		int userLevel_s; 
 		if(userLevel == null){
-			userLevel_s = null;
+			userLevel_s = 0;
 		} else {
-			userLevel_s = userLevel.getString(i);
+			userLevel_s = userLevel.getInt(i);
 		}
 		return userLevel_s;
 	}
