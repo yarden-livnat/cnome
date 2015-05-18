@@ -2351,13 +2351,18 @@
   "stubs:StubRegion:StubRegion": "<text/>"
  }, 
  "specs": [
+  ":Brightlite:FuelfabFacility", 
+  ":Brightlite:ReactorFacility", 
+  ":Brightlite:ReprocessFacility", 
   ":agents:KFacility", 
   ":agents:NullInst", 
   ":agents:NullRegion", 
   ":agents:Predator", 
   ":agents:Prey", 
   ":agents:Sink", 
-  ":agents:Source",
+  ":agents:Source", 
+  ":cycaless:BatchReactor", 
+  ":cycaless:DeployInst", 
   ":cycamore:DeployInst", 
   ":cycamore:Enrichment", 
   ":cycamore:FuelFab", 
@@ -2366,6 +2371,19 @@
   ":cycamore:Reactor", 
   ":cycamore:Separations", 
   ":cycamore:Sink", 
-  ":cycamore:Source"
+  ":cycamore:Source", 
+  "StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion", 
+  "StubFacility/cyclus/StubInst:StubInst:StubInst", 
+  "StubFacility:StubFacility:StubFacility", 
+  "agents:agents:KFacility", 
+  "agents:agents:NullInst", 
+  "agents:agents:NullRegion", 
+  "agents:agents:Predator", 
+  "agents:agents:Prey", 
+  "agents:agents:Sink", 
+  "agents:agents:Source", 
+  "stubs:StubFacility:StubFacility", 
+  "stubs:StubInst:StubInst", 
+  "stubs:StubRegion:StubRegion"
  ]
 }
