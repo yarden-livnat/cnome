@@ -1538,7 +1538,6 @@
     }, 
     "res_indexes": {
      "alias": [["res_indexes", "item"], "key", "val"], 
-     "default": {}, 
      "doc": "This should NEVER be set manually.", 
      "index": 26, 
      "tooltip": [["res_indexes", ""], "", ""], 

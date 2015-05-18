@@ -204,9 +204,16 @@ public class XMLReader {
 		for(int i = 0; i < vars.size(); i++){
 			String var = vars.get(i);	
 			System.out.println(var);
+			if(anno.get(var).getValueType() == ValueType.STRING){
+				ArrayList<String> tempArray = new ArrayList<String>();
+				tempArray.add(anno.getString(var));
+				nodeBuilder(anno, facArray, tempArray);
+				break;
+			}
 			JsonObject anno1 = anno.getJsonObject(var);
 			System.out.println(anno1);
 			ValueType test = anno1.get("type").getValueType();
+			String doc_s = (anno1.getJsonString("doc") != null) ? anno1.getString("doc") : null;
 			if(test == ValueType.ARRAY){
 				JsonArray type = anno1.getJsonArray("type");
 				JsonArray alias = anno1.getJsonArray("alias");
@@ -219,15 +226,15 @@ public class XMLReader {
 				JsonArray defType = anno1.getJsonArray("default");
 				JsonArray userLevel = anno1.getJsonArray("userlevel");
 				JsonArray tooltip = anno1.getJsonArray("tooltip");
-				JsonArray doc = anno1.getJsonArray("doc");
 				JsonArray uilabel = anno1.getJsonArray("uilabel");
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				newArray = annotationBuilder(type, alias, uitype, var,units, range, defType, 
-						userLevel, tooltip, doc, uilabel, newArray);
+						userLevel, tooltip, uilabel, newArray);
+				newArray.set(8, doc_s);
 				System.out.println(newArray);
 				facArray.add(newArray);
 			} else {
-				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
+				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s;
 				int userLevel_s;
 				JsonString type = anno1.getJsonString("type");
 				JsonString alias = anno1.getJsonString("alias");
@@ -240,7 +247,6 @@ public class XMLReader {
 				defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
 				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
 				tooltip_s = (anno1.getJsonString("tooltip") != null) ? anno1.getString("tooltip") : null;
-				doc_s = (anno1.getJsonString("doc") != null) ? anno1.getString("doc") : null;
 				uilabel_s = (anno1.getJsonString("uilabel") != null) ? anno1.getString("uilabel") : null;
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				if(alias == null){
@@ -255,7 +261,8 @@ public class XMLReader {
 				}
 				newArray = stringAnnotationReq(type.toString(), alias_s, uitype_s, newArray);
 				newArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, newArray);
-				newArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, newArray);
+				newArray = stringAnnotationHelp(userLevel_s, tooltip_s, newArray);
+				newArray.set(8, doc_s);
 				System.out.println(newArray);
 				facArray.add(newArray);
 				
@@ -273,17 +280,23 @@ public class XMLReader {
 	 * @return
 	 */
 	static ArrayList<Object> annotationBuilder(JsonArray type, JsonArray alias, JsonArray uitype, String var, JsonArray units,
-			JsonArray range, JsonArray defType, JsonArray userLevel, JsonArray tooltip, JsonArray doc, JsonArray uilabel,
+			JsonArray range, JsonArray defType, JsonArray userLevel, JsonArray tooltip, JsonArray uilabel,
 			ArrayList<Object> facArray){
+		System.out.println(type.getJsonString(0).toString());
 		switch (type.getJsonString(0).toString().replaceAll("\"", "")){
 		case "std::map":
+			System.out.println("MAP START");
 			ArrayList<Object> structArray = new ArrayList<Object>();
 			for(int i = 1; i < type.size(); i++){
 				if(type.get(i) instanceof JsonArray){
 					ArrayList<Object> tempArray = new ArrayList<Object>();
+					JsonArray unitsArray = (units == null) ? null : units.getJsonArray(i);
+					JsonArray rangeArray = (units == null) ? null : range.getJsonArray(i);
+					JsonArray defTypeArray = (units == null) ? null : defType.getJsonArray(i);
+					JsonArray userLevelArray = (units == null) ? null : userLevel.getJsonArray(i);
 					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i), var,
-							units.getJsonArray(i), range.getJsonArray(i), defType.getJsonArray(i), userLevel.getJsonArray(i),
-							tooltip.getJsonArray(i), doc.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
+							unitsArray, rangeArray, defTypeArray, userLevelArray,
+							tooltip.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArray.add(tempArray);
 				} else {
 					String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
@@ -293,14 +306,17 @@ public class XMLReader {
 					uitype_s = uitypeTest(uitype, type, i);
 					units_s = unitsTest(units, i);
 					range_s = rangeTest(range, i);
-					defType_s = defaultTest(defType, i);
+					if(defType instanceof JsonObject){
+						defType_s = null;
+					} else {
+						defType_s = defaultTest(defType);
+					}
 					userLevel_s = userLevelTest(userLevel, i);
 					tooltip_s = tooltipTest(tooltip, i);
-					doc_s = helpTest(doc, i);
 					uilabel_s = labelTest(uilabel, i);
 					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
 					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
-					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
+					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
 					structArray.add(tempArray);
 					
 				}
@@ -314,16 +330,39 @@ public class XMLReader {
 			facArray.add(structArray);
 			facArray.add("oneOrMore");
 			cycicResize(facArray);
+			if(userLevel == null){
+				facArray.add(0);		
+			} else {
+				System.out.println(userLevel);
+				facArray.set(6, userLevel.getJsonArray(0).getString(0));		
+			}
+			if(tooltip == null){
+				facArray.add("");		
+			} else {
+				System.out.println(tooltip);
+				facArray.set(7, tooltip.getJsonArray(0).getString(0));		
+			}
+			if(uilabel == null){
+				facArray.add(var);		
+			} else {
+				System.out.println(uilabel);
+				facArray.set(9, uilabel.getJsonArray(0).getString(0));		
+			}
 			System.out.println("MAP2");
 			break;
 		case "std::pair":
+			System.out.println("PAIR START");
 			ArrayList<Object> structArrayPair = new ArrayList<Object>();
 			for(int i = 1; i < type.size(); i++){
 				if(type.get(i) instanceof JsonArray){
 					ArrayList<Object> tempArray = new ArrayList<Object>();
+					JsonArray unitsArray = (units == null) ? null : units.getJsonArray(i);
+					JsonArray rangeArray = (units == null) ? null : range.getJsonArray(i);
+					JsonArray defTypeArray = (units == null) ? null : defType.getJsonArray(i);
+					JsonArray userLevelArray = (units == null) ? null : userLevel.getJsonArray(i);
 					tempArray = annotationBuilder(type.getJsonArray(i), alias.getJsonArray(i), uitype.getJsonArray(i), var,
-							units.getJsonArray(i), range.getJsonArray(i), defType.getJsonArray(i), userLevel.getJsonArray(i),
-							tooltip.getJsonArray(i), doc.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
+							unitsArray, rangeArray, defTypeArray, userLevelArray,
+							tooltip.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArrayPair.add(tempArray);
 				} else {
 					ArrayList<Object> tempArray = new ArrayList<Object>();
@@ -333,14 +372,17 @@ public class XMLReader {
 					uitype_s = uitypeTest(uitype, type, i);
 					units_s = unitsTest(units, i);
 					range_s = rangeTest(range, i);
-					defType_s = defaultTest(defType, i);
+					if(defType instanceof JsonObject){
+						defType_s = null;
+					} else {
+						defType_s = defaultTest(defType);
+					}
 					userLevel_s = userLevelTest(userLevel, i);
 					tooltip_s = tooltipTest(tooltip, i);
-					doc_s = helpTest(doc, i);
 					uilabel_s = labelTest(uilabel, i);
 					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
 					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
-					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
+					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
 					structArrayPair.add(tempArray);
 				}
 			}
@@ -352,14 +394,37 @@ public class XMLReader {
 			facArray.add(structArrayPair);
 			facArray.add("pair");
 			cycicResize(facArray);
+			if(userLevel == null){
+				facArray.add(0);		
+			} else {
+				System.out.println(userLevel);
+				facArray.set(6, userLevel.getString(0));		
+			}
+			if(tooltip == null){
+				facArray.add("");		
+			} else {
+				System.out.println(tooltip);
+				facArray.set(7, tooltip.getString(0));		
+			}
+			if(uilabel == null){
+				facArray.add(var);		
+			} else {
+				System.out.println(uilabel);
+				facArray.set(9, uilabel.getString(0));		
+			}
+			System.out.println("PAIR END");
 			break;
 		case "std::vector":
 			ArrayList<Object> structArrayVector = new ArrayList<Object>();
 			if(type.get(1) instanceof JsonArray){
 				ArrayList<Object> tempArray = new ArrayList<Object>();
+				JsonArray unitsArray = (units == null) ? null : units.getJsonArray(1);
+				JsonArray rangeArray = (units == null) ? null : range.getJsonArray(1);
+				JsonArray defTypeArray = (units == null) ? null : defType.getJsonArray(1);
+				JsonArray userLevelArray = (units == null) ? null : userLevel.getJsonArray(1);
 				tempArray = annotationBuilder(type.getJsonArray(1), alias.getJsonArray(1), uitype.getJsonArray(1), var,
-						units.getJsonArray(1), range.getJsonArray(1), defType.getJsonArray(1), userLevel.getJsonArray(1), 
-						tooltip.getJsonArray(1), doc.getJsonArray(1), uilabel.getJsonArray(1), tempArray);
+						unitsArray, rangeArray, defTypeArray, userLevelArray, tooltip.getJsonArray(1), 
+						uilabel.getJsonArray(1), tempArray);
 				structArrayVector.add(tempArray);
 			} else {
 				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, doc_s, uilabel_s;
@@ -369,14 +434,17 @@ public class XMLReader {
 				uitype_s = uitypeTest(uitype, type);
 				units_s = unitsTest(units);
 				range_s = rangeTest(range);
-				defType_s = defaultTest(defType);
+				if(defType instanceof JsonArray){
+					defType_s = null;
+				} else {
+					defType_s = defaultTest(defType);
+				}
 				userLevel_s = userLevelTest(userLevel);
 				tooltip_s = tooltipTest(tooltip);
-				doc_s = helpTest(doc);
 				uilabel_s = labelTest(uilabel);
 				tempArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, tempArray);
 				tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
-				tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
+				tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
 				structArrayVector.add(tempArray);
 			}
 			if(alias == null){
@@ -401,11 +469,10 @@ public class XMLReader {
 			defType_s = defaultTest(defType);
 			userLevel_s = userLevelTest(userLevel);
 			tooltip_s = tooltipTest(tooltip);
-			doc_s = helpTest(doc);
 			uilabel_s = labelTest(uilabel);
 			tempArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, tempArray);
 			tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
-			tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, doc_s, tempArray);
+			tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
 			break;
 		default : 
 			System.out.println("Default");
@@ -438,10 +505,9 @@ public class XMLReader {
 		return facArray;
 	}
 	
-	static ArrayList<Object> stringAnnotationHelp(int userLevel, String tooltip, String doc, ArrayList<Object> facArray){
+	static ArrayList<Object> stringAnnotationHelp(int userLevel, String tooltip, ArrayList<Object> facArray){
 		facArray.set(6, userLevel);
 		facArray.set(7, tooltip);
-		facArray.set(8, doc);
 		return facArray;
 	}
 	
