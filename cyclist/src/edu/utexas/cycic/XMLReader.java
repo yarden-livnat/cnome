@@ -300,6 +300,7 @@ public class XMLReader {
 							tooltip.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArray.add(tempArray);
 				} else {
+
 					String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s;
 					int userLevel_s;
 					ArrayList<Object> tempArray = new ArrayList<Object>();

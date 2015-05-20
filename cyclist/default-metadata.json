@@ -1,398 +1,5 @@
 {
  "annotations": {
-  ":Brightlite:FuelfabFacility": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader"
-   ], 
-   "doc": "A fuelfab facility is provided as a skeleton for the design of new facility agents.", 
-   "entity": "facility", 
-   "name": "fuelfab::FuelfabFacility", 
-   "niche": "fuel fabrication", 
-   "parents": ["cyclus::Facility"], 
-   "vars": {
-    "fissle_stream": {
-     "index": 1, 
-     "type": "std::string", 
-     "uilabel": "Fissle Stream", 
-     "uitype": "incommodity"
-    }, 
-    "in_commods": {
-     "doc": "A list of the commodities that this facility can recieve", 
-     "index": 3, 
-     "tooltip": "input commodities", 
-     "type": ["std::map", "std::string", "double"], 
-     "uitype": ["oneOrMore", "incommodity", "double"]
-    }, 
-    "maximum_storage": {
-     "default": 9.999999999999999e+59, 
-     "index": 0, 
-     "tooltip": "maximum storage capacity of the facility", 
-     "type": "double"
-    }, 
-    "non_fissle_stream": {
-     "index": 2, 
-     "type": "std::string", 
-     "uilabel": "Nonfissle Stream", 
-     "uitype": "incommodity"
-    }, 
-    "out_commod": {
-     "doc": "commodity that the brightlite supplies", 
-     "index": 4, 
-     "tooltip": "output commodity", 
-     "type": "std::string", 
-     "uitype": "outcommodity"
-    }
-   }
-  }, 
-  ":Brightlite:ReactorFacility": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader"
-   ], 
-   "doc": "A reactor facility is provided as a skeleton for the design of new facility agents.", 
-   "entity": "facility", 
-   "name": "reactor::ReactorFacility", 
-   "niche": "reactor", 
-   "parents": ["cyclus::Facility"], 
-   "vars": {
-    "CR_fissile": {
-     "index": 30, 
-     "tooltip": "List of fissile isotopes for conversion ratio calculation.", 
-     "type": ["std::vector", "std::string"], 
-     "units": "NUCID", 
-     "userlevel": 3
-    }, 
-    "CR_lower": {
-     "default": 70, 
-     "index": 31, 
-     "tooltip": "Lower bound of the fission product mass number for conversion ratio calculation.", 
-     "type": "int", 
-     "userlevel": 3
-    }, 
-    "CR_target": {
-     "default": -1, 
-     "index": 33, 
-     "tooltip": "Target for conversion ratio.", 
-     "type": "double", 
-     "userlevel": 3
-    }, 
-    "CR_upper": {
-     "default": 160, 
-     "index": 32, 
-     "tooltip": "Upper bound of the fission product mass number for conversion ratio calculation.", 
-     "type": "int", 
-     "userlevel": 3
-    }, 
-    "DA_mode": {
-     "default": 0, 
-     "index": 27, 
-     "tooltip": "Disadvantage calculation. 0:Off, 1:On", 
-     "type": "int", 
-     "userlevel": 2
-    }, 
-    "SS_tolerance": {
-     "default": 0.010, 
-     "index": 1, 
-     "tooltip": "The steady state calculation tolerance for the code", 
-     "type": "double", 
-     "userlevel": 3
-    }, 
-    "batches": {
-     "default": 3, 
-     "index": 11, 
-     "tooltip": "number of batches", 
-     "type": "int", 
-     "userlevel": 1
-    }, 
-    "burnupcalc_timestep": {
-     "default": 10, 
-     "index": 25, 
-     "tooltip": "Timestep [days] for the burnup calculation.", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "core_mass": {
-     "index": 16, 
-     "tooltip": "Total mass of the core.", 
-     "type": "double", 
-     "units": "kgIHM", 
-     "userlevel": 0
-    }, 
-    "cylindrical_delta": {
-     "default": 5, 
-     "index": 19, 
-     "tooltip": "Delta to be used for cylindrical flux calculation.", 
-     "type": "double", 
-     "userlevel": 3
-    }, 
-    "disadv_a": {
-     "default": 0.40950, 
-     "index": 2, 
-     "tooltip": "Fuel pin radius used for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm", 
-     "userlevel": 3
-    }, 
-    "disadv_b": {
-     "default": 0.707490, 
-     "index": 3, 
-     "tooltip": "Moderator radius used for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm", 
-     "userlevel": 3
-    }, 
-    "disadv_fuel_sigs": {
-     "default": 0.430, 
-     "index": 6, 
-     "tooltip": "Fuel macroscopic scattering cross-section for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "disadv_mod_siga": {
-     "default": 0.2220, 
-     "index": 4, 
-     "tooltip": "Moderator macroscopic abs cross-section for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "disadv_mod_sigs": {
-     "default": 3.440, 
-     "index": 5, 
-     "tooltip": "Moderator macroscopic scattering cross-section for thermal disadvantage calculation.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "efficiency": {
-     "default": 0.330, 
-     "index": 17, 
-     "tooltip": "Thermal to electric conversion rate.", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "flux_mode": {
-     "default": 1, 
-     "index": 26, 
-     "tooltip": "Flux calculation method. 1:Uniform, 2:Inv.Neut.Prod, 3:Cylindrical", 
-     "type": "int", 
-     "userlevel": 2
-    }, 
-    "fuel_Sig_tr": {
-     "default": 0.120, 
-     "index": 24, 
-     "tooltip": "Macroscopic transport cross section of the fuel.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "fuel_area": {
-     "default": 4197, 
-     "index": 18, 
-     "tooltip": "Total area of the fuel in core. Used for cylindrical flux calculation.", 
-     "type": "double", 
-     "units": "cm2", 
-     "userlevel": 3
-    }, 
-    "generated_power": {
-     "index": 15, 
-     "tooltip": "Electrical production.", 
-     "type": "double", 
-     "units": "MWe", 
-     "userlevel": 0
-    }, 
-    "in_commods": {
-     "doc": "commodity that the brightlite reactor consumes", 
-     "index": 7, 
-     "schematype": "token", 
-     "tooltip": "input commodity", 
-     "type": ["std::vector", "std::string"], 
-     "uitype": ["oneOrMore", "incommodity"]
-    }, 
-    "interpol_pairs": {
-     "default": {"BURNUP": 42}, 
-     "index": 10, 
-     "tooltip": [
-      "interpolation pairs used for the library", 
-      "Interpolation metric", 
-      "Interpolation values"
-     ], 
-     "type": ["std::map", "std::string", "double"], 
-     "uitype": ["oneOrMore", "string", "double"], 
-     "userlevel": 2
-    }, 
-    "inventory": {
-     "capacity": "max_inv_size", 
-     "index": 28, 
-     "type": "cyclus::toolkit::ResourceBuff"
-    }, 
-    "libraries": {
-     "doc": "the reactor's burnup & criticality behavior to use", 
-     "index": 9, 
-     "tooltip": "reactor libraries to load", 
-     "type": ["std::vector", "std::string"], 
-     "userlevel": 0
-    }, 
-    "max_inv_size": {
-     "default": 1.000000000000000e+299, 
-     "doc": "total maximum inventory size of the reactor", 
-     "index": 13, 
-     "tooltip": "reactor maximum inventory size", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "mod_Sig_a": {
-     "default": 0.02220, 
-     "index": 20, 
-     "tooltip": "Macroscopic absorption cross section of the moderator.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "mod_Sig_f": {
-     "default": 0.0, 
-     "index": 22, 
-     "tooltip": "Macroscopic fission cross section of the moderator.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "mod_Sig_tr": {
-     "default": 3.460, 
-     "index": 21, 
-     "tooltip": "Macroscopic transport cross section of the moderator.", 
-     "type": "double", 
-     "units": "cm-1", 
-     "userlevel": 3
-    }, 
-    "mod_thickness": {
-     "default": 50, 
-     "index": 23, 
-     "tooltip": "Radial thickness of the moderator used for cylindrical flux calculation.", 
-     "type": "double", 
-     "units": "cm", 
-     "userlevel": 3
-    }, 
-    "nonleakage": {
-     "default": 0.980, 
-     "doc": "Varies from 0 - 1.", 
-     "index": 12, 
-     "tooltip": "Non-leakage probability", 
-     "type": "double", 
-     "userlevel": 1
-    }, 
-    "out_commod": {
-     "doc": "commodity that the brightlite supplies", 
-     "index": 8, 
-     "tooltip": "output commodity", 
-     "type": "std::string", 
-     "uilabel": "Output", 
-     "uitype": "outcommodity"
-    }, 
-    "outage_time": {
-     "default": 28, 
-     "index": 34, 
-     "label": "Outage Period", 
-     "tooltip": "The amount of time the reactor is offline to load new fuel and shuffle older fuel", 
-     "type": "double", 
-     "userlevel": 2
-    }, 
-    "reactor_life": {
-     "default": 480, 
-     "index": 29, 
-     "tooltip": "Time before reactor is shutdown after startup.", 
-     "type": "int", 
-     "units": "months", 
-     "userlevel": 1
-    }, 
-    "target_burnup": {
-     "default": 0, 
-     "index": 14, 
-     "tooltip": "Target burnup", 
-     "type": "double", 
-     "units": "MWd/kgIHM", 
-     "userlevel": 0
-    }, 
-    "tolerance": {
-     "default": 0.010, 
-     "index": 0, 
-     "tooltip": "The blending convergence requirement for the code", 
-     "type": "double", 
-     "userlevel": 3
-    }
-   }
-  }, 
-  ":Brightlite:ReprocessFacility": {
-   "all_parents": [
-    "cyclus::Agent", 
-    "cyclus::Facility", 
-    "cyclus::Ider", 
-    "cyclus::StateWrangler", 
-    "cyclus::TimeListener", 
-    "cyclus::Trader"
-   ], 
-   "doc": "A reprocess facility is provided as a skeleton for the design of new facility agents.", 
-   "entity": "facility", 
-   "name": "reprocess::ReprocessFacility", 
-   "niche": "reprocessing", 
-   "parents": ["cyclus::Facility"], 
-   "vars": {
-    "commod_out": {
-     "index": 1, 
-     "tooltip": "output commodity", 
-     "type": ["std::vector", "std::string"], 
-     "uitype": ["oneOrMore", "outcommodity"]
-    }, 
-    "in_commod": {
-     "doc": "commodity that the brightlite reprocess facility consumes", 
-     "index": 0, 
-     "schematype": "token", 
-     "tooltip": "input commodity", 
-     "type": ["std::vector", "std::string"], 
-     "uitype": ["oneOrMore", "incommodity"]
-    }, 
-    "input_capacity": {
-     "default": 150.10, 
-     "index": 4, 
-     "tooltip": "Conversion efficiency.", 
-     "type": "double"
-    }, 
-    "input_inventory": {
-     "capacity": "max_inv_size", 
-     "index": 6, 
-     "type": "cyclus::toolkit::ResourceBuff"
-    }, 
-    "max_inv_size": {
-     "default": 1.000000000000000e+299, 
-     "doc": "total maximum inventory size of the reactor", 
-     "index": 3, 
-     "tooltip": "reactor maximum inventory size", 
-     "type": "double"
-    }, 
-    "output_capacity": {
-     "default": 10, 
-     "index": 5, 
-     "tooltip": "Total conversion capacity.", 
-     "type": "double"
-    }, 
-    "repro_input_path": {"index": 2, "tooltip": "Efficiency input file", "type": "std::string"}, 
-    "waste_inventory": {
-     "capacity": "max_inv_size", 
-     "index": 7, 
-     "type": "cyclus::toolkit::ResourceBuff"
-    }
-   }
-  }, 
   ":agents:KFacility": {
    "all_parents": [
     "cyclus::Agent", 
@@ -901,28 +508,28 @@
    "vars": {
     "build_times": {
      "alias": ["build_times", "val"], 
-     "doc": "Time step on which to build agents given in prototypes (same order).", 
+     "doc": "Time step on which to deploy agents given in prototype list (same order).", 
      "index": 1, 
      "tooltip": ["build_times", ""], 
      "type": ["std::vector", "int"], 
-     "uilabel": ["build_times", ""]
+     "uilabel": ["Deployment times", ""]
     }, 
     "lifetimes": {
      "alias": ["lifetimes", "val"], 
      "default": [], 
-     "doc": "Lifetimes for each prototype in protos (same order). These lifetimes override the lifetimes in the original prototype definition. If unspecified, lifetimes from the original prototype definitions are used. Although a new prototype is created in the Prototypes table for each lifetime with the suffix '_life_[lifetime]', all deployed agents themselves will have the same original prototype name (and so will the Agents tables).", 
+     "doc": "Lifetimes for each prototype in prototype list (same order). These lifetimes override the lifetimes in the original prototype definition. If unspecified, lifetimes from the original prototype definitions are used. Although a new prototype is created in the Prototypes table for each lifetime with the suffix '_life_[lifetime]', all deployed agents themselves will have the same original prototype name (and so will the Agents tables).", 
      "index": 3, 
      "tooltip": ["lifetimes", ""], 
      "type": ["std::vector", "int"], 
-     "uilabel": ["lifetimes", ""]
+     "uilabel": ["Lifetimes", ""]
     }, 
     "n_build": {
      "alias": ["n_build", "val"], 
-     "doc": "Number of each prototype in prototypes var to build (same order).", 
+     "doc": "Number of each prototype given in prototype list that should be deployed (same order).", 
      "index": 2, 
      "tooltip": ["n_build", ""], 
      "type": ["std::vector", "int"], 
-     "uilabel": ["n_build", ""]
+     "uilabel": ["Number to deploy", ""]
     }, 
     "prototypes": {
      "alias": ["prototypes", "val"], 
@@ -930,8 +537,8 @@
      "index": 0, 
      "tooltip": ["prototypes", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["prototypes", ""], 
-     "uitype": ["onormore", "prototype"]
+     "uilabel": ["Prototypes to deploy", ""], 
+     "uitype": ["oneormore", "prototype"]
     }
    }
   }, 
@@ -944,10 +551,10 @@
     "cyclus::TimeListener", 
     "cyclus::Trader"
    ], 
-   "doc": "An enrichment facility that intakes a commodity (usually natural uranium) and supplies a user-specified enriched product based on SWU capacity", 
+   "doc": "The Enrichment facility is a simple agent that enriches natural uranium in a Cyclus simulation. It does not explicitly compute the physical enrichment process, rather it calculates the SWU required to convert an source uranium recipe (i.e. natural uranium) into a requested enriched recipe (i.e. 4% enriched uranium), given the natural uranium inventory constraint and its SWU capacity constraint.\n\nThe Enrichment facility requests an input commodity and associated recipe whose quantity is its remaining inventory capacity.  All facilities trading the same input commodity (even with different recipes) will offer materials for trade.  The Enrichment facility accepts any input materials with enrichments less than its tails assay, as long as some U235 is present, and preference increases with U235 content.  If no U235 is present in the offered material, the trade preference is set to -1 and the material is not accepted.  Any material components other than U235 and U238 are sent directly to the tails buffer.\n\nThe Enrichment facility will bid on any request for its output commodity up to the maximum allowed enrichment (if not specified, default is 100%) It bids on either the request quantity, or the maximum quanity allowed by its SWU constraint or natural uranium inventory, whichever is lower. If multiple output commodities with different enrichment levels are requested and the facility does not have the SWU or quantity capacity to meet all requests, the requests are fully, then partially filled in unspecified but repeatable order.\n\nAccumulated tails inventory is offered for trading as a specifiable output commodity.", 
    "entity": "facility", 
    "name": "cycamore::Enrichment", 
-   "niche": "enrichment", 
+   "niche": "enrichment facility", 
    "parents": ["cyclus::Facility"], 
    "vars": {
     "feed_commod": {
@@ -956,7 +563,7 @@
      "index": 0, 
      "tooltip": "feed commodity", 
      "type": "std::string", 
-     "uilabel": "feed_commod", 
+     "uilabel": "Feed Commodity", 
      "uitype": "incommodity"
     }, 
     "feed_recipe": {
@@ -965,7 +572,7 @@
      "index": 2, 
      "tooltip": "feed recipe", 
      "type": "std::string", 
-     "uilabel": "feed_recipe", 
+     "uilabel": "Feed Recipe", 
      "uitype": "recipe"
     }, 
     "initial_feed": {
@@ -975,7 +582,7 @@
      "index": 8, 
      "tooltip": "initial uranium reserves (kg)", 
      "type": "double", 
-     "uilabel": "initial_feed"
+     "uilabel": "Initial Feed Inventory"
     }, 
     "inventory": {
      "capacity": "max_feed_inventory", 
@@ -990,7 +597,7 @@
      "schema": "<optional>          <element name=\"max_enrich\">              <data type=\"double\">                  <param name=\"minInclusive\">0</param>                  <param name=\"maxInclusive\">1</param>              </data>          </element>      </optional>", 
      "tooltip": "maximum allowed enrichment fraction", 
      "type": "double", 
-     "uilabel": "max_enrich"
+     "uilabel": "Maximum Allowed Enrichment"
     }, 
     "max_feed_inventory": {
      "alias": "max_feed_inventory", 
@@ -999,7 +606,7 @@
      "index": 6, 
      "tooltip": "max inventory of feed material (kg)", 
      "type": "double", 
-     "uilabel": "max_feed_inventory"
+     "uilabel": "Maximum Feed Inventory"
     }, 
     "order_prefs": {
      "alias": "order_prefs", 
@@ -1008,7 +615,7 @@
      "index": 9, 
      "tooltip": "order material requests by U235 content", 
      "type": "bool", 
-     "uilabel": "order_prefs", 
+     "uilabel": "Prefer feed with higher U235 content", 
      "userlevel": 10
     }, 
     "product_commod": {
@@ -1017,7 +624,7 @@
      "index": 1, 
      "tooltip": "product commodity", 
      "type": "std::string", 
-     "uilabel": "product_commod", 
+     "uilabel": "Product Commodity", 
      "uitype": "outcommodity"
     }, 
     "swu_capacity": {
@@ -1027,7 +634,7 @@
      "index": 5, 
      "tooltip": "SWU capacity (kgSWU/month)", 
      "type": "double", 
-     "uilabel": "swu_capacity"
+     "uilabel": "SWU Capacity"
     }, 
     "tails": {"index": 11, "type": ["cyclus::toolkit::ResBuf", "cyclus::Material"]}, 
     "tails_assay": {
@@ -1037,7 +644,7 @@
      "index": 4, 
      "tooltip": "tails assay", 
      "type": "double", 
-     "uilabel": "tails_assay"
+     "uilabel": "Tails Assay"
     }, 
     "tails_commod": {
      "alias": "tails_commod", 
@@ -1045,7 +652,7 @@
      "index": 3, 
      "tooltip": "tails commodity", 
      "type": "std::string", 
-     "uilabel": "tails_commod", 
+     "uilabel": "Tails Commodity", 
      "uitype": "outcommodity"
     }
    }
@@ -1062,6 +669,7 @@
    "doc": "FuelFab takes in 2 streams of material and mixes them in ratios in order to supply material that matches some neutronics properties of reqeusted material.  It uses an equivalence type method [1] inspired by a similar approach in the COSI fuel cycle simulator.\n\nThe FuelFab has 3 input inventories: fissile stream, filler stream, and an optional top-up inventory.  All materials received into each inventory are always combined into a single material (i.e. a single fissile material, a single filler material, etc.).  The input streams and requested fuel composition are each assigned weights based on summing:\n\n    N * (p_i - p_U238) / (p_Pu239 - p_U238)\n\nfor each nuclide where:\n\n    - p = nu*sigma_f - sigma_a   for the nuclide\n    - p_U238 is p for pure U238\n    - p_Pu239 is p for pure Pu239\n    - N is the nuclide's atom fraction\n    - nu is the average # neutrons per fission\n    - sigma_f is the microscopic fission cross-section\n    - sigma_a is the microscopic neutron absorption cross-section\n\nThe cross sections are from the simple cross section library in PyNE. They can be set to either a thermal or fast neutron spectrum.  A linear interpolation is performed using the weights of the fissile, filler, and target streams. The interpolation is used to compute a mixing ratio of the input streams that matches the target weight.  In the event that the target weight is higher than the fissile stream weight, the FuelFab will attempt to use the top-up and fissile input streams together instead of the fissile and filler streams.  All supplied material will always have the same weight as the requested material.\n\nThe supplying of mixed material is constrained by available inventory quantities and a per time step throughput limit.  Requests for fuel material larger than the throughput can never be met.  Fissile inventory can be requested/received via one or more commodities.  The DRE request preference for each of these commodities can also optionally be specified. By default, the top-up inventory size is zero, and it is not used for mixing. \n\n[1] Baker, A. R., and R. W. Ross. \"Comparison of the value of plutonium and    uranium isotopes in fast reactors.\" Proceedings of the Conference on    Breeding. Economics, and Safety in Large Fast Power Reactors. 1963.", 
    "entity": "facility", 
    "name": "cycamore::FuelFab", 
+   "niche": "fabrication", 
    "parents": ["cyclus::Facility"], 
    "vars": {
     "fill": {
@@ -1075,7 +683,7 @@
      "index": 0, 
      "tooltip": "fill_commod", 
      "type": "std::string", 
-     "uilabel": "fill_commod", 
+     "uilabel": "Filler Stream Commodity", 
      "uitype": "incommodity"
     }, 
     "fill_pref": {
@@ -1085,7 +693,7 @@
      "index": 2, 
      "tooltip": "fill_pref", 
      "type": "double", 
-     "uilabel": "fill_pref"
+     "uilabel": "Filler Stream Preference"
     }, 
     "fill_recipe": {
      "alias": "fill_recipe", 
@@ -1093,7 +701,7 @@
      "index": 1, 
      "tooltip": "fill_recipe", 
      "type": "std::string", 
-     "uilabel": "fill_recipe", 
+     "uilabel": "Filler Stream Recipe", 
      "uitype": "recipe"
     }, 
     "fill_size": {
@@ -1102,7 +710,7 @@
      "index": 3, 
      "tooltip": "fill_size", 
      "type": "double", 
-     "uilabel": "fill_size", 
+     "uilabel": "Filler Stream Inventory Capacity", 
      "units": "kg"
     }, 
     "fiss": {
@@ -1117,7 +725,7 @@
      "index": 6, 
      "tooltip": ["fiss_commod_prefs", ""], 
      "type": ["std::vector", "double"], 
-     "uilabel": ["fiss_commod_prefs", ""]
+     "uilabel": ["Fissile Stream Preferences", ""]
     }, 
     "fiss_commods": {
      "alias": ["fiss_commods", "val"], 
@@ -1125,7 +733,7 @@
      "index": 5, 
      "tooltip": ["fiss_commods", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["fiss_commods", ""], 
+     "uilabel": ["Fissile Stream Commodities", ""], 
      "uitype": ["oneormore", "incommodity"]
     }, 
     "fiss_recipe": {
@@ -1135,7 +743,7 @@
      "index": 7, 
      "tooltip": "fiss_recipe", 
      "type": "std::string", 
-     "uilabel": "fiss_recipe", 
+     "uilabel": "Fissile Stream Recipes", 
      "uitype": "recipe"
     }, 
     "fiss_size": {
@@ -1144,7 +752,7 @@
      "index": 8, 
      "tooltip": "fiss_size", 
      "type": "double", 
-     "uilabel": "fiss_size", 
+     "uilabel": "Fissile Stream Inventory Capacity", 
      "units": "kg"
     }, 
     "outcommod": {
@@ -1153,16 +761,17 @@
      "index": 16, 
      "tooltip": "outcommod", 
      "type": "std::string", 
-     "uilabel": "outcommod", 
+     "uilabel": "Output Commodity", 
      "uitype": "outcommodity"
     }, 
     "spectrum": {
      "alias": "spectrum", 
+     "categorical": ["fission_spectrum_ave", "thermal"], 
      "doc": "The type of cross-sections to use for composition property calculation. Use 'fission_spectrum_ave' for fast reactor compositions or 'thermal' for thermal reactors.", 
      "index": 15, 
      "tooltip": "spectrum", 
      "type": "std::string", 
-     "uilabel": "spectrum"
+     "uilabel": "Spectrum type"
     }, 
     "throughput": {
      "alias": "throughput", 
@@ -1170,7 +779,7 @@
      "index": 17, 
      "tooltip": "throughput", 
      "type": "double", 
-     "uilabel": "throughput", 
+     "uilabel": "Maximum Throughput", 
      "units": "kg"
     }, 
     "topup": {
@@ -1185,7 +794,7 @@
      "index": 10, 
      "tooltip": "topup_commod", 
      "type": "std::string", 
-     "uilabel": "topup_commod", 
+     "uilabel": "Top-up Stream Commodity", 
      "uitype": "incommodity"
     }, 
     "topup_pref": {
@@ -1195,7 +804,7 @@
      "index": 12, 
      "tooltip": "topup_pref", 
      "type": "double", 
-     "uilabel": "topup_pref"
+     "uilabel": "Top-up Stream Preference"
     }, 
     "topup_recipe": {
      "alias": "topup_recipe", 
@@ -1204,7 +813,7 @@
      "index": 11, 
      "tooltip": "topup_recipe", 
      "type": "std::string", 
-     "uilabel": "topup_recipe", 
+     "uilabel": "Top-up Stream Recipe", 
      "uitype": "recipe"
     }, 
     "topup_size": {
@@ -1214,7 +823,7 @@
      "index": 13, 
      "tooltip": "topup_size", 
      "type": "double", 
-     "uilabel": "topup_size", 
+     "uilabel": "Top-up Stream Inventory Capacity", 
      "units": "kg"
     }
    }
@@ -1238,8 +847,7 @@
      "index": 0, 
      "tooltip": "commodity in demand", 
      "type": "std::string", 
-     "uilabel": "commodity_name", 
-     "uitype": "commodity"
+     "uilabel": "Growth Commodity"
     }, 
     "demand_params": {
      "alias": ["demand_params", "val"], 
@@ -1247,7 +855,7 @@
      "index": 2, 
      "tooltip": ["demand parameters", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["demand_params", ""]
+     "uilabel": ["Demand Growth Function Parameters", ""]
     }, 
     "demand_times": {
      "alias": ["demand_times", "val"], 
@@ -1255,7 +863,7 @@
      "index": 3, 
      "tooltip": ["demand times", ""], 
      "type": ["std::vector", "int"], 
-     "uilabel": ["demand_times", ""]
+     "uilabel": ["Demand Growth Piecewise Function Times", ""]
     }, 
     "demand_types": {
      "alias": ["demand_types", "val"], 
@@ -1263,7 +871,7 @@
      "index": 1, 
      "tooltip": ["demand type", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["demand_types", ""]
+     "uilabel": ["Demand Growth Function Form", ""]
     }
    }
   }, 
@@ -1293,7 +901,7 @@
      "index": 0, 
      "tooltip": ["facility prototypes", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["prototypes", ""], 
+     "uilabel": ["Prototype List", ""], 
      "uitype": ["none", "prototype"]
     }
    }
@@ -1322,6 +930,7 @@
      "tooltip": "assem_size", 
      "type": "double", 
      "uilabel": "assem_size", 
+     "uilabels": "Assembly Mass", 
      "units": "kg"
     }, 
     "core": {
@@ -1336,7 +945,7 @@
      "index": 9, 
      "tooltip": "cycle_step", 
      "type": "int", 
-     "uilabel": "cycle_step", 
+     "uilabel": "Time Since Start of Last Cycle", 
      "units": "time steps"
     }, 
     "cycle_time": {
@@ -1345,7 +954,7 @@
      "index": 7, 
      "tooltip": "cycle_time", 
      "type": "int", 
-     "uilabel": "cycle_time", 
+     "uilabel": "Cycle Length", 
      "units": "time steps"
     }, 
     "discharged": {
@@ -1353,6 +962,7 @@
      "default": 0, 
      "doc": "This should NEVER be set manually.", 
      "index": 25, 
+     "internal": true, 
      "tooltip": "discharged", 
      "type": "bool", 
      "uilabel": "discharged"
@@ -1368,7 +978,7 @@
      "index": 10, 
      "tooltip": ["fuel_incommods", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["fuel_incommods", ""], 
+     "uilabel": ["Fresh Fuel Commodity List", ""], 
      "uitype": ["oneormore", "incommodity"]
     }, 
     "fuel_inrecipes": {
@@ -1377,7 +987,7 @@
      "index": 11, 
      "tooltip": ["fuel_inrecipes", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["fuel_inrecipes", ""], 
+     "uilabel": ["Fresh Fuel Recipe List", ""], 
      "uitype": ["oneormore", "recipe"]
     }, 
     "fuel_outcommods": {
@@ -1386,8 +996,8 @@
      "index": 13, 
      "tooltip": ["fuel_outcommods", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["fuel_outcommods", ""], 
-     "uitype": ["oneormore", "incommodity"]
+     "uilabel": ["Spent Fuel Commodity List", ""], 
+     "uitype": ["oneormore", "outcommodity"]
     }, 
     "fuel_outrecipes": {
      "alias": ["fuel_outrecipes", "val"], 
@@ -1395,7 +1005,7 @@
      "index": 12, 
      "tooltip": ["fuel_outrecipes", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["fuel_outrecipes", ""], 
+     "uilabel": ["Spent Fuel Recipe List", ""], 
      "uitype": ["oneormore", "recipe"]
     }, 
     "fuel_prefs": {
@@ -1405,7 +1015,7 @@
      "index": 14, 
      "tooltip": ["fuel_prefs", ""], 
      "type": ["std::vector", "double"], 
-     "uilabel": ["fuel_prefs", ""]
+     "uilabel": ["Fresh Fuel Preference List", ""]
     }, 
     "n_assem_batch": {
      "alias": "n_assem_batch", 
@@ -1413,7 +1023,7 @@
      "index": 2, 
      "tooltip": "n_assem_batch", 
      "type": "int", 
-     "uilabel": "n_assem_batch"
+     "uilabel": "Number of Assemblies per Batch"
     }, 
     "n_assem_core": {
      "alias": "n_assem_core", 
@@ -1421,7 +1031,7 @@
      "index": 4, 
      "tooltip": "n_assem_core", 
      "type": "int", 
-     "uilabel": "n_assem_core"
+     "uilabel": "Number of Assemblies in Core"
     }, 
     "n_assem_fresh": {
      "alias": "n_assem_fresh", 
@@ -1430,7 +1040,8 @@
      "index": 6, 
      "tooltip": "n_assem_fresh", 
      "type": "int", 
-     "uilabel": "n_assem_fresh"
+     "uilabel": "Minimum Fresh Fuel Inventory", 
+     "units": "assemblies"
     }, 
     "n_assem_spent": {
      "alias": "n_assem_spent", 
@@ -1439,7 +1050,8 @@
      "index": 5, 
      "tooltip": "n_assem_spent", 
      "type": "int", 
-     "uilabel": "n_assem_spent"
+     "uilabel": "Maximum Spent Fuel Inventory", 
+     "units": "assemblies"
     }, 
     "power_cap": {
      "alias": "power_cap", 
@@ -1448,7 +1060,7 @@
      "index": 0, 
      "tooltip": "power_cap", 
      "type": "double", 
-     "uilabel": "power_cap", 
+     "uilabel": "Nominal Reactor Power", 
      "units": "MWe"
     }, 
     "power_name": {
@@ -1458,7 +1070,7 @@
      "index": 1, 
      "tooltip": "power_name", 
      "type": "std::string", 
-     "uilabel": "power_name"
+     "uilabel": "Power Commodity Name"
     }, 
     "pref_change_commods": {
      "alias": ["pref_change_commods", "val"], 
@@ -1467,7 +1079,7 @@
      "index": 19, 
      "tooltip": ["pref_change_commods", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["pref_change_commods", ""], 
+     "uilabel": ["Commodity for Changed Fresh Fuel Preference", ""], 
      "uitype": ["oneormore", "incommodity"]
     }, 
     "pref_change_times": {
@@ -1477,7 +1089,7 @@
      "index": 18, 
      "tooltip": ["pref_change_times", ""], 
      "type": ["std::vector", "int"], 
-     "uilabel": ["pref_change_times", ""]
+     "uilabel": ["Time to Change Fresh Fuel Preference", ""]
     }, 
     "pref_change_values": {
      "alias": ["pref_change_values", "val"], 
@@ -1486,7 +1098,7 @@
      "index": 20, 
      "tooltip": ["pref_change_values", ""], 
      "type": ["std::vector", "double"], 
-     "uilabel": ["pref_change_values", ""]
+     "uilabel": ["Changed Fresh Fuel Preference", ""]
     }, 
     "recipe_change_commods": {
      "alias": ["recipe_change_commods", "val"], 
@@ -1495,7 +1107,7 @@
      "index": 22, 
      "tooltip": ["recipe_change_commods", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["recipe_change_commods", ""], 
+     "uilabel": ["Commodity for Changed Fresh/Spent Fuel Recipe", ""], 
      "uitype": ["oneormore", "incommodity"]
     }, 
     "recipe_change_in": {
@@ -1505,7 +1117,7 @@
      "index": 23, 
      "tooltip": ["recipe_change_in", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["recipe_change_in", ""], 
+     "uilabel": ["New Recipe for Fresh Fuel", ""], 
      "uitype": ["oneormore", "recipe"]
     }, 
     "recipe_change_out": {
@@ -1515,7 +1127,7 @@
      "index": 24, 
      "tooltip": ["recipe_change_out", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["recipe_change_out", ""], 
+     "uilabel": ["New Recipe for Spent Fuel", ""], 
      "uitype": ["oneormore", "recipe"]
     }, 
     "recipe_change_times": {
@@ -1525,7 +1137,7 @@
      "index": 21, 
      "tooltip": ["recipe_change_times", ""], 
      "type": ["std::vector", "int"], 
-     "uilabel": ["recipe_change_times", ""]
+     "uilabel": ["Time to Change Fresh/Spent Fuel Recipe", ""]
     }, 
     "refuel_time": {
      "alias": "refuel_time", 
@@ -1533,13 +1145,15 @@
      "index": 8, 
      "tooltip": "refuel_time", 
      "type": "int", 
-     "uilabel": "refuel_time", 
+     "uilabel": "Refueling Outage Duration", 
      "units": "time steps"
     }, 
     "res_indexes": {
      "alias": [["res_indexes", "item"], "key", "val"], 
+     "default": {}, 
      "doc": "This should NEVER be set manually.", 
      "index": 26, 
+     "internal": true, 
      "tooltip": [["res_indexes", ""], "", ""], 
      "type": ["std::map", "int", "int"], 
      "uilabel": [["res_indexes", ""], "", ""]
@@ -1563,6 +1177,7 @@
    "doc": "Separations processes feed material into one or more streams containing specific elements and/or nuclides.  It uses mass-based efficiencies.\n\nUser defined separations streams are specified as groups of component-efficiency pairs where 'component' means either a particular element or a particular nuclide.  Each component's paired efficiency represents the mass fraction of that component in the feed that is separated into that stream.  The efficiencies of a particular component across all streams must sum up to less than or equal to one.  If less than one, the remainining material is sent to a waste inventory and (potentially) traded away from there.\n\nThe facility receives material into a feed inventory that it processes with a specified throughput each time step.  Each output stream has a corresponding output inventory size/limit.  If the facility is unable to reduce its stocks by trading and hits this limit for any of its output streams, further processing/separations of feed material will halt until room is again available in the output streams.", 
    "entity": "facility", 
    "name": "cycamore::Separations", 
+   "niche": "separations", 
    "parents": ["cyclus::Facility"], 
    "vars": {
     "feed": {
@@ -1577,7 +1192,7 @@
      "index": 2, 
      "tooltip": ["feed_commod_prefs", ""], 
      "type": ["std::vector", "double"], 
-     "uilabel": ["feed_commod_prefs", ""]
+     "uilabel": ["Feed Commodity Preference List", ""]
     }, 
     "feed_commods": {
      "alias": ["feed_commods", "val"], 
@@ -1585,7 +1200,7 @@
      "index": 1, 
      "tooltip": ["feed_commods", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["feed_commods", ""], 
+     "uilabel": ["Feed Commodity List", ""], 
      "uitype": ["oneormore", "incommodity"]
     }, 
     "feed_recipe": {
@@ -1595,7 +1210,7 @@
      "index": 3, 
      "tooltip": "feed_recipe", 
      "type": "std::string", 
-     "uilabel": "feed_recipe", 
+     "uilabel": "Feed Commodity Recipe List", 
      "uitype": "recipe"
     }, 
     "feedbuf_size": {
@@ -1604,7 +1219,7 @@
      "index": 4, 
      "tooltip": "feedbuf_size", 
      "type": "double", 
-     "uilabel": "feedbuf_size", 
+     "uilabel": "Maximum Feed Inventory", 
      "units": "kg"
     }, 
     "leftover": {
@@ -1619,7 +1234,7 @@
      "index": 7, 
      "tooltip": "leftover_commod", 
      "type": "std::string", 
-     "uilabel": "leftover_commod", 
+     "uilabel": "Leftover Commodity", 
      "uitype": "outcommodity"
     }, 
     "leftoverbuf_size": {
@@ -1629,7 +1244,7 @@
      "index": 6, 
      "tooltip": "leftoverbuf_size", 
      "type": "double", 
-     "uilabel": "leftoverbuf_size", 
+     "uilabel": "Maximum Leftover Inventory", 
      "units": "kg"
     }, 
     "streams": "streams_", 
@@ -1647,7 +1262,7 @@
       "std::string", 
       ["std::pair", "double", ["std::map", "int", "double"]]
      ], 
-     "uilabel": [["streams_", ""], "", ["", "", [["", ""], "", ""]]], 
+     "uilabel": [["Separations Streams and Efficiencies", ""], "", ["", "", [["", ""], "", ""]]], 
      "uitype": [
       "oneormore", 
       "outcommodity", 
@@ -1660,7 +1275,7 @@
      "index": 0, 
      "tooltip": "throughput", 
      "type": "double", 
-     "uilabel": "throughput", 
+     "uilabel": "Maximum Separations Throughput", 
      "units": "kg"
     }
    }
@@ -1674,7 +1289,7 @@
     "cyclus::TimeListener", 
     "cyclus::Trader"
    ], 
-   "doc": "A sink facility that accepts specified amounts of commodities from other agents", 
+   "doc": " A sink facility that accepts materials and products with a fixed\n throughput (per time step) capacity and a lifetime capacity defined by\n a total inventory size. The inventory size and throughput capacity\n both default to infinite. If a recipe is provided, it will request\n material with that recipe. Requests are made for any number of\n specified commodities.\n", 
    "entity": "facility", 
    "name": "cycamore::Sink", 
    "parents": ["cyclus::Facility"], 
@@ -1686,7 +1301,7 @@
      "index": 1, 
      "tooltip": "sink capacity", 
      "type": "double", 
-     "uilabel": "capacity"
+     "uilabel": "Maximum Throughput"
     }, 
     "in_commods": {
      "alias": ["in_commods", "val"], 
@@ -1694,16 +1309,13 @@
      "index": 0, 
      "tooltip": ["input commodities", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["in_commods", ""], 
+     "uilabel": ["List of Input Commodities", ""], 
      "uitype": ["oneormore", "incommodity"]
     }, 
     "inventory": {
-     "alias": "inventory", 
      "capacity": "max_inv_size", 
      "index": 4, 
-     "tooltip": "inventory", 
-     "type": "cyclus::toolkit::ResourceBuff", 
-     "uilabel": "inventory"
+     "type": ["cyclus::toolkit::ResBuf", "cyclus::Resource"]
     }, 
     "max_inv_size": {
      "alias": "max_inv_size", 
@@ -1712,7 +1324,7 @@
      "index": 3, 
      "tooltip": "sink maximum inventory size", 
      "type": "double", 
-     "uilabel": "max_inv_size"
+     "uilabel": "Maximum Inventory"
     }, 
     "recipe_name": {
      "alias": "recipe_name", 
@@ -1721,7 +1333,7 @@
      "index": 2, 
      "tooltip": "requested composition", 
      "type": "std::string", 
-     "uilabel": "recipe_name", 
+     "uilabel": "Input Recipe", 
      "uitype": "recipe"
     }
    }
@@ -1737,7 +1349,7 @@
     "cyclus::toolkit::AgentManaged", 
     "cyclus::toolkit::CommodityProducer"
    ], 
-   "doc": "This facility acts as a source of material with a fixed throughput (per\n time step) capacity and a lifetime capacity defined by a total inventory\n size.  It offers its material as a single commodity. If a composition\n recipe is specified, it provides that single material composition to\n requesters.  If unspecified, the source provides materials with the exact\n requested compositions.  The inventory size and throughput both default to\n infinite.  Supplies material results in corresponding decrease in\n inventory, and when the inventory size reaches zero, the source can provide\n no more material.\n", 
+   "doc": "This facility acts as a source of material with a fixed throughput (per\ntime step) capacity and a lifetime capacity defined by a total inventory\nsize.  It offers its material as a single commodity. If a composition\nrecipe is specified, it provides that single material composition to\nrequesters.  If unspecified, the source provides materials with the exact\nrequested compositions.  The inventory size and throughput both default to\ninfinite.  Supplies material results in corresponding decrease in\ninventory, and when the inventory size reaches zero, the source can provide\nno more material.\n", 
    "entity": "facility", 
    "name": "cycamore::Source", 
    "parents": ["cyclus::Facility", "cyclus::toolkit::CommodityProducer"], 
@@ -1749,7 +1361,7 @@
      "index": 3, 
      "tooltip": "inventory_size", 
      "type": "double", 
-     "uilabel": "inventory_size", 
+     "uilabel": "Initial Inventory", 
      "units": "kg"
     }, 
     "outcommod": {
@@ -1758,7 +1370,7 @@
      "index": 0, 
      "tooltip": "source output commodity", 
      "type": "std::string", 
-     "uilabel": "outcommod", 
+     "uilabel": "Output Commodity", 
      "uitype": "outcommodity"
     }, 
     "outrecipe": {
@@ -1768,7 +1380,7 @@
      "index": 1, 
      "tooltip": "name of material recipe to provide", 
      "type": "std::string", 
-     "uilabel": "outrecipe", 
+     "uilabel": "Output Recipe", 
      "uitype": "recipe"
     }, 
     "throughput": {
@@ -1778,7 +1390,7 @@
      "index": 2, 
      "tooltip": "per time step throughput", 
      "type": "double", 
-     "uilabel": "throughput", 
+     "uilabel": "Maximum Throughput", 
      "units": "kg/(time step)"
     }
    }
@@ -2314,9 +1926,6 @@
   }
  }, 
  "schema": {
-  ":Brightlite:FuelfabFacility": "<interleave>\n    <optional>\n        <element name=\"maximum_storage\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"fissle_stream\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"non_fissle_stream\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"in_commods\">\n        <oneOrMore>\n            <element name=\"key\">\n                <data type=\"string\"/>\n            </element>\n            <element name=\"val\">\n                <data type=\"double\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"out_commod\">\n        <data type=\"string\"/>\n    </element>\n</interleave>\n", 
-  ":Brightlite:ReactorFacility": "<interleave>\n    <optional>\n        <element name=\"tolerance\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"SS_tolerance\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_a\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_b\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_mod_siga\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_mod_sigs\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"disadv_fuel_sigs\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"in_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"out_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"libraries\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"interpol_pairs\">\n            <oneOrMore>\n                <element name=\"key\">\n                    <data type=\"string\"/>\n                </element>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"batches\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"nonleakage\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"target_burnup\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"generated_power\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"core_mass\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"efficiency\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fuel_area\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"cylindrical_delta\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_Sig_a\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_Sig_tr\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_Sig_f\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"mod_thickness\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fuel_Sig_tr\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"burnupcalc_timestep\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"flux_mode\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"DA_mode\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"reactor_life\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"CR_fissile\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"CR_lower\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"CR_upper\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"CR_target\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"outage_time\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
-  ":Brightlite:ReprocessFacility": "<interleave>\n    <element name=\"in_commod\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"commod_out\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"repro_input_path\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"input_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"output_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n</interleave>\n", 
   ":agents:KFacility": "<interleave>\n    <element name=\"in_commod\">\n        <data type=\"token\"/>\n    </element>\n    <element name=\"out_commod\">\n        <data type=\"token\"/>\n    </element>\n    <element name=\"recipe_name\">\n        <data type=\"token\"/>\n    </element>\n    <element name=\"in_capacity\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"out_capacity\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"current_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_inv_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"k_factor_in\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"k_factor_out\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
   ":agents:NullInst": "<text/>", 
   ":agents:NullRegion": "<text/>", 
@@ -2356,7 +1965,9 @@
   ":agents:Predator", 
   ":agents:Prey", 
   ":agents:Sink", 
-  ":agents:Source",
+  ":agents:Source", 
+  ":cycaless:BatchReactor", 
+  ":cycaless:DeployInst", 
   ":cycamore:DeployInst", 
   ":cycamore:Enrichment", 
   ":cycamore:FuelFab", 
@@ -2365,6 +1976,19 @@
   ":cycamore:Reactor", 
   ":cycamore:Separations", 
   ":cycamore:Sink", 
-  ":cycamore:Source"
+  ":cycamore:Source", 
+  "StubFacility/cyclus/StubInst/cyclus/StubRegion:StubRegion:StubRegion", 
+  "StubFacility/cyclus/StubInst:StubInst:StubInst", 
+  "StubFacility:StubFacility:StubFacility", 
+  "agents:agents:KFacility", 
+  "agents:agents:NullInst", 
+  "agents:agents:NullRegion", 
+  "agents:agents:Predator", 
+  "agents:agents:Prey", 
+  "agents:agents:Sink", 
+  "agents:agents:Source", 
+  "stubs:StubFacility:StubFacility", 
+  "stubs:StubInst:StubInst", 
+  "stubs:StubRegion:StubRegion"
  ]
 }
