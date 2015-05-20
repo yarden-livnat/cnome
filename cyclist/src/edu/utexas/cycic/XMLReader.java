@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javafx.scene.image.Image;
 
@@ -234,16 +235,15 @@ public class XMLReader {
 				System.out.println(newArray);
 				facArray.add(newArray);
 			} else {
-				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s;
+                                String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s, cat_s;
 				int userLevel_s;
 				JsonString type = anno1.getJsonString("type");
 				JsonString alias = anno1.getJsonString("alias");
 				JsonString uitype = anno1.getJsonString("uitype");
 				units_s = (anno1.getJsonString("units") != null) ? anno1.getString("units") : null;
 				range_s = (anno1.getJsonString("range") != null) ? anno1.getString("range") : null;
-				if(range_s == null){
-					range_s = (anno1.getJsonString("categorical") != null) ? anno1.getString("categorical") : null;
-				}
+                                cat_s = (anno1.getJsonArray("categorical") != null) ? anno1.getJsonArray("categorical").toString() : null;
+                                range_s = range_s == null ? cat_s : range_s;
 				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
 				defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
 				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
