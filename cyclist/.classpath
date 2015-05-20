@@ -15,6 +15,6 @@
 	<classpathentry kind="lib" path="lib/controlsfx-8.20.8.jar"/>
 	<classpathentry kind="lib" path="lib/openjfx-dialogs-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
-	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.7.jar"/>
+	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.8.10.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
