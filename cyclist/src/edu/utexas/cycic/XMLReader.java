@@ -235,21 +235,21 @@ public class XMLReader {
 				System.out.println(newArray);
 				facArray.add(newArray);
 			} else {
-                                String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s, cat_s;
-				int userLevel_s;
-				JsonString type = anno1.getJsonString("type");
-				JsonString alias = anno1.getJsonString("alias");
-				JsonString uitype = anno1.getJsonString("uitype");
-				units_s = (anno1.getJsonString("units") != null) ? anno1.getString("units") : null;
-				range_s = (anno1.getJsonString("range") != null) ? anno1.getString("range") : null;
-                                cat_s = (anno1.getJsonArray("categorical") != null) ?
-                                        anno1.getJsonArray("categorical").toString().replaceAll("[", "").replaceAll("]", "") : null;
-                                range_s = range_s == null ? cat_s : range_s;
-				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
-				defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
-				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
-				tooltip_s = (anno1.getJsonString("tooltip") != null) ? anno1.getString("tooltip") : null;
-				uilabel_s = (anno1.getJsonString("uilabel") != null) ? anno1.getString("uilabel") : null;
+				String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s, cat_s;
+                int userLevel_s;
+                JsonString type = anno1.getJsonString("type");
+                JsonString alias = anno1.getJsonString("alias");
+                JsonString uitype = anno1.getJsonString("uitype");
+                units_s = (anno1.getJsonString("units") != null) ? anno1.getString("units") : null;
+                range_s = (anno1.getJsonString("range") != null) ? anno1.getString("range") : null;
+                cat_s = (anno1.getJsonArray("categorical") != null) ?
+                		anno1.getJsonArray("categorical").toString().replaceAll("\\[", "").replaceAll("\\]", "") : null;
+                range_s = range_s == null ? cat_s : range_s;
+        		userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
+        		defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
+        		userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
+        		tooltip_s = (anno1.getJsonString("tooltip") != null) ? anno1.getString("tooltip") : null;
+        		uilabel_s = (anno1.getJsonString("uilabel") != null) ? anno1.getString("uilabel") : null;
 				ArrayList<Object> newArray = new ArrayList<Object>();
 				if(alias == null){
 					alias_s = var;
