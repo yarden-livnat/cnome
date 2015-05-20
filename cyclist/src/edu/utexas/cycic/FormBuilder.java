@@ -166,6 +166,11 @@ public class FormBuilder extends ViewBase {
 				if (facArray.get(2) == "oneOrMore"){
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
 						grid.add(name, columnNumber, rowNumber);
 						//grid.add(new Label((String) facArray.get(2)), columnNumber+1, rowNumber);
@@ -187,6 +192,11 @@ public class FormBuilder extends ViewBase {
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
 						grid.add(name, columnNumber, rowNumber);
 						// Indenting a sub structure
 						columnNumber += 1;

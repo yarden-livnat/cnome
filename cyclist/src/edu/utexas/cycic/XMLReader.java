@@ -244,6 +244,7 @@ public class XMLReader {
 				if(range_s == null){
 					range_s = (anno1.getJsonString("categorical") != null) ? anno1.getString("categorical") : null;
 				}
+				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
 				defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
 				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
 				tooltip_s = (anno1.getJsonString("tooltip") != null) ? anno1.getString("tooltip") : null;
@@ -260,8 +261,8 @@ public class XMLReader {
 					uitype_s = uitype.toString();
 				}
 				newArray = stringAnnotationReq(type.toString(), alias_s, uitype_s, newArray);
-				newArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, newArray);
 				newArray = stringAnnotationHelp(userLevel_s, tooltip_s, newArray);
+				newArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, newArray);
 				newArray.set(8, doc_s);
 				System.out.println(newArray);
 				facArray.add(newArray);
@@ -285,7 +286,6 @@ public class XMLReader {
 		System.out.println(type.getJsonString(0).toString());
 		switch (type.getJsonString(0).toString().replaceAll("\"", "")){
 		case "std::map":
-			System.out.println("MAP START");
 			ArrayList<Object> structArray = new ArrayList<Object>();
 			for(int i = 1; i < type.size(); i++){
 				if(type.get(i) instanceof JsonArray){
@@ -315,8 +315,8 @@ public class XMLReader {
 					tooltip_s = tooltipTest(tooltip, i);
 					uilabel_s = labelTest(uilabel, i);
 					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
-					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
+					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 					structArray.add(tempArray);
 					
 				}
@@ -348,10 +348,8 @@ public class XMLReader {
 				System.out.println(uilabel);
 				facArray.set(9, uilabel.getJsonArray(0).getString(0));		
 			}
-			System.out.println("MAP2");
 			break;
 		case "std::pair":
-			System.out.println("PAIR START");
 			ArrayList<Object> structArrayPair = new ArrayList<Object>();
 			for(int i = 1; i < type.size(); i++){
 				if(type.get(i) instanceof JsonArray){
@@ -381,8 +379,8 @@ public class XMLReader {
 					tooltip_s = tooltipTest(tooltip, i);
 					uilabel_s = labelTest(uilabel, i);
 					tempArray = stringAnnotationReq(type.getString(i), alias_s, uitype_s, tempArray);
-					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 					tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
+					tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 					structArrayPair.add(tempArray);
 				}
 			}
@@ -412,7 +410,6 @@ public class XMLReader {
 				System.out.println(uilabel);
 				facArray.set(9, uilabel.getString(0));		
 			}
-			System.out.println("PAIR END");
 			break;
 		case "std::vector":
 			ArrayList<Object> structArrayVector = new ArrayList<Object>();
@@ -443,8 +440,8 @@ public class XMLReader {
 				tooltip_s = tooltipTest(tooltip);
 				uilabel_s = labelTest(uilabel);
 				tempArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, tempArray);
-				tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 				tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
+				tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 				structArrayVector.add(tempArray);
 			}
 			if(alias == null){
@@ -471,8 +468,8 @@ public class XMLReader {
 			tooltip_s = tooltipTest(tooltip);
 			uilabel_s = labelTest(uilabel);
 			tempArray = stringAnnotationReq(type.getString(1), alias_s, uitype_s, tempArray);
-			tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 			tempArray = stringAnnotationHelp(userLevel_s, tooltip_s, tempArray);
+			tempArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, tempArray);
 			break;
 		default : 
 			System.out.println("Default");

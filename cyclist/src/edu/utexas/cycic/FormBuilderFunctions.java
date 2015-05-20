@@ -271,13 +271,13 @@ public class FormBuilderFunctions {
 		cb.setMinWidth(80);
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				for(facilityNode facility: DataArrays.FacilityNodes){
+				/*for(facilityNode facility: DataArrays.FacilityNodes){
 					for(int i =0; i < facility.cycicCircle.incommods.size(); i++){
 						if(facility.cycicCircle.incommods.get(i) == cb.getValue()){
 							facility.cycicCircle.incommods.remove(i);
 						}
 					}
-				}
+				}*/
 				cb.getItems().clear();
 
 				for(CommodityNode label: DataArrays.CommoditiesList){
