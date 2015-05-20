@@ -173,7 +173,32 @@ public class FormBuilder extends ViewBase {
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
 						grid.add(name, columnNumber, rowNumber);
-						//grid.add(new Label((String) facArray.get(2)), columnNumber+1, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
+						rowNumber += 1;
+						// Indenting a sub structure
+						columnNumber += 1;
+						for(int ii = 0; ii < dataArray.size(); ii ++){
+							if ( ii > 0 ) {
+								grid.add(arrayListRemove(grid, dataArray, ii), columnNumber+2, rowNumber);
+							}
+							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
+							rowNumber += 1;
+						}
+						// resetting the indent
+						columnNumber -= 1;
+						
+					}
+				} else if (facArray.get(2) == "oneOrMoreMap"){
+					facArray = (ArrayList<Object>) facArray.get(1);
+					if ((int)facArray.get(6) <= userLevel && i == 0){
+						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
 						// Indenting a sub structure
