@@ -405,7 +405,7 @@ public class XMLReader {
 				facArray.set(7, tooltip.getString(0));		
 			}
 			if(uilabel == null){
-				facArray.add(var);		
+				facArray.add(var);	
 			} else {
 				System.out.println(uilabel);
 				facArray.set(9, uilabel.getString(0));		

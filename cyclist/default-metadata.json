@@ -1387,7 +1387,7 @@
      "tooltip": ["fuel_outcommods", ""], 
      "type": ["std::vector", "std::string"], 
      "uilabel": ["fuel_outcommods", ""], 
-     "uitype": ["oneormore", "incommodity"]
+     "uitype": ["oneormore", "outcommodity"]
     }, 
     "fuel_outrecipes": {
      "alias": ["fuel_outrecipes", "val"], 
