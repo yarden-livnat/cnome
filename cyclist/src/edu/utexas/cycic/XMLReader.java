@@ -242,7 +242,8 @@ public class XMLReader {
 				JsonString uitype = anno1.getJsonString("uitype");
 				units_s = (anno1.getJsonString("units") != null) ? anno1.getString("units") : null;
 				range_s = (anno1.getJsonString("range") != null) ? anno1.getString("range") : null;
-                                cat_s = (anno1.getJsonArray("categorical") != null) ? anno1.getJsonArray("categorical").toString() : null;
+                                cat_s = (anno1.getJsonArray("categorical") != null) ?
+                                        anno1.getJsonArray("categorical").toString().replaceAll("[", "").replaceAll("]", "") : null;
                                 range_s = range_s == null ? cat_s : range_s;
 				userLevel_s = (anno1.get("userlevel") != null) ? anno1.getInt("userlevel") : 0;
 				defType_s = (anno1.get("default") != null) ? anno1.get("default").toString() : null;
