@@ -35,7 +35,7 @@
 		</copy>
 		<copy todir="deploy/externalLibs">
 			<fileset dir="${basedir}\cyclist\lib">
-				<filename name="sqlite-jdbc-3.8.5-pre1.jar"/>	
+				<filename name="sqlite-jdbc-3.8.10.1.jar"/>	
 			</fileset>
 		</copy>
 		<copy todir="deploy/externalLibs">
