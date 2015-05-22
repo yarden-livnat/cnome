@@ -254,7 +254,7 @@ public class XMLReader {
 				} else {
 					defType = anno1.getJsonArray("default");
 				}
-				defType = null;
+				//defType = null;
 				JsonArray userLevel = anno1.getJsonArray("userlevel");
 				JsonArray tooltip = anno1.getJsonArray("tooltip");
 				JsonArray uilabel = anno1.getJsonArray("uilabel");

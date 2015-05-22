@@ -239,7 +239,6 @@ public class FormBuilder extends ViewBase {
 						}
 						// resetting the indent
 						columnNumber -= 1;
-						
 					}
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
