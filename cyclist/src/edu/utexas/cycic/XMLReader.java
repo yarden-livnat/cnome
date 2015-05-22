@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javafx.scene.image.Image;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
@@ -224,7 +224,37 @@ public class XMLReader {
 				if(range == null){
 					range = anno1.getJsonArray("categorical");
 				}
-				JsonArray defType = anno1.getJsonArray("default");
+				JsonArray defType;
+				if(type.getJsonString(0).toString().replace("\"", "").equalsIgnoreCase("std::map")){
+					if(anno1.get("default") != null){
+						defType = Json.createArrayBuilder()
+								.add("")
+								.add("")
+								.add("")
+								/*.add(Json.createArrayBuilder()
+									.add("")
+									.add(""))*/
+								.build();
+					} else {
+						defType = null;
+					}
+				} else if (type.getJsonString(0).toString().replace("\"", "").equalsIgnoreCase("std::pair")){
+					if(anno1.get("default") != null){
+						defType = Json.createArrayBuilder()
+								.add("")
+								.add("")
+								.add("")
+								/*.add(Json.createArrayBuilder()
+									.add("")
+									.add(""))*/
+								.build();
+					} else {
+						defType = null;
+					}
+				} else {
+					defType = anno1.getJsonArray("default");
+				}
+				defType = null;
 				JsonArray userLevel = anno1.getJsonArray("userlevel");
 				JsonArray tooltip = anno1.getJsonArray("tooltip");
 				JsonArray uilabel = anno1.getJsonArray("uilabel");
@@ -265,7 +295,6 @@ public class XMLReader {
 				newArray = stringAnnotationHelp(userLevel_s, tooltip_s, newArray);
 				newArray = stringAnnotationCos(units_s, range_s, defType_s, uilabel_s, newArray);
 				newArray.set(8, doc_s);
-				System.out.println(newArray);
 				facArray.add(newArray);
 				
 			}
@@ -300,7 +329,6 @@ public class XMLReader {
 							tooltip.getJsonArray(i), uilabel.getJsonArray(i), tempArray);
 					structArray.add(tempArray);
 				} else {
-
 					String alias_s, uitype_s, units_s, range_s, defType_s, tooltip_s, uilabel_s;
 					int userLevel_s;
 					ArrayList<Object> tempArray = new ArrayList<Object>();
@@ -344,7 +372,7 @@ public class XMLReader {
 				facArray.set(6, userLevel.getJsonArray(0).getString(0));		
 			}
 			if(tooltip == null){
-				facArray.add("");		
+				facArray.add("");
 			} else {
 				System.out.println(tooltip);
 				facArray.set(7, tooltip.getJsonArray(0).getString(0));		

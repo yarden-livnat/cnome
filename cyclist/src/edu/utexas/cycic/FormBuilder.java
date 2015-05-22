@@ -168,7 +168,7 @@ public class FormBuilder extends ViewBase {
 				if (facArray.get(2) == "oneOrMore"){
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
-						if(facArray.get(9) != null){
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
 							name.setText((String) facArray.get(9));
 						} else {
 							name.setText((String) facArray.get(0));	
@@ -203,10 +203,11 @@ public class FormBuilder extends ViewBase {
 						
 					}
 				} else if (facArray.get(2) == "oneOrMoreMap"){
-					facArray = (ArrayList<Object>) facArray.get(1);
+					//facArray = (ArrayList<Object>) facArray.get(1);
+					//dataArray = (ArrayList<Object>) dataArray.get(0);
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
-						if(facArray.get(9) != null){
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
 							name.setText((String) facArray.get(9));
 						} else {
 							name.setText((String) facArray.get(0));	
@@ -243,7 +244,7 @@ public class FormBuilder extends ViewBase {
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
-						if(facArray.get(9) != null){
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
 							name.setText((String) facArray.get(9));
 						} else {
 							name.setText((String) facArray.get(0));	
@@ -278,7 +279,7 @@ public class FormBuilder extends ViewBase {
 				} else if ((int) facArray.get(6) <= userLevel){
 					// Adding the label
 					Label name = new Label();
-					if(facArray.get(9) != null){
+					if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
 						name.setText((String) facArray.get(9));
 					} else {
 						name.setText((String) facArray.get(0));	
