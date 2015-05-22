@@ -361,6 +361,7 @@ public class XMLReader {
 				itemArray.add(alias.getJsonArray(0).getString(1));
 			}
 			itemArray.add(structArray);
+			itemArray.add("item");
 			cycicResize(itemArray);
 			facArray.add(itemArray);
 			facArray.add("oneOrMoreMap");

@@ -139,7 +139,7 @@ public class RegionShape extends Rectangle {
 						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStrokeWidth(1);
 					}
 				}
-				
+				RegionCorralView.workingRegion = region;
 				rect.setEffect(VisFunctions.lighting);
 				rect.setStrokeWidth(5);
 				rect.setStroke(Color.DARKGRAY);
