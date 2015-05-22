@@ -129,6 +129,7 @@ public class RegionView extends ViewBase{
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		System.out.println(facArray);
 		if (facArray.size() == 0){
 			grid.add(new Label("This archetype is empty."), 0, 0);
 			return;

@@ -677,23 +677,23 @@
      "index": 4, 
      "type": ["cyclus::toolkit::ResBuf", "cyclus::Material"]
     }, 
-    "fill_commod": {
-     "alias": "fill_commod", 
-     "doc": "Commodity on which to request material for filler stream.", 
-     "index": 0, 
-     "tooltip": "fill_commod", 
-     "type": "std::string", 
-     "uilabel": "Filler Stream Commodity", 
-     "uitype": "incommodity"
-    }, 
-    "fill_pref": {
-     "alias": "fill_pref", 
-     "default": 0, 
-     "doc": "Filler material stream request preference.", 
+    "fill_commod_prefs": {
+     "alias": ["fill_commod_prefs", "val"], 
+     "default": [], 
+     "doc": "Filler stream commodity request preferences for each of the given filler commodities (same order). If unspecified, default is to use 1.0 for all preferences.", 
      "index": 2, 
-     "tooltip": "fill_pref", 
-     "type": "double", 
-     "uilabel": "Filler Stream Preference"
+     "tooltip": ["fill_commod_prefs", ""], 
+     "type": ["std::vector", "double"], 
+     "uilabel": ["Filler Stream Preferences", ""]
+    }, 
+    "fill_commods": {
+     "alias": ["fill_commods", "val"], 
+     "doc": "Ordered list of commodities on which to requesting filler stream material.", 
+     "index": 0, 
+     "tooltip": ["fill_commods", ""], 
+     "type": ["std::vector", "std::string"], 
+     "uilabel": ["Filler Stream Commodities", ""], 
+     "uitype": ["oneormore", "incommodity"]
     }, 
     "fill_recipe": {
      "alias": "fill_recipe", 
@@ -721,7 +721,7 @@
     "fiss_commod_prefs": {
      "alias": ["fiss_commod_prefs", "val"], 
      "default": [], 
-     "doc": "Fissile stream commodity request preferences for each of the given fissile commodities (same order). If unspecified, default is to use zero for all preferences.", 
+     "doc": "Fissile stream commodity request preferences for each of the given fissile commodities (same order). If unspecified, default is to use 1.0 for all preferences.", 
      "index": 6, 
      "tooltip": ["fiss_commod_prefs", ""], 
      "type": ["std::vector", "double"], 
@@ -841,38 +841,31 @@
    "name": "cycamore::GrowthRegion", 
    "parents": ["cyclus::Region"], 
    "vars": {
-    "commodity_name": {
-     "alias": "commodity_name", 
-     "doc": "name of the commodity experiencing a growth in demand", 
+    "commodity_demand": {
+     "alias": [
+      ["growth", "item"], 
+      "commod", 
+      ["piecewise_function", ["piece", "start", ["function", "type", "params"]]]
+     ], 
+     "doc": "Nameplate capacity demand functions.\n\nEach demand type must be for a commodity for which capacity can be built (e.g., 'power' from cycamore::Reactors). Any archetype that implements the cyclus::toolkit::CommodityProducer interface can interact with the GrowthRegion in the manner.\n\nDemand functions are defined as piecewise functions. Each piece must be provided a starting time and function description. Each function description is comprised of a function type and associated parameters. \n\n  * Start times are inclusive. For a start time :math:`t_0`, the demand function is evaluated on :math:`[t_0, \\infty)`.\n\n  * Supported function types are based on the `cyclus::toolkit::BasicFunctionFactory types <http://fuelcycle.org/cyclus/api/classcyclus_1_1toolkit_1_1BasicFunctionFactory.html#a2f3806305d99a745ab57c300e54a603d>`_. \n\n  * The type name is the lower-case name of the function (e.g., 'linear', 'exponential', etc.).\n\n  * The parameters associated with each function type can be found on their respective documentation pages.", 
      "index": 0, 
-     "tooltip": "commodity in demand", 
-     "type": "std::string", 
-     "uilabel": "Growth Commodity"
+     "tooltip": [["commodity_demand", ""], "", ["", ["", "", ["", "", ""]]]], 
+     "type": [
+      "std::map", 
+      "std::string", 
+      [
+       "std::vector", 
+       ["std::pair", "int", ["std::pair", "std::string", "std::string"]]
+      ]
+     ], 
+     "uilabel": [["Growth Demand Curves", ""], "", ["", ["", "", ["", "", ""]]]], 
+     "uitype": [
+      "oneormore", 
+      "string", 
+      ["oneormore", ["pair", "int", ["pair", "string", "string"]]]
+     ]
     }, 
-    "demand_params": {
-     "alias": ["demand_params", "val"], 
-     "doc": "parameters that define the behavior of the demand type function", 
-     "index": 2, 
-     "tooltip": ["demand parameters", ""], 
-     "type": ["std::vector", "std::string"], 
-     "uilabel": ["Demand Growth Function Parameters", ""]
-    }, 
-    "demand_times": {
-     "alias": ["demand_times", "val"], 
-     "doc": "vector describing the length of times regarding the piecewise demand type", 
-     "index": 3, 
-     "tooltip": ["demand times", ""], 
-     "type": ["std::vector", "int"], 
-     "uilabel": ["Demand Growth Piecewise Function Times", ""]
-    }, 
-    "demand_types": {
-     "alias": ["demand_types", "val"], 
-     "doc": "mathematical description of demand growth (i.e., linear, exponential, piecewise)", 
-     "index": 1, 
-     "tooltip": ["demand type", ""], 
-     "type": ["std::vector", "std::string"], 
-     "uilabel": ["Demand Growth Function Form", ""]
-    }
+    "growth": "commodity_demand"
    }
   }, 
   ":cycamore:ManagerInst": {
@@ -897,12 +890,12 @@
    "vars": {
     "prototypes": {
      "alias": ["prototypes", "val"], 
-     "doc": "a facility to be managed by the institution", 
+     "doc": "A set of facility prototypes that this institution can build. All prototypes in this list must be based on an archetype that implements the cyclus::toolkit::CommodityProducer interface", 
      "index": 0, 
-     "tooltip": ["facility prototypes", ""], 
+     "tooltip": ["producer facility prototypes", ""], 
      "type": ["std::vector", "std::string"], 
-     "uilabel": ["Prototype List", ""], 
-     "uitype": ["none", "prototype"]
+     "uilabel": ["Producer Prototype List", ""], 
+     "uitype": ["oneormore", "prototype"]
     }
    }
   }, 
@@ -917,7 +910,7 @@
     "cyclus::toolkit::AgentManaged", 
     "cyclus::toolkit::CommodityProducer"
    ], 
-   "doc": "Reactor is a simple, general reactor based on static compositional transformations to model fuel burnup.  The user specifies a set of input fuels and corresponding burnt compositions that fuel is transformed to when it is discharged from the core.  No incremental transmutation takes place. Rather, at the end of an operational cycle, the batch being discharged from the core is instantaneously transmuted from its original fresh fuel composition into its spent fuel form.\n\nEach fuel is identified by a specific input commodity and has an associated input recipe (nuclide composition), output recipe, output commidity, and preference.  The preference identifies which input fuels are preferred when requesting.  Changes in these preferences can be specified as a function of time using the pref_change variables.  Changes in the input-output recipe compositions can also be specified as a function of time using the recipe_change variables.\n\nThe reactor treats fuel as individual assemblies that are never split, combined or otherwise treated in any non-discrete way.  Fuel is requested in full-or-nothing assembly sized quanta.  If real-world assembly modeling is unnecessary, parameters can be adjusted (e.g. n_assem_core, assem_size, n_assem_batch).  At the end of every cycle, a full batch is discharged from the core consisting of n_assem_batch assemblies of assem_size kg. The reactor also has a specifiable refueling time period following the end of each cycle at the end of which it will resume operation on the next cycle *if* it has enough fuel for a full core; otherwise it waits until it has enough fresh fuel assemblies.\n\nIn addition to its core, the reactor has an on-hand fresh fuel inventory and a spent fuel inventory whose capacities are specified by n_assem_fresh and n_assem_spent respectively.  Each time step the reactor will attempt to acquire enough fresh fuel to fill its fresh fuel inventory (and its core if the core isn't currently full).  If the fresh fuel inventory has zero capacity, fuel will be ordered just-in-time after the end of each operational cycle before the next begins.  If the spent fuel inventory becomes full, the reactor will halt operation at the end of the next cycle until there is more room.  Each time step, the reactor will try to trade away as much of its spent fuel inventory as possible.", 
+   "doc": "Reactor is a simple, general reactor based on static compositional transformations to model fuel burnup.  The user specifies a set of input fuels and corresponding burnt compositions that fuel is transformed to when it is discharged from the core.  No incremental transmutation takes place. Rather, at the end of an operational cycle, the batch being discharged from the core is instantaneously transmuted from its original fresh fuel composition into its spent fuel form.\n\nEach fuel is identified by a specific input commodity and has an associated input recipe (nuclide composition), output recipe, output commidity, and preference.  The preference identifies which input fuels are preferred when requesting.  Changes in these preferences can be specified as a function of time using the pref_change variables.  Changes in the input-output recipe compositions can also be specified as a function of time using the recipe_change variables.\n\nThe reactor treats fuel as individual assemblies that are never split, combined or otherwise treated in any non-discrete way.  Fuel is requested in full-or-nothing assembly sized quanta.  If real-world assembly modeling is unnecessary, parameters can be adjusted (e.g. n_assem_core, assem_size, n_assem_batch).  At the end of every cycle, a full batch is discharged from the core consisting of n_assem_batch assemblies of assem_size kg. The reactor also has a specifiable refueling time period following the end of each cycle at the end of which it will resume operation on the next cycle *if* it has enough fuel for a full core; otherwise it waits until it has enough fresh fuel assemblies.\n\nIn addition to its core, the reactor has an on-hand fresh fuel inventory and a spent fuel inventory whose capacities are specified by n_assem_fresh and n_assem_spent respectively.  Each time step the reactor will attempt to acquire enough fresh fuel to fill its fresh fuel inventory (and its core if the core isn't currently full).  If the fresh fuel inventory has zero capacity, fuel will be ordered just-in-time after the end of each operational cycle before the next begins.  If the spent fuel inventory becomes full, the reactor will halt operation at the end of the next cycle until there is more room.  Each time step, the reactor will try to trade away as much of its spent fuel inventory as possible.\n\nWhen the reactor reaches the end of its lifetime, it will discharge all material from its core and trade away all its spent fuel as quickly as possible.  Full decommissioning will be delayed until all spent fuel is gone.  If the reactor has a full core when it is decommissioned (i.e. is mid-cycle) when the reactor is decommissioned, half (rounded up to nearest int) of its assemblies are transmuted to their respective burnt compositions.", 
    "entity": "facility", 
    "name": "cycamore::Reactor", 
    "niche": "reactor", 
@@ -1937,8 +1930,8 @@
   ":cycaless:DeployInst": "<element name=\"buildorder\">            \n<oneOrMore>                               \n  <element name=\"prototype\">           \n    <data type=\"string\"/>              \n  </element>                             \n  <element name=\"number\">              \n    <data type=\"nonNegativeInteger\"/>  \n  </element>                             \n  <element name=\"date\">                \n    <data type=\"nonNegativeInteger\"/>  \n  </element>                             \n</oneOrMore>                              \n</element>                               \n", 
   ":cycamore:DeployInst": "<interleave>\n    <element name=\"prototypes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"build_times\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"int\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"n_build\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"int\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"lifetimes\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n</interleave>\n", 
   ":cycamore:Enrichment": "<interleave>\n    <element name=\"feed_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"product_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"feed_recipe\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"tails_commod\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"tails_assay\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"swu_capacity\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_feed_inventory\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"max_enrich\">\n            <data type=\"double\">\n                <param name=\"minInclusive\">\n                    0\n                </param>\n                <param name=\"maxInclusive\">\n                    1\n                </param>\n            </data>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"initial_feed\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"order_prefs\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n</interleave>\n", 
-  ":cycamore:FuelFab": "<interleave>\n    <element name=\"fill_commod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"fill_recipe\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"fill_pref\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"fill_size\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"fiss_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"fiss_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fiss_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"fiss_size\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"topup_commod\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_pref\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"spectrum\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"outcommod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"throughput\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
-  ":cycamore:GrowthRegion": "<interleave>\n    <element name=\"commodity_name\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"demand_types\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"demand_params\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"demand_times\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"int\"/>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
+  ":cycamore:FuelFab": "<interleave>\n    <element name=\"fill_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fill_recipe\">\n        <data type=\"string\"/>\n    </element>\n    <optional>\n        <element name=\"fill_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <element name=\"fill_size\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"fiss_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"fiss_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"fiss_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"fiss_size\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"topup_commod\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_pref\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"topup_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <element name=\"spectrum\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"outcommod\">\n        <data type=\"string\"/>\n    </element>\n    <element name=\"throughput\">\n        <data type=\"double\"/>\n    </element>\n</interleave>\n", 
+  ":cycamore:GrowthRegion": "<interleave>\n    <element name=\"growth\">\n        <oneOrMore>\n            <element name=\"item\">\n                <interleave>\n                    <element name=\"commod\">\n                        <data type=\"string\"/>\n                    </element>\n                    <element name=\"piecewise_function\">\n                        <oneOrMore>\n                            <element name=\"piece\">\n                                <interleave>\n                                    <element name=\"start\">\n                                        <data type=\"int\"/>\n                                    </element>\n                                    <element name=\"function\">\n                                        <interleave>\n                                            <element name=\"type\">\n                                                <data type=\"string\"/>\n                                            </element>\n                                            <element name=\"params\">\n                                                <data type=\"string\"/>\n                                            </element>\n                                        </interleave>\n                                    </element>\n                                </interleave>\n                            </element>\n                        </oneOrMore>\n                    </element>\n                </interleave>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
   ":cycamore:ManagerInst": "<interleave>\n    <element name=\"prototypes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
   ":cycamore:Reactor": "<interleave>\n    <optional>\n        <element name=\"power_cap\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"power_name\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"n_assem_batch\">\n        <data type=\"int\"/>\n    </element>\n    <element name=\"assem_size\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"n_assem_core\">\n        <data type=\"int\"/>\n    </element>\n    <optional>\n        <element name=\"n_assem_spent\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"n_assem_fresh\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"cycle_time\">\n        <data type=\"int\"/>\n    </element>\n    <element name=\"refuel_time\">\n        <data type=\"int\"/>\n    </element>\n    <optional>\n        <element name=\"cycle_step\">\n            <data type=\"int\"/>\n        </element>\n    </optional>\n    <element name=\"fuel_incommods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_inrecipes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_outrecipes\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <element name=\"fuel_outcommods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"fuel_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_times\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_commods\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"pref_change_values\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_times\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"int\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_commods\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_in\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"recipe_change_out\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"string\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"discharged\">\n            <data type=\"boolean\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"res_indexes\">\n            <oneOrMore>\n                <element name=\"item\">\n                    <interleave>\n                        <element name=\"key\">\n                            <data type=\"int\"/>\n                        </element>\n                        <element name=\"val\">\n                            <data type=\"int\"/>\n                        </element>\n                    </interleave>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n</interleave>\n", 
   ":cycamore:Separations": "<interleave>\n    <element name=\"throughput\">\n        <data type=\"double\"/>\n    </element>\n    <element name=\"feed_commods\">\n        <oneOrMore>\n            <element name=\"val\">\n                <data type=\"string\"/>\n            </element>\n        </oneOrMore>\n    </element>\n    <optional>\n        <element name=\"feed_commod_prefs\">\n            <oneOrMore>\n                <element name=\"val\">\n                    <data type=\"double\"/>\n                </element>\n            </oneOrMore>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"feed_recipe\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"feedbuf_size\">\n        <data type=\"double\"/>\n    </element>\n    <optional>\n        <element name=\"leftoverbuf_size\">\n            <data type=\"double\"/>\n        </element>\n    </optional>\n    <optional>\n        <element name=\"leftover_commod\">\n            <data type=\"string\"/>\n        </element>\n    </optional>\n    <element name=\"streams\">\n        <oneOrMore>\n            <element name=\"item\">\n                <interleave>\n                    <element name=\"commod\">\n                        <data type=\"string\"/>\n                    </element>\n                    <element name=\"info\">\n                        <interleave>\n                            <element name=\"buf_size\">\n                                <data type=\"double\"/>\n                            </element>\n                            <element name=\"efficiencies\">\n                                <oneOrMore>\n                                    <element name=\"item\">\n                                        <interleave>\n                                            <element name=\"comp\">\n                                                <data type=\"string\"/>\n                                            </element>\n                                            <element name=\"eff\">\n                                                <data type=\"double\"/>\n                                            </element>\n                                        </interleave>\n                                    </element>\n                                </oneOrMore>\n                            </element>\n                        </interleave>\n                    </element>\n                </interleave>\n            </element>\n        </oneOrMore>\n    </element>\n</interleave>\n", 
