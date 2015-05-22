@@ -1,6 +1,7 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -8,12 +9,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -141,21 +145,78 @@ public class RegionView extends ViewBase{
 				if (facArray.get(2) == "oneOrMore"){
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						String help = (String) facArray.get(8);
+						name.setOnMouseClicked(new EventHandler<MouseEvent>(){
+							public void handle(MouseEvent e){
+								if(e.getClickCount() == 2){
+									Dialog dg = new Dialog();
+									ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+									dg.setContentText(help);
+									dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+									dg.show();
+								}
+							}
+						});
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
 							if ( ii > 0 ) {
-								grid.add(arrayListRemove(dataArray, ii), columnNumber-1, rowNumber);
+								grid.add(arrayListRemove(dataArray, ii), columnNumber+2, rowNumber);
 							}
 							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						
 					}
+				} else if (facArray.get(2) == "oneOrMoreMap"){
+					//facArray = (ArrayList<Object>) facArray.get(1);
+					//dataArray = (ArrayList<Object>) dataArray.get(0);
+					if ((int)facArray.get(6) <= userLevel && i == 0){
+						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						String help = (String) facArray.get(8);
+						name.setOnMouseClicked(new EventHandler<MouseEvent>(){
+							public void handle(MouseEvent e){
+								if(e.getClickCount() == 2){
+									Dialog dg = new Dialog();
+									ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+									dg.setContentText(help);
+									dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+									dg.show();
+								}
+							}
+						});
+						grid.add(name, columnNumber, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
+						rowNumber += 1;
+						// Indenting a sub structure
+						columnNumber += 1;
+						for(int ii = 0; ii < dataArray.size(); ii ++){
+							if ( ii > 0 ) {
+								grid.add(arrayListRemove(dataArray, ii), columnNumber+2, rowNumber);
+							}
+							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
+							rowNumber += 1;
+						}
+						// resetting the indent
+						columnNumber -= 1;
+					}				
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
@@ -172,9 +233,10 @@ public class RegionView extends ViewBase{
 						// resetting the indent
 						columnNumber -= 1;
 					}
-				} else if (facArray.get(2) == "input" || facArray.get(2) == "output") {
+				} else if (facArray.get(1) instanceof ArrayList) {
 					if ((int)facArray.get(6) <= userLevel){
 						Label name = new Label((String) facArray.get(0));
+						name.setTooltip(new Tooltip ((String)facArray.get(7)));
 						grid.add(name, columnNumber, rowNumber);
 						rowNumber += 1;
 						// Indenting a sub structure
