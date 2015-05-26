@@ -279,6 +279,9 @@ public class OutPut {
 				facilityDataElement(doc, configType, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
 			} else {
 				// Adding the label
+				if(facArray.get(5).toString().equalsIgnoreCase("true")){
+					break;
+				}
 				Element heading = doc.createElement((String) facArray.get(0));
 				heading.appendChild(doc.createTextNode((String) dataArray.get(0)));
 				configType.appendChild(heading);
@@ -429,7 +432,7 @@ public class OutPut {
 			}
 			
 			NodeList marketList = doc.getElementsByTagName("marketNode");
-			VisFunctions.marketHide();
+			VisFunctions.redrawPane();
 		} catch (Exception e){
 			e.printStackTrace();
 		}
@@ -521,7 +524,7 @@ public class OutPut {
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
 				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
 			}	
-			VisFunctions.marketHide();
+			VisFunctions.redrawPane();
 		} catch (Exception e){
 			e.printStackTrace();
 		}

@@ -271,11 +271,9 @@ public class FormBuilderFunctions {
 		cb.setMinWidth(80);
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				for(facilityNode facility: DataArrays.FacilityNodes){
-					for(int i =0; i < facility.cycicCircle.incommods.size(); i++){
-						if(facility.cycicCircle.incommods.get(i) == cb.getValue()){
-							facility.cycicCircle.incommods.remove(i);
-						}
+				for(int i =0; i < facNode.cycicCircle.incommods.size(); i++){
+					if(facNode.cycicCircle.incommods.get(i) == cb.getValue()){
+						facNode.cycicCircle.incommods.remove(i);
 					}
 				}
 				cb.getItems().clear();
@@ -304,10 +302,10 @@ public class FormBuilderFunctions {
 					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
 						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
 							facNode.cycicCircle.incommods.remove(i);
-							i--;
+							break;
 						}
 					}
-					VisFunctions.marketHide();
+					VisFunctions.redrawPane();
 				}
 			}
 		});
@@ -329,13 +327,11 @@ public class FormBuilderFunctions {
 				
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				for(facilityNode facility: DataArrays.FacilityNodes){
-					for(int i = 0; i < facility.cycicCircle.outcommods.size(); i++){
-						if(facility.cycicCircle.outcommods.get(i) == cb.getValue()){
-							facility.cycicCircle.outcommods.remove(i);
+					for(int i = 0; i < facNode.cycicCircle.outcommods.size(); i++){
+						if(facNode.cycicCircle.outcommods.get(i) == cb.getValue()){
+							facNode.cycicCircle.outcommods.remove(i);
 						}
 					}
-				}
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.name.getText());
@@ -361,10 +357,10 @@ public class FormBuilderFunctions {
 					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
 						if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
 							facNode.cycicCircle.outcommods.remove(i);
-							i--;
+							break;
 						}
 					}
-					VisFunctions.marketHide();
+					VisFunctions.redrawPane();
 				}
 			}
 		});
