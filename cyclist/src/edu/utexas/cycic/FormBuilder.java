@@ -114,6 +114,7 @@ public class FormBuilder extends ViewBase {
 		
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
+				facArray.set(10, true);
  				FormBuilderFunctions.formArrayBuilder(facArray, (ArrayList<Object>) dataArray);
 				grid.getChildren().clear();
 				rowNumber = 0;
@@ -161,6 +162,10 @@ public class FormBuilder extends ViewBase {
 					VisFunctions.redrawPane();
 				}
 				dataArray.remove(dataArrayNumber);
+				if(dataArray.size() == 0){
+					System.out.println("TEST");
+					facArray.set(10, false);
+				}
 				grid.getChildren().clear();
 				rowNumber = 0;
 				formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
@@ -327,13 +332,13 @@ public class FormBuilder extends ViewBase {
 						// If statement to test for a continuous range for sliders.
 						if (facArray.get(4).toString().split("[...]").length > 1){
 							Slider slider = FormBuilderFunctions.sliderBuilder(facArray.get(4).toString(), dataArray.get(0).toString());
-							TextField textField = FormBuilderFunctions.sliderTextFieldBuilder(slider, dataArray);
+							TextField textField = FormBuilderFunctions.sliderTextFieldBuilder(slider, facArray, dataArray);
 							grid.add(slider, 1+columnNumber, rowNumber);
 							grid.add(textField, 2+columnNumber, rowNumber);
 							columnEnd = 2+columnNumber+1;
 						// Slider with discrete steps
 						} else {
-							ComboBox<String> cb = FormBuilderFunctions.comboBoxBuilder(facArray.get(4).toString(), dataArray);
+							ComboBox<String> cb = FormBuilderFunctions.comboBoxBuilder(facArray.get(4).toString(), facArray, dataArray);
 							grid.add(cb, 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 						}
