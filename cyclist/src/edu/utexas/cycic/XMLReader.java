@@ -564,7 +564,7 @@ public class XMLReader {
 		facArray.set(5, defType);
 		if(defType != null){
 			facArray.set(6, 1);
-			if(defType.replace("\"", "").equalsIgnoreCase("")){facArray.set(10, false);}
+			facArray.set(10, false);
 		}
 		facArray.set(9, uilabel);
 		return facArray;
