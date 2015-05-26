@@ -197,23 +197,23 @@ public class InstitutionView extends ViewBase {
 						// If statement to test for a continuous range for sliders.
 						if (facArray.get(4).toString().split("[...]").length > 1){
 							Slider slider = FormBuilderFunctions.sliderBuilder(facArray.get(4).toString(), dataArray.get(0).toString());
-							TextField textField = FormBuilderFunctions.sliderTextFieldBuilder(slider, dataArray);
+							TextField textField = FormBuilderFunctions.sliderTextFieldBuilder(slider, facArray, dataArray);
 							grid.add(slider, 1+columnNumber, rowNumber);
 							grid.add(textField, 2+columnNumber, rowNumber);
 							columnEnd = 2+columnNumber+1;
 							// Slider with discrete steps
 						} else {
-							ComboBox<String> cb = FormBuilderFunctions.comboBoxBuilder(facArray.get(4).toString(), dataArray);
+							ComboBox<String> cb = FormBuilderFunctions.comboBoxBuilder(facArray.get(4).toString(), facArray, dataArray);
 							grid.add(cb, 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
 						}
 					} else {
 						switch ((String) facArray.get(2).toString().toLowerCase()) {
 						case "prototype":
-							grid.add(FormBuilderFunctions.comboBoxFac(dataArray), 1+columnNumber, rowNumber);
+							grid.add(FormBuilderFunctions.comboBoxFac(facArray, dataArray), 1+columnNumber, rowNumber);
 							break;
 						case "commodity":
-							grid.add(FormBuilderFunctions.comboBoxCommod(dataArray), 1+columnNumber, rowNumber);
+							grid.add(FormBuilderFunctions.comboBoxCommod(facArray, dataArray), 1+columnNumber, rowNumber);
 						default:
 							grid.add(FormBuilderFunctions.textFieldBuilder(facArray, (ArrayList<Object>)dataArray), 1+columnNumber, rowNumber);
 							columnEnd = 2 + columnNumber;
