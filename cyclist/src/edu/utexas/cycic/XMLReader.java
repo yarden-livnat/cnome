@@ -185,9 +185,12 @@ public class XMLReader {
 	 * @return
 	 */
 	static ArrayList<Object> cycicResize(ArrayList<Object> dataArray){
-		while(dataArray.size() < 10){
+		while(dataArray.size() < 11){
 			if(dataArray.size() == 6){
 				dataArray.add(0);
+			}
+			if(dataArray.size() == 10){
+				dataArray.add(true);
 			}
 			if(dataArray.size() == 3){
 				if(dataArray.get(2) == null){
@@ -228,7 +231,7 @@ public class XMLReader {
 						JsonObject defTypeObj = anno1.getJsonObject("default");
 						if(defTypeObj.size() == 0){
 							defType = Json.createArrayBuilder()
-									.add("true")
+									.add("false")
 									.add("")
 									.add("")
 									.build();
@@ -242,7 +245,7 @@ public class XMLReader {
 						JsonArray defTypeArray = anno1.getJsonArray("default");
 						if(defTypeArray.size() == 0){
 							defType = Json.createArrayBuilder()
-									.add("true")
+									.add("false")
 									.add("")
 									.build();
 						} else {
@@ -364,6 +367,7 @@ public class XMLReader {
 				facArray.set(5, defType.getString(0));
 				facArray.set(2, "zeroOrMore");
 				facArray.set(6, 1);
+				facArray.set(10, false);
 			} else {
 				facArray.set(2, "oneOrMoreMap");
 				if(userLevel == null){
@@ -430,8 +434,9 @@ public class XMLReader {
 				facArray.set(5, defType.getString(0));
 				facArray.set(2, "zeroOrMore");
 				facArray.set(6, 1);
+				facArray.set(10, false);
 			} else {
-				facArray.set(2, "oneOrMoreMap");
+				facArray.set(2, "oneOrMore");
 				if(userLevel == null){
 					facArray.set(6, 0);		
 				} else {
@@ -495,8 +500,9 @@ public class XMLReader {
 				facArray.set(5, defType.getString(0));
 				facArray.set(2, "zeroOrMore");
 				facArray.set(6, 1);
+				facArray.set(10, false);
 			} else {
-				facArray.set(2, "oneOrMoreMap");
+				facArray.set(2, "oneOrMore");
 				if(userLevel == null){
 					facArray.set(6, 0);		
 				} else {
@@ -558,6 +564,7 @@ public class XMLReader {
 		facArray.set(5, defType);
 		if(defType != null){
 			facArray.set(6, 1);
+			facArray.set(10, false);
 		}
 		facArray.set(9, uilabel);
 		return facArray;
