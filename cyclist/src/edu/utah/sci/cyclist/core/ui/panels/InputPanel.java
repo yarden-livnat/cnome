@@ -43,7 +43,7 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class InputPanel extends TitledPanel {
     public static final String ID = "input-panel";
-    public static final String TITLE = "Input";
+    public static final String TITLE = "Scenario Builder";
 
 
 	public ImageView dragView = new ImageView();
