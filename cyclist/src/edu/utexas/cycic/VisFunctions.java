@@ -258,7 +258,7 @@ public class VisFunctions {
 		return rgbArray;
 	}
 
-    public static void pastelize(Color color) {
+    public static Color pastelize(Color color) {
 
         double h = color.getHue();
         double s = color.getSaturation();
@@ -267,7 +267,7 @@ public class VisFunctions {
         s = s * (0.4) + 0.4;
         b = 1.0;
 
-        color = Color.hsb(h,s,b);
+        return Color.hsb(h,s,b);
     }
 
 	/**
