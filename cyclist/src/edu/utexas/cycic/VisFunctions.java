@@ -264,7 +264,7 @@ public class VisFunctions {
         double s = color.getSaturation();
         double b = color.getBrightness();
 
-        s = s * (0.3) + 0.4;
+        s = s * (0.4f);
         b = 1.0;
 
         return Color.hsb(h,s,b);
