@@ -51,16 +51,8 @@ public class CycicCircles{
 		circle.text.setText(name);
 		circle.tooltip.setText(name);
 		circle.text.setTooltip(circle.tooltip);
-		circle.text.setWrapText(true);
-		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
-		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
-		circle.text.setTextAlignment(TextAlignment.CENTER);
-		circle.text.setMaxWidth(circle.getRadius()*1.4);
-		circle.text.setMouseTransparent(true);
-		circle.text.setFont(new Font("ComicSans", 14));
-		circle.text.setMaxHeight(circle.getRadius()*1.2);
-		
-		
+
+        VisFunctions.placeTextOnCircle(circle,"bottom");
 		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
@@ -207,8 +199,7 @@ public class CycicCircles{
 					circle.image.setLayoutX(circle.getCenterX()-60);
 					circle.image.setLayoutY(circle.getCenterY()-50);
 
-					circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
-					circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+                    VisFunctions.placeTextOnCircle(circle,"bottom");
 
 					for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 						if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
@@ -231,8 +222,7 @@ public class CycicCircles{
 						circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
 						circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
 						circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-						circle.childrenList.get(i).text.setLayoutX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
-						circle.childrenList.get(i).text.setLayoutY(circle.childrenList.get(i).getCenterY()-circle.childrenList.get(i).getRadius()*0.6);
+                        VisFunctions.placeTextOnCircle(circle.childrenList.get(i),"bottom");
 						for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 							if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 								CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());

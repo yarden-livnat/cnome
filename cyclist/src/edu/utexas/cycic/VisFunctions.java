@@ -11,6 +11,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.Font;
 
 /**
  * Contains all of the generic and misc visualization functions 
@@ -19,6 +21,40 @@ import javafx.scene.text.Text;
  *
  */
 public class VisFunctions {
+
+    public static void placeTextOnCircle(FacilityCircle circle, String location) {
+        
+		circle.text.setWrapText(true);
+		circle.text.setMouseTransparent(true);
+		circle.text.setFont(new Font("ComicSans", 14));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -1.5;
+            shiftY = 1.2;
+            heightRatio = 1.2;
+            widthRatio = 3.0;
+        } else if (location.equals("top")) {
+            shiftX = -1.5;
+            shiftY = -1.2;
+            heightRatio = 1.2;
+            widthRatio = 3.0;
+        } else {
+            shiftX = -0.6;
+            shiftY = -0.6;
+            heightRatio = 1.2;
+            widthRatio = 1.4;
+        }
+        
+        circle.text.setLayoutX(circle.getCenterX()+circle.getRadius()*shiftX);
+		circle.text.setLayoutY(circle.getCenterY()+circle.getRadius()*shiftY);	
+		circle.text.setMaxHeight(circle.getRadius()*heightRatio);
+		circle.text.setMaxWidth(circle.getRadius()*widthRatio);
+		circle.text.setTextAlignment(TextAlignment.CENTER);
+
+        return;
+    }
 	
 	public static TextField numberField(){
 		TextField numberField = new TextField(){
