@@ -24,9 +24,9 @@ public class VisFunctions {
 
     public static void placeTextOnCircle(FacilityCircle circle, String location) {
         
-		circle.text.setWrapText(true);
-		circle.text.setMouseTransparent(true);
-		circle.text.setFont(new Font("ComicSans", 14));
+        circle.text.setWrapText(true);
+        circle.text.setMouseTransparent(true);
+        circle.text.setFont(new Font("ComicSans", 14));
 
         Double shiftX, shiftY, heightRatio, widthRatio;
 
