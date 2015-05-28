@@ -80,7 +80,7 @@ public class InstitutionCorralView extends ViewBase{
 					FormBuilderFunctions.formArrayBuilder(institute.institStruct, institute.institData);
 					institute.institutionShape = InstitutionShape.addInst((String)institute.name, institute);
 					institute.institutionShape.setLayoutX(event.getX());
-					institute.institutionShape.setLayoutY(event.getY());
+					institute.institutionShape.setLayoutY(event.getY()-80);
 					VisFunctions.placeTextOnEllipse(institute.institutionShape,"middle");
 					DataArrays.institNodes.add(institute);
 					institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
