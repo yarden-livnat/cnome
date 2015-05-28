@@ -248,9 +248,9 @@ public class VisFunctions {
 			red=Integer.parseInt(hashCode);
 		}
 
-		red = red * 256 /1000;
-		green = green * 256/1000;
-		blue = blue * 256/1000;
+		red = red % 256;
+		green = green % 256;
+		blue = blue % 256;
 
 		rgbArray.add(red);
 		rgbArray.add(green);
@@ -264,7 +264,7 @@ public class VisFunctions {
         double s = color.getSaturation();
         double b = color.getBrightness();
 
-        s = s * (0.4) + 0.4;
+        s = s * (0.3) + 0.4;
         b = 1.0;
 
         return Color.hsb(h,s,b);
