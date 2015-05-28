@@ -23,6 +23,76 @@ import javafx.scene.text.Font;
  */
 public class VisFunctions {
 
+    public static void placeTextOnRectangle(RegionRectangle rect, String location) {
+        
+        rect.text.setWrapText(true);
+        rect.text.setMouseTransparent(true);
+        rect.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -0.2;
+            shiftY = 1.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else if (location.equals("top")) {
+            shiftX = -0.2;
+            shiftY = -0.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else {
+            shiftX = 0.1;
+            shiftY = 0.1;
+            heightRatio = 0.8;
+            widthRatio = 0.8;
+        }
+        
+        rect.text.setLayoutX(rect.getX()+rect.getWidth()*shiftX);
+        rect.text.setLayoutY(rect.getY()+rect.getHeight()*shiftY);	
+        rect.text.setMaxHeight(rect.getHeight()*heightRatio);
+        rect.text.setMaxWidth(rect.getWidth()*widthRatio);
+        rect.text.setTextAlignment(TextAlignment.CENTER);
+        rect.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
+    public static void placeTextOnRectangle(RegionShape rect, String location) {
+        
+        rect.text.setWrapText(true);
+        rect.text.setMouseTransparent(true);
+        rect.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -0.2;
+            shiftY = 1.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else if (location.equals("top")) {
+            shiftX = -0.2;
+            shiftY = -0.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else {
+            shiftX = 0.1;
+            shiftY = 0.1;
+            heightRatio = 0.8;
+            widthRatio = 0.8;
+        }
+        
+        rect.text.setLayoutX(rect.getX()+rect.getWidth()*shiftX);
+        rect.text.setLayoutY(rect.getY()+rect.getHeight()*shiftY);	
+        rect.text.setMaxHeight(rect.getHeight()*heightRatio);
+        rect.text.setMaxWidth(rect.getWidth()*widthRatio);
+        rect.text.setTextAlignment(TextAlignment.CENTER);
+        rect.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
     public static void placeTextOnCircle(FacilityCircle circle, String location) {
         
         circle.text.setWrapText(true);

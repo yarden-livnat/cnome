@@ -197,13 +197,15 @@ public class InstitutionCorralView extends ViewBase{
 		nodesPane.autosize();
 		for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 			InstitutionEllipse instit = new InstitutionEllipse();
-			instit.setFill(Color.web("#CF5300"));
+			String instName = DataArrays.simInstitutions.get(i).institName;
+			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(instName);
+			instit.setFill(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2)));
 			instit.setLayoutX(60 + (i*110));
 			instit.setLayoutY(40);
 			instit.setRadiusX(50);
 			instit.setRadiusY(30);
 			instit.setStroke(Color.BLACK);
-			instit.text.setText(DataArrays.simInstitutions.get(i).institName);
+			instit.text.setText(instName.split(" ")[2] + " (" + instName.split(" ")[1] + ")");
 			VisFunctions.placeTextOnEllipse(instit,"middle");
 			nodesPane.getChildren().addAll(instit, instit.text);
 		}

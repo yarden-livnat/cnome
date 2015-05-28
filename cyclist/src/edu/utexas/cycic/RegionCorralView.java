@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -57,8 +58,7 @@ public class RegionCorralView extends ViewBase {
 						regionNode.regionCircle = RegionShape.addRegion((String)region.name, region);
 						regionNode.regionCircle.setX(event.getX());
 						regionNode.regionCircle.setY(event.getY());
-						regionNode.regionCircle.text.setLayoutX(event.getX()+regionNode.regionCircle.getHeight()*0.2);
-						regionNode.regionCircle.text.setLayoutY(event.getY()+regionNode.regionCircle.getHeight()*0.2);
+						VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
 						DataArrays.regionNodes.add(region);
 						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
 					}
@@ -128,19 +128,18 @@ public class RegionCorralView extends ViewBase {
 		nodesPane.autosize();
 		for(int i = 0; i < DataArrays.simRegions.size(); i++){
 			RegionRectangle region = new RegionRectangle();
-			region.setFill(Color.web("#CF5300"));
+			String regName = DataArrays.simRegions.get(i).regionName;
+			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(regName);
+			region.setFill(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2)));
 			region.setX(10 + (i*75));
 			region.setY(5);
 			region.setWidth(70);
 			region.setHeight(70);
 			region.setStroke(Color.BLACK);
-			region.text.setText(DataArrays.simRegions.get(i).regionName);
-			region.text.setWrapText(true);
-			region.text.setMaxWidth(region.getWidth()*0.8);
-			region.text.setLayoutX(region.getX()+region.getWidth()*0.1);
-			region.text.setLayoutY(region.getY()+region.getHeight()*0.1);	
-			region.text.setTextAlignment(TextAlignment.CENTER);
-			region.text.setMouseTransparent(true);
+			region.text.setText(regName.split(" ")[2] + " (" + regName.split(" ")[1] + ")");
+
+			VisFunctions.placeTextOnRectangle(region,"middle");
+
 			region.setOnDragDetected(new EventHandler<MouseEvent>(){
 				public void handle(MouseEvent e){
 					Dragboard db = region.startDragAndDrop(TransferMode.COPY);
