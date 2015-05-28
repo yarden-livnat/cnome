@@ -81,8 +81,7 @@ public class InstitutionCorralView extends ViewBase{
 					institute.institutionShape = InstitutionShape.addInst((String)institute.name, institute);
 					institute.institutionShape.setLayoutX(event.getX());
 					institute.institutionShape.setLayoutY(event.getY());
-					institute.institutionShape.text.setLayoutX(event.getX()+institute.institutionShape.getRadiusX()*0.2);
-					institute.institutionShape.text.setLayoutY(event.getY()+institute.institutionShape.getRadiusY()*0.2);
+					VisFunctions.placeTextOnEllipse(institute.institutionShape,"middle");
 					DataArrays.institNodes.add(institute);
 					institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
 				} else {
@@ -205,12 +204,7 @@ public class InstitutionCorralView extends ViewBase{
 			instit.setRadiusY(30);
 			instit.setStroke(Color.BLACK);
 			instit.text.setText(DataArrays.simInstitutions.get(i).institName);
-			instit.text.setWrapText(true);
-			instit.text.setMaxWidth(instit.getRadiusX()*1.6);
-			instit.text.setLayoutX(instit.getLayoutX()-instit.getRadiusX()*0.8);
-			instit.text.setLayoutY(instit.getLayoutY()-instit.getRadiusY()*0.7);	
-			instit.text.setTextAlignment(TextAlignment.CENTER);
-			instit.text.setMouseTransparent(true);
+			VisFunctions.placeTextOnEllipse(instit,"middle");
 			nodesPane.getChildren().addAll(instit, instit.text);
 		}
 		scroll.setContent(nodesPane);
