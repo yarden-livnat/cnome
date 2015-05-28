@@ -352,7 +352,7 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
-					VisFunctions.placeTextOnCircle(facility.cycicCircle, "bottom");
+					VisFunctions.placeTextOnCircle(facility.cycicCircle, "middle");
 					facility.cycicCircle.menu.setLayoutX(event.getX());
 					facility.cycicCircle.menu.setLayoutY(event.getY());
 					
@@ -361,6 +361,8 @@ public class Cycic extends ViewBase{
 							facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.getOrDefault(facility.niche,DataArrays.visualizationSkins.get(i).images.get("facility")));
 							facility.cycicCircle.image.setVisible(true);
 							facility.cycicCircle.setOpacity(0);
+							facility.cycicCircle.setRadius(DataArrays.visualizationSkins.get(i).radius);
+							VisFunctions.placeTextOnCircle(facility.cycicCircle,DataArrays.visualizationSkins.get(i).textPlacement);
 						}
 					}
 					facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);

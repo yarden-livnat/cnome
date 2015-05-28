@@ -273,5 +273,7 @@ class facilityNode{
 
 class skinSet{
 	String name; 
+	Integer radius;
+	String textPlacement;
 	Map<String, Image> images = new HashMap<String, Image>();
 }

@@ -30,6 +30,9 @@ public class CycicCircles{
 	protected static double mousex;
 	protected static double x;
 	protected static double y;
+	protected static int defRadius = 45;
+	protected static int mouseOverRadius = 52;
+
 	static Window window;
 	
 	/**
@@ -41,7 +44,7 @@ public class CycicCircles{
 	static FacilityCircle addNode(String name, final facilityNode parent) {
 
 		final FacilityCircle circle = parent.cycicCircle;
-		circle.setRadius(45);
+		circle.setRadius(defRadius);
 		circle.setCenterX(60);
 		circle.setCenterY(60);
 		circle.type = "Parent";
@@ -58,7 +61,7 @@ public class CycicCircles{
 		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
 
 		// Place text after color to get font color right //
-		VisFunctions.placeTextOnCircle(circle, "bottom");
+		VisFunctions.placeTextOnCircle(circle, "middle");
 		
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
@@ -195,7 +198,7 @@ public class CycicCircles{
 					circle.image.setLayoutX(circle.getCenterX()-60);
 					circle.image.setLayoutY(circle.getCenterY()-50);
 
-					VisFunctions.placeTextOnCircle(circle, "bottom");
+					VisFunctions.placeTextOnCircle(circle, "middle");
 
 					for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 						if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
@@ -218,7 +221,7 @@ public class CycicCircles{
 						circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
 						circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
 						circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-						VisFunctions.placeTextOnCircle(circle.childrenList.get(i), "bottom");
+						VisFunctions.placeTextOnCircle(circle.childrenList.get(i), "middle");
 						for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 							if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 								CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
@@ -293,13 +296,13 @@ public class CycicCircles{
 		
 		circle.setOnMouseEntered(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				circle.setRadius(52);
+				circle.setRadius(mouseOverRadius);
 			}
 		});
 		
 		circle.setOnMouseExited(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				circle.setRadius(45);
+				circle.setRadius(defRadius);
 			}
 		});
 		
