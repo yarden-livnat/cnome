@@ -48,10 +48,10 @@ public class VisFunctions {
         }
         
         circle.text.setLayoutX(circle.getCenterX()+circle.getRadius()*shiftX);
-		circle.text.setLayoutY(circle.getCenterY()+circle.getRadius()*shiftY);	
-		circle.text.setMaxHeight(circle.getRadius()*heightRatio);
-		circle.text.setMaxWidth(circle.getRadius()*widthRatio);
-		circle.text.setTextAlignment(TextAlignment.CENTER);
+        circle.text.setLayoutY(circle.getCenterY()+circle.getRadius()*shiftY);	
+        circle.text.setMaxHeight(circle.getRadius()*heightRatio);
+        circle.text.setMaxWidth(circle.getRadius()*widthRatio);
+        circle.text.setTextAlignment(TextAlignment.CENTER);
 
         return;
     }
