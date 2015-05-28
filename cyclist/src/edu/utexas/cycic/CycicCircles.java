@@ -58,7 +58,7 @@ public class CycicCircles{
 		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
 
 		// Place text after color to get font color right //
-		VisFunctions.placeTextOnCircle(circle,"bottom");
+		VisFunctions.placeTextOnCircle(circle, "bottom");
 		
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
@@ -195,7 +195,7 @@ public class CycicCircles{
 					circle.image.setLayoutX(circle.getCenterX()-60);
 					circle.image.setLayoutY(circle.getCenterY()-50);
 
-					VisFunctions.placeTextOnCircle(circle,"bottom");
+					VisFunctions.placeTextOnCircle(circle, "bottom");
 
 					for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 						if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
@@ -218,7 +218,7 @@ public class CycicCircles{
 						circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
 						circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
 						circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-						VisFunctions.placeTextOnCircle(circle.childrenList.get(i),"bottom");
+						VisFunctions.placeTextOnCircle(circle.childrenList.get(i), "bottom");
 						for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 							if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 								CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
