@@ -258,6 +258,18 @@ public class VisFunctions {
 		return rgbArray;
 	}
 
+    public static void pastelize(Color color) {
+
+        double h = color.getHue();
+        double s = color.getSaturation();
+        double b = color.getBrightness();
+
+        s = s * (0.4) + 0.4;
+        b = 1.0;
+
+        color = Color.hsb(h,s,b);
+    }
+
 	/**
 	 * Test to determine which font color to use, based on the color
 	 * of the node the text belongs to.
