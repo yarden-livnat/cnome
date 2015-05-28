@@ -362,7 +362,7 @@ public class Cycic extends ViewBase{
 							facility.cycicCircle.image.setVisible(true);
 							facility.cycicCircle.setOpacity(0);
 							facility.cycicCircle.setRadius(DataArrays.visualizationSkins.get(i).radius);
-							VisFunctions.placeTextOnCircle(facility.cycicCircle,DataArrays.visualizationSkins.get(i).textPlacement);
+							VisFunctions.placeTextOnCircle(facility.cycicCircle, DataArrays.visualizationSkins.get(i).textPlacement);
 						}
 					}
 					facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);
