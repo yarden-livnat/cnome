@@ -573,7 +573,7 @@ public class Cycic extends ViewBase{
 	public void buildDnDCircle(FacilityCircle circle, int i, String name){
 		circle.setRadius(40);
 		circle.setStroke(Color.BLACK);
-		circle.rgbColor=VisFunctions.stringToColor(name);c
+		circle.rgbColor=VisFunctions.stringToColor(name);
 		circle.setFill(VisFunctions.pastelize(Color.rgb(circle.rgbColor.get(0),circle.rgbColor.get(1),circle.rgbColor.get(2))));
 		circle.setCenterX(45+(i*90));
 		circle.setCenterY(50);
