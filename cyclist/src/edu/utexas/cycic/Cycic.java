@@ -352,7 +352,7 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
-                    VisFunctions.placeTextOnCircle(facility.cycicCircle,"bottom");
+					VisFunctions.placeTextOnCircle(facility.cycicCircle,"bottom");
 					facility.cycicCircle.menu.setLayoutX(event.getX());
 					facility.cycicCircle.menu.setLayoutY(event.getY());
 					
