@@ -352,7 +352,7 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
-					VisFunctions.placeTextOnCircle(facility.cycicCircle,"bottom");
+					VisFunctions.placeTextOnCircle(facility.cycicCircle, "bottom");
 					facility.cycicCircle.menu.setLayoutX(event.getX());
 					facility.cycicCircle.menu.setLayoutY(event.getY());
 					
@@ -572,11 +572,11 @@ public class Cycic extends ViewBase{
 		circle.setRadius(40);
 		circle.setStroke(Color.BLACK);
 		circle.rgbColor=VisFunctions.stringToColor(name);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0),circle.rgbColor.get(1),circle.rgbColor.get(2)));
+		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
 		circle.setCenterX(45+(i*90));
 		circle.setCenterY(50);
 		circle.text.setText(name.split(" ")[2] + " (" + name.split(" ")[1] + ")");
-		VisFunctions.placeTextOnCircle(circle,"middle");
+		VisFunctions.placeTextOnCircle(circle, "middle");
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
@@ -854,7 +854,7 @@ public class Cycic extends ViewBase{
 								}
 							}
 							buildDnDCircle(circle, pos-1, test.facilityName);
-							nodesPane.getChildren().addAll(circle,circle.text);
+							nodesPane.getChildren().addAll(circle, circle.text);
 						} catch (Exception eq) {
 							
 						}
