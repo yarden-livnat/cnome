@@ -52,6 +52,7 @@ public class VisFunctions {
         circle.text.setMaxHeight(circle.getRadius()*heightRatio);
         circle.text.setMaxWidth(circle.getRadius()*widthRatio);
         circle.text.setTextAlignment(TextAlignment.CENTER);
+        circle.text.setTextFill(Color.BLACK);
 
         return;
     }

@@ -52,18 +52,14 @@ public class CycicCircles{
 		circle.tooltip.setText(name);
 		circle.text.setTooltip(circle.tooltip);
 
-		VisFunctions.placeTextOnCircle(circle,"bottom");
-		
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.rgbColor=VisFunctions.stringToColor(parent.facilityType);
 		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
-		// Setting font color for visibility //
-		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setTextFill(Color.BLACK);
-		}else{
-			circle.text.setTextFill(Color.WHITE);
-		}
+
+		// Place text after color to get font color right //
+		VisFunctions.placeTextOnCircle(circle,"bottom");
+		
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
 				((Shape) Cycic.pane.getChildren().get(i)).setStroke(Color.BLACK);
