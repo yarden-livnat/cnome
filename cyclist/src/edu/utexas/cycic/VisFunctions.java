@@ -26,7 +26,7 @@ public class VisFunctions {
         
         circle.text.setWrapText(true);
         circle.text.setMouseTransparent(true);
-        circle.text.setFont(new Font("ComicSans", 14));
+        circle.text.setFont(new Font("ComicSans", 10));
 
         Double shiftX, shiftY, heightRatio, widthRatio;
 
@@ -34,17 +34,17 @@ public class VisFunctions {
             shiftX = -1.5;
             shiftY = 1.2;
             heightRatio = 1.2;
-            widthRatio = 3.0;
+            widthRatio = -2*shiftX;
         } else if (location.equals("top")) {
             shiftX = -1.5;
             shiftY = -1.2;
             heightRatio = 1.2;
-            widthRatio = 3.0;
+            widthRatio = -2*shiftX;
         } else {
-            shiftX = -0.6;
+            shiftX = -1.0;
             shiftY = -0.6;
             heightRatio = 1.2;
-            widthRatio = 1.4;
+            widthRatio = -2*shiftX;
         }
         
         circle.text.setLayoutX(circle.getCenterX()+circle.getRadius()*shiftX);
