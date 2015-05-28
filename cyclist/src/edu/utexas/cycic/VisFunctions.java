@@ -248,9 +248,9 @@ public class VisFunctions {
 			red=Integer.parseInt(hashCode);
 		}
 
-		red = red % 256;
-		green = green % 256;
-		blue = blue % 256;
+		red = red * 256 /1000;
+		green = green * 256/1000;
+		blue = blue * 256/1000;
 
 		rgbArray.add(red);
 		rgbArray.add(green);
