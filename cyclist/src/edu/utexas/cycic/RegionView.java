@@ -48,7 +48,9 @@ public class RegionView extends ViewBase{
 				}
 			}
 		});		
-		
+		for(int i = 0; i < workingRegion.institutions.size(); i++){
+			institList.getItems().add(workingRegion.institutions.get(i));
+		}
 		Label button = new Label(RegionCorralView.workingRegion.type);
 		button.setText(RegionCorralView.workingRegion.type);
 
@@ -69,7 +71,9 @@ public class RegionView extends ViewBase{
 		addInstit.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				institList.getItems().clear();
-				workingRegion.institutions.add(addNewInstitBox.getValue());
+				if(addNewInstitBox.getValue() != null){
+					workingRegion.institutions.add(addNewInstitBox.getValue());
+				}
 				for (String instit: workingRegion.institutions){
 					institList.getItems().add(instit);
 				}
@@ -135,7 +139,7 @@ public class RegionView extends ViewBase{
 	public void formBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
 		System.out.println(facArray);
 		if (facArray.size() == 0){
-			grid.add(new Label("This archetype is empty."), 0, 0);
+			grid.add(new Label("This archetype has no form to fill out."), 0, 0);
 			return;
 		}
 		for (int i = 0; i < facArray.size(); i++){
