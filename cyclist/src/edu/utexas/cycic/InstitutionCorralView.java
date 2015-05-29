@@ -81,7 +81,7 @@ public class InstitutionCorralView extends ViewBase{
 					institute.institutionShape = InstitutionShape.addInst((String)institute.name, institute);
 					institute.institutionShape.setLayoutX(event.getX());
 					institute.institutionShape.setLayoutY(event.getY()-80);
-					VisFunctions.placeTextOnEllipse(institute.institutionShape,"middle");
+					VisFunctions.placeTextOnEllipse(institute.institutionShape, "middle");
 					DataArrays.institNodes.add(institute);
 					institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
 				} else {
@@ -198,14 +198,15 @@ public class InstitutionCorralView extends ViewBase{
 		for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 			InstitutionEllipse instit = new InstitutionEllipse();
 			String instName = DataArrays.simInstitutions.get(i).institName;
-			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(instName);
+			String instLabel = instName.split(" ")[2] + " (" + instName.split(" ")[1] + ")";
+			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(instLabel);
 			instit.setFill(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2)));
 			instit.setLayoutX(60 + (i*110));
 			instit.setLayoutY(40);
 			instit.setRadiusX(50);
 			instit.setRadiusY(30);
 			instit.setStroke(Color.BLACK);
-			instit.text.setText(instName.split(" ")[2] + " (" + instName.split(" ")[1] + ")");
+			instit.text.setText(instLabel);
 			VisFunctions.placeTextOnEllipse(instit,"middle");
 			nodesPane.getChildren().addAll(instit, instit.text);
 		}
