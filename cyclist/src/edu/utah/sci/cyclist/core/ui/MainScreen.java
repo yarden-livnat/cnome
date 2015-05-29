@@ -170,11 +170,11 @@ public class MainScreen extends VBox implements Resource {
 		_toolsPane.setPrefHeight(USE_COMPUTED_SIZE);
 		_toolsPane.setOrientation(Orientation.VERTICAL);
 		_toolsPane.getItems().addAll(
+				_inputPanel = new InputPanel(),
 				_simulationPanel = new SimulationsPanel(),
 				_datasourcesPanel = new TablesPanel(),
 				_fieldsPanel = new SchemaPanel("Fields"),
                 _toolsPanel = new ToolsPanel(),
-                _inputPanel = new InputPanel(),
         		_jobsPanel = new JobsPanel(),
 				/*_filtersPanel = */new FiltersListPanel()
 				);
@@ -421,7 +421,7 @@ public class MainScreen extends VBox implements Resource {
     }
 	
     private Menu createInputMenu() {
-        Menu menu = new Menu("Input");          
+        Menu menu = new Menu("Scenario Builder");          
 
         for (final ToolFactory factory : ToolsLibrary.inputFactories) {
             MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
