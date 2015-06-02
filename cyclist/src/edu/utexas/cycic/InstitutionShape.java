@@ -156,7 +156,7 @@ public class InstitutionShape extends Ellipse {
 						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStrokeWidth(1);
 					}
 				}
-				
+				InstitutionCorralView.workingInstitution = instit;
 				institution.setEffect(VisFunctions.lighting);
 				institution.setStrokeWidth(5);
 				institution.setStroke(Color.DARKGRAY);
@@ -185,7 +185,42 @@ public class InstitutionShape extends Ellipse {
 			}
 		});
 		
+
+		// To allow the facilityCircle to be moved through the pane and setting bounding regions.
+		institution.onMouseDraggedProperty().set(new EventHandler<MouseEvent>(){
+			@Override
+			public void handle(MouseEvent event){
+				double tempX = institution.getLayoutX();
+				double tempY = institution.getLayoutY();
+				institution.setLayoutX(x+event.getX());
+				institution.setLayoutY(y+event.getY());
+
+				if(tempX <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinX()){
+					institution.setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMinX());
+				}
+				if(tempY <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinY()){
+					institution.setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMinY());
+				}
+				if(tempY >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-institution.getRadiusY()){
+					institution.setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-institution.getRadiusY());
+				}
+				if(tempX >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-institution.getRadiusX()){
+					institution.setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-institution.getRadiusX());
+				}
+                
+				VisFunctions.placeTextOnEllipse(institution,"middle");
+
+				institution.menuBar.setLayoutX(institution.getLayoutX()+institution.getRadiusX()*0.2);
+				institution.menuBar.setLayoutY(institution.getLayoutY()+institution.getRadiusY()*0.2);
+
+			}
+		});
+
+
 		return institution;	
+        
+        
+
 	};
 
 	static void deleteInstitution(InstitutionShape circle, instituteNode instit){
@@ -204,35 +239,5 @@ public class InstitutionShape extends Ellipse {
 			}
 		});
 
-		// To allow the facilityCircle to be moved through the pane and setting bounding regions.
-		onMouseDraggedProperty().set(new EventHandler<MouseEvent>(){
-			@Override
-			public void handle(MouseEvent event){
-				double tempX = getLayoutX();
-				double tempY = getLayoutY();
-				setLayoutX(x+event.getX());
-				setLayoutY(y+event.getY());
-
-				if(tempX <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinX()){
-					setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMinX());
-				}
-				if(tempY <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinY()){
-					setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMinY());
-				}
-				if(tempY >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-getRadiusY()){
-					setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-getRadiusY());
-				}
-				if(tempX >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-getRadiusX()){
-					setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-getRadiusX());
-				}
-
-				text.setLayoutX(getLayoutX()+getRadiusX()*0.2);
-				text.setLayoutY(getLayoutY()+getRadiusY()*0.2);	
-
-				menuBar.setLayoutX(getLayoutX()+getRadiusX()*0.2);
-				menuBar.setLayoutY(getLayoutY()+getRadiusY()*0.2);
-
-			}
-		});
 	}
 }
