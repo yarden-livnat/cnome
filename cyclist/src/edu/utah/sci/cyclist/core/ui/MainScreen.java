@@ -24,7 +24,9 @@ package edu.utah.sci.cyclist.core.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
@@ -39,6 +41,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -58,6 +62,7 @@ import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
+import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
 import edu.utah.sci.cyclist.core.ui.views.Workspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
@@ -73,9 +78,11 @@ public class MainScreen extends VBox implements Resource {
 	private SchemaPanel _fieldsPanel;
     private ToolsPanel _toolsPanel;
     private InputPanel _inputPanel;
-	private StackPane _workspacePane;
+//	private StackPane _workspacePane;
+	private TabPane _tabsPane;
 	private SimulationsPanel _simulationPanel;
 	private JobsPanel _jobsPanel;
+	private Map<String, TitledPanel> _panels = new HashMap<>();
 
 	private Menu _perspectiveMenu;
     private Menu _viewMenu;
@@ -109,10 +116,24 @@ public class MainScreen extends VBox implements Resource {
 		return wizard.show(getScene().getWindow());
 	}
 	
-	
-	public void setWorkspace(Workspace workspace) {
-		_workspacePane.getChildren().add(workspace);
+	public TabPane getTabPane() {
+		return _tabsPane;
 	}
+	
+	public void showPanels(List<String> list) {
+		_toolsPane.getItems().clear();
+		for (String name : list) {
+			TitledPanel panel = _panels.get(name);
+			if (panel != null)
+				_toolsPane.getItems().add(panel);
+			else
+				System.out.println("MainScreen error: can not show unknow panel ["+name+"]");
+		}
+	}
+	
+//	public void setWorkspace(Workspace workspace) {
+//		_workspacePane.getChildren().add(workspace);
+//	}
 	
 	public TablesPanel getDatasourcesPanel() {
 		return _datasourcesPanel;
@@ -138,14 +159,14 @@ public class MainScreen extends VBox implements Resource {
 		return _jobsPanel;
 	}
 	
-	public Workspace getWorkspace(){
-		for(Object obj : _workspacePane.getChildren()){
-			if (obj.getClass() == Workspace.class) {
-				return (Workspace)obj;
-			}
-		}
-		return null;
-	}
+//	public Workspace getWorkspace(){
+//		for(Object obj : _workspacePane.getChildren()){
+//			if (obj.getClass() == Workspace.class) {
+//				return (Workspace)obj;
+//			}
+//		}
+//		return null;
+//	}
 	
 	private double TOOLS_WIDTH = 120; 
 	
@@ -159,6 +180,14 @@ public class MainScreen extends VBox implements Resource {
 		this.setPrefHeight(400);
 		this.setPadding(new Insets(0));
 		this.setSpacing(0);
+
+		_panels.put("Builder", _inputPanel = new InputPanel());
+		_panels.put("Simulations", _simulationPanel = new SimulationsPanel());
+		_panels.put("Tables", _datasourcesPanel = new TablesPanel());
+		_panels.put("Fields", _fieldsPanel = new SchemaPanel("Fields"));
+		_panels.put("Tools", _toolsPanel = new ToolsPanel());
+		_panels.put("Jobs", _jobsPanel = new JobsPanel());
+		_panels.put("Filters", new FiltersListPanel());
 		
 		_sp = new SplitPane();
 		_sp.setOrientation(Orientation.HORIZONTAL);
@@ -169,20 +198,11 @@ public class MainScreen extends VBox implements Resource {
 		_toolsPane.setPrefWidth(USE_COMPUTED_SIZE);
 		_toolsPane.setPrefHeight(USE_COMPUTED_SIZE);
 		_toolsPane.setOrientation(Orientation.VERTICAL);
-		_toolsPane.getItems().addAll(
-				_inputPanel = new InputPanel(),
-				_simulationPanel = new SimulationsPanel(),
-				_datasourcesPanel = new TablesPanel(),
-				_fieldsPanel = new SchemaPanel("Fields"),
-                _toolsPanel = new ToolsPanel(),
-        		_jobsPanel = new JobsPanel(),
-				/*_filtersPanel = */new FiltersListPanel()
-				);
 		_toolsPane.setDividerPositions(div);
 		
 		_sp.getItems().addAll(
 				_toolsPane,
-				_workspacePane = new StackPane());
+				_tabsPane = new TabPane());
 		
 		this.getChildren().addAll(
 				createMenuBar(stage),

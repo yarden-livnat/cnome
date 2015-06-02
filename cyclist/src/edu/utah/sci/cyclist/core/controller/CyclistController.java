@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,6 +48,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -64,6 +64,7 @@ import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
+import edu.utah.sci.cyclist.core.model.Perspective;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
@@ -86,7 +87,6 @@ import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
 import edu.utah.sci.cyclist.core.util.LoadSqlite;
-import edu.utah.sci.cyclist.core.util.StreamUtils;
 
 
 public class CyclistController {
@@ -103,6 +103,12 @@ public class CyclistController {
     public static CyclusService _cyclusService;
 	
 	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
+	
+	
+	private Perspective _perspectives[] = {
+			new Perspective(1, "Scenario Builder", Arrays.asList("Builder", "Jobs")),
+			new Perspective(0, "Data Exploration", Arrays.asList("Simulations", "Tables", "Fields", "Filters", "Jobs"))
+	};
 	
 	/**
 	 * Constructor
@@ -187,17 +193,55 @@ public class CyclistController {
         ip.setPanel(screen.getInputPanel());
         ip.setFactories(Arrays.asList(ToolsLibrary.inputFactories));
         
-		// set up the main workspace
-		Workspace workspace = new Workspace(true);
-//		workspace.setWorkDirPath(getLastChosenWorkDirectory());
-		screen.setWorkspace(workspace);
+        // Builder perspectives
+       
 		
-		_presenter = new WorkspacePresenter(_eventBus);
-		_presenter.setView(workspace);
+		for (Perspective p : _perspectives) {
+			Workspace workspace = new Workspace(true);
+		    _presenter = new WorkspacePresenter(_eventBus);
+			_presenter.setView(workspace);
+			Tab tab = new Tab();
+			tab.setText(p.name);
+			tab.setClosable(false);
+			tab.setContent(workspace);
+			screen.getTabPane().getTabs().add(tab);
+		}
+		
+		screen.getTabPane().getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> o, Number prev, Number id) {
+				perspectiveChanged(id.intValue());
+
+			}
+		});
+		
+        selectPerspective(0);   
+        perspectiveChanged(0);
+        
+        // set up the main workspace
+//		Workspace workspace = new Workspace(true);
+//		workspace.setWorkDirPath(getLastChosenWorkDirectory());
+//		screen.setWorkspace(workspace);
+		
+//		_presenter = new WorkspacePresenter(_eventBus);
+//		_presenter.setView(workspace);
 		
 		// do something?
 		//selectWorkspace();
-		restore();
+//		restore();
+	}
+	
+	private void selectPerspective(int id) {
+		_screen.getTabPane().getSelectionModel().select(id);
+	}
+	
+	private void perspectiveChanged(int id) {
+		Perspective p = _perspectives[id];
+		if (!p.initialized) {
+			System.out.println("tab "+id);
+			p.initialized = true;
+		}
+		_screen.showPanels(_perspectives[id].tools);
 	}
 	
 	/**
