@@ -67,7 +67,7 @@ public class Clones {
 		clone.rgbColor.set(0, (int)(clone.rgbColor.get(0)*VisFunctions.colorMultiplierTest(clone.rgbColor.get(0))));
 		clone.rgbColor.set(1, (int)(clone.rgbColor.get(1)*VisFunctions.colorMultiplierTest(clone.rgbColor.get(1))));
 		clone.rgbColor.set(2, (int)(clone.rgbColor.get(2)*VisFunctions.colorMultiplierTest(clone.rgbColor.get(2))));
-		clone.setFill(Color.rgb(clone.rgbColor.get(0), clone.rgbColor.get(1), clone.rgbColor.get(2)));
+		clone.setFill(VisFunctions.pastelize(Color.rgb(clone.rgbColor.get(0), clone.rgbColor.get(1), clone.rgbColor.get(2))));
 		
 		// Setting font color for visibility //
 		if(VisFunctions.colorTest(clone.rgbColor) == true){

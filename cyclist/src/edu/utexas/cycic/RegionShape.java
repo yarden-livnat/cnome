@@ -68,7 +68,7 @@ public class RegionShape extends Rectangle {
 		
 		// Set circle color
 		rect.rgbColor=VisFunctions.stringToColor(region.type);
-		rect.setFill(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2), 0.8));
+		rect.setFill(VisFunctions.pastelize(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2), 0.8)));
 
 		VisFunctions.placeTextOnRectangle(rect,"middle");
 		

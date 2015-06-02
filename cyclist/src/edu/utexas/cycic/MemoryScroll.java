@@ -78,7 +78,7 @@ public class MemoryScroll extends ScrollPane{
 				circle.setRadius(60);
 				circle.setStroke(Color.BLACK);
 				circle.rgbColor=VisFunctions.stringToColor(fac.facilityType);
-				circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 1.0));
+				circle.setFill(VisFunctions.pastelize(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 1.0)));
 				circle.setCenterX(currentX);
 				circle.setCenterY(currentY);
 				circle.text.setText(fac.cycicCircle.text.getText());

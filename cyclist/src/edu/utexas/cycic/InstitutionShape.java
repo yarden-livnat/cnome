@@ -96,7 +96,7 @@ public class InstitutionShape extends Ellipse {
 		
 		// Set circle color
 		institution.rgbColor=VisFunctions.stringToColor(instit.type);
-		institution.setFill(Color.rgb(institution.rgbColor.get(0), institution.rgbColor.get(1), institution.rgbColor.get(2), 0.8));
+		institution.setFill(VisFunctions.pastelize(Color.rgb(institution.rgbColor.get(0), institution.rgbColor.get(1), institution.rgbColor.get(2), 0.8)));
 
 		VisFunctions.placeTextOnEllipse(institution,"middle");
 		
