@@ -58,7 +58,7 @@ public class SorterCircles{
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.rgbColor=VisFunctions.stringToColor((String)parent.name);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2)));
+		circle.setFill(VisFunctions.pastelize(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2))));
 		circle.setEffect(VisFunctions.lighting);
 		
 		// Setting font color for visibility //

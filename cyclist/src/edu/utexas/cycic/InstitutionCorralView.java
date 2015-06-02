@@ -200,7 +200,7 @@ public class InstitutionCorralView extends ViewBase{
 			String instName = DataArrays.simInstitutions.get(i).institName;
 			String instLabel = instName.split(" ")[2] + " (" + instName.split(" ")[1] + ")";
 			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(instLabel);
-			instit.setFill(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2)));
+			instit.setFill(VisFunctions.pastelize(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2))));
 			instit.setLayoutX(60 + (i*110));
 			instit.setLayoutY(40);
 			instit.setRadiusX(50);
