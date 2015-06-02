@@ -107,7 +107,7 @@ public class Cycic extends ViewBase{
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
     static CyclusJob _remoteDashA;
     private static Object monitor = new Object();
-    private static String currentSkin = "Default Skin";
+    static String currentSkin = "Default Skin";
 	
     
 	/**
@@ -354,8 +354,7 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
 					VisFunctions.placeTextOnCircle(facility.cycicCircle, "middle");
-					facility.cycicCircle.menu.setLayoutX(event.getX());
-					facility.cycicCircle.menu.setLayoutY(event.getY());
+
 					
 					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(currentSkin)){
@@ -444,8 +443,7 @@ public class Cycic extends ViewBase{
 				facility.cycicCircle.setCenterX(80);
 				facility.cycicCircle.setCenterY(80);
 				VisFunctions.placeTextOnCircle(facility.cycicCircle, "middle");
-				facility.cycicCircle.menu.setLayoutX(80);
-				facility.cycicCircle.menu.setLayoutY(80);
+
 				
 				for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
 					if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(currentSkin)){

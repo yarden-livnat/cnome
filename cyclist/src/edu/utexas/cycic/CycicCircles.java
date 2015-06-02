@@ -74,7 +74,6 @@ public class CycicCircles{
 		circle.setStroke(Color.DARKGRAY);
 		
 		// Adding the menu and it's menu items.
-		final Menu menu1 = new Menu("Options");
 		
 		MenuItem facForm = new MenuItem("Facility Form");
 		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
@@ -82,7 +81,6 @@ public class CycicCircles{
 			public void handle(ActionEvent event) {
 				try{
 					CyclistController._presenter.addTool(new FormBuilderTool());
-					circle.menu.setVisible(false);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -98,7 +96,6 @@ public class CycicCircles{
 		delete.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				deleteNode(parent);
-				circle.menu.setVisible(false);
 			}
 		});
 		
@@ -106,13 +103,21 @@ public class CycicCircles{
 		changeNiche.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				/** TODO CHANGE NICHE OF CIRCLE */
-				TextInputDialog dg = new TextInputDialog("Test");
-				dg.setContentText("ADSFA");
+				TextInputDialog dg = new TextInputDialog(parent.niche);
+				dg.setContentText("New Niche: ");
 				Optional<String> result = dg.showAndWait();
 				if (result.isPresent()){
-				    System.out.println("test");
+				    parent.niche = result.get();
+				    for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(Cycic.currentSkin)){
+							circle.image.setImage(DataArrays.visualizationSkins.get(i).images.getOrDefault(parent.niche,DataArrays.visualizationSkins.get(i).images.get("facility")));
+							circle.image.setVisible(true);
+							circle.setOpacity(0);
+							circle.setRadius(DataArrays.visualizationSkins.get(i).radius);
+							VisFunctions.placeTextOnCircle(circle, DataArrays.visualizationSkins.get(i).textPlacement);
+						}
+					}
 				}
-				circle.menu.setVisible(false);
 			}
 		});
 
@@ -122,7 +127,6 @@ public class CycicCircles{
 				circle.image.setVisible(true);
 				circle.image.toBack();
 				circle.setOpacity(0);	
-				circle.menu.setVisible(false);
 			}
 		});
 		
@@ -130,15 +134,10 @@ public class CycicCircles{
 		hideImage.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				circle.image.setVisible(false);
-				circle.setOpacity(100);
-				circle.menu.setVisible(false);			}
+				circle.setOpacity(100);	}
 		});
 		
-		menu1.getItems().addAll(facForm, changeNiche, delete, showImage, hideImage);
-		circle.menu.getMenus().add(menu1);
-		circle.menu.setLayoutX(circle.getCenterX());
-		circle.menu.setLayoutY(circle.getCenterY());
-		circle.menu.setVisible(false);
+		circle.menu.getItems().addAll(facForm, changeNiche, delete, showImage, hideImage);
 		
 		// Piece of test code for changing the look of the facility circles.
 		//circle.image.setImage(new Image("reactor.png"));
@@ -192,8 +191,6 @@ public class CycicCircles{
 						circle.setCenterX(Cycic.pane.getLayoutBounds().getMaxX()-circle.getRadius());
 					}
 
-					circle.menu.setLayoutX(circle.getCenterX());
-					circle.menu.setLayoutY(circle.getCenterY());
 
 					circle.image.setLayoutX(circle.getCenterX()-60);
 					circle.image.setLayoutY(circle.getCenterY()-50);
@@ -219,8 +216,6 @@ public class CycicCircles{
 						circle.childrenList.get(i).setCenterY(mousey-circle.childrenDeltaY.get(i)+y);
 						circle.childrenLinks.get(i).line.setEndX(circle.childrenList.get(i).getCenterX());
 						circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
-						circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
-						circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
 						VisFunctions.placeTextOnCircle(circle.childrenList.get(i), "bottom");
 						for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 							if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
@@ -244,7 +239,7 @@ public class CycicCircles{
 			@Override
 			public void handle(MouseEvent event){
 				if(event.getButton().equals(MouseButton.SECONDARY)){
-					circle.menu.setVisible(true);
+					circle.menu.show(circle, event.getScreenX(), event.getScreenY());
 					event.consume();
 				}
 				if(event.isAltDown() && event.isControlDown()){
@@ -308,7 +303,6 @@ public class CycicCircles{
 		
 		// Adding facilityCircle to the pane. 
 		Cycic.pane.getChildren().add(circle);
-		Cycic.pane.getChildren().add(circle.menu);
 		Cycic.pane.getChildren().add(circle.text);
 		Cycic.pane.getChildren().add(circle.image);
 		circle.image.toBack();
