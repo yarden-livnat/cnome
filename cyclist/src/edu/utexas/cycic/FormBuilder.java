@@ -139,28 +139,6 @@ public class FormBuilder extends ViewBase {
 		ArrayList<Object> tempData = (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(dataArrayNumber)).get(0);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e) {
-				/*if(facArray.get(1) instanceof ArrayList){
-					for(int i = 0; i < ((ArrayList<Object>) facArray.get(1)).size(); i++){
-						ArrayList<Object> tempArray = (ArrayList<Object>) ((ArrayList<Object>) facArray.get(1)).get(i);
-						String testString = tempArray.get(2).toString().toLowerCase();
-						if(testString.equalsIgnoreCase("incommodity")){
-							for(int j = 0; j < formNode.cycicCircle.incommods.size(); j++){
-								if(formNode.cycicCircle.incommods.get(j) == tempData.get(0)){
-									formNode.cycicCircle.incommods.remove(j);
-									break;
-								}
-							}
-						} else if (testString.equalsIgnoreCase("outcommodity")){
-							for(int j = 0; j < formNode.cycicCircle.outcommods.size(); j++){
-								if(formNode.cycicCircle.outcommods.get(j) == tempData.get(0)){
-									formNode.cycicCircle.outcommods.remove(j);
-									break;
-								}
-							}
-						}
-					}
-				}
-				VisFunctions.redrawPane();*/
 				dataArray.remove(dataArrayNumber);
 				if(dataArray.size() == 0){
 					facArray.set(10, false);
