@@ -1,7 +1,6 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
-
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,9 +10,11 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -29,6 +30,7 @@ import javafx.scene.layout.VBox;
  *
  */
 public class RegionView extends ViewBase{
+
 	/**
 	 * Init function for this class. Generates the top grids and form gridpane. 
 	 */
@@ -40,11 +42,27 @@ public class RegionView extends ViewBase{
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
 		institList.setMinHeight(25);
+
+        // populate list
+		institList.getItems().clear();
+		for (String instit: workingRegion.institutions){
+			institList.getItems().add(instit);
+		}
+
+        ContextMenu listCtxtMenu = new ContextMenu();
+        MenuItem removeInst = new MenuItem("Remove Institution");
+        removeInst.setOnAction(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent e){
+                    workingRegion.institutions.remove(institList.getSelectionModel().getSelectedItem());
+                    institList.getItems().remove(institList.getSelectionModel().getSelectedItem());
+                }
+            });
+        listCtxtMenu.getItems().add(removeInst);
+
 		institList.setOnMousePressed(new EventHandler<MouseEvent>(){
-			public void handle(MouseEvent event){
+                public void handle(MouseEvent event){
 				if (event.isSecondaryButtonDown()){
-					workingRegion.institutions.remove(institList.getSelectionModel().getSelectedItem());
-					institList.getItems().remove(institList.getSelectionModel().getSelectedItem());
+                    listCtxtMenu.show(institList,event.getScreenX(),event.getScreenY());
 				}
 			}
 		});		
@@ -70,12 +88,12 @@ public class RegionView extends ViewBase{
 		addInstit.setText("Add Institution");
 		addInstit.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				institList.getItems().clear();
-				if(addNewInstitBox.getValue() != null){
+				if (!addNewInstitBox.getValue().equals("")) {
+					institList.getItems().clear();
 					workingRegion.institutions.add(addNewInstitBox.getValue());
-				}
-				for (String instit: workingRegion.institutions){
-					institList.getItems().add(instit);
+					for (String instit: workingRegion.institutions){
+						institList.getItems().add(instit);
+					}
 				}
 			}
 		});
@@ -112,7 +130,7 @@ public class RegionView extends ViewBase{
 		
 		setTitle(TITLE);
 		setContent(regionBox);
-		setPrefSize(600,400);		
+		setPrefSize(600,400);	
 		formBuilder(RegionCorralView.workingRegion.regionStruct, RegionCorralView.workingRegion.regionData);
 		
 	}
