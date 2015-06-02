@@ -45,6 +45,10 @@ public class RegionView extends ViewBase{
 		institList.setMinHeight(25);
 
         // populate list
+		institList.getItems().clear();
+		for (String instit: workingRegion.institutions){
+			institList.getItems().add(instit);
+		}
 
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeInst = new MenuItem("Remove Institution");
