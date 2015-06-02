@@ -136,34 +136,11 @@ public class FormBuilder extends ViewBase {
 	public Button arrayListRemove(final GridPane grid, final ArrayList<Object> dataArray, final int dataArrayNumber, ArrayList<Object> facArray){
 		Button button = new Button();
 		button.setText("Remove");
-		
+		ArrayList<Object> tempData = (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(dataArrayNumber)).get(0);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e) {
-				if(facArray.get(2).toString().toLowerCase() == "incommodity"){
-					System.out.println("in commodity");
-					for(int i = 0; i < formNode.cycicCircle.incommods.size(); i++){
-						System.out.println(formNode.cycicCircle.incommods.get(i));
-						if(formNode.cycicCircle.incommods.get(i) == dataArray.get(0)){
-							System.out.println(dataArray.get(0));
-							formNode.cycicCircle.incommods.remove(i);
-							break;
-						}
-					}
-					VisFunctions.redrawPane();
-				} else if(facArray.get(2).toString().toLowerCase() == "outcommodity"){
-					System.out.println("Outcommodity");
-					for(int i = 0; i < formNode.cycicCircle.outcommods.size(); i++){
-						System.out.println(formNode.cycicCircle.outcommods.get(i));
-						if(formNode.cycicCircle.outcommods.get(i) == dataArray.get(0)){
-							formNode.cycicCircle.outcommods.remove(i);
-							break;
-						}
-					}
-					VisFunctions.redrawPane();
-				}
 				dataArray.remove(dataArrayNumber);
 				if(dataArray.size() == 0){
-					System.out.println("TEST");
 					facArray.set(10, false);
 				}
 				grid.getChildren().clear();
