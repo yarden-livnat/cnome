@@ -156,7 +156,7 @@ public class InstitutionShape extends Ellipse {
 						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStrokeWidth(1);
 					}
 				}
-				
+				InstitutionCorralView.workingInstitution = instit;
 				institution.setEffect(VisFunctions.lighting);
 				institution.setStrokeWidth(5);
 				institution.setStroke(Color.DARKGRAY);
