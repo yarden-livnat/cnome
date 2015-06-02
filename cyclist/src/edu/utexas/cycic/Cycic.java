@@ -299,6 +299,9 @@ public class Cycic extends ViewBase{
         skinMenu.getItems().add(defSkin);
 		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
             final String skinName = DataArrays.visualizationSkins.get(i).name;
+            if (skinName.equals("DSARR")) {
+                currentSkin = skinName;
+            }
             MenuItem item = new MenuItem(skinName);
             item.setOnAction(new EventHandler<ActionEvent>(){
                     public void handle(ActionEvent e){
