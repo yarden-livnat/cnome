@@ -1,7 +1,6 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
-
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -129,7 +128,7 @@ public class RegionView extends ViewBase{
 		
 		setTitle(TITLE);
 		setContent(regionBox);
-		setPrefSize(600,400);		
+		setPrefSize(600,400);	
 		formBuilder(RegionCorralView.workingRegion.regionStruct, RegionCorralView.workingRegion.regionData);
 		
 	}
