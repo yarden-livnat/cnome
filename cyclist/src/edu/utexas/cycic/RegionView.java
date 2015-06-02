@@ -87,10 +87,12 @@ public class RegionView extends ViewBase{
 		addInstit.setText("Add Institution");
 		addInstit.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				institList.getItems().clear();
-				workingRegion.institutions.add(addNewInstitBox.getValue());
-				for (String instit: workingRegion.institutions){
-					institList.getItems().add(instit);
+				if (!addNewInstitBox.getValue().equals("")) {
+					institList.getItems().clear();
+					workingRegion.institutions.add(addNewInstitBox.getValue());
+					for (String instit: workingRegion.institutions){
+						institList.getItems().add(instit);
+					}
 				}
 			}
 		});
