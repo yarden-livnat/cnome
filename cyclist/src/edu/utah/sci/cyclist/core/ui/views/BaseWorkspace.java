@@ -24,14 +24,12 @@ package edu.utah.sci.cyclist.core.ui.views;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
@@ -43,9 +41,6 @@ import org.mo.closure.v1.Closure;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.CyclistDropEvent;
-import edu.utah.sci.cyclist.core.model.CyclistDatasource;
-import edu.utah.sci.cyclist.core.model.Filter;
-import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.tools.Tool;
 import edu.utah.sci.cyclist.core.ui.CyclistView;
@@ -54,27 +49,18 @@ import edu.utah.sci.cyclist.core.ui.components.Console;
 import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.InfinitPane;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.ui.components.WorkspacePanelArea;
-import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 
-public class Workspace extends CyclistViewBase implements CyclistView {
-	public static final String WORKSPACE_ID = "workspace";
+public class BaseWorkspace extends ViewBase  {
+	public static final String WORKSPACE_ID = "base-workspace";
 	
-	static final Logger log = LogManager.getLogger(Workspace.class.getName());
+	static final Logger log = LogManager.getLogger(BaseWorkspace.class.getName());
 	
 	private Pane _pane;
-	
-	private WorkspacePanelArea _filtersPane;
-	ScrollBar _wb;
-	ScrollBar _hb;
-	private double _savedDivider = 0.9;
 	
 	private ViewBase _maximizedView = null;
 	
 	private Closure.V3<Tool, Double, Double> _onToolDrop = null;
 	private Closure.V4<Tool, Table, Double, Double> _onShowTable = null;
-	
-	private Table _currentTable = null;
 	
 	public void setOnToolDrop(Closure.V3<Tool, Double, Double> action) {
 		_onToolDrop = action;
@@ -105,11 +91,11 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 	 * Constructor
 	 */
 	
-	public Workspace() {
+	public BaseWorkspace() {
 		this(false);
 	}
 	
-	public Workspace(boolean toplevel) {
+	public BaseWorkspace(boolean toplevel) {
 		super(toplevel);
 		build(toplevel);
 		enableDragging(!toplevel);
@@ -133,29 +119,10 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		sp1.getItems().addAll(ipane, console);
 
 		SplitPane.setResizableWithParent(ipane, true);
-		SplitPane.setResizableWithParent(console, false);
-
-		// arrange filters to the right
-		_filtersPane = new WorkspacePanelArea();
+		SplitPane.setResizableWithParent(console, false);;
 	
-		final SplitPane sp2 = new SplitPane();
-		sp2.setId("hiddenSplitter");
-		sp2.setOrientation(Orientation.HORIZONTAL);
-		sp2.getItems().addAll(sp1, _filtersPane);
-		sp2.setDividerPosition(0, 1);
 		SplitPane.setResizableWithParent(ipane, true);
-		SplitPane.setResizableWithParent(_filtersPane, false);
-		
-		_filtersPane.visibleProperty().addListener((o, p, visible)->{
-			if (visible) {
-				sp2.setDividerPosition(0, _savedDivider);
-			} else {
-				_savedDivider = sp2.getDividerPositions()[0];
-				sp2.setDividerPosition(0, 1);
-			}
-		});
-
-		setContent(sp2, !toplevel);
+		setContent(sp1, !toplevel);
 		
 		/*
 		 *  set up listeners
@@ -230,39 +197,7 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 				event.consume();
 			}
 		});
-		filters().addListener(new ListChangeListener<Filter>() {
-
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends Filter> change) {
-				Simulation currentSim = getCurrentSimulation();
-				CyclistDatasource ds = (_currentTable != null && _currentTable.getDataSource()!= null) ? 
-										_currentTable.getDataSource() : 
-										currentSim != null ? currentSim.getDataSource() : null;
-				while (change.next()) {
-					for (Filter f : change.getAddedSubList()) {
-						//For a new filter - add the current simulation data source as its data source.
-						if(currentSim != null){
-							f.setDatasource(ds);
-						}
-					}
-				}
-			}
-		});
 	}
-	
-	@Override
-	public void selectSimulation(Simulation sim, boolean active) {
-		super.selectSimulation(sim, active);
-		updateFilters();
-	}
-	
-	@Override 
-	public void selectTable(Table table, boolean active){
-		if(active && table != _currentTable){
-			_currentTable = table;
-		}
-	};
-	
 	
 	@Override
 	public void setTitle(String title) {
@@ -330,34 +265,6 @@ public class Workspace extends CyclistViewBase implements CyclistView {
 		if(getOnToolDrop() != null){
 			getOnToolDrop().handle(new CyclistDropEvent(CyclistDropEvent.REMOVE, view));
 		}
-	}
-	
-	
-	public void addPanel(TitledPanel panel) {
-		_filtersPane.add(panel);
-	}
-	
-	public void showPanel(TitledPanel panel, boolean show) {
-		_filtersPane.show(panel, show);
-	}
-	
-	public void removePanel(TitledPanel panel) {
-		_filtersPane.remove(panel);
-	}
-	
-	/*
-	 * For each filter - update the current data source.
-	 */
-	private void updateFilters() {
-		Simulation currentSim = getCurrentSimulation();
-		CyclistDatasource ds = (_currentTable != null &&  _currentTable.getDataSource()!= null) ? 
-								_currentTable.getDataSource() : 
-							    currentSim != null ? currentSim.getDataSource() : null;
-		
-		if (currentSim != null)
-			for (Filter filter : filters()) {
-				filter.setDatasource(ds);
-			}
 	}
 	
 	private ViewPos _viewPos = new ViewPos();

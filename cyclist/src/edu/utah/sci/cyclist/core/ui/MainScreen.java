@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -64,7 +65,7 @@ import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
-import edu.utah.sci.cyclist.core.ui.views.Workspace;
+import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -120,15 +121,16 @@ public class MainScreen extends VBox implements Resource {
 		return _tabsPane;
 	}
 	
-	public void showPanels(List<String> list) {
+	public void showPanels(List<String> list, double[] pos) {
 		_toolsPane.getItems().clear();
 		for (String name : list) {
 			TitledPanel panel = _panels.get(name);
-			if (panel != null)
+			if (panel != null) 
 				_toolsPane.getItems().add(panel);
 			else
 				System.out.println("MainScreen error: can not show unknow panel ["+name+"]");
 		}
+		_toolsPane.setDividerPositions(pos);
 	}
 	
 //	public void setWorkspace(Workspace workspace) {
@@ -345,22 +347,32 @@ public class MainScreen extends VBox implements Resource {
 		return _stageCloseProperty;
 	}
 	
+	public double[] getToolsPositions() {
+		return _toolsPane.getDividerPositions();
+	}
+	
+	public double[] getSplitPositions() {
+		return _sp.getDividerPositions();
+	}
+	
 	public void save(IMemento memento) {
 		memento.createChild("sp-pos").putString("values", Arrays.toString(_sp.getDividerPositions()));
-		memento.createChild("tools-pos").putString("values", Arrays.toString(_toolsPane.getDividerPositions()));
+//		memento.createChild("tools-pos").putString("values", Arrays.toString(_toolsPane.getDividerPositions()));
 	}
 	
 	public void restore(IMemento memento, Context ctx) {
-//		final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
-//		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
-//
-//		Platform.runLater(new Runnable() {	
-//			@Override
-//			public void run() {
-//				_sp.setDividerPositions(pos);
-//				_toolsPane.setDividerPositions(pos1);
-//			}
-//		});
+		if (memento.getChild("sp-pos") != null) {
+			final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
+	//		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
+	//
+			Platform.runLater(new Runnable() {	
+				@Override
+				public void run() {
+					_sp.setDividerPositions(pos);
+	//				_toolsPane.setDividerPositions(pos1);
+				}
+			});
+		}
 	}
 	
 	private double[] parseArray(String str) {
