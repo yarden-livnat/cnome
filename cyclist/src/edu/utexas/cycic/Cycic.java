@@ -428,17 +428,39 @@ public class Cycic extends ViewBase{
 				if (structureCB.getValue() == null){
 					return;
 				}
-				facilityNode tempNode = new facilityNode();
-				tempNode.facilityType = structureCB.getValue();
+				facilityNode facility = new facilityNode();
+				facility.facilityType = structureCB.getValue();
+				facility.facilityType.trim();
 				for (int i = 0; i < DataArrays.simFacilities.size(); i++){
-					if (DataArrays.simFacilities.get(i).facilityName == structureCB.getValue()){
-						tempNode.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
-					}				
+					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
+						facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
+						facility.niche = DataArrays.simFacilities.get(i).niche;
+						facility.archetype = DataArrays.simFacilities.get(i).facilityArch;
+					}
 				}
-				tempNode.name = facNameField.getText();
-				tempNode.cycicCircle = CycicCircles.addNode((String)tempNode.name, tempNode);
-				tempNode.sorterCircle = SorterCircles.addNode((String)tempNode.name, tempNode, tempNode);
-				FormBuilderFunctions.formArrayBuilder(tempNode.facilityStructure, tempNode.facilityData);
+				event.consume();
+				facility.name = facNameField.getText();
+				facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
+				facility.cycicCircle.setCenterX(80);
+				facility.cycicCircle.setCenterY(80);
+				VisFunctions.placeTextOnCircle(facility.cycicCircle, "middle");
+				facility.cycicCircle.menu.setLayoutX(80);
+				facility.cycicCircle.menu.setLayoutY(80);
+				
+				for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+					if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(currentSkin)){
+						facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.getOrDefault(facility.niche,DataArrays.visualizationSkins.get(i).images.get("facility")));
+						facility.cycicCircle.image.setVisible(true);
+						facility.cycicCircle.setOpacity(0);
+						facility.cycicCircle.setRadius(DataArrays.visualizationSkins.get(i).radius);
+						VisFunctions.placeTextOnCircle(facility.cycicCircle, DataArrays.visualizationSkins.get(i).textPlacement);
+					}
+				}
+				facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);
+				facility.cycicCircle.image.setLayoutY(facility.cycicCircle.getCenterY()-60);
+				
+				facility.sorterCircle = SorterCircles.addNode((String)facility.name, facility, facility);
+				FormBuilderFunctions.formArrayBuilder(facility.facilityStructure, facility.facilityData);		
 			}
 		});
 		grid.add(submit1, 4, 0);
@@ -541,7 +563,6 @@ public class Cycic extends ViewBase{
                 rNode.regionArch = spec;
                 JsonObject regionVars = anno.getJsonObject("vars");
                 ArrayList<Object> regionArray = new ArrayList<Object>();
-                rNode.regionStruct = XMLReader.nodeBuilder(regionVars, regionArray, XMLReader.readSchema_new(schema));
                 rNode.regionName = spec.replace(":", " ");
                 DataArrays.simRegions.add(rNode);
                 break;
