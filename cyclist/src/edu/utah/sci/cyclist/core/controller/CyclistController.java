@@ -68,24 +68,18 @@ import edu.utah.sci.cyclist.core.model.Perspective;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.presenter.BaseWorkspacePresenter;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.core.presenter.InputPresenter;
-import edu.utah.sci.cyclist.core.presenter.Presenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
-import edu.utah.sci.cyclist.core.presenter.ViewPresenter;
 import edu.utah.sci.cyclist.core.presenter.VisWorkspacePresenter;
 import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
 import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
-import edu.utah.sci.cyclist.core.ui.View;
-import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
-import edu.utah.sci.cyclist.core.ui.views.BaseWorkspace;
 import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
@@ -206,15 +200,15 @@ public class CyclistController {
 		
 		for (Perspective p : _perspectives) {
 			ViewBase view;
-			if (p.type == "Vis") {
+//			if (p.type == "Vis") {
 				view = new VisWorkspace(true);
 				p.presenter = new VisWorkspacePresenter(_eventBus);
 				p.presenter.setView(view);
-			} else {
-				view = new BaseWorkspace(true);
-				p.presenter = new BaseWorkspacePresenter(_eventBus);
-				p.presenter.setView(view);
-			}
+//			} else {
+//				view = new BaseWorkspace(true);
+//				p.presenter = new BaseWorkspacePresenter(_eventBus);
+//				p.presenter.setView(view);
+//			}
 
 			Tab tab = new Tab();
 			tab.setText(p.name);
@@ -243,7 +237,6 @@ public class CyclistController {
 	}
 	
 	private void perspectiveChanged(int id) {
-		System.out.println("perspective changed");
 		if (_currentPerspective != null && _currentPerspective.id != id)
 			_currentPerspective.setToolsPositions(_screen.getToolsPositions());
 		
@@ -877,18 +870,20 @@ public class CyclistController {
 							Perspective p = _perspectives[child.getInteger("id")];
 							p.restore(child, ctx);
 						}
+	
+						int i = 0;
+						try {
+							i = p_memento.getInteger("current");
+						} catch(Exception e) {
+							// ignore
+						}
+						_currentPerspective= _perspectives[i];
+					} else {
+						_currentPerspective= _perspectives[0];
+						if (memento.getChild("workspace") != null) {
+							_perspectives[1].restore(memento, ctx);
+						}
 					}
-					int i = 0;
-					try {
-						i = p_memento.getInteger("current");
-					} catch(Exception e) {
-						// ignore
-					}
-					_currentPerspective= _perspectives[i];
-//					IMemento toolsRoot = memento.getChild("workspace");
-//					if(toolsRoot != null){
-//						_presenter.restore(toolsRoot, ctx);
-//					}
 								
 				} catch (Exception e) {
 					log.error("Error during restore: "+e.getMessage());

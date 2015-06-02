@@ -253,7 +253,7 @@ public class Field implements Resource {
 			_name = memento.getString("name");
 			if (_id == null) _id = _name;
 			ctx.put(_id, this);
-			System.out.println("restore "+_name);
+//			System.out.println("restore "+_name);
     		
     		IMemento dataMemento = memento.getChild("datatype");
     		DataType.Role role = dataMemento.getString("role")!= "" ? DataType.Role.valueOf(dataMemento.getString("role")) : null;

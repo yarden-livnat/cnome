@@ -60,7 +60,8 @@ public class Perspective {
 	
 	public void restore(IMemento memento, Context ctx) {	
 		if (memento == null) return;
-		toolsPositions = parse(memento.getChild("tools-pos").getString("values"));
+		if (memento.getChild("tools-pos") != null )
+			toolsPositions = parse(memento.getChild("tools-pos").getString("values"));
 		_memento = memento;
 		_ctx = ctx;
 		
