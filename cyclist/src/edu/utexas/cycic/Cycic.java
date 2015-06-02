@@ -888,7 +888,7 @@ public class Cycic extends ViewBase{
 		});
 		archetypes.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-                addArcheToBar(archetypes.getValue());
+				addArcheToBar(archetypes.getValue());
 			}
 		});
 
