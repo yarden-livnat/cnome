@@ -430,7 +430,7 @@ public class Cycic extends ViewBase{
 				facilityNode facility = new facilityNode();
 				facility.facilityType = structureCB.getValue();
 				facility.facilityType.trim();
-                addArcheToBar(facility.facilityType);
+				addArcheToBar(facility.facilityType);
 				for (int i = 0; i < DataArrays.simFacilities.size(); i++){
 					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 						facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
