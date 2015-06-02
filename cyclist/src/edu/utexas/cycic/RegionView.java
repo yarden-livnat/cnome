@@ -43,12 +43,6 @@ public class RegionView extends ViewBase{
 		institList.setOrientation(Orientation.VERTICAL);
 		institList.setMinHeight(25);
 
-        // populate list
-		institList.getItems().clear();
-		for (String instit: workingRegion.institutions){
-			institList.getItems().add(instit);
-		}
-
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeInst = new MenuItem("Remove Institution");
         removeInst.setOnAction(new EventHandler<ActionEvent>(){
