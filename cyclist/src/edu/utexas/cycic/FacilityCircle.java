@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.util.ArrayList;
 
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -36,7 +37,7 @@ public class FacilityCircle extends Circle {
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
 	ArrayList<String> incommods = new ArrayList<String>();
 	ArrayList<String> outcommods = new ArrayList<String>();
-	MenuBar menu = new MenuBar();
+	ContextMenu menu = new ContextMenu();
 	Label text = new Label("");
 	ImageView image = new ImageView();
 	String type = new String();

@@ -431,11 +431,9 @@ public class OutPut {
 				double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterX(xPosition);
 				tempNode.cycicCircle.text.setLayoutX(xPosition-radius*0.6);
-				tempNode.cycicCircle.menu.setLayoutX(xPosition);
 				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterY(yPosition);
 				tempNode.cycicCircle.text.setLayoutY(yPosition-radius*0.6);
-				tempNode.cycicCircle.menu.setLayoutY(yPosition);
 			}
 			
 			NodeList marketList = doc.getElementsByTagName("marketNode");
