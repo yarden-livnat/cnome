@@ -80,9 +80,8 @@ public class InstitutionCorralView extends ViewBase{
 					FormBuilderFunctions.formArrayBuilder(institute.institStruct, institute.institData);
 					institute.institutionShape = InstitutionShape.addInst((String)institute.name, institute);
 					institute.institutionShape.setLayoutX(event.getX());
-					institute.institutionShape.setLayoutY(event.getY());
-					institute.institutionShape.text.setLayoutX(event.getX()+institute.institutionShape.getRadiusX()*0.2);
-					institute.institutionShape.text.setLayoutY(event.getY()+institute.institutionShape.getRadiusY()*0.2);
+					institute.institutionShape.setLayoutY(event.getY()-80);
+					VisFunctions.placeTextOnEllipse(institute.institutionShape, "middle");
 					DataArrays.institNodes.add(institute);
 					institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
 				} else {
@@ -198,19 +197,17 @@ public class InstitutionCorralView extends ViewBase{
 		nodesPane.autosize();
 		for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
 			InstitutionEllipse instit = new InstitutionEllipse();
-			instit.setFill(Color.web("#CF5300"));
+			String instName = DataArrays.simInstitutions.get(i).institName;
+			String instLabel = instName.split(" ")[2] + " (" + instName.split(" ")[1] + ")";
+			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(instLabel);
+			instit.setFill(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2)));
 			instit.setLayoutX(60 + (i*110));
 			instit.setLayoutY(40);
 			instit.setRadiusX(50);
 			instit.setRadiusY(30);
 			instit.setStroke(Color.BLACK);
-			instit.text.setText(DataArrays.simInstitutions.get(i).institName);
-			instit.text.setWrapText(true);
-			instit.text.setMaxWidth(instit.getRadiusX()*1.6);
-			instit.text.setLayoutX(instit.getLayoutX()-instit.getRadiusX()*0.8);
-			instit.text.setLayoutY(instit.getLayoutY()-instit.getRadiusY()*0.7);	
-			instit.text.setTextAlignment(TextAlignment.CENTER);
-			instit.text.setMouseTransparent(true);
+			instit.text.setText(instLabel);
+			VisFunctions.placeTextOnEllipse(instit,"middle");
 			nodesPane.getChildren().addAll(instit, instit.text);
 		}
 		scroll.setContent(nodesPane);

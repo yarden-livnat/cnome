@@ -93,23 +93,12 @@ public class InstitutionShape extends Ellipse {
 		
 		institution.name = name;
 		institution.text.setText(name);
-		institution.text.setLayoutX(institution.getLayoutX()-institution.getRadiusX()*0.5);
-		institution.text.setLayoutY(institution.getLayoutY()-institution.getRadiusY()*0.5);	
-		institution.text.setMaxWidth(institution.getRadiusX()*0.8);
-		institution.text.setMaxHeight(institution.getRadiusY()*0.8);
-		institution.text.setMouseTransparent(true);
-		institution.text.setFont(new Font(14));
-		institution.text.setWrapText(true);
 		
 		// Set circle color
 		institution.rgbColor=VisFunctions.stringToColor(instit.type);
 		institution.setFill(Color.rgb(institution.rgbColor.get(0), institution.rgbColor.get(1), institution.rgbColor.get(2), 0.8));
-		// Setting font color for visibility //
-		if(VisFunctions.colorTest(institution.rgbColor) == true){
-			institution.text.setTextFill(Color.BLACK);
-		}else{
-			institution.text.setTextFill(Color.WHITE);
-		}
+
+		VisFunctions.placeTextOnEllipse(institution,"middle");
 		
 		institution.setEffect(VisFunctions.lighting);
 

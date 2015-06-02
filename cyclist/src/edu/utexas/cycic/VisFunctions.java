@@ -10,7 +10,10 @@ import javafx.scene.effect.Lighting;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.Font;
 
 /**
  * Contains all of the generic and misc visualization functions 
@@ -19,7 +22,183 @@ import javafx.scene.text.Text;
  *
  */
 public class VisFunctions {
+
+    public static void placeTextOnRectangle(RegionRectangle rect, String location) {
+        
+        rect.text.setWrapText(true);
+        rect.text.setMouseTransparent(true);
+        rect.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -0.2;
+            shiftY = 1.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else if (location.equals("top")) {
+            shiftX = -0.2;
+            shiftY = -0.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else {
+            shiftX = 0.1;
+            shiftY = 0.1;
+            heightRatio = 0.8;
+            widthRatio = 0.8;
+        }
+        
+        rect.text.setLayoutX(rect.getX()+rect.getWidth()*shiftX);
+        rect.text.setLayoutY(rect.getY()+rect.getHeight()*shiftY);	
+        rect.text.setMaxHeight(rect.getHeight()*heightRatio);
+        rect.text.setMaxWidth(rect.getWidth()*widthRatio);
+        rect.text.setTextAlignment(TextAlignment.CENTER);
+        rect.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
+    public static void placeTextOnRectangle(RegionShape rect, String location) {
+        
+        rect.text.setWrapText(true);
+        rect.text.setMouseTransparent(true);
+        rect.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -0.2;
+            shiftY = 1.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else if (location.equals("top")) {
+            shiftX = -0.2;
+            shiftY = -0.2;
+            heightRatio = 1.0;
+            widthRatio = 1.4;
+        } else {
+            shiftX = 0.1;
+            shiftY = 0.1;
+            heightRatio = 0.8;
+            widthRatio = 0.8;
+        }
+        
+        rect.text.setLayoutX(rect.getX()+rect.getWidth()*shiftX);
+        rect.text.setLayoutY(rect.getY()+rect.getHeight()*shiftY);	
+        rect.text.setMaxHeight(rect.getHeight()*heightRatio);
+        rect.text.setMaxWidth(rect.getWidth()*widthRatio);
+        rect.text.setTextAlignment(TextAlignment.CENTER);
+        rect.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
+    public static void placeTextOnCircle(FacilityCircle circle, String location) {
+        
+        circle.text.setWrapText(true);
+        circle.text.setMouseTransparent(true);
+        circle.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -1.5;
+            shiftY = 1.2;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        } else if (location.equals("top")) {
+            shiftX = -1.5;
+            shiftY = -1.2;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        } else {
+            shiftX = -1.0;
+            shiftY = -0.6;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        }
+        
+        circle.text.setLayoutX(circle.getCenterX()+circle.getRadius()*shiftX);
+        circle.text.setLayoutY(circle.getCenterY()+circle.getRadius()*shiftY);	
+        circle.text.setMaxHeight(circle.getRadius()*heightRatio);
+        circle.text.setMaxWidth(circle.getRadius()*widthRatio);
+        circle.text.setTextAlignment(TextAlignment.CENTER);
+        circle.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
+    public static void placeTextOnEllipse(InstitutionShape ellipse, String location) {
+        
+        ellipse.text.setWrapText(true);
+        ellipse.text.setMouseTransparent(true);
+        ellipse.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -1.5;
+            shiftY = 1.2;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        } else if (location.equals("top")) {
+            shiftX = -1.5;
+            shiftY = -1.2;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        } else {
+            shiftX = -1.0;
+            shiftY = -0.6;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        }
+        
+        ellipse.text.setLayoutX(ellipse.getLayoutX()+ellipse.getRadiusX()*shiftX);
+        ellipse.text.setLayoutY(ellipse.getLayoutY()+ellipse.getRadiusY()*shiftY);	
+        ellipse.text.setMaxHeight(ellipse.getRadiusY()*heightRatio);
+        ellipse.text.setMaxWidth(ellipse.getRadiusX()*widthRatio);
+        ellipse.text.setTextAlignment(TextAlignment.CENTER);
+        ellipse.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
 	
+    public static void placeTextOnEllipse(InstitutionEllipse ellipse, String location) {
+        
+        ellipse.text.setWrapText(true);
+        ellipse.text.setMouseTransparent(true);
+        ellipse.text.setFont(new Font("ComicSans", 10));
+
+        Double shiftX, shiftY, heightRatio, widthRatio;
+
+        if (location.equals("bottom")) {
+            shiftX = -1.5;
+            shiftY = 1.2;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        } else if (location.equals("top")) {
+            shiftX = -1.5;
+            shiftY = -1.2;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        } else {
+            shiftX = -1.0;
+            shiftY = -0.6;
+            heightRatio = 1.2;
+            widthRatio = -2*shiftX;
+        }
+        
+        ellipse.text.setLayoutX(ellipse.getLayoutX()+ellipse.getRadiusX()*shiftX);
+        ellipse.text.setLayoutY(ellipse.getLayoutY()+ellipse.getRadiusY()*shiftY);	
+        ellipse.text.setMaxHeight(ellipse.getRadiusY()*heightRatio);
+        ellipse.text.setMaxWidth(ellipse.getRadiusX()*widthRatio);
+        ellipse.text.setTextAlignment(TextAlignment.CENTER);
+        ellipse.text.setTextFill(Color.BLACK);
+
+        return;
+    }
+
 	public static TextField numberField(){
 		TextField numberField = new TextField(){
 			@Override public void replaceText(int start, int end, String text) {
