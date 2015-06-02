@@ -131,7 +131,7 @@ public class RegionCorralView extends ViewBase {
 			String regName = DataArrays.simRegions.get(i).regionName;
 			String regLabel = regName.split(" ")[2] + " (" + regName.split(" ")[1] + ")";
 			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(regLabel);
-			region.setFill(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2)));
+			region.setFill(VisFunctions.pastelize(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2))));
 			region.setX(10 + (i*75));
 			region.setY(5);
 			region.setWidth(70);
