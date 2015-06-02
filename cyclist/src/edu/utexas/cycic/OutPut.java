@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -63,7 +64,6 @@ public class OutPut {
 			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
-
 				regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.archetype.split(":")[2]);
 				// Building the institutions within regions.
 				for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){
@@ -99,7 +99,8 @@ public class OutPut {
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(file);
-
+                        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			transformer.transform(source, result);
 
 		} catch (ParserConfigurationException pce){
@@ -160,6 +161,7 @@ public class OutPut {
 		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
+			System.out.println(region.archetype);
 			String[] fullPath = region.archetype.split(":");
 			
 			if(!fullPath[0].equalsIgnoreCase("")){
@@ -355,7 +357,7 @@ public class OutPut {
 	 * @return Boolean to indicate whether a indent is required. 
 	 */
 	public static boolean indentCheck(String string){
-		if(string == "oneOrMore" || string == "zeroOrMore" || string == "input" || string == "output"){
+		if(string == "oneOrMore" || string == "zeroOrMore"||string == "oneOrMoreMap" || string == "pair" || string == "item"){
 			return true;
 		} else {
 			return false;

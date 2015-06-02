@@ -65,23 +65,12 @@ public class RegionShape extends Rectangle {
 		
 		rect.name = name;
 		rect.text.setText(name);
-		rect.text.setLayoutX(rect.getX()+rect.getHeight()*0.2);
-		rect.text.setLayoutY(rect.getY()+rect.getHeight()*0.2);	
-		rect.text.setMaxWidth(rect.getWidth()*0.8);
-		rect.text.setMaxHeight(rect.getHeight()*0.8);
-		rect.text.setMouseTransparent(true);
-		rect.text.setFont(new Font(14));
-		rect.text.setWrapText(true);
 		
 		// Set circle color
 		rect.rgbColor=VisFunctions.stringToColor(region.type);
-		rect.setFill(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2), 0.8));
-		// Setting font color for visibility //
-		if(VisFunctions.colorTest(rect.rgbColor) == true){
-			rect.text.setTextFill(Color.BLACK);
-		}else{
-			rect.text.setTextFill(Color.WHITE);
-		}
+		rect.setFill(VisFunctions.pastelize(Color.rgb(rect.rgbColor.get(0), rect.rgbColor.get(1), rect.rgbColor.get(2), 0.8)));
+
+		VisFunctions.placeTextOnRectangle(rect,"middle");
 		
 		rect.setEffect(VisFunctions.lighting);
 
@@ -139,7 +128,7 @@ public class RegionShape extends Rectangle {
 						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStrokeWidth(1);
 					}
 				}
-				
+				RegionCorralView.workingRegion = region;
 				rect.setEffect(VisFunctions.lighting);
 				rect.setStrokeWidth(5);
 				rect.setStroke(Color.DARKGRAY);

@@ -18,6 +18,15 @@ import javafx.scene.text.Text;
  *
  */
 public class FacilityCircle extends Circle {
+
+	protected static int defRadius = 45;
+	protected static int mouseOverRadius = 52;
+
+	void resetRadius() {
+		this.setRadius(defRadius);
+	}
+
+
 	String facilityType = "";
 	Integer facTypeIndex = 0;
 	ArrayList<FacilityCircle> childrenList = new ArrayList<FacilityCircle>();

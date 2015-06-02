@@ -30,6 +30,9 @@ public class CycicCircles{
 	protected static double mousex;
 	protected static double x;
 	protected static double y;
+	protected static int defRadius = 45;
+	protected static int mouseOverRadius = 52;
+
 	static Window window;
 	
 	/**
@@ -41,7 +44,7 @@ public class CycicCircles{
 	static FacilityCircle addNode(String name, final facilityNode parent) {
 
 		final FacilityCircle circle = parent.cycicCircle;
-		circle.setRadius(45);
+		circle.setRadius(defRadius);
 		circle.setCenterX(60);
 		circle.setCenterY(60);
 		circle.type = "Parent";
@@ -51,27 +54,15 @@ public class CycicCircles{
 		circle.text.setText(name);
 		circle.tooltip.setText(name);
 		circle.text.setTooltip(circle.tooltip);
-		circle.text.setWrapText(true);
-		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
-		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
-		circle.text.setTextAlignment(TextAlignment.CENTER);
-		circle.text.setMaxWidth(circle.getRadius()*1.4);
-		circle.text.setMouseTransparent(true);
-		circle.text.setFont(new Font("ComicSans", 14));
-		circle.text.setMaxHeight(circle.getRadius()*1.2);
-		
-		
-		
+
 		// Setting the circle color //
 		circle.setStroke(Color.BLACK);
 		circle.rgbColor=VisFunctions.stringToColor(parent.facilityType);
-		circle.setFill(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9));
-		// Setting font color for visibility //
-		if(VisFunctions.colorTest(circle.rgbColor) == true){
-			circle.text.setTextFill(Color.BLACK);
-		}else{
-			circle.text.setTextFill(Color.WHITE);
-		}
+		circle.setFill(VisFunctions.pastelize(Color.rgb(circle.rgbColor.get(0), circle.rgbColor.get(1), circle.rgbColor.get(2), 0.9)));
+
+		// Place text after color to get font color right //
+		VisFunctions.placeTextOnCircle(circle, "bottom");
+		
 		for(int i = 0; i < Cycic.pane.getChildren().size(); i++){
 			if(Cycic.pane.getChildren().get(i).getId() == "cycicNode"){
 				((Shape) Cycic.pane.getChildren().get(i)).setStroke(Color.BLACK);
@@ -207,8 +198,7 @@ public class CycicCircles{
 					circle.image.setLayoutX(circle.getCenterX()-60);
 					circle.image.setLayoutY(circle.getCenterY()-50);
 
-					circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.6);
-					circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
+					VisFunctions.placeTextOnCircle(circle, "bottom");
 
 					for(int i = 0; i < CycicScenarios.workingCycicScenario.Links.size(); i++){
 						if(CycicScenarios.workingCycicScenario.Links.get(i).source == circle){
@@ -231,8 +221,7 @@ public class CycicCircles{
 						circle.childrenLinks.get(i).line.setEndY(circle.childrenList.get(i).getCenterY());
 						circle.childrenList.get(i).menu.setLayoutX(circle.childrenList.get(i).getCenterX());
 						circle.childrenList.get(i).menu.setLayoutY(circle.childrenList.get(i).getCenterY());
-						circle.childrenList.get(i).text.setLayoutX(circle.childrenList.get(i).getCenterX()-circle.childrenList.get(i).getRadius()*0.6);
-						circle.childrenList.get(i).text.setLayoutY(circle.childrenList.get(i).getCenterY()-circle.childrenList.get(i).getRadius()*0.6);
+						VisFunctions.placeTextOnCircle(circle.childrenList.get(i), "bottom");
 						for(int ii = 0; ii < CycicScenarios.workingCycicScenario.Links.size(); ii++){
 							if(circle.childrenList.get(i) == CycicScenarios.workingCycicScenario.Links.get(ii).source){
 								CycicScenarios.workingCycicScenario.Links.get(ii).line.setStartX(circle.childrenList.get(i).getCenterX());
@@ -307,13 +296,13 @@ public class CycicCircles{
 		
 		circle.setOnMouseEntered(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				circle.setRadius(52);
+				circle.setRadius(mouseOverRadius);
 			}
 		});
 		
 		circle.setOnMouseExited(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				circle.setRadius(45);
+				circle.setRadius(defRadius);
 			}
 		});
 		

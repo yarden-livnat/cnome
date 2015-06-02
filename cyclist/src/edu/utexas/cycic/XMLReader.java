@@ -46,6 +46,8 @@ public class XMLReader {
 		skinSet skin = new skinSet(){
 			{
 				name = "DSARR";
+				radius = 45;
+				textPlacement = "bottom";
 				images.put("abr", new Image(new File(path + "/skinImages/fuelcycle_abr.png").toURI().toString(), 100, 100, false, false));
 				images.put("facility", new Image(new File(path + "/skinImages/fuelcycle_enr.png").toURI().toString()));
 				images.put("fuel fabrication", new Image(new File(path + "/skinImages/fuelcycle_fab.png").toURI().toString(), 100, 100, false, false));
@@ -360,6 +362,7 @@ public class XMLReader {
 				itemArray.add(alias.getJsonArray(0).getString(1));
 			}
 			itemArray.add(structArray);
+			itemArray.add("item");
 			cycicResize(itemArray);
 			facArray.add(itemArray);
 			cycicResize(facArray);

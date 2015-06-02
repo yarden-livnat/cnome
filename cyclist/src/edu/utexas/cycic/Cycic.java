@@ -47,8 +47,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
@@ -100,12 +102,12 @@ public class Cycic extends ViewBase{
 	static DataArrays workingScenario;
 	static boolean marketHideBool = true;
 	static Window window;
-	ComboBox<String> skins = new ComboBox<String>();
 	static ToggleGroup opSwitch = new ToggleGroup();
 	static ToggleButton localToggle = new ToggleButton("Local");
 	static ToggleButton remoteToggle = new ToggleButton("Remote");
     static CyclusJob _remoteDashA;
     private static Object monitor = new Object();
+    private static String currentSkin = "Default Skin";
 	
     
 	/**
@@ -199,6 +201,63 @@ public class Cycic extends ViewBase{
 	};
 	
 
+    private void updateLinkColor(){
+        ColorPicker cP = new ColorPicker();
+        cP.setOnAction(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent e){
+                    for(nodeLink node: DataArrays.Links){
+                        node.line.updateColor(cP.getValue());
+                    }
+                }
+            });
+        Dialog dg = new Dialog();
+        ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+        dg.getDialogPane().setContent(cP);
+        dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        dg.setResizable(true);
+        dg.show();
+        
+    }
+    private void updateBgColor(){
+        ColorPicker cP = new ColorPicker();
+        cP.setOnAction(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent e){
+                    String background = "-fx-background-color: #";
+                    background += cP.getValue().toString().substring(2, 8);
+                    pane.setStyle(background);
+                }
+            });
+        Dialog dg = new Dialog();
+        ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+        dg.getDialogPane().setContent(cP);
+        dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        dg.setResizable(true);
+        dg.show();
+        
+    }
+
+    private void setSkin() {
+        
+        if(currentSkin.equalsIgnoreCase("Default Skin")){
+            for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+                DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(false);
+                DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(100);
+            }
+        } else {
+            for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+                skinSet skin = DataArrays.visualizationSkins.get(i);
+                if(skin.name.equalsIgnoreCase(currentSkin)){
+                    for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
+                        DataArrays.FacilityNodes.get(j).cycicCircle.image.setImage(skin.images.getOrDefault(DataArrays.FacilityNodes.get(j).niche, skin.images.get("facility")));
+                        DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(true);
+                        DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(0);
+                    }
+                }
+            }
+        }
+        
+    }
+
 	/**
 	 * Initiates the Pane and GridPane.
 	 */
@@ -212,42 +271,62 @@ public class Cycic extends ViewBase{
 		} catch (IOException e1) {
 			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
 		}
+
+        final ContextMenu paneMenu = new ContextMenu();
+        MenuItem linkColor = new MenuItem("Change Link Color...");
+        linkColor.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                updateLinkColor();
+            }
+            });
+        MenuItem bgColor = new MenuItem("Change Background Color...");
+        bgColor.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent e){
+                updateBgColor();
+            }
+            });
+
+		DataArrays.visualizationSkins.add(XMLReader.SC2);
+		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
+
+        Menu skinMenu = new Menu("Change skin");
+        MenuItem defSkin = new MenuItem("Default Skin");
+        defSkin.setOnAction(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent e){
+                    currentSkin = "Default Skin";
+                    setSkin();
+                }
+            });
+        skinMenu.getItems().add(defSkin);
+		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
+            final String skinName = DataArrays.visualizationSkins.get(i).name;
+            if (skinName.equals("DSARR")) {
+                currentSkin = skinName;
+            }
+            MenuItem item = new MenuItem(skinName);
+            item.setOnAction(new EventHandler<ActionEvent>(){
+                    public void handle(ActionEvent e){
+                        currentSkin = skinName;
+                        setSkin();
+                    }
+                });
+			skinMenu.getItems().add(item);
+		}
+        
+        
+        MenuItem imageExport = new MenuItem("Save fuel cycle diagram");
+		imageExport.setOnAction(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent e){
+                    export();
+                }
+            });
+
+        paneMenu.getItems().addAll(linkColor,bgColor,skinMenu,new SeparatorMenuItem(), imageExport);
+ 
 		pane.setOnMouseClicked(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				if(e.getButton().equals(MouseButton.SECONDARY)){
-					/** TODO Turn this into a menu. Should menu move with cursor or rebuild menu each time? 
-					 * Also this should save the previous color and cancel should return you to that color.*/
-
-					if (e.isShiftDown() == true){
-						ColorPicker cP = new ColorPicker();
-						cP.setOnAction(new EventHandler<ActionEvent>(){
-							public void handle(ActionEvent e){
-								for(nodeLink node: DataArrays.Links){
-									node.line.updateColor(cP.getValue());
-								}
-							}
-						});
-						Dialog dg = new Dialog();
-						ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-						dg.getDialogPane().setContent(cP);
-						dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-						dg.setResizable(true);
-						dg.show();
-					} else {
-						ColorPicker cP = new ColorPicker();
-						cP.setOnAction(new EventHandler<ActionEvent>(){
-							public void handle(ActionEvent e){
-								String background = "-fx-background-color: #";
-								background += cP.getValue().toString().substring(2, 8);
-								pane.setStyle(background);
-							}
-						});
-						Dialog dg = new Dialog();
-						ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-						dg.getDialogPane().setContent(cP);
-						dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-						dg.show();
-					}
+                    paneMenu.show(pane,e.getScreenX(),e.getScreenY());
 				}
 			}
 		});
@@ -274,16 +353,17 @@ public class Cycic extends ViewBase{
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
-					facility.cycicCircle.text.setLayoutX(event.getX()-facility.cycicCircle.getRadius()*0.7);
-					facility.cycicCircle.text.setLayoutY(event.getY()-facility.cycicCircle.getRadius()*0.6);
+					VisFunctions.placeTextOnCircle(facility.cycicCircle, "middle");
 					facility.cycicCircle.menu.setLayoutX(event.getX());
 					facility.cycicCircle.menu.setLayoutY(event.getY());
 					
 					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
-						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(skins.getValue())){
-							facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.get(facility.niche));
+						if(DataArrays.visualizationSkins.get(i).name.equalsIgnoreCase(currentSkin)){
+							facility.cycicCircle.image.setImage(DataArrays.visualizationSkins.get(i).images.getOrDefault(facility.niche,DataArrays.visualizationSkins.get(i).images.get("facility")));
 							facility.cycicCircle.image.setVisible(true);
 							facility.cycicCircle.setOpacity(0);
+							facility.cycicCircle.setRadius(DataArrays.visualizationSkins.get(i).radius);
+							VisFunctions.placeTextOnCircle(facility.cycicCircle, DataArrays.visualizationSkins.get(i).textPlacement);
 						}
 					}
 					facility.cycicCircle.image.setLayoutX(facility.cycicCircle.getCenterX()-60);
@@ -367,49 +447,6 @@ public class Cycic extends ViewBase{
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
 		
-		skins.getItems().add("Default Skin");
-		skins.setValue("Default Skin");
-		DataArrays.visualizationSkins.add(XMLReader.SC2);
-		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
-		for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
-			skins.getItems().add(DataArrays.visualizationSkins.get(i).name);
-		}
-		skins.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				if(skins.getValue().equalsIgnoreCase("Default Skin")){
-					for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
-						DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(false);
-						DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(100);
-					}
-				} else {
-					for(int i = 0; i < DataArrays.visualizationSkins.size(); i++){
-						skinSet skin = DataArrays.visualizationSkins.get(i);
-						if(skin.name.equalsIgnoreCase(skins.getValue())){
-							for(int j = 0; j < DataArrays.FacilityNodes.size(); j++){
-								DataArrays.FacilityNodes.get(j).cycicCircle.image.setImage(skin.images.getOrDefault(DataArrays.FacilityNodes.get(j).niche, skin.images.get("facility")));
-								DataArrays.FacilityNodes.get(j).cycicCircle.image.setVisible(true);
-								DataArrays.FacilityNodes.get(j).cycicCircle.setOpacity(0);
-							}
-						}
-					}
-				}
-			}
-		});
-		grid.add(new Label("Node Skins"){
-			{
-				setTooltip(new Tooltip("Use this drop down to select the skin set to use for your nodes."));
-				setFont(new Font("Time", 14));
-			}
-		}, 0, 1);
-		grid.add(skins, 1, 1);
-		
-        Button imageButton = new Button("Save fuel cycle diagram");
-		imageButton.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				export();
-			}
-		});
-		grid.add(imageButton, 2, 1);
 		opSwitch.getToggles().clear();
         opSwitch.getToggles().addAll(localToggle, remoteToggle);
         try {
@@ -537,18 +574,12 @@ public class Cycic extends ViewBase{
 	public void buildDnDCircle(FacilityCircle circle, int i, String name){
 		circle.setRadius(40);
 		circle.setStroke(Color.BLACK);
-		circle.setFill(Color.web("#CF5300"));
+		circle.rgbColor=VisFunctions.stringToColor(name);
+		circle.setFill(VisFunctions.pastelize(Color.rgb(circle.rgbColor.get(0),circle.rgbColor.get(1),circle.rgbColor.get(2))));
 		circle.setCenterX(45+(i*90));
 		circle.setCenterY(50);
-		circle.text.setText(name.split(" ")[2]);
-		circle.text.setWrapText(true);
-		circle.text.setMaxWidth(60);
-		circle.text.setLayoutX(circle.getCenterX()-circle.getRadius()*0.7);
-		circle.text.setLayoutY(circle.getCenterY()-circle.getRadius()*0.6);	
-		circle.text.setTextAlignment(TextAlignment.CENTER);
-		circle.text.setMouseTransparent(true);
-		circle.text.setMaxWidth(circle.getRadius()*1.4);
-		circle.text.setMaxHeight(circle.getRadius()*1.2);
+		circle.text.setText(name.split(" ")[2] + " (" + name.split(" ")[1] + ")");
+		VisFunctions.placeTextOnCircle(circle, "middle");
 		circle.setOnDragDetected(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
 				Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
@@ -826,7 +857,7 @@ public class Cycic extends ViewBase{
 								}
 							}
 							buildDnDCircle(circle, pos-1, test.facilityName);
-							nodesPane.getChildren().addAll(circle,circle.text);
+							nodesPane.getChildren().addAll(circle, circle.text);
 						} catch (Exception eq) {
 							
 						}
