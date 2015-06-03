@@ -219,7 +219,7 @@ public class InstitutionCorralView extends ViewBase{
 		
 		
 		HBox corralBox = new HBox();
-		corralBox.getChildren().addAll(institBox, facilityScroll);
+		corralBox.getChildren().addAll(institBox /*facilityScroll*/);
 		setContent(corralBox);
 
 	}
