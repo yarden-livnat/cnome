@@ -8,7 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -16,7 +15,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -36,6 +34,7 @@ public class RegionCorralView extends ViewBase {
 		{
 			setPrefHeight(375);
 			setPrefWidth(630);
+			setStyle("-fx-background-color: #555555");
 			setOnDragDropped(new EventHandler<DragEvent>(){
 				public void handle(DragEvent event){
 					if(event.getDragboard().hasContent(DnD.VALUE_FORMAT)){
@@ -82,19 +81,8 @@ public class RegionCorralView extends ViewBase {
 	/**
 	 * 
 	 */
-	static HBox unassociatedFacilityList = new HBox(10);
-	
-	/**
-	 * 
-	 */
-	public static void addUnassInstit(){
-		unassociatedFacilityList.getChildren().add(new Circle());
-	}
-	
-	/**
-	 * 
-	 */
 	public RegionCorralView() {
+		super(); 
 		
 		// Create content for RegionCorralView header 
 		final Label regionLabel = new Label("Region Name:");
@@ -116,8 +104,6 @@ public class RegionCorralView extends ViewBase {
 		/** TODO THIS BUTTON DOES NOTHING AT ALL */
 		regionCorralGrid.add(corralButton, 3, 0);
 
-		final Label regionPrototypeLabel = new Label("Region Prototypes:");
-		regionCorralGrid.add(regionPrototypeLabel, 0, 1);
 
 		ScrollPane scroll = new ScrollPane();
 		scroll.autosize();
