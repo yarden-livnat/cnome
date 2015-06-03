@@ -535,7 +535,7 @@ public class ChartView extends CyclistViewBase {
 		}
 		else {
 			s = s.equals(" ") ? "Infinity values removed" :
-				("Infinities values removed from: "+s);		
+				("Infinity values removed from: "+s);		
 			_warningText.setText(s);
 			_warningLabel.setVisible(true);
 		}
