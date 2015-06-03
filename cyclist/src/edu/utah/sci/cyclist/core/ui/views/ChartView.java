@@ -98,7 +98,8 @@ public class ChartView extends CyclistViewBase {
 
 	enum MarkType { TEXT, BAR, LINE, SHAPE, GANTT, NA }
 
-
+	public static double CYCLIST_MAX_VALUE = 1e90;
+	
 	private boolean _active = true;
 
 	private TableProxy _tableProxy = null;
@@ -474,6 +475,17 @@ public class ChartView extends CyclistViewBase {
 	@SuppressWarnings("unchecked")
     private void assignData(List<TableRow> list, Spec spec) {
 		log.debug("chart data has "+list.size()+" rows");
+		// TODO: fix this Hack
+		for (TableRow r : list) {
+			
+		}
+//		for (TableRow r : list) {
+//			for (int i=0; i<r.value.length; i++) {
+//				if (i>0) System.out.print(", "); 
+//				System.out.print(r.value[i]);
+//			}
+//			System.out.println();
+//		}
 		if (list.size() == 0) {
 			log.debug("no data");
 			getChart().getData().clear();
@@ -553,7 +565,6 @@ public class ChartView extends CyclistViewBase {
 				for (TableRow row : list) {
 					// pt
 					XYChart.Data<Object, Object> pt = createPoint(row.value[ix], row.value[iy], cx, cy);
-					
 					// key
 					Object [] index = Arrays.copyOfRange(row.value, nx+ny-2, cols); // copy two extra to the left. 
 					index[0] = xInfo.field.getName();
@@ -571,6 +582,7 @@ public class ChartView extends CyclistViewBase {
 		}
 		return map;
 	}
+	
 	
 	private XYChart.Data<Object, Object> createPoint(Object x, Object y, Classification cx, Classification cy) {
 		x = convert(x, cx);
@@ -606,7 +618,7 @@ public class ChartView extends CyclistViewBase {
 			} else {
 				// Data can not be visualize 
 				// Don't throw an exception
-				return 0;
+				v = 0;
 			}
 		}
 		return v;

@@ -48,6 +48,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -63,6 +64,7 @@ import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
 import edu.utah.sci.cyclist.core.model.Field;
 import edu.utah.sci.cyclist.core.model.Model;
+import edu.utah.sci.cyclist.core.model.Perspective;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
@@ -72,12 +74,13 @@ import edu.utah.sci.cyclist.core.presenter.Presenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
-import edu.utah.sci.cyclist.core.presenter.WorkspacePresenter;
+import edu.utah.sci.cyclist.core.presenter.VisWorkspacePresenter;
 import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
-import edu.utah.sci.cyclist.core.ui.views.Workspace;
+import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
@@ -94,14 +97,20 @@ public class CyclistController {
 
 	private final EventBus _eventBus;
 	private MainScreen _screen;
-	public static WorkspacePresenter _presenter;
+	public static VisWorkspacePresenter _presenter;
 	private Model _model = new Model();
 	private String SAVE_FILE = "workspace-config.xml";
-	private WorkDirectoryController _workDirectoryController;
+	private SessionController _sessionController;
 	private Boolean _dirtyFlag = false;
     public static CyclusService _cyclusService;
 	
 	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
+	
+	private Perspective _perspectives[] = {
+			new Perspective(0, "Scenario Builder", "Base", Arrays.asList("Builder", "Jobs")),
+			new Perspective(1, "Data Exploration", "Vis", Arrays.asList("Simulations", "Tables", "Fields", "Filters", "Jobs"))
+	};
+	private Perspective _currentPerspective = null;
 	
 	/**
 	 * Constructor
@@ -121,20 +130,20 @@ public class CyclistController {
 		// TODO: fix this hack. We need a better way of passing around the list of datasources
 		LoadSqlite.setSources(_model.getSources());
 		
-		_workDirectoryController = new WorkDirectoryController();
+		_sessionController = new SessionController();
 		
 		// If the save directory does not exist, create it
-		File saveDir = new File(WorkDirectoryController.CYCLIST_DIR);
+		File saveDir = new File(SessionController.CYCLIST_DIR);
 		if (!saveDir.exists())	
 			saveDir.mkdir();  
 	
-		File defaultWs = new File(WorkDirectoryController.DEFAULT_WORKSPACE);
+		File defaultWs = new File(SessionController.DEFAULT_WORKSPACE);
 		if (!defaultWs.exists())	
 			defaultWs.mkdir();
 		
-		if (_workDirectoryController.initGeneralConfigFile())
+		if (_sessionController.initGeneralConfigFile())
 		{
-			_workDirectoryController.restoreGeneralConfigFile();
+			_sessionController.restoreGeneralConfigFile();
 		}
 	}
 
@@ -202,14 +211,56 @@ public class CyclistController {
         ip.setPanel(screen.getInputPanel());
         ip.setFactories(Arrays.asList(ToolsLibrary.inputFactories));
         
-		// set up the main workspace
-		Workspace workspace = new Workspace(true);
-		screen.setWorkspace(workspace);
+        // Builder perspectives
+       
+		for (Perspective p : _perspectives) {
+			ViewBase view;
+//			if (p.type == "Vis") {
+				view = new VisWorkspace(true);
+				p.presenter = new VisWorkspacePresenter(_eventBus);
+				p.presenter.setView(view);
+//			} else {
+//				view = new BaseWorkspace(true);
+//				p.presenter = new BaseWorkspacePresenter(_eventBus);
+//				p.presenter.setView(view);
+//			}
+
+			Tab tab = new Tab();
+			tab.setText(p.name);
+			tab.setClosable(false);
+			tab.setContent(view);
+			screen.getTabPane().getTabs().add(tab);
+		}
 		
-		_presenter = new WorkspacePresenter(_eventBus);
-		_presenter.setView(workspace);
+		screen.getTabPane().getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> o, Number prev, Number id) {
+				perspectiveChanged(id.intValue());
+
+			}
+		});
 		
 		restore();
+		
+		selectPerspective(_currentPerspective.id);   
+		if (_currentPerspective.id == 0)
+			perspectiveChanged(_currentPerspective.id);  
+	}
+	
+	private void selectPerspective(int id) {
+		_screen.getTabPane().getSelectionModel().select(id);
+	}
+	
+	private void perspectiveChanged(int id) {
+		if (_currentPerspective != null && _currentPerspective.id != id)
+			_currentPerspective.setToolsPositions(_screen.getToolsPositions());
+		
+		_currentPerspective = _perspectives[id];
+		if (!_currentPerspective.initialized) {
+			_currentPerspective.init();
+		}
+		_presenter = _currentPerspective.presenter;
+		_screen.showPanels(_currentPerspective.tools, _currentPerspective.toolsPositions);
 	}
 	
 	/**
@@ -218,19 +269,19 @@ public class CyclistController {
 	 */
 	public void selectWorkspace() {
 		
-		if(_workDirectoryController == null){
+		if(_sessionController == null){
 			return;
 		}
 		
-		ObservableList<String> selection = _screen.selectWorkspace(_workDirectoryController.getWorkDirectories(),
-																   _workDirectoryController.getLastChosenIndex());
+		ObservableList<String> selection = _screen.selectWorkspace(_sessionController.getWorkDirectories(),
+																   _sessionController.getLastChosenIndex());
 		
 		selection.addListener(new ListChangeListener<String>(){
 
 			@Override
 			public void onChanged(Change<? extends String> list ){
-				if(_workDirectoryController != null){
-					if(_workDirectoryController.handleWorkDirectoriesListChangedEvent(list)){
+				if(_sessionController != null){
+					if(_sessionController.handleWorkDirectoriesListChangedEvent(list)){
 						restore();
 						
 						//Set all the views to match the new tables.
@@ -455,8 +506,11 @@ public class CyclistController {
 			public void handle(ActionEvent arg0) {
 				
 				//If need to save the current workspace data - ask the user whether to save it or not
-				
-				if(_dirtyFlag || _presenter.getDirtyFlag()){
+				boolean dirty = _dirtyFlag;
+				for (Perspective p : _perspectives) {
+					dirty |= p.presenter.getDirtyFlag();
+				}
+				if (dirty) {
 					SaveWsWizard wizard = new SaveWsWizard();
 					ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
 					selection.addListener(new ChangeListener<Boolean>(){
@@ -492,7 +546,7 @@ public class CyclistController {
 				File dir = new File(getLastChosenWorkDirectory());
 				String parent="";
 				if(!dir.exists()){
-					parent = WorkDirectoryController.DEFAULT_WORKSPACE;
+					parent = SessionController.DEFAULT_WORKSPACE;
 				}else{
 					parent = dir.getParent();
 				}
@@ -503,7 +557,7 @@ public class CyclistController {
 				if (file != null) {
 					saveAs(file.getAbsolutePath());
 					//Display the new directory in the work directories dialog.
-					_workDirectoryController.addNewDir(file.getAbsolutePath());
+					_sessionController.addNewDir(file.getAbsolutePath());
 				}
 			}
 		});
@@ -579,7 +633,7 @@ public class CyclistController {
 				quit();
 			}
 		});
-		;
+		
 		EventHandler<ActionEvent> viewAction = new EventHandler<ActionEvent>() {		
 			@Override
 			public void handle(ActionEvent event) {
@@ -603,18 +657,22 @@ public class CyclistController {
 		_model.getSimulations().addListener(new ListChangeListener<Simulation>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends Simulation> listChange) {
-				while (listChange.next()) {
-					for(Simulation sim : listChange.getRemoved()){
-						_presenter.removeSimulation(sim);
-						_model.markSimALiasAsRemoved(sim);
-					}
-					boolean select = true;
-					for(Simulation sim : listChange.getAddedSubList()){
-						_model.addNewSimALias(sim,"");
-						//If there are a few simulations added at the same time - select only the first.
-						_presenter.addFirstSelectedSimulation(sim,select);
-						if(select){
-							select = false;
+				if (_presenter instanceof VisWorkspacePresenter) {
+					VisWorkspacePresenter p = (VisWorkspacePresenter) _presenter;
+	
+					while (listChange.next()) {
+						for(Simulation sim : listChange.getRemoved()){
+							p.removeSimulation(sim);
+							_model.markSimALiasAsRemoved(sim);
+						}
+						boolean select = true;
+						for(Simulation sim : listChange.getAddedSubList()){
+							_model.addNewSimALias(sim,"");
+							//If there are a few simulations added at the same time - select only the first.
+							p.addFirstSelectedSimulation(sim,select);
+							if(select){
+								select = false;
+							}
 						}
 					}
 				}
@@ -625,7 +683,14 @@ public class CyclistController {
 	
 		
 	private void quit() {
-		if(_dirtyFlag || _presenter.getDirtyFlag()){
+		_currentPerspective.setToolsPositions(_screen.getToolsPositions());
+		
+		boolean dirty = _dirtyFlag;
+		for (Perspective p : _perspectives) {
+			dirty |= p.presenter.getDirtyFlag();
+		}
+		
+		if(dirty){
 			SaveWsWizard wizard = new SaveWsWizard();
 			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
 			selection.addListener(new ChangeListener<Boolean>(){
@@ -647,6 +712,8 @@ public class CyclistController {
 	}
 	
 	private void saveAs(String workdir) {
+		
+		_currentPerspective.setToolsPositions(_screen.getToolsPositions());
 		
 		IMemento child;
 		File saveDir = new File(workdir);
@@ -699,7 +766,11 @@ public class CyclistController {
 		
 		_cyclusService.save(memento.createChild("Jobs"));
 		
-		_presenter.save(memento.createChild("workspace"));
+		IMemento perspectives_memento = memento.createChild("Perspectives");
+		perspectives_memento.putInteger("current", _currentPerspective.id);
+		for (Perspective p : _perspectives) {
+			p.save(perspectives_memento.createChild("Perspective"));
+		}
 		
 		//First save the main workspace
 		IMemento mainWs = memento.createChild("main-window");	
@@ -719,7 +790,7 @@ public class CyclistController {
 	
 	private void restore() {
 	
-		String currDirectory = _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+		String currDirectory = _sessionController.getWorkDirectories().get(_sessionController.getLastChosenIndex());
 		
 		// Check if the save file exists
 		File saveFile = new File(currDirectory+"/"+SAVE_FILE);
@@ -728,7 +799,9 @@ public class CyclistController {
 		clearModel();
 		
 		//Clears the main workspace.
-		_presenter.clearWorkspace();
+		for(Perspective p : _perspectives) {
+			p.presenter.clearWorkspace();
+		}
 		
 		_screen.getRemoteServers().clear();
 			
@@ -805,9 +878,26 @@ public class CyclistController {
 					restoreMainScreen(mainWs.getChild("geom"));
 					_screen.restore(mainWs, ctx);
 					
-					IMemento toolsRoot = memento.getChild("workspace");
-					if(toolsRoot != null){
-						_presenter.restore(toolsRoot, ctx);
+					 
+					IMemento p_memento = memento.getChild("Perspectives");
+					if (p_memento != null) {
+						for (IMemento child : p_memento.getChildren("Perspective")) {
+							Perspective p = _perspectives[child.getInteger("id")];
+							p.restore(child, ctx);
+						}
+	
+						int i = 0;
+						try {
+							i = p_memento.getInteger("current");
+						} catch(Exception e) {
+							// ignore
+						}
+						_currentPerspective= _perspectives[i];
+					} else {
+						_currentPerspective= _perspectives[0];
+						if (memento.getChild("workspace") != null) {
+							_perspectives[1].restore(memento, ctx);
+						}
 					}
 								
 				} catch (Exception e) {
@@ -828,7 +918,7 @@ public class CyclistController {
 	 */
 	private void readSimulationsTables(Context ctx){
 		try {
-			Path path = FileSystems.getDefault().getPath(WorkDirectoryController.CYCLIST_DIR, SIMULATIONS_TABLES_FILE);
+			Path path = FileSystems.getDefault().getPath(SessionController.CYCLIST_DIR, SIMULATIONS_TABLES_FILE);
 			if (!Files.exists(path)) {
 				InputStream in = Cyclist.class.getResourceAsStream("assets/"+SIMULATIONS_TABLES_FILE);
 				Files.copy(in, path);
@@ -855,10 +945,10 @@ public class CyclistController {
 	 * If not available - return the default work directory
 	 */
 	private String getLastChosenWorkDirectory(){
-		if(_workDirectoryController == null){
-			return WorkDirectoryController.CYCLIST_DIR;
+		if(_sessionController == null){
+			return SessionController.CYCLIST_DIR;
 		}
-		return _workDirectoryController.getWorkDirectories().get(_workDirectoryController.getLastChosenIndex());
+		return _sessionController.getWorkDirectories().get(_sessionController.getLastChosenIndex());
 	}
 	
 	/*

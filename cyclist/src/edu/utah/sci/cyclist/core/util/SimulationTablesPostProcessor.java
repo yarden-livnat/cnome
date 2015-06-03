@@ -71,7 +71,7 @@ public class SimulationTablesPostProcessor {
 								   + "	WHERE "
 								   + "		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId "
 								   + "	GROUP BY inv.SimId, tl.Time, cmp.NucId, ag.AgentID; "
-								   + "CREATE INDEX IF NOT EXISTS quantitytransacted_idx ON quantitytransactedbase (simid,agentid,time,nucid,quantity)";
+								   + "CREATE INDEX IF NOT EXISTS QuantityInventoryBase_idx ON QuantityInventoryBase (simid,agentid,time,nucid,quantity)";
 	
 	private static final String QUANTITY_INVENTORY_VIEW_CREATE = 
 								  "CREATE view if not exists  QuantityInventory as "
@@ -95,7 +95,7 @@ public class SimulationTablesPostProcessor {
 								+ "		tr.SimId = res.SimId AND ag.SimId = tr.SimId and cmp.SimId=res.SimId "
 							    + "	GROUP BY res.SimId, cmp.NucId, tr.Time, ag.AgentID"
 								+ "	ORDER BY tr.Time ASC;"
-							    + " CREATE INDEX IF NOT EXISTS quantityinventory_idx ON quantityinventorybase (simid,agentid,time,nucid,quantity); ";
+							    + " CREATE INDEX IF NOT EXISTS QuantityTransactedBase_idx ON QuantityTransactedBase (simid,agentid,time,nucid,quantity); ";
 
 	
 	private static final String QUANTITY_TRANSACTED_VIEW_CREATE = 
@@ -418,7 +418,7 @@ public class SimulationTablesPostProcessor {
 			}
 			return true;
 		} catch (SQLException e) {
-			log.warn("Create additional table failed");
+			log.warn("Create additional table failed:", e);
 			return false;
 		}finally{
 			try {
