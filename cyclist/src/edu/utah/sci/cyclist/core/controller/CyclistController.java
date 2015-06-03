@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +52,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import jdk.internal.util.xml.impl.Pair;
 
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
@@ -68,7 +66,6 @@ import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
-import edu.utah.sci.cyclist.core.presenter.CyclistViewPresenter;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.core.presenter.InputPresenter;
 import edu.utah.sci.cyclist.core.presenter.Presenter;
@@ -89,7 +86,6 @@ import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
 import edu.utah.sci.cyclist.core.util.LoadSqlite;
-import edu.utah.sci.cyclist.core.util.StreamUtils;
 
 
 public class CyclistController {
