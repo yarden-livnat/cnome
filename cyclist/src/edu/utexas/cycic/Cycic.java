@@ -477,8 +477,6 @@ public class Cycic extends ViewBase{
             localToggle.setSelected(false);
             remoteToggle.setSelected(true);
         };
-		grid.add(localToggle, 7, 0);
-		grid.add(remoteToggle, 8, 0);
 
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
@@ -842,6 +840,10 @@ public class Cycic extends ViewBase{
             }
         });;
         simInfo.add(runCyclus, 1,6);    
+        HBox toggleBox = new HBox();
+        toggleBox.getChildren().addAll(localToggle, remoteToggle);
+        simInfo.add(new Label("Execution Environment: "), 0, 7);
+        simInfo.add(toggleBox, 1, 7);
     }
 
 	public void createArchetypeBar(GridPane grid){
