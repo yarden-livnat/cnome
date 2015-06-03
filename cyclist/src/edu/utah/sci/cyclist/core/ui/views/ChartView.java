@@ -482,14 +482,16 @@ public class ChartView extends CyclistViewBase {
 	@SuppressWarnings("unchecked")
     private void assignData(List<TableRow> list, Spec spec) {
 		log.debug("chart data has "+list.size()+" rows");
+		_seriesWithInfinity.clear();
 		if (list.size() == 0) {
 			log.debug("no data");
 			getChart().getData().clear();
 			_currentSpec = spec;
+			checkForInfinities(null);
 			return;
 		}
 				
-		_seriesWithInfinity.clear();
+
 		Map<MultiKey, ObservableList<XYChart.Data<Object, Object>>> dataMap = split(list, spec);
 		
 		// remove current series that are not part of the new data
@@ -523,9 +525,11 @@ public class ChartView extends CyclistViewBase {
 	
 	private void checkForInfinities(Collection<MultiKey> keys ) {
 		String s = "";
-		for (MultiKey bad : _seriesWithInfinity) {
-			if (keys.contains(bad)) {
-				s += createLabel(bad) + " ";
+		if (keys != null) {
+			for (MultiKey bad : _seriesWithInfinity) {
+				if (keys.contains(bad)) {
+					s += createLabel(bad) + " ";
+				}
 			}
 		}
 
@@ -774,7 +778,7 @@ public class ChartView extends CyclistViewBase {
 			_currentSpec = spec != null? spec : new Spec();
 			setChart(chart);
 		} else {
-			Text text = new Text("Unsupported fields combination");
+			Text text = new Text("No data");
 			_stackPane.getChildren().add(0, text);			
 			_currentSpec = new Spec();
 		}
