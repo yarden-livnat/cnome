@@ -53,6 +53,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import jdk.internal.util.xml.impl.Pair;
 
 import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
@@ -67,8 +68,10 @@ import edu.utah.sci.cyclist.core.model.Model;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
+import edu.utah.sci.cyclist.core.presenter.CyclistViewPresenter;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.core.presenter.InputPresenter;
+import edu.utah.sci.cyclist.core.presenter.Presenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
@@ -157,6 +160,22 @@ public class CyclistController {
 		ds.setTables(_model.getTables());
 		ds.setPanel(screen.getDatasourcesPanel());
 		
+		screen.getDatasourcesPanel().setTableActions(Arrays.asList("Plot"), 
+				action -> {
+					try {
+						for (ToolFactory factory : 	ToolsLibrary.factories) {
+							if (factory.getToolName().equals(action.v1)) {
+								Presenter p = _presenter.addTool(factory.create());
+								p.addTable(action.v2);
+								return;
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return;
+				});
+		
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
 		sp.setPanel(screen.getFieldsPanel());
@@ -189,14 +208,11 @@ public class CyclistController {
         
 		// set up the main workspace
 		Workspace workspace = new Workspace(true);
-//		workspace.setWorkDirPath(getLastChosenWorkDirectory());
 		screen.setWorkspace(workspace);
 		
 		_presenter = new WorkspacePresenter(_eventBus);
 		_presenter.setView(workspace);
 		
-		// do something?
-		//selectWorkspace();
 		restore();
 	}
 	

@@ -203,8 +203,8 @@ public class WorkspacePresenter extends CyclistViewPresenter {
 	/*
 	 * addTool
 	 */
-	public void addTool(Tool tool) {
-		addTool(tool, 100, 100);
+	public Presenter addTool(Tool tool) {
+		return addTool(tool, 100, 100);
 	}
 	
 	@Override
