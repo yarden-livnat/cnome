@@ -229,7 +229,6 @@ public class XMLReader {
 				JsonArray defType = null;
 				if(anno1.get("default") != null){
 					if(anno1.get("default").getValueType() == JsonValue.ValueType.OBJECT){
-						System.out.println("OBJECT "  + anno1.getJsonObject("default"));
 						JsonObject defTypeObj = anno1.getJsonObject("default");
 						if(defTypeObj.size() == 0){
 							defType = Json.createArrayBuilder()
@@ -243,7 +242,6 @@ public class XMLReader {
 							//TODO add method for walking arrays. 
 						}
 					} else if(anno1.get("default").getValueType() == JsonValue.ValueType.ARRAY){
-						System.out.println("ARRAY "  + anno1.getJsonArray("default"));
 						JsonArray defTypeArray = anno1.getJsonArray("default");
 						if(defTypeArray.size() == 0){
 							defType = Json.createArrayBuilder()

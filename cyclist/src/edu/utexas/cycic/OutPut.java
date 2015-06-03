@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 import javafx.scene.control.Label;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -93,6 +96,10 @@ public class OutPut {
 			for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
 				recipeBuilder(doc, rootElement, recipe);
 			}
+			
+			Element ui = doc.createElement("ui");
+			saveFile(doc, ui);
+			rootElement.appendChild(ui);
 
 			// Writing out the xml file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -421,22 +428,25 @@ public class OutPut {
 			NodeList facList = doc.getElementsByTagName("facilityNode");
 			
 			for (int i = 0; i < facList.getLength(); i++){
-				org.w3c.dom.Node facNode = facList.item(i);
+				Node facNode = facList.item(i);
 				
 				facilityNode tempNode = new facilityNode();
 				Element element = (Element) facNode;
 				tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
 				tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
-				double radius = Double.parseDouble(element.getElementsByTagName("radius").item(0).getTextContent());
 				double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterX(xPosition);
-				tempNode.cycicCircle.text.setLayoutX(xPosition-radius*0.6);
 				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterY(yPosition);
-				tempNode.cycicCircle.text.setLayoutY(yPosition-radius*0.6);
+				String facArray = element.getElementsByTagName("facArray").item(0).getTextContent();
+				System.out.println(facArray);
+				Reader facArrayRead = new StringReader(facArray);
+				JsonReader facArr = Json.createReader(facArrayRead);
+				JsonArray jsonFacArray = facArr.readArray();
+				System.out.println(jsonFacArray);
+				VisFunctions.placeTextOnCircle(tempNode.cycicCircle, "middle");
 			}
 			
-			NodeList marketList = doc.getElementsByTagName("marketNode");
 			VisFunctions.redrawPane();
 		} catch (Exception e){
 			e.printStackTrace();
@@ -457,11 +467,11 @@ public class OutPut {
 		Element yPosition = doc.createElement("yPosition");
 		yPosition.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getCenterY())));
 		facElement.appendChild(yPosition);
-		// radius
-		Element radius = doc.createElement("radius");
-		radius.appendChild(doc.createTextNode(String.format("%.2f", facility.cycicCircle.getRadius())));
-		facElement.appendChild(radius);
 		
+		Element facArray = doc.createElement("facArray");
+		facArray.appendChild(doc.createTextNode(facility.facilityStructure.toString()));
+		facElement.appendChild(facArray);
+
 		for (String commodity: facility.cycicCircle.incommods){
 			Element commodityObj = doc.createElement("cycicInCommod");
 			commodityObj.appendChild(doc.createTextNode(commodity));
@@ -540,8 +550,8 @@ public class OutPut {
 		for (int i = 0; i < commodityList.getLength(); i++){
 			Node commodity = commodityList.item(i);
 			CommodityNode commod = new CommodityNode();
-			commod.name = new Label(commodity.getChildNodes().item(0).getTextContent());
-			commod.priority =  Double.parseDouble(commodity.getChildNodes().item(0).getTextContent());
+			commod.name = new Label(commodity.getChildNodes().item(1).getTextContent());
+			commod.priority =  Double.parseDouble(commodity.getChildNodes().item(3).getTextContent());
 			Cycic.workingScenario.CommoditiesList.add(commod);
 		}		
 	}
@@ -565,11 +575,13 @@ public class OutPut {
 		NodeList facList = doc.getElementsByTagName("facility");
 		for (int i = 0; i < facList.getLength(); i++){
 			Element facility = (Element) facList.item(i);
-			System.out.println(facility);
-			Element model = (Element) facility.getChildNodes().item(1).getChildNodes().item(0);
+			for (int j = 0; j < facility.getChildNodes().getLength(); j++){
+				System.out.println(facility.getChildNodes().item(j));
+			}
+			/*Element model = (Element) facility.getChildNodes().item(1).getChildNodes().item(0);
 			for (int j = 0; j < model.getChildNodes().getLength(); j++){
 				System.out.println(model.getChildNodes().item(j).getTextContent());
-			}
+			}*/
 		}
 
 	}

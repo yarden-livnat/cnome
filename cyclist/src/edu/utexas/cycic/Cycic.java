@@ -50,6 +50,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
@@ -839,11 +840,47 @@ public class Cycic extends ViewBase{
             	}
             }
         });;
-        simInfo.add(runCyclus, 1,6);    
+        simInfo.add(runCyclus, 1,6);  
+        /// TODO Update load
+        Button load = new Button("LOAD");
+        load.setOnAction(new EventHandler<ActionEvent>(){
+        	public void handle(ActionEvent e){
+				FileChooser fileChooser = new FileChooser();
+				//Set extension filter
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+				fileChooser.getExtensionFilters().add(extFilter);
+				fileChooser.setTitle("Select input file to load.");
+				fileChooser.setInitialFileName("*.xml");
+				//Show save file dialog
+				File file = fileChooser.showOpenDialog(window);
+				OutPut.loadFile(file);        	}
+        });
+        simInfo.add(load, 2, 6);
+        
+        
+        /// TODO Choose! 
         HBox toggleBox = new HBox();
         toggleBox.getChildren().addAll(localToggle, remoteToggle);
+        toggleBox.setSpacing(5);
         simInfo.add(new Label("Execution Environment: "), 0, 7);
         simInfo.add(toggleBox, 1, 7);
+        
+        ToggleGroup group = new ToggleGroup();
+        RadioButton button1 = new RadioButton("Local");
+        button1.setToggleGroup(group);
+        button1.setSelected(true);
+        RadioButton button2 = new RadioButton("Remote");
+        button2.setToggleGroup(group);
+        HBox radioBox = new HBox();
+        radioBox.setSpacing(5);
+        radioBox.getChildren().addAll(button1, button2);
+        simInfo.add(new Label("Execution Environment: "), 0, 8);
+        simInfo.add(radioBox, 1, 8);
+        
+        ComboBox<String> comboToggle = new ComboBox<String>();
+        comboToggle.getItems().addAll("Local", "Remote");
+        simInfo.add(new Label("Execution Environment: "), 0, 9);
+        simInfo.add(comboToggle, 1, 9);
     }
 
 	public void createArchetypeBar(GridPane grid){
