@@ -85,7 +85,9 @@ public class InstitutionCorralView extends ViewBase{
 	 */
 	public InstitutionCorralView(){
 		super();
-	
+
+		DataArrays.cycicInitLoader();
+
 		TextField institName = new TextField();
 		
 		final ComboBox<String> typeOptions = new ComboBox<String>();
