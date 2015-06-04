@@ -46,7 +46,6 @@ public class InstitutionCorralView extends ViewBase{
 		{
 			setPrefHeight(375);
 			setPrefWidth(630);
-			setStyle("-fx-background-color: #555555");
 			setOnDragDropped(new EventHandler<DragEvent>(){
 				public void handle(DragEvent event){
 					if(event.getDragboard().hasContent(DnD.VALUE_FORMAT)){
