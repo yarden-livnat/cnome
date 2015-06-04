@@ -209,7 +209,7 @@ public class CyclistController {
         // InputLibrary panel
         InputPresenter ip = new InputPresenter(_eventBus);
         ip.setPanel(screen.getInputPanel());
-        ip.setFactories(Arrays.asList(ToolsLibrary.inputFactories));
+        ip.setFactories(ToolsLibrary.getFactories(ToolsLibrary.SCENARIO_TOOL));
         
         // Builder perspectives
        

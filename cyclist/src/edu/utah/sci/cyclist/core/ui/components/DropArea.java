@@ -138,7 +138,7 @@ public class DropArea extends HBox implements Observable {
      * @name setDragAndDropModes
      * @param sourcesTransferModes - Maps for each possible source the accepted drag and drop transfer modes.
      */
-	public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes){
+	public void setDragAndDropModes( Map<Class<?>, TransferMode[]> sourcesTransferModes) {
 		_sourcesTransferModes = sourcesTransferModes;
 	}
 	
