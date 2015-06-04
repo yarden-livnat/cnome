@@ -72,13 +72,7 @@ public class ToolsLibrary {
         new RegionCorralViewToolFactory()
 	};
 
-//    public static final ToolFactory[] inputFactories = {
-//        new CycicToolFactory(),
-//        new InstitutionCorralViewToolFactory(),
-//        new RecipeFormToolFactory(),
-//        new RegionCorralViewToolFactory(),
-//        //new TimelineDisplayToolFactory()
-//    };
+//   ac
     
 	public static ToolFactory findFactory(String name) {
 		for (int i=0; i<factories.length; i++) {

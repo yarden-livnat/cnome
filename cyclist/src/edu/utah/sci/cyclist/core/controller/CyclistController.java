@@ -214,16 +214,9 @@ public class CyclistController {
         // Builder perspectives
        
 		for (Perspective p : _perspectives) {
-			ViewBase view;
-//			if (p.type == "Vis") {
-				view = new VisWorkspace(true);
-				p.presenter = new VisWorkspacePresenter(_eventBus);
-				p.presenter.setView(view);
-//			} else {
-//				view = new BaseWorkspace(true);
-//				p.presenter = new BaseWorkspacePresenter(_eventBus);
-//				p.presenter.setView(view);
-//			}
+			ViewBase view = new VisWorkspace(true);
+			p.presenter = new VisWorkspacePresenter(_eventBus);
+			p.presenter.setView(view);
 
 			Tab tab = new Tab();
 			tab.setText(p.name);
@@ -691,20 +684,17 @@ public class CyclistController {
 		}
 		
 		if(dirty){
-			// TODO: fix the issue with the dividers. For now always save the data
-			save();
-			System.exit(0);
-//			SaveWsWizard wizard = new SaveWsWizard();
-//			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
-//			selection.addListener(new ChangeListener<Boolean>(){
-//				@Override
-//				public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
-//					if(newVal){
-//						save();
-//					}
-//					System.exit(0);
-//				}
-//			});
+			SaveWsWizard wizard = new SaveWsWizard();
+			ObjectProperty<Boolean> selection = wizard.show(_screen.getParent().getScene().getWindow());
+			selection.addListener(new ChangeListener<Boolean>(){
+				@Override
+				public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldVal,Boolean newVal) {
+					if(newVal){
+						save();
+					}
+					System.exit(0);
+				}
+			});
 		}else{
 			System.exit(0);
 		}

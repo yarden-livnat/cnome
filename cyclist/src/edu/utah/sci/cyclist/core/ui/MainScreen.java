@@ -42,11 +42,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -65,7 +63,6 @@ import edu.utah.sci.cyclist.core.ui.panels.SimulationsPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TablesPanel;
 import edu.utah.sci.cyclist.core.ui.panels.TitledPanel;
 import edu.utah.sci.cyclist.core.ui.panels.ToolsPanel;
-import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
 import edu.utah.sci.cyclist.core.ui.wizards.WorkspaceWizard;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
@@ -79,7 +76,6 @@ public class MainScreen extends VBox implements Resource {
 	private SchemaPanel _fieldsPanel;
     private ToolsPanel _toolsPanel;
     private InputPanel _inputPanel;
-//	private StackPane _workspacePane;
 	private TabPane _tabsPane;
 	private SimulationsPanel _simulationPanel;
 	private JobsPanel _jobsPanel;
@@ -128,14 +124,16 @@ public class MainScreen extends VBox implements Resource {
 			if (panel != null) 
 				_toolsPane.getItems().add(panel);
 			else
-				System.out.println("MainScreen error: can not show unknow panel ["+name+"]");
+				System.out.println("MainScreen error: unknow panel ["+name+"]");
 		}
-		_toolsPane.setDividerPositions(pos);
+		
+		Platform.runLater(new Runnable() {	
+			@Override
+			public void run() {
+				_toolsPane.setDividerPositions(pos);
+			}
+		});
 	}
-	
-//	public void setWorkspace(Workspace workspace) {
-//		_workspacePane.getChildren().add(workspace);
-//	}
 	
 	public TablesPanel getDatasourcesPanel() {
 		return _datasourcesPanel;
@@ -161,21 +159,10 @@ public class MainScreen extends VBox implements Resource {
 		return _jobsPanel;
 	}
 	
-//	public Workspace getWorkspace(){
-//		for(Object obj : _workspacePane.getChildren()){
-//			if (obj.getClass() == Workspace.class) {
-//				return (Workspace)obj;
-//			}
-//		}
-//		return null;
-//	}
-	
 	private double TOOLS_WIDTH = 120; 
 	
 	private void build(Stage stage){
-		getStyleClass().add("main-screen");
-		double[] div = {0.1, 0.4, 0.7, 0.8, 0.95, 0.97};
-		
+		getStyleClass().add("main-screen");		
 		double [] mainDividers = {TOOLS_WIDTH/600.0};
 		
 		this.setPrefWidth(600);
@@ -200,7 +187,6 @@ public class MainScreen extends VBox implements Resource {
 		_toolsPane.setPrefWidth(USE_COMPUTED_SIZE);
 		_toolsPane.setPrefHeight(USE_COMPUTED_SIZE);
 		_toolsPane.setOrientation(Orientation.VERTICAL);
-		_toolsPane.setDividerPositions(div);
 		
 		_sp.getItems().addAll(
 				_toolsPane,
@@ -357,19 +343,16 @@ public class MainScreen extends VBox implements Resource {
 	
 	public void save(IMemento memento) {
 		memento.createChild("sp-pos").putString("values", Arrays.toString(_sp.getDividerPositions()));
-//		memento.createChild("tools-pos").putString("values", Arrays.toString(_toolsPane.getDividerPositions()));
 	}
 	
 	public void restore(IMemento memento, Context ctx) {
 		if (memento.getChild("sp-pos") != null) {
 			final double [] pos = parseArray(memento.getChild("sp-pos").getString("values"));
-	//		final double [] pos1 = parseArray(memento.getChild("tools-pos").getString("values"));
-	//
+
 			Platform.runLater(new Runnable() {	
 				@Override
 				public void run() {
 					_sp.setDividerPositions(pos);
-	//				_toolsPane.setDividerPositions(pos1);
 				}
 			});
 		}
@@ -392,10 +375,8 @@ public class MainScreen extends VBox implements Resource {
         _viewMenu = createViewMenu();
         _inputMenu = createInputMenu();
 		_runMenu = createRunMenu();
-//		Menu panelMenu = createPanelMenu();
-//		_perspectiveMenu = createPerspectiveMenu();
 		
-        menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _inputMenu, _runMenu /*, _perspectiveMenu*/);
+        menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _inputMenu, _runMenu);
 		
 		return menubar;
 	}
@@ -518,15 +499,5 @@ public class MainScreen extends VBox implements Resource {
 		if(newServers.size()>0){
 			_runOnMenu.getItems().addAll(0, newServers);
 		}
-	}
-	
-	private Menu createPerspectiveMenu() {
-		Menu menu = new Menu("Perspectives");
-		
-		MenuItem cycic = new MenuItem("Design");
-		MenuItem cyclist = new MenuItem("Analysis");
-		
-		menu.getItems().addAll(cycic, cyclist);
-		return menu;
 	}
 }
