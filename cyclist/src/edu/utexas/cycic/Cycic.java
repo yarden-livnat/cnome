@@ -262,15 +262,8 @@ public class Cycic extends ViewBase{
 	 * Initiates the Pane and GridPane.
 	 */
 	private void init(){
-		Resources1 resource = new Resources1();
-		File file = new File(resource.getCurrentPath());
-		String path = "/" + file.getParent();
-		try {
-			defaultJsonReader(path);
-			log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
-		} catch (IOException e1) {
-			log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
-		}
+
+        DataArrays.cycicInitLoader();
 
         final ContextMenu paneMenu = new ContextMenu();
         MenuItem linkColor = new MenuItem("Change Link Color...");
@@ -285,9 +278,6 @@ public class Cycic extends ViewBase{
                 updateBgColor();
             }
             });
-
-		DataArrays.visualizationSkins.add(XMLReader.SC2);
-		DataArrays.visualizationSkins.add(XMLReader.loadSkin(path));
 
         Menu skinMenu = new Menu("Change skin");
         MenuItem defSkin = new MenuItem("Default Skin");
@@ -504,86 +494,6 @@ public class Cycic extends ViewBase{
 		setContent(mainView);
 	}
 	
-	/**
-	 * 
-	 */
-    public void retrieveSchema(String rawMetadata) {
-        // rawMetadata is a JSON string.
-        Reader metaReader = new StringReader(rawMetadata);
-        JsonReader metaJsonReader = Json.createReader(metaReader);
-        JsonObject metadata = metaJsonReader.readObject();
-        metaJsonReader.close();
-        JsonObject schemas = metadata.getJsonObject("schema");
-        JsonObject annotations = metadata.getJsonObject("annotations");
-            
-        DataArrays.simFacilities.clear();
-        DataArrays.simRegions.clear();
-        DataArrays.simInstitutions.clear();
-        for(javax.json.JsonString specVal : metadata.getJsonArray("specs").getValuesAs(JsonString.class)){
-        	String spec = specVal.getString();
-            boolean test = true;
-            for(int j = 0; j < XMLReader.blackList.size(); j++){
-                if(spec.equalsIgnoreCase(XMLReader.blackList.get(j))){
-                    test = false;
-                }
-            }
-            if(test == false){
-                continue;
-            }
-            
-            
-            String schema = schemas.getString(spec);
-            String pattern1 = "<!--.*?-->";
-            Pattern p = Pattern.compile(pattern1, Pattern.DOTALL);
-            schema = p.matcher(schema).replaceAll("");
-            if(schema.length() > 12){
-            	if(!schema.substring(0, 12).equals("<interleave>")){
-                	schema = "<interleave>" + schema + "</interleave>"; 
-                }
-            }
-            JsonObject anno = annotations.getJsonObject(spec);
-            switch(anno.getString("entity")){
-            case "facility":
-                log.info("Adding archetype "+spec);
-                facilityStructure node = new facilityStructure();
-                node.facAnnotations = anno.toString();
-                node.facilityArch = spec;
-                node.niche = anno.getString("niche", "facility");
-                JsonObject facVars = anno.getJsonObject("vars");
-                ArrayList<Object> facArray = new ArrayList<Object>();
-                node.facStruct = XMLReader.nodeBuilder(facVars, facArray, XMLReader.readSchema_new(schema));
-                node.facilityName = spec.replace(":", " ");
-                DataArrays.simFacilities.add(node);
-                break;
-            case "region":
-                log.info("Adding archetype "+spec);
-                regionStructure rNode = new regionStructure();
-                rNode.regionAnnotations = anno.toString();
-                rNode.regionArch = spec;
-                JsonObject regionVars = anno.getJsonObject("vars");
-                ArrayList<Object> regionArray = new ArrayList<Object>();
-                rNode.regionName = spec.replace(":", " ");
-                DataArrays.simRegions.add(rNode);
-                break;
-            case "institution":
-                log.info("Adding archetype "+spec);
-                institutionStructure iNode = new institutionStructure();
-                iNode.institArch = spec;
-                iNode.institAnnotations = anno.toString();
-                JsonObject instVars = anno.getJsonObject("vars");
-                ArrayList<Object> instArray = new ArrayList<Object>();
-                iNode.institStruct = XMLReader.nodeBuilder(instVars, instArray, XMLReader.readSchema_new(schema));
-                iNode.institName = spec.replace(":", " ");
-                DataArrays.simInstitutions.add(iNode);
-                break;
-            default:
-                log.error(spec+" is not of the 'facility', 'region' or 'institution' type. "
-                    + "Please check the entity value in the archetype annotation.");
-            break;
-            };  
-        }
-        log.info("Schema discovery complete");
-	}
 	
 	/**
 	 * 
@@ -905,7 +815,7 @@ public class Cycic extends ViewBase{
                         String metadata = new String();
                         while ((line = metaBuf.readLine()) != null) {metadata += line;}
                         metaBuf.close();
-                        retrieveSchema(metadata);
+                        DataArrays.retrieveSchema(metadata);
                     } catch (IOException ex) {
                         // TODO Auto-generated catch block
                         ex.printStackTrace();
@@ -920,7 +830,7 @@ public class Cycic extends ViewBase{
                         public void changed(ObservableValue<? extends Status> observable,
                             Status oldValue, Status newValue) {
                             if (newValue == Status.READY) {
-                                retrieveSchema(_remoteDashA.getStdout());
+                                DataArrays.retrieveSchema(_remoteDashA.getStdout());
                             }
                         }
                     });
@@ -951,18 +861,4 @@ public class Cycic extends ViewBase{
 		}
 	}
 	
-	private void defaultJsonReader(String path) throws IOException{
-	    BufferedReader reader = new BufferedReader( new FileReader (path + "/default-metadata.json"));
-	    String         line = null;
-	    StringBuilder  stringBuilder = new StringBuilder();
-	    String         ls = System.getProperty("line.separator");
-
-	    while( ( line = reader.readLine() ) != null ) {
-	        stringBuilder.append( line );
-	        stringBuilder.append( ls );
-	    }
-	    reader.close();
-	    
-		retrieveSchema(stringBuilder.toString());
-	}
 }
