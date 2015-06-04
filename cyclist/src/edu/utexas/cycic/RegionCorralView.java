@@ -96,6 +96,8 @@ public class RegionCorralView extends ViewBase {
 	 */
 	public RegionCorralView() {
 		
+		DataArrays.cycicInitLoader();
+
 		// Create content for RegionCorralView header 
 		final Label regionLabel = new Label("Region Name:");
 		regionLabel.setFont(new Font(12));
