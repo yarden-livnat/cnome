@@ -1,5 +1,8 @@
 package edu.utexas.cycic;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 
 import javafx.event.ActionEvent;
@@ -9,8 +12,10 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -21,29 +26,54 @@ import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 
 public class InstitutionView extends ViewBase {
+
+    private String facNameFromListItem(String listItem) {
+        // This assumes that list items always have the form "facName - ##"
+        // where ## is an integer and facName may contain spaces, hyphens and numbers
+        
+        List<String> facNameSplit = Arrays.asList(listItem.split(" - "));
+        String facName = facNameSplit.get(0);
+        for (int i=1; i < facNameSplit.size()-1; i++) {
+            facName = facName + " - " + facNameSplit.get(i);
+        }
+        return facName;
+
+    }
+
 	public InstitutionView() {
 		super();
 		TITLE = (String) InstitutionCorralView.workingInstitution.name;
 		workingInstitution = InstitutionCorralView.workingInstitution;
-		//Institution list view for the region.
 
-		ListView<String> facilityList = new ListView<String>(){
-			{
-				setOrientation(Orientation.VERTICAL);
-				setOnMousePressed(new EventHandler<MouseEvent>(){
-					public void handle(MouseEvent event){
-						if (event.isSecondaryButtonDown()){
-							workingInstitution.availFacilities.remove(getSelectionModel().getSelectedItem());
-							getItems().remove(getSelectionModel().getSelectedItem());
-						}
-					}
-				});
-				for(facilityItem fac: workingInstitution.availFacilities){
-					getItems().add(fac.name + " - " + fac.number);
-				}
-			}
-		};
-		
+		//Initial facility list view for the institution.
+
+		ListView<String> facilityList = new ListView<String>();
+        facilityList.setOrientation(Orientation.VERTICAL);
+        facilityList.setMinHeight(25);
+
+        ContextMenu listCtxtMenu = new ContextMenu();
+        MenuItem removeFac = new MenuItem("Remove Initial Facility");
+        removeFac.setOnAction(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent e){
+                    String selectedFac = facNameFromListItem(facilityList.getSelectionModel().getSelectedItem());
+                    workingInstitution.availFacilities.remove(selectedFac);
+                    facilityList.getItems().remove(facilityList.getSelectionModel().getSelectedItem());
+                }
+            });
+		listCtxtMenu.getItems().add(removeFac);
+
+        facilityList.setOnMousePressed(new EventHandler<MouseEvent>(){
+                public void handle(MouseEvent event){
+                    if (event.isSecondaryButtonDown()){
+                        listCtxtMenu.show(facilityList,event.getScreenX(),event.getScreenY());
+                    }
+                }
+            });
+
+        for(Map.Entry<String, Integer> fac : workingInstitution.availFacilities.entrySet()) {
+            facilityList.getItems().add(fac.getKey() + " - " + fac.getValue());
+        }
+
 		topGrid.add(new Label(InstitutionCorralView.workingInstitution.type), 2, 0);
 
 		// Setting up the view visuals.
@@ -82,9 +112,15 @@ public class InstitutionView extends ViewBase {
 		Button protoButton = new Button("Add");
 		protoButton.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				facilityItem fac = new facilityItem(protoName.getValue(), Integer.parseInt(protoNumber.getText()));
-				workingInstitution.availFacilities.add(fac);
-				facilityList.getItems().add(fac.name + " - " + fac.number);
+                String facName = protoName.getValue();
+                Integer numFac = 0;
+                if (workingInstitution.availFacilities.containsKey(facName)) {
+                    numFac = workingInstitution.availFacilities.get(facName);
+                    facilityList.getItems().remove(facName + " - " + numFac);
+                }
+                numFac = numFac + Integer.parseInt(protoNumber.getText());
+                workingInstitution.availFacilities.put(facName, numFac );
+				facilityList.getItems().add(facName + " - " + numFac);
 			}
 		});
 		topGrid.add(protoButton, 4, 2);

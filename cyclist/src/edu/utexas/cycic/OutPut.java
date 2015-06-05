@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javafx.scene.control.Label;
 
@@ -70,18 +71,20 @@ public class OutPut {
 						if (institution.name.equalsIgnoreCase(instit)) {
 							Element institID = doc.createElement("institution");
 							regionID.appendChild(institID);
-							Element initFacList = doc.createElement("initialfacilitylist");
-							for(facilityItem facility: institution.availFacilities) {
-								Element entry = doc.createElement("entry");
-								Element initProto = doc.createElement("prototype");
-								initProto.appendChild(doc.createTextNode(facility.name));
-								entry.appendChild(initProto);
-								Element number = doc.createElement("number");
-								number.appendChild(doc.createTextNode(facility.number));
-								entry.appendChild(number);
-								initFacList.appendChild(entry);
-							}
-							institID.appendChild(initFacList);
+                            if (institution.availFacilities.size() > 0) {
+                                Element initFacList = doc.createElement("initialfacilitylist");
+                                for (Map.Entry<String, Integer> facility: institution.availFacilities.entrySet()) {
+                                    Element entry = doc.createElement("entry");
+                                    Element initProto = doc.createElement("prototype");
+                                    initProto.appendChild(doc.createTextNode(facility.getKey()));
+                                    entry.appendChild(initProto);
+                                    Element number = doc.createElement("number");
+                                    number.appendChild(doc.createTextNode(Integer.toString(facility.getValue())));
+                                    entry.appendChild(number);
+                                    initFacList.appendChild(entry);
+                                }
+                                institID.appendChild(initFacList);
+                            }
 							regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.archetype.split(":")[2]);
 						}
 					}
@@ -634,18 +637,20 @@ public class OutPut {
 							if (institution.name.equalsIgnoreCase(instit)) {
 								Element institID = doc.createElement("institution");
 								regionID.appendChild(institID);
-								Element initFacList = doc.createElement("initialfacilitylist");
-								for(facilityItem facility: institution.availFacilities) {
-									Element entry = doc.createElement("entry");
-									Element initProto = doc.createElement("prototype");
-									initProto.appendChild(doc.createTextNode(facility.name));
-									entry.appendChild(initProto);
-									Element number = doc.createElement("number");
-									number.appendChild(doc.createTextNode(facility.number));
-									entry.appendChild(number);
-									initFacList.appendChild(entry);
-								}
-								institID.appendChild(initFacList);
+                                if (institution.availFacilities.size() > 0) {
+                                    Element initFacList = doc.createElement("initialfacilitylist");
+                                    for (Map.Entry<String, Integer> facility: institution.availFacilities.entrySet()) {
+                                        Element entry = doc.createElement("entry");
+                                        Element initProto = doc.createElement("prototype");
+                                        initProto.appendChild(doc.createTextNode(facility.getKey()));
+                                        entry.appendChild(initProto);
+                                        Element number = doc.createElement("number");
+                                        number.appendChild(doc.createTextNode(Integer.toString(facility.getValue())));
+                                        entry.appendChild(number);
+                                        initFacList.appendChild(entry);
+                                    }
+                                    institID.appendChild(initFacList);
+                                }
 								regionBuilder(doc, institID, institution.name, institution.institStruct, institution.institData, institution.archetype.split(":")[2]);
 							}
 						}
