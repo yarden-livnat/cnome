@@ -425,7 +425,7 @@ public class MainScreen extends VBox implements Resource {
     private Menu createViewMenu() {
         Menu menu = new Menu("Views");          
 
-        for (final ToolFactory factory : ToolsLibrary.factories) {
+        for (final ToolFactory factory : ToolsLibrary.getFactories(ToolsLibrary.VIS_TOOL)) {
             MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
             menu.getItems().add(item);
         }

@@ -204,7 +204,7 @@ public class CyclistController {
         // ToolsLibrary panel
         ToolsPresenter tp = new ToolsPresenter(_eventBus);
         tp.setPanel(screen.getToolsPanel());
-        tp.setFactories(Arrays.asList(ToolsLibrary.factories));
+        tp.setFactories(ToolsLibrary.getFactories(ToolsLibrary.VIS_TOOL));
        
         // InputLibrary panel
         InputPresenter ip = new InputPresenter(_eventBus);
@@ -254,6 +254,8 @@ public class CyclistController {
 		}
 		_presenter = _currentPerspective.presenter;
 		_screen.showPanels(_currentPerspective.tools, _currentPerspective.toolsPositions);
+		_screen.getInputMenu().setDisable(id != 0);
+		_screen.getViewMenu().setDisable(id != 1);
 	}
 	
 	/**
@@ -631,14 +633,11 @@ public class CyclistController {
 			@Override
 			public void handle(ActionEvent event) {
 				MenuItem item = (MenuItem) event.getSource();
-				for (ToolFactory factory : 	ToolsLibrary.factories) {
-					if (factory.getToolName().equals(item.getText())) {
-						try {
-							_presenter.addTool(factory.create());
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
+				try {
+					ToolFactory factory = ToolsLibrary.findFactory(item.getText());
+					_presenter.addTool(factory.create());
+				} catch (Exception e) {
+					log.error("Internal error: Can't find tool "+item.getText());
 				}
 			}
 		};
