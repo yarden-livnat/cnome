@@ -70,7 +70,6 @@ import edu.utah.sci.cyclist.core.model.Simulation;
 import edu.utah.sci.cyclist.core.model.Table;
 import edu.utah.sci.cyclist.core.presenter.DatasourcesPresenter;
 import edu.utah.sci.cyclist.core.presenter.InputPresenter;
-import edu.utah.sci.cyclist.core.presenter.Presenter;
 import edu.utah.sci.cyclist.core.presenter.SchemaPresenter;
 import edu.utah.sci.cyclist.core.presenter.SimulationPresenter;
 import edu.utah.sci.cyclist.core.presenter.ToolsPresenter;
@@ -166,20 +165,15 @@ public class CyclistController {
 		ds.setPanel(screen.getDatasourcesPanel());
 		
 		screen.getDatasourcesPanel().setTableActions(Arrays.asList("Plot"), 
-				action -> {
-					try {
-						for (ToolFactory factory : 	ToolsLibrary.factories) {
-							if (factory.getToolName().equals(action.v1)) {
-								Presenter p = _presenter.addTool(factory.create());
-								p.addTable(action.v2);
-								return;
-							}
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					return;
-				});
+			action -> { 
+				try {
+					_presenter
+						.addTool(ToolsLibrary.getFactory(action.v1).create())
+						.addTable(action.v2);
+				} catch (Exception e) {
+					log.error("internal error: ",e);
+				}	
+			});
 		
 		// Schema panel
 		SchemaPresenter sp = new SchemaPresenter(_eventBus);
@@ -204,12 +198,12 @@ public class CyclistController {
         // ToolsLibrary panel
         ToolsPresenter tp = new ToolsPresenter(_eventBus);
         tp.setPanel(screen.getToolsPanel());
-        tp.setFactories(ToolsLibrary.getFactories(ToolsLibrary.VIS_TOOL));
+        tp.setFactories(ToolsLibrary.getFactoriesOfType(ToolsLibrary.VIS_TOOL));
        
         // InputLibrary panel
         InputPresenter ip = new InputPresenter(_eventBus);
         ip.setPanel(screen.getInputPanel());
-        ip.setFactories(ToolsLibrary.getFactories(ToolsLibrary.SCENARIO_TOOL));
+        ip.setFactories(ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL));
         
         // Builder perspectives
        
@@ -634,7 +628,7 @@ public class CyclistController {
 			public void handle(ActionEvent event) {
 				MenuItem item = (MenuItem) event.getSource();
 				try {
-					ToolFactory factory = ToolsLibrary.findFactory(item.getText());
+					ToolFactory factory = ToolsLibrary.getFactory(item.getText());
 					_presenter.addTool(factory.create());
 				} catch (Exception e) {
 					log.error("Internal error: Can't find tool "+item.getText());
