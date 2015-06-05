@@ -889,7 +889,7 @@ public class CyclistController {
 					} else {
 						_currentPerspective= _perspectives[0];
 						if (memento.getChild("workspace") != null) {
-							_perspectives[1].restore(memento, ctx);
+							_perspectives[0].restore(memento, ctx);
 						}
 					}
 								
