@@ -627,7 +627,6 @@ public class OutPut {
 				for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 					Element regionID = doc.createElement("region");
 					rootElement.appendChild(regionID);
-
 					regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.archetype.split(":")[2]);
 					// Building the institutions within regions.
 					for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){

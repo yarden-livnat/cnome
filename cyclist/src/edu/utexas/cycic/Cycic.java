@@ -731,6 +731,11 @@ public class Cycic extends ViewBase{
                             log.info(line);
                         }
                         input.close();
+                        input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                        while ((line = input.readLine()) != null) {        
+                            log.info(line);
+                        }
+                        input.close();
                         log.info("Cyclus run complete");
                     } catch (Exception e1) {
                         e1.printStackTrace();
