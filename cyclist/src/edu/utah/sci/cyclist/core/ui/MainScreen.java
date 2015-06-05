@@ -84,7 +84,7 @@ public class MainScreen extends VBox implements Resource {
 	private Menu _perspectiveMenu;
     private Menu _viewMenu;
     private Menu _inputMenu;
-	private Menu _runMenu;
+//	private Menu _runMenu;
 	
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
 		
@@ -202,25 +202,25 @@ public class MainScreen extends VBox implements Resource {
 		SplitPane.setResizableWithParent(_toolsPane, false);
 		
 		_stageCloseProperty = stage.onCloseRequestProperty();
-		_remoteServers = FXCollections.observableArrayList();
-		_remoteServers.addListener(new ListChangeListener<MenuItem>() {
-			@Override
-			public void onChanged(ListChangeListener.Change<? extends MenuItem> change) {
-				List<MenuItem> newServers = new ArrayList<MenuItem>();
-				List<MenuItem> deletedServers = new ArrayList<MenuItem>();
-				while (change.next()) {
-					for (MenuItem item : change.getRemoved()) {
-						deletedServers.add(item);
-					}
-					for (MenuItem item : change.getAddedSubList()) {
-						item.setUserData(item.getText());
-						item.onActionProperty().set(_runMenuItem.getOnAction());
-						newServers.add(item);
-					}
-					updateRunOnMenu(newServers,deletedServers);
-				}
-			}
-		});
+//		_remoteServers = FXCollections.observableArrayList();
+//		_remoteServers.addListener(new ListChangeListener<MenuItem>() {
+//			@Override
+//			public void onChanged(ListChangeListener.Change<? extends MenuItem> change) {
+//				List<MenuItem> newServers = new ArrayList<MenuItem>();
+//				List<MenuItem> deletedServers = new ArrayList<MenuItem>();
+//				while (change.next()) {
+//					for (MenuItem item : change.getRemoved()) {
+//						deletedServers.add(item);
+//					}
+//					for (MenuItem item : change.getAddedSubList()) {
+//						item.setUserData(item.getText());
+//						item.onActionProperty().set(_runMenuItem.getOnAction());
+//						newServers.add(item);
+//					}
+//					updateRunOnMenu(newServers,deletedServers);
+//				}
+//			}
+//		});
 	}
 	
 	/*
@@ -239,9 +239,9 @@ public class MainScreen extends VBox implements Resource {
 		return _perspectiveMenu;
 	}
 	
-	public Menu getRunMenu() {
-		return _runMenu;
-	}
+//	public Menu getRunMenu() {
+//		return _runMenu;
+//	}
 	
 	private MenuItem _datasourceMenuItem;
 	private MenuItem _workspaceMenuItem;
@@ -252,10 +252,10 @@ public class MainScreen extends VBox implements Resource {
 	private MenuItem _sqliteLoaderMenuItem;
 	private MenuItem _runMenuItem;
 	private MenuItem _manageMenuItem;
-	private Menu     _runOnMenu;
+//	private Menu     _runOnMenu;
 	private MenuItem _runOnOtherItem;
 	private MenuItem _preferencesMenuItem;
-	private ObservableList<MenuItem> _remoteServers;
+//	private ObservableList<MenuItem> _remoteServers;
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onAddDatasource() {
 		return _datasourceMenuItem.onActionProperty();
@@ -284,9 +284,9 @@ public class MainScreen extends VBox implements Resource {
 		return _quitMenuItem.onActionProperty();
 	}
 	
-	public ObjectProperty<EventHandler<ActionEvent>> onRun() {
-		return _runMenuItem.onActionProperty();
-	}
+//	public ObjectProperty<EventHandler<ActionEvent>> onRun() {
+//		return _runMenuItem.onActionProperty();
+//	}
 	
 	public ObjectProperty<EventHandler<ActionEvent>> onManage() {
 		return _manageMenuItem.onActionProperty();
@@ -304,9 +304,9 @@ public class MainScreen extends VBox implements Resource {
 		return _preferencesMenuItem.onActionProperty();
 	}
 	
-	public ObservableList<MenuItem> getRemoteServers(){
-		return _remoteServers; 
-	}
+//	public ObservableList<MenuItem> getRemoteServers(){
+//		return _remoteServers; 
+//	}
 
 	
 	/**
@@ -374,9 +374,9 @@ public class MainScreen extends VBox implements Resource {
 		Menu dataMenu = createDataMenu();
         _viewMenu = createViewMenu();
         _inputMenu = createInputMenu();
-		_runMenu = createRunMenu();
+//		_runMenu = createRunMenu();
 		
-        menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _inputMenu, _runMenu);
+        menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _inputMenu /*, _runMenu*/);
 		
 		return menubar;
 	}
@@ -444,24 +444,24 @@ public class MainScreen extends VBox implements Resource {
         return menu;
     }
 
-	private Menu createRunMenu() {
-		Menu menu= new Menu("Run");
-		_runMenuItem = new MenuItem("Submit file"/*, GlyphRegistry.get(AwesomeIcon.EXCHANGE))*/);
-		_runMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+R"));
-		//Let the controller retrieve the current default server each time the menu item is selected.
-		_runMenuItem.setUserData("");
-		
-		_runOnMenu = new Menu("Run on");
-	    _runOnOtherItem = new MenuItem("other...");
-		   
-		_runOnMenu.getItems().add(_runOnOtherItem);
-		
-		_manageMenuItem = new MenuItem("Manage list");
-
-		menu.getItems().addAll(_runMenuItem,_runOnMenu,_manageMenuItem);
-	
-		return menu;
-	}
+//	private Menu createRunMenu() {
+//		Menu menu= new Menu("Run");
+//		_runMenuItem = new MenuItem("Submit file"/*, GlyphRegistry.get(AwesomeIcon.EXCHANGE))*/);
+//		_runMenuItem.setAccelerator(KeyCombination.keyCombination("Meta+R"));
+//		//Let the controller retrieve the current default server each time the menu item is selected.
+//		_runMenuItem.setUserData("");
+//		
+//		_runOnMenu = new Menu("Run on");
+//	    _runOnOtherItem = new MenuItem("other...");
+//		   
+//		_runOnMenu.getItems().add(_runOnOtherItem);
+//		
+//		_manageMenuItem = new MenuItem("Manage list");
+//
+//		menu.getItems().addAll(_runMenuItem,_runOnMenu,_manageMenuItem);
+//	
+//		return menu;
+//	}
 	
 	/*
 	 * Updates the remote servers menu after the list of remote addresses has changed.
@@ -471,33 +471,33 @@ public class MainScreen extends VBox implements Resource {
 	 * @param List<MenuItem> deletedServers - list of addresses to remove.
 	 *  
 	 */
-	private void updateRunOnMenu(List<MenuItem> newServers, List<MenuItem> deletedServers){
-		
-		List<MenuItem> deleted = new ArrayList<MenuItem>();
-		//First deleted old items
-		for(MenuItem item : deletedServers){
-			for(MenuItem menuItem :_runOnMenu.getItems()){
-				if(menuItem.getText() != null &&  menuItem.getText().equals(item.getText())){
-					deleted.add(menuItem);
-				}
-			}
-		}
-		
-		for(MenuItem menuItem : deleted){
-			_runOnMenu.getItems().remove(menuItem);
-		}
-		
-		//If only the separator and "other" where left
-		if(_runOnMenu.getItems().size()==2 && _runOnMenu.getItems().get(0) instanceof SeparatorMenuItem){
-			 _runOnMenu.getItems().remove(0);
-		}
-		
-		//If only "other" menu item exists - add a separator
-		if(_runOnMenu.getItems().size()==1 && newServers.size()>0 ){
-			_runOnMenu.getItems().add(0,new SeparatorMenuItem());
-		}
-		if(newServers.size()>0){
-			_runOnMenu.getItems().addAll(0, newServers);
-		}
-	}
+//	private void updateRunOnMenu(List<MenuItem> newServers, List<MenuItem> deletedServers){
+//		
+//		List<MenuItem> deleted = new ArrayList<MenuItem>();
+//		//First deleted old items
+//		for(MenuItem item : deletedServers){
+//			for(MenuItem menuItem :_runOnMenu.getItems()){
+//				if(menuItem.getText() != null &&  menuItem.getText().equals(item.getText())){
+//					deleted.add(menuItem);
+//				}
+//			}
+//		}
+//		
+//		for(MenuItem menuItem : deleted){
+//			_runOnMenu.getItems().remove(menuItem);
+//		}
+//		
+//		//If only the separator and "other" where left
+//		if(_runOnMenu.getItems().size()==2 && _runOnMenu.getItems().get(0) instanceof SeparatorMenuItem){
+//			 _runOnMenu.getItems().remove(0);
+//		}
+//		
+//		//If only "other" menu item exists - add a separator
+//		if(_runOnMenu.getItems().size()==1 && newServers.size()>0 ){
+//			_runOnMenu.getItems().add(0,new SeparatorMenuItem());
+//		}
+//		if(newServers.size()>0){
+//			_runOnMenu.getItems().addAll(0, newServers);
+//		}
+//	}
 }
