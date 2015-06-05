@@ -21,8 +21,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import edu.utah.sci.cyclist.core.ui.views.ChartView;
 /**
  * Output class for the CYCIC GUI.
  * @author Robert
@@ -61,6 +59,7 @@ public class OutPut {
 				rootElement.appendChild(facID);
 			}
 			// Regions
+			
 			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
@@ -628,7 +627,6 @@ public class OutPut {
 				for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 					Element regionID = doc.createElement("region");
 					rootElement.appendChild(regionID);
-
 					regionBuilder(doc, regionID, region.name, region.regionStruct, region.regionData, region.archetype.split(":")[2]);
 					// Building the institutions within regions.
 					for (instituteNode institution: CycicScenarios.workingCycicScenario.institNodes){

@@ -762,15 +762,25 @@ public class Cycic extends ViewBase{
                 if ("Local".equals(server)) {
                     // local execution
                     String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-                    String cycicTemp = "cycic"+tempHash;
+                    String prefix = "cycic" + tempHash;
+                    String infile = prefix + ".xml";
+                    String outfile = prefix + ".sqlite";
                     try {
-                        File temp = File.createTempFile(cycicTemp, ".xml");
-                        FileWriter fileOutput = new FileWriter(temp);
-                        new BufferedWriter(fileOutput);
-                        Process p = Runtime.getRuntime().exec("cyclus -o "+cycicTemp +".sqlite "+cycicTemp);
+                        File temp = new File(infile);
+                        log.info("Writing file " + temp.getName());
+                        log.info("lines:\n" + OutPut.xmlStringGen());
+                        BufferedWriter output = new BufferedWriter(new FileWriter(temp));
+                        output.write(OutPut.xmlStringGen());
+                        output.close();
+                        Process p = Runtime.getRuntime().exec("cyclus -o " + outfile + " " + infile);
                         p.waitFor();
                         String line = null;
                         BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                        while ((line = input.readLine()) != null) {        
+                            log.info(line);
+                        }
+                        input.close();
+                        input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
                         while ((line = input.readLine()) != null) {        
                             log.info(line);
                         }
