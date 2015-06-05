@@ -106,8 +106,8 @@ public class CyclistController {
 	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
 	
 	private Perspective _perspectives[] = {
-			new Perspective(0, "Scenario Builder", "Base", Arrays.asList("Builder", "Jobs")),
-			new Perspective(1, "Data Exploration", "Vis", Arrays.asList("Simulations", "Tables", "Fields", "Filters", "Jobs"))
+			new Perspective(0, "Scenario Builder", ToolsLibrary.SCENARIO_TOOL, Arrays.asList("Builder", "Jobs")),
+			new Perspective(1, "Data Exploration", ToolsLibrary.VIS_TOOL, Arrays.asList("Simulations", "Tables", "Fields", "Filters", "Jobs"))
 	};
 	private Perspective _currentPerspective = null;
 	
@@ -248,8 +248,7 @@ public class CyclistController {
 		}
 		_presenter = _currentPerspective.presenter;
 		_screen.showPanels(_currentPerspective.tools, _currentPerspective.toolsPositions);
-		_screen.getInputMenu().setDisable(id != 0);
-		_screen.getViewMenu().setDisable(id != 1);
+		_screen.selectTools( _currentPerspective.type);
 	}
 	
 	/**
@@ -636,7 +635,7 @@ public class CyclistController {
 			}
 		};
 		
-		for (MenuItem item : _screen.getViewMenu().getItems()) {
+		for (MenuItem item : _screen.getToolsMenu().getItems()) {
 			item.setOnAction(viewAction);
 		}
 		

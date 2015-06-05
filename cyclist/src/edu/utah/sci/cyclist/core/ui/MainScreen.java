@@ -79,8 +79,8 @@ public class MainScreen extends VBox implements Resource {
 	private Map<String, TitledPanel> _panels = new HashMap<>();
 
 	private Menu _perspectiveMenu;
-    private Menu _viewMenu;
-    private Menu _inputMenu;
+    private Menu _toolsMenu;
+//    private Menu _inputMenu;
 //	private Menu _runMenu;
 	
 	private ObjectProperty<EventHandler<WindowEvent>> _stageCloseProperty;
@@ -224,13 +224,13 @@ public class MainScreen extends VBox implements Resource {
 	 * Menus & Actions
 	 */
 	
-    public Menu getViewMenu() {
-        return _viewMenu;
+    public Menu getToolsMenu() {
+        return _toolsMenu;
     }
     
-    public Menu getInputMenu() {
-        return _inputMenu;
-    }
+//    public Menu getInputMenu() {
+//        return _inputMenu;
+//    }
     
 	public Menu getPerspectiveMenu() {
 		return _perspectiveMenu;
@@ -369,11 +369,11 @@ public class MainScreen extends VBox implements Resource {
 		
 		Menu fileMenu = createFileMenu();
 		Menu dataMenu = createDataMenu();
-        _viewMenu = createViewMenu();
-        _inputMenu = createInputMenu();
+        _toolsMenu = createToolsMenu();
+//        _inputMenu = createInputMenu();
 //		_runMenu = createRunMenu();
 		
-        menubar.getMenus().addAll(fileMenu, dataMenu, _viewMenu, _inputMenu /*, _runMenu*/);
+        menubar.getMenus().addAll(fileMenu, dataMenu, _toolsMenu /*, _inputMenu , _runMenu*/);
 		
 		return menubar;
 	}
@@ -419,27 +419,40 @@ public class MainScreen extends VBox implements Resource {
 		return dataMenu;
 	}
 
-    private Menu createViewMenu() {
-        Menu menu = new Menu("Views");          
+    private Menu createToolsMenu() {
+        Menu menu = new Menu("Tools");          
 
+        for (final ToolFactory factory : ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL)) {
+            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+            item.getProperties().put("type", ToolsLibrary.SCENARIO_TOOL);
+            menu.getItems().add(item);
+        }
+        
         for (final ToolFactory factory : ToolsLibrary.getFactoriesOfType(ToolsLibrary.VIS_TOOL)) {
             MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+            item.getProperties().put("type", ToolsLibrary.VIS_TOOL);
             menu.getItems().add(item);
         }
 
         return menu;
     }
 	
-    private Menu createInputMenu() {
-        Menu menu = new Menu("Scenario Builder");          
-
-        for (final ToolFactory factory : ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL)) {
-            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
-            menu.getItems().add(item);
-        }
-
-        return menu;
+    public void selectTools(String type) {
+    	for (MenuItem item : _toolsMenu.getItems()) {
+    		item.setDisable(item.getProperties().get("type") != type);
+    	}
     }
+    
+//    private Menu createInputMenu() {
+//        Menu menu = new Menu("Scenario Builder");          
+//
+//        for (final ToolFactory factory : ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL)) {
+//            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+//            menu.getItems().add(item);
+//        }
+//
+//        return menu;
+//    }
 
 //	private Menu createRunMenu() {
 //		Menu menu= new Menu("Run");
