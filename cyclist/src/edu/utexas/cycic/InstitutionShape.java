@@ -37,24 +37,12 @@ public class InstitutionShape extends Ellipse {
 				boolean test = false;
 				if(event.getDragboard().hasContent(CycICDnD.UNASSOC_FAC)){
 					String facName = event.getDragboard().getContent(CycICDnD.UNASSOC_FAC).toString();
-					if(institBackTrace.availFacilities.size() > 0){
-						for(facilityItem fac: institBackTrace.availFacilities){
-							if(facName.equalsIgnoreCase(fac.name)){
-								int temp  = Integer.parseInt(fac.number);
-								temp += 1;
-								fac.number = String.valueOf(temp);
-								test = true;
-							}
-							if (test == false){
-								facilityItem temp_fac = new facilityItem(facName, 1);
-								institBackTrace.availFacilities.add(temp_fac);
-							}
-						}
-					} else {
-						facilityItem temp_fac = new facilityItem(facName, 1);
-						institBackTrace.availFacilities.add(temp_fac);
-					}
-					event.consume();
+                    Integer numFac = 1;
+                    if (institBackTrace.availFacilities.containsKey(facName)) {
+                            numFac = numFac + institBackTrace.availFacilities.get(facName);
+                    }
+                    institBackTrace.availFacilities.put(facName, numFac);
+                    event.consume();
 				} else {
 					event.consume();
 				}

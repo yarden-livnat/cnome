@@ -357,24 +357,8 @@ class instituteNode{
 	String archetype;
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
-	ArrayList<facilityItem> availFacilities = new ArrayList<facilityItem>();
+	Map<String, Integer> availFacilities = new HashMap<String, Integer>();
 	InstitutionShape institutionShape = new InstitutionShape();
-}
-
-/**
- * Class used to indicate an initial facility within an institution and
- * the number of these institutions at the start of the simualtion.
- * @author Robert
- *
- */
-class facilityItem{
-	String name;
-	String number;
-	
-	facilityItem(String name, int number){
-		this.name = name;
-		this.number = Integer.toString(number);
-	}
 }
 
 /**
