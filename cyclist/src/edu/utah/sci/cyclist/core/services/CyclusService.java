@@ -147,14 +147,16 @@ public class CyclusService {
         this._submit(path, request,serverUrl);
     }
 
-    public void submit(String file) {
-        // file is a string of XML here that represents an input file,
-        // rather than a file path
-    	String serverUrl = Preferences.CLOUDIUS_URL;
+    public void submit(String cmd) {
+    	submit(cmd, Preferences.CLOUDIUS_URL);
+    }
+    
+    public void submit(String cmd, String url) {
+        // cmd is a string of XML 
         String path = "cycic.xml";
-        Request request = Request.Post(serverUrl+ SUBMIT_PATH)
-            .bodyString(file, ContentType.DEFAULT_TEXT);
-        this._submit(path, request,serverUrl);
+        Request request = Request.Post(url+ SUBMIT_PATH)
+            .bodyString(cmd, ContentType.DEFAULT_TEXT);
+        this._submit(path, request,url);
     }
 
     public void submitCmd(String cmd, String... args) {

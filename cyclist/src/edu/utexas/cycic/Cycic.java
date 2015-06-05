@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -20,8 +21,11 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
+import edu.utah.sci.cyclist.core.model.Preferences;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -29,6 +33,7 @@ import javafx.event.EventHandler;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -623,7 +628,7 @@ public class Cycic extends ViewBase{
 		Label simDets = new Label("Simulation Details");
 		simDets.setTooltip(new Tooltip("The top level details of the simulation."));
 		simDets.setFont(new Font("Times", 16));
-		simInfo.add(simDets, 0, 0);
+		simInfo.add(simDets, 0, 0, 2, 1);
 		TextField duration = VisFunctions.numberField();
 		duration.setMaxWidth(150);
 		duration.setPromptText("Length of Simulation");
@@ -634,8 +639,8 @@ public class Cycic extends ViewBase{
 				Cycic.workingScenario.simulationData.duration = newValue;
 			}
 		});
-		simInfo.add(new Label("Duration (Months)"), 0, 1);
-		simInfo.add(duration, 1, 1);
+		simInfo.add(new Label("Duration (Months)"), 0, 1, 2, 1);
+		simInfo.add(duration, 2, 1);
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
@@ -651,8 +656,8 @@ public class Cycic extends ViewBase{
 			}
 		});
 		startMonth.setPromptText("Select Month");
-		simInfo.add(new Label("Start Month"), 0, 2);
-		simInfo.add(startMonth, 1, 2);
+		simInfo.add(new Label("Start Month"), 0, 2, 2, 1);
+		simInfo.add(startMonth, 2, 2);
 		TextField startYear = VisFunctions.numberField();
 		startYear.setText(Cycic.workingScenario.simulationData.startYear);
 		Cycic.workingScenario.simulationData.startYear = "0";
@@ -663,8 +668,8 @@ public class Cycic extends ViewBase{
 		});
 		startYear.setPromptText("Starting Year");
 		startYear.setMaxWidth(150);
-		simInfo.add(new Label("Start Year"), 0, 3);
-		simInfo.add(startYear, 1, 3);
+		simInfo.add(new Label("Start Year"), 0, 3, 2, 1);
+		simInfo.add(startYear, 2, 3);
 				
 		TextArea description = new TextArea();
 		description.setMaxSize(250, 50);
@@ -675,7 +680,7 @@ public class Cycic extends ViewBase{
 			}
 		});
 		simInfo.add(new Label("Description"), 0, 4);
-		simInfo.add(description, 1, 4);
+		simInfo.add(description, 2, 4);
 		
 		TextArea notes = new TextArea();
 		notes.setMaxSize(250, 50);
@@ -685,12 +690,12 @@ public class Cycic extends ViewBase{
 				Cycic.workingScenario.simulationData.notes = newValue;
 			}
 		});
-		simInfo.add(new Label("Notes"), 0, 5);
-		simInfo.add(notes, 1, 5);
+		simInfo.add(new Label("Notes"), 0, 5, 2, 1);
+		simInfo.add(notes, 2, 5);
 		
 	
 		// Prints the Cyclus input associated with this simulator. 
-		Button output = new Button("Generate Cyclus Input");
+		Button output = new Button("Generate");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				if(OutPut.inputTest()){
@@ -698,7 +703,7 @@ public class Cycic extends ViewBase{
 					//Set extension filter
 					FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
 					fileChooser.getExtensionFilters().add(extFilter);
-					fileChooser.setTitle("Please save as Cyclus input file.");
+					fileChooser.setTitle("Save Cyclus input file");
 					fileChooser.setInitialFileName("*.xml");
 					//Show save file dialog
 					File file = fileChooser.showSaveDialog(window);
@@ -706,16 +711,55 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		simInfo.add(output, 0, 6);
+		simInfo.add(output, 0, 6, 2, 1);
 		
-        Button runCyclus = new Button("Run Cyclus!");
+        Button runCyclus = new Button("Execute");
+        simInfo.add(runCyclus, 0, 7, 1, 1);    
+        
+        
+        final List<String> serversList = FXCollections.observableArrayList(Preferences.getInstance().servers());
+        serversList.add(0, "-- add new --");
+        ComboBox<String> serverBox = new ComboBox<>();
+        serverBox.getItems().addAll(serversList);
+        serverBox.setVisibleRowCount(Math.min(6,  serverBox.getItems().size()));
+        
+        int currentIndex = Preferences.getInstance().getCurrentServerIndex()+1;
+        
+        serverBox.setPromptText("server");
+        serverBox.setEditable(true);
+        serverBox.getSelectionModel().select(currentIndex);
+        
+        serverBox.valueProperty().addListener(
+        		(ov, from, to)-> {
+        			int idx = serverBox.getSelectionModel().getSelectedIndex();
+					if (idx-1 != Preferences.getInstance().getCurrentServerIndex()) {
+						Preferences.getInstance().setCurrentServerIndex(idx-1);
+					} else if ("local".equals(from)) {
+						serverBox.getSelectionModel().select(idx);
+    				} else if ("".equals(to)) {
+    					serverBox.getItems().remove(from);
+    					Preferences.getInstance().servers().remove(from);
+    				} else if (serverBox.getItems().indexOf(to) == -1) {
+						serverBox.getItems().add(to);
+						Preferences.getInstance().servers().add(to);
+						Preferences.getInstance().setCurrentServerIndex(serverBox.getItems().size()-2);
+						serverBox.setVisibleRowCount(Math.min(6,  serverBox.getItems().size()));
+    				}
+    			});
+
+        Label serverLabel = new Label("Server:");
+        GridPane.setHalignment(serverLabel, HPos.RIGHT);
+    	simInfo.add(serverLabel, 1, 7, 1, 1);
+        simInfo.add(serverBox, 2, 7);
+        
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
                 if(!OutPut.inputTest()){
                     log.info("Cyclus Input Not Well Formed!");
                     return;  // safety dance
                 }
-                if (localToggle.isSelected()) {
+                String server = serverBox.getValue();
+                if ("Local".equals(server)) {
                     // local execution
                     String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
                     String cycicTemp = "cycic"+tempHash;
@@ -738,15 +782,11 @@ public class Cycic extends ViewBase{
                 } else {
                     // remote execution
             		String cycicXml = OutPut.xmlStringGen();
-            		CyclistController._cyclusService.submit(cycicXml);
+            		CyclistController._cyclusService.submit(cycicXml, server);
             	}
             }
         });;
-        simInfo.add(runCyclus, 1,6);    
-        HBox toggleBox = new HBox();
-        toggleBox.getChildren().addAll(localToggle, remoteToggle);
-        simInfo.add(new Label("Execution Environment: "), 0, 7);
-        simInfo.add(toggleBox, 1, 7);
+   
     }
 
 

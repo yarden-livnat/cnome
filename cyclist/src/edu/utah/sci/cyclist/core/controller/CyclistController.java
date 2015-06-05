@@ -671,7 +671,7 @@ public class CyclistController {
 	private void quit() {
 		_currentPerspective.setToolsPositions(_screen.getToolsPositions());
 		
-		boolean dirty = _dirtyFlag;
+		boolean dirty = _dirtyFlag || Preferences.getInstance().isDirty();
 		for (Perspective p : _perspectives) {
 			dirty |= p.presenter.getDirtyFlag();
 		}
