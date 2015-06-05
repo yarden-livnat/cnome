@@ -22,7 +22,6 @@
  *******************************************************************************/
 package edu.utah.sci.cyclist.core.ui;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +29,6 @@ import java.util.Map;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -250,10 +247,10 @@ public class MainScreen extends VBox implements Resource {
 	private MenuItem _saveAsMenuItem;
 	private MenuItem _simulationMenuItem;
 	private MenuItem _sqliteLoaderMenuItem;
-	private MenuItem _runMenuItem;
-	private MenuItem _manageMenuItem;
+//	private MenuItem _runMenuItem;
+//	private MenuItem _manageMenuItem;
 //	private Menu     _runOnMenu;
-	private MenuItem _runOnOtherItem;
+//	private MenuItem _runOnOtherItem;
 	private MenuItem _preferencesMenuItem;
 //	private ObservableList<MenuItem> _remoteServers;
 	
@@ -288,13 +285,13 @@ public class MainScreen extends VBox implements Resource {
 //		return _runMenuItem.onActionProperty();
 //	}
 	
-	public ObjectProperty<EventHandler<ActionEvent>> onManage() {
-		return _manageMenuItem.onActionProperty();
-	}
-	
-	public ObjectProperty<EventHandler<ActionEvent>> onRunOnOther() {
-		return _runOnOtherItem.onActionProperty();
-	}
+//	public ObjectProperty<EventHandler<ActionEvent>> onManage() {
+//		return _manageMenuItem.onActionProperty();
+//	}
+//	
+//	public ObjectProperty<EventHandler<ActionEvent>> onRunOnOther() {
+//		return _runOnOtherItem.onActionProperty();
+//	}
 	
 	public ObjectProperty<Boolean> editDataSourceProperty() {
 		return _datasourcesPanel.editTableProperty();
