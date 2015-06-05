@@ -93,6 +93,7 @@ public class FormBuilderFunctions {
 		textField.textProperty().addListener(new ChangeListener<Object>(){         
 			public void changed(ObservableValue<?> observable, Object oldValue, Object newValue){
 				defaultValue.set(0, newValue);
+				facArray.set(10, true);
 			}
 		});
 		

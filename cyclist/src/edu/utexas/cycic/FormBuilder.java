@@ -197,7 +197,6 @@ public class FormBuilder extends ViewBase {
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
 							if ( ii > 0 ) {
-								System.out.println(facArray);
 								grid.add(arrayListRemove(grid, dataArray, ii, facArray), columnNumber+2, rowNumber);
 							}
 							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
@@ -237,7 +236,6 @@ public class FormBuilder extends ViewBase {
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
 							if ( ii > 0 ) {
-								System.out.println(facArray);
 								grid.add(arrayListRemove(grid, dataArray, ii, facArray), columnNumber+2, rowNumber);
 							}
 							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
@@ -258,7 +256,6 @@ public class FormBuilder extends ViewBase {
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
-							System.out.println(facArray);
 							grid.add(arrayListRemove(grid, dataArray, ii, facArray), columnNumber+2, rowNumber);
 							formBuilder(grid, (ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;

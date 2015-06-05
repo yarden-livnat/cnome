@@ -150,10 +150,10 @@ public class InstitutionShape extends Ellipse {
                     menuEvent.consume();
 					CyclistController._presenter.addTool(new InstitutionViewTool());
 				}
-				for(int i = 0; i < RegionCorralView.corralPane.getChildren().size(); i++){
-					if(RegionCorralView.corralPane.getChildren().get(i).getId() == "this"){
-						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStroke(Color.BLACK);
-						((Shape) RegionCorralView.corralPane.getChildren().get(i)).setStrokeWidth(1);
+				for(int i = 0; i < InstitutionCorralView.institutionPane.getChildren().size(); i++){
+					if(InstitutionCorralView.institutionPane.getChildren().get(i).getId() == "this"){
+						((Shape) InstitutionCorralView.institutionPane.getChildren().get(i)).setStroke(Color.BLACK);
+						((Shape) InstitutionCorralView.institutionPane.getChildren().get(i)).setStrokeWidth(1);
 					}
 				}
 				InstitutionCorralView.workingInstitution = instit;
@@ -190,22 +190,22 @@ public class InstitutionShape extends Ellipse {
 		institution.onMouseDraggedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				double tempX = institution.getLayoutX();
-				double tempY = institution.getLayoutY();
-				institution.setLayoutX(x+event.getX());
-				institution.setLayoutY(y+event.getY());
+				//double tempX = institution.getCenterX();
+				//double tempY = institution.getCenterY();
+				institution.setCenterX(x+mousex);
+				institution.setCenterY(y+mousey);
 
-				if(tempX <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinX()){
-					institution.setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMinX());
+				if(institution.getCenterX() <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinX()+institution.getRadiusX()*0.5){
+					institution.setCenterX(InstitutionCorralView.institutionPane.getLayoutBounds().getMinX()+institution.getRadiusX()*0.5);
 				}
-				if(tempY <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinY()){
-					institution.setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMinY());
+				if(institution.getCenterY() <= InstitutionCorralView.institutionPane.getLayoutBounds().getMinY()-institution.getRadiusY()*0.2){
+					institution.setCenterY(InstitutionCorralView.institutionPane.getLayoutBounds().getMinY()-institution.getRadiusY()*0.2);
 				}
-				if(tempY >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-institution.getRadiusY()){
-					institution.setLayoutY(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-institution.getRadiusY());
+				if(institution.getCenterY() >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-institution.getRadiusY()*2.3){
+					institution.setCenterY(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxY()-institution.getRadiusY()*2.3);
 				}
-				if(tempX >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-institution.getRadiusX()){
-					institution.setLayoutX(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-institution.getRadiusX());
+				if(institution.getCenterX() >= InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-institution.getRadiusX()*1.8){
+					institution.setCenterX(InstitutionCorralView.institutionPane.getLayoutBounds().getMaxX()-institution.getRadiusX()*1.8);
 				}
                 
 				VisFunctions.placeTextOnEllipse(institution,"middle");
@@ -213,6 +213,8 @@ public class InstitutionShape extends Ellipse {
 				institution.menuBar.setLayoutX(institution.getLayoutX()+institution.getRadiusX()*0.2);
 				institution.menuBar.setLayoutY(institution.getLayoutY()+institution.getRadiusY()*0.2);
 
+				mousex = event.getX();
+				mousey = event.getY();
 			}
 		});
 
@@ -232,8 +234,8 @@ public class InstitutionShape extends Ellipse {
 		onMousePressedProperty().set(new EventHandler<MouseEvent>(){
 			@Override
 			public void handle(MouseEvent event){
-				x = getLayoutX() - event.getX();
-				y = getLayoutY() - event.getY();
+				x = getCenterX() - event.getX();
+				y = getCenterY() - event.getY();
 				mousex = event.getX();
 				mousey = event.getY();
 			}

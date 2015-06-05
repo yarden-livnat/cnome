@@ -8,7 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -16,7 +15,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
@@ -82,19 +80,8 @@ public class RegionCorralView extends ViewBase {
 	/**
 	 * 
 	 */
-	static HBox unassociatedFacilityList = new HBox(10);
-	
-	/**
-	 * 
-	 */
-	public static void addUnassInstit(){
-		unassociatedFacilityList.getChildren().add(new Circle());
-	}
-	
-	/**
-	 * 
-	 */
 	public RegionCorralView() {
+		super(); 
 		
 		DataArrays.cycicInitLoader();
 
@@ -118,8 +105,6 @@ public class RegionCorralView extends ViewBase {
 		/** TODO THIS BUTTON DOES NOTHING AT ALL */
 		regionCorralGrid.add(corralButton, 3, 0);
 
-		final Label regionPrototypeLabel = new Label("Region Prototypes:");
-		regionCorralGrid.add(regionPrototypeLabel, 0, 1);
 
 		ScrollPane scroll = new ScrollPane();
 		scroll.autosize();
@@ -130,7 +115,7 @@ public class RegionCorralView extends ViewBase {
 			String regName = DataArrays.simRegions.get(i).regionName;
 			region.name = regName;
 			String regLabel = regName.split(" ")[2] + " (" + regName.split(" ")[1] + ")";
-			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(regLabel);
+			ArrayList<Integer> rgbColor = VisFunctions.stringToColor(regName);
 			region.setFill(VisFunctions.pastelize(Color.rgb(rgbColor.get(0),rgbColor.get(1),rgbColor.get(2))));
 			region.setX(10 + (i*75));
 			region.setY(5);
@@ -183,5 +168,10 @@ public class RegionCorralView extends ViewBase {
 		};	//ends EventHandler addRegion
 
 		corralButton.setOnMouseClicked(addRegion);
+	}
+
+	public static void addUnassInstit() {
+		// TODO Auto-generated method stub
+		
 	}
 }

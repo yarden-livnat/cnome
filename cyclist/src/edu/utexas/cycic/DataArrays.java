@@ -65,8 +65,6 @@ public class DataArrays{
         } catch (IOException e1) {
             log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
         }
-        
-        visualizationSkins.add(XMLReader.SC2);
         visualizationSkins.add(XMLReader.loadSkin(path));
     }
     
@@ -128,6 +126,7 @@ public class DataArrays{
                 rNode.regionArch = spec;
                 JsonObject regionVars = anno.getJsonObject("vars");
                 ArrayList<Object> regionArray = new ArrayList<Object>();
+                rNode.regionStruct = XMLReader.nodeBuilder(regionVars,regionArray, XMLReader.readSchema_new(schema));
                 rNode.regionName = spec.replace(":", " ");
                 DataArrays.simRegions.add(rNode);
                 break;
