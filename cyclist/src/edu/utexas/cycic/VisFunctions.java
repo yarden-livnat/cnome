@@ -137,24 +137,24 @@ public class VisFunctions {
         Double shiftX, shiftY, heightRatio, widthRatio;
 
         if (location.equals("bottom")) {
-            shiftX = -1.5;
+            shiftX = -0.7;
             shiftY = 1.2;
             heightRatio = 1.2;
             widthRatio = -2*shiftX;
         } else if (location.equals("top")) {
-            shiftX = -1.5;
+            shiftX = -0.7;
             shiftY = -1.2;
             heightRatio = 1.2;
             widthRatio = -2*shiftX;
         } else {
-            shiftX = -1.0;
-            shiftY = -0.6;
+            shiftX = 0.1;
+            shiftY = +0.5;
             heightRatio = 1.2;
-            widthRatio = -2*shiftX;
+            widthRatio = 1.;
         }
         
-        ellipse.text.setLayoutX(ellipse.getLayoutX()+ellipse.getRadiusX()*shiftX);
-        ellipse.text.setLayoutY(ellipse.getLayoutY()+ellipse.getRadiusY()*shiftY);	
+        ellipse.text.setLayoutX(ellipse.getCenterX()+ellipse.getRadiusX()*shiftX);
+        ellipse.text.setLayoutY(ellipse.getCenterY()+ellipse.getRadiusY()*shiftY);	
         ellipse.text.setMaxHeight(ellipse.getRadiusY()*heightRatio);
         ellipse.text.setMaxWidth(ellipse.getRadiusX()*widthRatio);
         ellipse.text.setTextAlignment(TextAlignment.CENTER);
@@ -183,10 +183,10 @@ public class VisFunctions {
             heightRatio = 1.2;
             widthRatio = -2*shiftX;
         } else {
-            shiftX = -1.0;
+            shiftX = -0.8;
             shiftY = -0.6;
-            heightRatio = 1.2;
-            widthRatio = -2*shiftX;
+            heightRatio = 1.;
+            widthRatio = -1.7*shiftX;
         }
         
         ellipse.text.setLayoutX(ellipse.getLayoutX()+ellipse.getRadiusX()*shiftX);

@@ -1959,8 +1959,6 @@
   ":agents:Prey", 
   ":agents:Sink", 
   ":agents:Source", 
-  ":cycaless:BatchReactor", 
-  ":cycaless:DeployInst", 
   ":cycamore:DeployInst", 
   ":cycamore:Enrichment", 
   ":cycamore:FuelFab", 
