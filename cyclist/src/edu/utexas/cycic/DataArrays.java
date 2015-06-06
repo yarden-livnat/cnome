@@ -371,6 +371,8 @@ class simInfo{
 	String duration;
 	String startMonth;
 	String startYear;
+	String decay;
+	String simHandle;
 	String notes;
 	String description;
 }

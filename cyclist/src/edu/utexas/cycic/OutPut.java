@@ -132,7 +132,19 @@ public class OutPut {
 			
 		Element simStartYear = doc.createElement("startyear");
 		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
-		control.appendChild(simStartYear);	
+		control.appendChild(simStartYear);
+		
+		if(!CycicScenarios.workingCycicScenario.simulationData.decay.equalsIgnoreCase("decay")){
+			Element decay = doc.createElement("decay");
+			simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
+			control.appendChild(decay);
+		}
+		
+		if(!CycicScenarios.workingCycicScenario.simulationData.simHandle.equalsIgnoreCase("")){
+			Element simhandle = doc.createElement("simhandle");
+			simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simHandle));
+			control.appendChild(simhandle);
+		}
 	}
 	
 	/**

@@ -595,9 +595,6 @@ public class Cycic extends ViewBase{
 	 * i.e. January = 0, Feb = 1, etc...
 	 */
 	public void months(){
-		
-		Cycic.workingScenario.simulationData.startMonth = "0";
-		
 		monthList.add("January");
 		monthList.add("February");
 		monthList.add("March");
@@ -611,19 +608,23 @@ public class Cycic extends ViewBase{
 		monthList.add("November");
 		monthList.add("December");
 		
-		months.put("January", "1");
-		months.put("Febuary", "2");
-		months.put("March", "3");
-		months.put("April", "4");
-		months.put("May", "5");
-		months.put("June", "6");
-		months.put("July", "7");
-		months.put("August", "8");
-		months.put("September", "9");
-		months.put("October", "10");
-		months.put("November", "11");
-		months.put("December", "12");
+		months.put("January", "0");
+		months.put("Febuary", "1");
+		months.put("March", "2");
+		months.put("April", "3");
+		months.put("May", "4");
+		months.put("June", "5");
+		months.put("July", "6");
+		months.put("August", "7");
+		months.put("September", "8");
+		months.put("October", "9");
+		months.put("November", "10");
+		months.put("December", "11");
 	}
+	
+	/**
+	 * 
+	 */
 	public void details(){
 		Label simDets = new Label("Simulation Details");
 		simDets.setTooltip(new Tooltip("The top level details of the simulation."));
@@ -648,7 +649,7 @@ public class Cycic extends ViewBase{
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
-		Cycic.workingScenario.simulationData.startMonth = "1";
+		Cycic.workingScenario.simulationData.startMonth = "0";
 		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)));
 		startMonth.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -671,16 +672,26 @@ public class Cycic extends ViewBase{
 		simInfo.add(new Label("Start Year"), 0, 3, 2, 1);
 		simInfo.add(startYear, 2, 3);
 				
-		TextArea description = new TextArea();
-		description.setMaxSize(250, 50);
-		description.setWrapText(true);
-		description.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				Cycic.workingScenario.simulationData.description = newValue;
+		ComboBox<String> decay = new ComboBox<String>();
+		decay.getItems().addAll("Manual", "Never");
+		decay.setValue("Never");
+		decay.setOnAction(new EventHandler<ActionEvent>(){
+			public void handle(ActionEvent e){
+				Cycic.workingScenario.simulationData.decay = decay.getValue();
 			}
 		});
-		simInfo.add(new Label("Description"), 0, 4);
-		simInfo.add(description, 2, 4);
+		simInfo.add(new Label("Decay"), 0, 4);
+		simInfo.add(decay, 2, 4);
+		
+		TextField simHandle = new TextField();
+		simHandle.setPromptText("Optional Simulation Name");
+		simHandle.textProperty().addListener(new ChangeListener<String>(){
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				Cycic.workingScenario.simulationData.simHandle = newValue;
+			}
+		});
+		simInfo.add(new Label("Simulation Handle"), 0, 5, 2, 1);
+		simInfo.add(simHandle, 2, 5);
 		
 		TextArea notes = new TextArea();
 		notes.setMaxSize(250, 50);
@@ -690,8 +701,8 @@ public class Cycic extends ViewBase{
 				Cycic.workingScenario.simulationData.notes = newValue;
 			}
 		});
-		simInfo.add(new Label("Notes"), 0, 5, 2, 1);
-		simInfo.add(notes, 2, 5);
+		simInfo.add(new Label("Notes"), 0, 6, 2, 1);
+		simInfo.add(notes, 2, 6);
 		
 	
 		// Prints the Cyclus input associated with this simulator. 
@@ -711,10 +722,10 @@ public class Cycic extends ViewBase{
 				}
 			}
 		});
-		simInfo.add(output, 0, 6, 2, 1);
+		simInfo.add(output, 0, 7, 2, 1);
 		
         Button runCyclus = new Button("Execute");
-        simInfo.add(runCyclus, 0, 7, 1, 1);    
+        simInfo.add(runCyclus, 0, 8, 1, 1);    
         
         
         final List<String> serversList = FXCollections.observableArrayList(Preferences.getInstance().servers());
@@ -749,8 +760,8 @@ public class Cycic extends ViewBase{
 
         Label serverLabel = new Label("Server:");
         GridPane.setHalignment(serverLabel, HPos.RIGHT);
-    	simInfo.add(serverLabel, 1, 7, 1, 1);
-        simInfo.add(serverBox, 2, 7);
+    	simInfo.add(serverLabel, 1, 8, 1, 1);
+        simInfo.add(serverBox, 2, 8);
         
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
