@@ -782,7 +782,8 @@ public class Cycic extends ViewBase{
                         input.close();
                         log.info("Cyclus run complete");
                     } catch (Exception e1) {
-                        e1.printStackTrace();
+//                        e1.printStackTrace();
+                    	log.error(e1.getMessage());
                     }
                 } else {
                     // remote execution
@@ -856,8 +857,8 @@ public class Cycic extends ViewBase{
                         metaBuf.close();
                         DataArrays.retrieveSchema(metadata);
                     } catch (IOException ex) {
-                        // TODO Auto-generated catch block
-                        ex.printStackTrace();
+                        log.error(ex.getMessage());
+//                        ex.printStackTrace();
                     }
                 } else {
                     // Remote metadata collection

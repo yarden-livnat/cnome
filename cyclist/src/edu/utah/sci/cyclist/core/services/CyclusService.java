@@ -134,11 +134,12 @@ public class CyclusService {
             _jobs.add(job);
             poll(job);
         } catch (ClientProtocolException e) {
-        	String msg = e.getMessage() != null ? e.getMessage() : "";
-            log.error("Submit job communication error: "+ msg);
+        	String msg = e.getMessage() != null ? ": "+e.getMessage() : "";
+            log.error("Submit job communication error "+ msg);
             job.setStatus(Status.FAILED);
         } catch (IOException e) {
-            log.error("submit job IO error: "+ e.getMessage());
+        	String msg = e.getMessage() != null ? ": "+e.getMessage() : "";
+            log.error("submit job IO error"+msg);
             job.setStatus(Status.FAILED);
         }
         return job;

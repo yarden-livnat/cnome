@@ -25,9 +25,11 @@ import org.apache.log4j.spi.LoggingEvent;
 public class Console extends ScrollPane {
 	private TextFlow _textFlow;
     private Map<Level, Color> _colors = new HashMap<>();
+    private Map<Level, String> _prefix = new HashMap<>();
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[hh:mm]");
     private Font regular = Font.getDefault();
     private Font bold = Font.font(regular.getFamily(), FontWeight.BOLD, regular.getSize());
+
     private boolean active = true;
     
 	public Console() {
@@ -49,8 +51,16 @@ public class Console extends ScrollPane {
 		_colors.put(Level.WARN, Color.BLACK);
 		_colors.put(Level.INFO, Color.BLACK);
 		_colors.put(Level.DEBUG, Color.BLUE);
-		_colors.put(Level.TRACE, Color.BLUE);
-		_colors.put(Level.ALL, Color.BLACK);	
+		_colors.put(Level.TRACE, Color.GRAY);
+		_colors.put(Level.ALL, Color.GRAY);	
+		
+		_prefix.put(Level.FATAL, "FATAL: ");
+		_prefix.put(Level.ERROR, "Error: ");
+		_prefix.put(Level.WARN, "Warning: ");
+		_prefix.put(Level.INFO, "");
+		_prefix.put(Level.DEBUG, "");
+		_prefix.put(Level.TRACE, "");
+		_prefix.put(Level.ALL, "");	
 	}
 
 	private void build() {
@@ -93,7 +103,10 @@ public class Console extends ScrollPane {
         	if (!active) return;
         	
             StringBuilder builder = new StringBuilder()
+            	.append(" [")
             	.append(LocalTime.now().format(formatter))
+            	.append("] ")
+            	.append(_prefix.get(e.getLevel()))
             	.append(": ")
             	.append(e.getMessage())
             	.append("\n");
@@ -104,7 +117,14 @@ public class Console extends ScrollPane {
         	
         	_textFlow.getChildren().add(text);
         	
-        	setVvalue(1);
+        	final Console self = Console.this;
+    		Platform.runLater(new Runnable() {	
+    			@Override
+    			public void run() {
+    				self.setVvalue(1);
+    			}
+    		});
+        	
         }
 
 		@Override

@@ -880,11 +880,9 @@ public class CyclistController {
 								
 				} catch (Exception e) {
 					log.error("Error during restore: "+e.getMessage());
-					e.printStackTrace();
 				}
 			} catch (FileNotFoundException e) {
 				log.error("Error during restore: "+e.getMessage());
-				e.printStackTrace();
 			} 		
 		}
 		
@@ -917,7 +915,7 @@ public class CyclistController {
 				_model.getTables().add(table);	
 			}
 		} catch (Exception e) {
-			log.info("Exception " + e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 	
