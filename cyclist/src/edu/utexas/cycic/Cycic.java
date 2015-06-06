@@ -1,6 +1,5 @@
 package edu.utexas.cycic;
 
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,28 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
-import edu.utah.sci.cyclist.core.controller.CyclistController;
-import edu.utah.sci.cyclist.core.model.CyclusJob;
-import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
-import edu.utah.sci.cyclist.core.model.Preferences;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
@@ -41,18 +24,15 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.WritableImage;
@@ -68,9 +48,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+
+import javax.imageio.ImageIO;
+
+import org.apache.log4j.Logger;
+
+import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.CyclistController;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.CyclusJob;
+import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
+import edu.utah.sci.cyclist.core.model.Preferences;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
@@ -757,7 +750,7 @@ public class Cycic extends ViewBase{
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
                 if(!OutPut.inputTest()){
-                    log.info("Cyclus Input Not Well Formed!");
+                    log.error("Cyclus Input Not Well Formed!");
                     return;  // safety dance
                 }
                 String server = serverBox.getValue();
@@ -769,8 +762,8 @@ public class Cycic extends ViewBase{
                     String outfile = prefix + ".sqlite";
                     try {
                         File temp = new File(infile);
-                        log.info("Writing file " + temp.getName());
-                        log.info("lines:\n" + OutPut.xmlStringGen());
+                        log.trace("Writing file " + temp.getName());
+                        log.trace("lines:\n" + OutPut.xmlStringGen());
                         BufferedWriter output = new BufferedWriter(new FileWriter(temp));
                         output.write(OutPut.xmlStringGen());
                         output.close();
@@ -908,6 +901,7 @@ public class Cycic extends ViewBase{
 		        log.error("Error writing image to file: "+e.getMessage());
 		    }
 		} else {
+			log.error("File did not generate correctly.");
 			System.out.println("File did not generate correctly.");
 		}
 	}

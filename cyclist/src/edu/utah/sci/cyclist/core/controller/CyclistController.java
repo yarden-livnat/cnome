@@ -240,14 +240,17 @@ public class CyclistController {
 	}
 	
 	private void perspectiveChanged(int id) {
-		if (_currentPerspective != null && _currentPerspective.id != id)
+		if (_currentPerspective != null && _currentPerspective.id != id) {
 			_currentPerspective.setToolsPositions(_screen.getToolsPositions());
+			_presenter.getWorkspace().getConsole().setActive(false);
+		}
 		
 		_currentPerspective = _perspectives[id];
 		if (!_currentPerspective.initialized) {
 			_currentPerspective.init();
 		}
 		_presenter = _currentPerspective.presenter;
+		_presenter.getWorkspace().getConsole().setActive(true);
 		_screen.showPanels(_currentPerspective.tools, _currentPerspective.toolsPositions);
 		_screen.selectTools( _currentPerspective.type);
 	}
@@ -276,13 +279,6 @@ public class CyclistController {
 						//Set all the views to match the new tables.
 						ObservableList<Field> emptyList = FXCollections.observableArrayList();
 						_screen.getFieldsPanel().setFields(emptyList);
-						
-//						//Set the workspace to display the new path at the title.
-//						Workspace workspace = _screen.getWorkspace();
-//						if(workspace != null){
-//							workspace.setWorkDirPath(getLastChosenWorkDirectory());
-//						}
-						
 					}
 				}
 				
