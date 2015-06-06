@@ -59,7 +59,11 @@ public class Console extends ScrollPane {
         @Override
         public void doAppend(LoggingEvent event) {
             StringBuilder builder = new StringBuilder();
-            _current = builder.append(_current).append(event.getMessage()).append("\n").toString();
+            builder.append(_current);
+            if (event.getMessage() != null) {
+            	builder.append(event.getMessage());
+            }
+            _current = builder.append("\n").toString();
             Platform.runLater(new Runnable() {                          
                 @Override
                 public void run() {

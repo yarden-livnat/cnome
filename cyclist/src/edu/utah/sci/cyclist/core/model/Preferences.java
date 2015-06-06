@@ -26,6 +26,7 @@ public class Preferences {
 				_dirty = true;
 			}
 		});
+    	_servers.addAll("local", CLOUDIUS_URL);
     }
 	public static Preferences getInstance() {
 		return _instance;
@@ -75,6 +76,7 @@ public class Preferences {
 		boolean prev = _dirty;
 		_defaultServer = memento.getChild("defaultServer").getString("value");
 		
+		_servers.clear();
 		IMemento s = memento.getChild("servers");
 		if (s == null) {
 			_servers.addAll("local", CLOUDIUS_URL);

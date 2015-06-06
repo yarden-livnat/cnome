@@ -868,18 +868,23 @@ public class Cycic extends ViewBase{
                     }
                 } else {
                     // Remote metadata collection
-                    CyclistController._cyclusService.submitCmdToRemote(currentServer, "cyclus", "-m");
-                    _remoteDashA = CyclistController._cyclusService.latestJob();
-                    _remoteDashA.statusProperty()
-                        .addListener(new ChangeListener<CyclusJob.Status>() {
-                        @Override
-                        public void changed(ObservableValue<? extends Status> observable,
-                            Status oldValue, Status newValue) {
-                            if (newValue == Status.READY) {
-                                DataArrays.retrieveSchema(_remoteDashA.getStdout());
-                            }
-                        }
-                    });
+                	_remoteDashA = CyclistController._cyclusService.submitCmdToRemote(currentServer, "cyclus", "-m");
+//                    _remoteDashA = CyclistController._cyclusService.latestJob();
+                	CyclusJob job = _remoteDashA;
+                	if (_remoteDashA.getStatus() == Status.FAILED) {
+                		// TODO: an error msg was already sent to the console. Do we want to pop up an error msg?
+                	} else {
+	                    _remoteDashA.statusProperty()
+	                        .addListener(new ChangeListener<CyclusJob.Status>() {
+		                        @Override
+		                        public void changed(ObservableValue<? extends Status> observable,
+		                            Status oldValue, Status newValue) {
+		                            if (newValue == Status.READY) {
+		                                DataArrays.retrieveSchema(_remoteDashA.getStdout());
+		                            }
+		                        }
+	                    });
+                	}
                 }
             }
         });

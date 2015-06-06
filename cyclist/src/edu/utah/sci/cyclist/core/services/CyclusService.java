@@ -122,7 +122,7 @@ public class CyclusService {
 		}
 	}
 	
-    private void _submit(String path, Request request, String serverUrl) {
+    private CyclusJob _submit(String path, Request request, String serverUrl) {
         CyclusJob job = new CyclusJob(path,serverUrl);
 
         try {
@@ -134,36 +134,40 @@ public class CyclusService {
             _jobs.add(job);
             poll(job);
         } catch (ClientProtocolException e) {
-            log.error("Submit job communication error: "+ e.getMessage());
+        	String msg = e.getMessage() != null ? e.getMessage() : "";
+            log.error("Submit job communication error: "+ msg);
+            job.setStatus(Status.FAILED);
         } catch (IOException e) {
             log.error("submit job IO error: "+ e.getMessage());
+            job.setStatus(Status.FAILED);
         }
+        return job;
     }
 
-    public void submit(File file, String serverUrl) {
+    public CyclusJob submit(File file, String serverUrl) {
     	String path = file.getAbsolutePath();
         Request request = Request.Post(serverUrl + SUBMIT_PATH)
             .bodyFile(file, ContentType.DEFAULT_TEXT);
-        this._submit(path, request,serverUrl);
+        return this._submit(path, request,serverUrl);
     }
 
-    public void submit(String cmd) {
-    	submit(cmd, Preferences.CLOUDIUS_URL);
+    public CyclusJob submit(String cmd) {
+    	return submit(cmd, Preferences.CLOUDIUS_URL);
     }
     
-    public void submit(String cmd, String url) {
+    public CyclusJob submit(String cmd, String url) {
         // cmd is a string of XML 
         String path = "cycic.xml";
         Request request = Request.Post(url+ SUBMIT_PATH)
             .bodyString(cmd, ContentType.DEFAULT_TEXT);
-        this._submit(path, request,url);
+        return this._submit(path, request,url);
     }
 
-    public void submitCmd(String cmd, String... args) {
-    	submitCmdToRemote(Preferences.CLOUDIUS_URL, cmd, args);
+    public CyclusJob submitCmd(String cmd, String... args) {
+    	return submitCmdToRemote(Preferences.CLOUDIUS_URL, cmd, args);
     }
     
-    public void submitCmdToRemote(String url, String cmd, String... args) {
+    public CyclusJob submitCmdToRemote(String url, String cmd, String... args) {
     	String name = "cmd";
         String uid = UUID.randomUUID().toString().replace("-", "");
         String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
@@ -173,7 +177,7 @@ public class CyclusService {
         reqJSON += "]}";
         Request request = Request.Post(url+SUBMIT_JOB_PATH)
             .bodyString(reqJSON, ContentType.APPLICATION_JSON);
-        this._submit(name, request,url);
+        return this._submit(name, request,url);
 	}
 
     private void poll(final CyclusJob job) {
