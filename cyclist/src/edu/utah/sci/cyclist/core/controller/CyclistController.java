@@ -894,6 +894,9 @@ public class CyclistController {
 				e.printStackTrace();
 			} 		
 		}
+		
+		if (_currentPerspective == null) 
+			_currentPerspective = _perspectives[0];
 	}
 	
 	/*
