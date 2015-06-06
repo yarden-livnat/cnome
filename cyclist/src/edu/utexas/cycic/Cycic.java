@@ -100,11 +100,10 @@ public class Cycic extends ViewBase{
 	static boolean marketHideBool = true;
 	static Window window;
 	static ToggleGroup opSwitch = new ToggleGroup();
-	static ToggleButton localToggle = new ToggleButton("Local");
-	static ToggleButton remoteToggle = new ToggleButton("Remote");
     static CyclusJob _remoteDashA;
     private static Object monitor = new Object();
     static String currentSkin = "Default Skin";
+    static String currentServer = "";
 	
     
 	/**
@@ -455,16 +454,16 @@ public class Cycic extends ViewBase{
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
 		
-		opSwitch.getToggles().clear();
-        opSwitch.getToggles().addAll(localToggle, remoteToggle);
-        try {
-            Process readproc = Runtime.getRuntime().exec("cyclus -V");
-            new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-            localToggle.setSelected(true);
-        } catch (RuntimeException | IOException e) {
-            localToggle.setSelected(false);
-            remoteToggle.setSelected(true);
-        };
+//		opSwitch.getToggles().clear();
+//        opSwitch.getToggles().addAll(localToggle, remoteToggle);
+//        try {
+//            Process readproc = Runtime.getRuntime().exec("cyclus -V");
+//            new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+//            localToggle.setSelected(true);
+//        } catch (RuntimeException | IOException e) {
+//            localToggle.setSelected(false);
+//            remoteToggle.setSelected(true);
+//        };
 
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
@@ -724,6 +723,7 @@ public class Cycic extends ViewBase{
         serverBox.setVisibleRowCount(Math.min(6,  serverBox.getItems().size()));
         
         int currentIndex = Preferences.getInstance().getCurrentServerIndex()+1;
+        currentServer = serversList.get(currentIndex);
         
         serverBox.setPromptText("server");
         serverBox.setEditable(true);
@@ -739,12 +739,14 @@ public class Cycic extends ViewBase{
     				} else if ("".equals(to)) {
     					serverBox.getItems().remove(from);
     					Preferences.getInstance().servers().remove(from);
+
     				} else if (serverBox.getItems().indexOf(to) == -1) {
 						serverBox.getItems().add(to);
 						Preferences.getInstance().servers().add(to);
 						Preferences.getInstance().setCurrentServerIndex(serverBox.getItems().size()-2);
 						serverBox.setVisibleRowCount(Math.min(6,  serverBox.getItems().size()));
     				}
+					currentServer = serverBox.getValue();
     			});
 
         Label serverLabel = new Label("Server:");
@@ -850,7 +852,7 @@ public class Cycic extends ViewBase{
         cyclusDashM.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
         cyclusDashM.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-                if (localToggle.isSelected()) {
+                if ("local".equals(currentServer)) {
                     // Local metadata collection
                     try {
                         Process readproc = Runtime.getRuntime().exec("cyclus -m");
@@ -866,7 +868,7 @@ public class Cycic extends ViewBase{
                     }
                 } else {
                     // Remote metadata collection
-                    CyclistController._cyclusService.submitCmd("cyclus", "-m");
+                    CyclistController._cyclusService.submitCmdToRemote(currentServer, "cyclus", "-m");
                     _remoteDashA = CyclistController._cyclusService.latestJob();
                     _remoteDashA.statusProperty()
                         .addListener(new ChangeListener<CyclusJob.Status>() {

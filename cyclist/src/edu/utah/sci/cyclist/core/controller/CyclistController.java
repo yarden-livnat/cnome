@@ -58,6 +58,7 @@ import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.CyclistPerspectives;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.model.Context;

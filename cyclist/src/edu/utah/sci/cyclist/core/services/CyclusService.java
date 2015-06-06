@@ -160,7 +160,10 @@ public class CyclusService {
     }
 
     public void submitCmd(String cmd, String... args) {
-    	String serverUrl = Preferences.CLOUDIUS_URL;
+    	submitCmdToRemote(Preferences.CLOUDIUS_URL, cmd, args);
+    }
+    
+    public void submitCmdToRemote(String url, String cmd, String... args) {
     	String name = "cmd";
         String uid = UUID.randomUUID().toString().replace("-", "");
         String reqJSON = "{\"Id\": \"" + uid + "\", \"Cmd\": [\"" + cmd + "\"";
@@ -168,9 +171,9 @@ public class CyclusService {
             reqJSON += ", \"" + arg + "\"";
         }
         reqJSON += "]}";
-        Request request = Request.Post(serverUrl+SUBMIT_JOB_PATH)
+        Request request = Request.Post(url+SUBMIT_JOB_PATH)
             .bodyString(reqJSON, ContentType.APPLICATION_JSON);
-        this._submit(name, request,serverUrl);
+        this._submit(name, request,url);
 	}
 
     private void poll(final CyclusJob job) {

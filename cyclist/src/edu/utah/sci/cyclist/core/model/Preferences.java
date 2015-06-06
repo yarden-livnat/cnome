@@ -77,7 +77,7 @@ public class Preferences {
 		
 		IMemento s = memento.getChild("servers");
 		if (s == null) {
-			_servers.addAll("local", "remote");
+			_servers.addAll("local", CLOUDIUS_URL);
 			_currentServer = 0;
 		} else {
 			_currentServer = s.getInteger("current");
