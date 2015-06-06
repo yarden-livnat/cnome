@@ -50,7 +50,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -58,7 +57,6 @@ import org.apache.log4j.Logger;
 import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.CyclistPerspectives;
 import edu.utah.sci.cyclist.ToolsLibrary;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.model.Context;
@@ -82,9 +80,7 @@ import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
-import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
-import edu.utah.sci.cyclist.core.ui.wizards.RemoteServerWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
