@@ -89,13 +89,12 @@ public class CycicCircles{
 		};
 		facForm.setOnAction(circleAction);
         
-        MenuItem helpDialog = new MenuItem("Facility Documentation");
-        helpDialog.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e){
-                FormBuilder.showHelpDialog(parent.doc);
-            }
-        });
-            
+		MenuItem helpDialog = new MenuItem("Facility Documentation");
+		helpDialog.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e){
+				FormBuilder.showHelpDialog(parent.doc);
+			}
+		});
 
 		circle.image.setLayoutX(circle.getCenterX()-60);
 		circle.image.setLayoutY(circle.getCenterY()-60);

@@ -325,7 +325,7 @@ public class Cycic extends ViewBase{
 						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
 							facility.niche = DataArrays.simFacilities.get(i).niche;
-                            facility.doc = DataArrays.simFacilities.get(i).doc;
+							facility.doc = DataArrays.simFacilities.get(i).doc;
 							facility.archetype = DataArrays.simFacilities.get(i).facilityArch;
 						}
 					}

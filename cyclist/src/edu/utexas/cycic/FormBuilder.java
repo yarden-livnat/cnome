@@ -285,7 +285,7 @@ public class FormBuilder extends ViewBase {
 						name.setText((String) facArray.get(0));	
 					}
 					name.setTooltip(new Tooltip((String) facArray.get(7)));
-                    name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
+					name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 					grid.add(name, columnNumber, rowNumber);
 					// Setting up the input type for the label
 					if (facArray.get(4) != null){

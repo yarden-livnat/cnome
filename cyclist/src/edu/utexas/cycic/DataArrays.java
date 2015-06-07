@@ -188,7 +188,7 @@ class facilityStructure {
 	String facilityName;
 	String facilityArch;
 	String niche;
-    String doc;
+	String doc;
 	ArrayList<Object> facStruct = new ArrayList<Object>();
 	String facSchema;
 	String facAnnotations;
@@ -218,7 +218,7 @@ class facilityStructure {
  */
 class regionStructure {
 	String regionName;
-    String doc;
+	String doc;
 	String regionArch;
 	String regionSchema;
 	String regionAnnotations;
@@ -251,7 +251,7 @@ class institutionStructure {
 	String institArch;
 	String institSchema;
 	String institAnnotations;
-    String doc;
+	String doc;
 	ArrayList<Object> institStruct = new ArrayList<Object>();
 	
 	 
@@ -343,7 +343,7 @@ class regionNode{
 	String type = new String();
 	String entity; 
 	String archetype;
-    String doc;
+	String doc;
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
 	ArrayList<Object> regionData  = new ArrayList<Object>();
 	ArrayList<String> institutions = new ArrayList<String>();
@@ -362,7 +362,7 @@ class instituteNode{
 	String type;
 	String entity;
 	String archetype;
-    String doc;
+	String doc;
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	Map<String, Integer> availFacilities = new HashMap<String, Integer>();
@@ -395,7 +395,7 @@ class facilityNode{
 	FacilityCircle cycicCircle = new FacilityCircle();
 	FacilityCircle sorterCircle = new FacilityCircle();
 	protected String niche;
-    protected String doc;
+	protected String doc;
 	public String archetype;
 }
 
