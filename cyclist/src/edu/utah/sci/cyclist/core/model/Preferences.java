@@ -1,5 +1,7 @@
 package edu.utah.sci.cyclist.core.model;
 
+import java.awt.datatransfer.StringSelection;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
@@ -11,13 +13,15 @@ public class Preferences {
 	public static String CURRENT_SERVER = "Current server";
 	public static String RUN_DEFAULT = "Run default";
 	public static final String CLOUDIUS_URL = "http://cycrun.fuelcycle.org";
+	private String _defaultServer = CLOUDIUS_URL;
 	
 	private static Preferences _instance = new Preferences();
 	
+	public static final String LOCAL_SERVER = "local";
+	
 	private boolean _dirty = false;
-	private String _defaultServer = CLOUDIUS_URL;
-    private ObservableList<String> _servers = FXCollections.observableArrayList();
     private int _currentServer = 0;
+    private ObservableList<String> _servers = FXCollections.observableArrayList();
 
     private Preferences() {
     	_servers.addListener(new InvalidationListener() {
@@ -79,12 +83,15 @@ public class Preferences {
 		_servers.clear();
 		IMemento s = memento.getChild("servers");
 		if (s == null) {
-			_servers.addAll("local", CLOUDIUS_URL);
+			_servers.addAll(LOCAL_SERVER, CLOUDIUS_URL);
 			_currentServer = 0;
 		} else {
 			_currentServer = s.getInteger("current");
 			for (IMemento m : s.getChildren("server")) {
-				_servers.add(m.getTextData());
+				// TEMPORARY fix
+				String server = m.getTextData());
+				if ("local".equals(server.toLowerCase())) server = LOCAL_SERVER;
+				_servers.add(server);
 			}
 		}
 		

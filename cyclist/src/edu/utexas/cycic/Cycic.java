@@ -67,6 +67,7 @@ import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
+	
 	/**
 	 * Function for building the CYCIC Pane and GridPane of this view. 
 	 */
@@ -727,7 +728,7 @@ public class Cycic extends ViewBase{
         			int idx = serverBox.getSelectionModel().getSelectedIndex();
 					if (idx-1 != Preferences.getInstance().getCurrentServerIndex()) {
 						Preferences.getInstance().setCurrentServerIndex(idx-1);
-					} else if ("local".equals(from)) {
+					} else if (Preferences.LOCAL_SERVER.equals(from)) {
 						serverBox.getSelectionModel().select(idx);
     				} else if ("".equals(to)) {
     					serverBox.getItems().remove(from);
@@ -754,7 +755,7 @@ public class Cycic extends ViewBase{
                     return;  // safety dance
                 }
                 String server = serverBox.getValue();
-                if ("Local".equals(server)) {
+                if (Preferences.LOCAL_SERVER.equals(server)) {
                     // local execution
                     String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
                     String prefix = "cycic" + tempHash;
@@ -846,7 +847,7 @@ public class Cycic extends ViewBase{
         cyclusDashM.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
         cyclusDashM.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-                if ("local".equals(currentServer)) {
+                if (Preferences.LOCAL_SERVER.equals(currentServer)) {
                     // Local metadata collection
                     try {
                         Process readproc = Runtime.getRuntime().exec("cyclus -m");
