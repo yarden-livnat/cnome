@@ -105,6 +105,23 @@ public class FormBuilderFunctions {
 	 * @param node
 	 * @return
 	 */
+	static TextField lifetimeFieldBuilder(final facilityNode node){
+		TextField textField = new TextField();
+		textField.setText((String)node.facLifetime);
+		
+		textField.textProperty().addListener(new ChangeListener<String>(){         
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
+				node.facLifetime = newValue;
+			}
+		});
+		return textField;
+	}
+
+	/**
+	 * 
+	 * @param node
+	 * @return
+	 */
 	static TextField nameFieldBuilder(final facilityNode node){
 		TextField textField = new TextField();
 		textField.setText((String)node.name);
