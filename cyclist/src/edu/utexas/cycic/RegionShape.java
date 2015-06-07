@@ -99,15 +99,8 @@ public class RegionShape extends Rectangle {
 		MenuItem delete = new MenuItem("Delete");
 		delete.setOnAction(deleteEvent);
 
-		EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent exitEvent) {
-			}
-		};
-		MenuItem exit = new MenuItem("Exit");
-		exit.setOnAction(exitEvent);
-		
         rect.menu = new ContextMenu();
-		rect.menu.getItems().addAll(regionForm, helpDialog, delete, exit);		
+		rect.menu.getItems().addAll(regionForm, helpDialog, delete);		
 
 		rect.onMouseClickedProperty().set(new EventHandler <MouseEvent>(){
 			@Override
