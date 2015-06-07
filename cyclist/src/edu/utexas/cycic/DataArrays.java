@@ -113,6 +113,7 @@ public class DataArrays{
                 node.facAnnotations = anno.toString();
                 node.facilityArch = spec;
                 node.niche = anno.getString("niche", "facility");
+                node.doc = anno.getString("doc", "facility");
                 JsonObject facVars = anno.getJsonObject("vars");
                 ArrayList<Object> facArray = new ArrayList<Object>();
                 node.facStruct = XMLReader.nodeBuilder(facVars, facArray, XMLReader.readSchema_new(schema));
@@ -124,6 +125,7 @@ public class DataArrays{
                 regionStructure rNode = new regionStructure();
                 rNode.regionAnnotations = anno.toString();
                 rNode.regionArch = spec;
+                rNode.doc = anno.getString("doc","region");
                 JsonObject regionVars = anno.getJsonObject("vars");
                 ArrayList<Object> regionArray = new ArrayList<Object>();
                 rNode.regionStruct = XMLReader.nodeBuilder(regionVars,regionArray, XMLReader.readSchema_new(schema));
@@ -135,6 +137,7 @@ public class DataArrays{
                 institutionStructure iNode = new institutionStructure();
                 iNode.institArch = spec;
                 iNode.institAnnotations = anno.toString();
+                iNode.doc = anno.getString("doc","institution");
                 JsonObject instVars = anno.getJsonObject("vars");
                 ArrayList<Object> instArray = new ArrayList<Object>();
                 iNode.institStruct = XMLReader.nodeBuilder(instVars, instArray, XMLReader.readSchema_new(schema));
@@ -185,6 +188,7 @@ class facilityStructure {
 	String facilityName;
 	String facilityArch;
 	String niche;
+	String doc;
 	ArrayList<Object> facStruct = new ArrayList<Object>();
 	String facSchema;
 	String facAnnotations;
@@ -214,6 +218,7 @@ class facilityStructure {
  */
 class regionStructure {
 	String regionName;
+	String doc;
 	String regionArch;
 	String regionSchema;
 	String regionAnnotations;
@@ -246,6 +251,7 @@ class institutionStructure {
 	String institArch;
 	String institSchema;
 	String institAnnotations;
+	String doc;
 	ArrayList<Object> institStruct = new ArrayList<Object>();
 	
 	 
@@ -337,6 +343,7 @@ class regionNode{
 	String type = new String();
 	String entity; 
 	String archetype;
+	String doc;
 	ArrayList<Object> regionStruct = new ArrayList<Object>();
 	ArrayList<Object> regionData  = new ArrayList<Object>();
 	ArrayList<String> institutions = new ArrayList<String>();
@@ -355,6 +362,7 @@ class instituteNode{
 	String type;
 	String entity;
 	String archetype;
+	String doc;
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	Map<String, Integer> availFacilities = new HashMap<String, Integer>();
@@ -382,6 +390,7 @@ class facilityNode{
 	String facilityType = "";
 	String entity; 
 	Integer facTypeIndex = 0;
+	String facLifetime  = "";
 	ArrayList<Object> facilityData = new ArrayList<Object>();
 	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
 	ArrayList<facilityNode> facilityClones = new ArrayList<facilityNode>();
@@ -389,6 +398,7 @@ class facilityNode{
 	FacilityCircle cycicCircle = new FacilityCircle();
 	FacilityCircle sorterCircle = new FacilityCircle();
 	protected String niche;
+	protected String doc;
 	public String archetype;
 }
 

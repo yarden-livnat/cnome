@@ -42,6 +42,10 @@ public class FormBuilder extends ViewBase {
 		
 		Button button = new Button();
 		button.setText(formNode.facilityType);
+
+		Label lifetimeLabel    = new Label("Lifetime");
+		TextField lifetimeField = FormBuilderFunctions.lifetimeFieldBuilder(formNode);
+
 		for(int i = 0; i < 4; i++){
 			userLevelBox.getItems().add(String.format("%d", i));
 		}
@@ -51,7 +55,11 @@ public class FormBuilder extends ViewBase {
 				userLevelBox.setValue(newValue);
 				userLevel = Integer.parseInt(newValue);
 				grid.getChildren().clear();
-				rowNumber = 0;
+				if (userLevel > 0) {
+					grid.add(lifetimeLabel,0,0);
+					grid.add(lifetimeField,1,0);
+				}            
+				rowNumber = 1;
 				formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 			}
 		});
@@ -152,6 +160,25 @@ public class FormBuilder extends ViewBase {
 		return button;
 	}
 	
+    public static void showHelpDialog(String help) {
+        Dialog dg = new Dialog();
+        ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
+        dg.setContentText(help);
+        dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        dg.show();
+    }
+
+    public static EventHandler<MouseEvent> helpDialogHandler(String help) {
+        return new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent e){
+                if(e.getClickCount() == 2){
+                    showHelpDialog(help);
+                }
+            }
+        };
+    }
+
+
 	/**
 	 * This function builds an input form from the data structures associated
 	 * with a facility.
@@ -178,18 +205,7 @@ public class FormBuilder extends ViewBase {
 							name.setText((String) facArray.get(0));	
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
-						String help = (String) facArray.get(8);
-						name.setOnMouseClicked(new EventHandler<MouseEvent>(){
-							public void handle(MouseEvent e){
-								if(e.getClickCount() == 2){
-									Dialog dg = new Dialog();
-									ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-									dg.setContentText(help);
-									dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-									dg.show();
-								}
-							}
-						});
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
@@ -217,18 +233,7 @@ public class FormBuilder extends ViewBase {
 							name.setText((String) facArray.get(0));	
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
-						String help = (String) facArray.get(8);
-						name.setOnMouseClicked(new EventHandler<MouseEvent>(){
-							public void handle(MouseEvent e){
-								if(e.getClickCount() == 2){
-									Dialog dg = new Dialog();
-									ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-									dg.setContentText(help);
-									dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-									dg.show();
-								}
-							}
-						});
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
@@ -288,18 +293,7 @@ public class FormBuilder extends ViewBase {
 						name.setText((String) facArray.get(0));	
 					}
 					name.setTooltip(new Tooltip((String) facArray.get(7)));
-					String help = (String) facArray.get(8);
-					name.setOnMouseClicked(new EventHandler<MouseEvent>(){
-						public void handle(MouseEvent e){
-							if(e.getClickCount() == 2){
-								Dialog dg = new Dialog();
-								ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-								dg.setContentText(help);
-								dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-								dg.show();
-							}
-						}
-					});
+					name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 					grid.add(name, columnNumber, rowNumber);
 					// Setting up the input type for the label
 					if (facArray.get(4) != null){

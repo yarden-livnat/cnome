@@ -58,6 +58,7 @@ public class InstitutionCorralView extends ViewBase{
 						for (int i = 0; i < DataArrays.simInstitutions.size(); i++){
 							if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(institute.type)){
 								institute.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+								institute.doc = DataArrays.simInstitutions.get(i).doc;
 								institute.archetype = DataArrays.simInstitutions.get(i).institArch;
 							}
 						}
@@ -70,7 +71,7 @@ public class InstitutionCorralView extends ViewBase{
 						institute.institutionShape.setCenterY(event.getY());
 						VisFunctions.placeTextOnEllipse(institute.institutionShape, "middle");
 						DataArrays.institNodes.add(institute);
-						institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text, institute.institutionShape.menuBar);
+						institutionPane.getChildren().addAll(institute.institutionShape, institute.institutionShape.text);
 					} else {
 						event.consume();
 					}
@@ -119,7 +120,7 @@ public class InstitutionCorralView extends ViewBase{
 						
 				DataArrays.institNodes.add(institution);
 
-				institutionPane.getChildren().addAll(instituteNode.institutionShape, instituteNode.institutionShape.text, instituteNode.institutionShape.menuBar);
+				institutionPane.getChildren().addAll(instituteNode.institutionShape, instituteNode.institutionShape.text);
 
 
 			}	//ends definition of EventHandler addRegion  

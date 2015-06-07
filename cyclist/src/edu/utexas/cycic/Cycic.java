@@ -325,11 +325,13 @@ public class Cycic extends ViewBase{
 						if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 							facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
 							facility.niche = DataArrays.simFacilities.get(i).niche;
+							facility.doc = DataArrays.simFacilities.get(i).doc;
 							facility.archetype = DataArrays.simFacilities.get(i).facilityArch;
 						}
 					}
 					event.consume();
 					facility.name = "";
+					facility.facLifetime = "";
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
@@ -415,11 +417,13 @@ public class Cycic extends ViewBase{
 					if(DataArrays.simFacilities.get(i).facilityName.equalsIgnoreCase(facility.facilityType)){
 						facility.facilityStructure = DataArrays.simFacilities.get(i).facStruct;
 						facility.niche = DataArrays.simFacilities.get(i).niche;
+						facility.doc = DataArrays.simFacilities.get(i).doc;
 						facility.archetype = DataArrays.simFacilities.get(i).facilityArch;
 					}
 				}
 				event.consume();
 				facility.name = facNameField.getText();
+				facility.facLifetime = "";
 				facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 				facility.cycicCircle.setCenterX(80);
 				facility.cycicCircle.setCenterY(80);

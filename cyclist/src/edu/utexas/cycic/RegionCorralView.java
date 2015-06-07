@@ -43,6 +43,7 @@ public class RegionCorralView extends ViewBase {
 						for (int i = 0; i < DataArrays.simRegions.size(); i++){
 							if(DataArrays.simRegions.get(i).regionName.equalsIgnoreCase(region.type)){
 								region.regionStruct = DataArrays.simRegions.get(i).regionStruct;
+								region.doc = DataArrays.simRegions.get(i).doc;
 								region.archetype = DataArrays.simRegions.get(i).regionArch;
 							}
 						}
@@ -55,7 +56,7 @@ public class RegionCorralView extends ViewBase {
 						regionNode.regionCircle.setY(event.getY());
 						VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
 						DataArrays.regionNodes.add(region);
-						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text);
 					}
 				}
 			});
@@ -164,7 +165,7 @@ public class RegionCorralView extends ViewBase {
                                 VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
 				DataArrays.regionNodes.add(region);
 
-				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text);
 
 
 			}	//ends definition of EventHandler addRegion  

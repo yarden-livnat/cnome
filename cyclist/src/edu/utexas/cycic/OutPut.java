@@ -285,6 +285,12 @@ public class OutPut {
 		Element name = doc.createElement("name");
 		name.setTextContent(facName);
 		rootElement.appendChild(name);
+
+		if (!facility.facLifetime.equals("")) {
+			Element lifetime = doc.createElement("lifetime");
+			lifetime.setTextContent(facility.facLifetime);
+			rootElement.appendChild(lifetime);
+		}
 		
 		Element config = doc.createElement("config");
 		rootElement.appendChild(config);
