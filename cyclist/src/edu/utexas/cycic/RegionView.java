@@ -149,7 +149,6 @@ public class RegionView extends ViewBase{
 	 */
 	@SuppressWarnings("unchecked")
 	public void formBuilder(ArrayList<Object> facArray, ArrayList<Object> dataArray){
-		System.out.println(facArray);
 		if (facArray.size() == 0){
 			grid.add(new Label("This archetype has no form to fill out."), 0, 0);
 			return;
@@ -167,18 +166,7 @@ public class RegionView extends ViewBase{
 							name.setText((String) facArray.get(0));	
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
-						String help = (String) facArray.get(8);
-						name.setOnMouseClicked(new EventHandler<MouseEvent>(){
-							public void handle(MouseEvent e){
-								if(e.getClickCount() == 2){
-									Dialog dg = new Dialog();
-									ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-									dg.setContentText(help);
-									dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-									dg.show();
-								}
-							}
-						});
+						name.setOnMouseClicked(FormBuilder.addHelpDialog( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
@@ -206,18 +194,7 @@ public class RegionView extends ViewBase{
 							name.setText((String) facArray.get(0));	
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
-						String help = (String) facArray.get(8);
-						name.setOnMouseClicked(new EventHandler<MouseEvent>(){
-							public void handle(MouseEvent e){
-								if(e.getClickCount() == 2){
-									Dialog dg = new Dialog();
-									ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
-									dg.setContentText(help);
-									dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-									dg.show();
-								}
-							}
-						});
+						name.setOnMouseClicked(FormBuilder.addHelpDialog( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
