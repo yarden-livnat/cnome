@@ -89,7 +89,7 @@ public class Preferences {
 			_currentServer = s.getInteger("current");
 			for (IMemento m : s.getChildren("server")) {
 				// TEMPORARY fix
-				String server = m.getTextData());
+				String server = m.getTextData();
 				if ("local".equals(server.toLowerCase())) server = LOCAL_SERVER;
 				_servers.add(server);
 			}
