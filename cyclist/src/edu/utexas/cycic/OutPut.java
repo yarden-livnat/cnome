@@ -134,16 +134,18 @@ public class OutPut {
 		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
 		control.appendChild(simStartYear);
 		
-		if(!CycicScenarios.workingCycicScenario.simulationData.decay.equalsIgnoreCase("decay")){
+		if(!CycicScenarios.workingCycicScenario.simulationData.decay.equalsIgnoreCase("never")){
 			Element decay = doc.createElement("decay");
-			simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
+			decay.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
 			control.appendChild(decay);
 		}
 		
-		if(!CycicScenarios.workingCycicScenario.simulationData.simHandle.equalsIgnoreCase("")){
-			Element simhandle = doc.createElement("simhandle");
-			simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simHandle));
-			control.appendChild(simhandle);
+		if(CycicScenarios.workingCycicScenario.simulationData.simHandle == null){
+			
+		} else if(!CycicScenarios.workingCycicScenario.simulationData.simHandle.equalsIgnoreCase("")){
+			Element simHandle = doc.createElement("simhandle");
+			simHandle.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simHandle));
+			control.appendChild(simHandle);
 		}
 	}
 	

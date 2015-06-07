@@ -608,18 +608,18 @@ public class Cycic extends ViewBase{
 		monthList.add("November");
 		monthList.add("December");
 		
-		months.put("January", "0");
-		months.put("Febuary", "1");
-		months.put("March", "2");
-		months.put("April", "3");
-		months.put("May", "4");
-		months.put("June", "5");
-		months.put("July", "6");
-		months.put("August", "7");
-		months.put("September", "8");
-		months.put("October", "9");
-		months.put("November", "10");
-		months.put("December", "11");
+		months.put("January", "1");
+		months.put("Febuary", "2");
+		months.put("March", "3");
+		months.put("April", "4");
+		months.put("May", "5");
+		months.put("June", "6");
+		months.put("July", "7");
+		months.put("August", "8");
+		months.put("September", "9");
+		months.put("October", "10");
+		months.put("November", "11");
+		months.put("December", "12");
 	}
 	
 	/**
@@ -673,8 +673,9 @@ public class Cycic extends ViewBase{
 		simInfo.add(startYear, 2, 3);
 				
 		ComboBox<String> decay = new ComboBox<String>();
-		decay.getItems().addAll("Manual", "Never");
+		decay.getItems().addAll("manual", "never");
 		decay.setValue("Never");
+		Cycic.workingScenario.simulationData.decay = "never";
 		decay.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				Cycic.workingScenario.simulationData.decay = decay.getValue();
