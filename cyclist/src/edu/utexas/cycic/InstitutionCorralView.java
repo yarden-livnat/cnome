@@ -1,22 +1,25 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
-
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+
 /**
  * A view used to build and develop institutions for the simulation 
  * currently being built. 
@@ -96,35 +99,35 @@ public class InstitutionCorralView extends ViewBase{
 			typeOptions.getItems().add(DataArrays.simInstitutions.get(i).institName);
 		}
 		
-		Button institButton = new Button("Add Institution");
-		/** TODO This literally does nothing. */
-		institButton.setOnAction(new EventHandler<ActionEvent>(){
-			public void handle(ActionEvent e){
-				instituteNode tempInstit = new instituteNode();
-				tempInstit.name = institName.getText();
-				workingInstit = tempInstit;
+		Button institButton = new Button("Add");
+
+		EventHandler<MouseEvent> addInstitution = new EventHandler<MouseEvent>(){
+			public void handle(MouseEvent event) {
+				final instituteNode institution = new instituteNode();
+				institution.type = (String) typeOptions.getValue();
 				for(int i = 0; i < DataArrays.simInstitutions.size(); i++){
-					if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase((String) typeOptions.getValue())){
-						tempInstit.institStruct = DataArrays.simInstitutions.get(i).institStruct;
-						tempInstit.archetype = DataArrays.simInstitutions.get(i).institArch;
+					if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(institution.type)){
+                                          institution.institStruct = DataArrays.simInstitutions.get(i).getStruct();
 					}
 				}
-				tempInstit.type = (String) typeOptions.getValue();
-				FormBuilderFunctions.formArrayBuilder(workingInstit.institStruct, workingInstit.institData);
-				DataArrays.institNodes.add(tempInstit);
-				new Label("Name");
-				FormBuilderFunctions.institNameBuilder(workingInstit);				
-			}
-		});
-		
+				FormBuilderFunctions.formArrayBuilder(institution.institStruct, institution.institData);
+				instituteNode.institutionShape = InstitutionShape.addInst(institName.getText(), institution);
+				
+				DataArrays.institNodes.add(institution);
+
+				institutionPane.getChildren().addAll(instituteNode.institutionShape, instituteNode.institutionShape.text, instituteNode.institutionShape.menuBar);
+
+
+			}	//ends definition of EventHandler addRegion  
+		};	//ends EventHandler addRegion
+                institButton.setOnMouseClicked(addInstitution);		
 		
 		topGrid.add(new Label("New Institution"), 0, 0);
 		topGrid.add(institName, 1, 0);
 		topGrid.add(typeOptions, 2, 0);
 		topGrid.add(institButton, 3, 0);
-		
-				
-		
+	
+						
 		//ComboBox for adding a new facility to the initial facility array of the institution.
 		
 		// Building the grids for the views.
