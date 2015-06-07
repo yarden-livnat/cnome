@@ -11,8 +11,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -57,7 +57,7 @@ public class InstitutionShape extends Ellipse {
 	protected static double deltay;
 	Object name;
 	Label text = new Label("");
-	MenuBar menuBar = new MenuBar();
+	ContextMenu menu;
 	static instituteNode institBackTrace;
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
 	
@@ -95,8 +95,7 @@ public class InstitutionShape extends Ellipse {
 		MenuItem regionForm = new MenuItem("Configure");
 		regionForm.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				CyclistController._presenter.addTool(new RegionViewTool());
-				institution.menuBar.setVisible(false);
+				CyclistController._presenter.addTool(new InstitutionViewTool());
 			}
 		});
 
@@ -111,35 +110,21 @@ public class InstitutionShape extends Ellipse {
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
 				deleteInstitution(institution, instit);
-				institution.menuBar.setVisible(false);
 			}
 		};
 		MenuItem delete = new MenuItem("Delete");
 		delete.setOnAction(deleteEvent);
 
-		EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent exitEvent) {
-				institution.menuBar.setVisible(false);
-			}
-		};
-		MenuItem exit = new MenuItem("Exit");
-		exit.setOnAction(exitEvent);
-		
-		final Menu menu = new Menu("Options");
-		menu.getItems().addAll(regionForm, helpDialog, delete, exit);		
+		institution.menu = new ContextMenu();
+		institution.menu.getItems().addAll(regionForm, helpDialog, delete);		
 
-		institution.menuBar.getMenus().add(menu);
-		institution.menuBar.setLayoutX(institution.getLayoutX());
-		institution.menuBar.setLayoutY(institution.getLayoutY());
-		institution.menuBar.setVisible(false);
 
 		institution.onMouseClickedProperty().set(new EventHandler <MouseEvent>(){
 			@Override
 			public void handle(MouseEvent menuEvent){
 				if(menuEvent.getButton().equals(MouseButton.SECONDARY)){
-					institution.menuBar.setVisible(true);
-					institution.menuBar.setLayoutX(institution.getLayoutX());
-					institution.menuBar.setLayoutY(institution.getLayoutY());
+					institution.menu.show(institution,menuEvent.getScreenX(),menuEvent.getScreenY());
+					menuEvent.consume();
 				}
 				
 				if(menuEvent.getClickCount() == 2){
@@ -206,9 +191,6 @@ public class InstitutionShape extends Ellipse {
                 
 				VisFunctions.placeTextOnEllipse(institution,"middle");
 
-				institution.menuBar.setLayoutX(institution.getLayoutX()+institution.getRadiusX()*0.2);
-				institution.menuBar.setLayoutY(institution.getLayoutY()+institution.getRadiusY()*0.2);
-
 				mousex = event.getX();
 				mousey = event.getY();
 			}
@@ -223,7 +205,7 @@ public class InstitutionShape extends Ellipse {
 
 	static void deleteInstitution(InstitutionShape circle, instituteNode instit){
 		DataArrays.institNodes.remove(instit);
-		InstitutionCorralView.institutionPane.getChildren().removeAll(circle, circle.menuBar, circle.text);
+		InstitutionCorralView.institutionPane.getChildren().removeAll(circle, circle.text);
 	};
 
 	{
