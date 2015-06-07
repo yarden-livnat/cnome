@@ -127,7 +127,7 @@ public class OutPut {
 		control.appendChild(simDuration);
 
 		Element simStartMon = doc.createElement("startmonth");
-		simStartMon.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startMonth));
+		simStartMon.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startMonth+1));
 		control.appendChild(simStartMon);
 			
 		Element simStartYear = doc.createElement("startyear");
