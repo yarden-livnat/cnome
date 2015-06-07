@@ -57,7 +57,7 @@ public class InstitutionShape extends Ellipse {
 	protected static double deltay;
 	Object name;
 	Label text = new Label("");
-    ContextMenu menu;
+	ContextMenu menu;
 	static instituteNode institBackTrace;
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
 	
@@ -123,8 +123,8 @@ public class InstitutionShape extends Ellipse {
 			@Override
 			public void handle(MouseEvent menuEvent){
 				if(menuEvent.getButton().equals(MouseButton.SECONDARY)){
-                    institution.menu.show(institution,menuEvent.getScreenX(),menuEvent.getScreenY());
-                    menuEvent.consume();
+					institution.menu.show(institution,menuEvent.getScreenX(),menuEvent.getScreenY());
+					menuEvent.consume();
 				}
 				
 				if(menuEvent.getClickCount() == 2){
