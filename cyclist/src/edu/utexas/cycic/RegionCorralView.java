@@ -56,7 +56,7 @@ public class RegionCorralView extends ViewBase {
 						regionNode.regionCircle.setY(event.getY());
 						VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
 						DataArrays.regionNodes.add(region);
-						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text);
 					}
 				}
 			});
@@ -165,7 +165,7 @@ public class RegionCorralView extends ViewBase {
                                 VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
 				DataArrays.regionNodes.add(region);
 
-				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text);
 
 
 			}	//ends definition of EventHandler addRegion  
