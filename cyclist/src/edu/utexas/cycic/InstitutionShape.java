@@ -100,6 +100,14 @@ public class InstitutionShape extends Ellipse {
 			}
 		});
 
+        MenuItem helpDialog = new MenuItem("Institution Documentation");
+        helpDialog.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e){
+                FormBuilder.showHelpDialog(instit.doc);
+            }
+        });
+            
+
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
 				deleteInstitution(institution, instit);
@@ -118,7 +126,7 @@ public class InstitutionShape extends Ellipse {
 		exit.setOnAction(exitEvent);
 		
 		final Menu menu = new Menu("Options");
-		menu.getItems().addAll(regionForm, delete, exit);		
+		menu.getItems().addAll(regionForm, helpDialog, delete, exit);		
 
 		institution.menuBar.getMenus().add(menu);
 		institution.menuBar.setLayoutX(institution.getLayoutX());
