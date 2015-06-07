@@ -166,7 +166,7 @@ public class RegionView extends ViewBase{
 							name.setText((String) facArray.get(0));	
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
-						name.setOnMouseClicked(FormBuilder.addHelpDialog( (String) facArray.get(8)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
@@ -194,7 +194,7 @@ public class RegionView extends ViewBase{
 							name.setText((String) facArray.get(0));	
 						}
 						name.setTooltip(new Tooltip((String)facArray.get(7)));
-						name.setOnMouseClicked(FormBuilder.addHelpDialog( (String) facArray.get(8)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;

@@ -43,6 +43,7 @@ public class RegionCorralView extends ViewBase {
 						for (int i = 0; i < DataArrays.simRegions.size(); i++){
 							if(DataArrays.simRegions.get(i).regionName.equalsIgnoreCase(region.type)){
 								region.regionStruct = DataArrays.simRegions.get(i).regionStruct;
+                                region.doc = DataArrays.simRegions.get(i).doc;
 								region.archetype = DataArrays.simRegions.get(i).regionArch;
 							}
 						}

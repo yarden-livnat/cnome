@@ -58,6 +58,7 @@ public class InstitutionCorralView extends ViewBase{
 						for (int i = 0; i < DataArrays.simInstitutions.size(); i++){
 							if(DataArrays.simInstitutions.get(i).institName.equalsIgnoreCase(institute.type)){
 								institute.institStruct = DataArrays.simInstitutions.get(i).institStruct;
+                                institute.doc = DataArrays.simInstitutions.get(i).doc;
 								institute.archetype = DataArrays.simInstitutions.get(i).institArch;
 							}
 						}

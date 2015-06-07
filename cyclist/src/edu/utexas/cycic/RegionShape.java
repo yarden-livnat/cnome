@@ -84,6 +84,14 @@ public class RegionShape extends Rectangle {
 			}
 		});
 
+        MenuItem helpDialog = new MenuItem("Region Documentation");
+        helpDialog.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e){
+                FormBuilder.showHelpDialog(region.doc);
+            }
+        });
+            
+
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
 				deleteRegion(rect, region);
@@ -102,7 +110,7 @@ public class RegionShape extends Rectangle {
 		exit.setOnAction(exitEvent);
 		
 		final Menu menu = new Menu("Options");
-		menu.getItems().addAll(regionForm, delete, exit);		
+		menu.getItems().addAll(regionForm, helpDialog, delete, exit);		
 
 		rect.menuBar.getMenus().add(menu);
 		rect.menuBar.setLayoutX(rect.getX());
