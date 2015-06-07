@@ -358,7 +358,7 @@ class instituteNode{
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	Map<String, Integer> availFacilities = new HashMap<String, Integer>();
-	InstitutionShape institutionShape = new InstitutionShape();
+	static InstitutionShape institutionShape = new InstitutionShape();
 }
 
 /**
