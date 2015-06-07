@@ -106,7 +106,13 @@ public class FormBuilderFunctions {
 	 * @return
 	 */
 	static TextField lifetimeFieldBuilder(final facilityNode node){
-		TextField textField = new TextField();
+		TextField textField = new TextField() {
+			@Override public void replaceText(int start, int end, String text) {
+				if (!text.matches("[a-z]")){
+					super.replaceText(start, end, text);
+				}
+			}
+		};
 		textField.setText((String)node.facLifetime);
 		
 		textField.textProperty().addListener(new ChangeListener<String>(){         
