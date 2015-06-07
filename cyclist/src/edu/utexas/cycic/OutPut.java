@@ -591,14 +591,17 @@ public class OutPut {
 		// Duration
 		String duration = doc.getElementsByTagName("duration").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.duration = duration;
+		Cycic.duration.setText(duration);
 		
 		// Start Month
 		String startMonth = doc.getElementsByTagName("startmonth").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.startMonth = startMonth;
+		Cycic.startMonth.setValue(startMonth);
 		
 		// Start Year
 		String startYear = doc.getElementsByTagName("startyear").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.startYear = startYear;
+		Cycic.startYear.setText(startYear);
 		
 	}
 	

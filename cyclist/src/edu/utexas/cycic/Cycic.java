@@ -109,6 +109,10 @@ public class Cycic extends ViewBase{
     static CyclusJob _remoteDashA;
     private static Object monitor = new Object();
     static String currentSkin = "Default Skin";
+    static TextField duration = VisFunctions.numberField();
+	static ComboBox<String> startMonth = new ComboBox<String>();
+	static TextField startYear = VisFunctions.numberField();
+	static TextArea description = new TextArea();
 	
     
 	/**
@@ -722,7 +726,6 @@ public class Cycic extends ViewBase{
 		simDets.setTooltip(new Tooltip("The top level details of the simulation."));
 		simDets.setFont(new Font("Times", 16));
 		simInfo.add(simDets, 0, 0);
-		TextField duration = VisFunctions.numberField();
 		duration.setMaxWidth(150);
 		duration.setPromptText("Length of Simulation");
 		duration.setText(Cycic.workingScenario.simulationData.duration);
@@ -735,8 +738,6 @@ public class Cycic extends ViewBase{
 		simInfo.add(new Label("Duration (Months)"), 0, 1);
 		simInfo.add(duration, 1, 1);
 		
-
-		final ComboBox<String> startMonth = new ComboBox<String>();
 		startMonth.setValue(months.get(Cycic.workingScenario.simulationData.startMonth));
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
@@ -751,7 +752,7 @@ public class Cycic extends ViewBase{
 		startMonth.setPromptText("Select Month");
 		simInfo.add(new Label("Start Month"), 0, 2);
 		simInfo.add(startMonth, 1, 2);
-		TextField startYear = VisFunctions.numberField();
+		
 		startYear.setText(Cycic.workingScenario.simulationData.startYear);
 		Cycic.workingScenario.simulationData.startYear = "0";
 		startYear.textProperty().addListener(new ChangeListener<String>(){
@@ -764,7 +765,6 @@ public class Cycic extends ViewBase{
 		simInfo.add(new Label("Start Year"), 0, 3);
 		simInfo.add(startYear, 1, 3);
 				
-		TextArea description = new TextArea();
 		description.setMaxSize(250, 50);
 		description.setWrapText(true);
 		description.textProperty().addListener(new ChangeListener<String>(){
