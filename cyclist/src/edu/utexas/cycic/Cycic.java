@@ -859,28 +859,6 @@ public class Cycic extends ViewBase{
         
         
         /// TODO Choose! 
-        HBox toggleBox = new HBox();
-        toggleBox.getChildren().addAll(localToggle, remoteToggle);
-        toggleBox.setSpacing(5);
-        simInfo.add(new Label("Execution Environment: "), 0, 7);
-        simInfo.add(toggleBox, 1, 7);
-        
-        ToggleGroup group = new ToggleGroup();
-        RadioButton button1 = new RadioButton("Local");
-        button1.setToggleGroup(group);
-        button1.setSelected(true);
-        RadioButton button2 = new RadioButton("Remote");
-        button2.setToggleGroup(group);
-        HBox radioBox = new HBox();
-        radioBox.setSpacing(5);
-        radioBox.getChildren().addAll(button1, button2);
-        simInfo.add(new Label("Execution Environment: "), 0, 8);
-        simInfo.add(radioBox, 1, 8);
-        
-        ComboBox<String> comboToggle = new ComboBox<String>();
-        comboToggle.getItems().addAll("Local", "Remote");
-        simInfo.add(new Label("Execution Environment: "), 0, 9);
-        simInfo.add(comboToggle, 1, 9);
     }
 
 	public void createArchetypeBar(GridPane grid){

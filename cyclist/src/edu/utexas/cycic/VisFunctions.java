@@ -375,7 +375,7 @@ public class VisFunctions {
 			for (int i = 0; i < outFac.cycicCircle.outcommods.size(); i++) {
 				for (facilityNode inFac: CycicScenarios.workingCycicScenario.FacilityNodes) {
 					for (int j = 0; j < inFac.cycicCircle.incommods.size(); j++) {
-						if (outFac.cycicCircle.outcommods.get(i) == inFac.cycicCircle.incommods.get(j)){
+						if (outFac.cycicCircle.outcommods.get(i).toString().equalsIgnoreCase(inFac.cycicCircle.incommods.get(j).toString())){
 							linkFacToFac(outFac.cycicCircle, inFac.cycicCircle, inFac.cycicCircle.incommods.get(j));
 						}
 					}

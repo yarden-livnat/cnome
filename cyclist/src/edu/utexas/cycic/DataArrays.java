@@ -258,7 +258,6 @@ class simInfo{
 class facilityNode{
 	Object name;
 	String facilityType = "";
-	String entity; 
 	Integer facTypeIndex = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
 	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
