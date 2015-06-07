@@ -2,6 +2,7 @@ package edu.utexas.cycic;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Base64;
 
 import javafx.scene.control.Label;
 
@@ -438,12 +439,20 @@ public class OutPut {
 				tempNode.cycicCircle.setCenterX(xPosition);
 				double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
 				tempNode.cycicCircle.setCenterY(yPosition);
-				String facArray = element.getElementsByTagName("facArray").item(0).getTextContent();
-				System.out.println(facArray);
-				Reader facArrayRead = new StringReader(facArray);
-				JsonReader facArr = Json.createReader(facArrayRead);
-				JsonArray jsonFacArray = facArr.readArray();
-				System.out.println(jsonFacArray);
+				
+				String facByte = element.getElementsByTagName("facArray").item(0).getTextContent();
+				byte[] facTempArray = Base64.getDecoder().decode(facByte);
+				ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(facTempArray));
+				ArrayList<Object> facArray = (ArrayList<Object>) ois.readObject();
+				tempNode.facilityStructure = facArray;
+				
+				String dataByte = element.getElementsByTagName("dataArray").item(0).getTextContent();
+				byte[] dataTempArray = Base64.getDecoder().decode(dataByte);
+				ObjectInputStream dataois = new ObjectInputStream(new ByteArrayInputStream(dataTempArray));
+				ArrayList<Object> dataArray = (ArrayList<Object>) dataois.readObject();
+				tempNode.facilityData = dataArray;
+				
+				
 				VisFunctions.placeTextOnCircle(tempNode.cycicCircle, "middle");
 			}
 			
@@ -469,8 +478,30 @@ public class OutPut {
 		facElement.appendChild(yPosition);
 		
 		Element facArray = doc.createElement("facArray");
-		facArray.appendChild(doc.createTextNode(facility.facilityStructure.toString()));
+		try {
+			ByteArrayOutputStream boa = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(boa);
+			oos.writeObject(facility.facilityStructure);
+			oos.close();
+			facArray.appendChild(doc.createTextNode(Base64.getEncoder().encodeToString(boa.toByteArray())));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		facElement.appendChild(facArray);
+		
+		Element dataArray = doc.createElement("dataArray");
+		try {
+			ByteArrayOutputStream boa = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(boa);
+			oos.writeObject(facility.facilityData);
+			oos.close();
+			dataArray.appendChild(doc.createTextNode(Base64.getEncoder().encodeToString(boa.toByteArray())));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		facElement.appendChild(dataArray);
 
 		for (String commodity: facility.cycicCircle.incommods){
 			Element commodityObj = doc.createElement("cycicInCommod");
@@ -685,6 +716,37 @@ public class OutPut {
 			}
 		}
 		return null;
+	}
+	
+	static int stringToArrayList(String string, ArrayList<Object> array){
+		int trace = 0;
+		int length = 0;
+		for(int i = 0; i < string.length(); i++){
+			if(string.charAt(i) == '['){
+				string = string.substring(i+1, string.length());
+				i += stringToArrayList(string, array);
+			} else if(string.charAt(i) == ']'){
+				System.out.println(string.substring(i-trace, i));
+				string = string.substring(i, string.length());
+				length += trace;
+				trace = 0;
+				System.out.println(length);
+				return length;
+			} else {
+				if(string.charAt(i) == ','){
+					System.out.println(string.substring(i-trace, i));
+					length += trace;
+					trace = 0;
+				} else{
+					trace++;
+					continue;
+				}
+			}
+		}
+		
+		return length;
+		/*
+		return array;*/
 	}
 }
 
