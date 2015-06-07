@@ -154,11 +154,14 @@ public class RegionCorralView extends ViewBase {
 				for(int i = 0; i < DataArrays.simRegions.size(); i++){
 					if(DataArrays.simRegions.get(i).regionName.equalsIgnoreCase(region.type)){
 						region.regionStruct = DataArrays.simRegions.get(i).regionStruct;
+                                                region.archetype = DataArrays.simRegions.get(i).regionArch;
 					}
 				}
 				FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
 				regionNode.regionCircle = RegionShape.addRegion(regionText.getText(), region);
-				
+                                regionNode.regionCircle.setX(150);
+                                regionNode.regionCircle.setY(150);
+                                VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
 				DataArrays.regionNodes.add(region);
 
 				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
