@@ -331,7 +331,7 @@ public class Cycic extends ViewBase{
 					}
 					event.consume();
 					facility.name = "";
-                    facility.facLifetime = "";
+					facility.facLifetime = "";
 					facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 					facility.cycicCircle.setCenterX(event.getX());
 					facility.cycicCircle.setCenterY(event.getY());
@@ -423,7 +423,7 @@ public class Cycic extends ViewBase{
 				}
 				event.consume();
 				facility.name = facNameField.getText();
-                facility.facLifetime = "";
+				facility.facLifetime = "";
 				facility.cycicCircle = CycicCircles.addNode((String)facility.name, facility);
 				facility.cycicCircle.setCenterX(80);
 				facility.cycicCircle.setCenterY(80);

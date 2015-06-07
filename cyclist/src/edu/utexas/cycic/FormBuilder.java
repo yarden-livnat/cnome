@@ -43,8 +43,8 @@ public class FormBuilder extends ViewBase {
 		Button button = new Button();
 		button.setText(formNode.facilityType);
 
-        Label lifetimeLabel    = new Label("Lifetime");
-        TextField lifetimeField = FormBuilderFunctions.lifetimeFieldBuilder(formNode);
+		Label lifetimeLabel    = new Label("Lifetime");
+		TextField lifetimeField = FormBuilderFunctions.lifetimeFieldBuilder(formNode);
 
 		for(int i = 0; i < 4; i++){
 			userLevelBox.getItems().add(String.format("%d", i));
@@ -55,10 +55,10 @@ public class FormBuilder extends ViewBase {
 				userLevelBox.setValue(newValue);
 				userLevel = Integer.parseInt(newValue);
 				grid.getChildren().clear();
-                if (userLevel > 0) {
-                    grid.add(lifetimeLabel,0,0);
-                    grid.add(lifetimeField,1,0);
-                }            
+				if (userLevel > 0) {
+					grid.add(lifetimeLabel,0,0);
+					grid.add(lifetimeField,1,0);
+				}            
 				rowNumber = 1;
 				formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 			}
