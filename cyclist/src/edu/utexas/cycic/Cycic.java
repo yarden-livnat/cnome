@@ -1,6 +1,5 @@
 package edu.utexas.cycic;
 
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,28 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import edu.utah.sci.cyclist.Cyclist;
-import edu.utah.sci.cyclist.core.event.dnd.DnD;
-import edu.utah.sci.cyclist.core.ui.components.ViewBase;
-import edu.utah.sci.cyclist.core.util.AwesomeIcon;
-import edu.utah.sci.cyclist.core.util.GlyphRegistry;
-import edu.utah.sci.cyclist.core.controller.CyclistController;
-import edu.utah.sci.cyclist.core.model.CyclusJob;
-import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
-import edu.utah.sci.cyclist.core.model.Preferences;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
@@ -41,18 +24,15 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.WritableImage;
@@ -68,12 +48,26 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
+import javax.imageio.ImageIO;
+
+import org.apache.log4j.Logger;
+
+import edu.utah.sci.cyclist.Cyclist;
+import edu.utah.sci.cyclist.core.controller.CyclistController;
+import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.model.CyclusJob;
+import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
+import edu.utah.sci.cyclist.core.model.Preferences;
+import edu.utah.sci.cyclist.core.ui.components.ViewBase;
+import edu.utah.sci.cyclist.core.util.AwesomeIcon;
+import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
+	
 	/**
 	 * Function for building the CYCIC Pane and GridPane of this view. 
 	 */
@@ -100,11 +94,10 @@ public class Cycic extends ViewBase{
 	static boolean marketHideBool = true;
 	static Window window;
 	static ToggleGroup opSwitch = new ToggleGroup();
-	static ToggleButton localToggle = new ToggleButton("Local");
-	static ToggleButton remoteToggle = new ToggleButton("Remote");
     static CyclusJob _remoteDashA;
     private static Object monitor = new Object();
     static String currentSkin = "Default Skin";
+    static String currentServer = "";
 	
     
 	/**
@@ -455,16 +448,16 @@ public class Cycic extends ViewBase{
 		scroll.setMinHeight(120);
 		scroll.setContent(nodesPane);
 		
-		opSwitch.getToggles().clear();
-        opSwitch.getToggles().addAll(localToggle, remoteToggle);
-        try {
-            Process readproc = Runtime.getRuntime().exec("cyclus -V");
-            new BufferedReader(new InputStreamReader(readproc.getInputStream()));
-            localToggle.setSelected(true);
-        } catch (RuntimeException | IOException e) {
-            localToggle.setSelected(false);
-            remoteToggle.setSelected(true);
-        };
+//		opSwitch.getToggles().clear();
+//        opSwitch.getToggles().addAll(localToggle, remoteToggle);
+//        try {
+//            Process readproc = Runtime.getRuntime().exec("cyclus -V");
+//            new BufferedReader(new InputStreamReader(readproc.getInputStream()));
+//            localToggle.setSelected(true);
+//        } catch (RuntimeException | IOException e) {
+//            localToggle.setSelected(false);
+//            remoteToggle.setSelected(true);
+//        };
 
 		cycicBox.getChildren().addAll(grid, scroll, pane);
 		
@@ -736,6 +729,7 @@ public class Cycic extends ViewBase{
         serverBox.setVisibleRowCount(Math.min(6,  serverBox.getItems().size()));
         
         int currentIndex = Preferences.getInstance().getCurrentServerIndex()+1;
+        currentServer = serversList.get(currentIndex);
         
         serverBox.setPromptText("server");
         serverBox.setEditable(true);
@@ -746,17 +740,19 @@ public class Cycic extends ViewBase{
         			int idx = serverBox.getSelectionModel().getSelectedIndex();
 					if (idx-1 != Preferences.getInstance().getCurrentServerIndex()) {
 						Preferences.getInstance().setCurrentServerIndex(idx-1);
-					} else if ("local".equals(from)) {
+					} else if (Preferences.LOCAL_SERVER.equals(from)) {
 						serverBox.getSelectionModel().select(idx);
     				} else if ("".equals(to)) {
     					serverBox.getItems().remove(from);
     					Preferences.getInstance().servers().remove(from);
+
     				} else if (serverBox.getItems().indexOf(to) == -1) {
 						serverBox.getItems().add(to);
 						Preferences.getInstance().servers().add(to);
 						Preferences.getInstance().setCurrentServerIndex(serverBox.getItems().size()-2);
 						serverBox.setVisibleRowCount(Math.min(6,  serverBox.getItems().size()));
     				}
+					currentServer = serverBox.getValue();
     			});
 
         Label serverLabel = new Label("Server:");
@@ -767,11 +763,11 @@ public class Cycic extends ViewBase{
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
                 if(!OutPut.inputTest()){
-                    log.info("Cyclus Input Not Well Formed!");
+                    log.error("Cyclus Input Not Well Formed!");
                     return;  // safety dance
                 }
                 String server = serverBox.getValue();
-                if ("Local".equals(server)) {
+                if (Preferences.LOCAL_SERVER.equals(server)) {
                     // local execution
                     String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
                     String prefix = "cycic" + tempHash;
@@ -779,8 +775,8 @@ public class Cycic extends ViewBase{
                     String outfile = prefix + ".sqlite";
                     try {
                         File temp = new File(infile);
-                        log.info("Writing file " + temp.getName());
-                        log.info("lines:\n" + OutPut.xmlStringGen());
+                        log.trace("Writing file " + temp.getName());
+                        log.trace("lines:\n" + OutPut.xmlStringGen());
                         BufferedWriter output = new BufferedWriter(new FileWriter(temp));
                         output.write(OutPut.xmlStringGen());
                         output.close();
@@ -794,12 +790,13 @@ public class Cycic extends ViewBase{
                         input.close();
                         input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
                         while ((line = input.readLine()) != null) {        
-                            log.info(line);
+                            log.warn(line);
                         }
                         input.close();
                         log.info("Cyclus run complete");
                     } catch (Exception e1) {
-                        e1.printStackTrace();
+//                        e1.printStackTrace();
+                    	log.error(e1.getMessage());
                     }
                 } else {
                     // remote execution
@@ -862,7 +859,7 @@ public class Cycic extends ViewBase{
         cyclusDashM.setTooltip(new Tooltip("Use this button to search for all local Cyclus modules."));
         cyclusDashM.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-                if (localToggle.isSelected()) {
+                if (Preferences.LOCAL_SERVER.equals(currentServer)) {
                     // Local metadata collection
                     try {
                         Process readproc = Runtime.getRuntime().exec("cyclus -m");
@@ -873,23 +870,28 @@ public class Cycic extends ViewBase{
                         metaBuf.close();
                         DataArrays.retrieveSchema(metadata);
                     } catch (IOException ex) {
-                        // TODO Auto-generated catch block
-                        ex.printStackTrace();
+                        log.error(ex.getMessage());
+//                        ex.printStackTrace();
                     }
                 } else {
                     // Remote metadata collection
-                    CyclistController._cyclusService.submitCmd("cyclus", "-m");
-                    _remoteDashA = CyclistController._cyclusService.latestJob();
-                    _remoteDashA.statusProperty()
-                        .addListener(new ChangeListener<CyclusJob.Status>() {
-                        @Override
-                        public void changed(ObservableValue<? extends Status> observable,
-                            Status oldValue, Status newValue) {
-                            if (newValue == Status.READY) {
-                                DataArrays.retrieveSchema(_remoteDashA.getStdout());
-                            }
-                        }
-                    });
+                	_remoteDashA = CyclistController._cyclusService.submitCmdToRemote(currentServer, "cyclus", "-m");
+//                    _remoteDashA = CyclistController._cyclusService.latestJob();
+                	CyclusJob job = _remoteDashA;
+                	if (_remoteDashA.getStatus() == Status.FAILED) {
+                		// TODO: an error msg was already sent to the console. Do we want to pop up an error msg?
+                	} else {
+	                    _remoteDashA.statusProperty()
+	                        .addListener(new ChangeListener<CyclusJob.Status>() {
+		                        @Override
+		                        public void changed(ObservableValue<? extends Status> observable,
+		                            Status oldValue, Status newValue) {
+		                            if (newValue == Status.READY) {
+		                                DataArrays.retrieveSchema(_remoteDashA.getStdout());
+		                            }
+		                        }
+	                    });
+                	}
                 }
             }
         });
@@ -913,6 +915,7 @@ public class Cycic extends ViewBase{
 		        log.error("Error writing image to file: "+e.getMessage());
 		    }
 		} else {
+			log.error("File did not generate correctly.");
 			System.out.println("File did not generate correctly.");
 		}
 	}

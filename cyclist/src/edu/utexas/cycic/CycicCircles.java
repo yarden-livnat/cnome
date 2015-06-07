@@ -75,7 +75,7 @@ public class CycicCircles{
 		
 		// Adding the menu and it's menu items.
 		
-		MenuItem facForm = new MenuItem("Facility Form");
+		MenuItem facForm = new MenuItem("Configure");
 		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {

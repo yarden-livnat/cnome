@@ -61,9 +61,9 @@ public class DataArrays{
         String path = "/" + file.getParent();
         try {
             defaultJsonReader(path);
-            log.info("Meta data loaded for default archetypes. If you wish to add others, please use the DISCOVER ARCHETYPES button. Thanks!");
+            log.info("Meta data loaded for default archetypes.\n Use DISCOVER ARCHETYPES button to load more.");
         } catch (IOException e1) {
-            log.warn("Could not read default meta data. Please use DISCOVER ARCHETYPES button. Thanks!");
+            log.warn("Could not read default meta data.\n Use DISCOVER ARCHETYPES button to load more.");
         }
         visualizationSkins.add(XMLReader.loadSkin(path));
     }
@@ -358,7 +358,7 @@ class instituteNode{
 	ArrayList<Object> institStruct  = new ArrayList<Object>();
 	ArrayList<Object> institData  = new ArrayList<Object>();
 	Map<String, Integer> availFacilities = new HashMap<String, Integer>();
-	InstitutionShape institutionShape = new InstitutionShape();
+	static InstitutionShape institutionShape = new InstitutionShape();
 }
 
 /**

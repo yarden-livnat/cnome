@@ -50,7 +50,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -81,9 +80,7 @@ import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
 import edu.utah.sci.cyclist.core.ui.wizards.DatatableWizard;
-import edu.utah.sci.cyclist.core.ui.wizards.ManageRemoteServersWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.PreferencesWizard;
-import edu.utah.sci.cyclist.core.ui.wizards.RemoteServerWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SaveWsWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SimulationWizard;
 import edu.utah.sci.cyclist.core.ui.wizards.SqliteLoaderWizard;
@@ -239,14 +236,17 @@ public class CyclistController {
 	}
 	
 	private void perspectiveChanged(int id) {
-		if (_currentPerspective != null && _currentPerspective.id != id)
+		if (_currentPerspective != null && _currentPerspective.id != id) {
 			_currentPerspective.setToolsPositions(_screen.getToolsPositions());
+			_presenter.getWorkspace().getConsole().setActive(false);
+		}
 		
 		_currentPerspective = _perspectives[id];
 		if (!_currentPerspective.initialized) {
 			_currentPerspective.init();
 		}
 		_presenter = _currentPerspective.presenter;
+		_presenter.getWorkspace().getConsole().setActive(true);
 		_screen.showPanels(_currentPerspective.tools, _currentPerspective.toolsPositions);
 		_screen.selectTools( _currentPerspective.type);
 	}
@@ -275,13 +275,6 @@ public class CyclistController {
 						//Set all the views to match the new tables.
 						ObservableList<Field> emptyList = FXCollections.observableArrayList();
 						_screen.getFieldsPanel().setFields(emptyList);
-						
-//						//Set the workspace to display the new path at the title.
-//						Workspace workspace = _screen.getWorkspace();
-//						if(workspace != null){
-//							workspace.setWorkDirPath(getLastChosenWorkDirectory());
-//						}
-						
 					}
 				}
 				
@@ -887,11 +880,9 @@ public class CyclistController {
 								
 				} catch (Exception e) {
 					log.error("Error during restore: "+e.getMessage());
-					e.printStackTrace();
 				}
 			} catch (FileNotFoundException e) {
 				log.error("Error during restore: "+e.getMessage());
-				e.printStackTrace();
 			} 		
 		}
 		
@@ -924,7 +915,7 @@ public class CyclistController {
 				_model.getTables().add(table);	
 			}
 		} catch (Exception e) {
-			log.info("Exception " + e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 	

@@ -92,7 +92,7 @@ public class InstitutionShape extends Ellipse {
 
 		//Adding the circle's menu and its functions.
 
-		MenuItem regionForm = new MenuItem("Region Form");
+		MenuItem regionForm = new MenuItem("Configure");
 		regionForm.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				CyclistController._presenter.addTool(new RegionViewTool());
