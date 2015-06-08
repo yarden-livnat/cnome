@@ -43,6 +43,7 @@ public class RegionView extends ViewBase{
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
 		institList.setMinHeight(25);
+		institList.setMaxWidth(120);
 
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeInst = new MenuItem("Remove Institution");
@@ -113,8 +114,6 @@ public class RegionView extends ViewBase{
 		VBox institBox = new VBox();
 		institBox.getChildren().addAll(new Label("Institutions"), institList);
 		regionSideBar.setPadding(new Insets(0, 5, 0, 0));
-		regionSideBar.setMinWidth(200);
-		regionSideBar.setPrefWidth(200);
 		regionSideBar.getChildren().addAll(institBox);
 		
 		VBox regionGridBox = new VBox();
@@ -125,7 +124,6 @@ public class RegionView extends ViewBase{
 		
 		setTitle(TITLE);
 		setContent(regionBox);
-		setPrefSize(600,400);	
 		formBuilder(RegionCorralView.workingRegion.regionStruct, RegionCorralView.workingRegion.regionData);
 		
 	}
