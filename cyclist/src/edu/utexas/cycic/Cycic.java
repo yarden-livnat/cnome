@@ -760,6 +760,12 @@ public class Cycic extends ViewBase{
         
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
+				if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0){
+					OutPut.addNullRegion();
+				}
+				if(CycicScenarios.workingCycicScenario.institNodes.size() == 0){
+					OutPut.addNullInst();
+				}
                 if(!OutPut.inputTest()){
                     log.error("Cyclus Input Not Well Formed!");
                     return;  // safety dance
