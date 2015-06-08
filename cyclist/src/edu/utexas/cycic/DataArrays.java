@@ -391,6 +391,7 @@ class facilityNode{
 	String entity; 
 	Integer facTypeIndex = 0;
 	String facLifetime  = "";
+	Integer userLevel = 0;
 	ArrayList<Object> facilityData = new ArrayList<Object>();
 	ArrayList<Object> facilityStructure = new ArrayList<Object>();	
 	ArrayList<facilityNode> facilityClones = new ArrayList<facilityNode>();

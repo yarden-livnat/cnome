@@ -38,8 +38,7 @@ public class FormBuilder extends ViewBase {
 		formNode = Cycic.workingNode;
 		TITLE = (String) Cycic.workingNode.name;
 		//System.out.println(formNode.facilityStructure);
-		formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
-		
+		userLevel = formNode.userLevel;
 		Button button = new Button();
 		button.setText(formNode.facilityType);
 
@@ -54,6 +53,7 @@ public class FormBuilder extends ViewBase {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				userLevelBox.setValue(newValue);
 				userLevel = Integer.parseInt(newValue);
+				formNode.userLevel = Integer.parseInt(newValue);
 				grid.getChildren().clear();
 				if (userLevel > 0) {
 					grid.add(lifetimeLabel,0,0);
@@ -93,6 +93,7 @@ public class FormBuilder extends ViewBase {
 				Cycic.workingNode = formNode;
 			}
 		});
+		formBuilder(grid, formNode.facilityStructure, formNode.facilityData);
 		setTitle(TITLE);
 		setContent(formGrid);
 	}
@@ -257,8 +258,12 @@ public class FormBuilder extends ViewBase {
 						} else {
 							name.setText((String) facArray.get(0));	
 						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						// Indenting a sub structure
+						rowNumber += 1;
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
 							grid.add(arrayListRemove(grid, dataArray, ii, facArray), columnNumber+2, rowNumber);
@@ -267,7 +272,6 @@ public class FormBuilder extends ViewBase {
 						}
 						// resetting the indent
 						columnNumber -= 1;
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber, rowNumber);
 						rowNumber += 1;
 					}
 				} else if (facArray.get(1) instanceof ArrayList) {
