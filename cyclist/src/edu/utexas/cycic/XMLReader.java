@@ -55,6 +55,7 @@ public class XMLReader {
 				images.put("mine", new Image(new File(path + "/skinImages/fuelcycle_mine.png").toURI().toString()));
 				images.put("reactor", new Image(new File(path + "/skinImages/fuelcycle_rxtr.png").toURI().toString(), true));
 				images.put("reprocessing", new Image(new File(path + "/skinImages/fuelcycle_sep.png").toURI().toString()));
+				images.put("separations", new Image(new File(path + "/skinImages/fuelcycle_sep.png").toURI().toString()));
 			}
 		};
 		return skin;
@@ -80,8 +81,7 @@ public class XMLReader {
 			add("StubFacility:StubFacility:StubFacility");
 			add(":cycaless:BatchReactor");
 			add(":cycamore:BatchReactor");
-			//add(":cycamore:DeployInst");
-			//add(":cycamore:Separations");
+			add(":cycaless:DeplayInst");
 			add("commodconverter:CommodConverter:CommodConverter");
 		}
 	};
@@ -252,9 +252,7 @@ public class XMLReader {
 							//TODO add method for walking arrays
 						}
 					} else if(anno1.get("default").getValueType() == JsonValue.ValueType.STRING){
-						System.out.println("STRING "  + anno1.getJsonString("default"));
 					} else if(anno1.get("default").getValueType() == JsonValue.ValueType.NUMBER){
-						System.out.println("NUMBER "  + anno1.getJsonNumber("default"));
 					} 
 				}
 				JsonArray userLevel = anno1.getJsonArray("userlevel");

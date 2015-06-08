@@ -11,8 +11,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -44,7 +44,7 @@ public class RegionShape extends Rectangle {
 	protected static double deltay;
 	Object name;
 	Label text = new Label("");
-	MenuBar menuBar = new MenuBar();
+    ContextMenu menu;
 	static regionNode regionBackTrace;
 	ArrayList<Integer> rgbColor = new ArrayList<Integer>();
 
@@ -76,46 +76,38 @@ public class RegionShape extends Rectangle {
 
 		//Adding the circle's menu and its functions.
 
-		MenuItem regionForm = new MenuItem("Region Form");
+		MenuItem regionForm = new MenuItem("Configure");
 		regionForm.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
 				CyclistController._presenter.addTool(new RegionViewTool());
-				rect.menuBar.setVisible(false);
 			}
 		});
+
+        MenuItem helpDialog = new MenuItem("Region Documentation");
+        helpDialog.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e){
+                FormBuilder.showHelpDialog(region.doc);
+            }
+        });
+            
 
 		EventHandler<ActionEvent> deleteEvent = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent deleteEvent) {
 				deleteRegion(rect, region);
-				rect.menuBar.setVisible(false);
 			}
 		};
 		MenuItem delete = new MenuItem("Delete");
 		delete.setOnAction(deleteEvent);
 
-		EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent exitEvent) {
-				rect.menuBar.setVisible(false);
-			}
-		};
-		MenuItem exit = new MenuItem("Exit");
-		exit.setOnAction(exitEvent);
-		
-		final Menu menu = new Menu("Options");
-		menu.getItems().addAll(regionForm, delete, exit);		
-
-		rect.menuBar.getMenus().add(menu);
-		rect.menuBar.setLayoutX(rect.getX());
-		rect.menuBar.setLayoutY(rect.getY());
-		rect.menuBar.setVisible(false);
+        rect.menu = new ContextMenu();
+		rect.menu.getItems().addAll(regionForm, helpDialog, delete);		
 
 		rect.onMouseClickedProperty().set(new EventHandler <MouseEvent>(){
 			@Override
 			public void handle(MouseEvent menuEvent){
 				if(menuEvent.getButton().equals(MouseButton.SECONDARY)){
-					rect.menuBar.setVisible(true);
-					rect.menuBar.setLayoutX(rect.getX());
-					rect.menuBar.setLayoutY(rect.getY());
+                    rect.menu.show(rect, menuEvent.getScreenX(), menuEvent.getScreenY());
+                    menuEvent.consume();
 				}
 				
 				if(menuEvent.getClickCount() == 2){
@@ -180,8 +172,6 @@ public class RegionShape extends Rectangle {
 
 				VisFunctions.placeTextOnRectangle(rect,"middle");
 
-				rect.menuBar.setLayoutX(rect.getX()+rect.getHeight()*0.2);
-				rect.menuBar.setLayoutY(rect.getY()+rect.getHeight()*0.2);
 			}
 		});
 
@@ -192,7 +182,7 @@ public class RegionShape extends Rectangle {
 
 	static void deleteRegion(RegionShape circle, regionNode region){
 		DataArrays.regionNodes.remove(region);
-		RegionCorralView.corralPane.getChildren().removeAll(circle, circle.menuBar, circle.text);
+		RegionCorralView.corralPane.getChildren().removeAll(circle,  circle.text);
 	};
     
 	{	

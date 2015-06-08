@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utexas.cycic.tools.FormBuilderTool;
+import edu.utexas.cycic.FormBuilder;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -75,7 +76,7 @@ public class CycicCircles{
 		
 		// Adding the menu and it's menu items.
 		
-		MenuItem facForm = new MenuItem("Facility Form");
+		MenuItem facForm = new MenuItem("Configure");
 		EventHandler<ActionEvent> circleAction = new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -87,7 +88,14 @@ public class CycicCircles{
 			}
 		};
 		facForm.setOnAction(circleAction);
-		
+        
+		MenuItem helpDialog = new MenuItem("Facility Documentation");
+		helpDialog.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e){
+				FormBuilder.showHelpDialog(parent.doc);
+			}
+		});
+
 		circle.image.setLayoutX(circle.getCenterX()-60);
 		circle.image.setLayoutY(circle.getCenterY()-60);
 		
@@ -137,7 +145,7 @@ public class CycicCircles{
 				circle.setOpacity(100);	}
 		});
 		
-		circle.menu.getItems().addAll(facForm, changeNiche, delete, showImage, hideImage);
+		circle.menu.getItems().addAll(facForm, helpDialog, changeNiche, delete, showImage, hideImage);
 		
 		// Piece of test code for changing the look of the facility circles.
 		//circle.image.setImage(new Image("reactor.png"));
@@ -261,7 +269,7 @@ public class CycicCircles{
 			}
 		});
 		
-		Cycic.workingScenario.FacilityNodes.add(parent);
+		CycicScenarios.workingCycicScenario.FacilityNodes.add(parent);
 		
 		// Code for allow a shift + (drag and drop) to start a new facility form for this facilityCircle.
 		/*circle.setOnDragDetected(new EventHandler<MouseEvent>(){
@@ -275,7 +283,7 @@ public class CycicCircles{
 					Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
 					//Dragboard db = circle.startDragAndDrop(TransferMode.NONE);
 					ClipboardContent content = new ClipboardContent();				
-					content.put(DnD.TOOL_FORMAT, "Facility Form");
+					content.put(DnD.TOOL_FORMAT, "Configure");
 					db.setContent(content);
 					Line line = new Line();
 					Cycic.pane.getChildren().add(line);
