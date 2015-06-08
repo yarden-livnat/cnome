@@ -597,7 +597,7 @@ public class Cycic extends ViewBase{
 	}
 	
 	HashMap<String, String> months = new HashMap<String, String>();
-	ArrayList<String> monthList = new ArrayList<String>();
+	static ArrayList<String> monthList = new ArrayList<String>();
 	/**
 	 * Quick hack to convert months into their integer values.
 	 * i.e. January = 0, Feb = 1, etc...

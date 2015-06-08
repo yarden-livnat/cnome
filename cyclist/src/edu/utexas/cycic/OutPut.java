@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -653,7 +654,7 @@ public class OutPut {
 		// Start Month
 		String startMonth = doc.getElementsByTagName("startmonth").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.startMonth = startMonth;
-		Cycic.startMonth.setValue(startMonth);
+		Cycic.startMonth.setValue(Cycic.monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)-1));
 		
 		// Start Year
 		String startYear = doc.getElementsByTagName("startyear").item(0).getTextContent();
@@ -695,6 +696,7 @@ public class OutPut {
 			facNode.archetype = (String) fac.get("archetype");
 			facNode.facilityType = (String) fac.get("type");
 			facNode.cycicCircle = CycicCircles.addNode((String) facNode.name, facNode);
+			facNode.niche = (String) fac.get("niche");
 			facNode.cycicCircle.niche = (String) fac.get("niche");
 			facNode.cycicCircle.setCenterX(Double.parseDouble((String) fac.get("X")));
 			facNode.cycicCircle.setCenterY(Double.parseDouble((String) fac.get("Y")));
