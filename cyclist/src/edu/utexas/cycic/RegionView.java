@@ -1,6 +1,7 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -213,18 +214,26 @@ public class RegionView extends ViewBase{
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
-						rowNumber += 1;
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						// Indenting a sub structure
+						rowNumber += 1;
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
-							grid.add(arrayListRemove(dataArray, ii), columnNumber-1, rowNumber);
+							grid.add(arrayListRemove(dataArray, ii), columnNumber+2, rowNumber);
 							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						rowNumber += 1;
 					}
 				} else if (facArray.get(1) instanceof ArrayList) {
 					if ((int)facArray.get(6) <= userLevel){
