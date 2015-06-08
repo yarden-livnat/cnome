@@ -304,11 +304,11 @@ public class FormBuilderFunctions {
 		cb.setMinWidth(80);
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-				for(int i =0; i < facNode.cycicCircle.incommods.size(); i++){
+				/*for(int i =0; i < facNode.cycicCircle.incommods.size(); i++){
 					if(facNode.cycicCircle.incommods.get(i) == cb.getValue()){
 						facNode.cycicCircle.incommods.remove(i);
 					}
-				}
+				}*/
 				cb.getItems().clear();
 
 				for(CommodityNode label: DataArrays.CommoditiesList){
@@ -316,7 +316,7 @@ public class FormBuilderFunctions {
 				}
 				cb.getItems().add("New Commodity");
 				
-				if(!defaultValue.get(0).equals("")) {
+				if(defaultValue.get(0) != null) {
 					cb.setValue((String) defaultValue.get(0));
 				}
 			}
@@ -327,7 +327,15 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if (newValue == "New Commodity"){
+				if(newValue == null){
+					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
+						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
+							String string = facNode.cycicCircle.incommods.remove(i);
+							System.out.println(string);
+							break;
+						}
+					}
+				} else if (newValue == "New Commodity"){
 					Cycic.addNewCommodity();
 				} else {
 					facNode.cycicCircle.incommods.add(newValue);
@@ -337,7 +345,7 @@ public class FormBuilderFunctions {
 					}
 					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
 						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
-							facNode.cycicCircle.incommods.remove(i);
+							String string = facNode.cycicCircle.incommods.remove(i);
 							break;
 						}
 					}
@@ -363,18 +371,18 @@ public class FormBuilderFunctions {
 				
 		cb.setOnMousePressed(new EventHandler<MouseEvent>(){
 			public void handle(MouseEvent e){
-					for(int i = 0; i < facNode.cycicCircle.outcommods.size(); i++){
-						if(facNode.cycicCircle.outcommods.get(i) == cb.getValue()){
-							facNode.cycicCircle.outcommods.remove(i);
-						}
+				/*for(int i = 0; i < facNode.cycicCircle.outcommods.size(); i++){
+					if(facNode.cycicCircle.outcommods.get(i) == cb.getValue()){
+						facNode.cycicCircle.outcommods.remove(i);
 					}
+				}*/
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
 					cb.getItems().add(label.name.getText());
 				}
 				cb.getItems().add("New Commodity");
 				
-				if (defaultValue.get(0) != "") {
+				if (defaultValue.get(0) != null) {
 					cb.setValue((String) defaultValue.get(0));
 				}
 			}
@@ -385,7 +393,14 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if (newValue == "New Commodity"){
+				if(newValue == null){
+					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
+						if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
+							facNode.cycicCircle.outcommods.remove(i);
+							break;
+						}
+					}
+				} else if (newValue == "New Commodity"){
 					Cycic.addNewCommodity(); 
 				} else {
 					facNode.cycicCircle.outcommods.add(newValue);
