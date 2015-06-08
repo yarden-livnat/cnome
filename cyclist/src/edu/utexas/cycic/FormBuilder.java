@@ -164,6 +164,7 @@ public class FormBuilder extends ViewBase {
 	
     public static void showHelpDialog(String help) {
         Dialog dg = new Dialog();
+        dg.setResizable(true);
         ButtonType loginButtonType = new ButtonType("Ok", ButtonData.OK_DONE);
         dg.setContentText(help);
         dg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
