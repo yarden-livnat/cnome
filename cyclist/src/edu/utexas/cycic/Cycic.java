@@ -642,12 +642,11 @@ public class Cycic extends ViewBase{
 		
 
 		final ComboBox<String> startMonth = new ComboBox<String>();
-		startMonth.setValue(months.get(Cycic.workingScenario.simulationData.startMonth));
 		for(int i = 0; i < 12; i++ ){
 			startMonth.getItems().add(monthList.get(i));
 		}
-		Cycic.workingScenario.simulationData.startMonth = "0";
-		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)));
+		Cycic.workingScenario.simulationData.startMonth = "1";
+		startMonth.setValue(monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)-1));
 		startMonth.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				Cycic.workingScenario.simulationData.startMonth = months.get(newValue);
