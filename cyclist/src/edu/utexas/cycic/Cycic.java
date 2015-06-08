@@ -58,12 +58,14 @@ import org.apache.log4j.Logger;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utexas.cycic.presenter.CycicPresenter;
 
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
@@ -552,6 +554,7 @@ public class Cycic extends ViewBase{
 								facility.cycicCircle.outcommods.remove(i);
 							}
 						}
+						commodListRm(facility.facilityStructure, facility.facilityData, commod);
 					}
 					VisFunctions.redrawPane();
 					buildCommodPane();
@@ -904,6 +907,31 @@ public class Cycic extends ViewBase{
 		} else {
 			log.error("File did not generate correctly.");
 			System.out.println("File did not generate correctly.");
+		}
+	}
+	
+	public static void commodListRm(ArrayList<Object> facArray, ArrayList<Object> dataArray, String commod){
+		if(facArray.get(0) instanceof ArrayList){
+			for(int i = 0; i < facArray.size(); i++){
+				commodListRm((ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i), commod);
+			}
+		} else if(facArray.get(1) instanceof ArrayList){
+			for(int i = 0; i < dataArray.size(); i++){
+				commodListRm((ArrayList<Object>) facArray.get(1), (ArrayList<Object>) dataArray.get(i), commod);
+			}
+		} else {
+			switch ((String) facArray.get(2).toString().toLowerCase()){
+			case "incommodity":
+				if(dataArray.get(0).toString().equalsIgnoreCase(commod)){
+					dataArray.set(0, "");
+				}
+				break;
+			case "outcommodity":
+				if(dataArray.get(0).toString().equalsIgnoreCase(commod)){
+					dataArray.set(0, "");
+				}
+				break;
+			}
 		}
 	}
 	

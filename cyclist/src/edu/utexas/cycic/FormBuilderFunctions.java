@@ -323,7 +323,6 @@ public class FormBuilderFunctions {
 					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
 						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
 							String string = facNode.cycicCircle.incommods.remove(i);
-							System.out.println("SECOND " + string);
 							break;
 						}
 					}

@@ -159,8 +159,6 @@ public class FormBuilder extends ViewBase {
 	 * @param dataArray
 	 */
 	public void commodRemoval(ArrayList<Object> facArray, ArrayList<Object> dataArray){
-		System.out.println(facArray);
-		System.out.println(dataArray);
 		if(facArray.get(0) instanceof ArrayList){
 			for(int i = 0; i < facArray.size(); i++){
 				commodRemoval((ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -170,8 +168,6 @@ public class FormBuilder extends ViewBase {
 				commodRemoval((ArrayList<Object>) facArray.get(1), (ArrayList<Object>) dataArray.get(i));
 			}
 		} else {
-			System.out.println("SOMETHING " + facArray);
-			System.out.println("SOMETHING " + dataArray);
 			switch ((String) facArray.get(2).toString().toLowerCase()){
 			case "incommodity":
 				for(int i = 0; i < formNode.cycicCircle.incommods.size(); i++){
