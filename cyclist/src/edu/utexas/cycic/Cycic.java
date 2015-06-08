@@ -695,6 +695,12 @@ public class Cycic extends ViewBase{
 		Button output = new Button("Generate");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
+				if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0){
+					OutPut.addNullRegion();
+				}
+				if(CycicScenarios.workingCycicScenario.institNodes.size() == 0){
+					OutPut.addNullInst();
+				}
 				if(OutPut.inputTest()){
 					FileChooser fileChooser = new FileChooser();
 					//Set extension filter

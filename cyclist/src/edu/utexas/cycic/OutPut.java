@@ -62,10 +62,8 @@ public class OutPut {
 				facilityBuilder(doc, facID, facility);
 				rootElement.appendChild(facID);
 			}
-			// Regions
-			if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0){
-				
-			}
+		
+			//Regions
 			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes) {
 				Element regionID = doc.createElement("region");
 				rootElement.appendChild(regionID);
@@ -168,7 +166,6 @@ public class OutPut {
 		for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
 			Element spec = doc.createElement("spec");
 			Element lib = doc.createElement("lib");
-			System.out.println(region.archetype);
 			String[] fullPath = region.archetype.split(":");
 			
 			if(!fullPath[0].equalsIgnoreCase("")){
@@ -685,12 +682,13 @@ public class OutPut {
 		return null;
 	}
 	
-    public static void addNullRegion(String help) {
+    public static void addNullRegion(){
         Dialog dg = new Dialog();
         dg.setTitle("Input Error");
         dg.setHeaderText("Error: No Region found in this simulation");
         dg.setContentText("If you are just saving the file to work with later this is fine. If you wish to run this file "
         		+ "now you will need to add a REGION. Would you like to add a NullRegion containing your INSTITUTIONS?");
+        dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> result = dg.showAndWait();
         if(result.get() == ButtonType.YES){
         	regionNode region = new regionNode();
@@ -702,12 +700,9 @@ public class OutPut {
         	}
         	CycicScenarios.workingCycicScenario.regionNodes.add(region);
         }
-        dg.setContentText(help);
-        dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-        dg.show();
     }
     
-    public static void addNullInst(String help) {
+    public static void addNullInst(){
         Dialog dg = new Dialog();
         dg.setTitle("Input Error");
         dg.setHeaderText("Error: No Institution found in this simulation");
@@ -715,6 +710,7 @@ public class OutPut {
         		+ "now you will need to add an INSTITUTION. Would you like to add a NullInst containing your FACILITIES? This "
         		+ "INSTITUTION will be added to the first REGION in your simulation. If you have more than one REGION you will"
         		+ "need to add their INSTITUTIONS manually.");
+        dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> result = dg.showAndWait();
         if(result.get() == ButtonType.YES){
         	instituteNode inst = new instituteNode();
@@ -728,9 +724,6 @@ public class OutPut {
         	CycicScenarios.workingCycicScenario.institNodes.add(inst);
         	CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
         }
-        dg.setContentText(help);
-        dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-        dg.show();
     }
 }
 
