@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -59,12 +60,14 @@ import org.apache.log4j.Logger;
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.controller.CyclistController;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
 import edu.utah.sci.cyclist.core.model.CyclusJob;
 import edu.utah.sci.cyclist.core.model.CyclusJob.Status;
 import edu.utah.sci.cyclist.core.model.Preferences;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
+import edu.utexas.cycic.presenter.CycicPresenter;
 
 public class Cycic extends ViewBase{
 	static Logger log = Logger.getLogger(Cycic.class);
@@ -564,6 +567,7 @@ public class Cycic extends ViewBase{
 								facility.cycicCircle.outcommods.remove(i);
 							}
 						}
+						commodListRm(facility.facilityStructure, facility.facilityData, commod);
 					}
 					VisFunctions.redrawPane();
 					buildCommodPane();
@@ -707,17 +711,18 @@ public class Cycic extends ViewBase{
 		Button output = new Button("Generate");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				if(OutPut.inputTest()){
-					FileChooser fileChooser = new FileChooser();
-					//Set extension filter
-					FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-					fileChooser.getExtensionFilters().add(extFilter);
-					fileChooser.setTitle("Save Cyclus input file");
-					fileChooser.setInitialFileName("*.xml");
-					//Show save file dialog
-					File file = fileChooser.showSaveDialog(window);
-					OutPut.output(file);
-				}
+                          OutPut.CheckInjection();
+                          if(OutPut.inputTest()){
+                            FileChooser fileChooser = new FileChooser();
+                            //Set extension filter
+                            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+                            fileChooser.getExtensionFilters().add(extFilter);
+                            fileChooser.setTitle("Save Cyclus input file");
+                            fileChooser.setInitialFileName("*.xml");
+                            //Show save file dialog
+                            File file = fileChooser.showSaveDialog(window);
+                            OutPut.output(file);
+                          }
 			}
 		});
 		simInfo.add(output, 0, 7, 2, 1);
@@ -782,49 +787,51 @@ public class Cycic extends ViewBase{
         
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-                if(!OutPut.inputTest()){
-                    log.error("Cyclus Input Not Well Formed!");
-                    return;  // safety dance
+              OutPut.CheckInjection();
+              if(!OutPut.inputTest()){
+                log.error("Cyclus Input Not Well Formed!");
+                return;  // safety dance
+              }
+              String server = serverBox.getValue();
+              if (Preferences.LOCAL_SERVER.equals(server)) {
+                // local execution
+                String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+                String prefix = "cycic" + tempHash;
+                String infile = prefix + ".xml";
+                String outfile = prefix + ".sqlite";
+                try {
+                  File temp = new File(infile);
+                  log.trace("Writing file " + temp.getName());
+                  log.trace("lines:\n" + OutPut.xmlStringGen());
+                  OutPut.output(temp);
+                  // BufferedWriter output = new BufferedWriter(new FileWriter(temp));
+                  // output.write(OutPut.xmlStringGen());
+                  // output.close();
+                  Process p = Runtime.getRuntime().exec("cyclus -o " + outfile + " " + infile);
+                  p.waitFor();
+                  String line = null;
+                  BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                  while ((line = input.readLine()) != null) {        
+                    log.info(line);
+                  }
+                  input.close();
+                  input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                  while ((line = input.readLine()) != null) {        
+                    log.warn(line);
+                  }
+                  input.close();
+                  log.info("Cyclus run complete");
+                } catch (Exception e1) {
+                  //                        e1.printStackTrace();
+                  log.error(e1.getMessage());
                 }
-                String server = serverBox.getValue();
-                if (Preferences.LOCAL_SERVER.equals(server)) {
-                    // local execution
-                    String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-                    String prefix = "cycic" + tempHash;
-                    String infile = prefix + ".xml";
-                    String outfile = prefix + ".sqlite";
-                    try {
-                        File temp = new File(infile);
-                        log.trace("Writing file " + temp.getName());
-                        log.trace("lines:\n" + OutPut.xmlStringGen());
-                        BufferedWriter output = new BufferedWriter(new FileWriter(temp));
-                        output.write(OutPut.xmlStringGen());
-                        output.close();
-                        Process p = Runtime.getRuntime().exec("cyclus -o " + outfile + " " + infile);
-                        p.waitFor();
-                        String line = null;
-                        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                        while ((line = input.readLine()) != null) {        
-                            log.info(line);
-                        }
-                        input.close();
-                        input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                        while ((line = input.readLine()) != null) {        
-                            log.warn(line);
-                        }
-                        input.close();
-                        log.info("Cyclus run complete");
-                    } catch (Exception e1) {
-//                        e1.printStackTrace();
-                    	log.error(e1.getMessage());
-                    }
-                } else {
-                    // remote execution
-            		String cycicXml = OutPut.xmlStringGen();
-            		CyclistController._cyclusService.submit(cycicXml, server);
-            	}
+              } else {
+                // remote execution
+                String cycicXml = OutPut.xmlStringGen();
+                CyclistController._cyclusService.submit(cycicXml, server);
+              }
             }
-        });;
+          });;
    
     }
 
@@ -937,6 +944,31 @@ public class Cycic extends ViewBase{
 		} else {
 			log.error("File did not generate correctly.");
 			System.out.println("File did not generate correctly.");
+		}
+	}
+	
+	public static void commodListRm(ArrayList<Object> facArray, ArrayList<Object> dataArray, String commod){
+		if(facArray.get(0) instanceof ArrayList){
+			for(int i = 0; i < facArray.size(); i++){
+				commodListRm((ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i), commod);
+			}
+		} else if(facArray.get(1) instanceof ArrayList){
+			for(int i = 0; i < dataArray.size(); i++){
+				commodListRm((ArrayList<Object>) facArray.get(1), (ArrayList<Object>) dataArray.get(i), commod);
+			}
+		} else {
+			switch ((String) facArray.get(2).toString().toLowerCase()){
+			case "incommodity":
+				if(dataArray.get(0).toString().equalsIgnoreCase(commod)){
+					dataArray.set(0, "");
+				}
+				break;
+			case "outcommodity":
+				if(dataArray.get(0).toString().equalsIgnoreCase(commod)){
+					dataArray.set(0, "");
+				}
+				break;
+			}
 		}
 	}
 	

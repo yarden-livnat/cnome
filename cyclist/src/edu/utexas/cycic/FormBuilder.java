@@ -144,9 +144,10 @@ public class FormBuilder extends ViewBase {
 	public Button arrayListRemove(final GridPane grid, final ArrayList<Object> dataArray, final int dataArrayNumber, ArrayList<Object> facArray){
 		Button button = new Button();
 		button.setText("Remove");
-		ArrayList<Object> tempData = (ArrayList<Object>) ((ArrayList<Object>) dataArray.get(dataArrayNumber)).get(0);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e) {
+				commodRemoval((ArrayList<Object>) facArray.get(1), (ArrayList<Object>) dataArray.get(dataArrayNumber));
+				VisFunctions.redrawPane();
 				dataArray.remove(dataArrayNumber);
 				if(dataArray.size() == 0){
 					facArray.set(10, false);
@@ -179,6 +180,42 @@ public class FormBuilder extends ViewBase {
     }
 
 
+	/**
+	 * 
+	 * @param facArray
+	 * @param dataArray
+	 */
+	public void commodRemoval(ArrayList<Object> facArray, ArrayList<Object> dataArray){
+		if(facArray.get(0) instanceof ArrayList){
+			for(int i = 0; i < facArray.size(); i++){
+				commodRemoval((ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
+			}
+		} else if(facArray.get(1) instanceof ArrayList){
+			for(int i = 0; i < dataArray.size(); i++){
+				commodRemoval((ArrayList<Object>) facArray.get(1), (ArrayList<Object>) dataArray.get(i));
+			}
+		} else {
+			switch ((String) facArray.get(2).toString().toLowerCase()){
+			case "incommodity":
+				for(int i = 0; i < formNode.cycicCircle.incommods.size(); i++){
+					if(dataArray.get(0).toString().equalsIgnoreCase(formNode.cycicCircle.incommods.get(i))){
+						formNode.cycicCircle.incommods.remove(i);
+						break;
+					}
+				}
+				break;
+			case "outcommodity":
+				for(int i = 0; i < formNode.cycicCircle.outcommods.size(); i++){
+					if(dataArray.get(0).toString().equalsIgnoreCase(formNode.cycicCircle.outcommods.get(i))){
+						formNode.cycicCircle.outcommods.remove(i);
+						break;
+					}
+				}
+				break;
+			}
+		}
+	}
+	
 	/**
 	 * This function builds an input form from the data structures associated
 	 * with a facility.
