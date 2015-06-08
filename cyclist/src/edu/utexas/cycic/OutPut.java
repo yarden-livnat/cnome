@@ -3,6 +3,8 @@ package edu.utexas.cycic;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Set;
 
 import javafx.scene.control.Label;
 
@@ -24,6 +26,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -410,12 +414,27 @@ public class OutPut {
 	}
 	
 	public static void saveFile(Document doc, Element rootElement){
-			
-		
-		
+			String institString = "";
+			String regionString = "";
+			JSONObject ui = new JSONObject();
+			JSONObject json = new JSONObject();
 			for (facilityNode facility: CycicScenarios.workingCycicScenario.FacilityNodes){				
-				//rootElement.appendChild(outputFacility(facility));
+				json.put(facility.name.toString(), outputFacility(facility));
 			}
+			ui.put("facilities", json);
+			/*for (instituteNode instit: CycicScenarios.workingCycicScenario.institNodes){
+				institString += outputInstitution(instit);
+			}
+			for(regionNode region: CycicScenarios.workingCycicScenario.regionNodes){
+				regionString += outputRegion(region);
+			}
+			JsonObject object = Json.createObjectBuilder()
+					.add("institutions", institString)
+					.add("regions", regionString)
+					.build();
+			*/
+			
+			rootElement.setTextContent(ui.toJSONString());
 	}
 	
 	public static void loadFile(File file){
@@ -427,7 +446,12 @@ public class OutPut {
 			loadSimControl(doc);
 			loadCommodities(doc);
 			Cycic.buildCommodPane();
-			loadFacilities(doc);
+			NodeList uiItem = doc.getElementsByTagName("ui");
+			String uiString = uiItem.item(0).getTextContent().replaceAll("\\\\\"", "\"");
+			System.out.println(uiString);
+			JSONObject json = (JSONObject) JSONValue.parse(uiString);
+			Map facs = (Map) json.get("facilities");
+			loadFacilities(facs);	
 			
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			
@@ -438,7 +462,7 @@ public class OutPut {
 		}
 	}
 	
-	static String outputFacility(facilityNode facility){
+	static JSONObject outputFacility(facilityNode facility){
 		String facArray = "";
 		String dataArray = "";
 		try {
@@ -461,19 +485,94 @@ public class OutPut {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		JSONObject facObject = new JSONObject();
+		
+		facObject.put("name", facility.name.toString());
+		facObject.put("X", String.format("%.2f", facility.cycicCircle.getCenterX()));
+		facObject.put("Y", String.format("%.2f", facility.cycicCircle.getCenterY()));
+		facObject.put("niche", facility.niche);
+		facObject.put("type", facility.facilityType);
+		facObject.put("archetype", facility.archetype);
+		facObject.put("facArray", facArray);
+		facObject.put("dataArray", dataArray);
+		facObject.put("incommods", facility.cycicCircle.incommods.toString().replaceAll("[", "").replaceAll("]", ""));
+		facObject.put("outcommods", facility.cycicCircle.outcommods.toString().replaceAll("[", "").replaceAll("]", ""));
+		
+		return facObject;
+	}
+	
+	static JSONObject outputInstitution(instituteNode institute){
+		String facArray = "";
+		String dataArray = "";
+		try {
+			ByteArrayOutputStream boa = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(boa);
+			oos.writeObject(institute.institStruct);
+			oos.close();
+			facArray = Base64.getEncoder().encodeToString(boa.toByteArray());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			ByteArrayOutputStream boa = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(boa);
+			oos.writeObject(institute.institData);
+			oos.close();
+			dataArray = Base64.getEncoder().encodeToString(boa.toByteArray());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 
+		JSONObject institObject = new JSONObject();
+		institObject.put("name", institute.name);
+		institObject.put("X", String.format("%.2f", institute.institutionShape.getCenterX()));
+		institObject.put("Y", String.format("%.2f", institute.institutionShape.getCenterY()));
+		institObject.put("type", institute.type);
+		institObject.put("archetype", institute.archetype);
+		institObject.put("facArray", facArray);
+		institObject.put("dataArray", dataArray);
+		institObject.put("availableFacs", institute.availFacilities.toString());
+		
+		return institObject;
+	}
+	
+	static String outputRegion(regionNode region){
+		String facArray = "";
+		String dataArray = "";
+		try {
+			ByteArrayOutputStream boa = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(boa);
+			oos.writeObject(region.regionStruct);
+			oos.close();
+			facArray = Base64.getEncoder().encodeToString(boa.toByteArray());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			ByteArrayOutputStream boa = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(boa);
+			oos.writeObject(region.regionData);
+			oos.close();
+			dataArray = Base64.getEncoder().encodeToString(boa.toByteArray());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		JsonObject facObject = Json.createObjectBuilder()
-				.add("name", (JsonValue) facility.name)
-				.add("X", String.format("%.2f", facility.cycicCircle.getCenterX()))
-				.add("Y", String.format("%.2f", facility.cycicCircle.getCenterY()))
-				.add("niche", facility.niche)
-				.add("type", facility.facilityType)
-				.add("archetype", facility.archetype)
+				.add("name", region.name)
+				.add("X", String.format("%.2f", region.regionShape.getX()))
+				.add("Y", String.format("%.2f", region.regionShape.getY()))
+				.add("type", region.type)
+				.add("archetype", region.archetype)
 				.add("facArray", facArray)
 				.add("dataArray", dataArray)
-				.add("incommods", facility.cycicCircle.incommods.toString())
-				.add("outcommods", facility.cycicCircle.outcommods.toString())
+				.add("availableFacs", region.institutions.toString())
 				.build();
 		
 		return facObject.toString();
@@ -499,11 +598,11 @@ public class OutPut {
 		regionElement.appendChild(regionName);
 		// X position
 		Element xPosition = doc.createElement("xPosition");
-		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getX())));
+		xPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionShape.getX())));
 		regionElement.appendChild(xPosition);
 		// Y position
 		Element yPosition = doc.createElement("yPosition");
-		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionCircle.getY())));
+		yPosition.appendChild(doc.createTextNode(String.format("%.2f", region.regionShape.getY())));
 		
 		regionElement.appendChild(yPosition);
 		
@@ -519,7 +618,7 @@ public class OutPut {
 			
 			loadSimControl(doc);
 			loadCommodities(doc);
-			loadFacilities(doc);
+			//loadFacilities(doc);
 			
 			Cycic.workingScenario = CycicScenarios.workingCycicScenario;
 			NodeList facList = doc.getElementsByTagName("facility");
@@ -567,56 +666,46 @@ public class OutPut {
 		
 	}
 	
-	static public void loadFacilities(Document doc){
-		NodeList facList = doc.getElementsByTagName("facilityNode");
-		for (int i = 0; i < facList.getLength(); i++){
-			Node facNode = facList.item(i);
+	static public void loadFacilities(Map object){
+		Object[] keys = object.keySet().toArray();
+		for(int i = 0; i < keys.length; i++){
+			Map fac = (Map) object.get(keys[i]);
 			
-			facilityNode tempNode = new facilityNode();
-			Element element = (Element) facNode;
-			tempNode.name = element.getElementsByTagName("name").item(0).getTextContent();
-			tempNode.cycicCircle = CycicCircles.addNode((String) tempNode.name, tempNode);
-			double xPosition = Double.parseDouble(element.getElementsByTagName("xPosition").item(0).getTextContent());
-			tempNode.cycicCircle.setCenterX(xPosition);
-			double yPosition = Double.parseDouble(element.getElementsByTagName("yPosition").item(0).getTextContent());
-			tempNode.cycicCircle.setCenterY(yPosition);
+			facilityNode facNode = new facilityNode();
+			facNode.name = fac.get("name");
+			facNode.archetype = (String) fac.get("archetype");
+			facNode.facilityType = (String) fac.get("type");
+			facNode.cycicCircle = CycicCircles.addNode((String) facNode.name, facNode);
+			facNode.cycicCircle.niche = (String) fac.get("niche");
+			facNode.cycicCircle.setCenterX(Double.parseDouble((String) fac.get("X")));
+			facNode.cycicCircle.setCenterY(Double.parseDouble((String) fac.get("Y")));
+			facNode.cycicCircle.incommods = (ArrayList<String>) fac.get("incommods");
+			VisFunctions.placeTextOnCircle(facNode.cycicCircle, "middle");
 			
-			NodeList incommods = element.getElementsByTagName("cycicInCommod");
-			for(int j = 0; j < incommods.getLength(); j++){
-				tempNode.cycicCircle.incommods.add(incommods.item(j).getTextContent().toString());
-			}
-			
-			NodeList outcommods = element.getElementsByTagName("cycicOutCommod");
-			for(int j = 0; j < outcommods.getLength(); j++){
-				tempNode.cycicCircle.outcommods.add(outcommods.item(j).getTextContent().toString());
-			}
-			
-			String facByte = element.getElementsByTagName("facArray").item(0).getTextContent();
+			String facByte = (String) fac.get("facArray");
 			byte[] facTempArray = Base64.getDecoder().decode(facByte);
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(facTempArray));
 				ArrayList<Object> facArray = (ArrayList<Object>) ois.readObject();
-				tempNode.facilityStructure = facArray;
+				facNode.facilityStructure = facArray;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 			
-			String dataByte = element.getElementsByTagName("dataArray").item(0).getTextContent();
+			String dataByte = (String) fac.get("dataArray");
 			byte[] dataTempArray = Base64.getDecoder().decode(dataByte);
 			ObjectInputStream dataois;
 			try {
 				dataois = new ObjectInputStream(new ByteArrayInputStream(dataTempArray));
 				ArrayList<Object> dataArray = (ArrayList<Object>) dataois.readObject();
-				tempNode.facilityData = dataArray;
+				facNode.facilityData = dataArray;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			VisFunctions.placeTextOnCircle(tempNode.cycicCircle, "middle");
-		}
+		}	
 	}
 	
 	public static Boolean inputTest(){
@@ -719,36 +808,6 @@ public class OutPut {
 		}
 		return null;
 	}
-	
-	static int stringToArrayList(String string, ArrayList<Object> array){
-		int trace = 0;
-		int length = 0;
-		for(int i = 0; i < string.length(); i++){
-			if(string.charAt(i) == '['){
-				string = string.substring(i+1, string.length());
-				i += stringToArrayList(string, array);
-			} else if(string.charAt(i) == ']'){
-				System.out.println(string.substring(i-trace, i));
-				string = string.substring(i, string.length());
-				length += trace;
-				trace = 0;
-				System.out.println(length);
-				return length;
-			} else {
-				if(string.charAt(i) == ','){
-					System.out.println(string.substring(i-trace, i));
-					length += trace;
-					trace = 0;
-				} else{
-					trace++;
-					continue;
-				}
-			}
-		}
-		
-		return length;
-		/*
-		return array;*/
-	}
+
 }
 

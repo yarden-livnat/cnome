@@ -52,12 +52,12 @@ public class RegionCorralView extends ViewBase {
 						region.name = "";
 						workingRegion = region;
 						FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
-						regionNode.regionCircle = RegionShape.addRegion((String)region.name, region);
-						regionNode.regionCircle.setX(event.getX());
-						regionNode.regionCircle.setY(event.getY());
-						VisFunctions.placeTextOnRectangle(regionNode.regionCircle,"middle");
+						regionNode.regionShape = RegionShape.addRegion((String)region.name, region);
+						regionNode.regionShape.setX(event.getX());
+						regionNode.regionShape.setY(event.getY());
+						VisFunctions.placeTextOnRectangle(regionNode.regionShape,"middle");
 						DataArrays.regionNodes.add(region);
-						corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+						corralPane.getChildren().addAll(regionNode.regionShape, regionNode.regionShape.text, regionNode.regionShape.menuBar);
 					}
 				}
 			});
@@ -170,11 +170,11 @@ public class RegionCorralView extends ViewBase {
 					}
 				}
 				FormBuilderFunctions.formArrayBuilder(region.regionStruct, region.regionData);
-				regionNode.regionCircle = RegionShape.addRegion(regionText.getText(), region);
+				regionNode.regionShape = RegionShape.addRegion(regionText.getText(), region);
 				
 				DataArrays.regionNodes.add(region);
 
-				corralPane.getChildren().addAll(regionNode.regionCircle, regionNode.regionCircle.text, regionNode.regionCircle.menuBar);
+				corralPane.getChildren().addAll(regionNode.regionShape, regionNode.regionShape.text, regionNode.regionShape.menuBar);
 
 
 			}	//ends definition of EventHandler addRegion  
