@@ -327,11 +327,10 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if(newValue == null){
+				if(newValue == null || newValue.equalsIgnoreCase("")){
 					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
 						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
-							String string = facNode.cycicCircle.incommods.remove(i);
-							System.out.println(string);
+							facNode.cycicCircle.incommods.remove(i);
 							break;
 						}
 					}
@@ -393,7 +392,7 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if(newValue == null){
+				if(newValue == null || newValue.equalsIgnoreCase("")){
 					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
 						if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
 							facNode.cycicCircle.outcommods.remove(i);
