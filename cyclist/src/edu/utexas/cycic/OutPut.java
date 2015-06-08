@@ -141,12 +141,27 @@ public class OutPut {
 		control.appendChild(simDuration);
 
 		Element simStartMon = doc.createElement("startmonth");
-		simStartMon.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startMonth));
+		int month = Integer.parseInt(CycicScenarios.workingCycicScenario.simulationData.startMonth);
+		simStartMon.appendChild(doc.createTextNode(String.valueOf(month)));
 		control.appendChild(simStartMon);
 			
 		Element simStartYear = doc.createElement("startyear");
 		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
-		control.appendChild(simStartYear);	
+		control.appendChild(simStartYear);
+		
+		if(!CycicScenarios.workingCycicScenario.simulationData.decay.equalsIgnoreCase("never")){
+			Element decay = doc.createElement("decay");
+			decay.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
+			control.appendChild(decay);
+		}
+		
+		if(CycicScenarios.workingCycicScenario.simulationData.simHandle == null){
+			
+		} else if(!CycicScenarios.workingCycicScenario.simulationData.simHandle.equalsIgnoreCase("")){
+			Element simHandle = doc.createElement("simhandle");
+			simHandle.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simHandle));
+			control.appendChild(simHandle);
+		}
 	}
 	
 	/**
@@ -443,6 +458,8 @@ public class OutPut {
 			ui.put("regions", reg);
 			
 			ui.put("description", CycicScenarios.workingCycicScenario.simulationData.description);
+			ui.put("decay", CycicScenarios.workingCycicScenario.simulationData.decay);
+			ui.put("simHandle", CycicScenarios.workingCycicScenario.simulationData.simHandle);
 			
 			rootElement.setTextContent(ui.toJSONString());
 	}
@@ -473,6 +490,14 @@ public class OutPut {
 			String description = (String) json.get("description");
 			CycicScenarios.workingCycicScenario.simulationData.description = description;
 			Cycic.description.setText(description);	
+			
+			String decay = (String) json.get("decay");
+			CycicScenarios.workingCycicScenario.simulationData.description = decay;
+			Cycic.decay.setValue(decay);	
+
+			String simHandle = (String) json.get("simHandle");
+			CycicScenarios.workingCycicScenario.simulationData.description = simHandle;
+			Cycic.simHandle.setText(simHandle);	
 
 			VisFunctions.redrawPane();
 			VisFunctions.redrawInstitPane();
