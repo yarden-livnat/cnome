@@ -707,19 +707,7 @@ public class Cycic extends ViewBase{
 		Button output = new Button("Generate");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-                          if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0
-                             && CycicScenarios.workingCycicScenario.institNodes.size() == 0) {
-                                  Dialog dg = new Dialog();
-                                  dg.setTitle("Input Injection");
-                                  dg.setHeaderText("Warning: No Region or Institution found");
-                                  dg.setContentText("Would you like to add defaults?");
-                                  dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-                                  Optional<ButtonType> result = dg.showAndWait();
-                                  if(result.get() == ButtonType.YES){
-                                    OutPut.addNullRegion();
-                                    OutPut.addNullInst();
-                                  }
-                          }
+                          OutPut.CheckInjection();
                           if(OutPut.inputTest()){
                             FileChooser fileChooser = new FileChooser();
                             //Set extension filter
@@ -779,55 +767,51 @@ public class Cycic extends ViewBase{
         
         runCyclus.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent e){
-				if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0){
-					OutPut.addNullRegion();
-				}
-				if(CycicScenarios.workingCycicScenario.institNodes.size() == 0){
-					OutPut.addNullInst();
-				}
-                if(!OutPut.inputTest()){
-                    log.error("Cyclus Input Not Well Formed!");
-                    return;  // safety dance
+              OutPut.CheckInjection();
+              if(!OutPut.inputTest()){
+                log.error("Cyclus Input Not Well Formed!");
+                return;  // safety dance
+              }
+              String server = serverBox.getValue();
+              if (Preferences.LOCAL_SERVER.equals(server)) {
+                // local execution
+                String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
+                String prefix = "cycic" + tempHash;
+                String infile = prefix + ".xml";
+                String outfile = prefix + ".sqlite";
+                try {
+                  File temp = new File(infile);
+                  log.trace("Writing file " + temp.getName());
+                  log.trace("lines:\n" + OutPut.xmlStringGen());
+                  OutPut.output(temp);
+                  // BufferedWriter output = new BufferedWriter(new FileWriter(temp));
+                  // output.write(OutPut.xmlStringGen());
+                  // output.close();
+                  Process p = Runtime.getRuntime().exec("cyclus -o " + outfile + " " + infile);
+                  p.waitFor();
+                  String line = null;
+                  BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                  while ((line = input.readLine()) != null) {        
+                    log.info(line);
+                  }
+                  input.close();
+                  input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                  while ((line = input.readLine()) != null) {        
+                    log.warn(line);
+                  }
+                  input.close();
+                  log.info("Cyclus run complete");
+                } catch (Exception e1) {
+                  //                        e1.printStackTrace();
+                  log.error(e1.getMessage());
                 }
-                String server = serverBox.getValue();
-                if (Preferences.LOCAL_SERVER.equals(server)) {
-                    // local execution
-                    String tempHash = Integer.toString(OutPut.xmlStringGen().hashCode());
-                    String prefix = "cycic" + tempHash;
-                    String infile = prefix + ".xml";
-                    String outfile = prefix + ".sqlite";
-                    try {
-                        File temp = new File(infile);
-                        log.trace("Writing file " + temp.getName());
-                        log.trace("lines:\n" + OutPut.xmlStringGen());
-                        BufferedWriter output = new BufferedWriter(new FileWriter(temp));
-                        output.write(OutPut.xmlStringGen());
-                        output.close();
-                        Process p = Runtime.getRuntime().exec("cyclus -o " + outfile + " " + infile);
-                        p.waitFor();
-                        String line = null;
-                        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                        while ((line = input.readLine()) != null) {        
-                            log.info(line);
-                        }
-                        input.close();
-                        input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                        while ((line = input.readLine()) != null) {        
-                            log.warn(line);
-                        }
-                        input.close();
-                        log.info("Cyclus run complete");
-                    } catch (Exception e1) {
-//                        e1.printStackTrace();
-                    	log.error(e1.getMessage());
-                    }
-                } else {
-                    // remote execution
-            		String cycicXml = OutPut.xmlStringGen();
-            		CyclistController._cyclusService.submit(cycicXml, server);
-            	}
+              } else {
+                // remote execution
+                String cycicXml = OutPut.xmlStringGen();
+                CyclistController._cyclusService.submit(cycicXml, server);
+              }
             }
-        });;
+          });;
    
     }
 

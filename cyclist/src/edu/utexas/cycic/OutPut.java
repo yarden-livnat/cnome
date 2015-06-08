@@ -94,19 +94,20 @@ public class OutPut {
 				}
 			}
 			
+			for(instituteNode inst : CycicScenarios.workingCycicScenario.institNodes){
+				if(inst.name.equalsIgnoreCase("__inst__")){
+					CycicScenarios.workingCycicScenario.institNodes.remove(inst);
+					break;
+				}
+			}
+                        
 			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes){
-				if(region.name.equalsIgnoreCase("temp&region")){
+				if(region.name.equalsIgnoreCase("__region__")){
 					CycicScenarios.workingCycicScenario.regionNodes.remove(region);
 					break;
 				}
 			}
 			
-			for(instituteNode inst : CycicScenarios.workingCycicScenario.institNodes){
-				if(inst.name.equalsIgnoreCase("temp&inst")){
-					CycicScenarios.workingCycicScenario.institNodes.remove(inst);
-					break;
-				}
-			}
 			//Recipes
 			for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
 				recipeBuilder(doc, rootElement, recipe);
@@ -598,7 +599,9 @@ public class OutPut {
 		Cycic.workingScenario.simulationData.startYear = startYear;
 		
 	}
-	
+
+        
+  
 	static public void loadFacilities(Document doc){
 		NodeList facList = doc.getElementsByTagName("facility");
 		for (int i = 0; i < facList.getLength(); i++){
@@ -706,28 +709,44 @@ public class OutPut {
 		}
 		return null;
 	}
-	
-    public static void addNullRegion(){
-      regionNode region = new regionNode();
-      region.name = "temp&Region";
-      region.archetype = ":agents:NullRegion";
-      region.type = "agents NullRegion";
-      for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
-        region.institutions.add(inst.name);
+
+  public static void CheckInjection() {    
+    if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0
+       && CycicScenarios.workingCycicScenario.institNodes.size() == 0) {
+      Dialog dg = new Dialog();
+      dg.setTitle("Input Injection");
+      dg.setHeaderText("Warning: No Region or Institution found");
+      dg.setContentText("Would you like to add defaults?");
+      dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+      Optional<ButtonType> result = dg.showAndWait();
+      if(result.get() == ButtonType.YES){
+        OutPut.addNullRegion();
+        OutPut.addNullInst();
       }
-      CycicScenarios.workingCycicScenario.regionNodes.add(region);
     }
+  }
+  
+  public static void addNullRegion(){
+    regionNode region = new regionNode();
+    region.name = "__region__";
+    region.archetype = ":agents:NullRegion";
+    region.type = "agents NullRegion";
+    for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
+      region.institutions.add(inst.name);
+    }
+    CycicScenarios.workingCycicScenario.regionNodes.add(region);
+  }
     
-    public static void addNullInst(){
-      instituteNode inst = new instituteNode();
-      inst.name = "temp&Inst";
-      inst.archetype = ":agents:NullInst";
-      inst.type = "agents NullInst";
-      for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){        
-        inst.availFacilities.put((String) fac.name, 1);
-      }
-      CycicScenarios.workingCycicScenario.institNodes.add(inst);
-      CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
+  public static void addNullInst(){
+    instituteNode inst = new instituteNode();
+    inst.name = "__inst__";
+    inst.archetype = ":agents:NullInst";
+    inst.type = "agents NullInst";
+    for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){        
+      inst.availFacilities.put((String) fac.name, 1);
     }
+    CycicScenarios.workingCycicScenario.institNodes.add(inst);
+    CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
+  }
 }
 
