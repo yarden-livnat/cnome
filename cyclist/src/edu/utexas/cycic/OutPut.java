@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
-import java.util.Optional;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -769,7 +768,6 @@ public class OutPut {
 						
 			String facByte = (String) region.get("facArray");
 			regionNode.regionStruct = StringtoALObj(facByte);
-
 			
 			String dataByte = (String) region.get("dataArray");
 			regionNode.regionData = StringtoALObj(dataByte);
@@ -889,6 +887,45 @@ public class OutPut {
 		}
 		return null;
 	}
+
+  public static void CheckInjection() {    
+    if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0
+       && CycicScenarios.workingCycicScenario.institNodes.size() == 0) {
+      Dialog dg = new Dialog();
+      dg.setTitle("Input Injection");
+      dg.setHeaderText("Warning: No Region or Institution found");
+      dg.setContentText("Would you like to add defaults?");
+      dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+      Optional<ButtonType> result = dg.showAndWait();
+      if(result.get() == ButtonType.YES){
+        OutPut.addNullRegion();
+        OutPut.addNullInst();
+      }
+    }
+  }
+  
+  public static void addNullRegion(){
+    regionNode region = new regionNode();
+    region.name = "__region__";
+    region.archetype = ":agents:NullRegion";
+    region.type = "agents NullRegion";
+    for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
+      region.institutions.add(inst.name);
+    }
+    CycicScenarios.workingCycicScenario.regionNodes.add(region);
+  }
+    
+  public static void addNullInst(){
+    instituteNode inst = new instituteNode();
+    inst.name = "__inst__";
+    inst.archetype = ":agents:NullInst";
+    inst.type = "agents NullInst";
+    for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){        
+      inst.availFacilities.put((String) fac.name, 1);
+    }
+    CycicScenarios.workingCycicScenario.institNodes.add(inst);
+    CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
+  }
 	static String alObjtoString(ArrayList<Object> array){
 		String returnString = null;
 		try {
@@ -973,45 +1010,5 @@ public class OutPut {
 		}
 		return map;
 	}
-
-  public static void CheckInjection() {    
-    if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0
-       && CycicScenarios.workingCycicScenario.institNodes.size() == 0) {
-      Dialog dg = new Dialog();
-      dg.setResizable(true);
-      dg.setTitle("Input Injection");
-      dg.setHeaderText("Warning: No Region or Institution found");
-      dg.setContentText("Would you like to add defaults?");
-      dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-      Optional<ButtonType> result = dg.showAndWait();
-      if(result.get() == ButtonType.YES){
-        OutPut.addNullRegion();
-        OutPut.addNullInst();
-      }
-    }
-  }
-  
-  public static void addNullRegion(){
-    regionNode region = new regionNode();
-    region.name = "__region__";
-    region.archetype = ":agents:NullRegion";
-    region.type = "agents NullRegion";
-    for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
-      region.institutions.add(inst.name);
-    }
-    CycicScenarios.workingCycicScenario.regionNodes.add(region);
-  }
-    
-  public static void addNullInst(){
-    instituteNode inst = new instituteNode();
-    inst.name = "__inst__";
-    inst.archetype = ":agents:NullInst";
-    inst.type = "agents NullInst";
-    for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){        
-      inst.availFacilities.put((String) fac.name, 1);
-    }
-    CycicScenarios.workingCycicScenario.institNodes.add(inst);
-    CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
-  }
 }
 
