@@ -727,7 +727,7 @@ public class Cycic extends ViewBase{
 		});
 		simInfo.add(output, 0, 7, 2, 1);
 		
-		Button load = new Button("Load Scenario");
+		Button load = new Button("Load");
 		load.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				FileChooser fileChooser = new FileChooser();
