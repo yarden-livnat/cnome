@@ -616,19 +616,16 @@ public class OutPut {
 		Boolean errorTest = true;
 		DataArrays scen = CycicScenarios.workingCycicScenario;
 		if(scen.FacilityNodes.size() == 0){
-			log.error(" There are no facilities in your simulation. Please add a facility to your simulation.");
+			log.error("There are no facilities in your simulation. Please add a facility to your simulation.");
 			errorTest = false;
-		}
-		if(scen.regionNodes.size() == 0){
-			log.warn("Warning: There are no regions in your simulation. Please add a region to your simulation.");
-		}
-		if(scen.institNodes.size() == 0){
-			log.warn("Warning: There are no institutions in your simulation. Please add an institution to your simulation.");
 		}
 		if(scen.simulationData.duration.equalsIgnoreCase("0")){
 			log.error("Please add a duration to your cyclus simulation.");
 			errorTest = false;
 		}
+		if(scen.regionNodes.size() == 0 && scen.institNodes.size() == 0){
+			log.warn("Warning: No institutions or regions found.");
+                }
 		return errorTest;
 	}
 	public static String xmlStringGen(){
@@ -711,47 +708,26 @@ public class OutPut {
 	}
 	
     public static void addNullRegion(){
-        Dialog dg = new Dialog();
-        dg.setTitle("Input Error");
-        dg.setHeaderText("Error: No Region found in this simulation");
-        dg.setContentText("If you are just saving the file to work with later this is fine. If you wish to run this file "
-        		+ "now you will need to add a REGION. Would you like to add a NullRegion containing your INSTITUTIONS?");
-        dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-        Optional<ButtonType> result = dg.showAndWait();
-        if(result.get() == ButtonType.YES){
-        	regionNode region = new regionNode();
-        	region.name = "temp&Region";
-        	region.archetype = ":agents:NullRegion";
-        	region.type = "agents NullRegion";
-        	for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
-        		region.institutions.add(inst.name);
-        	}
-        	CycicScenarios.workingCycicScenario.regionNodes.add(region);
-        }
+      regionNode region = new regionNode();
+      region.name = "temp&Region";
+      region.archetype = ":agents:NullRegion";
+      region.type = "agents NullRegion";
+      for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
+        region.institutions.add(inst.name);
+      }
+      CycicScenarios.workingCycicScenario.regionNodes.add(region);
     }
     
     public static void addNullInst(){
-        Dialog dg = new Dialog();
-        dg.setTitle("Input Error");
-        dg.setHeaderText("Error: No Institution found in this simulation");
-        dg.setContentText("If you are just saving the file to work with later this is fine. If you wish to run this file "
-        		+ "now you will need to add an INSTITUTION. Would you like to add a NullInst containing your FACILITIES? This "
-        		+ "INSTITUTION will be added to the first REGION in your simulation. If you have more than one REGION you will"
-        		+ "need to add their INSTITUTIONS manually.");
-        dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-        Optional<ButtonType> result = dg.showAndWait();
-        if(result.get() == ButtonType.YES){
-        	instituteNode inst = new instituteNode();
-        	inst.name = "temp&Inst";
-        	inst.archetype = ":agents:NullInst";
-        	inst.type = "agents NullInst";
-        	for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){
-        		
-        		inst.availFacilities.put((String) fac.name, 1);
-        	}
-        	CycicScenarios.workingCycicScenario.institNodes.add(inst);
-        	CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
-        }
+      instituteNode inst = new instituteNode();
+      inst.name = "temp&Inst";
+      inst.archetype = ":agents:NullInst";
+      inst.type = "agents NullInst";
+      for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){        
+        inst.availFacilities.put((String) fac.name, 1);
+      }
+      CycicScenarios.workingCycicScenario.institNodes.add(inst);
+      CycicScenarios.workingCycicScenario.regionNodes.get(0).institutions.add(inst.name);
     }
 }
 

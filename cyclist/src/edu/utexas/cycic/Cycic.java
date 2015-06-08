@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -706,23 +707,30 @@ public class Cycic extends ViewBase{
 		Button output = new Button("Generate");
 		output.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent event){
-				if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0){
-					OutPut.addNullRegion();
-				}
-				if(CycicScenarios.workingCycicScenario.institNodes.size() == 0){
-					OutPut.addNullInst();
-				}
-				if(OutPut.inputTest()){
-					FileChooser fileChooser = new FileChooser();
-					//Set extension filter
-					FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-					fileChooser.getExtensionFilters().add(extFilter);
-					fileChooser.setTitle("Save Cyclus input file");
-					fileChooser.setInitialFileName("*.xml");
-					//Show save file dialog
-					File file = fileChooser.showSaveDialog(window);
-					OutPut.output(file);
-				}
+                          if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0
+                             && CycicScenarios.workingCycicScenario.institNodes.size() == 0) {
+                                  Dialog dg = new Dialog();
+                                  dg.setTitle("Input Injection");
+                                  dg.setHeaderText("Warning: No Region or Institution found");
+                                  dg.setContentText("Would you like to add defaults?");
+                                  dg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+                                  Optional<ButtonType> result = dg.showAndWait();
+                                  if(result.get() == ButtonType.YES){
+                                    OutPut.addNullRegion();
+                                    OutPut.addNullInst();
+                                  }
+                          }
+                          if(OutPut.inputTest()){
+                            FileChooser fileChooser = new FileChooser();
+                            //Set extension filter
+                            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+                            fileChooser.getExtensionFilters().add(extFilter);
+                            fileChooser.setTitle("Save Cyclus input file");
+                            fileChooser.setInitialFileName("*.xml");
+                            //Show save file dialog
+                            File file = fileChooser.showSaveDialog(window);
+                            OutPut.output(file);
+                          }
 			}
 		});
 		simInfo.add(output, 0, 7, 2, 1);
