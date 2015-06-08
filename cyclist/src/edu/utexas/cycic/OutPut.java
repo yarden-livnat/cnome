@@ -93,7 +93,20 @@ public class OutPut {
 					}
 				}
 			}
-
+			
+			for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes){
+				if(region.name.equalsIgnoreCase("temp&region")){
+					CycicScenarios.workingCycicScenario.regionNodes.remove(region);
+					break;
+				}
+			}
+			
+			for(instituteNode inst : CycicScenarios.workingCycicScenario.institNodes){
+				if(inst.name.equalsIgnoreCase("temp&inst")){
+					CycicScenarios.workingCycicScenario.institNodes.remove(inst);
+					break;
+				}
+			}
 			//Recipes
 			for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
 				recipeBuilder(doc, rootElement, recipe);
