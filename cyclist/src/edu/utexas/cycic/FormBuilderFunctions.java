@@ -312,7 +312,9 @@ public class FormBuilderFunctions {
 				cb.getItems().clear();
 
 				for(CommodityNode label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.name.getText());
+					if(!label.name.getText().equalsIgnoreCase("")){
+						cb.getItems().add(label.name.getText());
+					}
 				}
 				cb.getItems().add("New Commodity");
 				
@@ -377,7 +379,9 @@ public class FormBuilderFunctions {
 				}*/
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.name.getText());
+					if(!label.name.getText().equalsIgnoreCase("")){
+						cb.getItems().add(label.name.getText());
+					}
 				}
 				cb.getItems().add("New Commodity");
 				
@@ -468,17 +472,24 @@ public class FormBuilderFunctions {
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.name.getText());
+					if(!label.name.getText().equalsIgnoreCase("")){
+						cb.getItems().add(label.name.getText());
+					}
 				}
-				//cb.getItems().add("New Commodity");
+				cb.getItems().add("New Commodity");
 			}
 		});
 		
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				defaultValue.set(0, newValue);
-				if((Boolean) facArray.get(10) == false){
-					facArray.set(10, true);
+				if(newValue == null || newValue.equalsIgnoreCase("")){
+				} else if (newValue == "New Commodity"){
+					Cycic.addNewCommodity(); 
+				} else {
+					defaultValue.set(0, newValue);
+					if((Boolean) facArray.get(10) == false){
+						facArray.set(10, true);
+					}
 				}
 			}
 		});
