@@ -692,16 +692,15 @@ public class Cycic extends ViewBase{
 		simInfo.add(new Label("Simulation Handle"), 0, 5, 2, 1);
 		simInfo.add(simHandle, 2, 5);
 		
-		TextArea notes = new TextArea();
-		notes.setMaxSize(250, 50);
-		notes.setWrapText(true);
-		notes.textProperty().addListener(new ChangeListener<String>(){
+		description.setMaxSize(250, 50);
+		description.setWrapText(true);
+		description.textProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
 				Cycic.workingScenario.simulationData.notes = newValue;
 			}
 		});
-		simInfo.add(new Label("Notes"), 0, 6, 2, 1);
-		simInfo.add(notes, 2, 6);
+		simInfo.add(new Label("Description"), 0, 6, 2, 1);
+		simInfo.add(description, 2, 6);
 		
 	
 		// Prints the Cyclus input associated with this simulator. 
@@ -737,7 +736,7 @@ public class Cycic extends ViewBase{
 				OutPut.loadFile(file);   
 			}
 		});
-		simInfo.add(load, 2, 6);
+		simInfo.add(load, 2, 7);
 		
         Button runCyclus = new Button("Execute");
         simInfo.add(runCyclus, 0, 8, 1, 1);    
