@@ -127,12 +127,27 @@ public class OutPut {
 		control.appendChild(simDuration);
 
 		Element simStartMon = doc.createElement("startmonth");
-		simStartMon.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startMonth));
+		int month = Integer.parseInt(CycicScenarios.workingCycicScenario.simulationData.startMonth);
+		simStartMon.appendChild(doc.createTextNode(String.valueOf(month)));
 		control.appendChild(simStartMon);
 			
 		Element simStartYear = doc.createElement("startyear");
 		simStartYear.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.startYear));
-		control.appendChild(simStartYear);	
+		control.appendChild(simStartYear);
+		
+		if(!CycicScenarios.workingCycicScenario.simulationData.decay.equalsIgnoreCase("never")){
+			Element decay = doc.createElement("decay");
+			decay.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.decay));
+			control.appendChild(decay);
+		}
+		
+		if(CycicScenarios.workingCycicScenario.simulationData.simHandle == null){
+			
+		} else if(!CycicScenarios.workingCycicScenario.simulationData.simHandle.equalsIgnoreCase("")){
+			Element simHandle = doc.createElement("simhandle");
+			simHandle.appendChild(doc.createTextNode(CycicScenarios.workingCycicScenario.simulationData.simHandle));
+			control.appendChild(simHandle);
+		}
 	}
 	
 	/**
