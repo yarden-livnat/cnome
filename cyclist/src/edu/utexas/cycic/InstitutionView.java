@@ -49,7 +49,8 @@ public class InstitutionView extends ViewBase {
 
 		ListView<String> facilityList = new ListView<String>();
         facilityList.setOrientation(Orientation.VERTICAL);
-        facilityList.setMinHeight(25);
+        facilityList.autosize();
+        facilityList.setMaxWidth(100);
 
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeFac = new MenuItem("Remove Initial Facility");
@@ -74,14 +75,14 @@ public class InstitutionView extends ViewBase {
             facilityList.getItems().add(fac.getKey() + " - " + fac.getValue());
         }
 
-		topGrid.add(new Label(InstitutionCorralView.workingInstitution.type), 2, 0);
+		topGrid.add(new Label(InstitutionCorralView.workingInstitution.type), 4, 0);
 
 		// Setting up the view visuals.
 		topGrid.setHgap(10);
 		topGrid.setVgap(2);
 
 		topGrid.add(new Label("Name"), 0, 0);
-		topGrid.add(FormBuilderFunctions.institNameBuilder(InstitutionCorralView.workingInstitution), 1, 0);
+		topGrid.add(FormBuilderFunctions.institNameBuilder(InstitutionCorralView.workingInstitution), 1, 0, 2, 1);
 		
 		topGrid.add(new Label("Prototype"), 0, 2);
 		ComboBox<String> protoName = new ComboBox<String>();
@@ -108,6 +109,7 @@ public class InstitutionView extends ViewBase {
 				}
 			}
 		};
+		protoNumber.setMaxWidth(20);
 		topGrid.add(protoNumber, 3, 2);
 		Button protoButton = new Button("Add");
 		protoButton.setOnAction(new EventHandler<ActionEvent>(){
@@ -134,8 +136,6 @@ public class InstitutionView extends ViewBase {
 		VBox regionGridBox = new VBox();
 		regionGridBox.getChildren().addAll(topGrid, grid);		
 		
-
-
 		VBox listBox = new VBox();
 		listBox.getChildren().addAll(new Label("Initial Facilities"), facilityList);
 		HBox overView = new HBox();
@@ -143,7 +143,7 @@ public class InstitutionView extends ViewBase {
 		
 		setTitle(TITLE);
 		setContent(overView);
-		setPrefSize(600,400);		
+		//setPrefSize(600,400);		
 		formBuilder(InstitutionCorralView.workingInstitution.institStruct, InstitutionCorralView.workingInstitution.institData);
 
 	}
