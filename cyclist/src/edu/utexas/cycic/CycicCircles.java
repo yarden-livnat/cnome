@@ -112,6 +112,7 @@ public class CycicCircles{
 			public void handle(ActionEvent e){
 				/** TODO CHANGE NICHE OF CIRCLE */
 				TextInputDialog dg = new TextInputDialog(parent.niche);
+				dg.setResizable(true);
 				dg.setContentText("New Niche: ");
 				Optional<String> result = dg.showAndWait();
 				if (result.isPresent()){

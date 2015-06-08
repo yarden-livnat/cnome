@@ -490,6 +490,7 @@ public class OutPut {
 			
 			loadSimControl(doc);
 			loadCommodities(doc);
+			loadRecipes(doc);
 			Cycic.buildCommodPane();
 			NodeList uiItem = doc.getElementsByTagName("ui");
 			String uiString = uiItem.item(0).getTextContent().replaceAll("\\\\\"", "\"");
@@ -670,7 +671,28 @@ public class OutPut {
 	}
 
         
-  
+	static public void loadRecipes(Document doc){
+		NodeList recipeList = doc.getElementsByTagName("recipe");
+		for (int i = 0; i < recipeList.getLength(); i++){
+			Node tempRecipe = recipeList.item(i);
+			Nrecipe recipe = new Nrecipe();
+			recipe.Name = tempRecipe.getChildNodes().item(1).getTextContent();
+			recipe.Basis =  tempRecipe.getChildNodes().item(3).getTextContent();
+			for(int j = 5; j < tempRecipe.getChildNodes().getLength(); j+=2){
+				Node comp = tempRecipe.getChildNodes().item(j);
+				isotopeData composition = new isotopeData();
+				composition.Name = comp.getChildNodes().item(1).getTextContent();
+				if(recipe.Basis.equalsIgnoreCase("mass")){
+					composition.mass = Double.parseDouble(comp.getChildNodes().item(3).getTextContent());
+				} else {
+					composition.atom = Double.parseDouble(comp.getChildNodes().item(3).getTextContent());
+				}
+				recipe.Composition.add(composition);
+			}
+			Cycic.workingScenario.Recipes.add(recipe);
+		}		
+	}
+	
 	static public void loadFacilities(Map object){
 		Object[] keys = object.keySet().toArray();
 		for(int i = 0; i < keys.length; i++){
@@ -837,6 +859,20 @@ public class OutPut {
 				for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
 					recipeBuilder(doc, rootElement, recipe);
 				}
+				
+				for(instituteNode inst : CycicScenarios.workingCycicScenario.institNodes){
+					if(inst.name.equalsIgnoreCase("__inst__")){
+						CycicScenarios.workingCycicScenario.institNodes.remove(inst);
+						break;
+					}
+				}
+	                        
+				for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes){
+					if(region.name.equalsIgnoreCase("__region__")){
+						CycicScenarios.workingCycicScenario.regionNodes.remove(region);
+						break;
+					}
+				}
 
 				// Writing out the xml file
 				TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -942,6 +978,7 @@ public class OutPut {
     if(CycicScenarios.workingCycicScenario.regionNodes.size() == 0
        && CycicScenarios.workingCycicScenario.institNodes.size() == 0) {
       Dialog dg = new Dialog();
+      dg.setResizable(true);
       dg.setTitle("Input Injection");
       dg.setHeaderText("Warning: No Region or Institution found");
       dg.setContentText("Would you like to add defaults?");

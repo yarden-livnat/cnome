@@ -49,7 +49,8 @@ public class InstitutionView extends ViewBase {
 
 		ListView<String> facilityList = new ListView<String>();
         facilityList.setOrientation(Orientation.VERTICAL);
-        facilityList.setMinHeight(25);
+        facilityList.autosize();
+        facilityList.setMaxWidth(100);
 
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeFac = new MenuItem("Remove Initial Facility");
@@ -74,14 +75,14 @@ public class InstitutionView extends ViewBase {
             facilityList.getItems().add(fac.getKey() + " - " + fac.getValue());
         }
 
-		topGrid.add(new Label(InstitutionCorralView.workingInstitution.type), 2, 0);
+		topGrid.add(new Label(InstitutionCorralView.workingInstitution.type), 4, 0);
 
 		// Setting up the view visuals.
 		topGrid.setHgap(10);
 		topGrid.setVgap(2);
 
 		topGrid.add(new Label("Name"), 0, 0);
-		topGrid.add(FormBuilderFunctions.institNameBuilder(InstitutionCorralView.workingInstitution), 1, 0);
+		topGrid.add(FormBuilderFunctions.institNameBuilder(InstitutionCorralView.workingInstitution), 1, 0, 2, 1);
 		
 		topGrid.add(new Label("Prototype"), 0, 2);
 		ComboBox<String> protoName = new ComboBox<String>();
@@ -108,6 +109,7 @@ public class InstitutionView extends ViewBase {
 				}
 			}
 		};
+		protoNumber.setMaxWidth(20);
 		topGrid.add(protoNumber, 3, 2);
 		Button protoButton = new Button("Add");
 		protoButton.setOnAction(new EventHandler<ActionEvent>(){
@@ -134,8 +136,6 @@ public class InstitutionView extends ViewBase {
 		VBox regionGridBox = new VBox();
 		regionGridBox.getChildren().addAll(topGrid, grid);		
 		
-
-
 		VBox listBox = new VBox();
 		listBox.getChildren().addAll(new Label("Initial Facilities"), facilityList);
 		HBox overView = new HBox();
@@ -143,7 +143,7 @@ public class InstitutionView extends ViewBase {
 		
 		setTitle(TITLE);
 		setContent(overView);
-		setPrefSize(600,400);		
+		//setPrefSize(600,400);		
 		formBuilder(InstitutionCorralView.workingInstitution.institStruct, InstitutionCorralView.workingInstitution.institData);
 
 	}
@@ -194,34 +194,56 @@ public class InstitutionView extends ViewBase {
 						// resetting the indent
 						columnNumber -= 1;
 					}
-				} else if (facArray.get(2) == "zeroOrMore") {
+				} else if (facArray.get(2) == "oneOrMoreMap"){
+					//facArray = (ArrayList<Object>) facArray.get(1);
+					//dataArray = (ArrayList<Object>) dataArray.get(0);
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						rowNumber += 1;
 						// Indenting a sub structure
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
-							grid.add(arrayListRemove(dataArray, ii), columnNumber-1, rowNumber);
+							if ( ii > 0 ) {
+								grid.add(arrayListRemove(dataArray, ii), columnNumber+2, rowNumber);
+							}
 							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
 					}
-				} else if (facArray.get(2) == "input" || facArray.get(2) == "output") {
-					if ((int)facArray.get(6) <= userLevel){
+				} else if (facArray.get(2) == "zeroOrMore") {
+					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
-						rowNumber += 1;
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						// Indenting a sub structure
+						rowNumber += 1;
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
-							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));						
+							grid.add(arrayListRemove(dataArray, ii), columnNumber+2, rowNumber);
+							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
+							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						rowNumber += 1;
 					}
 				} else {
 					// Adding the label
