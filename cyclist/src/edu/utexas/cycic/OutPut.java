@@ -692,7 +692,7 @@ public class OutPut {
         Optional<ButtonType> result = dg.showAndWait();
         if(result.get() == ButtonType.YES){
         	regionNode region = new regionNode();
-        	region.name = "tempRegion";
+        	region.name = "temp&Region";
         	region.archetype = ":agents:NullRegion";
         	region.type = "agents NullRegion";
         	for(instituteNode inst: CycicScenarios.workingCycicScenario.institNodes){
@@ -714,7 +714,7 @@ public class OutPut {
         Optional<ButtonType> result = dg.showAndWait();
         if(result.get() == ButtonType.YES){
         	instituteNode inst = new instituteNode();
-        	inst.name = "tempInst";
+        	inst.name = "temp&Inst";
         	inst.archetype = ":agents:NullInst";
         	inst.type = "agents NullInst";
         	for(facilityNode fac: CycicScenarios.workingCycicScenario.FacilityNodes){
