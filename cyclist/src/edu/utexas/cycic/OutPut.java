@@ -321,7 +321,6 @@ public class OutPut {
 		
 		Element configType = doc.createElement(facType.replace(" ", "").toString());
 		config.appendChild(configType);
-		
 		for(int i = 0; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
 				facilityDataElement(doc, configType, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -403,7 +402,7 @@ public class OutPut {
 	 * @return Boolean to indicate whether a indent is required. 
 	 */
 	public static boolean indentCheck(String string){
-		if(string == "oneOrMore" || string == "zeroOrMore"||string == "oneOrMoreMap" || string == "pair" || string == "item"){
+		if(string.equalsIgnoreCase("oneOrMore") || string.equalsIgnoreCase("zeroOrMore")||string.equalsIgnoreCase("oneOrMoreMap") || string.equalsIgnoreCase("pair") || string.equalsIgnoreCase("item")){
 			return true;
 		} else {
 			return false;
