@@ -3,7 +3,6 @@ package edu.utexas.cycic;
 import java.io.File;
 import java.util.ArrayList;
 
-import edu.utah.sci.cyclist.core.presenter.SelectionModel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -11,14 +10,10 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -312,7 +307,9 @@ public class FormBuilderFunctions {
 				cb.getItems().clear();
 
 				for(CommodityNode label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.name.getText());
+					if(!label.name.getText().equalsIgnoreCase("")){
+						cb.getItems().add(label.name.getText());
+					}
 				}
 				cb.getItems().add("New Commodity");
 				
@@ -327,11 +324,10 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if(newValue == null){
+				if(newValue == null || newValue.equalsIgnoreCase("")){
 					for (int i = 0; i < facNode.cycicCircle.incommods.size(); i++) {
 						if (facNode.cycicCircle.incommods.get(i) == (String) oldValue){
-							String string = facNode.cycicCircle.incommods.remove(i);
-							System.out.println(string);
+							facNode.cycicCircle.incommods.remove(i);
 							break;
 						}
 					}
@@ -378,7 +374,9 @@ public class FormBuilderFunctions {
 				}*/
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.name.getText());
+					if(!label.name.getText().equalsIgnoreCase("")){
+						cb.getItems().add(label.name.getText());
+					}
 				}
 				cb.getItems().add("New Commodity");
 				
@@ -393,7 +391,7 @@ public class FormBuilderFunctions {
 		cb.setPromptText("Select a commodity");
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				if(newValue == null){
+				if(newValue == null || newValue.equalsIgnoreCase("")){
 					for (int i = 0; i < facNode.cycicCircle.outcommods.size(); i++) {
 						if (facNode.cycicCircle.outcommods.get(i) == (String) oldValue){
 							facNode.cycicCircle.outcommods.remove(i);
@@ -469,17 +467,24 @@ public class FormBuilderFunctions {
 			public void handle(MouseEvent e){
 				cb.getItems().clear();
 				for (CommodityNode label: DataArrays.CommoditiesList){
-					cb.getItems().add(label.name.getText());
+					if(!label.name.getText().equalsIgnoreCase("")){
+						cb.getItems().add(label.name.getText());
+					}
 				}
-				//cb.getItems().add("New Commodity");
+				cb.getItems().add("New Commodity");
 			}
 		});
 		
 		cb.valueProperty().addListener(new ChangeListener<String>(){
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				defaultValue.set(0, newValue);
-				if((Boolean) facArray.get(10) == false){
-					facArray.set(10, true);
+				if(newValue == null || newValue.equalsIgnoreCase("")){
+				} else if (newValue == "New Commodity"){
+					Cycic.addNewCommodity(); 
+				} else {
+					defaultValue.set(0, newValue);
+					if((Boolean) facArray.get(10) == false){
+						facArray.set(10, true);
+					}
 				}
 			}
 		});

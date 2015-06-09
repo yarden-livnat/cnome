@@ -1,6 +1,7 @@
 package edu.utexas.cycic;
 
 import java.util.ArrayList;
+
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -8,17 +9,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -42,6 +40,7 @@ public class RegionView extends ViewBase{
 		final ListView<String> institList = new ListView<String>();
 		institList.setOrientation(Orientation.VERTICAL);
 		institList.setMinHeight(25);
+		institList.setMaxWidth(120);
 
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeInst = new MenuItem("Remove Institution");
@@ -112,8 +111,6 @@ public class RegionView extends ViewBase{
 		VBox institBox = new VBox();
 		institBox.getChildren().addAll(new Label("Institutions"), institList);
 		regionSideBar.setPadding(new Insets(0, 5, 0, 0));
-		regionSideBar.setMinWidth(200);
-		regionSideBar.setPrefWidth(200);
 		regionSideBar.getChildren().addAll(institBox);
 		
 		VBox regionGridBox = new VBox();
@@ -124,7 +121,6 @@ public class RegionView extends ViewBase{
 		
 		setTitle(TITLE);
 		setContent(regionBox);
-		setPrefSize(600,400);	
 		formBuilder(RegionCorralView.workingRegion.regionStruct, RegionCorralView.workingRegion.regionData);
 		
 	}
@@ -213,18 +209,26 @@ public class RegionView extends ViewBase{
 				} else if (facArray.get(2) == "zeroOrMore") {
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
+						name.setTooltip(new Tooltip((String)facArray.get(7)));
+						name.setOnMouseClicked(FormBuilder.helpDialogHandler( (String) facArray.get(8)));
 						grid.add(name, columnNumber, rowNumber);
-						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
-						rowNumber += 1;
+						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), columnNumber+1, rowNumber);
 						// Indenting a sub structure
+						rowNumber += 1;
 						columnNumber += 1;
 						for(int ii = 0; ii < dataArray.size(); ii ++){
-							grid.add(arrayListRemove(dataArray, ii), columnNumber-1, rowNumber);
+							grid.add(arrayListRemove(dataArray, ii), columnNumber+2, rowNumber);
 							formBuilder((ArrayList<Object>)facArray.get(1), (ArrayList<Object>) dataArray.get(ii));	
 							rowNumber += 1;
 						}
 						// resetting the indent
 						columnNumber -= 1;
+						rowNumber += 1;
 					}
 				} else if (facArray.get(1) instanceof ArrayList) {
 					if ((int)facArray.get(6) <= userLevel){

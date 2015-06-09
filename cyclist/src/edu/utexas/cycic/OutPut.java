@@ -5,18 +5,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import javax.json.JsonValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -328,7 +321,6 @@ public class OutPut {
 		
 		Element configType = doc.createElement(facType.replace(" ", "").toString());
 		config.appendChild(configType);
-		
 		for(int i = 0; i < dataArray.size(); i++){
 			if (dataArray.get(i) instanceof ArrayList){
 				facilityDataElement(doc, configType, (ArrayList<Object>) facArray.get(i), (ArrayList<Object>) dataArray.get(i));
@@ -410,7 +402,7 @@ public class OutPut {
 	 * @return Boolean to indicate whether a indent is required. 
 	 */
 	public static boolean indentCheck(String string){
-		if(string == "oneOrMore" || string == "zeroOrMore"||string == "oneOrMoreMap" || string == "pair" || string == "item"){
+		if(string.equalsIgnoreCase("oneOrMore") || string.equalsIgnoreCase("zeroOrMore")||string.equalsIgnoreCase("oneOrMoreMap") || string.equalsIgnoreCase("pair") || string.equalsIgnoreCase("item")){
 			return true;
 		} else {
 			return false;
@@ -490,6 +482,7 @@ public class OutPut {
 			
 			loadSimControl(doc);
 			loadCommodities(doc);
+			loadRecipes(doc);
 			Cycic.buildCommodPane();
 			NodeList uiItem = doc.getElementsByTagName("ui");
 			String uiString = uiItem.item(0).getTextContent().replaceAll("\\\\\"", "\"");
@@ -660,13 +653,36 @@ public class OutPut {
 		// Start Month
 		String startMonth = doc.getElementsByTagName("startmonth").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.startMonth = startMonth;
-		Cycic.startMonth.setValue(startMonth);
+		Cycic.startMonth.setValue(Cycic.monthList.get(Integer.parseInt(Cycic.workingScenario.simulationData.startMonth)-1));
 		
 		// Start Year
 		String startYear = doc.getElementsByTagName("startyear").item(0).getTextContent();
 		Cycic.workingScenario.simulationData.startYear = startYear;
 		Cycic.startYear.setText(startYear);
 		
+	}
+
+        
+	static public void loadRecipes(Document doc){
+		NodeList recipeList = doc.getElementsByTagName("recipe");
+		for (int i = 0; i < recipeList.getLength(); i++){
+			Node tempRecipe = recipeList.item(i);
+			Nrecipe recipe = new Nrecipe();
+			recipe.Name = tempRecipe.getChildNodes().item(1).getTextContent();
+			recipe.Basis =  tempRecipe.getChildNodes().item(3).getTextContent();
+			for(int j = 5; j < tempRecipe.getChildNodes().getLength(); j+=2){
+				Node comp = tempRecipe.getChildNodes().item(j);
+				isotopeData composition = new isotopeData();
+				composition.Name = comp.getChildNodes().item(1).getTextContent();
+				if(recipe.Basis.equalsIgnoreCase("mass")){
+					composition.mass = Double.parseDouble(comp.getChildNodes().item(3).getTextContent());
+				} else {
+					composition.atom = Double.parseDouble(comp.getChildNodes().item(3).getTextContent());
+				}
+				recipe.Composition.add(composition);
+			}
+			Cycic.workingScenario.Recipes.add(recipe);
+		}		
 	}
 	
 	static public void loadFacilities(Map object){
@@ -679,6 +695,7 @@ public class OutPut {
 			facNode.archetype = (String) fac.get("archetype");
 			facNode.facilityType = (String) fac.get("type");
 			facNode.cycicCircle = CycicCircles.addNode((String) facNode.name, facNode);
+			facNode.niche = (String) fac.get("niche");
 			facNode.cycicCircle.niche = (String) fac.get("niche");
 			facNode.cycicCircle.setCenterX(Double.parseDouble((String) fac.get("X")));
 			facNode.cycicCircle.setCenterY(Double.parseDouble((String) fac.get("Y")));
@@ -833,6 +850,20 @@ public class OutPut {
 				//Recipes
 				for(Nrecipe recipe : CycicScenarios.workingCycicScenario.Recipes){
 					recipeBuilder(doc, rootElement, recipe);
+				}
+				
+				for(instituteNode inst : CycicScenarios.workingCycicScenario.institNodes){
+					if(inst.name.equalsIgnoreCase("__inst__")){
+						CycicScenarios.workingCycicScenario.institNodes.remove(inst);
+						break;
+					}
+				}
+	                        
+				for(regionNode region : CycicScenarios.workingCycicScenario.regionNodes){
+					if(region.name.equalsIgnoreCase("__region__")){
+						CycicScenarios.workingCycicScenario.regionNodes.remove(region);
+						break;
+					}
 				}
 
 				// Writing out the xml file
