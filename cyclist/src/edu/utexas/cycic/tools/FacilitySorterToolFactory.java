@@ -17,6 +17,11 @@ public class FacilitySorterToolFactory implements ToolFactory {
 	}
 	
 	@Override
+	public boolean isUserLevel() {
+		return true;
+	}
+	
+	@Override
 	public AwesomeIcon getIcon() {
 		return FacilitySorterTool.ICON;
 	}

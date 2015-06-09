@@ -28,6 +28,11 @@ public class CycicAgentTreeTableTool implements Tool{
 	public String getName() {
 		return TOOL_NAME;
 	}
+	
+	@Override
+	public boolean isUserLevel() {
+		return true;
+	}
 
 	@Override
 	public View getView() {

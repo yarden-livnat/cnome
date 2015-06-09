@@ -7,14 +7,16 @@ public class SimpleToolFactory implements ToolFactory {
 	private String _id;
 	private String _name;
 	private String _type;
+	private boolean _userlevel;
 	private AwesomeIcon _iconName;
 	private String _viewClass;
 	private String _presenterClass;
 	
-	public SimpleToolFactory(String pkg, String name, String type, AwesomeIcon iconName, String viewClass, String presenterClass) {
+	public SimpleToolFactory(String pkg, String name, String type, Boolean userlevel, AwesomeIcon iconName, String viewClass, String presenterClass) {
 		_id = pkg+"."+name;
 		_name = name;
 		_type = type;
+		_userlevel = userlevel;
 		_iconName = iconName;
 		_viewClass = pkg+"."+viewClass;
 		_presenterClass = pkg+"."+presenterClass;
@@ -29,6 +31,12 @@ public class SimpleToolFactory implements ToolFactory {
 	public String getToolType() {
 		return _type;
 	}
+	
+	@Override
+	public boolean isUserLevel() {
+		return _userlevel;
+	}
+	
 	@Override
 	public AwesomeIcon getIcon() {
 		return _iconName;

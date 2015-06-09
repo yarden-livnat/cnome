@@ -195,25 +195,27 @@ public class CyclistController {
         // ToolsLibrary panel
         ToolsPresenter tp = new ToolsPresenter(_eventBus);
         tp.setPanel(screen.getToolsPanel());
-        tp.setFactories(ToolsLibrary.getFactoriesOfType(ToolsLibrary.VIS_TOOL));
+        tp.setFactories(ToolsLibrary.getFactoriesOfType(ToolsLibrary.VIS_TOOL, true));
        
         // InputLibrary panel
         InputPresenter ip = new InputPresenter(_eventBus);
         ip.setPanel(screen.getInputPanel());
-        ip.setFactories(ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL));
+        ip.setFactories(ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL, true));
         
         // Builder perspectives
        
 		for (Perspective p : _perspectives) {
-			ViewBase view = new VisWorkspace(true);
+			ViewBase workspace = new VisWorkspace(true);
 			p.presenter = new VisWorkspacePresenter(_eventBus);
-			p.presenter.setView(view);
+			p.presenter.setView(workspace);
 
 			Tab tab = new Tab();
 			tab.setText(p.name);
 			tab.setClosable(false);
-			tab.setContent(view);
+			tab.setContent(workspace);
 			screen.getTabPane().getTabs().add(tab);
+			
+//			
 		}
 		
 		screen.getTabPane().getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
@@ -225,7 +227,7 @@ public class CyclistController {
 		});
 		
 		restore();
-		
+
 		selectPerspective(_currentPerspective.id);   
 		if (_currentPerspective.id == 0)
 			perspectiveChanged(_currentPerspective.id);  
@@ -244,6 +246,16 @@ public class CyclistController {
 		_currentPerspective = _perspectives[id];
 		if (!_currentPerspective.initialized) {
 			_currentPerspective.init();
+			if (id == 0) {
+				try {
+					if (!_perspectives[0].presenter.hasTool("Cycic")) {
+						ToolFactory factory = ToolsLibrary.getFactory("Cycic");
+						_perspectives[0].presenter.addTool(factory.create(), 0, 0);	 
+					}
+				} catch (Exception e) {
+					log.error("Can create scenario builder");
+				}
+			}
 		}
 		_presenter = _currentPerspective.presenter;
 		_presenter.getWorkspace().getConsole().setActive(true);
@@ -340,7 +352,6 @@ public class CyclistController {
 								Simulation sim = simulation.clone();
 								Simulation existingSim = _model.simExists(simulation);
 								if(existingSim==null){
-//									_model.getSimulations().add(sim);
 									newSimulations.add(sim);
 									_dirtyFlag = true;
 								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
@@ -386,7 +397,6 @@ public class CyclistController {
 								Simulation existingSim = _model.simExists(simulation);
 								if(existingSim == null){
 									newSimulations.add(sim);
-//									_model.getSimulations().add(sim);
 									_dirtyFlag = true;
 								}else if(!existingSim.getAlias().equals(simulation.getAlias())){
 									existingSim.setAlias(simulation.getAlias());

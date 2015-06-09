@@ -31,6 +31,11 @@ public class FacilitySorterTool implements Tool {
 	}
 
 	@Override
+	public boolean isUserLevel() {
+		return true;
+	}
+	
+	@Override
 	public View getView() {
 		if (_view == null) 
 			_view = new FacilitySorter();

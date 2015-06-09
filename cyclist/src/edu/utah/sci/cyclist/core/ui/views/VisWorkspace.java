@@ -179,7 +179,7 @@ public class VisWorkspace extends CyclistViewBase implements CyclistView {
 		});
 		
 		setOnDragOver(event->{
-			if (event.getTarget() == _pane) {
+//			if (event.getTarget() == _pane) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
 				if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
 				{
@@ -189,7 +189,7 @@ public class VisWorkspace extends CyclistViewBase implements CyclistView {
 					event.acceptTransferModes(TransferMode.MOVE);
 					event.consume();
 				}
-			}
+//			}
 		});	
 		
 		setOnDragDropped(event->{

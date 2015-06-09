@@ -213,7 +213,7 @@
 			<manifest>
 				<attribute name="Implementation-Vendor" value="SCI Institute, University of Utah"/>
 				<attribute name="Implementation-Title" value="Cyclist"/>
-				<attribute name="Implementation-Version" value="0.8.2"/>
+				<attribute name="Implementation-Version" value="1.0.0"/>
 				<attribute name="JavaFX-Feature-Proxy" value="None"/>
 			</manifest>
 		</fx:jar>
@@ -225,6 +225,7 @@
 		<!-- Need to use ${basedir} because somehow the ant task is calculating the directory differently -->
 		<fx:deploy
 			embedJNLP="true"
+			verbose="true"
 			extension="false"
 			width="1200" height="800" 
 			includeDT="false"
@@ -236,6 +237,9 @@
 			<fx:info title="cyclist" vendor="SCI Institute, University of Utah"/>
 			<fx:application refId="fxApplication"/>
 			<fx:resources refid="appRes"/>
+			
+			<!-- request user level installation -->
+			<fx:preferences install="false"/>
 		</fx:deploy>
 	</target>
 		
