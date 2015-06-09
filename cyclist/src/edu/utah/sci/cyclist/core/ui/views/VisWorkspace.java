@@ -181,13 +181,15 @@ public class VisWorkspace extends CyclistViewBase implements CyclistView {
 		setOnDragOver(event->{
 //			if (event.getTarget() == _pane) {
 				DnD.LocalClipboard clipboard = getLocalClipboard();
-				if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
-				{
-					event.acceptTransferModes(TransferMode.COPY);
-					event.consume();
-				} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
-					event.acceptTransferModes(TransferMode.MOVE);
-					event.consume();
+				if (clipboard != null) {
+					if (clipboard.hasContent(DnD.TOOL_FORMAT) || clipboard.hasContent(DnD.TABLE_FORMAT)) 
+					{
+						event.acceptTransferModes(TransferMode.COPY);
+						event.consume();
+					} else if (clipboard.hasContent(DnD.FIELD_FORMAT)) {
+						event.acceptTransferModes(TransferMode.MOVE);
+						event.consume();
+					}
 				}
 //			}
 		});	
