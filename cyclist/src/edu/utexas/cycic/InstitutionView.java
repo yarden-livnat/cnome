@@ -50,7 +50,7 @@ public class InstitutionView extends ViewBase {
 		ListView<String> facilityList = new ListView<String>();
         facilityList.setOrientation(Orientation.VERTICAL);
         facilityList.autosize();
-        facilityList.setMaxWidth(100);
+        facilityList.setMinWidth(100);
 
         ContextMenu listCtxtMenu = new ContextMenu();
         MenuItem removeFac = new MenuItem("Remove Initial Facility");
@@ -109,7 +109,7 @@ public class InstitutionView extends ViewBase {
 				}
 			}
 		};
-		protoNumber.setMaxWidth(20);
+		protoNumber.setMinWidth(20);
 		topGrid.add(protoNumber, 3, 2);
 		Button protoButton = new Button("Add");
 		protoButton.setOnAction(new EventHandler<ActionEvent>(){
