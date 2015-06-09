@@ -1301,7 +1301,7 @@ public class ChartView extends CyclistViewBase {
 			// LOD filters only show/hide data. No need to fetch new data 
 			// TODO: is this true only for classification == C? Seems to be true for any field that is not range
 			if(_currentSpec != null && isInLodArea(filter.getField()) && filter.getField().getClassification() == Classification.C ) {
-				invalidateLODFilters(filter);
+				//invalidateLODFilters(filter);
 				filter.setValid(true);
 				reassignData(filter);
 			} else {
