@@ -36,13 +36,11 @@ public class QueryBuilder {
 	}
 	
 	public QueryBuilder field(Field field) {
-		if (!_fields.contains(field)) {
-//			if (field.getRole() == Role.MEASURE && field.getString(FieldProperties.AGGREGATION_FUNC) != null) {
-//				_aggregates.add(field);
-//			} else {
-				_fields.add(field);
-//			}
-		}
+		if (_fields.contains(field)) {
+            return this;
+        }
+
+        _fields.add(field);
 		return this;
 	}
 	
@@ -174,7 +172,17 @@ public class QueryBuilder {
 			builder.append(" limit ").append(_limit);
 		}
 		
-		return builder.toString();
+        String q = builder.toString();
+        if (_table.toString().equals("QuantityInventory")) {
+            q = q.replaceAll("(.*\\W)Quantity(\\W.*)", "$1inv\\.Quantity\\*c\\.MassFrac$2");
+            q = q.replaceAll("(.*\\W)Time(\\W.*)", "$1tl\\.Time$2");
+            q = q.replaceAll("(.*\\W)NucId(\\W.*)", "$1c\\.NucId$2");
+            q = q.replaceAll("(.*\\W)AgentId(\\W.*)", "$1ag\\.AgentId$2");
+            q = q.replaceAll("(.*\\W)Prototype(\\W.*)", "$1ag\\.Prototype$2");
+            q = q.replaceAll("(.*\\W)SimId(\\W.*)", "$1inv\\.SimId$2");
+            q = q.replaceAll("(.*\\W)QuantityInventory(\\W.*)", "$1Timelist AS tl JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time AND inv.SimId=tl.SimId JOIN Agents AS ag ON ag.AgentId = inv.AgentId AND ag.SimId=tl.SimId JOIN Compositions AS c ON c.QualId = inv.QualId AND c.SimId=tl.SimId$2");
+        }
+		return q;
 	}
 	
 }

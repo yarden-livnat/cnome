@@ -31,27 +31,15 @@ REPLACE into Facilities(SimID,AgentId,Spec,Prototype,InstitutionId,RegionId,Ente
 CREATE INDEX if not exists Facilities_idx on Facilities (SimId ASC, AgentId ASC);
 
 --  Inventory
-CREATE table if not exists QuantityInventoryBase as 
+CREATE view if not exists QuantityInventory as 
 	SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.AgentID as AgentID, 
-	  	cast(SUM(inv.Quantity*cmp.MassFrac) as REAL) AS Quantity 
+	  	SUM(inv.Quantity*cmp.MassFrac) AS Quantity 
 	 FROM 
 		Timelist AS tl 
-		INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time 
-		INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId 
-		INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId 
-	 WHERE 
-		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId 
-	 GROUP BY inv.SimId, tl.Time, cmp.NucId, ag.AgentID; 
-
-CREATE INDEX IF NOT EXISTS QuantityInventoryBase_idx ON QuantityInventoryBase (simid,agentid,time,nucid,quantity);
-	 	
-CREATE view if not exists  QuantityInventory as 
-	SELECT base.SimID as SimID, Time, Quantity, NucId, base.AgentId as AgentId, Kind, Spec, Prototype
-	 FROM
-		QuantityInventoryBase as base, Agents ag 
-	 WHERE 
-		base.SimID = ag.SimID 
-		AND base.AgentId = ag.AgentId;
+		INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time AND inv.SimId=tl.SimId
+		INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId AND ag.SimId=tl.SimId
+		INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId AND cmp.SimId=tl.SimId
+	 GROUP BY inv.SimId, tl.Time;
 		
 --  Transacted
 CREATE table if not exists QuantityTransactedBase as 

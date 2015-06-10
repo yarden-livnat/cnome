@@ -59,28 +59,16 @@ public class SimulationTablesPostProcessor {
 	private static final String UPDATED_INDICATION_TABLE_CREATE = "create table if not exists UpdatedIndication (flag INTEGER DEFAULT 1)";
 	private static final String TEST_UPDATED_QUERY = "SELECT name FROM sqlite_master WHERE type='table' AND name='UpdatedIndication'";
 	
-	private static final String QUANTITY_INVENTORY_BASE_CREATE = 
-								   	"CREATE table if not exists QuantityInventoryBase as "
-								   + "SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.AgentID as AgentID, "
-								   + "  	cast(SUM(inv.Quantity*cmp.MassFrac) as REAL) AS Quantity "
-								   + " FROM "
-								   + "		Timelist AS tl "
-								   + "		INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time "
-								   + "		INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId "
-								   + "		INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId "
-								   + "	WHERE "
-								   + "		inv.SimId = cmp.SimId AND inv.SimId = ag.SimId and tl.SimId=inv.SimId "
-								   + "	GROUP BY inv.SimId, tl.Time, cmp.NucId, ag.AgentID; "
-								   + "CREATE INDEX IF NOT EXISTS QuantityInventoryBase_idx ON QuantityInventoryBase (simid,agentid,time,nucid,quantity)";
-	
 	private static final String QUANTITY_INVENTORY_VIEW_CREATE = 
-								  "CREATE view if not exists  QuantityInventory as "
-								+ " SELECT base.SimID as SimID, Time, Quantity, NucId, base.AgentId as AgentId, Kind, Spec, Prototype"
-								+ " FROM"
-								+ "  	QuantityInventoryBase as base, Agents ag "
-								+ " WHERE "
-								+ "		base.SimID = ag.SimID "
-								+ " AND base.AgentId = ag.AgentId";
+                                  "CREATE view if not exists QuantityInventory as "
+                                + "	SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.AgentID as AgentID, "
+                                + "	  	ag.Prototype AS Prototype, ag.Kind AS Kind, ag.Spec AS Spec, SUM(inv.Quantity*cmp.MassFrac) AS Quantity "
+                                + "	 FROM "
+                                + "		Timelist AS tl "
+                                + "		INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time AND inv.SimId=tl.SimId"
+                                + "		INNER JOIN Agents AS ag ON ag.AgentId = inv.AgentId AND ag.SimId=tl.SimId"
+                                + "		INNER JOIN Compositions AS cmp ON cmp.QualId = inv.QualId AND cmp.SimId=tl.SimId"
+                                + "	 GROUP BY inv.SimId, tl.Time,ag.AgentId,cmp.NucId";
 	
 	private static final String QUANTITY_TRANSACTED_BASE_CREATE = 
 								  "CREATE table if not exists QuantityTransactedBase as "
@@ -116,7 +104,6 @@ public class SimulationTablesPostProcessor {
 		     new QueryOperation("Update Facilitites table",FACILITIES_TABLE_UPDATE),
 		     new QueryOperation("Create Facilitites index",FACILITIES_TABLE_INDEX),
 		     
-		     new QueryOperation("Create base table QuantityInventoryBase",QUANTITY_INVENTORY_BASE_CREATE),
 		     new QueryOperation("Create view QuantityInventory",QUANTITY_INVENTORY_VIEW_CREATE),
 		     
 		     new QueryOperation("Create base table QuantityTransactedBase",QUANTITY_TRANSACTED_BASE_CREATE),
