@@ -263,6 +263,8 @@ public class Cycic extends ViewBase{
 	 */
 	private void init(){
 
+		setCloseable(false);
+		enableDragging(false);
         DataArrays.cycicInitLoader();
 
         final ContextMenu paneMenu = new ContextMenu();
@@ -322,7 +324,7 @@ public class Cycic extends ViewBase{
 		});
 		pane.setOnDragOver(new EventHandler <DragEvent>(){
 			public void handle(DragEvent event){
-				event.acceptTransferModes(TransferMode.ANY);
+				event.acceptTransferModes(TransferMode.COPY);
 			}
 		});
 		pane.setOnDragDropped(new EventHandler<DragEvent>(){

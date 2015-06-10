@@ -16,6 +16,11 @@ public class TimelineDisplayToolFactory implements ToolFactory {
 	public String getToolType() {
 		return TimelineDisplayTool.TYPE;
 	}
+	
+	@Override
+	public boolean isUserLevel() {
+		return true;
+	}
 
 	@Override
 	public AwesomeIcon getIcon() {

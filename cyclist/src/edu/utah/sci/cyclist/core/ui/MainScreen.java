@@ -423,9 +423,11 @@ public class MainScreen extends VBox implements Resource {
         Menu menu = new Menu("Tools");          
 
         for (final ToolFactory factory : ToolsLibrary.getFactoriesOfType(ToolsLibrary.SCENARIO_TOOL)) {
-            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
-            item.getProperties().put("type", ToolsLibrary.SCENARIO_TOOL);
-            menu.getItems().add(item);
+        	if (factory.isUserLevel()) {
+	            MenuItem item = new MenuItem(factory.getToolName(), GlyphRegistry.get(factory.getIcon()));
+	            item.getProperties().put("type", ToolsLibrary.SCENARIO_TOOL);
+	            menu.getItems().add(item);
+        	}
         }
         
         for (final ToolFactory factory : ToolsLibrary.getFactoriesOfType(ToolsLibrary.VIS_TOOL)) {

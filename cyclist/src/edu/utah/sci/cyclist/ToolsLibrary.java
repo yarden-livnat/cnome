@@ -62,6 +62,14 @@ public class ToolsLibrary {
 			.filter(f -> f.getToolType().equals(type))
 			.collect(Collectors.toList());
 	}
+
+	public static List<ToolFactory> getFactoriesOfType(String type, boolean level) {
+		return factories
+			.stream()
+			.filter(f -> f.getToolType().equals(type))
+			.filter(f -> f.isUserLevel() == level)
+			.collect(Collectors.toList());
+	}
 	
 	public static Tool createTool(String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Tool tool = null;
@@ -75,36 +83,56 @@ public class ToolsLibrary {
 	static {
 		register(
 			new SimpleToolFactory("edu.utah.sci.cyclist.core", 
-					"Table", VIS_TOOL, AwesomeIcon.LIST_ALT, 
+					"Table", VIS_TOOL, true, AwesomeIcon.LIST_ALT, 
 					"ui.views.SimpleTableView", 
 					"presenter.TablePresenter"),
 			
 			new SimpleToolFactory("edu.utah.sci.cyclist.core", 
-					"Plot", VIS_TOOL, AwesomeIcon.BAR_CHART_ALT, 
+					"Plot", VIS_TOOL, true, AwesomeIcon.BAR_CHART_ALT, 
 					"ui.views.ChartView", 
 					"presenter.ChartPresenter"),
 			
 			new SimpleToolFactory("edu.utah.sci.cyclist.neup", 
-					"Flow", VIS_TOOL, AwesomeIcon.RANDOM, 
+					"Flow", VIS_TOOL, true, AwesomeIcon.RANDOM, 
 					"ui.views.flow.FlowView", 
 					"presenter.NEUPPresenter"),	
 			
 			new SimpleToolFactory("edu.utah.sci.cyclist.neup", 
-					"Inventory", VIS_TOOL, AwesomeIcon.BOOK, 
+					"Inventory", VIS_TOOL, true, AwesomeIcon.BOOK, 
 					"ui.views.inventory.InventoryView", 
 					"presenter.NEUPPresenter"),
 			
 			new SimpleToolFactory("edu.utah.sci.cyclist.core", 
-					"Workspace", VIS_TOOL, AwesomeIcon.DESKTOP, 
+					"Workspace", VIS_TOOL, true, AwesomeIcon.DESKTOP, 
 					"ui.views.Workspace", 
 	              "presenter.WorkspacePresenter")
           );
 		
 		register(
-	      new CycicToolFactory(),
-	      new InstitutionCorralViewToolFactory(),
-	      new RecipeFormToolFactory(),
-	      new RegionCorralViewToolFactory()
+			new SimpleToolFactory("edu.utexas.cycic",
+					"Cycic", SCENARIO_TOOL, false, AwesomeIcon.EYE,
+					"Cycic",
+					"presenter.CycicPresenter"
+					),
+			new SimpleToolFactory("edu.utexas.cycic",
+					"Institution Corral", SCENARIO_TOOL, true, AwesomeIcon.GLOBE,
+					"InstitutionCorralView",
+					"presenter.InstitutionCorralViewPresenter"
+					),
+					new SimpleToolFactory("edu.utexas.cycic",
+					"Recipe Builder", SCENARIO_TOOL, true, AwesomeIcon.SORT_ALPHA_DESC,
+					"RecipeForm",
+					"presenter.RecipeFormPresenter"
+					),
+			new SimpleToolFactory("edu.utexas.cycic",
+					"Region Corral", SCENARIO_TOOL, true, AwesomeIcon.GLOBE,
+					"RegionCorralView",
+					"presenter.RegionCorralViewPresenter"
+			)
+//	      new CycicToolFactory(),
+//	      new InstitutionCorralViewToolFactory(),
+//	      new RecipeFormToolFactory(),
+//	      new RegionCorralViewToolFactory()
 		);
 	}
 

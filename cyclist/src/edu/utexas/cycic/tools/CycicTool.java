@@ -30,6 +30,11 @@ public class CycicTool implements Tool {
 	}
 
 	@Override
+	public boolean isUserLevel() {
+		return false;
+	}
+	
+	@Override
 	public View getView() {
 		if (_view == null) 
 			_view = new Cycic();
