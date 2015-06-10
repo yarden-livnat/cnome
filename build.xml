@@ -162,7 +162,6 @@
 		<mkdir dir="deploy/dist/libs" />
 		<mkdir dir="deploy/dist/externalApps" />
 		<mkdir dir="deploy/dist/skinImages" />
-		<mkdir dir="deploy/dist/package" />
 
 		<copy todir="deploy/dist">
 			<fileset dir="${basedir}\cyclist\">
@@ -183,22 +182,16 @@
 		</copy>
 		
 		<copy todir="deploy/dist/externalApps">
-			<fileset dir="deploy/externalApps">
-				<include name="*" />
-			</fileset>
+					<fileset dir="deploy/externalApps">
+						<include name="*" />
+					</fileset>
 		</copy>
 		
-		<copy todir="deploy/dist/package">
-			<fileset dir="${basedir}/cyclist/package">
-				<include name="*" />
-			</fileset>
-		</copy>
 		
 		<fx:resources id="appRes">
 			<fx:fileset dir="deploy/dist" includes="cyclist.jar"/>
 			<fx:fileset dir="deploy/dist" includes="libs/*"/>
 			<fx:fileset dir="deploy/dist" includes="externalApps/*"/>
-			<fx:fileset dir="deploy/dist" includes="package/*"/>
 		</fx:resources> 
 		
 		<fx:application id="fxApplication"
