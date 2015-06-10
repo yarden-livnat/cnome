@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,7 @@ import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.core.controller.IMemento;
+import edu.utah.sci.cyclist.core.event.Pair;
 import edu.utah.sci.cyclist.core.event.dnd.DnD;
 import edu.utah.sci.cyclist.core.event.ui.FilterEvent;
 import edu.utah.sci.cyclist.core.model.Context;
@@ -1301,7 +1303,7 @@ public class ChartView extends CyclistViewBase {
 			// LOD filters only show/hide data. No need to fetch new data 
 			// TODO: is this true only for classification == C? Seems to be true for any field that is not range
 			if(_currentSpec != null && isInLodArea(filter.getField()) && filter.getField().getClassification() == Classification.C ) {
-				//invalidateLODFilters(filter);
+//				invalidateLODFilters(filter);
 				filter.setValid(true);
 				reassignData(filter);
 			} else {
@@ -1428,15 +1430,19 @@ public class ChartView extends CyclistViewBase {
 		
 		keys.clear();
 		// add series
-		for (MultiKey multikey : _currentSpec.dataMap.keySet()) {
-			Object keyValue = multikey.getKey(idx);
-			if (filter.getSelectedValues().contains(keyValue)
-					&& !_currentSpec.seriesMap.containsKey(multikey)) {
+		
+		keys = new ArrayList<>(_currentSpec.dataMap.keySet());
+		for (Pair<Integer, Filter> p : getLODFilters()) {
+			Iterator<MultiKey> i = keys.iterator();
+			while (i.hasNext()) {
+				MultiKey key = i.next();
+				Object keyValue = key.getKey(p.v1+2);
+				if (!p.v2.getSelectedValues().contains(keyValue)
+					|| _currentSpec.seriesMap.containsKey(key)) 
 				{ 
-					// add
-					keys.add(multikey);
+					i.remove();
 				}	
-			}
+			}	
 		}
 		
 		for (MultiKey multikey : keys) {
@@ -1451,7 +1457,33 @@ public class ChartView extends CyclistViewBase {
 		checkForInfinities(_currentSpec.seriesMap.keySet());
 	}
 	
-
+	private List<Pair<Integer, Filter>> getLODFilters() {
+		List<Pair<Integer, Filter>> list = new ArrayList<>();
+		int idx = -1;
+		for (FieldInfo info : _currentSpec.lod) {
+			idx++;
+			boolean found = false;
+			String name = info.field.getName();
+			for (Filter f : filters()) {
+				if (f.getField().getName().equals(name)) {
+					list.add(new Pair<Integer, Filter>(idx, f));
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				for (Filter f : remoteFilters()) {
+					if (f.getField().getName().equals(name)) {
+						list.add(new Pair<Integer, Filter>(idx, f));
+						found = true;
+						break;
+					}
+				}
+			}
+		}
+		return list;
+	}
+	
 	/*Name: setAreaFiltersListeners 
 	 * This method handles fields which are connected to a filter
 	 * If the field SQL function has changed the filter has to be changed accordingly 
