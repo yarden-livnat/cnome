@@ -520,11 +520,11 @@ public class Cycic extends ViewBase{
 				Dragboard db = circle.startDragAndDrop(TransferMode.COPY);
 				ClipboardContent content = new ClipboardContent();				
 				content.put(DnD.VALUE_FORMAT, name);
-			
 				SnapshotParameters snapParams = new SnapshotParameters();
-				snapParams.setFill(Color.TRANSPARENT);
-
-				content.putImage(circle.snapshot(snapParams, null));	    
+	            snapParams.setFill(Color.TRANSPARENT);
+	            
+	            content.putImage(circle.snapshot(snapParams, null)); 
+	            
 				db.setContent(content);
 				e.consume();
 			}
