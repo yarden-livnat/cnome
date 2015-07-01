@@ -104,8 +104,8 @@ public class ToolsLibrary {
 			
 			new SimpleToolFactory("edu.utah.sci.cyclist.core", 
 					"Workspace", VIS_TOOL, true, AwesomeIcon.DESKTOP, 
-					"ui.views.Workspace", 
-	              "presenter.WorkspacePresenter")
+					"ui.views.VisWorkspace", 
+	              "presenter.VisWorkspacePresenter")
           );
 		
 		register(
