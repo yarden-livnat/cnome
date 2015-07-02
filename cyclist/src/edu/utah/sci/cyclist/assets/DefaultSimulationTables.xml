@@ -10,7 +10,7 @@
 			</field>
 			<field name="Kind">
 				<datatype role="DIMENSION" type="TEXT"/>
-			</field>
+			</field>d
 			<field name="Spec">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
@@ -230,24 +230,41 @@
 	<Table name="Inventories">
 		<Schema>
 			<field name="SimID" >
-			<datatype role="DIMENSION" type="TEXT"/>
+				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="ResourceId" >
-			<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="AgentId" >
-			<datatype role="DIMENSION" type="NUMERIC"/>
+				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="StartTime" >
-			<datatype role="INT_TIME" type="INT_TIME"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="EndTime" >
-			<datatype role="INT_TIME" type="INT_TIME"/>
+				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="QualID">
 				<datatype role="DIMENSION" type="NUMERIC"/>
 			</field>
 			<field name="Quantity">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>
+	
+	<Table name="TimeSeries%" type="MULTIPLE">
+		<Schema>
+			<field name="SimID" >
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="AgentId" >
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+			<field name="Time" >
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Value">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 		</Schema>
@@ -324,6 +341,5 @@
 			</field>
 		</Schema>
 	</Table>
-	
 	-->
 </root>

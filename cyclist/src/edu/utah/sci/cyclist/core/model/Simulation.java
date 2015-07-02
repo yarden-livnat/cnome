@@ -47,6 +47,7 @@ public class Simulation {
 	private int _duration;
 	private Map<String, Object> _properties = new HashMap<>();
 	private  ObjectProperty<String> _aliasProperty = new SimpleObjectProperty<>();
+	private boolean _initialized = false;
 	
 	public Simulation() {
 	}
@@ -63,6 +64,7 @@ public class Simulation {
 		copy.setStartYear(_startYear);
 		copy.setStartMonth(_startMonth);
 		copy.setDuration(_duration);
+		copy.setInitialized();
 		return copy;
 	}
 	
@@ -70,6 +72,13 @@ public class Simulation {
 		return _simulationId.toString();
 	}
 	
+	public boolean initialized() {
+		return _initialized;
+	}
+	
+	public void setInitialized() {
+		_initialized = true;
+	}
 	public ObjectProperty<String> aliasProperty() {
 		return _aliasProperty;
 	}
@@ -109,6 +118,8 @@ public class Simulation {
 	public int getDuration() {
 		return _duration;
 	}
+	
+
 	
 	/** Save the simulation
 	 * 

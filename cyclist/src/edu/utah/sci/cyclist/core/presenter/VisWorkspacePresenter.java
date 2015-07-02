@@ -381,6 +381,7 @@ public class VisWorkspacePresenter extends CyclistViewPresenter {
 						p.highlight(f1.contains(f) || f2.contains(f));
 					}
 				}
+				broadcast(event);
 			}
 		});
 
@@ -558,8 +559,10 @@ public class VisWorkspacePresenter extends CyclistViewPresenter {
 	 @Override
 	 public void onViewSelected(View view) {
 		 super.onViewSelected(view);
+		 CyclistNotification n = new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view);
 		 if (getWorkspace().isToplevel())
-			 broadcast(getLocalEventBus(), (new CyclistViewNotification(CyclistNotifications.VIEW_SELECTED, view)));
+			 broadcast(getLocalEventBus(), n);
+		 broadcast(n);
 	 }
 
 	 private FilterPresenter getFilterPresenter(Filter filter) {

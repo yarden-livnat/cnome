@@ -245,9 +245,13 @@ public class Table implements Resource {
 	 * Restores table from the simulation configuration file.
 	 * Restores only the information which is relevant to the simulation.
 	 */
-	public void restoreSimulated(IMemento memento, Context ctx){
-		_id = memento.getString("UID");
-		setName(memento.getString("name"));
+	public void restoreSimulated(IMemento memento, Context ctx) {
+		restoreSimulated(memento, ctx, memento.getString("name"));
+	}
+	
+	public void restoreSimulated(IMemento memento, Context ctx, String name) {
+ 		_id = memento.getString("UID");
+		setName(name);
 		if (_id == null) _id = getName();
 		ctx.put(_id, this);
 //		System.out.println("restore table: "+_id);

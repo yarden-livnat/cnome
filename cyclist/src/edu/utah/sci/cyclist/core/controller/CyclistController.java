@@ -32,8 +32,14 @@ import java.io.Reader;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +64,12 @@ import org.mo.closure.v1.Closure;
 
 import edu.utah.sci.cyclist.Cyclist;
 import edu.utah.sci.cyclist.ToolsLibrary;
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotification;
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotificationHandler;
+import edu.utah.sci.cyclist.core.event.notification.CyclistNotifications;
+import edu.utah.sci.cyclist.core.event.notification.CyclistSimulationNotification;
+import edu.utah.sci.cyclist.core.event.notification.CyclistTableNotification;
+import edu.utah.sci.cyclist.core.event.notification.CyclistViewNotification;
 import edu.utah.sci.cyclist.core.event.notification.EventBus;
 import edu.utah.sci.cyclist.core.model.Context;
 import edu.utah.sci.cyclist.core.model.CyclistDatasource;
@@ -76,6 +88,8 @@ import edu.utah.sci.cyclist.core.presenter.VisWorkspacePresenter;
 import edu.utah.sci.cyclist.core.services.CyclusService;
 import edu.utah.sci.cyclist.core.tools.ToolFactory;
 import edu.utah.sci.cyclist.core.ui.MainScreen;
+import edu.utah.sci.cyclist.core.ui.View;
+import edu.utah.sci.cyclist.core.ui.components.CyclistViewBase;
 import edu.utah.sci.cyclist.core.ui.components.ViewBase;
 import edu.utah.sci.cyclist.core.ui.panels.JobsPanel;
 import edu.utah.sci.cyclist.core.ui.views.VisWorkspace;
@@ -90,17 +104,25 @@ import edu.utah.sci.cyclist.core.util.LoadSqlite;
 public class CyclistController {
 	
 	Logger log = Logger.getLogger(CyclistController.class);
+	private String _id = "CyclistController";
 
-	private final EventBus _eventBus;
+	// TODO: This is a bad hack that should be fixed
+    public static CyclusService _cyclusService;
+    
+    private final EventBus _eventBus;
 	private MainScreen _screen;
 	public static VisWorkspacePresenter _presenter;
 	private Model _model = new Model();
 	private String SAVE_FILE = "workspace-config.xml";
 	private SessionController _sessionController;
 	private Boolean _dirtyFlag = false;
-    public static CyclusService _cyclusService;
+	private CyclistDatasource _currentDS;
+
 	
-	private static final String SIMULATIONS_TABLES_FILE = "SimulationTablesDef.xml";
+	List<IMemento> _extraDefaultTables = new ArrayList<>();
+	Map<String, List<Table>> _extraTables = new HashMap<>();
+	
+	private static final String SIMULATIONS_TABLES_FILE = "DefaultSimulationTables.xml";
 	
 	private Perspective _perspectives[] = {
 			new Perspective(0, "Scenario Builder", ToolsLibrary.SCENARIO_TOOL, Arrays.asList("Builder", "Jobs")),
@@ -214,8 +236,6 @@ public class CyclistController {
 			tab.setClosable(false);
 			tab.setContent(workspace);
 			screen.getTabPane().getTabs().add(tab);
-			
-//			
 		}
 		
 		screen.getTabPane().getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
@@ -318,6 +338,12 @@ public class CyclistController {
 						if(newVal != null)
 						{
 							Table tbl = new Table(newVal);
+							List<Table> extras = _extraTables.get(tbl.getDataSource().getUID());
+							if (extras == null) {
+								extras = new ArrayList<Table>();
+								_extraTables.put(tbl.getDataSource().getUID(), extras);
+							}
+							extras.add(tbl);
 							_model.getTables().add(tbl);
 							_model.setSelectedDatasource(wizard.getSelectedSource());
 							_dirtyFlag = true;
@@ -392,7 +418,7 @@ public class CyclistController {
 							}
 							
 							List<Simulation> newSimulations = new ArrayList<Simulation>();
-							for(Simulation simulation:newList.getList()){
+							for(Simulation simulation : newList.getList()){
 								Simulation sim = simulation.clone();
 								Simulation existingSim = _model.simExists(simulation);
 								if(existingSim == null){
@@ -602,15 +628,8 @@ public class CyclistController {
 		_screen.selectSimulationProperty().addListener(new ChangeListener<Simulation>() {
 			@Override
 			public void changed(ObservableValue<? extends Simulation> arg0, Simulation oldVal, Simulation newVal) {
-				
-				//Meanwhile - all the tables are the same for all the simulation - so load them once,
-				//when the first simulation is selected. In the future - can compare between old and new simulations
-				//and each time a different simulation is selected - change the tables accordingly.
-				
-				if(oldVal==null && newVal!=null){
-//					readSimulationsTables();
-//					_presenter.addFirstSelectedSimulation(newVal);
-				}
+				dbSelected(newVal == null ? null : newVal.getDataSource());
+
 				_model.setLastSelectedSimulation(newVal);
 				_dirtyFlag = true;
 			}
@@ -667,9 +686,83 @@ public class CyclistController {
 			}
 		});
 		
+		// Events
+		_eventBus.addHandler(CyclistNotifications.VIEW_SELECTED, _id, new CyclistNotificationHandler() {
+			@Override
+			public void handle(CyclistNotification notification) {
+				View view = ((CyclistViewNotification)notification).getView();
+				if (view instanceof CyclistViewBase) {
+					Simulation sim = ((CyclistViewBase) view).getCurrentSimulation();
+//					dbSelected(sim.getDataSource());
+					_eventBus.notify(new CyclistSimulationNotification(CyclistNotifications.SIMULATION_SELECTED, sim));
+				}
+			}
+		});
+		
+		_eventBus.addHandler(CyclistNotifications.SIMULATION_SELECTED, _id, new CyclistNotificationHandler() {
+			@Override
+			public void handle(CyclistNotification notification) {
+				Simulation sim = ((CyclistSimulationNotification) notification).getSimulation();
+				_screen.getSimulationPanel().selectSimulation(sim.getUID());
+			}
+		});
 	}
 	
+	private void dbSelected(CyclistDatasource ds) {
+		if (ds != _currentDS) {
+			if (_currentDS != null) {
+				List<Table> extra = _extraTables.get(_currentDS.getUID());
+				if (extra != null) {
+					for (Table table : extra) {
+						_model.getTables().remove(table);
+					}
+				}
+			}
+			if (ds != null) {
+				List<Table> list = _extraTables.get(ds.getUID());
+				if (list == null) {
+					list = findExtraTables(ds);
+					_extraTables.put(ds.getUID(), list);
+				}
+				for (Table table : list) {
+					_model.getTables().add(table);
+				}
+			}
+		}
+		_currentDS = ds;
+	}
+	private List<Table> findExtraTables(CyclistDatasource ds) {
+		Context ctx = new Context();
 		
+		List<Table> extraTables = new ArrayList<>();
+
+		try (Connection conn = ds.getConnection()) {
+			String query = "select name from sqlite_master where type='table' and name like ? order by name";
+			PreparedStatement stmt = conn.prepareStatement(query);
+			for (IMemento memento : _extraDefaultTables) {
+				String pattern = memento.getString("name");
+				stmt.setString(1, pattern);
+				
+				try {
+					ResultSet rs = stmt.executeQuery();
+					while (rs.next()) {
+						Table table = new Table();
+						table.restoreSimulated(memento, ctx, rs.getString(1));
+						table.setLocalDatafile(getLastChosenWorkDirectory());
+						extraTables.add(table);
+					}
+				} catch (SQLException e) {
+					log.debug("SQL error while querying for table pattern ["+pattern+"]", e);
+				}
+			} 
+		} catch (SQLException e) {
+			log.debug("SQL error while querying for extra tables", e);
+		} finally {
+			ds.releaseConnection();
+		}
+		return extraTables;
+	}
+	
 	private void quit() {
 		_currentPerspective.setToolsPositions(_screen.getToolsPositions());
 		
@@ -719,11 +812,20 @@ public class CyclistController {
 		
 		// Save the data tables
 		// Saves only tables added by the user (not loaded by the simulation configuration file).
-		for(Table table: _model.getTables()){
-			if(!table.getIsStandardSimulation()){
-				table.save(memento.createChild("Table"));
+//		for(Table table: _model.getTables()){
+//			if(!table.getIsStandardSimulation()){
+//				table.save(memento.createChild("Table"));
+//			}
+//		}
+		
+		IMemento extra = memento.createChild("extraTables");
+		_extraTables.forEach((k,v) -> {
+			IMemento dbMemento = extra.createChild("db");
+			dbMemento.putString("ref", k);
+			for (Table table : v) {
+				table.save(dbMemento.createChild("Table"));
 			}
-		}
+		});
 		
 		//Save the last selected simulation
 		if(_model.getLastSelectedSimulation() != null && _model.getSimulations().size() >0){
@@ -777,7 +879,7 @@ public class CyclistController {
 	}
 	
 	private void restore() {
-	
+		
 		String currDirectory = _sessionController.getWorkDirectories().get(_sessionController.getLastChosenIndex());
 		
 		// Check if the save file exists
@@ -785,6 +887,7 @@ public class CyclistController {
 		
 		//Clear the previous data
 		clearModel();
+		_extraTables = new HashMap<>();
 		
 		//Clears the main workspace.
 		for(Perspective p : _perspectives) {
@@ -813,13 +916,28 @@ public class CyclistController {
 						_model.getSources().add(datasource);
 					}
 					
-					// Read in the tables
-					IMemento[] tables = memento.getChildren("Table");
-					for(IMemento t_memento: tables){
-						Table table = new Table();
-						table.restore(t_memento, ctx);
-						table.setLocalDatafile(getLastChosenWorkDirectory());
-						_model.getTables().add(table);
+//					// Read in the tables
+//					IMemento[] tables = memento.getChildren("Table");
+//					for(IMemento t_memento: tables){
+//						Table table = new Table();
+//						table.restore(t_memento, ctx);
+//						table.setLocalDatafile(getLastChosenWorkDirectory());
+//						_model.getTables().add(table);
+//					}
+					
+					IMemento extraTables = memento.getChild("extraTables");
+					if (extraTables != null) {
+						for (IMemento db : extraTables.getChildren("db")) {
+							String name = db.getString("ref");
+							List<Table> list = new ArrayList<>();
+							_extraTables.put(name, list);
+							for (IMemento t : db.getChildren("Table")) {
+								Table table = new Table();
+								table.restore(t, ctx);
+								table.setLocalDatafile(getLastChosenWorkDirectory());
+								list.add(table);
+							}
+						}
 					}
 					
 					//Read the simulations
@@ -918,11 +1036,15 @@ public class CyclistController {
 			
 			// Restore tables
 			for(IMemento node: memento.getChildren("Table")){
-				Table table = new Table();
-				table.restoreSimulated(node, ctx);
-				table.setLocalDatafile(getLastChosenWorkDirectory());
-				_model.getSimulationsTablesDef().add(table);
-				_model.getTables().add(table);	
+				if ("MULTIPLE".equals(node.getString("type"))) {
+					_extraDefaultTables.add(node);
+				} else {
+					Table table = new Table();
+					table.restoreSimulated(node, ctx);
+					table.setLocalDatafile(getLastChosenWorkDirectory());
+					_model.getSimulationsTablesDef().add(table);
+					_model.getTables().add(table);	
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
