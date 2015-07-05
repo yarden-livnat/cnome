@@ -179,6 +179,11 @@ public class InstitutionView extends ViewBase {
 				if (facArray.get(2) == "oneOrMore"){
 					if ((int)facArray.get(6) <= userLevel && i == 0){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
 						grid.add(name, columnNumber, rowNumber);
 						grid.add(orMoreAddButton(grid, (ArrayList<Object>) facArray, (ArrayList<Object>) dataArray), 1+columnNumber, rowNumber);
 						rowNumber += 1;
@@ -248,6 +253,11 @@ public class InstitutionView extends ViewBase {
 				} else {
 					// Adding the label
 					Label name = new Label((String) facArray.get(0));
+					if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+						name.setText((String) facArray.get(9));
+					} else {
+						name.setText((String) facArray.get(0));	
+					}
 					name.setTooltip(new Tooltip((String) facArray.get(7)));
 					grid.add(name, columnNumber, rowNumber);
 					// Setting up the input type for the label

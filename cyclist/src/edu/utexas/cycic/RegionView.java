@@ -233,6 +233,11 @@ public class RegionView extends ViewBase{
 				} else if (facArray.get(1) instanceof ArrayList) {
 					if ((int)facArray.get(6) <= userLevel){
 						Label name = new Label((String) facArray.get(0));
+						if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+							name.setText((String) facArray.get(9));
+						} else {
+							name.setText((String) facArray.get(0));	
+						}
 						name.setTooltip(new Tooltip ((String)facArray.get(7)));
 						grid.add(name, columnNumber, rowNumber);
 						rowNumber += 1;
@@ -248,6 +253,11 @@ public class RegionView extends ViewBase{
 					// Adding the label
 					Label name = new Label((String) facArray.get(0));
 					name.setTooltip(new Tooltip((String) facArray.get(7)));
+					if(facArray.get(9) != null && !facArray.get(9).toString().equalsIgnoreCase("")){
+						name.setText((String) facArray.get(9));
+					} else {
+						name.setText((String) facArray.get(0));	
+					}
 					grid.add(name, columnNumber, rowNumber);
 					// Setting up the input type for the label
 					if (facArray.get(4) != null){
