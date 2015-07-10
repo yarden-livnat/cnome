@@ -389,7 +389,8 @@ public class OutPut {
 					break;
 				}
 				Element name = doc.createElement((String) facArray.get(0).toString().replace(" ", "").replace("\"", ""));
-				name.appendChild(doc.createTextNode((String)dataArray.get(0)));
+                                String s = (String)dataArray.get(0);
+				name.appendChild(doc.createTextNode(s.replace("\"", "")));
 				rootElement.appendChild(name);
 			}
 		}
