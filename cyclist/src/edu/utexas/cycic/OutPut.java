@@ -280,7 +280,7 @@ public class OutPut {
 			isotope.appendChild(isoID);
 			
 			Element isoComp = doc.createElement("comp");
-			isoComp.appendChild(doc.createTextNode(String.format("%f2", iso.value)));
+			isoComp.appendChild(doc.createTextNode(String.format("%f", iso.value)));
 			isotope.appendChild(isoComp);
 		}
 	}
