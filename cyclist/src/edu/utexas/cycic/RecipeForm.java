@@ -41,6 +41,7 @@ public class RecipeForm extends ViewBase{
 	private GridPane topRecipeGrid = new GridPane();
 	private GridPane recipeGrid = new GridPane();
 	private int rowNumber;
+        private Nrecipe cur_;
 	
 	/**
 	 * Places the top grid onto the function. For selecting an existing recipe
@@ -75,18 +76,34 @@ public class RecipeForm extends ViewBase{
 		});
 		topRecipeGrid.add(recipiesList, 1, 0);
 		
-		Button addRecipe = new Button("Add Recipe");
-		addRecipe.setOnAction(new EventHandler<ActionEvent>(){
+		Button newRecipe = new Button("New Recipe");
+		newRecipe.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
 				rowNumber = 3;
 				Nrecipe recipe = new Nrecipe();
-				CycicScenarios.workingCycicScenario.Recipes.add(recipe);
-				recipeGenInfo(recipe);				
+				recipeGenInfo(recipe);
+                                cur_ = recipe;
 			}
 		});
-		topRecipeGrid.add(addRecipe, 2, 0);
+		topRecipeGrid.add(newRecipe, 2, 0);
+
+                Button addRecipe = new Button("Add Recipe");
+		addRecipe.setOnAction(new EventHandler<ActionEvent>(){
+                    public void handle(ActionEvent e){
+                      if (cur_.Name != null && !cur_.Name.isEmpty()) {
+                        for(Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes){
+                          if(recipe.Name.equals(cur_.Name)){
+                            return; // already exists in list, just return
+                          }
+                        }
+                        CycicScenarios.workingCycicScenario.Recipes.add(cur_);
+                      }
+                    }
+		});
+		topRecipeGrid.add(addRecipe, 3, 0);
+                
 	}
-	
+  
 	/**
 	 * Builds the form structures required for each recipe. 
 	 */
