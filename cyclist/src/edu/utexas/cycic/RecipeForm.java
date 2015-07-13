@@ -38,10 +38,27 @@ public class RecipeForm extends ViewBase{
 		setContent(recipeBox);
 	}
 	
+	Button addRecipe = new Button("Add Recipe"){
+		{
+			setOnAction(new EventHandler<ActionEvent>(){
+				public void handle(ActionEvent e){
+					if (cur_.Name != null && !cur_.Name.isEmpty()) {
+						for(Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes){
+							if(recipe.Name.equals(cur_.Name)){
+								return; // already exists in list, just return
+							}
+						}
+						CycicScenarios.workingCycicScenario.Recipes.add(cur_);
+					}
+				}
+			});
+		}
+	};
+	
 	private GridPane topRecipeGrid = new GridPane();
 	private GridPane recipeGrid = new GridPane();
 	private int rowNumber;
-        private Nrecipe cur_;
+    private Nrecipe cur_;
 	
 	/**
 	 * Places the top grid onto the function. For selecting an existing recipe
@@ -81,27 +98,12 @@ public class RecipeForm extends ViewBase{
 			public void handle(ActionEvent e){
 				rowNumber = 3;
 				Nrecipe recipe = new Nrecipe();
-				recipeGenInfo(recipe);
-                                cur_ = recipe;
+				recipe.Composition.add(new isotopeData());
+				loadRecipe(recipe);
+				cur_ = recipe;
 			}
 		});
 		topRecipeGrid.add(newRecipe, 2, 0);
-
-                Button addRecipe = new Button("Add Recipe");
-		addRecipe.setOnAction(new EventHandler<ActionEvent>(){
-                    public void handle(ActionEvent e){
-                      if (cur_.Name != null && !cur_.Name.isEmpty()) {
-                        for(Nrecipe recipe: CycicScenarios.workingCycicScenario.Recipes){
-                          if(recipe.Name.equals(cur_.Name)){
-                            return; // already exists in list, just return
-                          }
-                        }
-                        CycicScenarios.workingCycicScenario.Recipes.add(cur_);
-                      }
-                    }
-		});
-		topRecipeGrid.add(addRecipe, 3, 0);
-                
 	}
   
 	/**
@@ -160,7 +162,9 @@ public class RecipeForm extends ViewBase{
 		addIso.setText("Add Isotope");
 		addIso.setOnAction(new EventHandler<ActionEvent>(){
 			public void handle(ActionEvent e){
-				addIsotope(recipe);
+				isotopeData isoData = new isotopeData();
+				recipe.Composition.add(isoData);
+				loadRecipe(recipe);
 			}
 		});
 		recipeGrid.add(addIso, 1, 2);	
@@ -171,8 +175,7 @@ public class RecipeForm extends ViewBase{
 	 * ArrayList
 	 * @param recipe Current working recipe.
 	 */
-	public void addIsotope(Nrecipe recipe){
-		final isotopeData isoData = new isotopeData(); 
+	public void addIsotope(isotopeData isoData, Nrecipe recipe){
 		Label isotope = new Label("Isotope");
 		recipeGrid.add(isotope, 0, rowNumber);
 		
@@ -209,7 +212,6 @@ public class RecipeForm extends ViewBase{
 		isoWeightFrac.setPromptText("0.0");
 		recipeGrid.add(isoWeightFrac, 3, rowNumber);
 		recipeGrid.add(removeIsotope(recipe, isoData), 4, rowNumber);
-		recipe.Composition.add(isoData);
 		rowNumber += 1;
 	}
 	
@@ -277,6 +279,9 @@ public class RecipeForm extends ViewBase{
 			recipeGrid.add(removeIsotope(recipe, iso), 4, rowNumber);
 			
 			rowNumber += 1;
+		}
+		if(recipe.Composition.size() >0){
+			recipeGrid.add(addRecipe, 4, rowNumber+1);
 		}
 	}
 }
