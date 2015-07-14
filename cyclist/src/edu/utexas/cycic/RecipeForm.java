@@ -171,51 +171,6 @@ public class RecipeForm extends ViewBase{
 	}
 	
 	/**
-	 * Adds an isotopeData item to the selected recipe's composition
-	 * ArrayList
-	 * @param recipe Current working recipe.
-	 */
-	public void addIsotope(isotopeData isoData, Nrecipe recipe){
-		Label isotope = new Label("Isotope");
-		recipeGrid.add(isotope, 0, rowNumber);
-		
-		TextField isotopeNumber = new TextField();
-		
-		isotopeNumber.setMinSize(40, 20);
-		isotopeNumber.setMaxSize(100, 20);
-		isotopeNumber.setPromptText("Isotope");
-		
-		//Recording Isotope Name
-		isotopeNumber.textProperty().addListener(new ChangeListener<String>(){
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				isoData.Name = newValue;
-			}
-		});
-		recipeGrid.add(isotopeNumber, 1, rowNumber);
-		
-		Label isotopeValue = new Label("Amount");
-		recipeGrid.add(isotopeValue, 2, rowNumber);
-		
-		TextField isoWeightFrac = new TextField(){
-			@Override public void replaceText(int start, int end, String text) {
-				if (!text.matches("[a-z]")){
-					super.replaceText(start, end, text);
-				}
-			}
-		};
-		// Determining if mass or atom needs to be used. 
-		isoWeightFrac.textProperty().addListener(new ChangeListener<String>(){
-			@Override public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue){
-				isoData.value = Double.parseDouble(newValue);
-			}
-		});
-		isoWeightFrac.setPromptText("0.0");
-		recipeGrid.add(isoWeightFrac, 3, rowNumber);
-		recipeGrid.add(removeIsotope(recipe, isoData), 4, rowNumber);
-		rowNumber += 1;
-	}
-	
-	/**
 	 * Removes an isotope for a recipe.
 	 * @param recipe Recipe the isotope will be removed from.
 	 * @param isoData isotopeData to be removed.
