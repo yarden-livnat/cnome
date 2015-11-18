@@ -172,18 +172,15 @@ public class QueryBuilder {
 			builder.append(" limit ").append(_limit);
 		}
 		
-		builder.append(" COLLATE NOCASE");
-		
         String q = builder.toString();
         if (_table.toString().equals("QuantityInventory")) {
             q = q.replaceAll("(.*\\W)Quantity(\\W.*)", "$1inv\\.Quantity\\*c\\.MassFrac$2");
             q = q.replaceAll("(.*\\W)Time(\\W.*)", "$1tl\\.Time$2");
-            q = q.replaceAll("(.*\\W)NucId(\\W.*)", "$1c\\.NucId$2");
-            q = q.replaceAll("(.*\\W)AgentId(\\W.*)", "$1ag\\.AgentId$2");
+            q = q.replaceAll("(.*\\W)NucI([dD]\\W.*)", "$1c\\.NucI$2");
+            q = q.replaceAll("(.*\\W)AgentI([dD]\\W.*)", "$1ag\\.AgentI$2");
             q = q.replaceAll("(.*\\W)Prototype(\\W.*)", "$1ag\\.Prototype$2");
-            q = q.replaceAll("(.*\\W)SimId(\\W.*)", "$1inv\\.SimId$2");
+            q = q.replaceAll("(.*\\W)SimI([dD]\\W.*)", "$1inv\\.SimI$2");
             q = q.replaceAll("(.*\\W)QuantityInventory(\\W.*)", "$1Timelist AS tl JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time AND inv.SimId=tl.SimId JOIN Agents AS ag ON ag.AgentId = inv.AgentId AND ag.SimId=tl.SimId JOIN Compositions AS c ON c.QualId = inv.QualId AND c.SimId=tl.SimId$2");
-            q = q.replaceAll(" SimID ", "tl.SimID ");
         }
         
 		return q;
