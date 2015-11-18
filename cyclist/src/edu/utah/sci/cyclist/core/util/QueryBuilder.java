@@ -172,6 +172,8 @@ public class QueryBuilder {
 			builder.append(" limit ").append(_limit);
 		}
 		
+		builder.append(" COLLATE NOCASE");
+		
         String q = builder.toString();
         if (_table.toString().equals("QuantityInventory")) {
             q = q.replaceAll("(.*\\W)Quantity(\\W.*)", "$1inv\\.Quantity\\*c\\.MassFrac$2");
@@ -181,7 +183,9 @@ public class QueryBuilder {
             q = q.replaceAll("(.*\\W)Prototype(\\W.*)", "$1ag\\.Prototype$2");
             q = q.replaceAll("(.*\\W)SimId(\\W.*)", "$1inv\\.SimId$2");
             q = q.replaceAll("(.*\\W)QuantityInventory(\\W.*)", "$1Timelist AS tl JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time AND inv.SimId=tl.SimId JOIN Agents AS ag ON ag.AgentId = inv.AgentId AND ag.SimId=tl.SimId JOIN Compositions AS c ON c.QualId = inv.QualId AND c.SimId=tl.SimId$2");
+            q = q.replaceAll(" SimID ", "tl.SimID ");
         }
+        
 		return q;
 	}
 	
