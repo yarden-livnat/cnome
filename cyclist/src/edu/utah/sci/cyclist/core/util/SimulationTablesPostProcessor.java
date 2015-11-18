@@ -61,8 +61,8 @@ public class SimulationTablesPostProcessor {
 	
 	private static final String QUANTITY_INVENTORY_VIEW_CREATE = 
                                   "CREATE view if not exists QuantityInventory as "
-                                + "	SELECT inv.SimId as SimId, tl.Time AS Time,cmp.NucId AS NucId,ag.AgentID as AgentID, "
-                                + "	  	ag.Prototype AS Prototype, ag.Kind AS Kind, ag.Spec AS Spec, SUM(inv.Quantity*cmp.MassFrac) AS Quantity "
+                                + "	SELECT inv.SimId as SimId, tl.Time AS Time, SUM(inv.Quantity*cmp.MassFrac) AS Quantity, cmp.NucId AS NucId,ag.AgentID as AgentID, "
+                                + "	  	ag.Kind AS Kind, ag.Spec AS Spec, ag.Prototype AS Prototype "
                                 + "	 FROM "
                                 + "		Timelist AS tl "
                                 + "		INNER JOIN Inventories AS inv ON inv.StartTime <= tl.Time AND inv.EndTime > tl.Time AND inv.SimId=tl.SimId"
