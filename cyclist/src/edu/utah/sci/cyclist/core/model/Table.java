@@ -636,7 +636,7 @@ public class Table implements Resource {
 		 FieldNode.putString("name", fieldName);
 		 FieldNode.putString("type", fieldType);
 		 FieldNode.putString("role", fieldRole);
-		 if (values.size() > 0) {
+		 if (values.size() > 0 && values.get(0) != null) {
 			 FieldNode.putString("class", values.get(0).getClass().getCanonicalName());
 		 }
 		 StringBuilder sb = new StringBuilder(); 

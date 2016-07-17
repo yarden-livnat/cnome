@@ -36,12 +36,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -94,6 +96,9 @@ import edu.utah.sci.cyclist.core.ui.panels.SchemaPanel;
 import edu.utah.sci.cyclist.core.util.AwesomeIcon;
 import edu.utah.sci.cyclist.core.util.GlyphRegistry;
 import edu.utah.sci.cyclist.core.util.QueryBuilder;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartInfo;
+import edu.utah.sci.cyclist.neup.ui.views.inventory.InventoryChart.ChartMode;
 
 public class ChartView extends CyclistViewBase {
 	public static final String TITLE = "Plot";
@@ -105,6 +110,10 @@ public class ChartView extends CyclistViewBase {
 
 	enum MarkType { TEXT, BAR, LINE, SHAPE, GANTT, NA }
 
+	public enum ChartMode {
+		LINE, AREA, STACKED
+	}
+	
 	public static double CYCLIST_MAX_VALUE = 1e90;
 	
 	private boolean _active = true;
@@ -112,6 +121,7 @@ public class ChartView extends CyclistViewBase {
 	private TableProxy _tableProxy = null;
 	
 	private ObjectProperty<XYChart<?,?>> _chartProperty = new SimpleObjectProperty<>();
+	private ObjectProperty<ChartMode> _mode = new SimpleObjectProperty<>(ChartMode.LINE);
 	
 	@SuppressWarnings("rawtypes")
     private Axis _xAxis = null;
@@ -143,6 +153,10 @@ public class ChartView extends CyclistViewBase {
 	private StackPane _stackPane;
 	private Pane _glassPane;
 
+	public ObjectProperty<ChartMode> getMode(){
+		return _mode;
+	}
+	
 	public ChartView() {
 		super();
 		build();
@@ -203,6 +217,7 @@ public class ChartView extends CyclistViewBase {
 	public void setChart(XYChart<?,?> chart) {
 		_chartProperty.set(chart);
 	}
+	
 	public Table getCurrentTable() {
 		return _currentTableProperty.get();
 	}
@@ -242,6 +257,8 @@ public class ChartView extends CyclistViewBase {
 	
 	@Override
 	public void save(IMemento memento) {
+		memento.putString( "mode", _mode.get().name());
+		
 		if (_xArea.getFields().size() > 0) {
 			IMemento xMemento = memento.createChild("xArea");
 			for (Field f : _xArea.getFields()) {
@@ -261,6 +278,8 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 		
+
+		
 		// options
 		IMemento child = memento.createChild("axis-opt");
 		IMemento x = child.createChild("x");
@@ -276,6 +295,11 @@ public class ChartView extends CyclistViewBase {
 	public void restore(IMemento memento, Context ctx) {
 		boolean wasActive = _active;
 		_active = false;
+		
+		String m = memento.getString("mode");
+		if (m != null) {
+			setMode(Enum.valueOf(ChartMode.class, m));
+		}
 		
 		IMemento child = memento.getChild("xArea");
 		if (child != null) {
@@ -318,6 +342,16 @@ public class ChartView extends CyclistViewBase {
 		
 		if (wasActive)
 			setActive(true);
+	}
+	
+	public void setMode(ChartMode mode) {
+		_mode.setValue(mode);
+		if (_currentSpec != null && _currentSpec.type == ViewType.LINE) {
+			ObservableList<?> data = getChart().getData();
+			setChart(createChart(_currentSpec), _currentSpec);
+			getChart().getData().addAll(data);
+			getChart().setLegendVisible(_currentSpec.seriesMap.size() > 1);
+		}
 	}
 	
 	private Field getXField() {
@@ -552,7 +586,7 @@ public class ChartView extends CyclistViewBase {
 		int n =key.size();
 		
 		if (n==2) return "";
-		if (n==3) return key.getKey(2).toString();
+		if (n==3) return key.getKey(2) != null ? key.getKey(2).toString() : "";
 
 		StringBuilder builder = new StringBuilder("[").append(key.getKey(2));
 		for (int i=3; i<n; i++)
@@ -801,10 +835,8 @@ public class ChartView extends CyclistViewBase {
 			chart = bar;
 			break;
 		case LINE:
-			LineChart<?,?> lineChart = new LineChart<>(x, y);
-			lineChart.setCreateSymbols(false);
-			lineChart.getStyleClass().add("line-chart");
-			chart = lineChart;
+			chart = createLineChart(x, y);
+//			lineChart.getStyleClass().add("line-chart");
 			break;
 		case SCATTER_PLOT:
 			chart = new ScatterChart<>(x, y);
@@ -822,6 +854,32 @@ public class ChartView extends CyclistViewBase {
 		return chart;
 	}
 	
+    
+    private XYChart<?,?> createLineChart(Axis<?> x, Axis<?> y) {
+    	switch (_mode.getValue()) {
+		case LINE:
+			LineChart<Number, Number> lineChart = (LineChart<Number, Number>) new LineChart<>(x, y);
+			lineChart.getStyleClass().add("chart");
+			lineChart.setCreateSymbols(false);
+			lineChart.setLegendVisible(false);
+			lineChart.setAnimated(false);
+			return lineChart;
+		case AREA:
+			AreaChart<Number, Number> areaChart = (AreaChart<Number, Number>) new AreaChart<>(x, y);
+			areaChart.getStyleClass().add("chart");
+			areaChart.setLegendVisible(false);
+			areaChart.setAnimated(false);
+			return areaChart;
+		case STACKED:
+			StackedAreaChart<Number, Number> stackedAreaChart = (StackedAreaChart<Number, Number>) new StackedAreaChart<>(x, y);
+			stackedAreaChart.getStyleClass().add("chart");
+			stackedAreaChart.setLegendVisible(false);
+			stackedAreaChart.setAnimated(false);
+			return stackedAreaChart;
+		}
+    	return null;
+    }
+    
     private Axis<?> createAxis(AxisSpec spec) {
         Axis<?> axis = null;
 		
@@ -978,10 +1036,59 @@ public class ChartView extends CyclistViewBase {
 
 	private void setupActions() {
 		List<Node> actions = new ArrayList<>();
+		actions.add(createModeOptions());
 		actions.add(createAxisOptions());
 		actions.add(createExportActions());
 		actions.add(createOptions());
 		addActions(actions);
+	}
+	
+	private Node createModeOptions() {
+		final Button btn = new Button("Mode", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		btn.getStyleClass().add("flat-button");
+		
+		final ContextMenu menu = new ContextMenu();
+		btn.setOnMousePressed(new EventHandler<Event>() {
+			@Override
+			public void handle(Event event) {
+				menu.show(btn, Side.BOTTOM, 0, 0);
+			}
+		});
+		
+		// LINE
+		MenuItem item = new MenuItem("Line", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				setMode(ChartMode.LINE);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_mode, ChartMode.LINE));
+		menu.getItems().add(item);
+		
+		// AREA
+		item = new MenuItem("Area", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				setMode(ChartMode.AREA);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_mode, ChartMode.AREA));
+		menu.getItems().add(item);
+		
+		// STACKED
+		item = new MenuItem("Stacked", GlyphRegistry.get(AwesomeIcon.CHECK));
+		item.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				setMode(ChartMode.STACKED);
+            }
+		});
+		item.getGraphic().visibleProperty().bind(Bindings.equal(_mode, ChartMode.STACKED));
+		menu.getItems().add(item);
+		
+		return btn;
 	}
 	
 	private Node createAxisOptions() {

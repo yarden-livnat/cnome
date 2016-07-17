@@ -129,6 +129,7 @@
 			</field>
 		</Schema>
 	</Table>
+	
 	<Table name="QuantityInventory">
 		<Schema>
 			<field name="SimID" >
@@ -185,6 +186,7 @@
 			</field>
 		</Schema>
 	</Table>
+	
 	<Table name="Transactions">
 		<Schema>
 			<field name="SimID" >
@@ -210,6 +212,7 @@
 			</field>
 		</Schema>
 	</Table>
+	
 	<Table name="Compositions">
 		<Schema>
 			<field name="SimID">
@@ -343,12 +346,46 @@
 		</Schema>
 	</Table>
 	
+	<Table name="PowerPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Power">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Prototype">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>	
+		</Schema>up
+	</Table>
+	
 	<Table name="Built">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Time">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="N_Built">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Prototype">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
+	
+	<Table name="BuiltPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="N_Built">
@@ -377,12 +414,92 @@
 		</Schema>
 	</Table>
 	
+	<Table name="DeployedPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="N_Deployed">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Prototype">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
+	
+	<Table name="RetiredPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="N_Retired">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Prototype">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+		</Schema>
+	</Table>
+	
 	<Table name="Flow">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Time">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Quantity">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Sender">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Receiver">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Commodity" semantic="Nuclide">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>	
+	
+	<Table name="f1">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Time">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Quantity">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Sender">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Receiver">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Commodity" semantic="Nuclide">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>	
+	
+	<Table name="FlowPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="Quantity">
@@ -417,12 +534,49 @@
 		</Schema>
 	</Table>
 	
-	<Table name="InventoryDetailed">
+	<Table name="InventoryQuantityPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Quantity">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Prototype">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>	
+		</Schema>
+	</Table>
+	
+	<Table name="InventoryDetails">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>
 			<field name="Time">
+				<datatype role="INT_TIME" type="INT_TIME"/>
+			</field>
+			<field name="Quantity">
+				<datatype role="MEASURE" type="NUMERIC"/>
+			</field>
+			<field name="Prototype">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>	
+			<field name="NucID" semantic="Nuclide">
+				<datatype role="DIMENSION" type="NUMERIC"/>
+			</field>
+		</Schema>
+	</Table>
+	
+	<Table name="InventoryDetailsPerYear">
+		<Schema>
+			<field name="SimID">
+				<datatype role="DIMENSION" type="TEXT"/>
+			</field>
+			<field name="Year">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
 			<field name="Quantity">
