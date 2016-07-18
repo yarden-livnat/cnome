@@ -117,6 +117,7 @@ public class ChartView extends CyclistViewBase {
 	public static double CYCLIST_MAX_VALUE = 1e90;
 	
 	private boolean _active = true;
+	private BooleanProperty _showSymbols = new SimpleBooleanProperty(false);
 
 	private TableProxy _tableProxy = null;
 	
@@ -858,21 +859,24 @@ public class ChartView extends CyclistViewBase {
     private XYChart<?,?> createLineChart(Axis<?> x, Axis<?> y) {
     	switch (_mode.getValue()) {
 		case LINE:
-			LineChart<Number, Number> lineChart = (LineChart<Number, Number>) new LineChart<>(x, y);
+			LineChart<?, ?> lineChart = new LineChart<>(x, y);
 			lineChart.getStyleClass().add("chart");
-			lineChart.setCreateSymbols(false);
+			lineChart.createSymbolsProperty().bind(_showSymbols);
 			lineChart.setLegendVisible(false);
 			lineChart.setAnimated(false);
 			return lineChart;
 		case AREA:
-			AreaChart<Number, Number> areaChart = (AreaChart<Number, Number>) new AreaChart<>(x, y);
+			AreaChart<?, ?> areaChart = new AreaChart<>(x, y);
 			areaChart.getStyleClass().add("chart");
+//			areaChart.createSymbolsProperty().bind(_showSymbols);
+			areaChart.setCreateSymbols(true);
 			areaChart.setLegendVisible(false);
 			areaChart.setAnimated(false);
 			return areaChart;
 		case STACKED:
-			StackedAreaChart<Number, Number> stackedAreaChart = (StackedAreaChart<Number, Number>) new StackedAreaChart<>(x, y);
+			StackedAreaChart<?, ?> stackedAreaChart = new StackedAreaChart<>(x, y);
 			stackedAreaChart.getStyleClass().add("chart");
+			stackedAreaChart.createSymbolsProperty().bind(_showSymbols);
 			stackedAreaChart.setLegendVisible(false);
 			stackedAreaChart.setAnimated(false);
 			return stackedAreaChart;
@@ -1044,7 +1048,7 @@ public class ChartView extends CyclistViewBase {
 	}
 	
 	private Node createModeOptions() {
-		final Button btn = new Button("Mode", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
+		final Button btn = new Button("Chart", GlyphRegistry.get(AwesomeIcon.CARET_DOWN));
 		btn.getStyleClass().add("flat-button");
 		
 		final ContextMenu menu = new ContextMenu();
@@ -1087,6 +1091,20 @@ public class ChartView extends CyclistViewBase {
 		});
 		item.getGraphic().visibleProperty().bind(Bindings.equal(_mode, ChartMode.STACKED));
 		menu.getItems().add(item);
+		
+		menu.getItems().add(new SeparatorMenuItem());
+		
+		// Markers
+		final MenuItem marker = new MenuItem("Markers", GlyphRegistry.get(AwesomeIcon.CHECK));
+		marker.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+            public void handle(ActionEvent event) {
+				_showSymbols.set(!_showSymbols.get());
+            }
+		});
+		marker.getGraphic().visibleProperty().bind(_showSymbols);
+
+		menu.getItems().add(marker);
 		
 		return btn;
 	}
