@@ -604,7 +604,7 @@ public class ChartView extends CyclistViewBase {
 
 		int nx = spec.numX();
 		int ny = spec.numY();
-		int cols = spec.cols();
+		int cols = spec.cols();		
 
 		for (FieldInfo xInfo : spec.xFields) {
 			int ix = xInfo.index;
@@ -634,7 +634,12 @@ public class ChartView extends CyclistViewBase {
 					if (pt == null) {
 						_seriesWithInfinity.add(key); 
 					} else {
+//						if (!series.isEmpty()) {
+//							series.add(new XYChart.Data<Object, Object>(pt.getXValue(), series.get(series.size()-1).getYValue()));
+//						}
 						series.add(pt);
+
+//						
 					}
 				}
 			}
