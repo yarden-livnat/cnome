@@ -319,7 +319,7 @@
 			<field name="Time">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="N_Built">
+			<field name="N">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Prototype">
@@ -336,7 +336,7 @@
 			<field name="Time">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="N_Deployed">
+			<field name="N">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Prototype">
@@ -415,7 +415,7 @@
 			<field name="Year">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="N_Built">
+			<field name="N">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Prototype">
@@ -432,7 +432,7 @@
 			<field name="Year">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="N_Deployed">
+			<field name="N">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Prototype">
@@ -449,7 +449,7 @@
 			<field name="Year">
 				<datatype role="INT_TIME" type="INT_TIME"/>
 			</field>
-			<field name="N_Retired">
+			<field name="N">
 				<datatype role="MEASURE" type="NUMERIC"/>
 			</field>
 			<field name="Prototype">
@@ -536,7 +536,7 @@
 	</Table>
 	
 <!-- Capacity -->	
-
+	
 	<Table name="Capacity">
 		<Schema>
 			<field name="SimID">
