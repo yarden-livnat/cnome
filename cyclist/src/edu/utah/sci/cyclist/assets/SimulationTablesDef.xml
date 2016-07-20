@@ -535,9 +535,9 @@
 		</Schema>
 	</Table>
 	
-<!-- Capacity -->	
+<!-- CapacityPerYear -->	
 	
-	<Table name="Capacity">
+	<Table name="CapacityPerYear">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
