@@ -248,7 +248,8 @@ public class Table implements Resource {
 	public void restoreSimulated(IMemento memento, Context ctx){
 		_id = memento.getString("UID");
 		setName(memento.getString("name"));
-		if (_id == null) _id = UUID.randomUUID().toString();
+		if (_id == null) _id = getName(); //UUID.randomUUID().toString();
+		
 		ctx.put(_id, this);
 //		System.out.println("restore table: "+_id);
 		

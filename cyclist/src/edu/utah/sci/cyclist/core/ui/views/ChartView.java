@@ -635,11 +635,14 @@ public class ChartView extends CyclistViewBase {
 						_seriesWithInfinity.add(key); 
 					} else {
 //						if (!series.isEmpty()) {
-//							series.add(new XYChart.Data<Object, Object>(pt.getXValue(), series.get(series.size()-1).getYValue()));
+//							// add previous value to cause the chart to look like step-after
+//							Object x = pt.getXValue();
+//							if (x instanceof Integer) {
+//								x = ((Integer) x)-0.1;
+//								series.add(new XYChart.Data<Object, Object>(x, series.get(series.size()-1).getYValue()));
+//							}
 //						}
 						series.add(pt);
-
-//						
 					}
 				}
 			}
