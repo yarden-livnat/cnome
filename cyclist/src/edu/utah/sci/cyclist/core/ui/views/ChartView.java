@@ -470,8 +470,10 @@ public class ChartView extends CyclistViewBase {
 
 		//Check the filters current validity
 		for(Filter filter : filters()){
-			if(getCurrentTable().hasField(filter.getField())){
-				filtersList.add(filter);
+			if (!_lodArea.hasFieldName(filter.getField().getName())) {
+				if(getCurrentTable().hasField(filter.getField())){
+					filtersList.add(filter);
+				}
 			}
 		}
 
@@ -538,9 +540,10 @@ public class ChartView extends CyclistViewBase {
 			}
 		}
 		
+		List<MultiKey> active = filterKeys(dataMap.keySet());
 		List<XYChart.Series<Object, Object>> add = new ArrayList<>();
 		
-		for (MultiKey key : dataMap.keySet()) {							
+		for (MultiKey key : active) {							
 			XYChart.Series<Object, Object> series = _currentSpec.seriesMap.get(key);
 			if (series == null) {
 				series = new XYChart.Series<Object, Object>();
@@ -1511,6 +1514,16 @@ public class ChartView extends CyclistViewBase {
 		return false;
 	}
 
+	private int getLodFilterIndex(Filter filter) {
+		int idx = 2;
+		String name = filter.getField().getName();
+		for (FieldInfo info : _currentSpec.lod) {
+			if (info.field.getName().equals(name)) break;
+			idx++;
+		}
+		return idx;
+	}
+	
 	/* 
 	 * Contained or has the same name and table as a field in the lod area  
 	 */
@@ -1528,6 +1541,37 @@ public class ChartView extends CyclistViewBase {
 		return false;
 	}
 
+	private List<MultiKey> filterKeys(Set<MultiKey> keys) {
+		List<MultiKey> active = new ArrayList<>();
+		List<Pair<Filter, Integer>> lodFilters = new ArrayList<>();
+		
+		for(Filter filter : filters()){
+			if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+				lodFilters.add(new Pair<>(filter, getLodFilterIndex(filter)));
+			}
+		}
+		for(Filter filter : remoteFilters()){
+			if(filter.getField().getClassification() == Classification.C && isInLodArea(filter.getField())){
+				lodFilters.add(new Pair<>(filter, getLodFilterIndex(filter)));
+			}
+		}
+		
+		for (MultiKey key : keys) {
+			boolean valid = true;
+	
+			for (Pair<Filter, Integer> p : lodFilters) {
+				Object keyValue = key.getKey(p.v2);
+				if (!p.v1.getSelectedValues().contains(keyValue)) {
+					valid = false;
+					break;
+				}
+			}
+			if (valid) active.add(key);
+		}
+		
+		return active;
+	}
+	
 	@SuppressWarnings("unchecked")
     private void reassignData(Filter filter) {
 		int idx = 0;
