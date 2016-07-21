@@ -368,7 +368,7 @@
 		</Schema>
 	</Table>	
 
-	<Table name="InventoryQuantity">
+	<!-- <Table name="InventoryQuantity">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
@@ -383,7 +383,7 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>	
 		</Schema>
-	</Table>
+	</Table> -->
 	
 	<Table name="InventoryDetails">
 		<Schema>
@@ -498,7 +498,7 @@
 		</Schema>
 	</Table>	
 	
-	<Table name="InventoryQuantityPerYear">
+	<!-- <Table name="InventoryQuantityPerYear">
 		<Schema>
 			<field name="SimID">
 				<datatype role="DIMENSION" type="TEXT"/>
@@ -513,7 +513,7 @@
 				<datatype role="DIMENSION" type="TEXT"/>
 			</field>	
 		</Schema>
-	</Table>
+	</Table> -->
 	
 		<Table name="InventoryDetailsPerYear">
 		<Schema>
